@@ -48,13 +48,17 @@ TopSelection::TopSelection(const ParameterSet& config, EventCounter& eventCounte
     cfg_dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff(config.getParameter<float>("dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff")),
     cfg_dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept(config.getParameter<float>("dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept")), 
     cfg_ChiSqrCut(config, "ChiSqrCut"),
+    cfg_LowLdgTrijetMassCut(config, "LowLdgTrijetMassCut"),
+    cfg_HighLdgTrijetMassCut(config, "HighLdgTrijetMassCut"),
     cfg_MaxJetsToUseInFit(config.getParameter<int>("MaxJetsToUseInFit")),
     cfg_MaxBJetsToUseInFit(config.getParameter<int>("MaxBJetsToUseInFit")),
     // Event counter for passing selection
     cPassedTopSelection(fEventCounter.addCounter("passed top selection ("+postfix+")")),
     // Sub counters
     cSubAll(fEventCounter.addSubCounter("top selection ("+postfix+")", "All events")),
-    cSubPassedChiSqCut(fEventCounter.addSubCounter("top selection ("+postfix+")", "Passed chiSq cut"))
+    cSubPassedChiSqCut(fEventCounter.addSubCounter("top selection ("+postfix+")", "Passed chiSq cut")),
+    cSubPassedLowLdgTrijetMassCut(fEventCounter.addSubCounter("top selection ("+postfix+")", "Passed low ldg trijet mass cut")),
+    cSubPassedHighLdgTrijetMassCut(fEventCounter.addSubCounter("top selection ("+postfix+")", "Passed high ldg trijet mass cut"))
 {
   initialize(config);
   nSelectedBJets = -1;
@@ -73,13 +77,17 @@ TopSelection::TopSelection(const ParameterSet& config)
   cfg_dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff(config.getParameter<float>("dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff")),
   cfg_dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept(config.getParameter<float>("dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept")), 
   cfg_ChiSqrCut(config, "ChiSqrCut"),
+  cfg_LowLdgTrijetMassCut(config, "LowLdgTrijetMassCut"),
+  cfg_HighLdgTrijetMassCut(config, "HighLdgTrijetMassCut"),
   cfg_MaxJetsToUseInFit(config.getParameter<int>("MaxJetsToUseInFit")),
   cfg_MaxBJetsToUseInFit(config.getParameter<int>("MaxBJetsToUseInFit")),
   // Event counter for passing selection
   cPassedTopSelection(fEventCounter.addCounter("passed top selection")),
   // Sub counters
   cSubAll(fEventCounter.addSubCounter("top selection", "All events")),
-  cSubPassedChiSqCut(fEventCounter.addSubCounter("top selection", "Passed a cut"))
+  cSubPassedChiSqCut(fEventCounter.addSubCounter("top selection", "Passed chiSq cut")),
+  cSubPassedLowLdgTrijetMassCut(fEventCounter.addSubCounter("top selection", "Passed low ldg trijet mass cut")),
+  cSubPassedHighLdgTrijetMassCut(fEventCounter.addSubCounter("top selection", "Passed high ldg trijet mass cut"))
 {
   initialize(config);
   bookHistograms(new TDirectory());
@@ -126,6 +134,8 @@ TopSelection::~TopSelection() {
   delete hTrijet1DijetBJetDEta;
   delete hTrijet2DijetBJetDEta;
   delete hLdgTrijetPt;
+  delete hLdgTrijetTopMassWMassRatio;
+  delete hLdgTrijetPt_Vs_LdgTrijetDijetPt;
   delete hLdgTrijetJet1Pt;
   delete hLdgTrijetJet1Eta;
   delete hLdgTrijetJet1BDisc;
@@ -139,6 +149,8 @@ TopSelection::~TopSelection() {
   delete hLdgTrijetDiJetEta;
   delete hLdgTrijetDiJetMass;
   delete hSubldgTrijetPt;
+  delete hSubldgTrijetTopMassWMassRatio;
+  delete hSubldgTrijetPt_Vs_SubldgTrijetDijetPt;
   delete hSubldgTrijetMass;
   delete hSubldgTrijetJet1Pt;
   delete hSubldgTrijetJet1Eta;
@@ -264,6 +276,9 @@ void TopSelection::bookHistograms(TDirectory* dir) {
   hLdgTrijetDiJetPt   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetDiJetPt"  ,";p_{T} (GeV/c)", nPtBins     , fPtMin     , fPtMax);
   hLdgTrijetDiJetEta  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetDiJetEta" ,";#eta"         , nEtaBins    , fEtaMin    , fEtaMax);
   hLdgTrijetDiJetMass = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetDiJetMass",";M (GeV/c^{2})", nWMassBins  , fWMassMin  , fWMassMax);
+  hLdgTrijetTopMassWMassRatio      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetTopMassWMassRatio"       ,";R_{32}", 100 , 0.0, 10.0);
+  hLdgTrijetPt_Vs_LdgTrijetDijetPt = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdir, "LdgTrijetPt_Vs_LdgTrijetDijetPt"  ,";p_{T} (GeV/c);p_{T} (GeV/c)",
+								nPtBins, fPtMin, fPtMax, nPtBins, fPtMin, fPtMax);
 
   hSubldgTrijetPt        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetPt"       ,";p_{T} (GeV/c)", nPtBins     , fPtMin     , fPtMax);
   hSubldgTrijetMass      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetMass"     ,";M (GeV/c^{2})", nTopMassBins, fTopMassMin, fTopMassMax);
@@ -279,6 +294,9 @@ void TopSelection::bookHistograms(TDirectory* dir) {
   hSubldgTrijetDiJetPt   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetDiJetPt"  ,";p_{T} (GeV/c)", nPtBins     , fPtMin     , fPtMax);
   hSubldgTrijetDiJetEta  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetDiJetEta" ,";#eta"         , nEtaBins    , fEtaMin    , fEtaMax);
   hSubldgTrijetDiJetMass = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetDiJetMass",";M (GeV/c^{2})", nWMassBins  , fWMassMin  , fWMassMax);
+  hSubldgTrijetTopMassWMassRatio         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetTopMassWMassRatio"       ,";R_{32}", 100 , 0.0, 10.0);
+  hSubldgTrijetPt_Vs_SubldgTrijetDijetPt = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdir, "SubldgTrijetPt_Vs_SubldgTrijetDijetPt",";p_{T} (GeV/c);p_{T} (GeV/c)",
+								nPtBins, fPtMin, fPtMax, nPtBins, fPtMin, fPtMax);
 
   // Histograms (2D) 
   hTetrajetBJetDijetWithMaxDR_TetrajetBJetDijetWithMinDR_DPhiVsDPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kDebug, subdir, 
@@ -361,6 +379,8 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
   output.fJetsUsedAsBJetsInFit = bjets;
   output.bIsGenuineB = _getIsGenuineB(event.isMC(), output.fJetsUsedAsBJetsInFit);
 
+  // Sanity check
+  // std::cout << "output.fJetsUsedAsBJetsInFit.size() = " << output.fJetsUsedAsBJetsInFit.size() << std::endl;
   std::vector<unsigned int> bjet1;
   std::vector<unsigned int> bjet2;
   std::vector<unsigned int> jet1;
@@ -477,7 +497,13 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
   hTrijet2DijetBJetDPhi->Fill( std::abs( ROOT::Math::VectorUtil::DeltaPhi( output.fTrijet2Dijet_p4, output.fTrijet2BJet.p4() ) ) );
   hTrijet1DijetBJetDR  ->Fill( ROOT::Math::VectorUtil::DeltaR( output.fTrijet1Dijet_p4, output.fTrijet1BJet.p4() ) );
   hTrijet2DijetBJetDR  ->Fill( ROOT::Math::VectorUtil::DeltaR( output.fTrijet2Dijet_p4, output.fTrijet2BJet.p4() ) );
+
   // Leading/Subleading tops
+  hLdgTrijetTopMassWMassRatio->Fill(output.getLdgTrijetTopMassWMassRatio());
+  hLdgTrijetPt_Vs_LdgTrijetDijetPt->Fill(output.getLdgTrijet().pt(), output.getLdgTrijetDijet().pt());
+  hSubldgTrijetTopMassWMassRatio->Fill(output.getSubldgTrijetTopMassWMassRatio());
+  hSubldgTrijetPt_Vs_SubldgTrijetDijetPt->Fill(output.getSubldgTrijet().pt(), output.getSubldgTrijetDijet().pt());
+
   if (output.fTrijet1_p4.pt() > output.fTrijet2_p4.pt()) 
     {
       // Leading
@@ -581,6 +607,16 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
   if ( !cfg_ChiSqrCut.passedCut(output.fChiSqr) ) return output;
   cSubPassedChiSqCut.increment();
 
+  double ldgTopMass = -1.0; //fixme: use getldgtrijet method
+  if (output.fTrijet1_p4.pt() > output.fTrijet2_p4.pt()) ldgTopMass = output.fTrijet1_p4.mass();
+  else ldgTopMass = output.fTrijet2_p4.mass();
+
+  if ( !cfg_LowLdgTrijetMassCut.passedCut(ldgTopMass) ) return output;
+  cSubPassedLowLdgTrijetMassCut.increment();
+
+  if ( !cfg_HighLdgTrijetMassCut.passedCut(ldgTopMass) ) return output;
+  cSubPassedHighLdgTrijetMassCut.increment();
+
   // Passed all top selection cuts
   output.bPassedSelection = true;
   cPassedTopSelection.increment();
@@ -673,12 +709,15 @@ const std::vector<Jet> TopSelection::GetBjetsToBeUsedInFit(const BJetSelection::
   // Append the vector of all failed bjets (in descending B-discriminator value) to the end of the bjets vector
   // Use case: QCD Measurement where we invert at least 1 b-jet => may have less than 3 b-jets available (min for di-top fit and inv mass) 
   if (bjetsForFit.size() < maxNumberOfBJets)
-    {
-  bjetsForFit.insert(bjetsForFit.end(), bjetData.getFailedBJetCands().begin(), bjetData.getFailedBJetCands().end()); 
+    {      
+      bjetsForFit.insert(bjetsForFit.end(), bjetData.getFailedBJetCands().begin(), bjetData.getFailedBJetCands().end()); 
     }
 
   // Truncate the bjets vector to correct size
   if (bjetsForFit.size() > maxNumberOfBJets) bjetsForFit.resize(maxNumberOfBJets);
+
+  // Finally sort by descending pt value (http://en.cppreference.com/w/cpp/algorithm/sort)      
+  std::sort(bjetsForFit.begin(), bjetsForFit.end(), [](const Jet& a, const Jet& b){return a.pt() > b.pt();});
 
   return bjetsForFit;
 }

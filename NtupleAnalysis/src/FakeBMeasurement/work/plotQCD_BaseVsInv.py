@@ -103,7 +103,7 @@ def GetDatasetsFromDir(opts):
 def main(opts):
 
     #optModes = ["", "OptChiSqrCutValue50", "OptChiSqrCutValue100", "OptChiSqrCutValue200"]
-    optModes = ["OptChiSqrCutValue100"]                                                                                                                             
+    optModes = [""]                                                                                                                             
 
     if opts.optMode != None:
         optModes = [opts.optMode]
@@ -126,9 +126,9 @@ def main(opts):
                 datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
 
         # Remove dataset ? 
-        if 1:
+        datasetsMgr.remove(filter(lambda name: "Charged" in name, datasetsMgr.getAllDatasetNames()))
+        if not opts.useMC:
             datasetsMgr.remove(filter(lambda name: "QCD" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "Charged" in name, datasetsMgr.getAllDatasetNames()))
                
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
@@ -136,6 +136,8 @@ def main(opts):
         # Re-order datasets (different for inverted than default=baseline)
         newOrder = ["Data"]
         newOrder.extend(GetListOfEwkDatasets())
+        if opts.useMC:
+            newOrder.append("QCD")
         datasetsMgr.selectAndReorder(newOrder)
 
         # Merge EWK samples
@@ -153,9 +155,8 @@ def main(opts):
 
         # 1) Do the StandardSelections/AllSelections
         bType  = ""
-        #folder = "ForFakeBNormalization" + bType	
-        folder = "ForFakeBMeasurement" + bType
-        hList  = datasetsMgr.getDataset("EWK").getDirectoryContent(folder)
+        folder = "ForFakeBMeasurement" + bType        
+        hList  = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(folder)
         hPaths = [os.path.join(folder, h) for h in hList]
         baselinePaths = []
         invertedPath  = []
@@ -170,8 +171,8 @@ def main(opts):
         # 2) Do the topSelection histos
         if 0:
             analysisType     = "Inverted"
-            folder           = "topSelection_%s" % (analysisType)
-            invertedList     = datasetsMgr.getDataset("EWK").getDirectoryContent(folder)
+            folder           = "topSelection_%s" % (analysisType)            
+            invertedList     = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(folder)
             invertedPaths    = [os.path.join(folder, h) for h in invertedList]
             baselinePaths    = [p.replace("Inverted", "Baseline") for p in invertedPaths]
             for hBaseline, hInverted in zip(baselinePaths, invertedPaths):
@@ -198,19 +199,32 @@ def PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted):
     p2 = plots.ComparisonPlot(*getHistos(datasetsMgr, "EWK", hBaseline, hInverted))
     p2.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
 
+    if opts.useMC:
+        p3 = plots.ComparisonPlot(*getHistos(datasetsMgr, "QCD", hBaseline, hInverted))
+        p3.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
+
     # Get Baseline histos
     baseline_Data = p1.histoMgr.getHisto("Baseline-Data").getRootHisto().Clone()
     baseline_QCD  = p1.histoMgr.getHisto("Baseline-Data").getRootHisto().Clone("Baseline-QCD")
     baseline_EWK  = p2.histoMgr.getHisto("Baseline-EWK").getRootHisto().Clone()
+    if opts.useMC:
+        baseline_QCDMC= p3.histoMgr.getHisto("Baseline-QCD").getRootHisto().Clone("Baseline-QCDMC")
 
     # Get Inverted histos
     inverted_Data = p1.histoMgr.getHisto("Inverted-Data").getRootHisto().Clone()
     inverted_QCD  = p1.histoMgr.getHisto("Inverted-Data").getRootHisto().Clone("Inverted-QCD")
     inverted_EWK  = p2.histoMgr.getHisto("Inverted-EWK").getRootHisto().Clone()
+    if opts.useMC:
+        inverted_QCDMC  = p3.histoMgr.getHisto("Inverted-QCD").getRootHisto().Clone("Inverted-QCDMC")
 
     # Subtract EWK from Data to get QCD
     baseline_QCD.Add(baseline_EWK, -1)
     inverted_QCD.Add(inverted_EWK, -1)
+
+    # Option: Use QCD-MC instead of QCD=Data-EWK
+    if opts.useMC:
+        baseline_QCD = baseline_QCDMC
+        inverted_QCD = inverted_QCDMC
 
     # Normalize histograms to unit area
     if opts.normaliseToOne:
@@ -225,23 +239,41 @@ def PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted):
     p = plots.ComparisonManyPlot(baseline_QCD, [inverted_QCD], saveFormats=[])
         
     # Apply styles
-    p.histoMgr.forHisto("Baseline-QCD" , styles.getBaselineStyle() )
-    p.histoMgr.forHisto("Inverted-QCD" , styles.getInvertedStyle() )
-
+    if opts.useMC:
+        p.histoMgr.forHisto("Baseline-QCDMC" , styles.getBaselineStyle() )
+        p.histoMgr.forHisto("Inverted-QCDMC" , styles.getInvertedStyle() )
+    else:
+        p.histoMgr.forHisto("Baseline-QCD" , styles.getBaselineStyle() )
+        p.histoMgr.forHisto("Inverted-QCD" , styles.getInvertedStyle() )
+        
     # Set draw style
-    p.histoMgr.setHistoDrawStyle("Baseline-QCD", "AP")
-    p.histoMgr.setHistoDrawStyle("Inverted-QCD", "HIST")
+    if opts.useMC:
+        p.histoMgr.setHistoDrawStyle("Baseline-QCDMC", "AP")
+        p.histoMgr.setHistoDrawStyle("Inverted-QCDMC", "HIST")        
+    else:
+        p.histoMgr.setHistoDrawStyle("Baseline-QCD", "AP")
+        p.histoMgr.setHistoDrawStyle("Inverted-QCD", "HIST")
 
     # Set legend style
-    p.histoMgr.setHistoLegendStyle("Baseline-QCD", "LP")
-    p.histoMgr.setHistoLegendStyle("Inverted-QCD", "F")
-    # p.histoMgr.setHistoLegendStyleAll("LP")
-
+    if opts.useMC:
+        p.histoMgr.setHistoLegendStyle("Baseline-QCDMC", "LP")
+        p.histoMgr.setHistoLegendStyle("Inverted-QCDMC", "F")
+    else:
+        p.histoMgr.setHistoLegendStyle("Baseline-QCD", "LP")
+        p.histoMgr.setHistoLegendStyle("Inverted-QCD", "F")    
+        
     # Set legend labels
-    p.histoMgr.setHistoLegendLabelMany({
-            "Baseline-QCD" : "QCD (Baseline)",
-            "Inverted-QCD" : "QCD (Inverted)",
-            })
+    if opts.useMC:
+        p.histoMgr.setHistoLegendLabelMany({
+                "Baseline-QCDMC" : "QCD-MC (Baseline)",
+                "Inverted-QCDMC" : "QCD-MC (Inverted)",
+                })
+    else:
+        p.histoMgr.setHistoLegendLabelMany({
+                "Baseline-QCD" : "QCD (Baseline)",
+                "Inverted-QCD" : "QCD (Inverted)",
+                })
+        
 
     # Draw the histograms
     _cutBox = None
@@ -284,6 +316,8 @@ def PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted):
         _format = "%0.2f"
     if "tetrajetm" in hBaseline.lower():
         _rebinX = 4 #10
+        if opts.useMC:
+            _rebinX = 10
         _units  = "GeV/c^{2}"
         _format = "%0.0f " + _units
         _xlabel = "m_{jjbb} (%s)" % (_units)
@@ -322,7 +356,7 @@ def IsBaselineOrInverted(analysisType):
     return
 
 
-def SavePlot(plot, saveName, saveDir, saveFormats = [".png", ".pdf"]):
+def SavePlot(plot, saveName, saveDir, saveFormats = [".png"]): #[".png", ".pdf"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
     
     # Check that path exists
@@ -379,7 +413,8 @@ if __name__ == "__main__":
     SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
-    NORMALISE    = False
+    NORMALISE    = True
+    USEMC        = False
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -426,8 +461,11 @@ if __name__ == "__main__":
     parser.add_option("-e", "--excludeTasks", dest="excludeTasks", action="store", 
                       help="List of datasets in mcrab to exclude")
 
-    parser.add_option("-n", "--normaliseToOne", dest="normaliseToOne", action="store_true", 
+    parser.add_option("-n", "--normaliseToOne", dest="normaliseToOne", action="store_true", default=NORMALISE, 
                       help="Normalise the baseline and inverted shapes to one? [default: %s]" % (NORMALISE) )
+
+    parser.add_option("--useMC", dest="useMC", action="store_true", default=USEMC, 
+                      help="Use QCD MC instead of QCD=Data-EWK? [default: %s]" % (USEMC) )
 
     (opts, parseArgs) = parser.parse_args()
 

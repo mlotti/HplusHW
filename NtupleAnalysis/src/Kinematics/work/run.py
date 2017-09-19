@@ -13,16 +13,20 @@ a time most probably you are I/O -limited. The limit is how much memory one proc
 
 
 USAGE:
-./runAnalysis.py -m <multicrab_directory> -j <numOfCores> -i <DatasetName>
+./run.py -m <multicrab_directory> -j <numOfCores> -i <DatasetName>
 or
-./runAnalysis.py -m <multicrab_directory> -n 10 -e "Keyword1|Keyword2|Keyword3"
+./run.py -m <multicrab_directory> -n 10 -e "Keyword1|Keyword2|Keyword3"
 
 Example:
-./runAnalysis.py -m /multicrab_CMSSW752_Default_07Jan2016/
-./runAnalysis.py -m multicrab_CMSSW752_Default_07Jan2016/ -j 16
-/runAnalysis.py -m multicrab_Hplus2tbAnalysis_v8014_20160818T1956 -n 1000 -e QCD
-./runAnalysis.py -m <multicrab-directory> -e TT_extOB
-./runAnalysis.py -m <multicrab_directory> -n 10 -e "QCD_bEnriched_HT300|2016|ST_"
+./run.py -m /uscms_data/d3/aattikis/workspace/multicrab/multicrab_Hplus2tbAnalysis_v8027_20170529T0448
+./run.py -m /multicrab_CMSSW752_Default_07Jan2016/
+./run.py -m multicrab_CMSSW752_Default_07Jan2016/ -j 16
+./run.py -m multicrab_Hplus2tbAnalysis_v8014_20160818T1956 -n 1000 -e QCD
+./run.py -m <multicrab-directory> -e TT_extOB
+./run.py -m <multicrab_directory> -n 10 -e "QCD_bEnriched_HT300|2016|ST_"
+
+Last used:
+./run.py -m /uscms_data/d3/aattikis/workspace/multicrab/multicrab_Hplus2tbAnalysis_v8027_20170529T0448 -e "JetHT" > log_lpc26.txt
 
 ROOT:
 The available ROOT options for the Error-Ignore-Level are (const Int_t):
@@ -32,6 +36,17 @@ The available ROOT options for the Error-Ignore-Level are (const Int_t):
         kWarning  =   2000
         kError    =   3000
         kBreak    =   4000
+
+HistoLevel:
+For the histogramAmbientLevel each DEEPER level is a SUBSET of the rest. 
+For example "kDebug" will include all kDebug histos but also kInformative, kVital, kSystematics, and kNever.  
+Setting histogramAmbientLevel=kSystematics will include kSystematics AND kNever.
+    1. kNever = 0,
+    2. kSystematics,
+    3. kVital,
+    4. kInformative,
+    5. kDebug,
+    6. kNumberOfLevels
 '''
 
 #================================================================================================
@@ -65,7 +80,7 @@ def Verbose(msg, printHeader=False):
         return
 
     if printHeader:
-        print "=== runAnalysis.py:"
+        print "=== run.py:"
 
     if msg !="":
         print "\t", msg
@@ -74,7 +89,7 @@ def Verbose(msg, printHeader=False):
 
 def Print(msg, printHeader=True):
     if printHeader:
-        print "=== runAnalysis.py:"
+        print "=== run.py:"
 
     if msg !="":
         print "\t", msg
@@ -112,30 +127,24 @@ def main():
         Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
         process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=opts.excludeTasks)
     else:
+        myBlackList = []#["QCD_b"]
         Print("Adding all datasets from multiCRAB directory %s" % (opts.mcrab))
         Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
-        process.addDatasetsFromMulticrab(opts.mcrab)
+        regex =  "|".join(myBlackList)
+        if len(myBlackList)>0:
+            process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=regex)
+        else:
+            process.addDatasetsFromMulticrab(opts.mcrab)
 
 
     # ================================================================================================
-    # Selection customisations
+    # Overwrite Default Settings  
     # ================================================================================================
     from HiggsAnalysis.NtupleAnalysis.parameters.hplus2tbAnalysis import allSelections
-    #from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections
-
-    # Overwrite verbosity
     allSelections.verbose = opts.verbose
-
-    # Overwrite histo ambient level (Options: Systematics, Vital, Informative, Debug)
     allSelections.histogramAmbientLevel = opts.histoLevel
-
-    
-    # Set splitting of phase space (first bin is below first edge value and last bin is above last edge value)
-    # allSelections.CommonPlots.histogramSplitting = [
-    #     PSet(label="tauPt", binLowEdges=[60.0, 70.0, 80.0, 100.0], useAbsoluteValues=False),
-    #     ]
-
-    # allSelections.TauSelection.rtau = 0.0      
+    # allSelections.BjetSelection.triggerMatchingApply = True
+    # allSelections.TopSelection.ChiSqrCutValue = 100.0
     # allSelections.BJetSelection.numberOfBJetsCutValue = 0
     # allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
 
@@ -145,7 +154,7 @@ def main():
     # ================================================================================================
     # selections = allSelections.clone()
     # process.addAnalyzer(prefix, Analyzer(prefix, config=selections, silent=False) ) #trigger passed from selections
-    
+
 
     # ================================================================================================
     # Command Line Options
@@ -157,15 +166,19 @@ def main():
     #================================================================================================
     # Build analysis modules
     #================================================================================================
+    PrintOptions(opts)
     builder = AnalysisBuilder(prefix,
                               dataEras,
                               searchModes,
-                              usePUreweighting=opts.puReweight,
-                              doSystematicVariations=opts.systematics)
+                              usePUreweighting       = opts.usePUreweighting,
+                              useTopPtReweighting    = opts.useTopPtReweighting,
+                              doSystematicVariations = False)
 
-    # Perform variations (e.g. for optimisation)
+    # Add variations (e.g. for optimisation)
     # builder.addVariation("METSelection.METCutValue", [100,120,140])
     # builder.addVariation("AngularCutsBackToBack.workingPoint", ["Loose","Medium","Tight"])
+    # builder.addVariation("BJetSelection.triggerMatchingApply", [False])
+    # builder.addVariation("TopSelection.ChiSqrCutValue", [5, 10, 15, 20])
 
     # Build the builder
     builder.build(process, allSelections)
@@ -187,20 +200,47 @@ def main():
     # Pick events
     # ================================================================================================
     #process.addOptions(EventSaver = PSet(enabled = True,pickEvents = True))
-
-
     # ================================================================================================
     # Run the analysis
     # ================================================================================================
-    # Run the analysis with PROOF? By default it uses all cores, but you can give proofWorkers=<N> as a parameter
+    # Run the analysis with PROOF? You can give proofWorkers=<N> as a parameter
     if opts.jCores:
         Print("Running process with PROOF (proofWorkes=%s)" % ( str(opts.jCores) ) )
         process.run(proof=True, proofWorkers=opts.jCores)
     else:
-        Print("Running process (no PROOF)")
+        Print("Running process")
         process.run()
 
-        
+
+#================================================================================================
+def PrintOptions(opts):
+    '''
+    '''
+    table    = []
+    msgAlign = "{:<20} {:<10} {:<10}"
+    title    =  msgAlign.format("Option", "Value", "Default")
+    hLine    = "="*len(title)
+    table.append(hLine)
+    table.append(title)
+    table.append(hLine)
+    #table.append( msgAlign.format("mcrab" , opts.mcrab , "") )
+    table.append( msgAlign.format("jCores", opts.jCores, "") )
+    table.append( msgAlign.format("includeOnlyTasks", opts.includeOnlyTasks, "") )
+    table.append( msgAlign.format("excludeTasks", opts.excludeTasks, "") )
+    table.append( msgAlign.format("nEvts", opts.nEvts, NEVTS) )
+    table.append( msgAlign.format("verbose", opts.verbose, VERBOSE) )
+    table.append( msgAlign.format("histoLevel", opts.histoLevel, HISTOLEVEL) )
+    table.append( msgAlign.format("usePUreweighting", opts.usePUreweighting, PUREWEIGHT) )
+    table.append( msgAlign.format("useTopPtReweighting", opts.useTopPtReweighting, TOPPTREWEIGHT) )
+    # table.append( msgAlign.format("doSystematics", opts.doSystematics, False) ) 
+    table.append( hLine )
+
+    # Print("Will run on multicrab directory %s" % (opts.mcrab), True)     
+    for i, line in enumerate(table):
+        Print(line, i==0)
+    return
+
+
 #================================================================================================      
 if __name__ == "__main__":
     '''
@@ -220,12 +260,12 @@ if __name__ == "__main__":
     '''
 
     # Default Values
-    VERBOSE     = False
-    PUREWEIGHT  = False
-    SYSTEMATICS = False
+    VERBOSE       = False
+    NEVTS         = -1
+    HISTOLEVEL    = "Debug"
+    PUREWEIGHT    = False
+    TOPPTREWEIGHT = True
 
-
-    
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
     parser.add_option("-m", "--mcrab", dest="mcrab", action="store", 
                       help="Path to the multicrab directory for input")
@@ -239,23 +279,28 @@ if __name__ == "__main__":
     parser.add_option("-e", "--excludeTasks", dest="excludeTasks", action="store", 
                       help="List of datasets in mcrab to exclude")
 
-    parser.add_option("-n", "--nEvts", dest="nEvts", action="store", type=int, default = -1,
-                      help="Number of events to run on")
+    parser.add_option("-n", "--nEvts", dest="nEvts", action="store", type=int, default = NEVTS,
+                      help="Number of events to run on (default: %s" % (NEVTS) )
 
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default = VERBOSE, 
                       help="Enable verbosity (for debugging) (default: %s)" % (VERBOSE))
 
-    parser.add_option("-h", "--histoLevel", dest="histoLevel", action="store", default = "Informative", 
-                      help="Histogram ambient level (default: Informative)")
+    parser.add_option("-h", "--histoLevel", dest="histoLevel", action="store", default = HISTOLEVEL,
+                      help="Histogram ambient level (default: %s)" % (HISTOLEVEL))
 
-    parser.add_option("--puReweight", dest="puReweight", action="store_true", default = PUREWEIGHT, 
+    parser.add_option("--doPU", dest="usePUreweighting", action="store_true", default = PUREWEIGHT, 
                       help="Apply Pileup re-weighting (default: %s)" % (PUREWEIGHT) )
 
-    parser.add_option("--systematics", dest="systematics", action="store_true", default = SYSTEMATICS, 
-                      help="Do systematics variations  (default: %s)" % (SYSTEMATICS) )
+    parser.add_option("--noTopPt", dest="useTopPtReweighting", action="store_false", default = TOPPTREWEIGHT, 
+                      help="Do NOT apply top-pt re-weighting (default: %s)" % (TOPPTREWEIGHT) )
 
     (opts, args) = parser.parse_args()
 
     if opts.mcrab == None:
         raise Exception("Please provide input multicrab directory with -m")
+
+    allowedLevels = ['Never', 'Systematics', 'Vital', 'Informative', 'Debug']
+    if opts.histoLevel not in allowedLevels:
+        raise Exception("Invalid ambient histogram level \"%s\"! Valid options are: %s" % (opts.histoLevel, ", ".join(allowedLevels)))
+
     main()

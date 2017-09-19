@@ -3,7 +3,8 @@
 
 def NoteStyle():
     # White text on magent background, bold
-    return "\033[0;45m\033[1;37m"
+    #return "\033[0;45m\033[1;37m"
+    return "\033[0;35m"
 
 def WarningStyle():
     # White text on orange background, bold
@@ -11,7 +12,8 @@ def WarningStyle():
 
 def ErrorStyle():
     # White text on red background, bold
-    return "\033[0;41m\033[1;37m"
+    #return "\033[0;41m\033[1;37m"
+    return "\033[1;31m"
 
 def HighlightStyle():
     # White text on black background, bold
@@ -63,14 +65,16 @@ def HighlightAltStyle():
     #return "\033[;47m\033[1;36m"
 
     # blue text on black backround
-    return "\033[;40m\033[1;34m"
+    #return "\033[;40m\033[1;34m"
+    return "\033[1;34m"
 
 def SuccessStyle():
     # green text on black backround
-    # return "\033[;40m\033[1;32m"
+    #return "\033[;40m\033[1;32m"
+    return "\033[92m"
     
     # black text on green backround
-    return "\033[;40m\033[1;42m"
+    #return "\033[;40m\033[1;42m"
 
 def SuccessLabel():
     # black text on green backround

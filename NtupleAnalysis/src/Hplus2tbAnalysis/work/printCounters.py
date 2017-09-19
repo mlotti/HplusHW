@@ -18,10 +18,10 @@ Commonly Used Commands:
 
 Examples:
 ./printCounters.py -m <multicrab_dir> -i "JetHT|TT"
-./printCounters.py -m <multicrab_dir> --noError --format %.3f --latex
-./printCounters.py -m <multicrab_dir> --noError --format %.3f --precision 3 --mergeEWK
-./printCounters.py -m <multicrab_dir> --noError --format %.3f --precision 3 --mergeEWK --latex -s
-./printCounters.py -m <multicrab_dir> --noError --format %.3f --precision 3 --mergeEWK --latex -s --histoLevel Debug
+./printCounters.py -m <multicrab_dir> --format %.3f --latex
+./printCounters.py -m <multicrab_dir> --format %.3f --precision 3 --mergeEWK
+./printCounters.py -m <multicrab_dir> --format %.3f --precision 3 --mergeEWK --latex -s
+./printCounters.py -m <multicrab_dir> --format %.3f --precision 3 --mergeEWK --latex -s --histoLevel Debug
 ./printCounters.py -m <multicrab_dir> --mcOnly --intLumi 100000
 ./printCounters.py -m <multicrab_dir> --fractionEWK
 ./printCounters.py -m <multicrab_dir> --subcounters
@@ -33,6 +33,10 @@ Examples:
 ./printCounters.py -m <multicrab_dir> --valueOnly
 ./printCounters.py -m <multicrab_dir> --uncertaintyFormat %.2f
 ./printCounters.py -m <multicrab_dir> --uncertaintyPrecision 4
+
+Last Used:
+./printCounters.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170827_075947 --valueFormat %.3f --withPrecision 3 -e "QCD|M_"
+./printCounters.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170827_075947 --valueFormat %.3f --withPrecision 3 --mergeEWK
 '''
 
 #================================================================================================ 
@@ -197,7 +201,6 @@ def doCounters(datasetsMgr):
     --latex (The table formatting is in LaTeX instead of plain text)
     --format (The table value-format of strings)
     --precision (The table value-precision)
-    --noError (Don't print statistical errors in tables)
     --mergeEWK (Merge all EWK samples into a single sample called EWK)
     -i (List of datasets in mcrab to include)
     -e (List of datasets in mcrab to exclude)

@@ -1,7 +1,6 @@
 // -*- c++ -*-
 #include "Framework/interface/BaseSelector.h"
 #include "Framework/interface/makeTH.h"
-
 // User
 #include "Auxiliary/interface/Table.h"
 #include "Auxiliary/interface/Tools.h"
@@ -16,8 +15,11 @@
 #include "TMatrixDSym.h"
 #include "TMatrixDSymEigen.h"
 
+typedef Particle<ParticleCollection<double> > genParticle;
+
 struct PtComparator
 {
+  bool operator() (const genParticle p1, const genParticle p2) const { return ( p1.pt() > p2.pt() ); }
   bool operator() (const math::XYZTLorentzVector p1, const math::XYZTLorentzVector p2) const { return ( p1.pt() > p2.pt() ); }
 };
 
@@ -33,6 +35,9 @@ public:
   virtual void setupBranches(BranchManager& branchManager) override;
   /// Called for each event
   virtual void process(Long64_t entry) override;  
+  virtual vector<genParticle> GetGenParticles(const vector<genParticle> genParticles, double ptCut, double etaCut, const int pdgId, const bool isLastCopy=true, const bool hasNoDaughters=false);
+  virtual vector<GenJet> GetGenJets(const GenJetCollection& genJets, std::vector<float> ptCut, std::vector<float> etaCut);
+  virtual vector<GenJet> GetGenJets(const vector<GenJet> genJets, std::vector<float> ptCut, std::vector<float> etaCut, vector<genParticle> genParticlesToMatch);
   virtual TMatrixDSym ComputeMomentumTensor(std::vector<math::XYZTLorentzVector> jets, double r = 2.0); 
   virtual TMatrixDSym ComputeMomentumTensor2D(std::vector<math::XYZTLorentzVector> jets);
   virtual vector<float> GetMomentumTensorEigenValues(std::vector<math::XYZTLorentzVector> jets,
@@ -53,18 +58,38 @@ public:
 private:
   // Input parameters
   const double cfg_Verbose;
-  const ParameterSet PSet_JetSelection;
-  const double cfg_JetPtCut;
-  const double cfg_JetEtaCut;
-  const DirectionalCut<int> cfg_JetNumberCut;
   const ParameterSet PSet_ElectronSelection;
   const double cfg_ElectronPtCut;
   const double cfg_ElectronEtaCut;
   const ParameterSet PSet_MuonSelection;
   const double cfg_MuonPtCut;
   const double cfg_MuonEtaCut;
+  const ParameterSet PSet_TauSelection;
+  const double cfg_TauPtCut;
+  const double cfg_TauEtaCut;
+  const ParameterSet PSet_JetSelection;
+  const std::vector<float> cfg_JetPtCuts;
+  const std::vector<float> cfg_JetEtaCuts;
+  const DirectionalCut<int> cfg_JetNumberCut;
   const ParameterSet PSet_HtSelection;
   const DirectionalCut<float> cfg_HtCut;
+  const ParameterSet PSet_BJetSelection;
+  const std::vector<float> cfg_BJetPtCuts;
+  const std::vector<float> cfg_BJetEtaCuts;
+  const DirectionalCut<int> cfg_BJetNumberCut;
+  // METSelection PSet_METSelection;
+  TopologySelection PSet_TopologySelection;
+  const DirectionalCut<double> cfg_SphericityCut;
+  const DirectionalCut<double> cfg_AplanarityCut;
+  const DirectionalCut<double> cfg_PlanarityCut;
+  const DirectionalCut<double> cfg_CircularityCut;
+  const DirectionalCut<double> cfg_Y23Cut;
+  const DirectionalCut<double> cfg_CparameterCut;
+  const DirectionalCut<double> cfg_DparameterCut;
+  const DirectionalCut<double> cfg_FoxWolframMomentCut;
+  const DirectionalCut<double> cfg_AlphaTCut;
+  const DirectionalCut<double> cfg_CentralityCut;
+  // TopSelection PSet_TopSelection;
   const HistogramSettings cfg_PtBinSetting;
   const HistogramSettings cfg_EtaBinSetting;
   const HistogramSettings cfg_PhiBinSetting;
@@ -77,10 +102,15 @@ private:
   
   // Counters
   Count cAllEvents;  
-  Count cSubNoPreselections;
-  Count cSubPassedLeptonVeto;
-  Count cSubPassedJetsCut;
-  Count cSubPassedHtCut;
+  Count cTrigger;
+  Count cElectronVeto;
+  Count cMuonVeto;
+  Count cTauVeto;
+  Count cJetSelection;
+  Count cBJetSelection;
+  Count cTopologySelection;
+  Count cTopSelection;
+  Count cSelected;
   
   // Event Variables
   WrappedTH1 *h_genMET_Et;
@@ -175,11 +205,7 @@ private:
   WrappedTH1 *h_BQuarkPair_dRMin_jet2_dPhi;
 
   // GenJets
-  WrappedTH1 *h_GenJet_N_NoPreselections;
-  WrappedTH1 *h_GenJet_N_AfterLeptonVeto;
-  WrappedTH1 *h_GenJet_N_AfterLeptonVetoNJetsCut;
-  WrappedTH1 *h_GenJet_N_AfterPreselections;  
-
+  WrappedTH1 *h_GenJets_N;
   WrappedTH1 *h_GenJet1_Pt;
   WrappedTH1 *h_GenJet2_Pt;
   WrappedTH1 *h_GenJet3_Pt;
@@ -195,14 +221,6 @@ private:
   WrappedTH1 *h_GenJet5_Eta;
   WrappedTH1 *h_GenJet6_Eta;
   vector<WrappedTH1*> vh_GenJets_Eta;
-  // With b-matched GenJets push in front
-  WrappedTH1 *h_GenJet1_BJetsFirst_Pt;
-  WrappedTH1 *h_GenJet2_BJetsFirst_Pt;
-  WrappedTH1 *h_GenJet3_BJetsFirst_Pt;
-  WrappedTH1 *h_GenJet4_BJetsFirst_Pt;
-  WrappedTH1 *h_GenJet5_BJetsFirst_Pt;
-  WrappedTH1 *h_GenJet6_BJetsFirst_Pt;
-  vector<WrappedTH1*> vh_GenJets_BJetsFirst_Pt;
 
   // GenJets: Dijet with largest mass
   WrappedTH1 *h_MaxDiJetMass_Pt;
@@ -262,72 +280,67 @@ REGISTER_SELECTOR(Kinematics);
 Kinematics::Kinematics(const ParameterSet& config, const TH1* skimCounters)
   : BaseSelector(config, skimCounters),
     cfg_Verbose(config.getParameter<bool>("verbose")),
-    PSet_JetSelection(config.getParameter<ParameterSet>("JetSelection")),
-    cfg_JetPtCut(config.getParameter<float>("JetSelection.jetPtCut")),
-    cfg_JetEtaCut(config.getParameter<float>("JetSelection.jetEtaCut")),
-    cfg_JetNumberCut(config, "JetSelection.numberOfJetsCut"),
     PSet_ElectronSelection(config.getParameter<ParameterSet>("ElectronSelection")),
     cfg_ElectronPtCut(config.getParameter<float>("ElectronSelection.electronPtCut")),  
     cfg_ElectronEtaCut(config.getParameter<float>("ElectronSelection.electronEtaCut")),
     PSet_MuonSelection(config.getParameter<ParameterSet>("MuonSelection")),
     cfg_MuonPtCut(config.getParameter<float>("MuonSelection.muonPtCut")),
     cfg_MuonEtaCut(config.getParameter<float>("MuonSelection.muonEtaCut")),
-    PSet_HtSelection(config.getParameter<ParameterSet>("HtSelection")),
-    cfg_HtCut(config, "HtSelection.HtCut"),
+    PSet_TauSelection(config.getParameter<ParameterSet>("TauSelection")),
+    cfg_TauPtCut(config.getParameter<float>("TauSelection.tauPtCut")),
+    cfg_TauEtaCut(config.getParameter<float>("TauSelection.tauEtaCut")),
+    PSet_JetSelection(config.getParameter<ParameterSet>("JetSelection")),
+    cfg_JetPtCuts(config.getParameter<std::vector<float>>("JetSelection.jetPtCuts")),
+    cfg_JetEtaCuts(config.getParameter<std::vector<float>>("JetSelection.jetEtaCuts")),
+    cfg_JetNumberCut(config, "JetSelection.numberOfJetsCut"),
+    PSet_HtSelection(config.getParameter<ParameterSet>("JetSelection")),
+    cfg_HtCut(config, "JetSelection.HTCut"),
+    PSet_BJetSelection(config.getParameter<ParameterSet>("BJetSelection")),
+    cfg_BJetPtCuts(config.getParameter<std::vector<float>>("BJetSelection.jetPtCuts")),
+    cfg_BJetEtaCuts(config.getParameter<std::vector<float>>("BJetSelection.jetEtaCuts")),
+    cfg_BJetNumberCut(config, "BJetSelection.numberOfBJetsCut"),
+    // PSet_METSelection(config.getParameter<ParameterSet>("METSelection")),
+    PSet_TopologySelection(config.getParameter<ParameterSet>("TopologySelection")),
+    cfg_SphericityCut(config, "TopologySelection.SphericityCut"),
+    cfg_AplanarityCut(config, "TopologySelection.AplanarityCut"),
+    cfg_PlanarityCut(config, "TopologySelection.PlanarityCut"),
+    cfg_CircularityCut(config, "TopologySelection.CircularityCut"),
+    cfg_Y23Cut(config, "TopologySelection.Y23Cut"),
+    cfg_CparameterCut(config, "TopologySelection.CparameterCut"),
+    cfg_DparameterCut(config, "TopologySelection.DparameterCut"),
+    cfg_FoxWolframMomentCut(config, "TopologySelection.FoxWolframMomentCut"),
+    cfg_AlphaTCut(config, "TopologySelection.AlphaTCut"),
+    cfg_CentralityCut(config, "TopologySelection.CentralityCut"),
+    // PSet_TopSelection(config.getParameter<ParameterSet>("TopSelection")),
     cfg_PtBinSetting(config.getParameter<ParameterSet>("CommonPlots.ptBins")),
     cfg_EtaBinSetting(config.getParameter<ParameterSet>("CommonPlots.etaBins")),
     cfg_PhiBinSetting(config.getParameter<ParameterSet>("CommonPlots.phiBins")),
-    cfg_MassBinSetting(config.getParameter<ParameterSet>("CommonPlots.invmassBins")),
+    cfg_MassBinSetting(config.getParameter<ParameterSet>("CommonPlots.invMassBins")),
     cfg_DeltaEtaBinSetting(config.getParameter<ParameterSet>("CommonPlots.deltaEtaBins")),
     cfg_DeltaPhiBinSetting(config.getParameter<ParameterSet>("CommonPlots.deltaPhiBins")),
     cfg_DeltaRBinSetting(config.getParameter<ParameterSet>("CommonPlots.deltaRBins")),
     cAllEvents(fEventCounter.addCounter("All events")),
-    cSubNoPreselections(fEventCounter.addSubCounter("Preselections", "All Events")),
-    cSubPassedLeptonVeto(fEventCounter.addSubCounter("Preselections", "Lepton Veto")),
-    cSubPassedJetsCut(fEventCounter.addSubCounter("Preselections", "Jets Cut")),
-    cSubPassedHtCut(fEventCounter.addSubCounter("Preselections","HT Cut"))
+    cTrigger(fEventCounter.addCounter("Trigger")),
+    cElectronVeto(fEventCounter.addCounter("e-veto")),
+    cMuonVeto(fEventCounter.addCounter("#mu-veto")),
+    cTauVeto(fEventCounter.addCounter("#tau-veto")),
+    cJetSelection(fEventCounter.addCounter("Jets + H_{T}")),
+    cBJetSelection(fEventCounter.addCounter("b-jets")),
+    cTopologySelection(fEventCounter.addCounter("Topology")),
+    cTopSelection(fEventCounter.addCounter("Top")),
+    cSelected(fEventCounter.addCounter("All Selections"))
 { }
 
 void Kinematics::book(TDirectory *dir) {
 
-  Table cuts("Variable | Jets | Electron | Muon | HT", "Text"); //LaTeX or Text
-  cuts.AddRowColumn(0, "Pt (GeV/c)");
-  cuts.AddRowColumn(1, "Eta");
-  cuts.AddRowColumn(2, "Cut Direction");
-  cuts.AddRowColumn(3, "Cut Value");
-  //  
-  cuts.AddRowColumn(0, auxTools.ToString(cfg_JetPtCut) );
-  cuts.AddRowColumn(0, auxTools.ToString(cfg_ElectronPtCut) );
-  cuts.AddRowColumn(0, auxTools.ToString(cfg_MuonPtCut) );
-  cuts.AddRowColumn(0, "-");
-  //
-  cuts.AddRowColumn(1, auxTools.ToString(cfg_JetEtaCut) );
-  cuts.AddRowColumn(1, auxTools.ToString(cfg_ElectronEtaCut) );
-  cuts.AddRowColumn(1, auxTools.ToString(cfg_MuonEtaCut) );
-  cuts.AddRowColumn(1, "-");
-  //
-  cuts.AddRowColumn(2, PSet_JetSelection.getParameter<string>("numberOfJetsCutDirection") );
-  cuts.AddRowColumn(2, "=<" );
-  cuts.AddRowColumn(2, "=<" );
-  cuts.AddRowColumn(2, PSet_HtSelection.getParameter<string>("HtCutDirection") );
-  //
-  cuts.AddRowColumn(3, auxTools.ToString(PSet_JetSelection.getParameter<int>("numberOfJetsCutValue")) );
-  cuts.AddRowColumn(3, "0" );
-  cuts.AddRowColumn(3, "0" );
-  cuts.AddRowColumn(3, PSet_HtSelection.getParameter<string>("HtCutValue") );
-  //
-  std::cout << "\n" << std::endl;
-  if (cfg_Verbose) cuts.Print();
-
-  
   // Fixed binning
-  const int nBinsPt   = cfg_PtBinSetting.bins();
+  const int nBinsPt   = 4*cfg_PtBinSetting.bins();
   const double minPt  = cfg_PtBinSetting.min();
-  const double maxPt  = cfg_PtBinSetting.max();
+  const double maxPt  = 4*cfg_PtBinSetting.max();
 
-  const int nBinsEta  = cfg_EtaBinSetting.bins();
-  const double minEta = cfg_EtaBinSetting.min();
-  const double maxEta = cfg_EtaBinSetting.max();
+  const int nBinsEta  = 2*cfg_EtaBinSetting.bins();
+  const double minEta = 2*cfg_EtaBinSetting.min();
+  const double maxEta = 2*cfg_EtaBinSetting.max();
 
   const int nBinsRap  = cfg_EtaBinSetting.bins();
   const double minRap = cfg_EtaBinSetting.min();
@@ -341,146 +354,144 @@ void Kinematics::book(TDirectory *dir) {
   const double minM = cfg_MassBinSetting.min();
   const double maxM = cfg_MassBinSetting.max();
   
-  const int nBinsdEta  = cfg_DeltaEtaBinSetting.bins();
+  const int nBinsdEta  = 2*cfg_DeltaEtaBinSetting.bins();
   const double mindEta = cfg_DeltaEtaBinSetting.min();
   const double maxdEta = cfg_DeltaEtaBinSetting.max();
 
-  const int nBinsdRap  = cfg_DeltaEtaBinSetting.bins();
+  const int nBinsdRap  = 2*cfg_DeltaEtaBinSetting.bins();
   const double mindRap = cfg_DeltaEtaBinSetting.min();
   const double maxdRap = cfg_DeltaEtaBinSetting.max();
 
-  const int nBinsdPhi  = cfg_DeltaPhiBinSetting.bins();
+  const int nBinsdPhi  = 2*cfg_DeltaPhiBinSetting.bins();
   const double mindPhi = cfg_DeltaPhiBinSetting.min();
   const double maxdPhi = cfg_DeltaPhiBinSetting.max();
 
-  const int nBinsdR  = cfg_DeltaRBinSetting.bins();
+  const int nBinsdR  = 2*cfg_DeltaRBinSetting.bins();
   const double mindR = cfg_DeltaRBinSetting.min();
   const double maxdR = cfg_DeltaRBinSetting.max();
 
-    
+  TDirectory* th1 = fHistoWrapper.mkdir(HistoLevel::kVital, dir, "TH1");
+  TDirectory* th2 = fHistoWrapper.mkdir(HistoLevel::kVital, dir, "TH2");
+
   // Event Variables
-  h_genMET_Et         =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital      , dir, "genMET_Et"    , ";Gen E_{T}^{miss} (GeV)"       , 60,  0.0,   +300.0);
-  h_genMET_Phi        =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "genMET_Phi"   , ";Gen E_{T}^{miss} #phi (rads)" , nBinsPhi, minPhi, maxPhi);
-  h_genHT_GenJets     =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital      , dir, "genHT_GenJets", ";GenJ H_{T} (GeV)"             ,  75,  0.0, +1500.0);  
+  h_genMET_Et         =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital      , th1, "genMET_Et"    , ";Gen E_{T}^{miss} (GeV)"       , 100,  0.0,   +500.0);
+  h_genMET_Phi        =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "genMET_Phi"   , ";Gen E_{T}^{miss} #phi (rads)" , nBinsPhi, minPhi, maxPhi);
+  h_genHT_GenJets     =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital      , th1, "genHT_GenJets", ";GenJ H_{T} (GeV)"             , nBinsM  , minM  , maxM   );
 
   // Event-Shape Variables
-  h_y23         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "y23"        , ";y_{23}"        , 25, 0.0,    0.25);
-  h_Sphericity  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Sphericity" , ";Sphericity"    , 20, 0.0,    1.00);
-  h_SphericityT = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "SphericityT", ";Sphericity_{T}", 20, 0.0,    1.00);
-  h_Y           = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Y"          , ";Y"             , 50, 0.0,    0.50);
-  h_S_Vs_Y      = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "S_Vs_Y"     , ";Sphericity;Y=#frac{#sqrt{3}}{2}x(Q1-Q2)", 100, 0.0, 1.0, 50, 0.0, 0.5);
-  h_Aplanarity  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Aplanarity" , ";Aplanarity" , 25, 0.0, 0.5);
-  h_Planarity   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Planarity"  , ";Planarity"  , 25, 0.0, 0.5);
-  h_CParameter  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "CParameter" , ";C"          , 20, 0.0, 1.0);
-  h_DParameter  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DParameter" , ";D"          , 20, 0.0, 1.0);
-  h_H2          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "H2"         , ";H_{2}"      , 20, 0.0, 1.0);
-  h_Circularity = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Circularity", ";Circularity", 20, 0.0, 1.0);
-  h_Centrality  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Centrality" , ";Centrality" , 20, 0.0, 1.0);
-  h_HT          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "HT"         , ";H_{T}"      , 30, 0.0, 1500.0);
-  h_JT          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "JT"         , ";J_{T}"      , 30, 0.0, 1500.0);
-  h_MHT         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MHT"        , ";MHT"        , 30, 0.0,  300.0);
-  h_AlphaT      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "AlphaT"     , ";#alpha_{T}" , 20, 0.0,    1.0);
+  h_y23         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "y23"        , ";y_{23}"        , 25, 0.0,    0.25);
+  h_Sphericity  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "Sphericity" , ";Sphericity"    , 20, 0.0,    1.00);
+  h_SphericityT = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "SphericityT", ";Sphericity_{T}", 20, 0.0,    1.00);
+  h_Y           = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "Y"          , ";Y"             , 50, 0.0,    0.50);
+  h_S_Vs_Y      = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, th2, "S_Vs_Y"     , ";Sphericity;Y=#frac{#sqrt{3}}{2}x(Q1-Q2)", 100, 0.0, 1.0, 50, 0.0, 0.5);
+  h_Aplanarity  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "Aplanarity" , ";Aplanarity" , 25, 0.0, 0.5);
+  h_Planarity   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "Planarity"  , ";Planarity"  , 25, 0.0, 0.5);
+  h_CParameter  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "CParameter" , ";C"          , 20, 0.0, 1.0);
+  h_DParameter  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "DParameter" , ";D"          , 20, 0.0, 1.0);
+  h_H2          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "H2"         , ";H_{2}"      , 20, 0.0, 1.0);
+  h_Circularity = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "Circularity", ";Circularity", 20, 0.0, 1.0);
+  h_Centrality  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "Centrality" , ";Centrality" , 20, 0.0, 1.0);
+  h_HT          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "HT"         , ";H_{T}"      , 30, 0.0, 4000.0);
+  h_JT          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "JT"         , ";J_{T}"      , 30, 0.0, 4000.0);
+  h_MHT         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "MHT"        , ";MHT"        , 50, 0.0,  500.0);
+  h_AlphaT      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "AlphaT"     , ";#alpha_{T}" , 20, 0.0,    1.0);
 
   // GenParticles: B-quarks
-  h_BQuarks_N   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarks_N" , ";N (b-quarks)" , 10, -0.5, +9.5);
-  h_BQuark1_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuark1_Pt", ";p_{T} (GeV/c)" , nBinsPt, minPt, maxPt);
-  h_BQuark2_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuark2_Pt", ";p_{T} (GeV/c)" , nBinsPt, minPt, maxPt);
-  h_BQuark3_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuark3_Pt", ";p_{T} (GeV/c)" , nBinsPt, minPt, maxPt);
-  h_BQuark4_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuark4_Pt", ";p_{T} (GeV/c)" , nBinsPt, minPt, maxPt);
+  h_BQuarks_N   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarks_N" , ";N (b-quarks)" , 20, 0.0, +20.0);
+  h_BQuark1_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuark1_Pt", ";p_{T} (GeV/c)" , nBinsPt, minPt, maxPt);
+  h_BQuark2_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuark2_Pt", ";p_{T} (GeV/c)" , nBinsPt, minPt, maxPt);
+  h_BQuark3_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuark3_Pt", ";p_{T} (GeV/c)" , nBinsPt, minPt, maxPt);
+  h_BQuark4_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuark4_Pt", ";p_{T} (GeV/c)" , nBinsPt, minPt, maxPt);
   vh_BQuarks_Pt.push_back(h_BQuark1_Pt);
   vh_BQuarks_Pt.push_back(h_BQuark2_Pt);
   vh_BQuarks_Pt.push_back(h_BQuark3_Pt);
   vh_BQuarks_Pt.push_back(h_BQuark4_Pt);
 
-  h_BQuark1_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuark1_Eta", ";#eta", nBinsEta, minEta, maxEta);
-  h_BQuark2_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuark2_Eta", ";#eta", nBinsEta, minEta, maxEta);
-  h_BQuark3_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuark3_Eta", ";#eta", nBinsEta, minEta, maxEta);
-  h_BQuark4_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuark4_Eta", ";#eta", nBinsEta, minEta, maxEta);
+  h_BQuark1_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuark1_Eta", ";#eta", nBinsEta, minEta, maxEta);
+  h_BQuark2_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuark2_Eta", ";#eta", nBinsEta, minEta, maxEta);
+  h_BQuark3_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuark3_Eta", ";#eta", nBinsEta, minEta, maxEta);
+  h_BQuark4_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuark4_Eta", ";#eta", nBinsEta, minEta, maxEta);
   vh_BQuarks_Eta.push_back(h_BQuark1_Eta);
   vh_BQuarks_Eta.push_back(h_BQuark2_Eta);
   vh_BQuarks_Eta.push_back(h_BQuark3_Eta);
   vh_BQuarks_Eta.push_back(h_BQuark4_Eta);
 
   // GenParticles: BQuarks pairs
-  h_BQuarkPair_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dR"  , ";#DeltaR"           , nBinsdR  , mindR  , maxdR  );
-  h_BQuarkPair_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dEta", ";#Delta#eta"        , nBinsdEta, mindEta, maxdEta);
-  h_BQuarkPair_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dPhi", ";#Delta#phi (rads)" , nBinsdPhi, mindPhi, maxdPhi);
-  h_BQuarkPair_dRAverage   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRAverage"   , ";#DeltaR"           , nBinsdR  , mindR  , maxdR  );
-  h_BQuarkPair_dEtaAverage = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dEtaAverage" , ";#Delta#eta"        , nBinsdEta, mindEta, maxdEta);
-  h_BQuarkPair_dPhiAverage = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dPhiAverage" , ";#Delta#phi (rads)" , nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuarkPair_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_dR"  , ";#DeltaR"           , nBinsdR  , mindR  , maxdR  );
+  h_BQuarkPair_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_dEta", ";#Delta#eta"        , nBinsdEta, mindEta, maxdEta);
+  h_BQuarkPair_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_dPhi", ";#Delta#phi (rads)" , nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuarkPair_dRAverage   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_dRAverage"   , ";#DeltaR"           , nBinsdR  , mindR  , maxdR  );
+  h_BQuarkPair_dEtaAverage = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_dEtaAverage" , ";#Delta#eta"        , nBinsdEta, mindEta, maxdEta);
+  h_BQuarkPair_dPhiAverage = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_dPhiAverage" , ";#Delta#phi (rads)" , nBinsdPhi, mindPhi, maxdPhi);
 
   // GenParticles: BQuarks pairs with maximum pT
-  h_BQuarkPair_MaxPt_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_Pt"  , ";p_{T} (GeV/c)"     , nBinsPt  , minPt  , maxPt  );
-  h_BQuarkPair_MaxPt_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_Eta" , ";#eta"              , nBinsEta , minEta , maxEta );
-  h_BQuarkPair_MaxPt_Phi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_Phi" , ";#phi (rads)"       , nBinsPhi , minPhi , maxPhi );
-  h_BQuarkPair_MaxPt_M   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_M"   , ";M (GeV/c^{2})"     , 100      ,    0.0 , 1000.0 );
-  h_BQuarkPair_MaxPt_dEta= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_dEta", ";#Delta#eta"        , nBinsdEta, mindEta, maxdEta);
-  h_BQuarkPair_MaxPt_dPhi= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_dPhi", ";#Delta#phi (rads)" , nBinsdPhi, mindPhi, maxdPhi);
-  h_BQuarkPair_MaxPt_dR  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_dR"  , ";#DeltaR"           ,  nBinsdR , mindR  , maxdR  );
-  h_BQuarkPair_MaxPt_jet1_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_jet1_dEta", ";#Delta#eta"        ,  nBinsdEta, mindEta, maxdEta);
-  h_BQuarkPair_MaxPt_jet1_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_jet1_dPhi", ";#Delta#phi (rads)" ,  nBinsdPhi, mindPhi, maxdPhi);
-  h_BQuarkPair_MaxPt_jet1_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_jet1_dR"  , ";#DeltaR"           ,  nBinsdR  , mindR  , maxdR  );
-  h_BQuarkPair_MaxPt_jet2_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_jet2_dEta", ";#Delta#eta"        ,  nBinsdEta, mindEta, maxdEta);
-  h_BQuarkPair_MaxPt_jet2_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_jet2_dPhi", ";#Delta#phi (rads)" ,  nBinsdPhi, mindPhi, maxdPhi);
-  h_BQuarkPair_MaxPt_jet2_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_jet2_dR"  , ";#DeltaR"           ,  nBinsdR  , mindR  , maxdR  );
+  h_BQuarkPair_MaxPt_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxPt_Pt"  , ";p_{T} (GeV/c)"     , nBinsPt  , minPt  , maxPt  );
+  h_BQuarkPair_MaxPt_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxPt_Eta" , ";#eta"              , nBinsEta , minEta , maxEta );
+  h_BQuarkPair_MaxPt_Phi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxPt_Phi" , ";#phi (rads)"       , nBinsPhi , minPhi , maxPhi );
+  h_BQuarkPair_MaxPt_M   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxPt_M"   , ";M (GeV/c^{2})"     , nBinsM   , minM   , maxM  );
+  h_BQuarkPair_MaxPt_dEta= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxPt_dEta", ";#Delta#eta"        , nBinsdEta, mindEta, maxdEta);
+  h_BQuarkPair_MaxPt_dPhi= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxPt_dPhi", ";#Delta#phi (rads)" , nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuarkPair_MaxPt_dR  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxPt_dR"  , ";#DeltaR"           , nBinsdR  , mindR  , maxdR  );
+  h_BQuarkPair_MaxPt_jet1_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxPt_jet1_dEta", ";#Delta#eta"        ,  nBinsdEta, mindEta, maxdEta);
+  h_BQuarkPair_MaxPt_jet1_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxPt_jet1_dPhi", ";#Delta#phi (rads)" ,  nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuarkPair_MaxPt_jet1_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxPt_jet1_dR"  , ";#DeltaR"           ,  nBinsdR  , mindR  , maxdR  );
+  h_BQuarkPair_MaxPt_jet2_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxPt_jet2_dEta", ";#Delta#eta"        ,  nBinsdEta, mindEta, maxdEta);
+  h_BQuarkPair_MaxPt_jet2_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxPt_jet2_dPhi", ";#Delta#phi (rads)" ,  nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuarkPair_MaxPt_jet2_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxPt_jet2_dR"  , ";#DeltaR"           ,  nBinsdR  , mindR  , maxdR  );
 
   // GenParticles: BQuarks pairs with maximum mass
-  h_BQuarkPair_MaxMass_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_Pt"  , ";p_{T} (GeV/c)"     , nBinsPt  , minPt  , maxPt  );
-  h_BQuarkPair_MaxMass_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_Eta" , ";#eta"              , nBinsEta , minEta , maxEta );
-  h_BQuarkPair_MaxMass_Phi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_Phi" , ";#phi (rads)"       , nBinsPhi , minPhi , maxPhi );
-  h_BQuarkPair_MaxMass_M   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_M"   , ";M (GeV/c^{2})"     , 100      ,    0.0 , 1000.0 );
-  h_BQuarkPair_MaxMass_dEta= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_dEta", ";#Delta#eta"        , nBinsdEta, mindEta, maxdEta);
-  h_BQuarkPair_MaxMass_dPhi= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_dPhi", ";#Delta#phi (rads)" , nBinsdPhi, mindPhi, maxdPhi);
-  h_BQuarkPair_MaxMass_dR  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_dR"  , ";#DeltaR"           ,  nBinsdR , mindR  , maxdR  );
-  h_BQuarkPair_MaxMass_jet1_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_jet1_dEta", ";#Delta#eta"        ,  nBinsdEta, mindEta, maxdEta);
-  h_BQuarkPair_MaxMass_jet1_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_jet1_dPhi", ";#Delta#phi (rads)" ,  nBinsdPhi, mindPhi, maxdPhi);
-  h_BQuarkPair_MaxMass_jet1_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_jet1_dR"  , ";#DeltaR"           ,  nBinsdR  , mindR  , maxdR  );
-  h_BQuarkPair_MaxMass_jet2_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_jet2_dEta", ";#Delta#eta"        ,  nBinsdEta, mindEta, maxdEta);
-  h_BQuarkPair_MaxMass_jet2_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_jet2_dPhi", ";#Delta#phi (rads)" ,  nBinsdPhi, mindPhi, maxdPhi);
-  h_BQuarkPair_MaxMass_jet2_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_jet2_dR"  , ";#DeltaR"           ,  nBinsdR  , mindR  , maxdR  );
+  h_BQuarkPair_MaxMass_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxMass_Pt"  , ";p_{T} (GeV/c)"     , nBinsPt, minPt  , maxPt );
+  h_BQuarkPair_MaxMass_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxMass_Eta" , ";#eta"              , nBinsEta , minEta , maxEta );
+  h_BQuarkPair_MaxMass_Phi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxMass_Phi" , ";#phi (rads)"       , nBinsPhi , minPhi , maxPhi );
+  h_BQuarkPair_MaxMass_M   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxMass_M"   , ";M (GeV/c^{2})"     , nBinsM   , minM   , maxM   );
+  h_BQuarkPair_MaxMass_dEta= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxMass_dEta", ";#Delta#eta"        , nBinsdEta, mindEta, maxdEta);
+  h_BQuarkPair_MaxMass_dPhi= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxMass_dPhi", ";#Delta#phi (rads)" , nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuarkPair_MaxMass_dR  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxMass_dR"  , ";#DeltaR"           , nBinsdR  , mindR  , maxdR  );
+  h_BQuarkPair_MaxMass_jet1_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxMass_jet1_dEta", ";#Delta#eta"        ,  nBinsdEta, mindEta, maxdEta);
+  h_BQuarkPair_MaxMass_jet1_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxMass_jet1_dPhi", ";#Delta#phi (rads)" ,  nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuarkPair_MaxMass_jet1_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxMass_jet1_dR"  , ";#DeltaR"           ,  nBinsdR  , mindR  , maxdR  );
+  h_BQuarkPair_MaxMass_jet2_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxMass_jet2_dEta", ";#Delta#eta"        ,  nBinsdEta, mindEta, maxdEta);
+  h_BQuarkPair_MaxMass_jet2_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxMass_jet2_dPhi", ";#Delta#phi (rads)" ,  nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuarkPair_MaxMass_jet2_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_MaxMass_jet2_dR"  , ";#DeltaR"           ,  nBinsdR  , mindR  , maxdR  );
 
   // GenParticles: BQuarks pair closest together
-  h_BQuarkPair_dRMin_Pt        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_Pt"       , ";p_{T} (GeV/c)"     , nBinsPt  , minPt  , maxPt  );
-  h_BQuarkPair_dRMin_Eta       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_Eta"      , ";#eta"              , nBinsEta , minEta , maxEta );
-  h_BQuarkPair_dRMin_Rap       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_Rap"      , ";#omega"            , nBinsRap , minRap , maxRap );
-  h_BQuarkPair_dRMin_Phi       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_Phi"      , ";#phi (rads)"       , nBinsPhi , minPhi , maxPhi );
-  h_BQuarkPair_dRMin_dEta      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_dEta"     , ";#Delta#eta"        , nBinsdEta, mindEta, maxdEta);
-  h_BQuarkPair_dRMin_dPhi      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_dPhi"     , ";#Delta#phi (rads)" , nBinsdPhi, mindPhi, maxdPhi);
-  h_BQuarkPair_dRMin_dR        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_dR"       , ";#DeltaR"           , nBinsdR  , mindR  , maxdR  );
-  h_BQuarkPair_dRMin_Mass      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_Mass"     , ";M (GeV/c^{2})"     , nBinsM   , minM   , maxM   );
-  h_BQuarkPair_dRMin_jet1_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_jet1_dEta", ";#Delta#eta"        , nBinsdEta, mindEta, maxdEta);
-  h_BQuarkPair_dRMin_jet1_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_jet1_dPhi", ";#Delta#phi (rads)" , nBinsdPhi, mindPhi, maxdPhi);
-  h_BQuarkPair_dRMin_jet1_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_jet1_dR"  , ";#DeltaR"           , nBinsdR  , mindR  , maxdR  );
-  h_BQuarkPair_dRMin_jet2_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_jet2_dEta", ";#Delta#eta"        , nBinsdEta, mindEta, maxdEta);
-  h_BQuarkPair_dRMin_jet2_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_jet2_dPhi", ";#Delta#phi (rads)" , nBinsdPhi, mindPhi, maxdPhi);
-  h_BQuarkPair_dRMin_jet2_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_jet2_dR"  , ";#DeltaR"           , nBinsdR  , mindR  , maxdR  );
+  h_BQuarkPair_dRMin_Pt        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_dRMin_Pt"       , ";p_{T} (GeV/c)"     , nBinsPt  , minPt  , maxPt  );
+  h_BQuarkPair_dRMin_Eta       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_dRMin_Eta"      , ";#eta"              , nBinsEta , minEta , maxEta );
+  h_BQuarkPair_dRMin_Rap       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_dRMin_Rap"      , ";#omega"            , nBinsRap , minRap , maxRap );
+  h_BQuarkPair_dRMin_Phi       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_dRMin_Phi"      , ";#phi (rads)"       , nBinsPhi , minPhi , maxPhi );
+  h_BQuarkPair_dRMin_dEta      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_dRMin_dEta"     , ";#Delta#eta"        , nBinsdEta, mindEta, maxdEta);
+  h_BQuarkPair_dRMin_dPhi      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_dRMin_dPhi"     , ";#Delta#phi (rads)" , nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuarkPair_dRMin_dR        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_dRMin_dR"       , ";#DeltaR"           , nBinsdR  , mindR  , maxdR  );
+  h_BQuarkPair_dRMin_Mass      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_dRMin_Mass"     , ";M (GeV/c^{2})"     , nBinsM   , minM   , maxM   );
+  h_BQuarkPair_dRMin_jet1_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_dRMin_jet1_dEta", ";#Delta#eta"        , nBinsdEta, mindEta, maxdEta);
+  h_BQuarkPair_dRMin_jet1_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_dRMin_jet1_dPhi", ";#Delta#phi (rads)" , nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuarkPair_dRMin_jet1_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_dRMin_jet1_dR"  , ";#DeltaR"           , nBinsdR  , mindR  , maxdR  );
+  h_BQuarkPair_dRMin_jet2_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_dRMin_jet2_dEta", ";#Delta#eta"        , nBinsdEta, mindEta, maxdEta);
+  h_BQuarkPair_dRMin_jet2_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_dRMin_jet2_dPhi", ";#Delta#phi (rads)" , nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuarkPair_dRMin_jet2_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "BQuarkPair_dRMin_jet2_dR"  , ";#DeltaR"           , nBinsdR  , mindR  , maxdR  );
   //
-  h_BQuarkPair_dRMin_Eta1_Vs_Eta2 = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_Eta1_Vs_Eta2", ";#eta;#eta", nBinsEta, minEta, maxEta, nBinsEta, minEta, maxEta);
-  h_BQuarkPair_dRMin_Phi1_Vs_Phi2 = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_Phi1_Vs_Phi2", ";#phi;#phi", nBinsPhi, minPhi, maxPhi, nBinsPhi, minPhi, maxPhi);
-  h_BQuarkPair_dRMin_Pt1_Vs_Pt2   = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_Pt1_Vs_Pt2"  , ";p_{T} (GeV/c); p_{T} (GeV/c)", nBinsPt, minPt, maxPt, nBinsPt, minPt, maxPt);
-  h_BQuarkPair_dRMin_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuarkPair_dRMin_Eta1_Vs_Eta2 = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, th2, "BQuarkPair_dRMin_Eta1_Vs_Eta2", ";#eta;#eta", nBinsEta, minEta, maxEta, nBinsEta, minEta, maxEta);
+  h_BQuarkPair_dRMin_Phi1_Vs_Phi2 = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, th2, "BQuarkPair_dRMin_Phi1_Vs_Phi2", ";#phi;#phi", nBinsPhi, minPhi, maxPhi, nBinsPhi, minPhi, maxPhi);
+  h_BQuarkPair_dRMin_Pt1_Vs_Pt2   = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, th2, "BQuarkPair_dRMin_Pt1_Vs_Pt2"  , ";p_{T} (GeV/c); p_{T} (GeV/c)", nBinsPt, minPt, maxPt, nBinsPt, minPt, maxPt);
+  h_BQuarkPair_dRMin_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, th2, "BQuarkPair_dRMin_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
   
   // Leading Jets
-  h_Jet1Jet2_dEta_Vs_Jet3Jet4_dEta = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "Jet1Jet2_dEta_Vs_Jet3Jet4_dEta", ";#Delta#eta(j_{1},j_{2});#Delta#eta(j_{3},j_{4})", nBinsdEta, mindEta, maxdEta, nBinsdEta, mindEta, maxdEta);
+  h_Jet1Jet2_dEta_Vs_Jet3Jet4_dEta = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, th2, "Jet1Jet2_dEta_Vs_Jet3Jet4_dEta", ";#Delta#eta(j_{1},j_{2});#Delta#eta(j_{3},j_{4})", nBinsdEta, mindEta, maxdEta, nBinsdEta, mindEta, maxdEta);
 
-  h_Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi", ";#Delta#phi(j_{1},j_{2}) (rads);#Delta#phi(j_{3},j_{4}) (rads)", nBinsdPhi, mindPhi, maxdPhi, nBinsdPhi, mindPhi, maxdPhi);
+  h_Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, th2, "Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi", ";#Delta#phi(j_{1},j_{2}) (rads);#Delta#phi(j_{3},j_{4}) (rads)", nBinsdPhi, mindPhi, maxdPhi, nBinsdPhi, mindPhi, maxdPhi);
 
-  h_Jet1Jet2_dEta_Vs_Jet1Jet2_Mass = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "Jet1Jet2_dEta_Vs_Jet1Jet2_Mass", ";#Delta#eta(j_{1},j_{2});M(j_{1},j_{2}) (GeV/c^{2})", nBinsdEta, mindEta, maxdEta, nBinsM, minM, maxM);
+  h_Jet1Jet2_dEta_Vs_Jet1Jet2_Mass = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, th2, "Jet1Jet2_dEta_Vs_Jet1Jet2_Mass", ";#Delta#eta(j_{1},j_{2});M(j_{1},j_{2}) (GeV/c^{2})", nBinsdEta, mindEta, maxdEta, nBinsM, minM, maxM);
 
-  h_Jet3Jet4_dEta_Vs_Jet3Jet4_Mass = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "Jet3Jet4_dEta_Vs_Jet3Jet4_Mass", ";#Delta#eta(j_{3},j_{4});M(j_{3},j_{4}) (GeV/c^{2})", nBinsdEta, mindEta, maxdEta, nBinsM, minM, maxM);
+  h_Jet3Jet4_dEta_Vs_Jet3Jet4_Mass = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, th2, "Jet3Jet4_dEta_Vs_Jet3Jet4_Mass", ";#Delta#eta(j_{3},j_{4});M(j_{3},j_{4}) (GeV/c^{2})", nBinsdEta, mindEta, maxdEta, nBinsM, minM, maxM);
   
   // GenJets
-  h_GenJet_N_NoPreselections         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet_N_NoPreselections"        , ";N (selected jets)" , 16, -0.5, +15.5);
-  h_GenJet_N_AfterLeptonVeto         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet_N_AfterLeptonVeto"        , ";N (selected jets)" , 16, -0.5, +15.5);
-  h_GenJet_N_AfterLeptonVetoNJetsCut = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet_N_AfterLeptonVetoNJetsCut", ";N (selected jets)" , 16, -0.5, +15.5);
-  h_GenJet_N_AfterPreselections      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet_N_AfterPreselections"     , ";N (selected jets)" , 16, -0.5, +15.5);
-  //
-  h_GenJet1_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet1_Pt", ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
-  h_GenJet2_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet2_Pt", ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
-  h_GenJet3_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet3_Pt", ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
-  h_GenJet4_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet4_Pt", ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
-  h_GenJet5_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet5_Pt", ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
-  h_GenJet6_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet6_Pt", ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  h_GenJets_N   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "GenJets_N" , ";genJet multiplicity" , 30, 0.0, 30.0);
+  h_GenJet1_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "GenJet1_Pt", ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  h_GenJet2_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "GenJet2_Pt", ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  h_GenJet3_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "GenJet3_Pt", ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  h_GenJet4_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "GenJet4_Pt", ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  h_GenJet5_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "GenJet5_Pt", ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  h_GenJet6_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "GenJet6_Pt", ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
   // To ease manipulation put in vector
   vh_GenJets_Pt.push_back(h_GenJet1_Pt);
   vh_GenJets_Pt.push_back(h_GenJet2_Pt);
@@ -489,77 +500,63 @@ void Kinematics::book(TDirectory *dir) {
   vh_GenJets_Pt.push_back(h_GenJet5_Pt);
   vh_GenJets_Pt.push_back(h_GenJet6_Pt);
   //
-  h_GenJet1_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet1_Eta", ";#eta", nBinsEta, minEta, maxEta);
-  h_GenJet2_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet2_Eta", ";#eta", nBinsEta, minEta, maxEta);
-  h_GenJet3_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet3_Eta", ";#eta", nBinsEta, minEta, maxEta);
-  h_GenJet4_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet4_Eta", ";#eta", nBinsEta, minEta, maxEta);
-  h_GenJet5_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet5_Eta", ";#eta", nBinsEta, minEta, maxEta);
-  h_GenJet6_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet6_Eta", ";#eta", nBinsEta, minEta, maxEta);
+  h_GenJet1_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "GenJet1_Eta", ";#eta", nBinsEta, minEta, maxEta);
+  h_GenJet2_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "GenJet2_Eta", ";#eta", nBinsEta, minEta, maxEta);
+  h_GenJet3_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "GenJet3_Eta", ";#eta", nBinsEta, minEta, maxEta);
+  h_GenJet4_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "GenJet4_Eta", ";#eta", nBinsEta, minEta, maxEta);
+  h_GenJet5_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "GenJet5_Eta", ";#eta", nBinsEta, minEta, maxEta);
+  h_GenJet6_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "GenJet6_Eta", ";#eta", nBinsEta, minEta, maxEta);
   vh_GenJets_Eta.push_back(h_GenJet1_Eta);
   vh_GenJets_Eta.push_back(h_GenJet2_Eta);
   vh_GenJets_Eta.push_back(h_GenJet3_Eta);
   vh_GenJets_Eta.push_back(h_GenJet4_Eta);
   vh_GenJets_Eta.push_back(h_GenJet5_Eta);
   vh_GenJets_Eta.push_back(h_GenJet6_Eta);
-  //
-  h_GenJet1_BJetsFirst_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet1_BJetsFirst_Pt", ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
-  h_GenJet2_BJetsFirst_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet2_BJetsFirst_Pt", ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
-  h_GenJet3_BJetsFirst_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet3_BJetsFirst_Pt", ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
-  h_GenJet4_BJetsFirst_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet4_BJetsFirst_Pt", ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
-  h_GenJet5_BJetsFirst_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet5_BJetsFirst_Pt", ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
-  h_GenJet6_BJetsFirst_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet6_BJetsFirst_Pt", ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
-  // To ease manipulation put in vector
-  vh_GenJets_BJetsFirst_Pt.push_back(h_GenJet1_BJetsFirst_Pt);
-  vh_GenJets_BJetsFirst_Pt.push_back(h_GenJet2_BJetsFirst_Pt);
-  vh_GenJets_BJetsFirst_Pt.push_back(h_GenJet3_BJetsFirst_Pt);
-  vh_GenJets_BJetsFirst_Pt.push_back(h_GenJet4_BJetsFirst_Pt);
-  vh_GenJets_BJetsFirst_Pt.push_back(h_GenJet5_BJetsFirst_Pt);
-  vh_GenJets_BJetsFirst_Pt.push_back(h_GenJet6_BJetsFirst_Pt);
 
   // GenJets: Dijet with largest mass
-  h_MaxDiJetMass_Pt    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxDiJetMass_Pt"   , ";p_{T} (GeV/c)"    , nBinsPt*2, minPt, maxPt*2);
-  h_MaxDiJetMass_Eta   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxDiJetMass_Eta"  , ";#eta"             , nBinsEta, minEta, maxEta);
-  h_MaxDiJetMass_Rap   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxDiJetMass_Rap"  , ";#omega"           , nBinsRap, minRap, maxRap);
-  h_MaxDiJetMass_Mass  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxDiJetMass_Mass" , ";M (GeV/c^{2})"    , 50,  0.0, +1000.0);  
-  h_MaxDiJetMass_dEta  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxDiJetMass_dEta" , ";#Delta#eta"       , nBinsdEta, mindEta, maxdEta);
-  h_MaxDiJetMass_dRap  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxDiJetMass_dRap" , ";#Delta#omega"     , nBinsdRap, mindRap, maxdRap);
-  h_MaxDiJetMass_dPhi  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxDiJetMass_dPhi" , ";#Delta#phi"       , nBinsdPhi, mindPhi, maxdPhi);  
-  h_MaxDiJetMass_dR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxDiJetMass_dR"   , ";#DeltaR"          , nBinsdR, mindR, maxdR);  
-  h_MaxDiJetMass_dRrap = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxDiJetMass_dRrap", ";#DeltaR_{#omega}" , nBinsdR, mindR, maxdR);  
-  h_MaxDiJetMass_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kInformative, dir, "MaxDiJetMass_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)"  , nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
-  h_MaxDiJetMass_dRap_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kInformative, dir, "MaxDiJetMass_dRap_Vs_dPhi", ";#Delta#omega;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
+  h_MaxDiJetMass_Pt    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "MaxDiJetMass_Pt"   , ";p_{T} (GeV/c)"    , nBinsPt  , minPt, maxPt*2);
+  h_MaxDiJetMass_Eta   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "MaxDiJetMass_Eta"  , ";#eta"             , nBinsEta , minEta, maxEta);
+  h_MaxDiJetMass_Rap   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "MaxDiJetMass_Rap"  , ";#omega"           , nBinsRap , minRap, maxRap);
+  h_MaxDiJetMass_Mass  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "MaxDiJetMass_Mass" , ";M (GeV/c^{2})"    , nBinsM   , minM  , maxM  );
+  h_MaxDiJetMass_dEta  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "MaxDiJetMass_dEta" , ";#Delta#eta"       , nBinsdEta, mindEta, maxdEta);
+  h_MaxDiJetMass_dRap  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "MaxDiJetMass_dRap" , ";#Delta#omega"     , nBinsdRap, mindRap, maxdRap);
+  h_MaxDiJetMass_dPhi  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "MaxDiJetMass_dPhi" , ";#Delta#phi"       , nBinsdPhi, mindPhi, maxdPhi);  
+  h_MaxDiJetMass_dR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "MaxDiJetMass_dR"   , ";#DeltaR"          , nBinsdR, mindR, maxdR);  
+  h_MaxDiJetMass_dRrap = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "MaxDiJetMass_dRrap", ";#DeltaR_{#omega}" , nBinsdR, mindR, maxdR);  
+  h_MaxDiJetMass_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kInformative, th2, "MaxDiJetMass_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)"  , nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
+  h_MaxDiJetMass_dRap_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kInformative, th2, "MaxDiJetMass_dRap_Vs_dPhi", ";#Delta#omega;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
 
   // GenJets: Untagged jet pair with min dR
-  h_dRMinDiJet_NoBJets_Pt    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "dRMinDiJet_NoBJets_Pt"   , ";p_{T} (GeV/c)"    , nBinsPt*2, minPt, maxPt*2);
-  h_dRMinDiJet_NoBJets_Eta   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "dRMinDiJet_NoBJets_Eta"  , ";#eta"             , nBinsEta, minEta, maxEta);
-  h_dRMinDiJet_NoBJets_Rap   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "dRMinDiJet_NoBJets_Rap"  , ";#omega"           , nBinsRap, minRap, maxRap);
-  h_dRMinDiJet_NoBJets_Mass  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "dRMinDiJet_NoBJets_Mass" , ";M (GeV/c^{2})"    , 50, 0.0, +500.0);  
-  h_dRMinDiJet_NoBJets_dEta  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "dRMinDiJet_NoBJets_dEta" , ";#Delta#eta"       , 40, 0.0,    2.0);
-  h_dRMinDiJet_NoBJets_dPhi  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "dRMinDiJet_NoBJets_dPhi" , ";#Delta#phi"       , nBinsdPhi, mindPhi, maxdPhi);  
-  h_dRMinDiJet_NoBJets_dR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "dRMinDiJet_NoBJets_dR"   , ";#DeltaR"          , 40, 0.0,    2.0);
+  h_dRMinDiJet_NoBJets_Pt    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "dRMinDiJet_NoBJets_Pt"   , ";p_{T} (GeV/c)"    , nBinsPt  , minPt  , maxPt );
+  h_dRMinDiJet_NoBJets_Eta   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "dRMinDiJet_NoBJets_Eta"  , ";#eta"             , nBinsEta , minEta , maxEta);
+  h_dRMinDiJet_NoBJets_Rap   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "dRMinDiJet_NoBJets_Rap"  , ";#omega"           , nBinsRap , minRap , maxRap);
+  h_dRMinDiJet_NoBJets_Mass  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "dRMinDiJet_NoBJets_Mass" , ";M (GeV/c^{2})"    , nBinsM   , minM   , maxM );
+  h_dRMinDiJet_NoBJets_dEta  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "dRMinDiJet_NoBJets_dEta" , ";#Delta#eta"       , nBinsdEta, mindEta, maxdEta);
+  h_dRMinDiJet_NoBJets_dPhi  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "dRMinDiJet_NoBJets_dPhi" , ";#Delta#phi"       , nBinsdPhi, mindPhi, maxdPhi);  
+  h_dRMinDiJet_NoBJets_dR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "dRMinDiJet_NoBJets_dR"   , ";#DeltaR"          , nBinsdR  , mindR  , maxdR);  
 
   // GenJets: Trijet with largest pT
-  h_MaxTriJetPt_Pt       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_Pt"     , ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
-  h_MaxTriJetPt_Eta      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_Eta"    , ";#eta"         , nBinsEta, minEta, maxEta);
-  h_MaxTriJetPt_Rap      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_Rap"    , ";#omega"       , nBinsRap, minRap, maxRap);
-  h_MaxTriJetPt_Mass     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_Mass"   , ";M (GeV/c^{2})", 50,  0.0, +1000.0);  
-  h_MaxTriJetPt_dEtaMax  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_dEtaMax", ";#Delta#eta"   , nBinsdEta, mindEta, maxdEta);
-  h_MaxTriJetPt_dPhiMax  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_dPhiMax", ";#Delta#phi"   , nBinsdPhi, mindPhi, maxdPhi);  
-  h_MaxTriJetPt_dRMax    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_dRMax"  , ";#DeltaR"      , nBinsdR  , mindR  , maxdR  );
-  h_MaxTriJetPt_dEtaMin  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_dEtaMin", ";#Delta#eta"   , nBinsdEta, mindEta, maxdEta);
-  h_MaxTriJetPt_dPhiMin  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_dPhiMin", ";#Delta#phi"   , nBinsdPhi, mindPhi, maxdPhi);  
-  h_MaxTriJetPt_dRMin    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_dRMin"  , ";#DeltaR"      , nBinsdR  , mindR  , maxdR  );
-  h_MaxTriJetPt_dEtaAverage  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_dEtaAverage", ";#Delta#eta"  , nBinsdEta, mindEta, maxdEta);
-  h_MaxTriJetPt_dPhiAverage  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_dPhiAverage", ";#Delta#phi"  , nBinsdPhi, mindPhi, maxdPhi);  
-  h_MaxTriJetPt_dRAverage    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_dRAverage"  , ";#Delta#omega", nBinsdRap, mindRap, maxdRap);
+  h_MaxTriJetPt_Pt       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "MaxTriJetPt_Pt"     , ";p_{T} (GeV/c)", nBinsPt  , minPt  , maxPt );
+  h_MaxTriJetPt_Eta      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "MaxTriJetPt_Eta"    , ";#eta"         , nBinsEta , minEta , maxEta);
+  h_MaxTriJetPt_Rap      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "MaxTriJetPt_Rap"    , ";#omega"       , nBinsRap , minRap , maxRap);
+  h_MaxTriJetPt_Mass     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "MaxTriJetPt_Mass"   , ";M (GeV/c^{2})", nBinsM   , minM   , maxM  );
+  h_MaxTriJetPt_dEtaMax  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "MaxTriJetPt_dEtaMax", ";#Delta#eta"   , nBinsdEta, mindEta, maxdEta);
+  h_MaxTriJetPt_dPhiMax  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "MaxTriJetPt_dPhiMax", ";#Delta#phi"   , nBinsdPhi, mindPhi, maxdPhi);  
+  h_MaxTriJetPt_dRMax    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "MaxTriJetPt_dRMax"  , ";#DeltaR"      , nBinsdR  , mindR  , maxdR  );
+  h_MaxTriJetPt_dEtaMin  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "MaxTriJetPt_dEtaMin", ";#Delta#eta"   , nBinsdEta, mindEta, maxdEta);
+  h_MaxTriJetPt_dPhiMin  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "MaxTriJetPt_dPhiMin", ";#Delta#phi"   , nBinsdPhi, mindPhi, maxdPhi);  
+  h_MaxTriJetPt_dRMin    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "MaxTriJetPt_dRMin"  , ";#DeltaR"      , nBinsdR  , mindR  , maxdR  );
+  h_MaxTriJetPt_dEtaAverage  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "MaxTriJetPt_dEtaAverage", ";#Delta#eta"  , nBinsdEta, mindEta, maxdEta);
+  h_MaxTriJetPt_dPhiAverage  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "MaxTriJetPt_dPhiAverage", ";#Delta#phi"  , nBinsdPhi, mindPhi, maxdPhi);  
+  h_MaxTriJetPt_dRAverage    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, th1, "MaxTriJetPt_dRAverage"  , ";#Delta#omega", nBinsdRap, mindRap, maxdRap);
 
   // Correlations
-  h_BQuark1_BQuark2_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "BQuark1_BQuark2_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
-  h_BQuark1_BQuark3_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "BQuark1_BQuark3_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
-  h_BQuark1_BQuark4_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "BQuark1_BQuark4_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
-  h_BQuark2_BQuark3_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "BQuark2_BQuark3_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
-  h_BQuark2_BQuark4_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "BQuark2_BQuark4_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
-  h_BQuark3_BQuark4_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "BQuark3_BQuark4_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuark1_BQuark2_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, th2, "BQuark1_BQuark2_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuark1_BQuark3_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, th2, "BQuark1_BQuark3_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuark1_BQuark4_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, th2, "BQuark1_BQuark4_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuark2_BQuark3_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, th2, "BQuark2_BQuark3_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuark2_BQuark4_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, th2, "BQuark2_BQuark4_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuark3_BQuark4_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, th2, "BQuark3_BQuark4_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
 
   return;
 }
@@ -579,92 +576,140 @@ void Kinematics::process(Long64_t entry) {
   // Initialise MCTools object
   MCTools mcTools(fEvent);
 
-  ///////////////////////////////////////////////////////////////////////////
-  // GenJets Calculations
-  /////////////////////////////////////////////////////////////////////////// 
-  if(0) std::cout << "=== GenJets" << std::endl;
+  //================================================================================================
+  // 1) Apply trigger
+  //================================================================================================
+  if (cfg_Verbose) std::cout << "=== Trigger" << std::endl;
+  if ( !(fEvent.passTriggerDecision()) ) return;
+  cTrigger.increment();
 
-  std::vector<math::XYZTLorentzVector> selJets_p4;
-  int nSelJets = 0;
+
+  //================================================================================================
+  // 2) MET filters (to remove events with spurious sources of fake MET)       
+  //================================================================================================
+  // nothing to do
+
+  //================================================================================================
+  // 3) Primarty Vertex (Check that a PV exists)
+  //================================================================================================
+  // nothing to do
+
+  //================================================================================================
+  // 4) Electron veto (fully hadronic + orthogonality)  
+  //================================================================================================
+  if (cfg_Verbose) std::cout << "=== Electron veto" << std::endl;
+  vector<genParticle> selectedElectrons = GetGenParticles(fEvent.genparticles().getGenParticles(), cfg_ElectronPtCut, cfg_ElectronEtaCut, 11, true, false);
+  if (0)
+    {
+      std::cout << "\nnElectrons = " << selectedElectrons.size() << std::endl;
+      for (auto& p: selectedElectrons) std::cout << "\tpT = " << p.pt() << " (GeV/c), eta = " << p.eta() << ", phi = " << p.phi() << " (rads)" << std::endl;
+    }
+  if ( selectedElectrons.size() > 0 ) return;
+  cElectronVeto.increment();
+
+
+  //================================================================================================
+  // 5) Muon veto (fully hadronic + orthogonality)  
+  //================================================================================================
+  if (cfg_Verbose) std::cout << "=== Muon veto" << std::endl;
+  vector<genParticle> selectedMuons = GetGenParticles(fEvent.genparticles().getGenParticles(), cfg_MuonPtCut, cfg_MuonEtaCut, 13, true, false);
+  if (cfg_Verbose)
+    {
+      std::cout << "\nnMuons = " << selectedMuons.size() << std::endl;
+      for (auto& p: selectedMuons) std::cout << "\tpT = " << p.pt() << " (GeV/c), eta = " << p.eta() << ", phi = " << p.phi() << " (rads)" << std::endl;
+    }
+  if ( selectedMuons.size() > 0 ) return;
+  cMuonVeto.increment();
+
+
+  //================================================================================================
+  // 6) Tau veto (HToTauNu orthogonality)  
+  //================================================================================================
+  if (cfg_Verbose) std::cout << "=== Tau veto" << std::endl;
+  vector<genParticle> selectedTaus = GetGenParticles(fEvent.genparticles().getGenParticles(), cfg_TauPtCut, cfg_TauEtaCut, 15, true, false);
+  if (0)
+    {
+      std::cout << "\nnTaus = " << selectedTaus.size() << std::endl;
+      for (auto& p: selectedTaus) std::cout << "\tpT = " << p.pt() << " (GeV/c), eta = " << p.eta() << ", phi = " << p.phi() << " (rads)" << std::endl;
+      std::cout << "" << std::endl;
+    }
+  if ( selectedTaus.size() > 0 ) return;
+  cTauVeto.increment();
+
+
+  //================================================================================================
+  // 7) Jet Selection
+  //================================================================================================
+  if (cfg_Verbose) std::cout << "=== Jet Selection" << std::endl;
+  vector<GenJet> selectedJets = GetGenJets(fEvent.genjets(), cfg_JetPtCuts, cfg_JetEtaCuts);
+  // for (auto& p: selectedJets) std::cout << "\tpT = " << p.pt() << " (GeV/c), eta = " << p.eta() << ", phi = " << p.phi() << " (rads)" << std::endl;
+  if (!cfg_JetNumberCut.passedCut(selectedJets.size())) return;
+
+  // HT Selection
   double genJ_HT = 0.0;
+  std::vector<math::XYZTLorentzVector> selJets_p4;
+  math::XYZTLorentzVector jet_p4;
+  for(auto jet: selectedJets) 
+    {
+        jet_p4 = jet.p4();
+	genJ_HT += jet.pt();
+	selJets_p4.push_back( jet_p4 );
+    }
 
-  // For-loop: GenJets
-  for(GenJet j: fEvent.genjets()) {
+  if ( !cfg_HtCut.passedCut(genJ_HT) ) return;
+  cJetSelection.increment();
 
-    math::XYZTLorentzVector genJ_p4;
-    genJ_p4 = j.p4();
-    double genJ_pt     = j.pt();
-    double genJ_eta    = j.eta();
+  //================================================================================================
+  // 8) BJet Selection
+  //================================================================================================
+  if (cfg_Verbose) std::cout << "=== BJet Selection" << std::endl;
+  vector<genParticle> selectedBQuarks = GetGenParticles(fEvent.genparticles().getGenParticles(), 10, 3, 5, true, false);
+  std::sort( selectedBQuarks.begin(), selectedBQuarks.end(), PtComparator() );
+  if (0) for (auto& p: selectedBQuarks) mcTools.PrintGenParticle(p);
 
-    // Apply selection cuts
-    if (genJ_pt < cfg_JetPtCut) continue;
-    if (std::abs(genJ_eta) > cfg_JetEtaCut) continue;
-    
-    // Do calculations
-    nSelJets++;
-    selJets_p4.push_back( genJ_p4 );
-    genJ_HT += genJ_pt;
-  }
- 
+  // Match b-quarks with GenJets
+  vector<GenJet> selectedBJets = GetGenJets(selectedJets, cfg_BJetPtCuts, cfg_BJetEtaCuts, selectedBQuarks);
+  // for (auto& p: selectedBJets) std::cout << "\tpT = " << p.pt() << " (GeV/c), eta = " << p.eta() << ", phi = " << p.phi() << " (rads)" << std::endl;
 
-  ///////////////////////////////////////////////////////////////////////////
-  // Lepton Veto & Primary Vertex
-  ///////////////////////////////////////////////////////////////////////////
-  if (0) std::cout << "=== Lepton Veto & Primary Vertex" << std::endl;
-  int nElectrons = 0;
-  int nMuons     = 0;
-  ROOT::Math::XYZPoint pv;
+  // Get selected jets excluding the matched bjets
+  bool isBJet = false;
+  std::vector<math::XYZTLorentzVector> selJets_NoBJets_p4;
 
-  // For-loop: All genParticles
-  for (auto& p: fEvent.genparticles().getGenParticles()) {
+  // For-loop: Selected jets
+  for (auto& jet: selectedJets) 
+    {
+      isBJet = false;
+	    
+      // For-loop: Selected bjets
+      for (auto& bjet: selectedBJets) 
+	{
+	  double dR = ROOT::Math::VectorUtil::DeltaR(jet.p4(), bjet.p4());
+	  if (dR < 0.01) isBJet = true;
+	}
+      if (isBJet) continue;
+      jet_p4 = jet.p4();
+      selJets_NoBJets_p4.push_back(jet_p4);
+    }
 
-    // Find leptons for vetoing
-    if (!p.isLastCopy()) continue;
-    if( !mcTools.IsLepton(p.pdgId()) ) continue;
+  if (!cfg_BJetNumberCut.passedCut(selectedBJets.size())) return;
+  cBJetSelection.increment();
 
-    // mcTools.PrintGenParticle(p);
-    // mcTools.PrintGenDaughters(p);
 
-    if ( std::abs(p.pdgId()) == 11)
-      {		      
-	if ( (p.pt() >= cfg_ElectronPtCut) && ( std::abs(p.eta()) <= cfg_ElectronEtaCut) ) nElectrons++;
-      }
-    else if ( std::abs(p.pdgId()) == 13)
-      {
-	if ( (p.pt() >= cfg_MuonPtCut) && ( std::abs(p.eta()) <= cfg_MuonEtaCut) ) nMuons++;
-      }
-    else continue;
-
-  }
+  //================================================================================================
+  // 9) BJet SF
+  //================================================================================================
+  // nothing to do
   
 
-  ///////////////////////////////////////////////////////////////////////////
-  // Preselection Cuts (python/parameters/hplus2tbAnalysis.py)
-  ///////////////////////////////////////////////////////////////////////////
-  if (0) std::cout << "=== Preselection Cuts" << std::endl;
-  cSubNoPreselections.increment();
-  h_GenJet_N_NoPreselections->Fill(nSelJets);
-
-  // Lepton Veto
-  if ( nElectrons > 0 ) return;
-  if ( nMuons > 0 ) return;
-  cSubPassedLeptonVeto.increment();
-  h_GenJet_N_AfterLeptonVeto->Fill(nSelJets);
-
-  // Jet Selection
-  if ( !cfg_JetNumberCut.passedCut(nSelJets) ) return;  
-  cSubPassedJetsCut.increment();
-  h_GenJet_N_AfterLeptonVetoNJetsCut->Fill(nSelJets);
-    
-  // HT Selection
-  if ( !cfg_HtCut.passedCut(genJ_HT) ) return;
-  cSubPassedHtCut.increment();
-  h_GenJet_N_AfterPreselections->Fill(nSelJets);  
+  //================================================================================================
+  // 10) MET selection 
+  //================================================================================================
+  // nothing to do
 
 
-  ///////////////////////////////////////////////////////////////////////////
-  // Event-Shape Variables
-  ///////////////////////////////////////////////////////////////////////////
+  //================================================================================================
+  // 11) Topology selection 
+  //================================================================================================
   float C, D, H2;
   float Circularity;
   float y23, Sphericity, SphericityT, Aplanarity, Planarity, Y; // functions to return values when properly implemented
@@ -673,25 +718,58 @@ void Kinematics::process(Long64_t entry) {
   vector<float> b = GetMomentumTensorEigenValues2D(selJets_p4, Circularity);
   vector<float> c = GetSphericityTensorEigenValues(selJets_p4, y23, Sphericity, SphericityT, Aplanarity, Planarity, Y);
   double alphaT   = GetAlphaT(selJets_p4, HT, JT, MHT, Centrality);
+  
+  // Apply cuts
+  if ( !cfg_CparameterCut.passedCut(C) ) return;
+  if ( !cfg_DparameterCut.passedCut(D) ) return;
+  if ( !cfg_FoxWolframMomentCut.passedCut(H2) ) return;
+  if ( !cfg_CircularityCut.passedCut(Circularity) ) return;
+  if ( !cfg_Y23Cut.passedCut(y23) ) return;
+  if ( !cfg_SphericityCut.passedCut(Sphericity) ) return;
+  if ( !cfg_AplanarityCut.passedCut(Aplanarity) ) return;
+  if ( !cfg_PlanarityCut.passedCut(Planarity) ) return;
+  if ( !cfg_CentralityCut.passedCut(Centrality) ) return;
+  if ( !cfg_AlphaTCut.passedCut(alphaT) ) return;
+  cTopologySelection.increment();
+
+
+  //================================================================================================
+  // 12) Top selection 
+  //================================================================================================
+  cTopSelection.increment();
+
+
+  //================================================================================================
+  // Standard Selections    
+  //================================================================================================
+
+
+  //================================================================================================
+  // All Selections
+  //================================================================================================
+  cSelected.increment();
 
   // Fill Histograms
-  h_y23         ->Fill(y23);
-  h_Sphericity  ->Fill(Sphericity);
-  h_SphericityT ->Fill(SphericityT);
-  h_Y           ->Fill(Y);
-  h_S_Vs_Y      ->Fill(Sphericity, Y);
-  h_Aplanarity  ->Fill(Aplanarity);
-  h_Planarity   ->Fill(Planarity);
-  h_CParameter  ->Fill(C);
-  h_DParameter  ->Fill(D);
-  h_H2          ->Fill(H2);
-  h_Circularity ->Fill(Circularity);
-  h_Centrality  ->Fill(Centrality);
-  h_HT          ->Fill(HT);
-  h_JT          ->Fill(JT);
-  h_MHT         ->Fill(MHT);
-  h_AlphaT      ->Fill(alphaT);
-
+  h_GenJets_N    ->Fill(selectedJets.size());
+  h_genMET_Et    ->Fill(fEvent.genMET().et()); 
+  h_genMET_Phi   ->Fill(fEvent.genMET().Phi());
+  h_genHT_GenJets->Fill(genJ_HT);
+  h_y23          ->Fill(y23);
+  h_Sphericity   ->Fill(Sphericity);
+  h_SphericityT  ->Fill(SphericityT);
+  h_Y            ->Fill(Y);
+  h_S_Vs_Y       ->Fill(Sphericity, Y);
+  h_Aplanarity   ->Fill(Aplanarity);
+  h_Planarity    ->Fill(Planarity);
+  h_CParameter   ->Fill(C);
+  h_DParameter   ->Fill(D);
+  h_H2           ->Fill(H2);
+  h_Circularity  ->Fill(Circularity);
+  h_Centrality   ->Fill(Centrality);
+  h_HT           ->Fill(HT);
+  h_JT           ->Fill(JT);
+  h_MHT          ->Fill(MHT);
+  h_AlphaT       ->Fill(alphaT);
 
   ///////////////////////////////////////////////////////////////////////////
   // GenParticles 
@@ -819,14 +897,6 @@ void Kinematics::process(Long64_t entry) {
   
   if (cfg_Verbose) table.Print();
   
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Basic Variables
-  //////////////////////////////////////////////////////////////////////////////////////////////////////
-  h_genMET_Et->Fill(fEvent.genMET().et()); 
-  h_genMET_Phi->Fill(fEvent.genMET().Phi());
-  h_genHT_GenJets->Fill(genJ_HT);
-
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////
   // GenJets
@@ -970,9 +1040,6 @@ void Kinematics::process(Long64_t entry) {
   std::vector<double> dR_ijk;
 
   math::XYZTLorentzVector TriJetMaxPt_p4(0,0,0,0);
-  std::vector<math::XYZTLorentzVector> selBJets_p4;
-  std::vector<math::XYZTLorentzVector> selJets_BJetsFirst_p4;
-  std::vector<math::XYZTLorentzVector> selJets_NoBJets_p4 = selJets_p4;
 
   if (selJets_p4.size() > 2)
     {
@@ -990,7 +1057,6 @@ void Kinematics::process(Long64_t entry) {
 	dPhi_ij   = 0.0;
 	dPhi_ik   = 0.0;
 	dPhi_jk   = 0.0;
-
 
 	// For-loop: All Selected Jets (nested)
 	for (auto j = i+1; j != selJets_p4.end()-1; ++j) {
@@ -1032,7 +1098,6 @@ void Kinematics::process(Long64_t entry) {
 	}
       }
     }
-
   	
   // Fill Histos
   h_MaxTriJetPt_Pt          ->Fill( TriJetMaxPt_p4.Pt()  );
@@ -1053,21 +1118,35 @@ void Kinematics::process(Long64_t entry) {
   //////////////////////////////////////////////////////////////////////////////////////////////////////
   // B-quarks (pT sorted)
   //////////////////////////////////////////////////////////////////////////////////////////////////////
-  if (0) std::cout << "=== BQuarks" << std::endl;
+  if (0) std::cout << "=== BQuark cuts" << std::endl;
   std::sort( bQuarks_p4.begin(), bQuarks_p4.end(), PtComparator() );  
-  
+   
   std::vector<math::XYZTLorentzVector> selBQuarks_p4;
-  // For-loop: All  BQuarks
+  unsigned int bQuark_index  = -1;
+  unsigned int ptCut_index   = 0;
+  unsigned int etaCut_index  = 0;
+
+  // For-loop: All b-quarks
   for (auto i = bQuarks_p4.begin(); i != bQuarks_p4.end(); ++i) {
-    
+
+    // Jet index (for pT and eta cuts)
+    bQuark_index++;
+
     // Apply selection cuts
-    if (i->Pt() < 15.0) continue;
+    const float cfg_JetPtCut  = cfg_JetPtCuts.at(ptCut_index);
+    const float cfg_JetEtaCut = cfg_JetEtaCuts.at(etaCut_index);
+
+    // if (i->Pt() < 15.0) continue;
+    if (i->Pt() < cfg_JetPtCut) continue;
     if (std::abs(i->Eta()) > cfg_JetEtaCut) continue;
     
     // Save this BQuark
     selBQuarks_p4.push_back(*i);
+
+    // Increment cut index only. Cannot be bigger than the size of the cut list provided
+    if (ptCut_index  < cfg_JetPtCuts.size()-1  ) ptCut_index++;
+    if (etaCut_index  < cfg_JetEtaCuts.size()-1  ) etaCut_index++;
   }
-  
 
   // Fill histos
   h_BQuarks_N->Fill(bQuarks_p4.size());
@@ -1077,13 +1156,13 @@ void Kinematics::process(Long64_t entry) {
   double dR   = 0.0;
   double dEta = 0.0;
   double dPhi = 0.0;
-  dRSum   = 0.0;
-  dEtaSum = 0.0;
-  dPhiSum = 0.0;
+  dRSum       = 0.0;
+  dEtaSum     = 0.0;
+  dPhiSum     = 0.0;
   math::XYZTLorentzVector maxPt_p4(0,0,0,0);
-  double maxPt_dEta = 0.0;
-  double maxPt_dPhi = 0.0;
-  double maxPt_dR   = 0.0;
+  double maxPt_dEta   = 0.0;
+  double maxPt_dPhi   = 0.0;
+  double maxPt_dR     = 0.0;
   double maxMass_dEta = 0.0;
   double maxMass_dPhi = 0.0;
   double maxMass_dR   = 0.0;
@@ -1187,34 +1266,8 @@ void Kinematics::process(Long64_t entry) {
       
     } // if (selBQuarks_p4.size() > 1)
 
-  // For-loop: Selected Jets
-  for (auto& jet: selJets_p4)
-    {
-      
-      // For-Loop (Nested): All b-quarks
-      for (auto& b: selBQuarks_p4)
-	{
-	  // If GenJet matches b-quark push at beginning of vector, otherwise do nothin
-	  double deltaR = ROOT::Math::VectorUtil::DeltaR(b, jet);	 
-	  if (deltaR < 0.1)
-	    { 
-	      selBJets_p4.push_back(jet);
-	    }
-	  else selJets_NoBJets_p4.push_back(jet);
-	}
-    }
 
-  // Instert all: Selected BJets (pT ordered) in the begining (ATLAS style)
-  selJets_BJetsFirst_p4 = selJets_NoBJets_p4;
-  selJets_BJetsFirst_p4.insert(selJets_BJetsFirst_p4.end(), selBJets_p4.begin(), selBJets_p4.end());
-
-  // Fill vector containers
-  for (size_t i=0; i < selJets_BJetsFirst_p4.size(); i++)
-    {
-      if (i > 5) continue;
-      vh_GenJets_BJetsFirst_Pt.at(i)-> Fill( selJets_BJetsFirst_p4.at(i).pt()  );
-    }
-
+  // Dijet with all selected jets (no b-jets)
   if (selJets_NoBJets_p4.size()>1)
     {
       double _deltaRMin = 999999.9;
@@ -1223,11 +1276,13 @@ void Kinematics::process(Long64_t entry) {
       int _i=-1;
       int _j=-1;
 
+      // For-loop: Selected jets, no b-jets
       for (auto& i: selJets_NoBJets_p4)
 	{
 	  _i++;
 	  
 	  _j=-1;
+	  // For-loop: Selected jets, no b-jets (nested)
 	  for (auto& j: selJets_NoBJets_p4)
 	    {
 	      _j++;
@@ -1245,7 +1300,6 @@ void Kinematics::process(Long64_t entry) {
       if (_deltaRMin_i > -1  && _deltaRMin_j > -1)
 	{
 	  // GenJets: Untagged jet pair with min dR
-	  // cout << "_deltaRMin_i = " << _deltaRMin_i << ", _deltaRMin_j = " << _deltaRMin_j << endl;
 	  math::XYZTLorentzVector dRMinDiJet_NoBJets_p4 = selJets_NoBJets_p4.at(_deltaRMin_i) + selJets_NoBJets_p4.at(_deltaRMin_j);
 	  h_dRMinDiJet_NoBJets_Pt   ->Fill( dRMinDiJet_NoBJets_p4.Pt() );
 	  h_dRMinDiJet_NoBJets_Eta  ->Fill( dRMinDiJet_NoBJets_p4.Eta() );
@@ -1463,9 +1517,9 @@ vector<float> Kinematics::GetMomentumTensorEigenValues(std::vector<math::XYZTLor
 vector<float> Kinematics::GetMomentumTensorEigenValues2D(std::vector<math::XYZTLorentzVector> jets,
 							 float &Circularity){
 
-  // For Circularity, the momentum tensor is the 2×2 submatrix of Mjk, normalized by the sum of pT instead by the sum of
+  // For Circularity, the momentum tensor is the 2¡Á2 submatrix of Mjk, normalized by the sum of pT instead by the sum of
   // This matrix has two eigenvalues Qi with 0 < Q1 < Q2. The following definition for the circularity C has been used:
-  //  C = 2 × min (Q1,Q2) / (Q1 +Q2)
+  //  C = 2 ¡Á min (Q1,Q2) / (Q1 +Q2)
   // The circularity C is especially interesting for hadron colliders because it only uses the momentum values in x and y direction transverse
   // to the beam line. So C is a two dimensional event shape variable and is therefore independent from a boost along z. 
   // In addition, the normalization by the sum of the particle momenta makes C highly independent from energy calibration effects  (systematic uncertainty).
@@ -1504,7 +1558,7 @@ vector<float> Kinematics::GetMomentumTensorEigenValues2D(std::vector<math::XYZTL
       vars.AddRowColumn(0, "Circularity");
       vars.AddRowColumn(0, auxTools.ToString(Circularity) );
       vars.AddRowColumn(0, "0.0 <= C <= 1.0 ");
-      vars.AddRowColumn(0, "C = 2 × min (Q1,Q2)/(Q1+Q2)");
+      vars.AddRowColumn(0, "C = 2 ¡Á min (Q1,Q2)/(Q1+Q2)");
       vars.Print();
     }
   
@@ -1654,7 +1708,6 @@ vector<float> Kinematics::GetSphericityTensorEigenValues(std::vector<math::XYZTL
   return eigenvalues;
   
 }
-
 
 TMatrixDSym Kinematics::ComputeMomentumTensor(std::vector<math::XYZTLorentzVector> jets, double r)
 {
@@ -1969,3 +2022,129 @@ double Kinematics::GetAlphaT(std::vector<math::XYZTLorentzVector> jets,
 
   return AlphaT;
 }
+
+vector<GenJet> Kinematics::GetGenJets(const vector<GenJet> genJets, std::vector<float> ptCuts, std::vector<float> etaCuts, vector<genParticle> genParticlesToMatch)
+{
+  /*
+    Jet-Flavour Definitions (https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagMCTools)
+
+    Algorithmic definition: (NOTE: Algorithmic definition is used by default for all b-tagging purposes)
+    - Try to find the parton that most likely determines the properties of the jet and assign that flavour as the true flavour
+    - Here, the ¡°final state¡± partons (after showering, radiation) are analyzed (within ¦¤R < 0.3 of the reconstructed jet axis). 
+    Partons selected for the algorithmic definition are those partons that don't have other partons as daughters, 
+    without any explicit requirement on their status (for Pythia6 these are status=2 partons).
+    - Jets from radiation are matched with full efficiency
+    -If there is a b/c within the jet cone: label as b/c
+    -Otherwise: assign flavour of the hardest parton
+   */
+
+  // Definitions
+  std::vector<GenJet> jets;
+  unsigned int jet_index   = -1;
+  unsigned int ptCut_index  = 0;
+  unsigned int etaCut_index = 0;
+
+  // For-loop: All genParticles
+  for (auto& p: genParticlesToMatch) 
+    {
+      
+      // Comparison variables
+      double dR   = 1e6;
+      double dPt  = 1e6;
+      double dEta = 1e6;
+      double dPhi = 1e6;
+	  
+      // For-loop: All Generated Jets
+      for (auto jet: genJets) 
+	{
+	  
+	  // Jet index (for pT and eta cuts)
+	  jet_index++;
+	  
+	  dPt  = jet.pt() - p.pt();
+	  dEta = jet.eta() - p.eta();
+	  dPhi = jet.phi() - p.phi();
+       	  dR   = ROOT::Math::VectorUtil::DeltaR(jet.p4(), p.p4());
+      
+	  // Fail to match
+	  if (dR > 0.3) continue;
+	  
+	  // Apply cuts after the matching
+	  const float ptCut  = ptCuts.at(ptCut_index);
+	  const float etaCut = etaCuts.at(etaCut_index);
+	  if (jet.pt() < ptCut) continue;
+	  if (std::abs(jet.eta()) > etaCut) continue;
+	  
+	  // Save this particle
+	  jets.push_back(jet);
+	  if (0) std::cout << "dR = " << dR << ": dPt = " << dPt << ", dEta = " << dEta << ", dPhi = " << dPhi << std::endl;
+
+	  // Increment cut index only. Cannot be bigger than the size of the cut list provided
+	  if (ptCut_index  < ptCuts.size()-1  ) ptCut_index++;
+	  if (etaCut_index < etaCuts.size()-1  ) etaCut_index++;
+	  break;
+	}
+    }
+  if (0) std::cout << "bjets.size() = " << jets.size() << std::endl;
+  return jets;
+}
+
+vector<GenJet> Kinematics::GetGenJets(const GenJetCollection& genJets, std::vector<float> ptCuts, std::vector<float> etaCuts)
+{
+  std::vector<GenJet> jets;
+
+  // Definitions
+  unsigned int jet_index   = -1;
+  unsigned int ptCut_index  = 0;
+  unsigned int etaCut_index = 0;
+
+  // For-loop: All Generated Jets
+  for (auto jet: genJets) 
+    {
+
+      // Jet index (for pT and eta cuts)
+      jet_index++;
+      
+      // Apply cuts
+      const float ptCut  = ptCuts.at(ptCut_index);
+      const float etaCut = etaCuts.at(etaCut_index);
+      if (jet.pt() < ptCut) continue;
+      if (std::abs(jet.eta()) > etaCut) continue;
+
+      // Save this particle
+      jets.push_back(jet);
+
+      // Increment cut index only. Cannot be bigger than the size of the cut list provided
+      if (ptCut_index  < ptCuts.size()-1  ) ptCut_index++;
+      if (etaCut_index < etaCuts.size()-1  ) etaCut_index++;
+    }
+  return jets;
+}
+
+vector<genParticle> Kinematics::GetGenParticles(const vector<genParticle> genParticles, double ptCut, double etaCut, const int pdgId, const bool isLastCopy, const bool hasNoDaughters)
+  {
+  
+  std::vector<genParticle> particles;
+
+  // For-loop: All genParticles
+  for (auto& p: genParticles) 
+    {
+      // Find last copy of a given particle
+      if (isLastCopy) if (!p.isLastCopy()) continue;      
+
+      // Commonly enables for parton-based jet flavour definition
+      if (hasNoDaughters) if (p.daughters().size() > 0) continue;
+
+      // Consider only particles
+      if (std::abs(p.pdgId()) != pdgId) continue;
+      
+      // Apply cuts
+      if ( p.pt() < ptCut ) continue;
+      if (std::abs(p.eta()) > etaCut) continue;
+      
+      // Save this particle
+      particles.push_back(p);
+    }
+  return particles;
+  }
+

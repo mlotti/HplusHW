@@ -1345,6 +1345,42 @@ def _createCutBoxAndLine(frame, cutValue, fillColor=18, box=True, line=True, **k
 
     return ret
 
+## Create cut box and/or line
+#
+# \param frame      TH1 representing the frame
+# \param cutValue   Value of the cut
+# \param fillColor  Fill color for the box
+# \param box        If true, draw cut box
+# \param line       If true, draw cut line
+# \param kwargs     Keyword arguments (\a lessThan or \a greaterThan, forwarded to histograms.isLessThan())
+def _createCutBoxAndLineY(frame, cutValue, fillColor=18, fillStyle=3001, box=True, line=True, **kwargs):
+    xmin = frame.GetXaxis().GetXmin()
+    xmax = frame.GetXaxis().GetXmax()
+    ymin = cutValue
+    ymax = cutValue
+    ret  = []
+
+    if box:
+        if histograms.isLessThan(**kwargs):
+            ymin = frame.GetYaxis().GetXmin()
+            ymax = cutValue
+        else:
+            ymin = cutValue
+            ymax = frame.GetYaxis().GetXmax()
+        b = ROOT.TBox(xmin, ymin, xmax, ymax)
+        b.SetFillColor(fillColor)
+        b.SetFillStyle(fillStyle)
+        ret.append(b)
+
+    if line:
+        l = ROOT.TLine(xmin, cutValue, xmax, cutValue)
+        l.SetLineWidth(3)
+        l.SetLineStyle(ROOT.kDashed)
+        l.SetLineColor(ROOT.kBlack)
+        ret.append(l)
+
+    return ret
+
 ## Helper function for creating a histograms.Histo object from a ROOT object based on the ROOT object type
 #
 # \param rootObject   ROOT object (TH1 or TGraph)
@@ -1557,6 +1593,15 @@ class PlotBase:
     # \param kwargs  Keyword arguments (forwarded to plots._createCutBoxAndLine())
     def addCutBoxAndLine(self, *args, **kwargs):
         objs = _createCutBoxAndLine(self.getFrame(), *args, **kwargs)
+        for o in objs:
+            self.appendPlotObject(o)
+
+    ## Add cut box and/or line
+    #
+    # \param args    Positional arguments (forwarded to plots._createCutBoxAndLine())
+    # \param kwargs  Keyword arguments (forwarded to plots._createCutBoxAndLine())
+    def addCutBoxAndLineY(self, *args, **kwargs):
+        objs = _createCutBoxAndLineY(self.getFrame(), *args, **kwargs)
         for o in objs:
             self.appendPlotObject(o)
 
@@ -2805,6 +2850,7 @@ class PlotDrawer:
         self.createFrame(p, name, **kwargs)
         self.setLegend(p, **kwargs)
         self.addCutLineBox(p, **kwargs)
+        self.addCutLineBoxY(p, **kwargs)
         self.customise(p, **kwargs)
         if len(args) > 1:
             raise Exception("At most 1 positional argument allowed (for xlabel), got %d" % len(args))
@@ -3137,6 +3183,42 @@ class PlotDrawer:
     
             for box in lst:
                 p.addCutBoxAndLine(**box)
+
+
+    ## Add cut box and/or line to the plot
+    #
+    # \param p       plots.PlotBase (or deriving) object
+    # \param kwargs  Keyword arguments (see below)
+    #
+    # <b>Keyword arguments</b>
+    # \li\a   cutLine   If given (and not None), should be a cut value or a list of cut values. Cut lines are drawn to the value points.
+    # \li\a   cutBox    If given (and not None), should be a cut box specification or a list of specifications. 
+    # For each specification, cut box and/or line is drawn according to the specification. Specification is a dictionary holding the parameters to plots._createCutBoxAndLine
+    def addCutLineBoxY(self, p, **kwargs):
+        cutLineY = self._getValue("cutLineY", p, kwargs, default=None)
+        cutBoxY  = self._getValue("cutBoxY" , p, kwargs, default=None)
+        if cutLineY != None and cutBoxY != None:
+            raise Exception("Both cutLineY and cutBoxY were given, only either one can exist")
+
+        # Add cut line and/or box
+        if cutLineY != None:
+            lst = cutLineY
+            if not isinstance(lst, list):
+                lst = [lst]
+    
+            for line in lst:                
+                p.addCutBoxAndLineY(line, box=False, line=True)
+                
+        if cutBoxY != None:
+            #if cutBoxY["box"] == False:
+            #    return
+            lst = cutBoxY
+            if not isinstance(lst, list):
+                lst = [lst]
+    
+            for box in lst:
+                p.addCutBoxAndLineY(**box)
+        return
 
     ## Provide hook for arbitrary customisation function just before drawing the plot
     #

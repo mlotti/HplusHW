@@ -385,7 +385,7 @@ bool BJetSelection::passTrgMatching(const Jet& bjet, std::vector<math::LorentzVe
     }
   // Fill histograms
   hTriggerMatchDeltaR->Fill(myMinDeltaR);
-
+  std::cout << "passed trigger matching = " << (myMinDeltaR < fTriggerMatchingCone) << " (dR = " << myMinDeltaR << ")" << std::endl;
   return (myMinDeltaR < fTriggerMatchingCone);
 }
 
@@ -396,6 +396,14 @@ void BJetSelection::SortFailedBJetsCands(Data &output, std::vector<math::Lorentz
   output.fFailedBJetCandsDescendingDiscr = output.fFailedBJetCands;
   output.fFailedBJetCandsAscendingDiscr  = output.fFailedBJetCands;
   output.fFailedBJetCandsShuffled        = output.fFailedBJetCands;
+  output.fFailedBJetCandsDescendingPt    = output.fFailedBJetCands;
+  output.fFailedBJetCandsAscendingPt     = output.fFailedBJetCands;
+
+  // Sort by descending pt value (http://en.cppreference.com/w/cpp/algorithm/sort)
+  std::sort(output.fFailedBJetCandsDescendingPt.begin(), output.fFailedBJetCandsDescendingPt.end(), [](const Jet& a, const Jet& b){return a.pt() > b.pt();});
+
+  // Sort by ascending pt value (http://en.cppreference.com/w/cpp/algorithm/sort)
+  std::sort(output.fFailedBJetCandsAscendingPt.begin(), output.fFailedBJetCandsAscendingPt.end(), [](const Jet& a, const Jet& b){return a.pt() < b.pt();});
 
   // Sort by descending b-discriminator value (http://en.cppreference.com/w/cpp/algorithm/sort)
   std::sort(output.fFailedBJetCandsDescendingDiscr.begin(), output.fFailedBJetCandsDescendingDiscr.end(), [](const Jet& a, const Jet& b){return a.bjetDiscriminator() > b.bjetDiscriminator();});
@@ -407,16 +415,48 @@ void BJetSelection::SortFailedBJetsCands(Data &output, std::vector<math::Lorentz
   std::random_shuffle(output.fFailedBJetCandsShuffled.begin(), output.fFailedBJetCandsShuffled.end());
 
   // Default sort: first all trg-matched objects (if any) then randomly
-  output.fFailedBJetCands = output.fFailedBJetCandsShuffled;
-  
+  // output.fFailedBJetCands = output.fFailedBJetCandsShuffled; // I suspect that this is what causes the systematic drift in tetrajetM closure test)
+
+  // Bjetness sort: first put jets with highest discriminator value
+  output.fFailedBJetCands = output.fFailedBJetCandsDescendingDiscr; // I suspect that this is even worse than using "output.fFailedBJetCandsShuffled"
+
+  // Bjetness sort: first put jets with highest discriminator value
+  // output.fFailedBJetCands = output.fFailedBJetCandsAscendingDiscr; // I suspect that this is even worse than using "output.fFailedBJetCandsShuffled"
+
+  // Pt sort: first put jets with lowest pt value
+  // output.fFailedBJetCands = output.fFailedBJetCandsAscendingPt;
+
+  // Pt sort: first put jets with highest pt value
+  // output.fFailedBJetCands = output.fFailedBJetCandsDescendingPt;
+
+  // Debugging moving the Trigger-Matched jets to the front
+//   for (auto it = output.fFailedBJetCands.begin(); it != output.fFailedBJetCands.end(); ++it) 
+//     {
+//       auto jet = *it;
+//       std::cout << "Before) jet.index() = " << jet.index() << ", jet.pt() = " << jet.pt() << std::endl;
+//     }
+//   std::cout << "\n" << std::endl;
+
   // Now put the trg-matched objects in the front
-  for (auto it = output.fFailedBJetCands.begin(); it != output.fFailedBJetCands.end(); ++it) 
+  if (bTriggerMatchingApply)
     {
-      if (!this->passTrgMatching(*it, myTriggerBJetMomenta)) continue;
-      auto jet = *it;
-      output.fFailedBJetCands.erase(it);
-      output.fFailedBJetCands.insert(output.fFailedBJetCands.begin(), jet);
+      for (auto it = output.fFailedBJetCands.begin(); it != output.fFailedBJetCands.end(); ++it) 
+	{
+	  if (!this->passTrgMatching(*it, myTriggerBJetMomenta)) continue;
+	  auto jet = *it;
+	  std::cout << "BJetSelection(): WARNING! Degub before using again! Make sure it does what it should!" << std::endl;
+	  output.fFailedBJetCands.erase(it);
+	  output.fFailedBJetCands.insert(output.fFailedBJetCands.begin(), jet);
+	}
     }
-    
+  
+//  // Debugging moving the Trigger-Matched jets to the front
+//  for (auto it = output.fFailedBJetCands.begin(); it != output.fFailedBJetCands.end(); ++it) 
+//    {
+//      auto jet = *it;
+//      std::cout << "After) jet.index() = " << jet.index() << ", jet.pt() = " << jet.pt() << std::endl;
+//    }
+//  std::cout << "\n" << std::endl;
+
   return;
 }

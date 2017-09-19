@@ -12,6 +12,8 @@ Examples:
 ./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_HLTBJetTrgMatch_TopCut10_H2Cut0p5_170720_104648 --url --signalMass 800
 
 Last Used:
+./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170827_075947/ --url
+./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --url --signalMass 800
 ./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170817_025841/ --url --signalMass 500
 '''
 
@@ -135,12 +137,20 @@ def main(opts):
         # Replace QCD MC with QCD-DataDriven
         qcdDatasetName    = "FakeBMeasurementTrijetMass"
         qcdDatasetNameNew = "QCD-Data"
-        replaceQCDFromData(datasetsMgr, qcdDatasetName, qcdDatasetNameNew)
+        if opts.mcQCD:
+            pass
+        else:
+            replaceQCDFromData(datasetsMgr, qcdDatasetName, qcdDatasetNameNew)
 
         # Re-order datasets (different for inverted than default=baseline)
         newOrder = ["Data"]
-        newOrder.extend(["ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass])
-        newOrder.extend(["QCD-Data"])
+        if opts.signalMass != 0:
+            signal = "ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass
+            newOrder.extend([signal])
+        if opts.mcQCD:
+            newOrder.extend(["QCD"])
+        else:
+            newOrder.extend(["QCD-Data"])
         newOrder.extend(GetListOfEwkDatasets())
         datasetsMgr.selectAndReorder(newOrder)
         
@@ -166,17 +176,18 @@ def GetHistoKwargs(histoList, opts):
     key   = histogramName
     value = kwargs
     '''
-
+    
     histoKwargs = {}
     _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": 0.1}
     if opts.mergeEWK:
         _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": -0.12}    
+    logY = True
 
     _kwargs = {
         "ylabel"           : "Events / %.0f",
         "rebinX"           : 1,
         "rebinY"           : None,
-        "ratioYlabel"      : "Data/MC",
+        "ratioYlabel"      : "Data/Bkg",
         "ratio"            : True, 
         "stackMCHistograms": True,
         "ratioInvert"      : False, 
@@ -186,12 +197,16 @@ def GetHistoKwargs(histoList, opts):
         "cmsExtraText"     : "Preliminary",
         "opts"             : {"ymin": 2e-1, "ymaxfactor": 10}, #1.2
         "opts2"            : {"ymin": 0.0, "ymax": 2.0},
-        "log"              : True,
+        "log"              : logY,
         "moveLegend"       : _moveLegend,
         }
 
     for h in histoList:
         kwargs = copy.deepcopy(_kwargs)
+        if "met" in h.lower():
+            units            = "GeV/c"
+            kwargs["ylabel"] = "Events / %.0f " + units
+            kwargs["xlabel"] = "E_{T}^{miss} (%s)" % units
         if "NVertices" in h:
             kwargs["ylabel"] = "Events / %.0f"
             kwargs["xlabel"] = "Vertices"
@@ -277,6 +292,11 @@ def GetHistoKwargs(histoList, opts):
             units = "GeV/c"
             kwargs["ylabel"] = "Events / %.0f " + units
             kwargs["xlabel"] = "p_{T} (%s)"  % units
+        if "LdgTrijetDijetPt" in h:
+            units = "GeV/c"
+            kwargs["ylabel"] = "Events / %.0f " + units
+            kwargs["xlabel"] = "p_{T} (%s)"  % units
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": 700.0, "ymin": 1e+0, "ymaxfactor": 10}
         if "LdgTrijetMass" in h:
             startBlind       = 115 #135 v. sensitive to bin-width!
             endBlind         = 225 #205 v. sensitive to bin-width!
@@ -328,14 +348,16 @@ def GetHistoKwargs(histoList, opts):
             kwargs["ylabel"] = "Events / %.0f " + units
             kwargs["xlabel"] = "p_{T} (%s)"  % units
         if "LdgTetrajetMass" in h:
-            startBlind       = 135  # 175 v. sensitive to bin-width!
-            endBlind         = 3000 #v. sensitive to bin-width!
+            ROOT.gStyle.SetNdivisions(5, "X")
+            startBlind       = 150  # 135 v. sensitive to bin-width!
+            endBlind         = 2500 #v. sensitive to bin-width!
             kwargs["rebinX"] = 4
             units            = "GeV/c^{2}"
             kwargs["ylabel"] = "Events / %.0f " + units
             kwargs["xlabel"] = "m_{jjbb} (%s)"  % units
             kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["opts"]   = {"xmin": 0.0, "xmax": endBlind, "ymin": 1e+0, "ymaxfactor": 10}
+            #kwargs["opts"]   = {"xmin": 0.0, "xmax": 2000, "ymin": 1e+0, "ymaxfactor": 10}
             if "AllSelections" in h:
                 kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind)
                 kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.12}
@@ -365,7 +387,16 @@ def GetHistoKwargs(histoList, opts):
             kwargs["xlabel"] = "#eta"
             kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": 1e+0, "ymaxfactor": 10}
-        #else:
+        if "TopMassWMassRatio" in h:
+            kwargs["ylabel"] = "Events / %.1f"
+            kwargs["xlabel"] = "R_{3/2}"
+            #kwargs["cutBox"] = {"cutValue": (173.21/80.385), "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+            kwargs["cutBox"] = {"cutValue": (172.5/80.385), "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+            #kwargs["cutBox"] = {"cutValue": 2.1, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+            #kwargs["opts"]   = {"xmin": 0, "xmax": +10.0, "ymin": 1e+0, "ymaxfactor": 1.2}
+            kwargs["opts"]   = {"xmin": 0, "xmax": +10.0, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["log"]    = True#False
+
         histoKwargs[h] = kwargs
     return histoKwargs
     
@@ -375,43 +406,87 @@ def DataMCHistograms(datasetsMgr, qcdDatasetName):
     # Definitions
     histoNames  = []
     saveFormats = [".png"] #[".C", ".png", ".pdf"]
+
+    # Get list of histograms
     dataPath    = "ForDataDrivenCtrlPlots"
-    allHistos   = datasetsMgr.getDataset(qcdDatasetName).getDirectoryContent(dataPath)
+    allHistos   = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(dataPath)
     histoList   = [h for h in allHistos if "StandardSelections" in h]
     histoList.extend([h for h in allHistos if "AllSelections" in h])
     histoList   = [h for h in histoList if "_MCEWK" not in h]
     histoList   = [h for h in histoList if "_Purity" not in h]
-    histoPaths  = [dataPath+"/"+h for h in histoList]
+    histoPaths  = [dataPath + "/" + h for h in histoList]
+
+    # Get histogram<->kwargs dictionary 
     histoKwargs = GetHistoKwargs(histoPaths, opts)
 
     # For-loop: All histograms in list
     for histoName in histoPaths:
-        
-        if "TrijetMass" not in histoName:
+
+        #if "LdgTetrajetMass" not in histoName:
+        #    continue
+
+        if "JetEtaPhi" in histoName:
             continue
+
+        if opts.signalMass == 0:
+            if "LdgTrijetMass" in histoName:
+                continue
+            
+            if "LdgTetrajetMass" in histoName:
+                continue
+
+        if "Vs" in histoName:
+            continue
+
+        # Not used in this analysis (yet)
+        if "MHT" in histoName:
+            continue
+
+        # By definition of the Inverted sample the following histoscannot agree!
+        if "NBjets_" in histoName:
+            continue
+        if "BJetPt_" in histoName:
+            continue
+        if "_BJetEta_" in histoName:
+            continue
+        if "_BtagDiscriminator_" in histoName:
+            continue
+
         kwargs_  = histoKwargs[histoName]
         saveName = histoName.replace("/", "_")
 
         # Create the plotting object
         p = plots.DataMCPlot(datasetsMgr, histoName, saveFormats=[])
-        
+
         # Apply QCD data-driven style
-        
-        p.histoMgr.forHisto("ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass, styles.getSignalStyleHToTB_M("%.0f" % opts.signalMass))
+        if opts.signalMass != 0:
+            signal = "ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass
+            mHPlus = "%s" % int(opts.signalMass)
+            p.histoMgr.forHisto(signal, styles.getSignalStyleHToTB_M(mHPlus))
+
         #p.histoMgr.forHisto(opts.signalMass, styles.getSignalStyleHToTB())
-        p.histoMgr.forHisto(qcdDatasetName, styles.getAltQCDStyle())
-        p.histoMgr.setHistoDrawStyle(qcdDatasetName, "HIST")
-        p.histoMgr.setHistoLegendStyle(qcdDatasetName, "F")
-        p.histoMgr.setHistoLegendLabelMany({
-                qcdDatasetName: "QCD (Data)",
-                })
+        if opts.mcQCD:
+            pass
+        else:
+            p.histoMgr.forHisto(qcdDatasetName, styles.getAltQCDStyle())
+            p.histoMgr.setHistoDrawStyle(qcdDatasetName, "HIST")
+            p.histoMgr.setHistoLegendStyle(qcdDatasetName, "F")
+
+        if not opts.mcQCD:
+            p.histoMgr.setHistoLegendLabelMany({
+                    qcdDatasetName: "QCD (Data)",
+                    })
+        else:
+            p.histoMgr.setHistoLegendLabelMany({
+                    "QCD": "QCD (MC)",
+                    })            
 
         # Apply blinding of signal region
         if "blindingRangeString" in kwargs_:
             startBlind = float(kwargs_["blindingRangeString"].split("-")[1])
             endBlind   = float(kwargs_["blindingRangeString"].split("-")[0])
             plots.partiallyBlind(p, maxShownValue=startBlind, minShownValue=endBlind, invert=True, moveBlindedText=kwargs_["moveBlindedText"])
-                
+
         # Draw and save the plot
         plots.drawPlot(p, saveName, **kwargs_) #the "**" unpacks the kwargs_ dictionary
         SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode) )
@@ -496,6 +571,7 @@ if __name__ == "__main__":
     
     # Default Settings
     ANALYSISNAME = "Hplus2tbAnalysis"
+    MCQCD        = False
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
     OPTMODE      = None
@@ -505,7 +581,7 @@ if __name__ == "__main__":
     SUBCOUNTERS  = False
     LATEX        = False
     MCONLY       = False
-    SIGNALMASS   = 500
+    SIGNALMASS   = 0
     MERGEEWK     = False
     URL          = False
     NOERROR      = True
@@ -527,6 +603,9 @@ if __name__ == "__main__":
 
     parser.add_option("--analysisName", dest="analysisName", type="string", default=ANALYSISNAME,
                       help="Override default analysisName [default: %s]" % ANALYSISNAME)
+
+    parser.add_option("--mcQCD", dest="mcQCD", action="store_true", default=MCQCD,
+                      help="Do not replace QCD MC with Data-Driven QCD Background Estiomation [default: %s]" % MCQCD)
 
     parser.add_option("--mcOnly", dest="mcOnly", action="store_true", default=MCONLY,
                       help="Plot only MC info [default: %s]" % MCONLY)
@@ -579,13 +658,11 @@ if __name__ == "__main__":
 
     # Sanity check
     allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 2000, 3000]
-    if opts.signalMass not in allowedMass:
+    if opts.signalMass!=0 and opts.signalMass not in allowedMass:
         Print("Invalid signal mass point (=%.0f) selected! Please select one of the following:" % (opts.signalMass), True)
         for m in allowedMass:
             Print(m, False)
         sys.exit()
-    #else:
-    #    opts.signalMass = "ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass
 
     # Call the main function
     main(opts)

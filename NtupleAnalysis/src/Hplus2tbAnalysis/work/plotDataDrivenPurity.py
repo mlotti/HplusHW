@@ -15,10 +15,14 @@ For more counter tricks and optios see also:
 HiggsAnalysis/NtupleAnalysis/scripts/hplusPrintCounters.py
 
 Usage:
-./plotDataDriven.py -m <pseudo_mcrab_directory> [opts]
+./plotDataDrivenPurity.py -m <pseudo_mcrab_directory> [opts]
 
 Examples:
-./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_HLTBJetTrgMatch_TopCut10_H2Cut0p5_170720_104648 --url -o ""
+./plotDataDrivenPurity.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_HLTBJetTrgMatch_TopCut10_H2Cut0p5_170720_104648 --url -o ""
+
+Last Used:
+./plotDataDrivenPurity.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229 --url
+
 '''
 
 #================================================================================================ 
@@ -177,6 +181,7 @@ def PurityHistograms(datasetsMgr, qcdDatasetName):
 
     # For-loop: All histograms in list
     for histoName in histoPaths:
+
         kwargs_  = histoKwargs[histoName]
         saveName = histoName.replace("/", "_")
 
@@ -228,90 +233,94 @@ def GetHistoKwargs(histoList, opts):
         }
 
     for h in histoList:
+        yAxis = "Events"
+        if "Purity" in h:
+            yAxis = "Purity "
+
         kwargs = copy.deepcopy(_kwargs)
         if "NVertices" in h:
-            kwargs["ylabel"] = "Events / %.0f"
+            kwargs["ylabel"] = yAxis + "/ %.0f"
             kwargs["xlabel"] = "Vertices"
         if "Njets" in h:                
-            kwargs["ylabel"] = "Events / %.0f"
+            kwargs["ylabel"] = yAxis + "/ %.0f"
             kwargs["xlabel"] = "Jets Multiplicity"
             kwargs["cutBox"] = {"cutValue": 7.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         if "JetPt" in h:                
             units            = "GeV/c"
-            kwargs["ylabel"] = "Events / %.0f " + units
+            kwargs["ylabel"] = yAxis + "/ %.0f " + units
             kwargs["xlabel"] = "p_{T} (%s)"  % units
             kwargs["cutBox"] = {"cutValue": 30.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         if "JetEta" in h:                
-            kwargs["ylabel"] = "Events / %.2f"
+            kwargs["ylabel"] = yAxis + "/ %.2f"
             kwargs["xlabel"] = "#eta"
             kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": yMin, "ymax": yMax}
         if "NBjets" in h:                
-            kwargs["ylabel"] = "Events / %.0f"
+            kwargs["ylabel"] = yAxis + "/ %.0f"
             kwargs["xlabel"] = "b-Jets Multiplicity"
             kwargs["cutBox"] = {"cutValue": 3.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["opts"]   = {"xmin": 0.0, "xmax": 10.0, "ymin": yMin, "ymax": yMax}
         if "BjetPt" in h:                
             units = "GeV/c"
-            kwargs["ylabel"] = "Events / %.0f " + units
+            kwargs["ylabel"] = yAxis + "/ %.0f " + units
             kwargs["xlabel"] = "p_{T} (%s)"  % units
             kwargs["cutBox"] = {"cutValue": 30.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         if "BjetEta" in h:                
-            kwargs["ylabel"] = "Events / %.2f"
+            kwargs["ylabel"] = yAxis + "/ %.2f"
             kwargs["xlabel"] = "#eta"
             kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": yMin, "ymax": yMax}
         if "BtagDiscriminator" in h:                
-            kwargs["ylabel"]     = "Events / %.2f"
+            kwargs["ylabel"]     = yAxis + "/ %.2f"
             kwargs["xlabel"]     = "b-Tag Discriminator"
             kwargs["cutBox"]     = {"cutValue": 0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["moveLegend"] = {"dx": -0.5, "dy": -0.01, "dh": 0.0}
             kwargs["opts"]       = {"xmin": 0.0, "xmax": 1.05, "ymin": yMin, "ymax": yMax}
         if "HT" in h:
             units            = "GeV"
-            kwargs["ylabel"] = "Events / %.0f " + units
+            kwargs["ylabel"] = yAxis + "/ %.0f " + units
             kwargs["xlabel"] = "H_{T} (%s)"  % units
             kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["opts"]   = {"xmin": 0.0, "xmax": 4500, "ymin": yMin, "ymax": yMax}
         if "MHT" in h:
             units            = "GeV"
-            kwargs["ylabel"] = "Events / %.0f " + units
+            kwargs["ylabel"] = yAxis + "/ %.0f " + units
             kwargs["xlabel"] = "MHT (%s)"  % units
             kwargs["opts"]   = {"xmin": 0.0, "xmax": 400, "ymin": yMin, "ymax": yMax}
         if "Sphericity" in h:
-            kwargs["ylabel"] = "Events / %.2f"
+            kwargs["ylabel"] = yAxis + "/ %.2f"
             kwargs["xlabel"] = "Sphericity"
         if "Aplanarity" in h:
-            kwargs["ylabel"] = "Events / %.2f"
+            kwargs["ylabel"] = yAxis + "/ %.2f"
             kwargs["xlabel"] = "Aplanarity"
         if "Circularity" in h:
-            kwargs["ylabel"] = "Events / %.2f"
+            kwargs["ylabel"] = yAxis + "/ %.2f"
             kwargs["xlabel"] = "Circularity"
         if "Circularity" in h:
-            kwargs["ylabel"] = "Events / %.2f"
+            kwargs["ylabel"] = yAxis + "/ %.2f"
             kwargs["xlabel"] = "Circularity"
         if "ThirdJetResolution" in h:
-            kwargs["ylabel"] = "Events / %.2f"
+            kwargs["ylabel"] = yAxis + "/ %.2f"
             kwargs["xlabel"] = "y_{23}"
         if "FoxWolframMoment" in h:
-            kwargs["ylabel"] = "Events / %.2f"
+            kwargs["ylabel"] = yAxis + "/ %.2f"
             kwargs["xlabel"] = "H_{2}"
         if "Centrality" in h:
-            kwargs["ylabel"] = "Events / %.2f"
+            kwargs["ylabel"] = yAxis + "/ %.2f"
             kwargs["xlabel"] = "Centrality"
             kwargs["moveLegend"] = {"dx": -0.53, "dy": 0.0, "dh": 0.0}
         if "TopFitChiSqr" in h:
-            kwargs["ylabel"] = "Events / %.0f"
+            kwargs["ylabel"] = yAxis + "/ %.0f"
             kwargs["xlabel"] = "#chi^{2}"
             kwargs["cutBox"] = {"cutValue": 100.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["opts"]   = {"xmin": 0.0, "xmax": 180.0, "ymin": yMin, "ymax": yMax}
         if "LdgTrijetPt" in h:
             units = "GeV/c"
-            kwargs["ylabel"] = "Events / %.0f " + units
+            kwargs["ylabel"] = yAxis + "/ %.0f " + units
             kwargs["xlabel"] = "p_{T} (%s)"  % units
         if "LdgTrijetMass" in h:
             units            = "GeV/c^{2}"
-            kwargs["ylabel"] = "Events / %.0f " + units
+            kwargs["ylabel"] = yAxis + "/ %.0f " + units
             kwargs["xlabel"] = "m_{jjb} (%s)"  % units
             kwargs["cutBox"] = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["opts"]   = {"xmin": 0.0, "xmax": 1200.0, "ymin": yMin, "ymax": yMax}
@@ -321,20 +330,20 @@ def GetHistoKwargs(histoList, opts):
             kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.12}
         if "LdgTrijetBjetPt" in h:
             units            = "GeV/c"
-            kwargs["ylabel"] = "Events / %.0f " + units
+            kwargs["ylabel"] = yAxis + "/ %.0f " + units
             kwargs["xlabel"] = "p_{T} (%s)"  % units
         if "LdgTrijetBjetEta" in h:
-            kwargs["ylabel"] = "Events / %.2f"
+            kwargs["ylabel"] = yAxis + "/ %.2f"
             kwargs["xlabel"] = "#eta"
             kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": yMin, "ymax": yMax}
         if "SubldgTrijetPt" in h:
             units = "GeV/c"
-            kwargs["ylabel"] = "Events / %.0f " + units
+            kwargs["ylabel"] = yAxis + "/ %.0f " + units
             kwargs["xlabel"] = "p_{T} (%s)"  % units
         if "SubldgTrijetMass" in h:
             units            = "GeV/c^{2}"
-            kwargs["ylabel"] = "Events / %.0f " + units
+            kwargs["ylabel"] = yAxis + "/ %.0f " + units
             kwargs["xlabel"] = "m_{jjb} (%s)"  % units
             kwargs["cutBox"] = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["opts"]   = {"xmin": 0.0, "xmax": 1200.0, "ymin": yMin, "ymax": yMax}
@@ -344,22 +353,22 @@ def GetHistoKwargs(histoList, opts):
             kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.12}
         if "SubldgTrijetBjetPt" in h:
             units            = "GeV/c"
-            kwargs["ylabel"] = "Events / %.0f " + units
+            kwargs["ylabel"] = yAxis + "/ %.0f " + units
             kwargs["xlabel"] = "p_{T} (%s)"  % units
         if "SubldgTrijetBjetEta" in h:
-            kwargs["ylabel"] = "Events / %.2f"
+            kwargs["ylabel"] = yAxis + "/ %.2f"
             kwargs["xlabel"] = "#eta"
             kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": yMin, "ymax": yMax}
         if "LdgTetrajetPt" in h:
             units            = "GeV/c"
-            kwargs["ylabel"] = "Events / %.0f " + units
+            kwargs["ylabel"] = yAxis + "/ %.0f " + units
             kwargs["xlabel"] = "p_{T} (%s)"  % units
         if "LdgTetrajetMass" in h:
             startBlind       = 180
             endBlind         = 3000
             units            = "GeV/c^{2}"
-            kwargs["ylabel"] = "Events / %.0f " + units
+            kwargs["ylabel"] = yAxis + "/ %.0f " + units
             kwargs["xlabel"] = "m_{jjbb} (%s)"  % units
             kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["opts"]   = {"xmin": 0.0, "xmax": endBlind, "ymin": yMin, "ymax": yMax}
@@ -367,13 +376,13 @@ def GetHistoKwargs(histoList, opts):
             kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.12}
         if "SubldgTetrajetPt" in h:
             units            = "GeV/c"
-            kwargs["ylabel"] = "Events / %.0f " + units
+            kwargs["ylabel"] = yAxis + "/ %.0f " + units
             kwargs["xlabel"] = "p_{T} (%s)"  % units
         if "SubldgTetrajetMass" in h:
             startBlind       = 180
             endBlind         = 3000
             units            = "GeV/c^{2}"
-            kwargs["ylabel"] = "Events / %.0f " + units
+            kwargs["ylabel"] = yAxis + "/ %.0f " + units
             kwargs["xlabel"] = "m_{jjbb} (%s)"  % units
             kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["opts"]   = {"xmin": 0.0, "xmax": endBlind}#, "ymin": 1e+0, "ymaxfactor": 10}
@@ -382,10 +391,10 @@ def GetHistoKwargs(histoList, opts):
             kwargs["moveBlindedText"] = {"dx": -0.22, "dy": +0.08, "dh": -0.12}
         if "TetrajetBjetPt" in h:
             units            = "GeV/c"
-            kwargs["ylabel"] = "Events / %.0f " + units
+            kwargs["ylabel"] = yAxis + "/ %.0f " + units
             kwargs["xlabel"] = "p_{T} (%s)"  % units
         if "TetrajetBjetEta" in h:
-            kwargs["ylabel"] = "Events / %.2f"
+            kwargs["ylabel"] = yAxis + "/ %.2f"
             kwargs["xlabel"] = "#eta"
             kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": yMin, "ymax": yMax}

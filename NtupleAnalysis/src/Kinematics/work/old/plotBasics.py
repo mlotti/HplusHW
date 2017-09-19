@@ -31,7 +31,8 @@ import ROOT
 kwargs = {
     "analysis"       : "Kinematics",
     #"savePath"       : "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_06September2016/figures/all/",
-    "savePath"       : None,
+    #"savePath"       : None,
+    "savePath"       :"/publicweb/a/aattikis/Kinematics/",
     "refDataset"     : "ChargedHiggs_HplusTB_HplusToTB_M_200",
     "rmDataset"      : ["ChargedHiggs_HplusTB_HplusToTB_M_300"], #["QCD"],
     "saveFormats"    : [".png"],#, ".pdf"],

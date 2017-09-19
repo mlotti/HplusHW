@@ -41,6 +41,8 @@ Usage:
 Examples:
 ./plotQCD_Fit.py -m FakeBMeasurement_SignalTriggers_NoTrgMatch_StdSelections_TopCut_AllSelections_TopCut10_170725_030408/ --url -o ""
 
+Last Used:
+./plotQCD_Fit.py -m FakeBMeasurement_SignalTriggers_NoTrgMatch_StdSelections_TopCut_AllSelections_TopCut10_InvMassFix_170822_074824 --url
 
 Fit options:
 https://root.cern.ch/root/htmldoc/guides/users-guide/FittingHistograms.html#the-th1fit-method
@@ -302,7 +304,7 @@ def PlotAndFitTemplates(datasetsMgr, histoName, inclusiveFolder, opts):
     # Rebin the EWK-MC histo (significant fit improvement - opposite effect for QCD fit)
     EWK_baseline.RebinX(2)
     EWK_inverted.RebinX(2)
-    FakeB_inverted.RebinX(1)
+    FakeB_inverted.RebinX(1) #FIXME: Optimal is 1 (i.e. bin width of 10 GeV/c^{2})
 
     # Create the final plot object
     compareHistos = [EWK_baseline]
@@ -416,10 +418,11 @@ def PlotAndFitTemplates(datasetsMgr, histoName, inclusiveFolder, opts):
     FITMIN  :   80
     FITMAX  : 1000
     BinWidth:  5 GeV/c^2
+    f_{QCD} : ~0.75118 +/- 0.00740 (data-driven plots looked great with this value)
     '''
     Print("Setting the fit-function to the QCD template", False)
-    FITMIN_QCD =  120
-    FITMAX_QCD = 1000
+    FITMIN_QCD =  120  # 120
+    FITMAX_QCD = 1000 #1000
     bPtochos   = False #True
     if bPtochos:
         par0 = [9.55e-01,   0.0 ,    1.0] # lognorm_norm
