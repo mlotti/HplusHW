@@ -379,6 +379,8 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
   output.fJetsUsedAsBJetsInFit = bjets;
   output.bIsGenuineB = _getIsGenuineB(event.isMC(), output.fJetsUsedAsBJetsInFit);
 
+  // Sanity check
+  // std::cout << "output.fJetsUsedAsBJetsInFit.size() = " << output.fJetsUsedAsBJetsInFit.size() << std::endl;
   std::vector<unsigned int> bjet1;
   std::vector<unsigned int> bjet2;
   std::vector<unsigned int> jet1;
@@ -707,12 +709,15 @@ const std::vector<Jet> TopSelection::GetBjetsToBeUsedInFit(const BJetSelection::
   // Append the vector of all failed bjets (in descending B-discriminator value) to the end of the bjets vector
   // Use case: QCD Measurement where we invert at least 1 b-jet => may have less than 3 b-jets available (min for di-top fit and inv mass) 
   if (bjetsForFit.size() < maxNumberOfBJets)
-    {
-  bjetsForFit.insert(bjetsForFit.end(), bjetData.getFailedBJetCands().begin(), bjetData.getFailedBJetCands().end()); 
+    {      
+      bjetsForFit.insert(bjetsForFit.end(), bjetData.getFailedBJetCands().begin(), bjetData.getFailedBJetCands().end()); 
     }
 
   // Truncate the bjets vector to correct size
   if (bjetsForFit.size() > maxNumberOfBJets) bjetsForFit.resize(maxNumberOfBJets);
+
+  // Finally sort by descending pt value (http://en.cppreference.com/w/cpp/algorithm/sort)      
+  std::sort(bjetsForFit.begin(), bjetsForFit.end(), [](const Jet& a, const Jet& b){return a.pt() > b.pt();});
 
   return bjetsForFit;
 }

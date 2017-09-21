@@ -1,5 +1,25 @@
 #!/usr/bin/env python
+'''
+DESCRIPTION:
+This is the swiss pocket knife for running Lands/Combine on large array of datacards
 
+
+INSTRUCTIONS:
+
+
+USAGE:
+cd datacards_test4b/CombineResults_taujets_170913_192047
+../../plotBRLimit_Hplus2tb.py 
+
+
+EXAMPLES:
+../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY && cp *.png ~/public/html/Combine/. 
+../../plotBRLimit_Hplus2tb.py --excludedArea --gridX --gridY --unblinded --cutLine 500 && cp *.png ~/public/html/Combine/
+
+Last Used:
+../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY && cp *.png ~/public/html/Combine/. 
+
+'''
 #================================================================================================
 # Import modules
 #================================================================================================
@@ -20,14 +40,15 @@ import HiggsAnalysis.LimitCalc.limit as limit
 #================================================================================================
 # Function definition
 #================================================================================================
-#def Verbose(msg, printHeader=False):
-#    '''
-#    Calls Print() only if verbose options is set to true.
-#    '''
-#    if not opts.verbose:
-#        return
-#    Print(msg, printHeader)
-#    return
+def Verbose(msg, printHeader=False):
+    '''
+    Calls Print() only if verbose options is set to true.
+    '''
+    if not opts.verbose:
+        return
+    Print(msg, printHeader)
+    return
+
 
 def Print(msg, printHeader=True):
     '''
@@ -68,26 +89,22 @@ def main(opts):
     if opts.parentheses:
         limit.useParentheses()
     
-    # Do the limit plot
-    doBRlimit(limits, opts.unblinded, opts)
-
-    # Do the limit plot (logy)
-    doBRlimit(limits, opts.unblinded, opts, log=True)
-
-    # Do the limit error plot
+    # Do the limit plots
+    doBRlimit(limits, opts.unblinded, opts, logy=False)
+    doBRlimit(limits, opts.unblinded, opts, logy=True)
     doLimitError(limits, opts.unblinded)
 
     # Print the Limits
     limits.printLimits(unblindedStatus=opts.unblinded, nDigits=opts.digits)
-    # limits.print2(unblindedStatus=opts.unblinded)
+    print
+    limits.print2(unblindedStatus=opts.unblinded)
     
     # Save the Limits in a LaTeX table file
     limits.saveAsLatexTable(unblindedStatus=opts.unblinded, nDigits=opts.digits)
     return
 
 
-def doBRlimit(limits, unblindedStatus, opts, log=False):
-    leptonicFS = False
+def doBRlimit(limits, unblindedStatus, opts, logy=False):
     
     graphs = []
     if unblindedStatus:
@@ -104,112 +121,139 @@ def doBRlimit(limits, unblindedStatus, opts, log=False):
             else:
                 graphs.append(histograms.HistoGraph(gr, "Observed", drawStyle="PL", legendStyle="lp"))
 
-
+    # Add the expected lines
     graphs.extend([
             histograms.HistoGraph(limits.expectedGraph(), "Expected", drawStyle="L"),
             histograms.HistoGraph(limits.expectedBandGraph(sigma=1), "Expected1", drawStyle="F", legendStyle="fl"),
             histograms.HistoGraph(limits.expectedBandGraph(sigma=2), "Expected2", drawStyle="F", legendStyle="fl"),
             ])
 
+    # Plot the TGraphs
     saveFormats = [".png", ".C", ".pdf"]
     if not opts.excludedArea:
         saveFormats.append(".eps")
     plot = plots.PlotBase(graphs, saveFormats=saveFormats)
     plot.setLuminosity(limits.getLuminosity())
 
+    # Customise legend entries
     plot.histoMgr.setHistoLegendLabelMany({
-            "Expected": None,
+            "Expected" : None,
             "Expected1": "Expected median #pm 1#sigma",
             "Expected2": "Expected median #pm 2#sigma"
             })
     
-    dy = -0.1
+    # Branching Ratio Assumption
+    if 0:
+        limit.BRassumption = "Assuming B(H^{+}#rightarrowt#bar{b}) = 1"
 
-    limit.BRassumption = ""   
-    #limit.BRassumption = "Assuming B(H^{+}#rightarrow#tau^{+}#nu_{#tau}) = 1"
-    #limit.BRassumption = "Assuming B(H^{+}#rightarrowt#bar{b}) = 1"
-    if limit.BRassumption != "":
-        dy -= 0.05
-    #if len(limits.getFinalstates()) > 1:
-    #    dy -= 0.1
-    
     # Create legend
-    x = 0.51
-    x = 0.45
-    legend = histograms.createLegend(x, 0.78+dy, x+0.4, 0.92+dy)
-    legend.SetMargin(0.17)
-    # Make room for the final state text
-    if opts.excludedArea:
-        legend.SetFillStyle(1001)
+    xPos   = 0.53
+    legend = getLegend(limit, opts, xPos)
     plot.setLegend(legend)
 
-    name = "limitsBr"
-    ymin = 0
-    ymax = limits.getFinalstateYmaxBR() #fixme: alexandros
-    if opts.logx:
-        name += "_logx"
-    if log:
-        name += "_log"
-        if limits.isHeavyStatus:
-            ymin = 1e-1
-            ymax = 10.0
-            if limit.BRassumption != "":
-                ymax = 10.0
-        else:
-            ymin = 1e-3
-            ymax = 4e-2
-    else:
-        ymax = 2.0
-    if leptonicFS:
-        ymax = 10
+    # Get y-min, y-max, and histogram name to be saved as
+    ymin, ymax, name = getYMinMaxAndName(limits, "limitsBr", logy, opts)
+
     if len(limits.mass) == 1:
         plot.createFrame(name, opts={"xmin": limits.mass[0]-5.0, "xmax": limits.mass[0]+5.0, "ymin": ymin, "ymax": ymax})
     else:
         plot.createFrame(name, opts={"ymin": ymin, "ymax": ymax})
 
-    # Set x-axis title
-    plot.frame.GetXaxis().SetTitle(limit.mHplus())
+    # Add cut box?
+    if opts.cutLine > 0:
+        kwargs = {"greaterThan": True}
+        plot.addCutBoxAndLine(cutValue=opts.cutLine, fillColor=ROOT.kRed, box=False, line=True, **kwargs)
 
-    if limits.isHeavyStatus:
-        if limit.BRassumption != "":
-            plot.frame.GetYaxis().SetTitle("95% CL limit for #sigma_{H^{+}} (pb)")
-        else:            
-            plot.frame.GetYaxis().SetTitle(limit.sigmaBRlimit)
+    # Set x-axis title
+    plot.frame.GetXaxis().SetTitle(limit.mHplus()) 
+
+    if limit.BRassumption != "":
+        plot.frame.GetYaxis().SetTitle("95% CL limit for #sigma_{H^{+}} (pb)")
     else:
-        plot.frame.GetYaxis().SetTitle(limit.BRlimit)
+        plot.frame.GetYaxis().SetTitle(limit.sigmaBRlimit)
+        # plot.frame.GetYaxis().SetTitle(limit.BRlimit)
 
     # Enable/Disable logscale for axes
-    if log:
-        plot.getPad().SetLogy(log)
-    if opts.logx:
-        plot.getPad().SetLogx(log)
+    if logy:
+        plot.getPad().SetLogy(logy)
+        plot.getPad().SetLogx(opts.logx)
+
+    plot.getPad().SetGridx(opts.gridX)
+    plot.getPad().SetGridy(opts.gridY)
+
+    # Enable grids in x and y?
+    #s = tdrstyle.TDRStyle()
+    #s.setGridX(True)
+    #s.setGridY(True)
 
     # Draw the plot with standard texts
     plot.draw()
     plot.addStandardTexts()
+    
+    # Add physics-related text on canvas
+    addPhysicsText(histograms, limit, x=xPos)
+    
+    # Save the canvas
+    plot.save()
+    return
 
-    # Add physics-process text
-    size = 20
-    x    = 0.51
-    x    = 0.45
-    process = limit.process
-    if limits.isHeavyStatus:
-        process = limit.processHeavy
-    histograms.addText(x, 0.88, process, size=size)
+
+def getLegend(limit, opts, xLeg1=0.53):
+    dy = -0.10
+    if limit.BRassumption != "":
+        dy -= 0.05
+
+    # Create customised legend
+    #xLeg1 = 0.53
+    xLeg2 = 0.93
+    yLeg1 = 0.78 + dy
+    yLeg2 = 0.91 + dy
+    if opts.unblinded:
+        yLeg2 = 0.92 + dy
+
+    # Adjust legend slightly to visually align with text
+    legend = histograms.createLegend(xLeg1*.98, yLeg1, xLeg2, yLeg2) 
+    legend.SetMargin(0.17)
+
+    # Make room for the final state text
+    if opts.excludedArea:
+        legend.SetFillStyle(1001) #legend.SetFillStyle(3001)
+    return legend
+
+
+def getYMinMaxAndName(limits, name, logy, opts):
+    ymin = limits.getYMin()
+    ymax = limits.getYMax()
+
+    if logy:
+        name += "_logy"
+        ymax *= 2
+    else:
+        ymin =  0.0
+        ymax *= 1.2
+
+    if opts.logx:
+        name += "_logx"
+    return ymin, ymax, name
+
+
+def addPhysicsText(histograms, limit, x=0.45, y=0.84, size=20):
+    '''
+    Add physics-process text on canvas
+    '''
+    # Add process text on canvas
+    histograms.addText(x, y+0.04, limit.processHeavyHtb, size=size)
 
     # Add final-state text
-    # histograms.addText(x, 0.84, limits.getFinalstateText(), size=size) #fixme: alexandros
-    histograms.addText(x, 0.84, "fully hadronic final state", size=size) #fixme: alexandros
-    # histograms.addText(x, 0.84, "#tau_{h}+jets and #mu#tau_{h} final states", size=size)
-    # histograms.addText(x, 0.84, "#tau_{h}+jets final state", size=size)
-    # histograms.addText(x, 0.84, "#tau_{h}+jets, #mu#tau_{h}, ee, e#mu, #mu#mu final states", size=size)
+    histograms.addText(x, y, "fully hadronic final state", size=size)
 
-    if leptonicFS:
-        histograms.addText(x, 0.84, "#mu#tau_{h}, ee, e#mu, #mu#mu final states", size=size)
+    if 0:
+        histograms.addText(x, y, "#tau_{h}+jets and #mu#tau_{h} final states", size=size)
+        histograms.addText(x, y, "#tau_{h}+jets final state", size=size)
+        histograms.addText(x, y, "#tau_{h}+jets, #mu#tau_{h}, ee, e#mu, #mu#mu final states", size=size)
+
     if limit.BRassumption != "":
-        histograms.addText(x, 0.79, limit.BRassumption, size=size)
-
-    plot.save()
+        histograms.addText(x, y-0.05, limit.BRassumption, size=size)
     return
 
 
@@ -300,8 +344,10 @@ if __name__ == "__main__":
     PARENTHESES = False
     EXCLUDEAREA = False
     LOGX        = False
-    #LOGY        = False
     DIGITS      = 5
+    CUTLINE     = 0
+    GRIDX       = False
+    GRIDY       = False
 
     parser = OptionParser(usage="Usage: %prog [options]")
 
@@ -326,11 +372,17 @@ if __name__ == "__main__":
     parser.add_option("--logx", dest="logx", action="store_true", default=LOGX, 
                       help="Plot x-axis (H+ mass) as logarithmic [default: %s]" % (LOGX) )
     
-    #parser.add_option("--logy", dest="logy", action="store_true", default=LOGY,
-    #                  help="Plot y-axis (H+ mass) as logarithmic [default: %s]" % (LOGY) )
-    
     parser.add_option("--digits", dest="digits", type="int", default=DIGITS,
                       help="Number of digits (precision) to print/save limit results [default: %s]" % (DIGITS) )
+
+    parser.add_option("--cutLine", dest="cutLine", type="int", default=CUTLINE,
+                      help="Number of digits (precision) to print/save limit results [default: %s]" % (CUTLINE) )
+
+    parser.add_option("--gridX", dest="gridX", default=GRIDX, action="store_true",
+                      help="Enable the grid for the x-axis [default: %s]" % (GRIDX) )
+
+    parser.add_option("--gridY", dest="gridY", default=GRIDY, action="store_true",
+                      help="Enable the grid for the y-axis [default: %s]" % (GRIDY) )
 
     (opts, args) = parser.parse_args()
     main(opts)

@@ -10,12 +10,10 @@ Usage:
 ./plot_2d.py -m <pseudo_mcrab_directory> [opts]
 
 Examples:
-./plot_2d.py -m Kinematics_FullStats_170831_085353 --url --mergeEWK -e "JetHT"
+./plot_2d.py -m Kinematics_StdSelections_TopCut100_AllSelections_NoTrgMatch__H2Cut0p5_NoTopMassCut_170831_085353/ --url -i "M_500"
 
 Last Used:
-./plot_2d.py -m Kinematics_StdSelections_TopCut100_AllSelections_NoTrgMatch__H2Cut0p5_NoTopMassCut_170831_085353/ --url -i "QCD|TT"
-./plot_2d.py -m Kinematics_StdSelections_TopCut100_AllSelections_NoTrgMatch__H2Cut0p5_NoTopMassCut_170831_085353/ -i "TT" --url
-./plot_2d.py -m Kinematics_FullStats_170831_085353 --url --mergeEWK -e "JetHT"
+
 
 Obsolete:
 foreach x ( 180 200 220 250 300 350 400 500 800 1000 2000 3000 )
