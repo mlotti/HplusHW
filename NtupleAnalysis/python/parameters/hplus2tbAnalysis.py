@@ -165,7 +165,7 @@ topologySelection = PSet(
     CparameterCutDirection       = "<=", 
     DparameterCutValue           = 100.0,   # 0.0 <= D <= 1.0
     DparameterCutDirection       = "<=",  
-    FoxWolframMomentCutValue     =   0.5,   # 0.0 <= H2 <= 1.0
+    FoxWolframMomentCutValue     = 100.0,   # 0.0 <= H2 <= 1.0
     FoxWolframMomentCutDirection = "<=", 
     AlphaTCutValue               = 1000.0,  # 0.0 <= alphaT ~ 2.0 (alphaT->0.5 for perfectly balanced events)
     AlphaTCutDirection           = "<=", 
@@ -178,7 +178,7 @@ topologySelection = PSet(
 # Top selection
 #================================================================================================
 topSelection = PSet(
-    ChiSqrCutValue     = 10.0,
+    ChiSqrCutValue     = 100.0,
     ChiSqrCutDirection =  "<",   # options: ==, !=, <, <=, >, >=
     LowLdgTrijetMassCutValue      = 150.0,
     LowLdgTrijetMassCutDirection  = ">=",
