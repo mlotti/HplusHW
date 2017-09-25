@@ -132,11 +132,9 @@ def main():
 
     allSelections.verbose                     = opts.verbose
     allSelections.histogramAmbientLevel       = opts.histoLevel
-    #allSelections.Trigger.triggerOR            = ["HLT_PFHT400_SixJet30", #Prescale 110 at inst. lumi 1.35E+34
-    #                                              "HLT_PFHT450_SixJet40", #Prescale  26 at inst. lumi 1.35E+34
-    #                                              ]
-    #allSelections.FakeBMeasurement.numberOfBJetsCutValue     = 0
-    #allSelections.FakeBMeasurement.numberOfBJetsCutDirection = "<="
+    allSelections.BJetSelection.jetPtCuts     = [40.0, 30.0]
+    # allSelections.Trigger.triggerOR           = ["HLT_PFHT400_SixJet30", #Prescale 110 at inst. lumi 1.35E+34
+    #                                              "HLT_PFHT450_SixJet40", #Prescale  26 at inst. lumi 1.35E+34]
 
     # ================================================================================================
     # Command Line Options
@@ -160,15 +158,21 @@ def main():
     # builder.addVariation("FakeBMeasurement.prelimTopFitChiSqrCutValue", [100, 20])
     # builder.addVariation("FakeBMeasurement.prelimTopFitChiSqrCutDirection", ["<=", "==", ">="])
     # builder.addVariation("FakeBMeasurement.numberOfBJetsCutValue", [0, 1])
+    # builder.addVariation("FakeBMeasurement.numberOfBJetsCutDirection", ["=="])
     # builder.addVariation("FakeBMeasurement.numberOfBJetsCutDirection", ["<=", "==", ">="])
-    # builder.addVariation("FakeBMeasurement.numberOfInvertedBJetsCutValue", [3])
+    # builder.addVariation("FakeBMeasurement.numberOfInvertedBJetsCutValue", [0, 1])
+    builder.addVariation("FakeBMeasurement.numberOfInvertedBJetsCutValue", [1])
     # builder.addVariation("FakeBMeasurement.numberOfInvertedBJetsCutDirection", [">="])
     # builder.addVariation("FakeBMeasurement.invertedBJetDiscr", "")
     # builder.addVariation("FakeBMeasurement.invertedBJetDiscrWorkingPoint", "Loose")
+    builder.addVariation("FakeBMeasurement.invertedBJetsSortType", ["Random", "DescendingBDiscriminator"])
+    builder.addVariation("FakeBMeasurement.invertedBJetsDiscrMaxCutValue", [1.0, 0.80, 0.75])
+    
     # builder.addVariation("TopSelection.ChiSqrCutValue", [100])
     # builder.addVariation("Trigger.triggerOR", [["HLT_PFHT450_SixJet40_BTagCSV_p056"]])
     # builder.addVariation("Trigger.triggerOR", [["HLT_PFHT450_SixJet40"], ["HLT_PFHT400_SixJet30"]])
     # builder.addVariation("TopologySelection.FoxWolframMomentCutValue", [0.5, 0.7])
+    # builder.addVariation(".triggerOR", [["HLT_PFHT400_SixJet30_DoubleBTagCSV_p056"], ["HLT_PFHT450_SixJet40_BTagCSV_p056"]])
     
     # Build the builder
     builder.build(process, allSelections)
