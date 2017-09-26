@@ -295,7 +295,19 @@ private:
   WrappedTH1 *hLdgTrijetDiJetPt;
   WrappedTH1 *hLdgTrijetDiJetEta;
   WrappedTH1 *hLdgTrijetDiJetMass;
-
+  // Marina - start
+  WrappedTH1 *hLdgTrijetPtDR;
+  WrappedTH1 *hLdgTrijetDiJetPtDR;
+  WrappedTH1 *hLdgTrijetBJetMass;
+  WrappedTH1 *hLdgTrijetLdgJetPt;
+  WrappedTH1 *hLdgTrijetLdgJetEta;
+  WrappedTH1 *hLdgTrijetLdgJetBDisc;
+  WrappedTH1 *hLdgTrijetSubldgJetPt;
+  WrappedTH1 *hLdgTrijetSubldgJetEta;
+  WrappedTH1 *hLdgTrijetSubldgJetBDisc;
+  WrappedTH1 *hLdgTrijetBJetLdgJetMass;
+  WrappedTH1 *hLdgTrijetBJetSubldgJetMass;
+  // Marina - end
   WrappedTH1 *hSubldgTrijetPt;
   WrappedTH1 *hSubldgTrijetTopMassWMassRatio;
   WrappedTH1 *hSubldgTrijetMass;
@@ -311,6 +323,22 @@ private:
   WrappedTH1 *hSubldgTrijetDiJetPt;
   WrappedTH1 *hSubldgTrijetDiJetEta;
   WrappedTH1 *hSubldgTrijetDiJetMass;
+  // Marina - start
+  WrappedTH1 *hSubldgTrijetPtDR;
+  WrappedTH1 *hSubldgTrijetDiJetPtDR;
+  WrappedTH1 *hSubldgTrijetBJetMass;
+  WrappedTH1 *hSubldgTrijetLdgJetPt;
+  WrappedTH1 *hSubldgTrijetLdgJetEta;
+  WrappedTH1 *hSubldgTrijetLdgJetBDisc;
+  WrappedTH1 *hSubldgTrijetSubldgJetPt;
+  WrappedTH1 *hSubldgTrijetSubldgJetEta;
+  WrappedTH1 *hSubldgTrijetSubldgJetBDisc;
+  WrappedTH1 *hSubldgTrijetBJetLdgJetMass;
+  WrappedTH1 *hSubldgTrijetBJetSubldgJetMass;
+  // Marina - end
+  
+
+
 
   // Histograms (2D)
   WrappedTH2 *hTetrajetBJetDijetWithMaxDR_TetrajetBJetDijetWithMinDR_DPhiVsDPhi;
