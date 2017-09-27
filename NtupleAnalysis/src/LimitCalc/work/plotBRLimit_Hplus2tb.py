@@ -13,16 +13,19 @@ cd datacards_test4b/CombineResults_taujets_170913_192047
 
 
 EXAMPLES:
-../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY && cp *.png ~/public/html/Combine/. 
-../../plotBRLimit_Hplus2tb.py --excludedArea --gridX --gridY --unblinded --cutLine 500 && cp *.png ~/public/html/Combine/
+../../plotBRLimit_Hplus2tb.py [opts]
 
 Last Used:
-../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY && cp *.png ~/public/html/Combine/. 
-
+../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY
+../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY --yMin 1e-3 --settings Default
+../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY --yMin 1e-3 --settings NoLumi
 '''
+
 #================================================================================================
 # Import modules
 #================================================================================================
+import os
+import getpass
 import sys
 from optparse import OptionParser
 
@@ -62,6 +65,9 @@ def Print(msg, printHeader=True):
 
 
 def main(opts):
+    if opts.saveDir =="":
+        opts.saveDir = os.getcwd()
+
     # Assume by default that the observed limit should be blinded
     if not opts.unblinded:
         msg="Working in BLINDED mode, i.e. I will not tell you the observed limit before you say please ..."
@@ -96,8 +102,7 @@ def main(opts):
 
     # Print the Limits
     limits.printLimits(unblindedStatus=opts.unblinded, nDigits=opts.digits)
-    print
-    limits.print2(unblindedStatus=opts.unblinded)
+    # limits.print2(unblindedStatus=opts.unblinded)
     
     # Save the Limits in a LaTeX table file
     limits.saveAsLatexTable(unblindedStatus=opts.unblinded, nDigits=opts.digits)
@@ -132,6 +137,7 @@ def doBRlimit(limits, unblindedStatus, opts, logy=False):
     saveFormats = [".png", ".C", ".pdf"]
     if not opts.excludedArea:
         saveFormats.append(".eps")
+
     plot = plots.PlotBase(graphs, saveFormats=saveFormats)
     plot.setLuminosity(limits.getLuminosity())
 
@@ -152,12 +158,16 @@ def doBRlimit(limits, unblindedStatus, opts, logy=False):
     plot.setLegend(legend)
 
     # Get y-min, y-max, and histogram name to be saved as
-    ymin, ymax, name = getYMinMaxAndName(limits, "limitsBr", logy, opts)
+    ymin, ymax, saveName = getYMinMaxAndName(limits, "limitsBr", logy, opts)
+    if opts.yMin != -1:
+        ymin = opts.yMin
+    if opts.yMax != -1:
+        ymax = opts.yMax
 
     if len(limits.mass) == 1:
-        plot.createFrame(name, opts={"xmin": limits.mass[0]-5.0, "xmax": limits.mass[0]+5.0, "ymin": ymin, "ymax": ymax})
+        plot.createFrame(saveName, opts={"xmin": limits.mass[0]-5.0, "xmax": limits.mass[0]+5.0, "ymin": ymin, "ymax": ymax})
     else:
-        plot.createFrame(name, opts={"ymin": ymin, "ymax": ymax})
+        plot.createFrame(saveName, opts={"ymin": ymin, "ymax": ymax})
 
     # Add cut box?
     if opts.cutLine > 0:
@@ -178,13 +188,9 @@ def doBRlimit(limits, unblindedStatus, opts, logy=False):
         plot.getPad().SetLogy(logy)
         plot.getPad().SetLogx(opts.logx)
 
+    # Enable grids in x and y?
     plot.getPad().SetGridx(opts.gridX)
     plot.getPad().SetGridy(opts.gridY)
-
-    # Enable grids in x and y?
-    #s = tdrstyle.TDRStyle()
-    #s.setGridX(True)
-    #s.setGridY(True)
 
     # Draw the plot with standard texts
     plot.draw()
@@ -195,6 +201,34 @@ def doBRlimit(limits, unblindedStatus, opts, logy=False):
     
     # Save the canvas
     plot.save()
+
+    # Save the plots
+    SavePlot(plot, saveName, os.path.join(opts.saveDir, opts.settings) )
+
+    return
+
+
+def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf", ".C"]):
+
+    # Check that path exists
+    if not os.path.exists(saveDir):
+        os.makedirs(saveDir)
+
+    # Create the name under which plot will be saved
+    saveName = os.path.join(saveDir, plotName.replace("/", "_"))
+
+    # For-loop: All save formats
+    for i, ext in enumerate(saveFormats):
+        saveNameURL = saveName + ext
+        saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
+        if i==0:
+            print "=== plotBRLimit_Hpluts2tb.py:"
+
+        if opts.url:
+            print "\t", saveNameURL
+        else:
+            print "\t", saveName + ext
+        plot.saveAs(saveName, formats=saveFormats)
     return
 
 
@@ -348,6 +382,14 @@ if __name__ == "__main__":
     CUTLINE     = 0
     GRIDX       = False
     GRIDY       = False
+    MINY        = -1
+    MAXY        = -1
+    print "*"*10
+    print 
+    print "*"*10
+    SETTINGS    = ""
+    SAVEDIR     = "/afs/cern.ch/user/%s/%s/public/html/Combine" % (getpass.getuser()[0], getpass.getuser())
+    URL         = False
 
     parser = OptionParser(usage="Usage: %prog [options]")
 
@@ -360,6 +402,9 @@ if __name__ == "__main__":
     parser.add_option("--paper", dest="paper", default=PAPER, action="store_true",
                       help="Paper mode [default: %s]" % (PAPER) )
 
+    parser.add_option("--url", dest="url", action="store_true", default=URL,
+                      help="Don't print the actual save path the plots are saved, but print the URL instead [default: %s]" % URL)
+    
     parser.add_option("--unpub", dest="unpublished", default=UNPUBLISHED, action="store_true",
                       help="Unpublished mode [default: %s]" % (UNPUBLISHED) )
 
@@ -384,5 +429,19 @@ if __name__ == "__main__":
     parser.add_option("--gridY", dest="gridY", default=GRIDY, action="store_true",
                       help="Enable the grid for the y-axis [default: %s]" % (GRIDY) )
 
+    parser.add_option("--yMin", dest="yMin", default=MINY, type="float",
+                      help="Overwrite automaticly calculated minimum value of y-axis [default: %s]" % (MINY) )
+
+    parser.add_option("--yMax", dest="yMax", default=MAXY, type="float",
+                      help="Overwrite automaticly calculated maximum value of y-axis [default: %s]" % (MAXY) )
+
+    parser.add_option("--settings", dest="settings", type="string", default=SETTINGS,
+                      help="Sub-directory describing additional settings used when creating the limits (e.g. no lumi) [default: %s]" % SETTINGS) 
+
+    parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR,
+                      help="Directory where all pltos will be saved [default: %s]" % SAVEDIR)
+
     (opts, args) = parser.parse_args()
+
     main(opts)
+    

@@ -431,7 +431,7 @@ class ResultContainer:
 
     ## Print the limits
     def print2(self):
-        print ""
+        #print ""
         print "                  Expected"
         print "Mass  Observed    Median       -2sigma     -1sigma        +1sigma     +2sigma"
         format = "%3s:  %-9s   %-10s   %-10s  %-10s  %-10s  %-10s"

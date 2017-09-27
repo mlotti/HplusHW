@@ -5,6 +5,7 @@ This is the swiss pocket knife for running Lands/Combine on large array of datac
 
 
 INSTRUCTIONS:
+python LimitOMatic.py --help
 
 
 USAGE:
@@ -302,10 +303,10 @@ class Result:
         Returns a table (list) with the BR limits
         '''
         # Open json file to read the results
-        filePath   = "%s/%s/limits.json" % (self._basedir,self._jobDir)
+        filePath   = os.path.join(self._basedir, self._jobDir,"limits.json")
         fileMode   = "r"
-        jsonFile   = open(filePath, fileMode)
-        myResults  = json.load(jsonFile)
+        jsonFile   = open(filePath, fileMode) #fixme
+        myResults  = json.load(jsonFile) #fixme
 
         # Definitions
         masspoints = myResults["masspoints"]

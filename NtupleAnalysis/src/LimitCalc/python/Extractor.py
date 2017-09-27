@@ -1,8 +1,14 @@
-## \package Extractor
-# Classes for extracting observation/rate/nuisance from datasets
-#
-#
+'''
+# \package Extractor
 
+DESCRIPTION:
+Classes for extracting observation/rate/nuisance from datasets
+
+'''
+
+#================================================================================================
+# Import modules
+#================================================================================================
 from HiggsAnalysis.NtupleAnalysis.tools.counter import EventCounter
 import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 from HiggsAnalysis.NtupleAnalysis.tools.systematics import ScalarUncertaintyItem,getBinningForPlot
@@ -17,12 +23,21 @@ import os
 import ROOT
 from array import array
 
-## QCD specific method for extracting purity for a shape
+
+#================================================================================================
+# Function definition
+#================================================================================================
 def _calculateAverageQCDPurity(shapeHisto, purityHisto):
+    '''
+    QCD specific method for extracting purity for a shape
+    '''
     # Calculated weighted average (weight = Nevents in the shape)
     mySum = 0.0
     myTotalWeight = 0.0
-    for i in range(0,purityHisto.GetNbinsX()+1):
+    
+    nBins = purityHisto.GetNbinsX()+1
+    # For-loop: all bins
+    for i in range(0, nBins):
         mySum += purityHisto.GetBinContent(i) * shapeHisto.GetBinContent(i)
         myTotalWeight += shapeHisto.GetBinContent(i)
     if abs(myTotalWeight) < 0.00001:
@@ -31,8 +46,13 @@ def _calculateAverageQCDPurity(shapeHisto, purityHisto):
         return mySum / myTotalWeight
 
 
-# Enumerator class for data mining mode
+#================================================================================================
+# Class definition
+#================================================================================================
 class ExtractorMode:
+    '''
+    Enumerator class for data mining mode
+    '''
     UNKNOWN = 0
     OBSERVATION = 1
     RATE = 2
@@ -42,10 +62,11 @@ class ExtractorMode:
     QCDNUISANCE = 6
     CONTROLPLOT = 7
 
-## ExtractorBase class
 class ExtractorBase:
-    ## Constructor
     def __init__(self, mode, exid, distribution, description, opts=None, scaleFactor = 1.0):
+        '''
+        Constructor
+        '''
         self._mode = mode
         self._isPrintable = True
         self._exid = exid
@@ -59,13 +80,18 @@ class ExtractorBase:
             self._scaleFactor = 1.0
         if abs(self._scaleFactor - 1.0) > 0.00001:
             print ShellStyles.WarningLabel()+"Scaling nuisance parameter %s by factor %f"%(self._exid, self._scaleFactor)
+        return
 
-    ## Returns true if extractable mode is observation
     def isObservation(self):
+        '''
+        Returns true if extractable mode is observation
+        '''
         return self._mode == ExtractorMode.OBSERVATION
 
-    ## Returns true if extractable mode is rate
     def isRate(self):
+        '''
+        Returns true if extractable mode is rate
+        '''
         return self._mode == ExtractorMode.RATE
 
     ## Returns true if extractable mode is any type of nuisance
@@ -151,8 +177,10 @@ class ExtractorBase:
     def extractAdditionalResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
         return None
 
-    ## Virtual method for extracting histograms
     def extractHistograms(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        '''
+        Virtual method for extracting histograms
+        '''
         return None
 
     ## Virtual method for printing debug information
@@ -502,11 +530,14 @@ class ScaleFactorExtractor(ExtractorBase):
     ## \var _counterItem
     # Name of item (label) in counter histogram
 
-## ShapeExtractor class
-# Extracts histogram shapes
 class ShapeExtractor(ExtractorBase):
-    ## Constructor
+    '''
+    # Extracts histogram shapes
+    '''
     def __init__(self, mode = ExtractorMode.SHAPENUISANCE, exid = "", distribution = "", description = "", opts=None, minimumStatUncert=None, minimumRate=0.0, scaleFactor=1.0):
+        '''
+        Constructor
+        '''
         ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts, scaleFactor=scaleFactor)
         if not (self.isRate() or self.isObservation()):
             if self._distribution != "shapeStat":
@@ -516,14 +547,19 @@ class ShapeExtractor(ExtractorBase):
         if minimumStatUncert == None:
             self._minimumStatUncert = 0.0
         self._minimumRate = minimumRate
+        return
 
-    ## Method for extracking result
     def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        '''
+        Method for extracking result
+        '''
         # Tell Lands / Combine that the nuisance is active for the given column, histogram is added to input root file via extractHistograms()
         return 1.0
 
-    ## Virtual method for extracting histograms
     def extractHistograms(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        '''
+        Virtual method for extracting histograms
+        '''
         myHistograms = []
         # Check that results have been cached
         if datasetColumn.getCachedShapeRootHistogramWithUncertainties() == None:

@@ -328,6 +328,7 @@ class MultiCrabCombine(commonLimitTools.LimitMultiCrabBase):
         self.exe = "combine"
         self.configuration["Combine_tag"] = Combine_tag
         self._results = None
+        self.jsonFile = None
         return
 
 
@@ -380,13 +381,13 @@ class MultiCrabCombine(commonLimitTools.LimitMultiCrabBase):
                 if not quietStatus:
                     Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), False)
 
-        if 1: #not quietStatus:
+        if not quietStatus:
             msg = "Summary of the results:"
             Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), True)
-
             self._results.print2()
-            fname = self._results.saveJson()
 
+        fname = self._results.saveJson()
+        self.jsonFile = fname
         Print("Wrote results to %s" % fname, True)
         return
 
