@@ -414,29 +414,17 @@ void BJetSelection::SortFailedBJetsCands(Data &output, std::vector<math::Lorentz
   // Sort randomly (https://stackoverflow.com/questions/6926433/how-to-shuffle-a-stdvector)
   std::random_shuffle(output.fFailedBJetCandsShuffled.begin(), output.fFailedBJetCandsShuffled.end());
 
-  // Default sort: first all trg-matched objects (if any) then randomly
-  // output.fFailedBJetCands = output.fFailedBJetCandsShuffled; // I suspect that this is what causes the systematic drift in tetrajetM closure test)
+  // For Debugging: Test moving the Trigger-Matched jets to the front
+  /*
+   for (auto it = output.fFailedBJetCands.begin(); it != output.fFailedBJetCands.end(); ++it) 
+       {
+         auto jet = *it;
+         std::cout << "Before) jet.index() = " << jet.index() << ", jet.pt() = " << jet.pt() << std::endl;
+       }
+     std::cout << "\n" << std::endl;
+  */
 
-  // Bjetness sort: first put jets with highest discriminator value
-  output.fFailedBJetCands = output.fFailedBJetCandsDescendingDiscr; // I suspect that this is even worse than using "output.fFailedBJetCandsShuffled"
-
-  // Bjetness sort: first put jets with highest discriminator value
-  // output.fFailedBJetCands = output.fFailedBJetCandsAscendingDiscr; // I suspect that this is even worse than using "output.fFailedBJetCandsShuffled"
-
-  // Pt sort: first put jets with lowest pt value
-  // output.fFailedBJetCands = output.fFailedBJetCandsAscendingPt;
-
-  // Pt sort: first put jets with highest pt value
-  // output.fFailedBJetCands = output.fFailedBJetCandsDescendingPt;
-
-  // Debugging moving the Trigger-Matched jets to the front
-//   for (auto it = output.fFailedBJetCands.begin(); it != output.fFailedBJetCands.end(); ++it) 
-//     {
-//       auto jet = *it;
-//       std::cout << "Before) jet.index() = " << jet.index() << ", jet.pt() = " << jet.pt() << std::endl;
-//     }
-//   std::cout << "\n" << std::endl;
-
+  
   // Now put the trg-matched objects in the front
   if (bTriggerMatchingApply)
     {
@@ -449,14 +437,17 @@ void BJetSelection::SortFailedBJetsCands(Data &output, std::vector<math::Lorentz
 	  output.fFailedBJetCands.insert(output.fFailedBJetCands.begin(), jet);
 	}
     }
+
   
-//  // Debugging moving the Trigger-Matched jets to the front
-//  for (auto it = output.fFailedBJetCands.begin(); it != output.fFailedBJetCands.end(); ++it) 
-//    {
-//      auto jet = *it;
-//      std::cout << "After) jet.index() = " << jet.index() << ", jet.pt() = " << jet.pt() << std::endl;
-//    }
-//  std::cout << "\n" << std::endl;
+  // For Debugging: Test moving the Trigger-Matched jets to the front
+  /*
+    for (auto it = output.fFailedBJetCands.begin(); it != output.fFailedBJetCands.end(); ++it) 
+    {
+      auto jet = *it;
+      std::cout << "After) jet.index() = " << jet.index() << ", jet.pt() = " << jet.pt() << std::endl;
+    }
+  std::cout << "\n" << std::endl;
+  */
 
   return;
 }
