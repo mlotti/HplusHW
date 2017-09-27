@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+#================================================================================================
+# Import modules
+#================================================================================================
 import os
 import sys
 import cProfile
@@ -21,8 +24,11 @@ import HiggsAnalysis.LimitCalc.MulticrabPathFinder as PathFinder
 import ROOT
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 
-# main class for generating the datacards from a given cfg file
 
+#================================================================================================
+# Class definition
+#================================================================================================
+# main class for generating the datacards from a given cfg file
 class DatacardQCDMethod:
     UNKNOWN = 0
     FACTORISED = 1
@@ -42,7 +48,8 @@ class DatasetMgrCreatorManager:
         self._mainCounterTables = []
         self._qcdMethodType = qcdMethodType
         if config.ToleranceForLuminosityDifference == None:
-            raise Exception(ShellStyles.ErrorLabel()+"Input datacard should contain entry for ToleranceForLuminosityDifference (for example: ToleranceForLuminosityDifference=0.01)!"+ShellStyles.NormalStyle())
+            msg = "Input datacard should contain entry for ToleranceForLuminosityDifference (for example: ToleranceForLuminosityDifference=0.01)!"
+            raise Exception(ShellStyles.ErrorLabel() + msg + ShellStyles.NormalStyle())
         self._toleranceForLuminosityDifference = config.ToleranceForLuminosityDifference
         self._optionDebugConfig = opts.debugConfig
         self._config = config
@@ -62,19 +69,23 @@ class DatasetMgrCreatorManager:
             if dMgr != None:
                 dMgr.close()
         self._dsetMgrs = []
-        print "DatasetManagerCreators closed"
+        # print "DatasetManagerCreators closed"
+        return
 
-    def obtainDatasetMgrs(self, era, searchMode, optimizationMode):
+    def obtainDatasetMgrs(self, era, searchMode, optimizationMode, verbose=False):
         if len(self._dsetMgrs) > 0:
             raise Exception(ShellStyles.ErrorLabel()+"DatasetMgrCreatorManager::obtainDatasetMgrs(...) was already called (dsetMgrs exist)!"+ShellStyles.NormalStyle())
         for i in range(0, len(self._dsetMgrCreators)):
             if self._dsetMgrCreators[i] != None:
                 # Create DatasetManager object and set pointer to the selected era, searchMode, and optimizationMode
                 myDsetMgr = self._dsetMgrCreators[i].createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
+
                 # Check consistency
                 consistencyCheck.checkConsistencyStandalone(self._dsetMgrCreators[i]._baseDirectory,myDsetMgr,name=self.getDatasetMgrLabel(i))
+
                 # Normalize
                 myDsetMgr.updateNAllEventsToPUWeighted()
+
                 # Obtain luminosity
                 myLuminosity = 0.0
                 if i != DatacardDatasetMgrSourceType.QCDMEASUREMENT and i != DatacardDatasetMgrSourceType.EMBEDDING:
@@ -86,13 +97,19 @@ class DatasetMgrCreatorManager:
                     # Speciality for the QCD measurement
                     myLuminosity = myDsetMgr.getAllDatasets()[0].getLuminosity()
                 self._luminosities.append(myLuminosity)
+
                 # Merge divided datasets
                 plots.mergeRenameReorderForDataMC(myDsetMgr)
+
                 # Show info of available datasets
-                print ShellStyles.HighlightStyle()+"Dataset merging structure for %s:%s"%(self.getDatasetMgrLabel(i),ShellStyles.NormalStyle())
-                myDsetMgr.printDatasetTree()
+                if verbose:
+                    msg = "Dataset merging structure for %s " % (self.getDatasetMgrLabel(i))
+                    print ShellStyles.NoteStyle() + msg + ShellStyles.NormalStyle()
+                    myDsetMgr.printDatasetTree()
+
                 # Store DatasetManager
                 self._dsetMgrs.append(myDsetMgr)
+
                 # For embedding, check setting on CaloMET
                 if i == DatacardDatasetMgrSourceType.EMBEDDING:
                     myProperty = myDsetMgr.getAllDatasets()[0].getProperty("analysisName")
@@ -103,6 +120,7 @@ class DatasetMgrCreatorManager:
                 self._dsetMgrs.append(None)
                 self._luminosities.append(None)
         self._checkLuminosityMatching()
+        return
 
     def cacheMainCounterTables(self):
         # Note: needs to be called after all merging operations have been done
@@ -195,33 +213,43 @@ class DatasetMgrCreatorManager:
                 print "DatasetMgr contains following datasets for '%s'"%self.getDatasetMgrLabel(i)
                 self.getDatasetMgr(i).printInfo()
 
-    def _checkLuminosityMatching(self):
-        # Print info of luminosity
-        print "\nLuminosity is set to:"
-        for i in range(0,len(self._luminosities)):
-            if self._luminosities[i] != None:
-                print "  %s: %s%f 1/pb%s"%(self.getDatasetMgrLabel(i),ShellStyles.HighlightStyle(),self._luminosities[i],ShellStyles.NormalStyle())
+    def _checkLuminosityMatching(self, verbose=False):
+
+        # Print info of luminosity?
+        if verbose:
+            print "Luminosity is set to:"
+            for i in range(0, len(self._luminosities)):
+                if self._luminosities[i] != None:
+                    print "%s: %.1f 1/pb"%(self.getDatasetMgrLabel(i), self._luminosities[i])
+
         # Compare luminosities to signal analysis
         if len(self._luminosities) == 0:
-            raise Exception(ShellStyles.ErrorLabel()+"DatasetMgrCreatorManager::obtainDatasetMgrs(...) needs to be called first!")
+            raise Exception(ShellStyles.ErrorLabel() + "DatasetMgrCreatorManager::obtainDatasetMgrs(...) needs to be called first!")
         mySignalLuminosity = self._luminosities[DatacardDatasetMgrSourceType.SIGNALANALYSIS]
+
         for i in range(1,len(self._luminosities)):
             if self._luminosities[i] != None:
                 myDiff = abs(self._luminosities[i] / mySignalLuminosity - 1.0)
                 if myDiff > self._toleranceForLuminosityDifference:
                     raise Exception(ShellStyles.ErrorLabel()+"signal and embedding luminosities differ more than 1 %%! (%s vs. %s)"%(self._luminosities[i], mySignalLuminosity))
                 elif myDiff > 0.0001:
-                    print ShellStyles.WarningLabel()+"%s and %s luminosities differ slightly (%.2f %%)!"%(self.getDatasetMgrLabel(DatacardDatasetMgrSourceType.SIGNALANALYSIS),self.getDatasetMgrLabel(i),myDiff*100.0)
-        print ""
+                    signalLabel  = self.getDatasetMgrLabel(DatacardDatasetMgrSourceType.SIGNALANALYSIS)
+                    datasetLabel = self.getDatasetMgrLabel(i)
+                    msg = "%s and %s luminosities differ slightly (%.2f %%)!" % (signalLabel, datasetLabel, myDiff*100.0)
+                    if verbose: 
+                        print ShellStyles.WarningLabel() + msg
+        return
 
 class DataCardGenerator:
-    def __init__(self, opts, config, qcdMethod):
+    def __init__(self, opts, config, qcdMethod, verbose=True):
+        self.verbose = verbose
         self._opts = opts
         self._config = config
         self._QCDMethod = qcdMethod
         # Check config file
         #self._checkCfgFile() #FIXME
-        print "Input datacard read and passed the tests"
+        if self.verbose:
+            print "Input datacard read and passed the tests"
         # Manager for datasetMgrCreators (DatasetMgrCreatorManager object)
         self._dsetMgrManager = None
         # Datacard columns
@@ -256,7 +284,7 @@ class DataCardGenerator:
                 myMsg += " QCD factorised"
             elif self._QCDMethod != DatacardQCDMethod.INVERTED:
                 myMsg += " QCD inverted"
-            print myMsg+" (if this is not intented, check your config!)\n"
+            print myMsg + " (if this is not intented, check your config!)\n"
             return
         # Construct prefix for output name
         myPathSplit = self._config.Path.split("/")
@@ -279,10 +307,17 @@ class DataCardGenerator:
         myMassRange = str(self._config.MassPoints[0])
         if len(self._config.MassPoints) > 0:
             myMassRange += "-"+str(self._config.MassPoints[len(self._config.MassPoints)-1])
-        print "Cards will be generated for "+ShellStyles.HighlightStyle()+myOutputPrefix+ShellStyles.NormalStyle()+" in mass range "+ShellStyles.HighlightStyle()+myMassRange+" GeV"+ShellStyles.NormalStyle()
+
+        # Cards will be generated for example4__MC_FakeAndGenuineTauNotSeparated in mass range 180-3000 GeV
+        outputPrefix = ShellStyles.NoteStyle() + myOutputPrefix + ShellStyles.NormalStyle()
+        massRange    = ShellStyles.HighlightStyle() + myMassRange
+        msg = "Cards will be generated for "+ outputPrefix + " in mass range " + massRange + " GeV"
+        if self.verbose:
+            print msg + ShellStyles.NormalStyle()
 
     def __del__(self):
-        print "\nDeleting cached objects"
+        if self.verbose:
+            print "\nDeleting cached objects"
         self.closeFiles()
         self.opts = None
         self._config = None
@@ -304,7 +339,9 @@ class DataCardGenerator:
 
     def setDsetMgrCreators(self, signalDsetCreator, embeddingDsetCreator, qcdDsetCreator):
         self._dsetMgrManager = DatasetMgrCreatorManager(self._opts, self._config, signalDsetCreator, embeddingDsetCreator, qcdDsetCreator, self._QCDMethod)
-        print "DatasetManagerCreator objects passed"
+        if self.verbose:
+            print "DatasetManagerCreator objects passed"
+        return
 
     def doDatacard(self, era, searchMode, optimizationMode, mcrabInfoOutput):
         def applyWeighting(h, myJsonBins):
@@ -322,10 +359,10 @@ class DataCardGenerator:
             s += "nominal"
         else:
             s += "%s"%optimizationMode
-        self._outputPrefix = s+"_"+self._outputPrefix
+        self._outputPrefix = s + "_" + self._outputPrefix
 
         # Get dataset managers for the era / searchMode / optimizationMode combination
-        self._dsetMgrManager.obtainDatasetMgrs(era, searchMode, optimizationMode)
+        self._dsetMgrManager.obtainDatasetMgrs(era, searchMode, optimizationMode, self.verbose)
 
         # Create columns (dataset groups)
         self.createDatacardColumns()
@@ -344,8 +381,13 @@ class DataCardGenerator:
                 mySubtractColumnList = []
                 if "subtractList" in item.keys():
                     mySubtractColumnList = item["subtractList"][:]
-                print "\nPerforming merge for %s"%item["label"]
-                self.separateMCEWKTausAndFakes(targetColumn=item["mergeList"][0],targetColumnNewName=item["label"],addColumnList=item["mergeList"][1:],subtractColumnList=mySubtractColumnList)
+                if self.verbose:
+                    print "\nPerforming merge for %s"%item["label"]
+                
+                targetColumn       = item["mergeList"][0]
+                targetColumnNewName= item["label"]
+                addColumnList      = item["mergeList"][1:]
+                self.separateMCEWKTausAndFakes(targetColumn, targetColumnNewName, addColumnList, mySubtractColumnList)
         
         #if self._config.OptionGenuineTauBackgroundSource == "MC_FullSystematics" or self._config.OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
             #if hasattr(self._config, "EWKFakeIdList") and len(self._config.EWKFakeIdList) > 0:
@@ -365,7 +407,10 @@ class DataCardGenerator:
 
         # Do rebinning of results, store a fine binned copy of all histograms as well
         for c in self._columns:
+            # print c.getLabel()
+            # print c.getNuisanceIds()
             c.doRebinningOfCachedResults(self._config)
+
         self._observation.doRebinningOfCachedResults(self._config)
 
         # Apply embedding reweighting - this here temporarily and should be moved to multicrab generation
@@ -405,16 +450,25 @@ class DataCardGenerator:
                     if item == e.getId():
                         myFoundStatus = True
                 if not myFoundStatus:
-                    myExtractor = Extractor.ConstantExtractor(exid = item, constantValue = -1.0, distribution = "lnN", 
-                                                              description = item+" normalization",
-                                                              mode = Extractor.ExtractorMode.ASYMMETRICNUISANCE)
+                    exid          = item
+                    constantValue = -1.0
+                    distribution  = "lnN"
+                    description   = item+" normalization"
+                    mode          = Extractor.ExtractorMode.ASYMMETRICNUISANCE
+                    myExtractor   = Extractor.ConstantExtractor(exid, constantValue, distribution, description, mode)
                     self._extractors.append(myExtractor)
 
         # Make datacards
-        myProducer = TableProducer.TableProducer(opts=self._opts, config=self._config, outputPrefix=self._outputPrefix,
-                                   luminosity=self._dsetMgrManager.getLuminosity(DatacardDatasetMgrSourceType.SIGNALANALYSIS),
-                                   observation=self._observation, datasetGroups=self._columns, extractors=self._extractors,
-                                   mcrabInfoOutput=mcrabInfoOutput)
+        opts            = self._opts
+        config          = self._config
+        outputPrefix    = self._outputPrefix
+        luminosity      = self._dsetMgrManager.getLuminosity(DatacardDatasetMgrSourceType.SIGNALANALYSIS)
+        observation     = self._observation
+        datasetGroups   = self._columns
+        extractors      = self._extractors
+        mcrabInfoOutput = mcrabInfoOutput
+        myProducer = TableProducer.TableProducer(opts, config, outputPrefix, luminosity, observation, datasetGroups, extractors, mcrabInfoOutput)
+
         # Close files
         self.closeFiles()
 
@@ -526,7 +580,9 @@ class DataCardGenerator:
                 if validMass in self._config.MassPoints:
                     myMassIsConsideredStatus = True
             if not myIngoreOtherQCDMeasurementStatus and myMassIsConsideredStatus:
-                print "Constructing datacard column for data group: "+ShellStyles.HighlightStyle()+""+dg.label+""+ShellStyles.NormalStyle()
+                if self.verbose:
+                    print "Constructing datacard column for data group %s%s" % (ShellStyles.NoteStyle() + dg.label, ShellStyles.NormalStyle())
+
                 # Construct datacard column object
                 myColumn = None
                 if dg.datasetType == "Embedding":
@@ -559,34 +615,45 @@ class DataCardGenerator:
 
         # Cache main counter tables
         self._dsetMgrManager.cacheMainCounterTables()
-        print "Data groups converted to datacard columns\n"
+        if self.verbose:
+            print "Data groups converted to datacard columns"
 
         if self._opts.debugDatasets:
             self._dsetMgrManager.printDatasetMgrContents()
 
     def doDataMining(self):
+        
         # Do data mining and cache results
-        print "\nStarting data mining"
+        if self.verbose:
+            print "\nStarting data mining"
+
         if self._dsetMgrManager.getDatasetMgr(DatacardDatasetMgrSourceType.SIGNALANALYSIS) != None:
             # Handle observation separately
             myDsetMgr = self._dsetMgrManager.getDatasetMgr(DatacardDatasetMgrSourceType.SIGNALANALYSIS)
             myLuminosity = self._dsetMgrManager.getLuminosity(DatacardDatasetMgrSourceType.SIGNALANALYSIS)
+
             myMainCounterTable = self._dsetMgrManager.getMainCounterTable(DatacardDatasetMgrSourceType.SIGNALANALYSIS)
-            self._observation.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractors)
+            self._observation.doDataMining(self._config, myDsetMgr, myLuminosity, myMainCounterTable, self._extractors, self._controlPlotExtractors)
+
         for c in self._columns:
             myDsetMgrIndex = 0
-            if c.typeIsObservation() or c.typeIsSignal() or c.typeIsEWKfake() or c.typeIsQCDMC() or (c.typeIsEWK() and not self._config.OptionGenuineTauBackgroundSource == "DataDriven"):
+            isDataDriven   = (self._config.OptionGenuineTauBackgroundSource == "DataDriven")
+            if c.typeIsObservation() or c.typeIsSignal() or c.typeIsEWKfake() or c.typeIsQCDMC() or (c.typeIsEWK() and not isDataDriven):
                 myDsetMgrIndex = 0
             elif c.typeIsEWK():
                 myDsetMgrIndex = 1
             elif c.typeIsQCDinverted():
                 myDsetMgrIndex = 2
+
             # Do mining for datacard columns (separately for EWK fake taus)
             myDsetMgr = self._dsetMgrManager.getDatasetMgr(myDsetMgrIndex)
             myLuminosity = self._dsetMgrManager.getLuminosity(myDsetMgrIndex)
             myMainCounterTable = self._dsetMgrManager.getMainCounterTable(myDsetMgrIndex)
             c.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractors)
-        print "\nData mining has been finished, results (and histograms) have been ingeniously cached"
+
+        if self.verbose:
+            print "\nData mining has been finished, results (and histograms) have been ingeniously cached"
+        return
 
     def separateMCEWKTausAndFakes(self, targetColumn, targetColumnNewName, addColumnList, subtractColumnList):
         # Obtain column for embedding
@@ -742,7 +809,9 @@ class DataCardGenerator:
     def closeFiles(self):
         #print "Closing open input files"
         #self._dsetMgrManager.closeManagers()
-        print "DatasetManagers closed"
+        if self.verbose:
+            print "DatasetManagers closed"
+        return
 
     ## Check landsProcess in datacard columns
     def checkDatacardColumns(self):
@@ -911,7 +980,8 @@ class DataCardGenerator:
         for n in self._config.ReservedNuisances:
             self._extractors.append(Extractor.ConstantExtractor(exid = n[0], constantValue = 0.0, distribution = "lnN", description = n[1], mode = myMode))
         # Done
-        print "Created extractors for all nuisances"
+        if self.verbose:
+            print "Created extractors for all nuisances"
         self.checkNuisances()
 
     def checkNuisances(self):
@@ -954,7 +1024,9 @@ class DataCardGenerator:
                 if not myFoundStatus:
                     print ShellStyles.ErrorStyle()+"Error in merging Nuisances:"+ShellStyles.NormalStyle()+" tried to merge '"+mset[i]+"' (slave) to '"+mset[0]+"' (master) but could not find a nuisance with id '"+mset[i]+"'!"
                     raise Exception()
-        print "Merged Nuisances"
+
+        if self.verbose:
+            print "Merged Nuisances"
 
 
     ## Creates extractors for nuisances

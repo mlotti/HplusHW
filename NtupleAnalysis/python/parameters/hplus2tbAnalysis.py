@@ -178,11 +178,12 @@ topologySelection = PSet(
 # Top selection
 #================================================================================================
 topSelection = PSet(
+    # Basic values
     ChiSqrCutValue     = 10.0,
     ChiSqrCutDirection =  "<",   # options: ==, !=, <, <=, >, >=
-    LowLdgTrijetMassCutValue      = 150.0,
+    LowLdgTrijetMassCutValue      = 0.0,
     LowLdgTrijetMassCutDirection  = ">=",
-    HighLdgTrijetMassCutValue      = 210.0,
+    HighLdgTrijetMassCutValue      = 900000.0,
     HighLdgTrijetMassCutDirection  = "<=",
     MassW              = 80.385,
     DiJetSigma         = 10.2,
@@ -197,6 +198,8 @@ topSelection = PSet(
     dijetWithMaxDR_tetrajetBjet_dPhi_min        = +2.5, # Disable: 0.0, Default: +2.5
     dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept = +3.0, # Disable:-1.0, Default: +3.0
     dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff = -1.0, # Disable: 0.0, Default: -1.0
+    # For Testing (perfect jet resolution)
+    ReplaceJetsWithGenJets = False,
 )
 
 
@@ -212,15 +215,19 @@ if 0:
 #================================================================================================
 fakeBMeasurement = PSet(
     prelimTopFitChiSqrCutValue        = 100.0,
-    prelimTopFitChiSqrCutDirection    =  "<",   # options: ==, !=, <, <=, >, >=
+    prelimTopFitChiSqrCutDirection    =  "<",     # options: ==, !=, <, <=, >, >=
     #
-    numberOfBJetsCutValue             = 2,
-    numberOfBJetsCutDirection         = "==", # options: ==, !=, <, <=, >, >=
+    numberOfBJetsCutValue             = 2,        # default: 2
+    numberOfBJetsCutDirection         = "==",     # default: ==, options: ==, !=, <, <=, >, >=
     #
-    numberOfInvertedBJetsCutValue     = 0,
-    numberOfInvertedBJetsCutDirection = ">", # options: ==, !=, <, <=, >, >=
-    invertedBJetDiscr                 = bjetSelection.bjetDiscr,
-    invertedBJetWorkingPoint          = "Loose",
+    numberOfInvertedBJetsCutValue     = 0,        # i.e. additional to the selected b-jets
+    numberOfInvertedBJetsCutDirection = ">=",     # options: ==, !=, <, <=, >, >=
+    invertedBJetsSortType             = "Random", # options: "AscendingPt", "DescendingPt", "AscendingBDiscriminator", "DescendingBDiscriminator", "Random"
+    invertedBJetsDiscr                = bjetSelection.bjetDiscr,
+    invertedBJetsWorkingPoint         = "Loose",
+    invertedBJetsDiscrMaxCutValue     = 0.8484,   # medium = 0.8484
+    invertedBJetsDiscrMaxCutDirection = "<",      # options: ==, !=, <, <=, >, >=
+
     )
 
 

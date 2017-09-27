@@ -218,7 +218,7 @@ class BRLimits:
 
         # Open limits file
         msg = "Opening file '%s'" % (limitsfile)
-        Print(msg, True)
+        Verbose(msg, True)
         f = open(os.path.join(directory, limitsfile), "r")
         limits = json.load(f)
         f.close()
