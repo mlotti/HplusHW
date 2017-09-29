@@ -422,8 +422,8 @@ def DataMCHistograms(datasetsMgr, qcdDatasetName):
     # For-loop: All histograms in list
     for histoName in histoPaths:
 
-        if "Mass" not in histoName:
-            continue
+        #if "Mass" not in histoName:
+        #    continue
 
         if "JetEtaPhi" in histoName:
             continue
@@ -442,7 +442,7 @@ def DataMCHistograms(datasetsMgr, qcdDatasetName):
         if "MHT" in histoName:
             continue
 
-        # By definition of the Inverted sample the following histoscannot agree!
+        # By definition of the Inverted sample the following histos cannot agree!
         if "NBjets_" in histoName:
             continue
         if "BJetPt_" in histoName:

@@ -105,14 +105,29 @@ def main(opts):
     # optModes = [""]                                                                                                                             
     # optModes = ["", "OptChiSqrCutValue50", "OptChiSqrCutValue100", "OptChiSqrCutValue200"]
     optModes = ["",
-                #"OptNumberOfInvertedBJetsCutValue0FailedBJetSortTypeDescendingPt",
-                #"OptNumberOfInvertedBJetsCutValue0FailedBJetSortTypeAscendingPt",
-                #"Random",
-                "OptNumberOfInvertedBJetsCutValue0FailedBJetSortTypeAscendingBDiscriminator",
-                "OptNumberOfInvertedBJetsCutValue0FailedBJetSortTypeDescendingBDiscriminator"]
+                "OptInvertedBJetsDiscrMaxCutValue0p82",
+                "OptInvertedBJetsDiscrMaxCutValue0p8",
+                "OptInvertedBJetsDiscrMaxCutValue0p75",
+                "OptInvertedBJetsDiscrMaxCutValue0p7"]
+                #"OptInvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeRandom",
+                #"OptInvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeDescendingBDiscriminator",
+                #"OptInvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeRandom",
+                #"OptInvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeDescendingBDiscriminator"]
+                #"OptInvertedBJetsDiscrMaxCutValue0p85InvertedBJetsSortTypeRandom",
+                #"OptInvertedBJetsDiscrMaxCutValue0p85InvertedBJetsSortTypeDescendingBDiscriminator",
+                #"OptInvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeRandom",
+                #"OptInvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeDescendingBDiscriminator",
+                #"OptInvertedBJetsDiscrMaxCutValue0p75InvertedBJetsSortTypeRandom",
+                #"OptInvertedBJetsDiscrMaxCutValue0p75InvertedBJetsSortTypeDescendingBDiscriminator"]
+                # "OptNumberOfInvertedBJetsCutValue1InvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeRandom",
+                # "OptNumberOfInvertedBJetsCutValue1InvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeDescendingBDiscriminator",
+                # "OptNumberOfInvertedBJetsCutValue1InvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeRandom",
+                # "OptNumberOfInvertedBJetsCutValue1InvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeDescendingBDiscriminator",
+                # "OptNumberOfInvertedBJetsCutValue1InvertedBJetsDiscrMaxCutValue0p75InvertedBJetsSortTypeRandom",
+                # "OptNumberOfInvertedBJetsCutValue1InvertedBJetsDiscrMaxCutValue0p75InvertedBJetsSortTypeDescendingBDiscriminator"]
     
-    if opts.optMode != None:
-        optModes = [opts.optMode]
+    #if opts.optMode != None:
+    #    optModes = [opts.optMode]
 
     # For-loop: All optimisation modes
     for opt in optModes:

@@ -130,11 +130,14 @@ def main():
     # ================================================================================================
     from HiggsAnalysis.NtupleAnalysis.parameters.hplus2tbAnalysis import allSelections
 
-    allSelections.verbose                     = opts.verbose
-    allSelections.histogramAmbientLevel       = opts.histoLevel
-    allSelections.BJetSelection.jetPtCuts     = [40.0, 30.0]
-    # allSelections.Trigger.triggerOR           = ["HLT_PFHT400_SixJet30", #Prescale 110 at inst. lumi 1.35E+34
-    #                                              "HLT_PFHT450_SixJet40", #Prescale  26 at inst. lumi 1.35E+34]
+    allSelections.verbose = opts.verbose
+    allSelections.histogramAmbientLevel = opts.histoLevel
+    allSelections.BJetSelection.jetPtCuts = [40.0, 30.0]
+    # allSelections.BJetSelection.triggerMatchingApply = True # at least 1 trg b-jet matched to offline b-jets
+    # allSelections.Trigger.triggerOR = ["HLT_PFHT400_SixJet30", #Prescale 110 at inst. lumi 1.35E+34
+    #                                    "HLT_PFHT450_SixJet40", #Prescale  26 at inst. lumi 1.35E+34]
+    # allSelections.Trigger.triggerOR = ["HLT_PFHT400_SixJet30_DoubleBTagCSV_p056"]
+    # allSelections.Trigger.triggerOR = ["HLT_PFHT450_SixJet40_BTagCSV_p056"]
 
     # ================================================================================================
     # Command Line Options
@@ -155,24 +158,23 @@ def main():
                               doSystematicVariations = opts.doSystematics)
 
     # Add variations (e.g. for optimisation)
+    # builder.addVariation("BJetSelection.triggerMatchingApply", [True, False]) # At least 1 trg b-jet dR-matched to offline b-jets
     # builder.addVariation("FakeBMeasurement.prelimTopFitChiSqrCutValue", [100, 20])
     # builder.addVariation("FakeBMeasurement.prelimTopFitChiSqrCutDirection", ["<=", "==", ">="])
     # builder.addVariation("FakeBMeasurement.numberOfBJetsCutValue", [0, 1])
     # builder.addVariation("FakeBMeasurement.numberOfBJetsCutDirection", ["=="])
     # builder.addVariation("FakeBMeasurement.numberOfBJetsCutDirection", ["<=", "==", ">="])
     # builder.addVariation("FakeBMeasurement.numberOfInvertedBJetsCutValue", [0, 1])
-    builder.addVariation("FakeBMeasurement.numberOfInvertedBJetsCutValue", [1])
     # builder.addVariation("FakeBMeasurement.numberOfInvertedBJetsCutDirection", [">="])
     # builder.addVariation("FakeBMeasurement.invertedBJetDiscr", "")
     # builder.addVariation("FakeBMeasurement.invertedBJetDiscrWorkingPoint", "Loose")
-    builder.addVariation("FakeBMeasurement.invertedBJetsSortType", ["Random", "DescendingBDiscriminator"])
-    builder.addVariation("FakeBMeasurement.invertedBJetsDiscrMaxCutValue", [1.0, 0.80, 0.75])
-    
+    # builder.addVariation("FakeBMeasurement.invertedBJetsSortType", ["Random", "DescendingBDiscriminator"])
+    # builder.addVariation("FakeBMeasurement.invertedBJetsDiscrMaxCutValue", [0.82, 0.80, 0.75, 0.70])
     # builder.addVariation("TopSelection.ChiSqrCutValue", [100])
-    # builder.addVariation("Trigger.triggerOR", [["HLT_PFHT450_SixJet40_BTagCSV_p056"]])
     # builder.addVariation("Trigger.triggerOR", [["HLT_PFHT450_SixJet40"], ["HLT_PFHT400_SixJet30"]])
     # builder.addVariation("TopologySelection.FoxWolframMomentCutValue", [0.5, 0.7])
-    # builder.addVariation(".triggerOR", [["HLT_PFHT400_SixJet30_DoubleBTagCSV_p056"], ["HLT_PFHT450_SixJet40_BTagCSV_p056"]])
+    builder.addVariation("Trigger.triggerOR", [["HLT_PFHT400_SixJet30_DoubleBTagCSV_p056"], ["HLT_PFHT450_SixJet40_BTagCSV_p056"]])
+    # builder.addVariation("Trigger.triggerOR", [["HLT_PFHT400_SixJet30_DoubleBTagCSV_p056", "HLT_PFHT450_SixJet40_BTagCSV_p056"]])
     
     # Build the builder
     builder.build(process, allSelections)

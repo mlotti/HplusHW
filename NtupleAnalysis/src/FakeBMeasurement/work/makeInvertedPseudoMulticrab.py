@@ -452,6 +452,7 @@ def main():
         erasList   = myModuleSelector.getSelectedEras()
         modesList  = myModuleSelector.getSelectedSearchModes()
         optList    = myModuleSelector.getSelectedOptimizationModes()
+        optList.append("") #append the default opt mode!
 
         # For-Loop over era, searchMode, and optimizationMode options
         for era in erasList:
