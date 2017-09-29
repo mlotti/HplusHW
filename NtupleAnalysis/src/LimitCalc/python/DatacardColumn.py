@@ -1,7 +1,15 @@
-## \package DatacardColumn
-# Class collecting information about a column to be produced in the datacard
-#
+'''
+DESCRIPTION:
+Class collecting information about a column to be produced in the datacard
 
+USAGE:
+Imported by other python files (HiggsAnalysis/NtupleAnalysis/src/LimitCalc/python/DataCardGenerator.py)
+
+'''
+
+#================================================================================================
+# Import modules
+#================================================================================================
 import os
 import sys
 import ROOT
@@ -18,12 +26,41 @@ from math import sqrt,pow
 from array import array
 
 _fineBinningSuffix = "_fineBinning"
+debug = False
 
-## ExtractorResult
-# Helper class to cache the result for each extractor in each datacard column
+#================================================================================================
+# Class definition
+#================================================================================================
+def Verbose(msg, printHeader=False):
+    '''
+    Calls Print() only if verbose options is set to true
+    '''
+    #if not opts.verbose:
+    if not debug:
+        return
+    Print(msg, printHeader)
+    return
+
+
+def Print(msg, printHeader=True):
+    '''
+    Simple print function. If verbose option is enabled prints, otherwise does nothing.
+    '''
+    fName = __file__.split("/")[-1]
+    if printHeader:
+        print "=== ", fName
+    print "\t", msg
+    return
+
+
 class ExtractorResult():
-    ## Constructor(
+    '''
+    Helper class to cache the result for each extractor in each datacard column
+    '''
     def __init__(self, exId = "-1", masterId = "-1", result=None, histograms=None, resultIsStat=False, additionalResult=None):
+        ''' 
+        Constructor
+        '''
         self._exId = exId
         self._masterId = masterId
         self._result = result
@@ -138,9 +175,7 @@ class ExtractorResult():
                 return 0.0
         return 0.0
 
-# DatacardColumn class
 class DatacardColumn():
-    ## Constructor
     def __init__(self,
                  opts = None,
                  label = "",
@@ -152,6 +187,9 @@ class DatacardColumn():
                  additionalNormalisationFactor = 1.0,
                  histoPath = "",
                  shapeHistoName = ""):
+        '''
+        Constructor
+        '''
         self._opts = opts
         self._label = label
         self._landsProcess = landsProcess
@@ -255,78 +293,114 @@ class DatacardColumn():
         if myMsg != "":
             print ShellStyles.ErrorStyle()+"Error (data group ='"+self._label+"'):"+ShellStyles.NormalStyle()+"\n"+myMsg
             raise Exception()
+        return
 
-    ## Returns true if column is enabled for given mass point
+
     def isActiveForMass(self, mass, config):
+        '''
+        Returns true if column is enabled for given mass point
+        '''
         myResult = (mass in self._enabledForMassPoints) and self._isPrintable
         # Ignore empty column for heavy H+
         myMassStatus = not (self.typeIsEmptyColumn() and (mass > 179 or config.OptionLimitOnSigmaBr))
         #print self._label,myResult,myMassStatus
         return myResult and myMassStatus and self.getLandsProcess != None
 
-    ## Disables the datacard column
     def disable(self):
+        '''
+        Disables the datacard column
+        '''
         self._isPrintable = False
+        return
 
-    ## Returns label
     def getLabel(self):
+        '''
+        Returns label
+        '''
         return self._label
 
-    ## Return shape histogram name with path
     def getFullShapeHistoName(self):
+        '''
+        Return shape histogram name with path
+        '''
         return os.path.join(self._histoPath, self._shapeHistoName)
 
-    ## Return shape histogram name with path
     def getFullHistoName(self, histoName):
+        '''
+        Return shape histogram name with path
+        '''
         return os.path.join(self._histoPath, histoName)
 
-    ## Returns LandS process
     def getLandsProcess(self):
+        '''
+        Returns LandS process
+        '''
         return self._landsProcess
 
-    ## Returns the list of nuisance IDs
     def getNuisanceIds(self):
+        '''
+        Returns the list of nuisance IDs
+        '''
         return self._nuisanceIds
 
-    ## Returns list of results for nuisances
     def getNuisanceResults(self):
+        '''
+        Returns list of results for nuisances
+        '''
         return self._nuisanceResults
 
-    ## Returns the cached roto histogram with uncertainties object for the shape
     def getCachedShapeRootHistogramWithUncertainties(self):
+        '''
+        Returns the cached ROOT histogram with uncertainties object for the shape
+        '''
         return self._cachedShapeRootHistogramWithUncertainties
 
-    ## Returns dataset manager
     def getDatasetMgr(self):
+        '''
+        Returns dataset manager
+        '''
         return self._datasetMgr
 
-    ## Returns dataset manager column
     def getDatasetMgrColumn(self):
+        '''
+        Returns dataset manager column
+        '''
         return self._datasetMgrColumn
 
-    ## Returns dataset manager column for MC EWK in QCD 
     def getDatasetMgrColumnForQCDMCEWK(self):
+        '''
+        Returns dataset manager column for MC EWK in QCD 
+        '''
         return self._datasetMgrColumnForQCDMCEWK
 
-    ## Get control plots
     def getControlPlotByIndex(self,index):
+        '''        
+        Get control plots
+        '''
         if index >= len(self._controlPlots):
             return None
         return self._controlPlots[index]
 
-    ## Get correct control plot
     def getControlPlotByTitle(self, title):
+        '''
+        Get correct control plot
+        '''
         for h in self._controlPlots:
             if title in h.getRootHisto().GetTitle():
                 return h
+
         print "Available control plot names:"
         for h in self._controlPlots:
-            print "  "+h.getRootHisto().GetTitle()
-        raise Exception(ErrorStyle()+"Error:"+ShellStyles.NormalStyle()+" Could not find control plot by title '%s' in column %s!"%(title, self._label))
+            print "  " + h.getRootHisto().GetTitle()
 
-    ## Creates an up and down variation histogram from a constant nuisance parameters
-    ## Returns list of created histograms
+        msg = "Could not find control plot by title '%s' in column %s!" % (title, self._label)
+        raise Exception(ErrorLabel() + msg)
+    
     def _createShapeNuisanceFromConstant(self, hRate, uncertaintyUp, uncertaintyDown, suffix=""):
+        '''
+        Creates an up and down variation histogram from a constant nuisance parameters
+        Returns list of created histograms
+        '''
         myNamePrefix = self.getLabel()+"_"+e._masterExID
         hUp = aux.Clone(hRate, myNamePrefix+"Up"+suffix)
         hDown = aux.Clone(hRate, myNamePrefix+"Down"+suffix)
@@ -340,13 +414,16 @@ class DatacardColumn():
             hDown.SetBinError(k, 0.01)
         return [hUp, hDown]
 
-
     def _getShapeNuisanceHistogramsFromRHWU(self, rhwu, systVariationName, masterExtractorId, suffix=""):
         myHistograms = []
         myShapeUncertDict = rhwu.getShapeUncertainties()
         # Check that asked variation exists
         if not systVariationName in myShapeUncertDict.keys():
-            raise Exception(ShellStyles.ErrorLabel()+"DatasetColumn '%s': Cannot find systematics variation %s, check that options in the datacard match to multicrab content (to run without shape systematics, set OptionIncludeSystematics to False)!"%(self.getLabel(),systVariationName))
+            msg  = "DatasetColumn '%s': Cannot find systematics variation %s, " % (self.getLabel(), systVariationName)
+            msg += "check that options in the datacard match to multicrab content"
+            msg += "(to run without shape systematics, set OptionIncludeSystematics to False)!"
+            raise Exception(ShellStyles.ErrorLabel()+msg)
+
         # Get histograms
         (hSystUp, hSystDown) = myShapeUncertDict[systVariationName]
         myNamePrefix = self.getLabel()+"_"+masterExtractorId
@@ -354,11 +431,13 @@ class DatacardColumn():
         hDown = aux.Clone(hSystDown, myNamePrefix+"Down"+suffix)
         hUp.SetTitle(myNamePrefix+"Up"+suffix)
         hDown.SetTitle(myNamePrefix+"Down"+suffix)
+
         # Do not apply here additional normalization, it has already been applied
         # via RootHistoWithUncertainties.Scale() in DatacardColumn::doDataMining()
         # Append histograms to output list
         myHistograms.append(hUp)
         myHistograms.append(hDown)
+
         # These histograms contain abs uncertainty, need to add nominal histogram so that Lands/Combine accepts the histograms
         for h in myHistograms:
             h.Add(rhwu.getRootHisto())
@@ -372,13 +451,19 @@ class DatacardColumn():
         # Return result
         return myHistograms
 
-    ## Do data mining and cache results
     def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors, controlPlotExtractors):
-        print "... processing column: "+ShellStyles.HighlightStyle()+self._label+ShellStyles.NormalStyle()
-        #print "begin files =",ROOT.gROOT.GetListOfFiles().GetSize()
-        #print "DBG: list at beginning of data mining:",ROOT.gDirectory.GetList().GetSize()
-        #for i in range(0,ROOT.gDirectory.GetListOfKeys().GetSize()):
-        #    print "keys %d = %s"%(i,ROOT.gDirectory.GetListOfKeys().At(i).GetTitle())
+        '''
+        Do data mining and cache results
+        '''
+        if self._opts.verbose:
+            print "... processing column: " + ShellStyles.HighlightStyle() + self._label+ShellStyles.NormalStyle()
+
+        # beginFilesSize = ROOT.gROOT.GetListOfFiles().GetSize()
+        # beginListSize  = ROOT.gDirectory.GetList().GetSize()
+        # beginKeys        = ROOT.gDirectory.GetListOfKeys()
+        #for i, key in enumerate(beginKeys):
+        #   print "key %d = %s" % (i, key.GetTitle())
+        
         # Construct list of shape variables used by the column
         myShapeVariationList = []
         for nid in self._nuisanceIds:
@@ -386,13 +471,16 @@ class DatacardColumn():
                 if e.getId() == nid:
                     if (e.getDistribution() == "shapeQ" and not isinstance(e, ConstantExtractor)) or isinstance(e, ShapeVariationToConstantExtractor):
                         myShapeVariationList.append(e._systVariation)
+
         # Obtain root histogram with uncertainties for shape and cache it
         hRateWithFineBinning = None
         if not (self.typeIsEmptyColumn() or dsetMgr == None):
             mySystematics = dataset.Systematics(allShapes=True) #,verbose=True)
             if not dsetMgr.hasDataset(self.getDatasetMgrColumn()):
-                raise Exception(ShellStyles.ErrorLabel()+"Cannot find merged dataset by key '%s' in multicrab dir! Did you forget to merge the root files with hplusMergeHistograms.py?"%self.getDatasetMgrColumn())
+                msg = "Cannot find merged dataset by key '%s' in multicrab dir! Did you forget to merge the root files with hplusMergeHistograms.py?" % self.getDatasetMgrColumn()
+                raise Exception(ShellStyles.ErrorLabel() + msg)
             myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
+
             if myDatasetRootHisto.isMC():
                 # Set signal xsection
                 # for heavy H+
@@ -402,7 +490,8 @@ class DatacardColumn():
                         #myDatasetRootHisto.Delete()
                         dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(1)
                         myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
-                        print "..... Assuming this is signal -> set cross section to 1 pb for limit calculation"
+                        if self._opts.verbose:
+                            print "..... Assuming this is signal -> set cross section to 1 pb for limit calculation"
                 # for light H+, use 13 TeV ttbar xsect from https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
                 elif (not config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH" or self._label[:2] == "WH")):
                      ttbarxsect = xsect.backgroundCrossSections.crossSection("TTJets", energy="13")
@@ -414,6 +503,7 @@ class DatacardColumn():
 
                 # Normalize to luminosity
                 myDatasetRootHisto.normalizeToLuminosity(luminosity)
+
             self._cachedShapeRootHistogramWithUncertainties = myDatasetRootHisto.getHistogramWithUncertainties().Clone()
             # Remove any variations not active for the column
             self._cachedShapeRootHistogramWithUncertainties.keepOnlySpecifiedShapeUncertainties(myShapeVariationList)
@@ -425,7 +515,11 @@ class DatacardColumn():
             # Leave histograms with the original binning at this stage, but do move under/overflow into first/last bin
             self._cachedShapeRootHistogramWithUncertainties.makeFlowBinsVisible()
 	    if not self.typeIsObservation():
-		print "..... event yield: %f +- %f (stat.)"%(self._cachedShapeRootHistogramWithUncertainties.getRate(),self._cachedShapeRootHistogramWithUncertainties.getRateStatUncertainty())
+                if self._opts.verbose:
+                    rate = self._cachedShapeRootHistogramWithUncertainties.getRate()
+                    statUncert = self._cachedShapeRootHistogramWithUncertainties.getRateStatUncertainty()
+                    print "..... event yield: %f +- %f (stat.)" % (rate, statUncert)
+
         # Obtain rate histogram
         myRateHistograms = []
         if self.typeIsEmptyColumn() or dsetMgr == None:
@@ -457,7 +551,13 @@ class DatacardColumn():
                 if isinstance(dsetMgr.getDataset(self.getDatasetMgrColumn()), dataset.DatasetMerged):
                     for dset in dsetMgr.getDataset(self.getDatasetMgrColumn()).datasets:
                         print "  - normalization coefficient for %s: %g"%(dset.getName(),dset.getNormFactor())
-                print "  - normalization coefficient = ", dsetMgr.getDataset(self.getDatasetMgrColumn()).getNormFactor()
+                
+                isMC = dsetMgr.getDataset(self.getDatasetMgrColumn()).isMC()
+                if (isMC):
+                    print "  - normalization coefficient = ", dsetMgr.getDataset(self.getDatasetMgrColumn()).getNormFactor()
+                else:
+                    print "  - normalization coefficient = N/A (isMC=%s)" % (isMC)
+
         if abs(myRateHistograms[0].Integral() - myRateHistograms[0].Integral(0,myRateHistograms[0].GetNbinsX()+2)) > 0.00001:
             raise Exception("Error: under/overflow bins contain data!")
         if self.typeIsEmptyColumn() or dsetMgr == None:
@@ -545,13 +645,15 @@ class DatacardColumn():
 
         # Obtain results for control plots
         if config.OptionDoControlPlots:
-            for c in controlPlotExtractors:
+            for index, c in enumerate(controlPlotExtractors, 1):
                 if dsetMgr != None and not self.typeIsEmptyColumn():
                     if self._opts.verbose:
                         print "  - Extracting data-driven control plot %s"%c._histoTitle
                     myCtrlDsetRootHisto = c.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
+
                     if myCtrlDsetRootHisto == None:
-                        print ShellStyles.WarningLabel()+"Could not find control plot '%s', skipping..."%c._histoTitle
+                        msg = "Could not find control plot \"%s\", skipping..." % (c._histoTitle)
+                        Print(ShellStyles.WarningLabel() + msg, index==1)
                         self._controlPlots.append(None)
                     else:
                         # Obtain overall purity for QCD
@@ -630,39 +732,79 @@ class DatacardColumn():
                                     pass
                         self._controlPlots.append(myDictionary)
 
-    ## Rebin the cached histograms and save a copy of the fine binned version
     def doRebinningOfCachedResults(self, config):
-        myArray = array("d",config.ShapeHistogramsDimensions)
-        for i in range(0,len(self._rateResult._histograms)):
+        '''
+        Rebin the cached histograms and save a copy of the fine binned version
+        '''
+        myArray = array("d", config.ShapeHistogramsDimensions)
+        nHistos = len(self._rateResult._histograms)
+
+        # For-loop: All rate histograms
+        for i in range(0, nHistos):
+            
             myTitle = self._rateResult._histograms[i].GetTitle()
             self._rateResult._histograms[i].SetTitle(myTitle+_fineBinningSuffix)
+
+            msg = "Rebinning %d/%d: %s" % (i+1, nHistos, myTitle)
+            Verbose(ShellStyles.NoteStyle() + msg + ShellStyles.NormalStyle())
+
             # move under/overflow bins to visible bins, store fine binned histogram, and do rebinning
             if self._rateResult._histograms[i].GetNbinsX() > 1:
                 # Note that Rebin() does a clone operation in this case
                 h = self._rateResult._histograms[i].Rebin(len(config.ShapeHistogramsDimensions)-1,myTitle,myArray)
                 h.SetTitle(myTitle)
                 histogramExtras.makeFlowBinsVisible(h)
-                self._rateResult._histograms.insert(0,h) # The first one is assumed to be the one with the final binning elsewhere
+                # The first one is assumed to be the one with the final binning elsewhere
+                self._rateResult._histograms.insert(0,h)
+
         # Look for negative bins in rate histogram
-        for k in range(1, self._rateResult._histograms[0].GetNbinsX()+1):
-            if self._rateResult._histograms[0].GetBinContent(k) < config.MinimumStatUncertainty:
-                if self._rateResult._histograms[0].GetBinContent(k) >= 0.0 and self._rateResult._histograms[0].GetBinContent(k) < config.MinimumStatUncertainty:
-                    print ShellStyles.WarningLabel()+"Rate value is zero or below min.stat.uncert. in bin %d for column '%s' (it was %f)! Compensating up stat uncertainty to %f!"%(k, self.getLabel(), self._rateResult._histograms[0].GetBinContent(k), config.MinimumStatUncertainty)
+        nBins = self._rateResult._histograms[0].GetNbinsX()+1
+        
+        nBelowMinStatUncert = 0
+        nNegativeRate = 0
+        # For-loop: All histogram bins
+        for k in range(1, nBins):
+            msg = "Checking bin %d/%d: %s" % (k, nBins, myTitle)
+            Verbose(ShellStyles.NoteStyle() + msg + ShellStyles.NormalStyle(), k==1)
+            
+            binRate = self._rateResult._histograms[0].GetBinContent(k)
+            if binRate < config.MinimumStatUncertainty:
+                if binRate >= 0.0 and binRate < config.MinimumStatUncertainty:
+                    msg  = "Rate value is zero or below min.stat.uncert. in bin %d for column '%s' (it was %f)! " % (k, self.getLabel(), binRate)
+                    msg += "Compensating up stat uncertainty to %f!" % (config.MinimumStatUncertainty)
+                    Verbose(ShellStyles.WarningLabel() + msg)
                     self._rateResult._histograms[0].SetBinError(k, config.MinimumStatUncertainty)                   
-                if self._rateResult._histograms[0].GetBinContent(k) < -0.001:
-                    #print ShellStyles.WarningLabel()+"Rate value is negative in bin %d for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, self.getLabel(), self._rateResult._histograms[0].GetBinContent(k))
-                    self._rateResult._histograms[0].SetBinContent(k, 0.0)
+                    nBelowMinStatUncert += 1
+
+                if binRate < -0.001:
+                    msg  = "Rate value is negative in bin %d for column '%s' (it was %f)! " % (k, self.getLabel(), binRate)
+                    msg += "This could have large effects to systematics, please fix!"
+                    Verbose(ShellStyles.WarningLabel() + msg)
+
                     #FIXME: if one adjusts the bin content, one needs to adjust accordingly the nuisances !!!
+                    self._rateResult._histograms[0].SetBinContent(k, 0.0)
                     self._rateResult._histograms[0].SetBinError(k, config.MinimumStatUncertainty)
-                    #raise Exception(ShellStyles.ErrorLabel()+"Bin %d rate value is negative for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, datasetColumn.getLabel(), h.GetBinContent(k)))
+                    nNegativeRate += 1
+
+        
+        # Print summarty of warnings/errors (if any)
+        if nNegativeRate >0:
+            msg = "Rate value for \"%s\" was negative (hence forced to zero) in %d bins" % (myTitle, nNegativeRate)
+            Print(ShellStyles.WarningLabel() + msg)
+
+        if nBelowMinStatUncert > 0:
+            msg = "Rate value for \"%s\" was below minimum statistical uncertainty (hence set to default min of %f) in %d bins" % (myTitle, config.MinimumStatUncertainty, nBelowMinStatUncert)
+            Print(ShellStyles.WarningLabel() + msg, False)
+
         # Convert bin content to integers for signal injection
         if self.typeIsObservation() and hasattr(config, "OptionSignalInjection"):
             for k in range(1, self._rateResult._histograms[0].GetNbinsX()+1):
-                self._rateResult._histograms[0].SetBinContent(k, round(self._rateResult._histograms[0].GetBinContent(k), 0))
+                self._rateResult._histograms[0].SetBinContent(k, round(binRate, 0))
 
         # Update integral
         self._rateResult._result = self._rateResult._histograms[0].Integral()
 
+        # For-loop: All nuisance results
         for j in range(0,len(self._nuisanceResults)):
             myNewHistograms = []
             for i in range(0,len(self._nuisanceResults[j]._histograms)):
@@ -674,6 +816,7 @@ class DatacardColumn():
                 histogramExtras.makeFlowBinsVisible(h)
                 myNewHistograms.append(h)
             self._nuisanceResults[j]._histograms.extend(myNewHistograms)
+
 	# Treat QCD MET shape nuisance
 	myQCDMetshapeFoundStatus = False
 	for j in range(0,len(self._nuisanceResults)):
@@ -702,6 +845,7 @@ class DatacardColumn():
 		systematicsForMetShapeDifference.createSystHistograms(self._rateResult._histograms[0], hUp, hDown, hNumerator, hDenominator, quietMode=False)
         if not myQCDMetshapeFoundStatus and self.typeIsQCDinverted():
             print ShellStyles.WarningLabel()+"QCD metshape uncertainty has not been rebinned, please check that it has the name 'QCD_metshape'!"
+
         # Update root histo with uncertainties to contain the binned version
         if self._cachedShapeRootHistogramWithUncertainties != None:
             #self._cachedShapeRootHistogramWithUncertainties.Debug()
@@ -725,9 +869,12 @@ class DatacardColumn():
                 else:
                     self._cachedShapeRootHistogramWithUncertainties.addShapeUncertaintyFromVariation(self._nuisanceResults[j].getId(), hUp, hDown)
             #self._cachedShapeRootHistogramWithUncertainties.Debug()
+        return
 
-    ## Returns rate for column
     def getRateResult(self):
+        '''
+        Returns rate for column
+        '''
         if self._rateResult == None:
             raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+ShellStyles.NormalStyle()+" Rate value has not been cached! (did you forget to call doDataMining()?)")
         if self._rateResult.getResult() == None:

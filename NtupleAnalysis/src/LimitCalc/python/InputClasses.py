@@ -140,11 +140,13 @@ def convertFromSystVariationToConstant(nuisanceList, name):
         #if not myFoundStatus:
         #    raise Exception("Error: cannot find name '%s' in nuisance names!"%n)
     # Print remaining shape variations
-    print "\nShape uncertainties:"
+    if all("shapeQ" in item.distr for item in nuisanceList):
+        print "\nShape uncertainties:"
+    #if len(nuisanceList) > 0:
     for item in nuisanceList:
         if item.distr == "shapeQ":
             print "... %s"%item.id
-    print ""
+    #print ""
 
 def separateShapeAndNormalizationFromSystVariation(nuisanceList, name):
     myList = []
