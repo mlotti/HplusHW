@@ -107,8 +107,8 @@ jetSelection = PSet(
 # B-jet selection
 #================================================================================================
 bjetSelection = PSet(
-    triggerMatchingApply      = False,
-    triggerMatchingCone       = 0.1,  # DeltaR for matching offline bjet with trigger::TriggerBjet
+    triggerMatchingApply      = False, # Do NOT enable until the HLTBJet collection is fixed (no duplicates)
+    triggerMatchingCone       = 0.1,   # DeltaR for matching offline bjet with trigger::TriggerBjet
     jetPtCuts                 = [40.0, 40.0, 30.0],
     jetEtaCuts                = [2.4],
     bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
@@ -210,7 +210,7 @@ if 0:
     scaleFactors.assignMETTriggerSF(metSelection, bjetSelection.bjetDiscrWorkingPoint, "nominal")
 
 
-#================================================================================================
+#=====OA===========================================================================================
 # FakeB Measurement Options
 #================================================================================================
 fakeBMeasurement = PSet(
@@ -220,12 +220,12 @@ fakeBMeasurement = PSet(
     numberOfBJetsCutValue             = 2,        # default: 2
     numberOfBJetsCutDirection         = "==",     # default: ==, options: ==, !=, <, <=, >, >=
     #
-    numberOfInvertedBJetsCutValue     = 0,        # i.e. additional to the selected b-jets
+    numberOfInvertedBJetsCutValue     = 1,        # i.e. additional to the selected b-jets
     numberOfInvertedBJetsCutDirection = ">=",     # options: ==, !=, <, <=, >, >=
     invertedBJetsSortType             = "Random", # options: "AscendingPt", "DescendingPt", "AscendingBDiscriminator", "DescendingBDiscriminator", "Random"
     invertedBJetsDiscr                = bjetSelection.bjetDiscr,
     invertedBJetsWorkingPoint         = "Loose",
-    invertedBJetsDiscrMaxCutValue     = 0.8484,   # medium = 0.8484
+    invertedBJetsDiscrMaxCutValue     = 0.7,      # medium = 0.8484
     invertedBJetsDiscrMaxCutDirection = "<",      # options: ==, !=, <, <=, >, >=
 
     )

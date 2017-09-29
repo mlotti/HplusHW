@@ -4,10 +4,10 @@ Usage:
 ./plotQCD_Purity.py -m <pseudo_mcrab_directory> [opts]
 
 Examples:
-./plotQCD_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar -e "QCD|Charged" --mergeEWK -o OptChiSqrCutValue100  
-./plotQCD_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar  -e "QCD|Charged" --mergeEWK -o OptChiSqrCutValue100  
-./plotQCD_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170630_045528_IsGenuineBEventBugFix_TopChiSqrVar -e "QCD|Charged" --mergeEWK -o OptChiSqrCutValue100  
-./plotQCD_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170627_124436_BJetsGE2_TopChiSqrVar_AllSamples --mergeEWK -e 'QCD|Charged'
+./plotQCD_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar -e "QCD|Charged" --plotEWK -o OptChiSqrCutValue100  
+./plotQCD_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar  -e "QCD|Charged" -plotEWK -o OptChiSqrCutValue100  
+./plotQCD_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170630_045528_IsGenuineBEventBugFix_TopChiSqrVar -e "QCD|Charged" --plotEWK -o OptChiSqrCutValue100  
+./plotQCD_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170627_124436_BJetsGE2_TopChiSqrVar_AllSamples --plotEWK -e 'QCD|Charged'
 
 NOTE:
 If unsure about the parameter settings a pseudo-multicrab do:
@@ -124,10 +124,18 @@ def main(opts):
 
 
     #optModes = ["", "OptChiSqrCutValue50p0", "OptChiSqrCutValue100p0", "OptChiSqrCutValue200p0"]
-    optModes = [""]
+    optModes = ["",
+                "OptInvertedBJetsDiscrMaxCutValue0p82",
+                "OptInvertedBJetsDiscrMaxCutValue0p8",
+                "OptInvertedBJetsDiscrMaxCutValue0p75",
+                "OptInvertedBJetsDiscrMaxCutValue0p7"]
+                #"OptInvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeRandom",
+                #"OptInvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeDescendingBDiscriminator",
+                #"OptInvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeRandom",
+                #"OptInvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeDescendingBDiscriminator"]
 
-    if opts.optMode != None:
-        optModes = [opts.optMode]
+    #if opts.optMode != None:
+     #   optModes = [opts.optMode]
 
     # For-loop: All optimisation modes
     for opt in optModes:
@@ -161,10 +169,9 @@ def main(opts):
             datasetsMgr.selectAndReorder(newOrder)
 
         # Merge EWK samples
-        if opts.mergeEWK:
-            datasetsMgr.merge("EWK", GetListOfEwkDatasets())
-            plots._plotStyles["EWK"] = styles.getAltEWKStyle()
-
+        datasetsMgr.merge("EWK", GetListOfEwkDatasets())
+        plots._plotStyles["EWK"] = styles.getAltEWKStyle()
+            
         # Print dataset information
         datasetsMgr.PrintInfo()
 
@@ -173,7 +180,7 @@ def main(opts):
         style.setOptStat(True)
 
         # Do the Purity Triplets?
-        if 1:
+        if 0:
             bType  = "" # ["", "EWKFakeB", "EWKGenuineB"]
             folder = "FakeBPurity" + bType
             hList  = datasetsMgr.getDataset("EWK").getDirectoryContent(folder)
@@ -185,9 +192,15 @@ def main(opts):
         allHistos = datasetsMgr.getDataset("EWK").getDirectoryContent(folder)
         hList = [h for h in allHistos if "StandardSelections" in h and "_Vs" not in h]
         hList.extend([h for h in allHistos if "AllSelections" in h and "_Vs" not in h])
+
+        # Only do these histos
+        myHistos = ["Njets", "LdgTrijetMass", "TetrajetBjetPt", "LdgTetrajetMass", "LdgTetrajetMass"]
+
+        # For-loop: All histos
         for h in hList:
-            #if "_Vs_" in h:
-             #   continue
+                
+            if h.split("_")[0] not in myHistos:
+                continue
             if "JetEtaPhi" in h:
                 continue
             PlotPurity(datasetsMgr, os.path.join(folder, h))
@@ -312,25 +325,37 @@ def PlotPurity(datasetsMgr, histoName):
         gEWK_Purity = MakeGraph(ROOT.kFullTriangleDown, ROOT.kPurple, binList, valueDict, upDict, downDict)
         
     # Make the plots
-    p = plots.ComparisonManyPlot(QCD_Purity, [EWK_Purity], saveFormats=[])
+    if opts.plotEWK:
+        p = plots.ComparisonManyPlot(QCD_Purity, [EWK_Purity], saveFormats=[])
+    else:
+        p = plots.PlotBase([QCD_Purity], saveFormats=[])
+
 
     # Apply histo styles
     p.histoMgr.forHisto("QCD", styles.getQCDLineStyle() )
-    p.histoMgr.forHisto("EWK"  , styles.getAltEWKLineStyle() )
+    if opts.plotEWK:
+        p.histoMgr.forHisto("EWK"  , styles.getAltEWKLineStyle() )
 
     # Set draw style
     p.histoMgr.setHistoDrawStyle("QCD", "P")
-    p.histoMgr.setHistoDrawStyle("EWK", "P")
+    if opts.plotEWK:
+        p.histoMgr.setHistoDrawStyle("EWK", "HIST")
 
     # Set legend style
     p.histoMgr.setHistoLegendStyle("QCD", "P")
-    p.histoMgr.setHistoLegendStyle("EWK", "P")
+    if opts.plotEWK:
+        p.histoMgr.setHistoLegendStyle("EWK", "F")
 
     # Set legend labels
-    p.histoMgr.setHistoLegendLabelMany({
-            "QCD" : "QCD",
-            "EWK" : "EWK",
-            })
+    if opts.plotEWK:
+        p.histoMgr.setHistoLegendLabelMany({
+                "QCD" : "QCD",
+                "EWK" : "EWK",
+                })
+    else:
+        p.histoMgr.setHistoLegendLabelMany({
+                "QCD" : "QCD",
+                })
     
     # Do the plot
     plots.drawPlot(p, 
@@ -340,7 +365,7 @@ def PlotPurity(datasetsMgr, histoName):
                    log           = False, 
                    rebinX       = 1, # must be done BEFORE calculating purity
                    cmsExtraText  = "Preliminary", 
-                   createLegend  = {"x1": 0.80, "y1": 0.80, "x2": 0.92, "y2": 0.92},
+                   createLegend  = {"x1": 0.76, "y1": 0.80, "x2": 0.92, "y2": 0.92},
                    opts          = _opts,
                    opts2         = {"ymin": 1e-5, "ymax": 1e0},
                    ratio         = False,
@@ -487,7 +512,7 @@ if __name__ == "__main__":
     SUBCOUNTERS  = False
     LATEX        = False
     MCONLY       = False
-    MERGEEWK     = True
+    PLOTEWK      = False
     URL          = False
     NOERROR      = True
     SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"
@@ -521,8 +546,8 @@ if __name__ == "__main__":
     parser.add_option("--dataEra", dest="dataEra", type="string", default=DATAERA, 
                       help="Override default dataEra [default: %s]" % DATAERA)
 
-    parser.add_option("--mergeEWK", dest="mergeEWK", action="store_true", default=MERGEEWK, 
-                      help="Merge all EWK samples into a single sample called \"EWK\" [default: %s]" % MERGEEWK)
+    parser.add_option("--plotEWK", dest="plotEWK", action="store_true", default=PLOTEWK, 
+                      help="Include EWK purity in all the plots (1-QCDPurity) [default: %s]" % (PLOTEWK) )
 
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR, 
                       help="Directory where all pltos will be saved [default: %s]" % SAVEDIR)
@@ -553,11 +578,7 @@ if __name__ == "__main__":
         Print("Not enough arguments passed to script execution. Printing docstring & EXIT.")
         parser.print_help()
         #print __doc__
-        sys.exit(1)
-        
-    if not opts.mergeEWK:        
-        Print("Cannot draw the Data/QCD/EWK histograms without the option --mergeEWK. Exit", True)
-        sys.exit()
+        sys.exit(1)        
 
     # Call the main function
     main(opts)

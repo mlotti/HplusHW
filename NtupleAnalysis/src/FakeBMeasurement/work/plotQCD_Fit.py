@@ -41,8 +41,10 @@ Usage:
 Examples:
 ./plotQCD_Fit.py -m FakeBMeasurement_SignalTriggers_NoTrgMatch_StdSelections_TopCut_AllSelections_TopCut10_170725_030408/ --url -o ""
 
+
 Last Used:
-./plotQCD_Fit.py -m FakeBMeasurement_SignalTriggers_NoTrgMatch_StdSelections_TopCut_AllSelections_TopCut10_InvMassFix_170822_074824 --url
+./plotQCD_Fit.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/QCDMeaurement/Jet6Pt40Jet7Pt30/FakeBMeasurement_GE2MediumPt40Pt30_GE1ExtraLooseWithManyMaxDiscrWP_StdSelections_TopCut100_AllSelections_TopCut10_H2Cut0p5_RandomFailedBJetSort_170929_005352 -o OptInvertedBJetsDiscrMaxCutValue0p7 --url
+
 
 Fit options:
 https://root.cern.ch/root/htmldoc/guides/users-guide/FittingHistograms.html#the-th1fit-method
@@ -216,8 +218,14 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
 def main(opts):
     Verbose("main function")
 
-    #optModes = ["", "OptChiSqrCutValue40", "OptChiSqrCutValue60", "OptChiSqrCutValue80", "OptChiSqrCutValue100", "OptChiSqrCutValue120", "OptChiSqrCutValue140"]
     optModes = [""]
+    #optModes = ["", "OptChiSqrCutValue40", "OptChiSqrCutValue60", "OptChiSqrCutValue80", "OptChiSqrCutValue100", "OptChiSqrCutValue120", "OptChiSqrCutValue140"]
+    #optModes = ["",
+    #            "OptInvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeRandom",
+    #            "OptInvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeDescendingBDiscriminator",
+    #            "OptInvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeRandom",
+    #            "OptInvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeDescendingBDiscriminator"]
+
 
     if opts.optMode != None:
         optModes = [opts.optMode]
@@ -474,13 +482,14 @@ def PlotAndFitTemplates(datasetsMgr, histoName, inclusiveFolder, opts):
     
     # Not really needed to plot the histograms again
     if 1:
-        saveName = fileName.replace("/", "_").replace(".py", "")
+        #saveName = fileName.replace("/", "_").replace(".py", "")
+        saveName = histoName
 
         # Draw the histograms
         plots.drawPlot(p, saveName, **GetHistoKwargs(histoName) ) #the "**" unpacks the kwargs_ 
 
         # Save plot in all formats
-        SavePlot(p, saveName, os.path.join(opts.saveDir, "Fit") ) 
+        SavePlot(p, saveName, os.path.join(opts.saveDir, "Fit", opts.optMode) ) 
     return
 
 if __name__ == "__main__":
@@ -512,7 +521,7 @@ if __name__ == "__main__":
     LATEX        = False
     MCONLY       = False
     MERGEEWK     = True
-    URL          = True
+    URL          = False
     NOERROR      = True
     SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"
     VERBOSE      = False

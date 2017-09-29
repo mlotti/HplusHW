@@ -66,10 +66,10 @@ private:
   TopSelection fInvertedTopSelection;
   Count cInvertedSelected;
 
-  void doInvertedAnalysis(const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const int nVertices);
-  void doBaselineAnalysis(const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const int nVertices);
+  void DoInvertedAnalysis(const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const int nVertices);
+  void DoBaselineAnalysis(const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const int nVertices);
+  bool PassedInvertedBJetSelection(const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
   bool IsGenuineBEvent(const std::vector<Jet>& selectedBJets);
-  bool HasZeroUntaggedGenuineBJets(const JetSelection::Data& jetData, const BJetSelection::Data& bjetData); // not used
 
   // Normalisation Triplets
   WrappedTH1Triplet *hBaseline_LdgTrijetMass_AfterStandardSelections;
@@ -362,7 +362,7 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
     fBaselineTopSelection(config.getParameter<ParameterSet>("TopSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
     cBaselineSelected(fEventCounter.addCounter("Baseline: selected events")),
     // Inverted selection
-    cInvertedBTaggingCounter(fEventCounter.addCounter("Inverted: passed b-jet veto")),
+    cInvertedBTaggingCounter(fEventCounter.addCounter("Inverted: passed b-jet selection")),
     cInvertedBTaggingSFCounter(fEventCounter.addCounter("Inverted: b tag SF")),
     fInvertedMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
     fInvertedTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
@@ -1685,55 +1685,24 @@ void FakeBMeasurement::process(Long64_t entry) {
   // 8) BJet Selection
   //================================================================================================
   if (0) std::cout << "=== BJet selection" << std::endl;
+  // Enable histogram filling and counter with silent analyze
+  const BJetSelection::Data bjetData = fBJetSelection.analyze(fEvent, jetData);
   // Disable histogram filling and counter with silent analyze
-  const BJetSelection::Data bjetData = fBJetSelection.silentAnalyze(fEvent, jetData);
+  // const BJetSelection::Data bjetData = fBJetSelection.silentAnalyze(fEvent, jetData);
 
-  // Baseline (Bjets criteria pass)
+  // Baseline Selection
   if (bjetData.passedSelection())
     {
-      doBaselineAnalysis(jetData, bjetData, nVertices);
+      DoBaselineAnalysis(jetData, bjetData, nVertices);
     }
-  else // Inverted (Bjets criteria fail)
+  else // Inverted Selection
     {
-      // Apply requirement on selected b-jets 
-      bool passSelected = cfg_NumberOfBJets.passedCut(bjetData.getNumberOfSelectedBJets());
-      if (!passSelected) return;
 
-      // Apply requirement on inverted b-jets
-      int nInvertedBJets = 0;
-      float invertedBJetDiscr = fBJetSelection.getDiscriminatorWP(cfg_InvertedBJetsDiscriminator, cfg_InvertedBJetsDiscriminatorWP);
-      float baselineBJetDiscr = fBJetSelection.getDiscriminatorWP(cfg_BaselineBJetsDiscriminator, cfg_BaselineBJetsDiscriminatorWP);
-      if (0) std::cout << "invertedBJetDiscr = " << invertedBJetDiscr << std::endl;
-      if (0) std::cout << "baselineBJetDiscr = " << baselineBJetDiscr << std::endl;
-      
-      // For-loop over selected jets
-      for(const Jet& jet: jetData.getSelectedJets()) 
-	{
-
-	  // Skip a jet if it is a selected bjet
-	  if (isBJet(jet, bjetData.getSelectedBJets())) continue;
-
-	  //=== Apply discriminator WP cut
-	  if (jet.bjetDiscriminator() < invertedBJetDiscr) continue;
-	  
-	  // Apply also upper cut on b-jet discriminator (Provide buffer zone between SR and CR)
-	  if ( !cfg_InvertedBJetsDiscrMax.passedCut(jet.bjetDiscriminator()) ) continue;
-
-	  // Sanity check
-	  if (0) std::cout << "jet.bjetDiscriminator() = " << jet.bjetDiscriminator() << std::endl;
-	  nInvertedBJets++;
-
-	}
-      
-      // Apply inversion requirements 
-      bool passInverted = cfg_NumberOfInvertedBJets.passedCut(nInvertedBJets);
+      bool passInverted = PassedInvertedBJetSelection(jetData, bjetData);
       if (!passInverted) return;
 
-      // Sanity Check
-      if (0) for(const Jet& jet: jetData.getSelectedJets()) std::cout << "jet.bjetDiscriminator() = " << jet.bjetDiscriminator() << std::endl;
-      
       // Do the inverted analysis
-      doInvertedAnalysis(jetData, bjetData, nVertices); 
+      DoInvertedAnalysis(jetData, bjetData, nVertices); 
     }
   return;
 }
@@ -1754,7 +1723,55 @@ bool FakeBMeasurement::areSameJets(const Jet& jet1, const Jet& jet2) {
   else return false;
 }
 
-void FakeBMeasurement::doBaselineAnalysis(const JetSelection::Data& jetData,
+
+ bool FakeBMeasurement::PassedInvertedBJetSelection(const JetSelection::Data& jetData, const BJetSelection::Data& bjetData)
+ {
+   
+   // Apply requirement on selected b-jets 
+   bool passSelected = cfg_NumberOfBJets.passedCut(bjetData.getNumberOfSelectedBJets());
+   if (!passSelected) return false;
+   
+   // Apply requirement on inverted b-jets
+   int nInvertedBJets = 0;
+   float invertedBJetDiscrMin = fBJetSelection.getDiscriminatorWP(cfg_InvertedBJetsDiscriminator, cfg_InvertedBJetsDiscriminatorWP);
+   // float baselineBJetDiscr = fBJetSelection.getDiscriminatorWP(cfg_BaselineBJetsDiscriminator, cfg_BaselineBJetsDiscriminatorWP);
+   
+   // For-loop over selected jets
+   for(const Jet& jet: jetData.getSelectedJets()) 
+     {
+       
+       // Skip a jet if it is a selected bjet
+       if (isBJet(jet, bjetData.getSelectedBJets())) continue;
+       
+       // Apply discriminator WP cuts (min and max)
+       bool passBjetDiscrMin = (jet.bjetDiscriminator() > invertedBJetDiscrMin);
+       bool passBjetDiscrMax = cfg_InvertedBJetsDiscrMax.passedCut(jet.bjetDiscriminator());
+
+       // Skip jets with a b-discrininator below a cut-off value
+       if (!passBjetDiscrMin) continue;
+       
+       // Reject event if a jet has a b-discriminator above a cut-off value
+       if (!passBjetDiscrMax)
+	 {
+	   nInvertedBJets = 0;
+	   break;
+	 }
+       
+       // Found jet satisfying inverted b-jet criteria
+       nInvertedBJets++;
+
+       // Sanity check
+       // std::cout << "jet.bjetDiscriminator() = " << jet.bjetDiscriminator() << " (nInvertedBJets = " << nInvertedBJets << ")" << std::endl;
+       
+     }
+
+   // Do we have enough inverted (failed) b-jets?
+   bool passInverted = cfg_NumberOfInvertedBJets.passedCut(nInvertedBJets);
+   // std::cout << "passInverted = " << passInverted << "\n" << std::endl;
+   return passInverted;
+ }
+ 
+void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
                                           const BJetSelection::Data& bjetData,
                                           const int nVertices){
   if (!bjetData.passedSelection()) return;
@@ -2056,7 +2073,7 @@ void FakeBMeasurement::doBaselineAnalysis(const JetSelection::Data& jetData,
 }
 
 
-void FakeBMeasurement::doInvertedAnalysis(const JetSelection::Data& jetData,
+void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
                                           const BJetSelection::Data& bjetData,
                                           const int nVertices){
   if (bjetData.passedSelection()) return;
@@ -2495,43 +2512,4 @@ bool FakeBMeasurement::IsGenuineBEvent(const std::vector<Jet>& selectedBJets)
   // std::cout << "BJets = " << selectedBJets().size() << ", Fakes = " << nFakes << std::endl;
   
   return (nFakes==0);
-}
-
-
-bool FakeBMeasurement::HasZeroUntaggedGenuineBJets(const JetSelection::Data& jetData,
-						   const BJetSelection::Data& bjetData) 
-{ 
-  if (!fEvent.isMC()) return false;
-  
-  float dR_match = 0.1;
-  unsigned int jet_index = 0;
-  unsigned int taggedGenuineBs = 0;
-  unsigned int untaggedGenuineBs = 0;
-
-  // For-loop: Selected jets
-  for(const Jet& jet: jetData.getSelectedJets()) 
-    {
-      jet_index++;
-
-      // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagMCTools#Jet_flavour_in_PAT
-      bool isGenuine = (abs(jet.pdgId()) == 5); // For data pdgId==0
-      bool isTagged  = false;
-      
-      // For-loop: Selected bjets
-      for(const Jet& bjet: bjetData.getSelectedBJets())
-	{
-	  float dR = ROOT::Math::VectorUtil::DeltaR(jet.p4(), bjet.p4());
-	  if (dR <= dR_match) 
-	    {
-	      isTagged = true;
-	      break;
-	    }
-	}
-      // std::cout << "jet#" << jet_index << " isGenuine = " << isGenuine << ", isTagged = " << isTagged << std::endl;
-      if (!isGenuine) continue;
-      if (isTagged) taggedGenuineBs++;
-      else untaggedGenuineBs++;
-    }
-
-  return (untaggedGenuineBs==0);
 }
