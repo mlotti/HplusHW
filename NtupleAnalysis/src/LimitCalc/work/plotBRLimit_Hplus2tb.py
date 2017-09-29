@@ -384,9 +384,6 @@ if __name__ == "__main__":
     GRIDY       = False
     MINY        = -1
     MAXY        = -1
-    print "*"*10
-    print 
-    print "*"*10
     SETTINGS    = ""
     SAVEDIR     = "/afs/cern.ch/user/%s/%s/public/html/Combine" % (getpass.getuser()[0], getpass.getuser())
     URL         = False
@@ -439,7 +436,7 @@ if __name__ == "__main__":
                       help="Sub-directory describing additional settings used when creating the limits (e.g. no lumi) [default: %s]" % SETTINGS) 
 
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR,
-                      help="Directory where all pltos will be saved [default: %s]" % SAVEDIR)
+                      help="Directory where all plots will be saved [default: %s]" % SAVEDIR)
 
     (opts, args) = parser.parse_args()
 

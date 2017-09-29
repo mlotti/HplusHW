@@ -338,6 +338,15 @@ class BRLimits:
                 yMin = y
         return yMin
 
+    def getYMinMedian(self):
+        yMin = 1e6
+
+        # For-loop: All mass points
+        for y in self.expectedMedian:
+            if y < yMin:
+                yMin = y
+        return yMin
+
 
     def getFinalstateYmaxBR(self):
         '''

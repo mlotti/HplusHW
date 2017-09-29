@@ -102,7 +102,7 @@ class Result:
                 self._limitCalculated = True
             else:
                 msg = "Creating and submitting " + basedir
-                Print(msg, True)
+                Verbose(msg, True)
                 self._createAndSubmit()
                 #if not self._opts.printonly and not self._opts.lhcTypeAsymptotic:
                 #    self._getOutput()
