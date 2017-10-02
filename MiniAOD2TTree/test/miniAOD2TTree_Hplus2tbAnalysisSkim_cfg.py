@@ -121,6 +121,30 @@ print msgAlign.format(dataVersion.version, dataVersion.getGlobalTag(), dataVersi
 print 
 ####
 
+# Marina - start
+#================================================================================================
+# Adding Jet Toolbox
+#================================================================================================
+# JetToolbox twiki:                      https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetToolbox
+# Using the QGTagger with Jet Toolbox:   https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetToolbox#QGTagger
+# QuarkGluonLikelihood twiki:            https://twiki.cern.ch/twiki/bin/view/CMS/QuarkGluonLikelihood
+# More info:                             https://twiki.cern.ch/twiki/bin/viewauth/CMS/QGDataBaseVersion
+process.load("Configuration.EventContent.EventContent_cff")
+process.load("Configuration.StandardSequences.GeometryRecoDB_cff")
+process.load('Configuration.StandardSequences.MagneticField_38T_cff')
+process.load('Configuration.StandardSequences.Services_cff')
+
+from JMEAnalysis.JetToolbox.jetToolbox_cff import jetToolbox
+jetToolbox( process, 'ak4', 'ak4JetSubs', 'out', addQGTagger=True, addPUJetID=True, postFix='New' )
+
+# Small fix to add the variables ptD, axis2, mult
+# see: https://hypernews.cern.ch/HyperNews/CMS/get/jet-algorithms/418/1.html
+getattr( process, 'patJetsAK4PFCHSNew').userData.userFloats.src += ['QGTagger'+'AK4PFCHSNew'+':ptD']
+getattr( process, 'patJetsAK4PFCHSNew').userData.userFloats.src += ['QGTagger'+'AK4PFCHSNew'+':axis2']
+getattr( process, 'patJetsAK4PFCHSNew').userData.userInts.src   += ['QGTagger'+'AK4PFCHSNew'+':mult']
+# =================================================================================================
+# Marina - end
+
 process.load("HiggsAnalysis/MiniAOD2TTree/PUInfo_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/TopPt_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Tau_cfi")

@@ -12,7 +12,7 @@ Jets = cms.VPSet(
     cms.PSet(
         branchname = cms.untracked.string("Jets"),
 #        src = cms.InputTag("patJetsReapplyJECAK4CHS"), # made from ak4PFJetsCHS
-        src = cms.InputTag("updatedPatJetsUpdatedJEC"),
+        src = cms.InputTag("selectedPatJetsAK4PFCHSNew"),#updatedPatJetsUpdatedJEC"),
 #        src = cms.InputTag("selectedPatJetsForMetT1T2SmearCorr"),
 #        src = cms.InputTag("cleanedPatJets"),
 #        src = cms.InputTag("patJetsReapplyJEC"),
@@ -30,7 +30,14 @@ Jets = cms.VPSet(
             "pfCombinedCvsBJetTags"
         ),
         userFloats = cms.vstring(
-#           "pileupJetId:fullDiscriminant"
+#            "pileupJetId:fullDiscriminant",
+            "AK4PFCHSNewpileupJetIdEvaluator:fullDiscriminant",
+            "QGTaggerAK4PFCHSNew:qgLikelihood",
+            "QGTaggerAK4PFCHSNew:ptD",
+            "QGTaggerAK4PFCHSNew:axis2",
+        ),       
+        userInts = cms.vstring(
+            "QGTaggerAK4PFCHSNew:mult",
         ),
     ),
 #    cms.PSet(
