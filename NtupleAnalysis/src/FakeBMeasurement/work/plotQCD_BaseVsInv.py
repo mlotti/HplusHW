@@ -104,11 +104,13 @@ def main(opts):
 
     # optModes = [""]                                                                                                                             
     # optModes = ["", "OptChiSqrCutValue50", "OptChiSqrCutValue100", "OptChiSqrCutValue200"]
-    optModes = ["",
-                "OptInvertedBJetsDiscrMaxCutValue0p82",
-                "OptInvertedBJetsDiscrMaxCutValue0p8",
-                "OptInvertedBJetsDiscrMaxCutValue0p75",
-                "OptInvertedBJetsDiscrMaxCutValue0p7"]
+    optModes = [""]#,
+                #"OptTriggerOR['HLT_PFHT400_SixJet30_DoubleBTagCSV_p056']",
+                #"OptTriggerOR['HLT_PFHT450_SixJet40_BTagCSV_p056']"]
+                #"OptInvertedBJetsDiscrMaxCutValue0p82",
+                #"OptInvertedBJetsDiscrMaxCutValue0p8",
+                #"OptInvertedBJetsDiscrMaxCutValue0p75",
+                #"OptInvertedBJetsDiscrMaxCutValue0p7"]
                 #"OptInvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeRandom",
                 #"OptInvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeDescendingBDiscriminator",
                 #"OptInvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeRandom",

@@ -218,7 +218,11 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
 def main(opts):
     Verbose("main function")
 
-    optModes = [""]
+    optModes = [""]#,
+                #"OptTriggerOR['HLT_PFHT400_SixJet30_DoubleBTagCSV_p056']",
+                #"OptTriggerOR['HLT_PFHT450_SixJet40_BTagCSV_p056']"
+                #]
+
     #optModes = ["", "OptChiSqrCutValue40", "OptChiSqrCutValue60", "OptChiSqrCutValue80", "OptChiSqrCutValue100", "OptChiSqrCutValue120", "OptChiSqrCutValue140"]
     #optModes = ["",
     #            "OptInvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeRandom",
@@ -429,7 +433,7 @@ def PlotAndFitTemplates(datasetsMgr, histoName, inclusiveFolder, opts):
     f_{QCD} : ~0.75118 +/- 0.00740 (data-driven plots looked great with this value)
     '''
     Print("Setting the fit-function to the QCD template", False)
-    FITMIN_QCD =  120  # 120
+    FITMIN_QCD =  80  # 120
     FITMAX_QCD = 1000 #1000
     bPtochos   = False #True
     if bPtochos:
@@ -445,11 +449,11 @@ def PlotAndFitTemplates(datasetsMgr, histoName, inclusiveFolder, opts):
                                                    defaultLowerLimit   = [par0[1], par1[1], par2[1], par3[1], par4[1] , par5[1], par6[1] ],
                                                    defaultUpperLimit   = [par0[2], par1[2], par2[2], par3[2], par4[2] , par5[2], par6[2] ])
     else:
-        par0 = [8.9743e-01,   0.0 ,    1.0] # lognorm_norm
-        par1 = [2.3242e+02, 200.0 , 1000.0] # lognorm_mean
-        par2 = [1.4300e+00,   0.5,    10.0] # lognorm_shape
-        par3 = [2.2589e+02, 100.0 ,  500.0] # gaus_mean
-        par4 = [4.5060e+01,   0.0 ,  100.0] # gaus_sigma
+        par0 = [8.7273e-01,   0.0 ,    1.0] # lognorm_norm
+        par1 = [2.3720e+02, 200.0 , 1000.0] # lognorm_mean
+        par2 = [1.4620e+00,   0.5,    10.0] # lognorm_shape
+        par3 = [2.3001e+02, 100.0 ,  500.0] # gaus_mean
+        par4 = [4.3290e+01,   0.0 ,  100.0] # gaus_sigma
         template_FakeB_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunctionAlt", boundary=0, norm=1, rejectPoints=0), FITMIN_QCD, FITMAX_QCD)
         template_FakeB_Inverted.setDefaultFitParam(defaultInitialValue = [par0[0], par1[0], par2[0], par3[0], par4[0] ],
                                                    defaultLowerLimit   = [par0[1], par1[1], par2[1], par3[1], par4[1] ],
@@ -482,13 +486,8 @@ def PlotAndFitTemplates(datasetsMgr, histoName, inclusiveFolder, opts):
     
     # Not really needed to plot the histograms again
     if 1:
-        #saveName = fileName.replace("/", "_").replace(".py", "")
         saveName = histoName
-
-        # Draw the histograms
         plots.drawPlot(p, saveName, **GetHistoKwargs(histoName) ) #the "**" unpacks the kwargs_ 
-
-        # Save plot in all formats
         SavePlot(p, saveName, os.path.join(opts.saveDir, "Fit", opts.optMode) ) 
     return
 
