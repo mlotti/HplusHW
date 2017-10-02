@@ -316,8 +316,13 @@ def PlotAndFitTemplates(datasetsMgr, histoName, inclusiveFolder, opts):
     # Rebin the EWK-MC histo (significant fit improvement - opposite effect for QCD fit)
     EWK_baseline.RebinX(2)
     EWK_inverted.RebinX(2)
-    FakeB_inverted.RebinX(1) #FIXME: Optimal is 1 (i.e. bin width of 10 GeV/c^{2})
-
+    FakeB_inverted.RebinX(1)
+    if 0:
+        print "+"*100
+        Print("FIXME: Optimal is 1 (i.e. bin width of 10 GeV/c^{2})")
+        print "+"*100
+        FakeB_inverted.RebinX(2)
+    
     # Create the final plot object
     compareHistos = [EWK_baseline]
     p = plots.ComparisonManyPlot(FakeB_inverted, compareHistos, saveFormats=[])
@@ -433,27 +438,32 @@ def PlotAndFitTemplates(datasetsMgr, histoName, inclusiveFolder, opts):
     f_{QCD} : ~0.75118 +/- 0.00740 (data-driven plots looked great with this value)
     '''
     Print("Setting the fit-function to the QCD template", False)
-    FITMIN_QCD =  80  # 120
-    FITMAX_QCD = 1000 #1000
-    bPtochos   = False #True
+    FITMIN_QCD =   90   #  120
+    FITMAX_QCD = 1000   # 1000
+    bPtochos   = False
     if bPtochos:
-        par0 = [9.55e-01,   0.0 ,    1.0] # lognorm_norm
-        par1 = [2.33e+02,   0.0 , 1000.0] # lognorm_mean
-        par2 = [1.44e+00,   0.5 ,   10.0] # lognorm_shape
-        par3 = [2.2e-03 ,   0.0 ,    1.0] # exp_const
-        par4 = [-6.2e-03,  -1.0 ,    0.0] # exp_coeff
-        par5 = [2.17e+02, 200.0 ,  250.0] # gaus_mean
-        par6 = [3.08e+01,   0.0 ,  100.0] # gaus_sigma
+        par0 = [  0.92,   0.0,   1.0] # lognorm_norm
+        par1 = [220.00, 180.0, 500.0] # lognorm_mean
+        par2 = [  1.44,   0.4,  10.0] # lognorm_shape
+        par3 = [   0.0,   0.0,   1.0] # exp_const
+        par4 = [  -0.01, -2.0,   0.0] # exp_coeff
+        par5 = [220.00, 100.0, 400.0] # gaus_mean
+        par6 = [ 40.00,   0.0,  60.0] # gaus_sigma
         template_FakeB_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunction", boundary=0, norm=1, rejectPoints=0), FITMIN_QCD, FITMAX_QCD)
         template_FakeB_Inverted.setDefaultFitParam(defaultInitialValue = [par0[0], par1[0], par2[0], par3[0], par4[0] , par5[0], par6[0] ],
                                                    defaultLowerLimit   = [par0[1], par1[1], par2[1], par3[1], par4[1] , par5[1], par6[1] ],
                                                    defaultUpperLimit   = [par0[2], par1[2], par2[2], par3[2], par4[2] , par5[2], par6[2] ])
     else:
-        par0 = [8.7273e-01,   0.0 ,    1.0] # lognorm_norm
-        par1 = [2.3720e+02, 200.0 , 1000.0] # lognorm_mean
-        par2 = [1.4620e+00,   0.5,    10.0] # lognorm_shape
-        par3 = [2.3001e+02, 100.0 ,  500.0] # gaus_mean
-        par4 = [4.3290e+01,   0.0 ,  100.0] # gaus_sigma
+        # par0 = [9.2578e-01,   0.0 ,    1.0] # lognorm_norm
+        # par1 = [2.3662e+02, 200.0 , 1000.0] # lognorm_mean
+        # par2 = [1.4436e+00,   0.5,    10.0] # lognorm_shape
+        # par3 = [2.2575e+02, 100.0 ,  500.0] # gaus_mean
+        # par4 = [3.6716e+01,   0.0 ,   60.0] # gaus_sigma
+        par0 = [  0.92,   0.0,   1.0] # lognorm_norm
+        par1 = [220.00, 180.0, 500.0] # lognorm_mean
+        par2 = [  1.44,   0.4,  10.0] # lognorm_shape
+        par3 = [220.00, 100.0, 400.0] # gaus_mean
+        par4 = [ 40.00,   0.0,  60.0] # gaus_sigma
         template_FakeB_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunctionAlt", boundary=0, norm=1, rejectPoints=0), FITMIN_QCD, FITMAX_QCD)
         template_FakeB_Inverted.setDefaultFitParam(defaultInitialValue = [par0[0], par1[0], par2[0], par3[0], par4[0] ],
                                                    defaultLowerLimit   = [par0[1], par1[1], par2[1], par3[1], par4[1] ],
