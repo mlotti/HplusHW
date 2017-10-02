@@ -124,12 +124,12 @@ void TauTriggerEfficiencyValidation::analyze( const edm::Event& iEvent, const ed
     iEvent.getByLabel(primaryVertexSrc,primaryVertices);
 
     const reco::VertexCollection vertexCollection = *(primaryVertices.product());
-    double pv_x = 0;
-    double pv_y = 0;
+    // double pv_x = 0;
+    // double pv_y = 0;
     double pv_z = 0;
     if(vertexCollection.size() > 0){
-        pv_x = vertexCollection.begin()->x();
-        pv_y = vertexCollection.begin()->y();
+      // pv_x = vertexCollection.begin()->x();
+      // pv_y = vertexCollection.begin()->y(); // Alexandros - 02 Oct 2017: Disabled. Declared but not used!
         pv_z = vertexCollection.begin()->z();
     }
 
