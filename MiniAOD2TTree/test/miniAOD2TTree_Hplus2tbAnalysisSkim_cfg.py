@@ -12,7 +12,7 @@ from HiggsAnalysis.MiniAOD2TTree.tools.HChOptions import getOptionsDataVersion
 #================================================================================================  
 # Options
 #================================================================================================  
-maxEvents    = 5000
+maxEvents    = 1000
 maxWarnings  = 100
 reportEvery  = 100
 testWithData = True
@@ -110,10 +110,8 @@ process.GlobalTag = GlobalTag(process.GlobalTag, str(dataVersion.getGlobalTag())
 
 
 #================================================================================================  
-# Set up tree dumper
+# Print Settings
 #================================================================================================  
-
-####
 msgAlign = "{:<10} {:<55} {:<25} {:<25}"
 title    =  msgAlign.format("Data", "Global Tag", "Trigger Source", "Trigger Tag")
 print "="*len(title)
@@ -121,44 +119,7 @@ print title
 print "="*len(title)
 print msgAlign.format(dataVersion.version, dataVersion.getGlobalTag(), dataVersion.getMETFilteringProcess(), dataVersion.getTriggerProcess())
 print 
-####
 
-#================================================================================================
-# Adding Jet Toolbox
-#================================================================================================
-'''
-JetToolbox twiki:
-https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetToolbox
- 
-Using the QGTagger with Jet Toolbox: 
-https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetToolbox#QGTagger
-
-QuarkGluonLikelihood twiki: 
-https://twiki.cern.ch/twiki/bin/view/CMS/QuarkGluonLikelihood
-
-More info:
-https://twiki.cern.ch/twiki/bin/viewauth/CMS/QGDataBaseVersion
-
-Small fix required to add the variables ptD, axis2, mult. See:
-https://hypernews.cern.ch/HyperNews/CMS/get/jet-algorithms/418/1.html
-'''
-process.load("Configuration.EventContent.EventContent_cff")
-process.load("Configuration.StandardSequences.GeometryRecoDB_cff")
-process.load('Configuration.StandardSequences.MagneticField_38T_cff')
-process.load('Configuration.StandardSequences.Services_cff')
-
-JEC = ['L1FastJet','L2Relative','L3Absolute']
-if dataVersion == "80Xdata":
-    JEC += ['L2L3Residual']
-
-from JMEAnalysis.JetToolbox.jetToolbox_cff import jetToolbox
-jetToolbox( process, 'ak4', 'ak4JetSubs', 'out', addQGTagger=True, addPUJetID=True, JETCorrLevels = JEC,
-            bTagDiscriminators = ['pfCombinedInclusiveSecondaryVertexV2BJetTags', 'pfCombinedMVAV2BJetTags','pfCombinedCvsBJetTags','pfCombinedCvsLJetTags'],
-            postFix='' )
-
-getattr( process, 'patJetsAK4PFCHS').userData.userFloats.src += ['QGTagger'+'AK4PFCHS'+':ptD']
-getattr( process, 'patJetsAK4PFCHS').userData.userFloats.src += ['QGTagger'+'AK4PFCHS'+':axis2']
-getattr( process, 'patJetsAK4PFCHS').userData.userInts.src   += ['QGTagger'+'AK4PFCHS'+':mult']
 
 #================================================================================================
 # Load processes
@@ -192,7 +153,10 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	LHESrc                      = cms.untracked.InputTag("externalLHEProducer"),
 	OfflinePrimaryVertexSrc     = cms.InputTag("offlineSlimmedPrimaryVertices"),
 	TopPtProducer               = cms.InputTag("TopPtProducer"),
-        SlimmedSecondaryVerticesSrc = cms.InputTag("slimmedSecondaryVertices"), 
+    ),
+    SoftBTag = cms.PSet(
+	PrimaryVertexSrc   = cms.InputTag("offlineSlimmedPrimaryVertices"),
+        SecondaryVertexSrc = cms.InputTag("slimmedSecondaryVertices"), 
     ),
     Trigger = cms.PSet(
 	TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess())),
@@ -274,7 +238,7 @@ process.skim.TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.ge
 # Setup customizations
 #================================================================================================ 
 from HiggsAnalysis.MiniAOD2TTree.CommonFragments import produceCustomisations
-produceCustomisations(process,dataVersion.isData()) # This produces process.CustomisationsSequence which needs to be included to path
+produceCustomisations(process, dataVersion.isData()) # This produces process.CustomisationsSequence which needs to be included to path
 
 
 #================================================================================================ 

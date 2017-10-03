@@ -3,16 +3,11 @@
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
-#include "RecoVertex/VertexTools/interface/VertexDistance.h"
-#include "RecoVertex/VertexTools/interface/VertexDistance3D.h"
-#include "RecoVertex/VertexTools/interface/VertexDistanceXY.h"
-
 
 EventInfoDumper::EventInfoDumper(edm::ConsumesCollector&& iConsumesCollector, const edm::ParameterSet& pset)
 : puSummaryToken(iConsumesCollector.consumes<std::vector<PileupSummaryInfo>>(pset.getParameter<edm::InputTag>("PileupSummaryInfoSrc"))),
   lheToken(iConsumesCollector.consumes<LHEEventProduct>(pset.getUntrackedParameter<edm::InputTag>("LHESrc", edm::InputTag("")))),
-  vertexToken(iConsumesCollector.consumes<edm::View<reco::Vertex>>(pset.getParameter<edm::InputTag>("OfflinePrimaryVertexSrc"))),
-  secvertexToken(iConsumesCollector.consumes<edm::View<reco::VertexCompositePtrCandidate>>(pset.getParameter<edm::InputTag>("SlimmedSecondaryVerticesSrc")))
+  vertexToken(iConsumesCollector.consumes<edm::View<reco::Vertex>>(pset.getParameter<edm::InputTag>("OfflinePrimaryVertexSrc")))
 //  topPtToken(iConsumesCollector.consumes<double>(pset.getParameter<edm::InputTag>("TopPtProducer")))
 {
     bookTopPt = false;
@@ -45,20 +40,7 @@ void EventInfoDumper::book(TTree* tree){
     if(bookTopPt)
     tree->Branch("topPtWeight", &topPtWeight);
 
-    // Secondary Vertex Collection
-    tree->Branch("svPt", &svPt);
-    tree->Branch("svEta", &svEta);
-    tree->Branch("svPhi", &svPhi);
-    tree->Branch("svMass", &svMass);
-    tree->Branch("svNTks", &svNTks);
-    tree->Branch("svChi2", &svChi2);
-    tree->Branch("svNdof", &svNdof);
-    tree->Branch("svDxy", &svDxy);
-    tree->Branch("svDxyErr", &svDxyErr);
-    tree->Branch("svD3d", &svD3d);
-    tree->Branch("svD3dErr", &svD3dErr);
-    tree->Branch("costhetasvpv", &costhetasvpv);
-
+    return;
 }
 
 bool EventInfoDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
@@ -143,27 +125,6 @@ bool EventInfoDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
       topPtWeight = *(topPtHandle.product());
     }
 
-    // Secondary Vertex collection
-    reco::Vertex PV = hoffvertex->at(0); //getting PV from above.
-    edm::Handle<edm::View<reco::VertexCompositePtrCandidate> > secvertex;
-    if(iEvent.getByToken(secvertexToken, secvertex)){
-      for(size_t isv = 0; isv<secvertex->size(); isv++ ){
-        const reco::VertexCompositePtrCandidate &sv = (*secvertex)[isv];
-        svPt         = sv.pt();
-        svEta        = sv.eta();
-        svPhi        = sv.phi();
-        svMass       = sv.mass();
-        svNTks       = sv.numberOfDaughters();
-        svChi2       = sv.vertexChi2();
-        svNdof       = sv.vertexNdof();
-        svDxy        = vertexDxy(sv,PV).value();
-        svDxyErr     = vertexDxy(sv,PV).error();
-        svD3d        = vertexD3d(sv,PV).value();
-        svD3dErr     = vertexD3d(sv,PV).error();
-        costhetasvpv = vertexDdotP(sv, PV);
-      }//eof: loop on sec vertex
-    }//eof: sec vertex handle
-    
     return filter();
 }
 
@@ -172,27 +133,5 @@ bool EventInfoDumper::filter(){
 }
 
 void EventInfoDumper::reset(){
-}
-
-Measurement1D EventInfoDumper::vertexD3d(const reco::VertexCompositePtrCandidate &svcand,
-                                         const reco::Vertex &pv) const{
-  VertexDistance3D dist;
-  reco::Vertex::CovarianceMatrix csv; svcand.fillVertexCovariance(csv);
-  reco::Vertex svtx(svcand.vertex(), csv);
-  return dist.distance(svtx, pv);
-}
-
-Measurement1D EventInfoDumper::vertexDxy(const reco::VertexCompositePtrCandidate &svcand,
-                                         const reco::Vertex &pv) const{
-  VertexDistanceXY dist;
-  reco::Vertex::CovarianceMatrix csv; svcand.fillVertexCovariance(csv);
-  reco::Vertex svtx(svcand.vertex(), csv);
-  return dist.distance(svtx, pv);
-}
-
-float EventInfoDumper::vertexDdotP(const reco::VertexCompositePtrCandidate &sv, const
-                                   reco::Vertex &pv) const{
-  reco::Candidate::Vector p = sv.momentum();
-  reco::Candidate::Vector d(sv.vx() - pv.x(), sv.vy() - pv.y(), sv.vz() - pv.z());
-  return p.Unit().Dot(d.Unit());
+  return;
 }
