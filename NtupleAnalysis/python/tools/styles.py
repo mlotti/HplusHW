@@ -249,32 +249,7 @@ signalHH160Style = signalHHStyle.clone()
 
 signal180Style = signalStyle.clone()
 signal190Style = signalStyle.clone()
-"""
-# Problem with StyleCompound: solid signal histo in control plots. 13122016/SL
-signal200Style = StyleCompound([
-        Style(ROOT.kFullCross, ROOT.kBlue), 
-        StyleMarker(markerSize=1.2, markerColor=ROOT.kBlue, markerSizes=None, markerStyle=ROOT.kFullCross),
-        StyleFill(fillStyle=1001, fillColor=ROOT.kBlue), 
-        StyleLine(lineStyle=ROOT.kDashed, lineWidth=3, lineColor=ROOT.kBlue) ])
-signal220Style = signalStyle.clone()
-signal250Style = signalStyle.clone()
-signal300Style = StyleCompound([
-        Style(ROOT.kFullTriangleUp, ROOT.kRed), 
-        StyleMarker(markerSize=1.2, markerColor=ROOT.kRed, markerSizes=None, markerStyle=ROOT.kFullTriangleUp),
-        StyleFill(fillStyle=1001, fillColor=ROOT.kRed), 
-        StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kRed) ])
-signal350Style = signalStyle.clone()
-signal400Style = StyleCompound([
-        Style(ROOT.kFullTriangleDown, ROOT.kSpring+5), 
-        StyleMarker(markerSize=1.2, markerColor=ROOT.kSpring+5, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
-        StyleFill(fillStyle=1001, fillColor=ROOT.kSpring+5), 
-        StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kSpring+5) ])
-signal500Style = StyleCompound([
-        Style(ROOT.kFullCircle, ROOT.kBlue+3), 
-        StyleMarker(markerSize=1.2, markerColor=ROOT.kBlue+3, markerSizes=None, markerStyle=ROOT.kFullCircle),
-        StyleFill(fillStyle=1001, fillColor=ROOT.kBlue+3), 
-        StyleLine(lineStyle=ROOT.kDashed, lineWidth=3, lineColor=ROOT.kBlue+3) ])
-"""
+
 signal200Style = signalStyle.clone()
 signal220Style = signalStyle.clone()
 signal250Style = signalStyle.clone()
@@ -290,6 +265,40 @@ signal1000Style = signalStyle.clone()
 signal1500Style = signalStyle.clone()
 signal2000Style = signalStyle.clone()
 signal3000Style = signalStyle.clone()
+
+
+# Problem with StyleCompound: solid signal histo in control plots. 13122016/SL
+signal200Style = StyleCompound([
+        Style(ROOT.kFullCross, ROOT.kBlue), 
+#        StyleMarker(markerSize=1.2, markerColor=ROOT.kBlue, markerSizes=None, markerStyle=ROOT.kFullCross),
+#        StyleFill(fillStyle=1001, fillColor=ROOT.kBlue), 
+        StyleLine(lineStyle=ROOT.kDashed, lineWidth=3, lineColor=ROOT.kBlue) ])
+signal220Style = signalStyle.clone()
+signal250Style = signalStyle.clone()
+signal300Style = StyleCompound([
+        Style(ROOT.kFullCross, ROOT.kRed), 
+#        StyleMarker(markerSize=1.2, markerColor=ROOT.kRed, markerSizes=None, markerStyle=ROOT.kFullTriangleUp),
+#        StyleFill(fillStyle=1001, fillColor=ROOT.kRed), 
+        StyleLine(lineStyle=ROOT.kDashed, lineWidth=3, lineColor=ROOT.kRed) ])
+signal350Style = signalStyle.clone()
+signal400Style = StyleCompound([
+        Style(ROOT.kFullTriangleDown, ROOT.kSpring+5), 
+#        StyleMarker(markerSize=1.2, markerColor=ROOT.kSpring+5, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
+#        StyleFill(fillStyle=1001, fillColor=ROOT.kSpring+5), 
+        StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kSpring+5) ])
+#signal500Style = StyleCompound([
+#        Style(ROOT.kFullCircle, ROOT.kBlue+3), 
+#        StyleMarker(markerSize=1.2, markerColor=ROOT.kBlue+3, markerSizes=None, markerStyle=ROOT.kFullCircle),
+#        StyleFill(fillStyle=1001, fillColor=ROOT.kBlue+3), 
+#        StyleLine(lineStyle=ROOT.kDashed, lineWidth=3, lineColor=ROOT.kBlue+3) ])
+signal500Style = StyleCompound([
+        Style(ROOT.kFullCross, ROOT.kPink+3),
+#        StyleMarker(markerSize=1.2, markerColor=ROOT.kBlue+3, markerSizes=None, markerStyle=ROOT.kFullCircle),
+#        StyleFill(fillStyle=1001, fillColor=ROOT.kBlue+3),
+        StyleLine(lineStyle=ROOT.kDashed, lineWidth=3, lineColor=ROOT.kPink+3) ])
+
+###
+
 
 dibStyle          = Style(ROOT.kMultiply, ROOT.kBlue-4)
 dyStyle           = Style(ROOT.kStar, ROOT.kTeal-9)
@@ -318,6 +327,7 @@ wwStyle           = Style(ROOT.kMultiply, ROOT.kPink-9)
 wzStyle           = Style(ROOT.kMultiply, ROOT.kPink-7)
 zjetsStyle        = Style(ROOT.kFullCross, ROOT.kRed-7)
 zzStyle           = Style(ROOT.kMultiply, ROOT.kPink-5)
+
 baselineStyle     = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kBlue, markerSizes=None, markerStyle=ROOT.kFullTriangleUp),
                                    StyleLine(lineColor=ROOT.kBlue, lineStyle=ROOT.kSolid, lineWidth=3), 
                                    StyleFill(fillColor=ROOT.kBlue, fillStyle=1001)])

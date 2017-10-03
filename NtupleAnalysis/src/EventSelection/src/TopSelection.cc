@@ -30,6 +30,7 @@ TopSelection::Data::Data()
   fTetrajet2_p4(),
   fLdgTetrajet_p4(),
   fSubldgTetrajet_p4()
+  //  LdgTopRec() //Soti
 { }
 
 TopSelection::Data::~Data() { }
@@ -586,8 +587,13 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
       hLdgTrijetPtDR      ->Fill(output.fTrijet1_p4.pt() * ROOT::Math::VectorUtil::DeltaR(output.fTrijet1Dijet_p4, output.fTrijet1BJet.p4()));
       hLdgTrijetDiJetPtDR ->Fill(output.fTrijet1Dijet_p4.pt() * ROOT::Math::VectorUtil::DeltaR( output.fTrijet1Jet1.p4(), output.fTrijet1Jet2.p4()));
       hLdgTrijetBJetMass  ->Fill(output.fTrijet1BJet.p4().mass());
+    
+      //Soti
+      // output.LdgTopRec.PtDR = output.fTrijet1_p4.pt() * ROOT::Math::VectorUtil::DeltaR(output.fTrijet1Dijet_p4, output.fTrijet1BJet.p4());
+      // output.LdgTopRec.DijetPtDR = output.fTrijet1Dijet_p4.pt() * ROOT::Math::VectorUtil::DeltaR( output.fTrijet1Jet1.p4(), output.fTrijet1Jet2.p4());
+      // output.LdgTopRec.BJetMass = output.fTrijet1BJet.p4().mass();
+      //Soti
 
-      
       if (output.fTrijet1Jet1.pt()  > output.fTrijet1Jet2.pt())
 	{
 	  hLdgTrijetLdgJetPt       ->Fill(output.fTrijet1Jet1.pt());
@@ -598,6 +604,9 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
 	  hLdgTrijetSubldgJetBDisc ->Fill(output.fTrijet1Jet2.bjetDiscriminator());
 	  hLdgTrijetBJetLdgJetMass    ->Fill( (output.fTrijet1BJet.p4() + output.fTrijet1Jet1.p4()).mass());
 	  hLdgTrijetBJetSubldgJetMass ->Fill( (output.fTrijet1BJet.p4() + output.fTrijet1Jet2.p4()).mass());
+
+
+
 	}
       else
 	{
@@ -680,6 +689,12 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
       hLdgTrijetPtDR      ->Fill(output.fTrijet2_p4.pt() * ROOT::Math::VectorUtil::DeltaR(output.fTrijet2Dijet_p4, output.fTrijet2BJet.p4()));
       hLdgTrijetDiJetPtDR ->Fill(output.fTrijet2Dijet_p4.pt() * ROOT::Math::VectorUtil::DeltaR( output.fTrijet2Jet1.p4(), output.fTrijet2Jet2.p4()));
       hLdgTrijetBJetMass  ->Fill(output.fTrijet2BJet.p4().mass());
+      
+      //Soti
+      // output.LdgTopRec.PtDR = output.fTrijet2_p4.pt() * ROOT::Math::VectorUtil::DeltaR(output.fTrijet2Dijet_p4, output.fTrijet2BJet.p4());
+      // output.LdgTopRec.DijetPtDR = output.fTrijet2Dijet_p4.pt() * ROOT::Math::VectorUtil::DeltaR( output.fTrijet2Jet1.p4(), output.fTrijet2Jet2.p4());
+      //Soti
+
       
       if (output.fTrijet2Jet1.pt()  > output.fTrijet2Jet2.pt())
 	{

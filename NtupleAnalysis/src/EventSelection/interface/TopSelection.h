@@ -8,6 +8,9 @@
 #include "DataFormat/interface/Jet.h"
 #include "Framework/interface/EventCounter.h"
 #include "Tools/interface/DirectionalCut.h"
+//soti
+//#include "EventSelection/interface/TopRec.h"
+//soti
 
 #include <string>
 #include <vector>
@@ -115,6 +118,9 @@ public:
     const double ChiSqr() const { return fChiSqr; }
     const unsigned int getNumberOfFits() const { return fNumberOfFits;}
 
+    //Soti
+    //    const TopRec getLdgTopRec() const {return LdgTopRec;}
+
     friend class TopSelection;
 
   private:
@@ -148,8 +154,10 @@ public:
     math::XYZTLorentzVector fDijetWithMinDR_p4;
     // DijetWithMaxDR
     math::XYZTLorentzVector fDijetWithMaxDR_p4;
+    //soti    TopRec LdgTopRec;
   };
-  
+
+
   // Main class
   /// Constructor with histogramming
   explicit TopSelection(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix = "");
