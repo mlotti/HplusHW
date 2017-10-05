@@ -107,8 +107,8 @@ jetSelection = PSet(
 # B-jet selection
 #================================================================================================
 bjetSelection = PSet(
-    triggerMatchingApply      = False,
-    triggerMatchingCone       = 0.1,  # DeltaR for matching offline bjet with trigger::TriggerBjet
+    triggerMatchingApply      = False, # Do NOT enable until the HLTBJet collection is fixed (no duplicates)
+    triggerMatchingCone       = 0.1,   # DeltaR for matching offline bjet with trigger::TriggerBjet
     jetPtCuts                 = [40.0, 40.0, 30.0],
     jetEtaCuts                = [2.4],
     bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
@@ -178,11 +178,12 @@ topologySelection = PSet(
 # Top selection
 #================================================================================================
 topSelection = PSet(
+    # Basic values
     ChiSqrCutValue     = 10.0,
     ChiSqrCutDirection =  "<",   # options: ==, !=, <, <=, >, >=
-    LowLdgTrijetMassCutValue      = 150.0,
+    LowLdgTrijetMassCutValue      = 0.0,
     LowLdgTrijetMassCutDirection  = ">=",
-    HighLdgTrijetMassCutValue      = 210.0,
+    HighLdgTrijetMassCutValue      = 900000.0,
     HighLdgTrijetMassCutDirection  = "<=",
     MassW              = 80.385,
     DiJetSigma         = 10.2,
@@ -197,6 +198,8 @@ topSelection = PSet(
     dijetWithMaxDR_tetrajetBjet_dPhi_min        = +2.5, # Disable: 0.0, Default: +2.5
     dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept = +3.0, # Disable:-1.0, Default: +3.0
     dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff = -1.0, # Disable: 0.0, Default: -1.0
+    # For Testing (perfect jet resolution)
+    ReplaceJetsWithGenJets = False,
 )
 
 
@@ -207,20 +210,24 @@ if 0:
     scaleFactors.assignMETTriggerSF(metSelection, bjetSelection.bjetDiscrWorkingPoint, "nominal")
 
 
-#================================================================================================
+#=====OA===========================================================================================
 # FakeB Measurement Options
 #================================================================================================
 fakeBMeasurement = PSet(
     prelimTopFitChiSqrCutValue        = 100.0,
-    prelimTopFitChiSqrCutDirection    =  "<",   # options: ==, !=, <, <=, >, >=
+    prelimTopFitChiSqrCutDirection    =  "<",     # options: ==, !=, <, <=, >, >=
     #
-    numberOfBJetsCutValue             = 2,
-    numberOfBJetsCutDirection         = "==", # options: ==, !=, <, <=, >, >=
+    numberOfBJetsCutValue             = 2,        # default: 2
+    numberOfBJetsCutDirection         = "==",     # default: ==, options: ==, !=, <, <=, >, >=
     #
-    numberOfInvertedBJetsCutValue     = 0,
-    numberOfInvertedBJetsCutDirection = ">", # options: ==, !=, <, <=, >, >=
-    invertedBJetDiscr                 = bjetSelection.bjetDiscr,
-    invertedBJetWorkingPoint          = "Loose",
+    numberOfInvertedBJetsCutValue     = 1,        # i.e. additional to the selected b-jets
+    numberOfInvertedBJetsCutDirection = ">=",     # options: ==, !=, <, <=, >, >=
+    invertedBJetsSortType             = "Random", # options: "AscendingPt", "DescendingPt", "AscendingBDiscriminator", "DescendingBDiscriminator", "Random"
+    invertedBJetsDiscr                = bjetSelection.bjetDiscr,
+    invertedBJetsWorkingPoint         = "Loose",
+    invertedBJetsDiscrMaxCutValue     = 0.7,      # medium = 0.8484
+    invertedBJetsDiscrMaxCutDirection = "<",      # options: ==, !=, <, <=, >, >=
+
     )
 
 

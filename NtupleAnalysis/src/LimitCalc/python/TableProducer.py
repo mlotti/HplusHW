@@ -1,8 +1,14 @@
-## \package TableProducer
-# Classes for producing output
-#
-#
+'''
+\package TableProducer
 
+DESCRIPTION:
+Classes for producing output
+
+'''
+
+#================================================================================================ 
+# Import modules
+#================================================================================================ 
 from HiggsAnalysis.LimitCalc.Extractor import ExtractorBase
 from HiggsAnalysis.LimitCalc.DatacardColumn import DatacardColumn
 from HiggsAnalysis.LimitCalc.ControlPlotMaker import ControlPlotMaker
@@ -17,12 +23,37 @@ import sys
 import time
 import ROOT
 
-## Creates and returns a list of bin-by-bin stat. uncert. histograms
-# Inputs:
-#   hRate  rate histogram
-#   xmin   float, specifies minimum value for which bin-by-bin histograms are created (default: all)
-#   xmax   float, specifies maximum value for which bin-by-bin histograms are created (default: all)
+
+#================================================================================================ 
+# Function definition
+#================================================================================================ 
+#def Verbose(msg, printHeader=False):
+#    if not Verbose:
+#        return
+#    if printHeader:
+#        print "=== dcardHplus2tb2017Datacard_v2.py:"
+#
+#    if msg !="":
+#        print "\t", msg
+#    return
+
+def Print(msg, printHeader=True):
+    fName = __file__.split("/")[-1]
+    if printHeader:
+        print "=== ", fName
+    if msg !="":
+        print "\t", msg
+    return
+
+
 def createBinByBinStatUncertHistograms(hRate, minimumStatUncertainty=0.5, xmin=None, xmax=None):
+    '''
+    Creates and returns a list of bin-by-bin stat. uncert. histograms
+    Inputs:
+    hRate  rate histogram
+    xmin   float, specifies minimum value for which bin-by-bin histograms are created (default: all)
+    xmax   float, specifies maximum value for which bin-by-bin histograms are created (default: all)
+    '''
     myList = []
     myName = hRate.GetTitle()
     # Construct range
@@ -32,44 +63,72 @@ def createBinByBinStatUncertHistograms(hRate, minimumStatUncertainty=0.5, xmin=N
         myRangeMin = hRate.GetXaxis().GetBinLowEdge(1)
     if myRangeMax == None:
         myRangeMax = hRate.GetXaxis().GetBinUpEdge(hRate.GetNbinsX())
-    # Loop over bins
+
+
+    nNegativeRate = 0
+    nBelowMinStatUncert = 0
+    # For-loop: All histogram bins
     for i in range(1, hRate.GetNbinsX()+1):
         #print hRate.GetXaxis().GetBinLowEdge(i), xmin, hRate.GetXaxis().GetBinUpEdge(i), xmax
+        
         if hRate.GetXaxis().GetBinLowEdge(i) > myRangeMin-0.0001 and hRate.GetXaxis().GetBinUpEdge(i) < myRangeMax+0.0001:
-            #print "*"
-            hUp = aux.Clone(hRate, "%s_%s_statBin%dUp"%(myName,myName,i))
-            hDown = aux.Clone(hRate, "%s_%s_statBin%dDown"%(myName,myName,i))
+
+            hUp   = aux.Clone(hRate, "%s_%s_statBin%dUp"  % (myName, myName,i) )
+            hDown = aux.Clone(hRate, "%s_%s_statBin%dDown"% (myName, myName,i) )
             hUp.SetTitle(hUp.GetName())
             hDown.SetTitle(hDown.GetName())
+
+            # Sanity check
             if hRate.GetBinContent(i) < minimumStatUncertainty:
+                nBelowMinStatUncert += 1
                 hUp.SetBinContent(i, minimumStatUncertainty)
-                print ShellStyles.WarningLabel()+"Rate is zero for bin %d, setting up stat. uncert. to %f for %s."%(i,minimumStatUncertainty,hRate.GetTitle())
+                #msg = "Rate is zero for bin %d. Setting up stat. uncert. to %f for %s."% (i, minimumStatUncertainty, hRate.GetTitle())
+                # Print(ShellStyles.WarningLabel() + msg)
+
                 if hRate.GetBinContent(i) < 0.0:
-                    print ShellStyles.WarningLabel()+"Rate is negative for bin %d, continue at your own risk!"%i
+                    nNegativeRate += 1
+                    #msg = "Rate is negative for bin %d, continue at your own risk!" % (i)
+                    # Print(ShellStyles.WarningLabel() + msg)
             else:
-                hUp.SetBinContent(i, hUp.GetBinContent(i)+hUp.GetBinError(i))
+                hUp.SetBinContent(i, hUp.GetBinContent(i) + hUp.GetBinError(i))
             
             hDown.SetBinContent(i, hDown.GetBinContent(i)-hDown.GetBinError(i))
+
             # Clear uncertainty bins, because they have no effect on LandS/Combine
             for j in range(1, hRate.GetNbinsX()+1):
                 hUp.SetBinError(j, 0.0)
                 hDown.SetBinError(j, 0.0)
+
+            # Append to list before returning it
             myList.append(hUp)
             myList.append(hDown)
+
+    # Print summarty of warnings/errors (if any)
+    if nNegativeRate > 0:
+        msg = "Rate value for \"%s\" was negative (hence forced to zero) in %d bins" % (hRate.GetName(), nNegativeRate)
+        Print(ShellStyles.WarningLabel() + msg)
+    if nBelowMinStatUncert > 0:
+        msg = "Rate value for \"%s\" was below minimum statistical uncertainty (hence set to default min of %f) in %d bins" % (hRate.GetName(), minimumStatUncertainty, nBelowMinStatUncert)
+        Print(ShellStyles.WarningLabel() + msg, False)
+
     return myList
 
-## Creates and returns a list of bin-by-bin stat. uncert. name strings
-# Inputs:
-#   hRate  rate histogram
 def createBinByBinStatUncertNames(hRate):
+    '''
+    Creates and returns a list of bin-by-bin stat. uncert. name strings
+    Inputs:
+    hRate  rate histogram
+    '''
     myList = []
     myName = hRate.GetTitle()
     for i in range(1, hRate.GetNbinsX()+1):
         myList.append(myName+"_statBin%d"%i)
     return myList
 
-## Calculates maximum width of each table cell
 def calculateCellWidths(widths,table):
+    '''
+    Calculates maximum width of each table cell
+    '''
     myResult = widths
     # Initialise widths if necessary
     if len(table) == 0:
@@ -111,10 +170,15 @@ def getTableOutput(widths,table,latexMode=False):
         myResult += "\n"
     return myResult
 
-## TableProducer class
+
+#================================================================================================ 
+# Class definition
+#================================================================================================ 
 class TableProducer:
-    ## Constructor
     def __init__(self, opts, config, outputPrefix, luminosity, observation, datasetGroups, extractors, mcrabInfoOutput):
+        '''
+        Constructor
+        '''
         self._opts = opts
         self._config = config
         self._outputPrefix = outputPrefix
@@ -152,52 +216,78 @@ class TableProducer:
         if self._config.OptionDoControlPlots:
             ControlPlotMaker(self._opts, self._config, self._ctrlPlotDirname, self._luminosity, self._observation, self._datasetGroups)
         else:
-            print "\n"+ShellStyles.WarningLabel()+"Skipped making of data-driven Control plots. To enable, set OptionDoControlPlots = True in the input datacard."
+            msg = "Skipped making of data-driven control plots. To enable, set OptionDoControlPlots = True in the input datacard."
+            if self._opts.verbose:
+                Print(ShellStyles.WarningLabel() + msg)
 
         # Make other reports
-        print "\n"+ShellStyles.HighlightStyle()+"Generating reports"+ShellStyles.NormalStyle()
+        if self._opts.verbose:
+            Print(ShellStyles.HighlightStyle() + "Generating reports" + ShellStyles.NormalStyle())
+
         # Print table of shape variation for shapeQ nuisances
         self.makeShapeVariationTable()
+
         # Print event yield summary table
         self.makeEventYieldSummary()
+
         # Print systematics summary table
         self.makeSystematicsSummary(light=True)
         self.makeSystematicsSummary(light=False)        
+
         # Prints QCD purity information
         #self.makeQCDPuritySummary() #FIXME missing
 
         # Make datacards
-        self.makeDataCards()
+        self.makeDataCards()        
 
-        # Debugging info
         # Make copy of input datacard
-        os.system("cp %s %s/input_datacard.py"%(self._opts.datacard,self._infoDirname))
+        os.system("cp %s %s/input_datacard.py" % (self._opts.datacard, self._infoDirname) )
+
         # Write input multicrab directory names
-        f = open(os.path.join(self._infoDirname, "inputDirectories.txt"), "w")
-        f.write("\n".join(map(str, mcrabInfoOutput))+"\n")
-        f.close()
-        f = open(os.path.join(self._infoDirname, "codeVersion.txt"), "w")
-        f.write(git.getCommitId()+"\n")
-        f.close()
-        f = open(os.path.join(self._infoDirname, "codeStatus.txt"), "w")
-        f.write(git.getStatus()+"\n")
-        f.close()
-        f = open(os.path.join(self._infoDirname, "codeDiff.txt"), "w")
-        f.write(git.getDiff()+"\n")
-        f.close()
+        fileAndContents = {}
+        filePath     = os.path.join(self._infoDirname, "inputDirectories.txt")
+        fileContents = "\n".join(map(str, mcrabInfoOutput)) + "\n"
+        fileAndContents[filePath] = fileContents
+
+        filePath     = os.path.join(self._infoDirname, "codeVersion.txt")
+        fileContents = git.getCommitId()+"\n"
+        fileAndContents[filePath] = fileContents
+
+        filePath      = os.path.join(self._infoDirname, "codeStatus.txt")
+        fileContents = git.getStatus()+"\n"
+        fileAndContents[filePath] = fileContents
+
+        filePath     = os.path.join(self._infoDirname, "codeDiff.txt")
+        fileContents = git.getDiff()+"\n"
+        fileAndContents[filePath] = fileContents
         
+        # For-loop: All file path-content pairs
+        for index, theFile in enumerate(fileAndContents, 1):
+            theContents = fileAndContents[theFile]
+            f = open(theFile, "w")
+            f.write(theContents)
+            f.close()
+            # Inform user of code status txt files
+            msg = "Created file " 
+            Print(msg + ShellStyles.SuccessStyle() + theFile + ShellStyles.NormalStyle(), index==1)
+
         self._extractors = extractors[:]
         
         # Create for each shape nuisance a variation 
         if opts.testShapeSensitivity:
             self._createDatacardsForShapeSensitivityTest()
-            
-    ## Returns name of results directory
+        return
+
     def getDirectory(self):
+        '''
+        Returns name of results directory
+        '''
         return self._dirname
 
-    ## Generates datacards
     def makeDataCards(self):
+        '''
+        Generates datacards
+        '''
 
         # For combine, do some formatting
         if self._opts.combine and not self._purgeColumnsWithSmallRateDoneStatus:
@@ -205,6 +295,8 @@ class TableProducer:
             mySmallestColumnId = 9
             # Find and remove empty column
             myRemoveList = []
+            
+            # For-loop: Dataset groups
             for c in self._datasetGroups:
                 if c.getLandsProcess() < mySmallestColumnId:
                     mySmallestColumnId = c.getLandsProcess()
@@ -214,6 +306,8 @@ class TableProducer:
             if len(myRemoveList) > 0:
                 self._datasetGroups.remove(c)
                 print "Removed empty column for combine datacard"
+
+            # For-loop: Dataset groups
             for c in self._datasetGroups:
                 if c.getLandsProcess() > mySubtractAfterId:
                     c._landsProcess = c.getLandsProcess() - 1
@@ -224,29 +318,42 @@ class TableProducer:
 
         self._purgeColumnsWithSmallRate()
 
-        # Loop over mass points
-        for m in self._config.MassPoints:
-            print "\n"+ShellStyles.HighlightStyle()+"Generating datacard for mass point %d for "%m +self._outputPrefix+ShellStyles.NormalStyle()
+        # For-loop: All mass points
+        for index, m in enumerate(self._config.MassPoints):
+            
+            # massString = ShellStyles.HighlightAltStyle() + str(m) + ShellStyles.NormalStyle()
+            # outString  = ShellStyles.HighlightAltStyle() + self._outputPrefix + ShellStyles.NormalStyle()
+            # msg = "Generating datacard for mass point %s for %s" % (massString, outString)
+            msg = "Generating datacard %s/%s" % (index+1, len(self._config.MassPoints)) #for mass point %s for %s" % (massString, outString)
+            Print(ShellStyles.HighlightAltStyle() + msg + ShellStyles.NormalStyle() )
+
             # Open output root file
             myFilename = self._dirname+"/"+self._outputFileStem+"%d.txt"%m
             myRootFilename = self._dirname+"/"+self._outputRootFileStem+"%d.root"%m
             myRootFile = ROOT.TFile.Open(myRootFilename, "RECREATE")
+
             if myRootFile == None:
-                print ErrorStyle()+"Error:"+ShellStyles.NormalStyle()+" Cannot open file '"+myRootFilename+"' for output!"
+                msg = " Cannot open file %s for output!" % (myRootFilename)
+                Print(ShellStyles.ErrorLabel() + msg + ShellStyles.NormalStyle())
                 sys.exit()
+
             # Invoke extractors
             if self._opts.verbose:
                 print "TableProducer/producing observation line"
             myObservationLine = self._generateObservationLine()
+
             if self._opts.verbose:
                 print "TableProducer/producing rate line"
             myRateHeaderTable = self._generateRateHeaderTable(m)
             myRateDataTable = self._generateRateDataTable(m)
+
             if self._opts.verbose:
                 print "TableProducer/producing nuisance lines"
             myNuisanceTable = self._generateNuisanceTable(m)
+
             if self._opts.verbose:
                 print "TableProducer/producing bin-by-bin stat. lines"
+
             myBinByBinStatUncertTable = self._generateBinByBinStatUncertTable(m)
             # Calculate dimensions of tables
             myWidths = []
@@ -273,26 +380,31 @@ class TableProducer:
             if self._opts.combine:
                 myCard += mySeparatorLine
                 myCard += getTableOutput(myWidths,myBinByBinStatUncertTable)
+
             # Print datacard to screen if requested
             if self._opts.showDatacard:
                 if self._config.BlindAnalysis:
                     print ShellStyles.WarningStyle()+"You are BLINDED: Refused cowardly to print datacard on screen (you're not supposed to look at it)!"+ShellStyles.NormalStyle()
                 else:
                     print myCard
-            # Save datacard to file
+
+            # Save & close datacard to file
             myFile = open(myFilename, "w")
             myFile.write(myCard)
             myFile.close()
-            print "Written datacard to:",myFilename
-            # Save histograms to root file
+            Print("Written datacard to %s" % (ShellStyles.SuccessStyle() + myFilename + ShellStyles.NormalStyle() ))
+
+            # Save & close histograms to root file
             self._saveHistograms(myRootFile,m),
-            # Close root file
             myRootFile.Write()
             myRootFile.Close()
-            print "Written shape root file to:",myRootFilename
+            Print("Written shape ROOT file to %s" % (ShellStyles.SuccessStyle() + myRootFilename + ShellStyles.NormalStyle() ))
+        return
 
-    ## Purge columns with zero rate
     def _purgeColumnsWithSmallRate(self):
+        '''
+        Purge columns with zero rate
+        '''
         if self._purgeColumnsWithSmallRateDoneStatus:
             return
         myLastUntouchableLandsProcessNumber = 0 # For sigma x br
@@ -422,22 +534,31 @@ class TableProducer:
         myResult.append(myRow)
         return myResult
 
-    ## Generates nuisance table as list
-    def _generateNuisanceTable(self,mass):
-        myResult = []
-        myVetoList = [] # List of nuisance id's to veto
+    def _generateNuisanceTable(self, mass):
+        '''
+        Generates nuisance table as list
+        '''
+        myResult     = []
+        myVetoList   = [] # List of nuisance id's to veto
         mySingleList = [] # List of nuisance id's that apply only to single column
+
         # Suppress nuisance rows that are not affecting anything
         for n in self._extractors:
             myCount = 0
+
             for c in self._datasetGroups:
                 if c.isActiveForMass(mass,self._config) and n.isPrintable() and c.hasNuisanceByMasterId(n.getId()):
                     myCount += 1
+
             if myCount == 0 and n.isPrintable():
-                print ShellStyles.WarningLabel()+"Suppressed nuisance %s: '%s' because it does not affect any data column!"%(n.getId(),n.getDescription())
+                msg = "Suppressed nuisance %s: '%s' because it does not affect any data column!" % (n.getId(),n.getDescription())
+                if self._opts.verbose:
+                    Print(ShellStyles.WarningLabel() + msg, len(myVetoList) < 1)
                 myVetoList.append(n.getId())
+
             if myCount == 1:
                 mySingleList.append(n.getId())
+
         # Merge nuisances (quadratic sum) together, if they apply to only one column (is mathematically equal treatrment, but makes datacard running faster)
         # Note that it is not possible to merge physically the nuisances, because it would affect all other parts as well
         # Only solution is to do a virtual merge affecting only this method
@@ -549,8 +670,10 @@ class TableProducer:
                 myResult.append(myRow)
         return myResult
 
-    ## Generates nuisance table as list
     def _generateBinByBinStatUncertTable(self,mass):
+        '''
+        Generates nuisance table as list
+        '''
         myTable = []
         # Loop over columns
         for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
@@ -570,9 +693,11 @@ class TableProducer:
                     myTable.append(myRow)
         return myTable
 
-    ## Generates nuisance table as list
-    # Recipe is to integrate first (linear sum for variations), then to evaluate
     def _generateShapeNuisanceVariationTable(self,mass):
+        '''
+        Generates nuisance table as list
+        Recipe is to integrate first (linear sum for variations), then to evaluate
+        '''
         myResult = []
         # Loop over rows
         for n in self._extractors:
@@ -654,8 +779,10 @@ class TableProducer:
                 myResult.append(myDownRow)
         return myResult
 
-    ## Save histograms to root file
-    def _saveHistograms(self,rootFile,mass):
+    def _saveHistograms(self, rootFile, mass):
+        '''
+        Save histograms to root file
+        '''
         # Observation
         if self._observation != None:
             self._observation.setResultHistogramsToRootFile(rootFile)
@@ -669,19 +796,26 @@ class TableProducer:
                 for h in myHistos:
                     h.SetDirectory(rootFile)
                 c._rateResult._tempHistos.extend(myHistos)
+        return
 
-    ## Generates table of shape variation for shapeQ nuisances
     def makeShapeVariationTable(self):
+        '''
+        Generates table of shape variation for shapeQ nuisances
+        '''
         myOutput = ""
+
+        # For-loop: All signal mass points
         for m in self._config.MassPoints:
             # Invoke extractors
             myRateHeaderTable = self._generateRateHeaderTable(m)
             myNuisanceTable = self._generateShapeNuisanceVariationTable(m)
+
             # Calculate dimensions of tables
             myWidths = []
             myWidths = calculateCellWidths(myWidths, myRateHeaderTable)
             myWidths = calculateCellWidths(myWidths, myNuisanceTable)
             mySeparatorLine = getSeparatorLine(myWidths)
+
             # Construct output
             myOutput += "*** Shape nuisance variation summary ***\n"
             myOutput += self._generateHeader(m)
@@ -691,15 +825,22 @@ class TableProducer:
             myOutput += getTableOutput(myWidths,myNuisanceTable)
             myOutput += "\n"
             myOutput += "Note: Linear sum is used to obtain the values, i.e. cancellations might occur. Bin-by-bin uncertainties could be larger.\n"
+
         # Save output to file
         myFilename = self._infoDirname+"/shapeVariationResults.txt"
         myFile = open(myFilename, "w")
         myFile.write(myOutput)
         myFile.close()
-        print ShellStyles.HighlightStyle()+"Shape variation tables written to: "+ShellStyles.NormalStyle()+myFilename
 
-    ## Prints event yield summary table
+        # Inform the user
+        msg = "Shape variation tables written to "
+        Print(msg + ShellStyles.SuccessStyle() + myFilename + ShellStyles.NormalStyle() ) #ShellStyles.HighlightAltStyle()
+        return
+
     def makeEventYieldSummary(self):
+        '''
+        Prints event yield summary table
+        '''
         formatStr = "%6."
         myPrecision = None
         if self._config.OptionNumberOfDecimalsInSummaries == None:
@@ -737,16 +878,19 @@ class TableProducer:
 
         # Loop over mass points
         for m in self._config.MassPoints:
+
             # Initialize
-            HH = None
-            HW = None
-            HST = None # Single top signal
-            QCD = None
+            HH        = None
+            HW        = None
+            HST       = None # Single top signal
+            QCD       = None
             Embedding = None
-            EWKFakes = None
+            EWKFakes  = None
+
             # Loop over columns to obtain RootHistoWithUncertainties objects
             containsQCDdataset = False
             for c in self._datasetGroups:
+
                 if c.isActiveForMass(m,self._config) and not c.typeIsEmptyColumn():
                     # Find out what type the column is
                     if c.getLabel().startswith("HH") or c.getLabel().startswith("CMS_Hptntj_HH"):
@@ -777,7 +921,9 @@ class TableProducer:
                         else:
                             EWKFakes.Add(c.getCachedShapeRootHistogramWithUncertainties())
                     else:
-                        raise Exception(ShellStyles.ErrorLabel()+"Unknown dataset type for dataset %s!%s"%(c.getLabel(),ShellStyles.NormalStyle()))
+                        msg = "Unknown dataset type for dataset %s!%s" % (c.getLabel(), ShellStyles.NormalStyle())
+                        raise Exception(ShellStyles.ErrorLabel() + msg)
+
             # Calculate signal yield
             myBr = self._config.OptionBr
             if not (self._config.OptionLimitOnSigmaBr or m > 179):
@@ -791,6 +937,7 @@ class TableProducer:
             if HST != None:
                 HST.Scale(myBr)
                 HW.Add(HST)
+
             # From this line on, HW includes all signal
             # Calculate expected yield
             if containsQCDdataset:
@@ -802,7 +949,14 @@ class TableProducer:
                 if EWKFakes != None:
                     TotalExpected.Add(EWKFakes)
 
-            # Construct table
+            # Construct table (FIXME: what a mess!)
+            '''
+            Example: 
+            align   = "{:<3} {:<50} {:>20} {:<3} {:>20} {:>15} {:<3}"
+            header  = align.format("#", "Dataset", "Cross Section", "", "Norm. Factor",  "Int. Lumi", "")
+            table   = [] 
+            table.append(header)
+            '''
             myOutput = "*** Event yield summary ***\n"
             myOutput += self._generateHeader(m)
             myOutput += "\n"
@@ -821,20 +975,27 @@ class TableProducer:
                 if EWKFakes != None:
                     myOutput += "               EWK+tt with fake taus: %s"%getResultString(EWKFakes,formatStr,myPrecision)
             myOutput += "                      Total expected: %s"%getResultString(TotalExpected,formatStr,myPrecision)
+
             #if self._config.BlindAnalysis:
             #    myOutput += "                            Observed: BLINDED\n\n"
             #else:
 	    myOutput += "                            Observed: %5d\n\n"%self._observation.getCachedShapeRootHistogramWithUncertainties().getRate()
+
             # Print to screen
             if self._config.OptionDisplayEventYieldSummary:
-                print myOutput
+               Print(myOutput)
+
             # Save output to file
-            myFilename = self._infoDirname+"/EventYieldSummary_m%d.txt"%m
+            myFilename = self._infoDirname + "/EventYieldSummary_m%d.txt" % m #fixme: Ridiculously big name!
             myFile = open(myFilename, "w")
             myFile.write(myOutput)
             myFile.close()
-            print ShellStyles.HighlightStyle()+"Event yield summary for mass %d written to: "%m +ShellStyles.NormalStyle()+myFilename
-
+            
+            # Inform user
+            if self._opts.verbose:
+                msg = "Event yield summary written to "
+                Print(msg + ShellStyles.SuccessStyle() + msg + myFilename + ShellStyles.NormalStyle(), True) #HighlightAltStyle
+            
             myOutputLatex = "% table auto generated by datacard generator on "+self._timestamp+" for "+self._config.DataCardName+" / "+self._outputPrefix+"\n"
             myOutputLatex += "\\renewcommand{\\arraystretch}{1.2}\n"
             myOutputLatex += "\\begin{table}\n"
@@ -871,15 +1032,30 @@ class TableProducer:
             myOutputLatex += "  \\end{tabular}\n"
             myOutputLatex += "\\end{table}\n"
             myOutputLatex += "\\renewcommand{\\arraystretch}{1}\n"
-            # Save output to file
-            myFilename = self._infoDirname+"/EventYieldSummary_m%d_"%(m) +self._timestamp+"_"+self._outputPrefix+"_"+self._config.DataCardName.replace(" ","_")+".tex"
+
+            # Save output to file 
+            myFilename = self._infoDirname + "/EventYieldSummary_m%d_" % (m) 
+            myFilename+= self._timestamp + "_" + self._outputPrefix + "_" + self._config.DataCardName.replace(" ","_")
+            myFilename+= ".tex" #fixme: Ridiculously big name!
             myFile = open(myFilename, "w")
             myFile.write(myOutputLatex)
             myFile.close()
-            print ShellStyles.HighlightStyle()+"Latex table of event yield summary for mass %d written to: "%m +ShellStyles.NormalStyle()+myFilename
+            
+            # Inform user
+            if self._opts.verbose:
+                # msg = "Latex table of event yield summary for mass %d written to \"%s\"" % (m, myFilename)
+                msg = "Event yield summary (LaTeX) written to "
+                Print(msg + ShellStyles.SuccessStyle() + myFilename + ShellStyles.NormalStyle() ) #ShellStyles.HighlightAltStyle()
+                
+        # Inform user of where the event yield summaries were saved
+        msg = "Event yield summary tables written to " 
+        Print(msg + ShellStyles.SuccessStyle() + self._infoDirname + ShellStyles.NormalStyle(), False) #ShellStyles.HighlightAltStyle() 
+        return
 
-    ## Returns a string with proper numerical formatting
-    def _getFormattedSystematicsNumber(self,value):
+    def _getFormattedSystematicsNumber(self, value):
+        '''
+        Returns a string with proper numerical formatting
+        '''
         if abs(value) >= 0.1:
             return "%.0f"%(abs(value)*100)
         elif abs(value) >= 0.001:
@@ -887,8 +1063,10 @@ class TableProducer:
         else:
             return "\\textless~0.1"
 
-    ## Prints systematics summary table
     def makeSystematicsSummary(self,light=False):
+        '''
+        Prints systematics summary table
+        '''
 #        myColumnOrder = ["HH",
 #                         "HW",
 #                         "QCD",
@@ -1101,16 +1279,23 @@ class TableProducer:
         mySignalText="heavy"
         if light:
            mySignalText="light"
+
         myFilename = self._infoDirname+"/SystematicsSummary_"+mySignalText
 #        myFilename += "_"+self._timestamp+"_"+self._outputPrefix+"_"+self._config.DataCardName.replace(" ","_")
         myFilename+=".tex"
         myFile = open(myFilename, "w")
         myFile.write(myOutput)
         myFile.close()
-        print ShellStyles.HighlightStyle()+"Latex table of systematics summary written to: "+ShellStyles.NormalStyle()+myFilename
 
-    ## Prints QCD purity information
+        # Inform the user
+        msg = "Systematics summary table written to "
+        Print(msg + ShellStyles.SuccessStyle() + myFilename + ShellStyles.NormalStyle(), False) #HighlightAltStyle
+        return
+
     def makeQCDPuritySummary(self):
+        '''
+        Prints QCD purity information
+        '''
         h = aux.Clone(self._observation.getRateHistogram(), "dummy")
         h.Reset()
         hQCD = None
@@ -1202,6 +1387,7 @@ class TableProducer:
         myOutList.append("... shape sensitivity test CONTROL: obs integral = %f"%(myControlIntegral))
         os.mkdir(self._dirname)
         self.makeDataCards()
+
         # Loop over shape nuisances
         for direction in [0,1]:
             dirStr = "UP"

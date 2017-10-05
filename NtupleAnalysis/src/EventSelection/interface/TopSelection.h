@@ -31,12 +31,12 @@ public:
     ~Data();
 
     // Status of passing event selection
-    //    bool passedSelection() const { return bPassedSelection; } //fixme: add preliniminary chiSq cut
     bool passedSelection() const { return bPassedSelection; } 
     /// Status of GenuineB event (if false event is FakeB)
     bool isGenuineB() const { return bIsGenuineB; }
     // Trijet-1
     const std::vector<Jet>& getJetsUsedAsBJetsInFit() const { return fJetsUsedAsBJetsInFit;}
+    const std::vector<Jet>& getFailedBJetsUsedAsBJetsInFit() const { return fFailedBJetsUsedAsBJetsInFit;}
     const Jet getTrijet1Jet1() const { return fTrijet1Jet1; } 
     const Jet getTrijet1Jet2() const { return fTrijet1Jet2; } 
     const Jet getTrijet1BJet() const { return fTrijet1BJet; } 
@@ -126,6 +126,7 @@ public:
     double fChiSqr;
     unsigned int fNumberOfFits;
     std::vector<Jet> fJetsUsedAsBJetsInFit;
+    std::vector<Jet> fFailedBJetsUsedAsBJetsInFit;
     /// Trijet-1
     Jet fTrijet1Jet1;
     Jet fTrijet1Jet2;
@@ -162,11 +163,11 @@ public:
   /// Use silentAnalyze if you do not want to fill histograms or increment counters
   Data silentAnalyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
   // silentAnalyze for FakeBMeasurement
-  Data silentAnalyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const unsigned int maxNumberOfBJetsInTopFit=3);
+  Data silentAnalyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const std::string failedBJetsSortType="Random");
   /// analyze does fill histograms and incrementes counters
   Data analyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
   // analyze for FakeBMeasurement
-  Data analyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const unsigned int maxNumberOfBJetsInTopFit=3);
+  Data analyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const std::string failedBJetsSortType="Random");
 
 private:
   /// Initialisation called from constructor
@@ -179,6 +180,8 @@ private:
   bool areSameJets(const Jet& jet1, const Jet& jet2);
   // Return true if a selected jet matches a selected bjet
   bool isBJet(const Jet& jet1, const std::vector<Jet>& bjets);
+  // Replaces all output objects with MCJet information (N.B: Wherever possible!)
+  void ReplaceJetsWithGenJets(Data &output);
   // Calculates the index combinations for the di-top fit
   void GetJetIndicesForChiSqrFit(const std::vector<Jet> jets,
 				 const std::vector<Jet> bjets,
@@ -209,7 +212,11 @@ private:
 					      const unsigned int maxNumberOfJets);
 
   const std::vector<Jet> GetBjetsToBeUsedInFit(const BJetSelection::Data& bjetData,
-					       const unsigned int maxNumberOfBJets);
+					       const unsigned int maxNumberOfBJets,
+					       const std::string jetSortType="Random");
+
+  const std::vector<Jet>& GetFailedBJetsUsedAsBJetsInFit(void) const { return myFailedBJetsUsedAsBJetsInFit;} 
+
   // Input parameters
   int nSelectedBJets;
   const double cfg_MassW;
@@ -226,6 +233,8 @@ private:
   const DirectionalCut<double> cfg_HighLdgTrijetMassCut;
   const int cfg_MaxJetsToUseInFit;
   const int cfg_MaxBJetsToUseInFit;
+  const bool cfg_ReplaceJetsWithGenJets;
+  std::vector<Jet> myFailedBJetsUsedAsBJetsInFit;
 
   // Event counter for passing selection
   Count cPassedTopSelection;
