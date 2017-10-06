@@ -123,10 +123,14 @@ def main(opts):
 
 
     #optModes = ["", "OptChiSqrCutValue50p0", "OptChiSqrCutValue100p0", "OptChiSqrCutValue200p0"]
-    optModes = [""]
+    optModes = ["",
+                "OptInvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeRandom",
+                "OptInvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeDescendingBDiscriminator",
+                "OptInvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeRandom",
+                "OptInvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeDescendingBDiscriminator"]
 
-    if opts.optMode != None:
-        optModes = [opts.optMode]
+    #if opts.optMode != None:
+    #    optModes = [opts.optMode]
 
     # For-loop: All optimisation modes
     for opt in optModes:
@@ -160,9 +164,8 @@ def main(opts):
             datasetsMgr.selectAndReorder(newOrder)
 
         # Merge EWK samples
-        if opts.mergeEWK:
-            datasetsMgr.merge("EWK", GetListOfEwkDatasets())
-            plots._plotStyles["EWK"] = styles.getAltEWKStyle()
+        datasetsMgr.merge("EWK", GetListOfEwkDatasets())
+        plots._plotStyles["EWK"] = styles.getAltEWKStyle()
 
         # Print dataset information
         datasetsMgr.PrintInfo()
@@ -171,11 +174,26 @@ def main(opts):
         style = tdrstyle.TDRStyle()
         style.setOptStat(True)
 
-        # Do the Purity Triplets?
-        if 1:
-            folder = "FakeBPurity"
+        # Only do these histos
+        myHistos = ["FailedBJet1BDisc",
+                    "FailedBJet1Pt", 
+                    "FailedBJet1Eta", 
+                    #"FailedBJet1PdgId", 
+                    #"FailedBJet1PartonFlavour", 
+                    #"FailedBJet1HadronFlavour", 
+                    #"FailedBJet1Ancestry"
+                    ]
+        
+        # For-loop: All histos
+        folders = ["", "FakeB", "GenuineB"]
+        for f in folders:
+
+            folder = "FailedBJet" + f
             hList  = datasetsMgr.getDataset("EWK").getDirectoryContent(folder)
+            
             for hName in hList:
+                if hName.split("_")[-2] not in myHistos:
+                    continue
                 PlotHisto(datasetsMgr, os.path.join(folder, hName))
     return
 
@@ -246,31 +264,46 @@ def PlotHisto(datasetsMgr, histoName):
 
     # Normalize histograms to unit area?
     if opts.normaliseToOne:
-        Data.Scale(1.0/Data.Integral())
-        QCD.Scale( 1.0/QCD.Integral())
-        EWK.Scale( 1.0/EWK.Integral())
+        if Data.Integral() > 0:
+            Data.Scale(1.0/Data.Integral())
+        if QCD.Integral() > 0:
+            QCD.Scale( 1.0/QCD.Integral())
+        if EWK.Integral() > 0:
+            EWK.Scale( 1.0/EWK.Integral())
 
     # Make the plots
-    p = plots.ComparisonManyPlot(QCD, [EWK], saveFormats=[])
+    if opts.plotEWK:
+        p = plots.ComparisonManyPlot(QCD, [EWK], saveFormats=[])
+    else:
+        p = plots.PlotBase([QCD], saveFormats=[])
 
     # Apply histo styles
     p.histoMgr.forHisto("QCD", styles.getQCDLineStyle() )
-    p.histoMgr.forHisto("EWK", styles.getAltEWKLineStyle() )
+    if opts.plotEWK:
+        p.histoMgr.forHisto("EWK", styles.getEWKStyle() )
+        #p.histoMgr.forHisto("EWK", styles.getAltEWKLineStyle() )
 
     # Set draw style
     p.histoMgr.setHistoDrawStyle("QCD", "P")
-    p.histoMgr.setHistoDrawStyle("EWK", "P")
+    if opts.plotEWK:
+        p.histoMgr.setHistoDrawStyle("EWK", "HIST")
 
     # Set legend style
     p.histoMgr.setHistoLegendStyle("QCD", "P")
-    p.histoMgr.setHistoLegendStyle("EWK", "P")
+    if opts.plotEWK:
+        p.histoMgr.setHistoLegendStyle("EWK", "F")
 
     # Set legend labels
-    p.histoMgr.setHistoLegendLabelMany({
-            "QCD" : "QCD",
-            "EWK" : "EWK",
-            })
-    
+    if opts.plotEWK:
+        p.histoMgr.setHistoLegendLabelMany({
+                "QCD" : "QCD",
+                "EWK" : "EWK",
+                })
+    else:
+        p.histoMgr.setHistoLegendLabelMany({
+                "QCD" : "QCD",
+                })
+
     # Do the plot
     plots.drawPlot(p, 
                    histoName,  
@@ -279,7 +312,7 @@ def PlotHisto(datasetsMgr, histoName):
                    log           = logY, 
                    rebinX       = 1,
                    cmsExtraText  = "Preliminary", 
-                   createLegend  = {"x1": 0.80, "y1": 0.80, "x2": 0.92, "y2": 0.92},
+                   createLegend  = {"x1": 0.76, "y1": 0.80, "x2": 0.92, "y2": 0.92},
                    opts          = _opts,
                    opts2         = {"ymin": 1e-5, "ymax": 1e0},
                    ratio         = False,
@@ -293,7 +326,7 @@ def PlotHisto(datasetsMgr, histoName):
     return
 
 
-def SavePlot(plot, plotName, saveDir, saveFormats = [".png"]):
+def SavePlot(plot, plotName, saveDir, saveFormats = [".pdf", ".png"]):
     # Check that path exists
     if not os.path.exists(saveDir):
         os.makedirs(saveDir)
@@ -344,7 +377,7 @@ if __name__ == "__main__":
     SUBCOUNTERS  = False
     LATEX        = False
     MCONLY       = False
-    MERGEEWK     = True
+    PLOTEWK      = False
     URL          = False
     NOERROR      = True
     SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"
@@ -379,8 +412,8 @@ if __name__ == "__main__":
     parser.add_option("--dataEra", dest="dataEra", type="string", default=DATAERA, 
                       help="Override default dataEra [default: %s]" % DATAERA)
 
-    parser.add_option("--mergeEWK", dest="mergeEWK", action="store_true", default=MERGEEWK, 
-                      help="Merge all EWK samples into a single sample called \"EWK\" [default: %s]" % MERGEEWK)
+    parser.add_option("--plotEWK", dest="plotEWK", action="store_true", default=PLOTEWK, 
+                      help="Also plot EWK distribution on canvas [default: %s]" % PLOTEWK)
 
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR, 
                       help="Directory where all pltos will be saved [default: %s]" % SAVEDIR)
@@ -416,10 +449,6 @@ if __name__ == "__main__":
         #print __doc__
         sys.exit(1)
         
-    if not opts.mergeEWK:        
-        Print("Cannot draw the Data/QCD/EWK histograms without the option --mergeEWK. Exit", True)
-        sys.exit()
-
     # Call the main function
     main(opts)
 

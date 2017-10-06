@@ -72,6 +72,10 @@ BJetSelection::~BJetSelection() {
   delete hTriggerBJets;
   for (auto p: hTriggerMatchedBJetPt) delete p;
   for (auto p: hTriggerMatchedBJetEta) delete p;
+  delete hTriggerMatchedBJet_dPt;
+  delete hTriggerMatchedBJet_dEta;
+  delete hTriggerMatchedBJet_dPhi;
+  delete hTriggerMatchedBJet_dR;
   for (auto p: hSelectedBJetPt) delete p;
   for (auto p: hSelectedBJetEta) delete p;
   for (auto p: hSelectedBJetBDisc) delete p;
@@ -103,25 +107,67 @@ void BJetSelection::initialize(const ParameterSet& config) {
 }
 
 void BJetSelection::bookHistograms(TDirectory* dir) {
-  TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "bjetSelection_"+sPostfix);
+  TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "bjetSelection_" + sPostfix);
 
-  int  nBinsBDisc = 10;
-  float minBDisc = 0.0;
-  float maxBDisc = 10.0;
+  // Histogram binning options
+  int  nPtBins      =  50;
+  float fPtMin      =   0.0;
+  float fPtMax      = 500.0;
+  int  nEtaBins     =  50;
+  float fEtaMin     =  -5.0;
+  float fEtaMax     =  +5.0;
+  int  nBinsBDisc   =  10;
+  float minBDisc    =   0.0;
+  float maxBDisc    =  10.0;
+  int nDEtaBins     = 200;   // 100;
+  double fDEtaMin   =   0.0;
+  double fDEtaMax   =   0.2; //  10;
+  int nDPhiBins     = 200;   // 32;
+  double fDPhiMin   =   0.0;
+  double fDPhiMax   =   0.2; // 3.2;
+  int nDRBins       =  50;
+  double fDRMin     =   0;
+  double fDRMax     =  10;
+  // Overwrite binning from cfg file?
   if (fCommonPlots != nullptr) {  
-    nBinsBDisc= fCommonPlots->getBJetDiscBinSettings().bins();
-    minBDisc = fCommonPlots->getBJetDiscBinSettings().min();
-    maxBDisc = fCommonPlots->getBJetDiscBinSettings().max();
+      nPtBins    = 2*fCommonPlots->getPtBinSettings().bins();
+      fPtMin     = fCommonPlots->getPtBinSettings().min();
+      fPtMax     = 2*fCommonPlots->getPtBinSettings().max();
+      
+      nEtaBins   = fCommonPlots->getEtaBinSettings().bins();
+      fEtaMin    = fCommonPlots->getEtaBinSettings().min();
+      fEtaMax    = fCommonPlots->getEtaBinSettings().max();
+      
+      nBinsBDisc = fCommonPlots->getBJetDiscBinSettings().bins();
+      minBDisc   = fCommonPlots->getBJetDiscBinSettings().min();
+      maxBDisc   = fCommonPlots->getBJetDiscBinSettings().max();
+      
+      // nDEtaBins   = fCommonPlots->getDeltaEtaBinSettings().bins();
+      // fDEtaMin    = fCommonPlots->getDeltaEtaBinSettings().min();
+      // fDEtaMax    = fCommonPlots->getDeltaEtaBinSettings().max();
+      
+      // nDPhiBins   = fCommonPlots->getDeltaPhiBinSettings().bins();
+      // fDPhiMin    = fCommonPlots->getDeltaPhiBinSettings().min();
+      // fDPhiMax    = fCommonPlots->getDeltaPhiBinSettings().max();
+      
+      nDRBins     = fCommonPlots->getDeltaRBinSettings().bins();
+      fDRMin      = fCommonPlots->getDeltaRBinSettings().min();
+      fDRMax      = fCommonPlots->getDeltaRBinSettings().max();
   }
 
-  hTriggerMatchDeltaR = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "triggerMatchDeltaR", "Trigger match #DeltaR;#DeltaR", 60, 0, 3.);
-  hTriggerMatches     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "triggerMatches"    , "trigger-matched objects multiplicity; Multiplicity", 20, 0, 20.);
-  hTriggerBJets       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "triggerBJets"      , "trigger object multiplicity; Multiplicity", 20, 0, 20.);
+  hTriggerMatchDeltaR = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "triggerMatchDeltaR", "Trigger matched objects #DeltaR;#DeltaR", nDRBins, fDRMin, fDRMax);
+  hTriggerMatches     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "triggerMatches"    , "trigger-matched objects multiplicity; Multiplicity", 20, 0, 20.0);
+  hTriggerBJets       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "triggerBJets"      , "trigger object multiplicity; Multiplicity", 20, 0, 20.0);
   
-  hTriggerMatchedBJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "triggerMatchedLdgBJetPt"   , "Ldg trigger matched b-jet pT;p_{T} (GeV/c)"   , 50, 0.0, 500.0) );
-  hTriggerMatchedBJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "triggerMatchedSubldgBJetPt", "Subldg trigger matched b-jet pT;p_{T} (GeV/c)", 50, 0.0, 500.0) );
-  hTriggerMatchedBJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "triggerMatchedLdgBJetEta"   , "Ldg trigger matched b-jet eta;#eta"   , 50, -2.5, 2.5) );
-  hTriggerMatchedBJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "triggerMatchedSubldgBJetEta", "Subldg trigger matched b-jet eta;#eta", 50, -2.5, 2.5) );
+  hTriggerMatchedBJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir , "triggerMatchedLdgBJetPt"    , ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax) );
+  hTriggerMatchedBJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir , "triggerMatchedSubldgBJetPt" , ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax) );
+  hTriggerMatchedBJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "triggerMatchedLdgBJetEta"   , ";#eta", nEtaBins, fEtaMin, fEtaMax) );
+  hTriggerMatchedBJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "triggerMatchedSubldgBJetEta", ";#eta", nEtaBins, fEtaMin, fEtaMax) );
+
+  hTriggerMatchedBJet_dPt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "triggerMatchedBJets_dPt" , "Trigger-matched objects;#Delta p_{T} (GeV/c)", 200, -100.0, 100.0);
+  hTriggerMatchedBJet_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "triggerMatchedBJets_dEta", "Trigger-matched objects;#Delta #eta"         , nDEtaBins, fDEtaMin, fDEtaMax);
+  hTriggerMatchedBJet_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "triggerMatchedBJets_dPhi", "Trigger-matched objects;#Delta #phi (rads)"  , nDPhiBins, fDPhiMin, fDPhiMax);
+  hTriggerMatchedBJet_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "triggerMatchedBJets_dR"  , "Trigger-matched objects;#Delta R"            , 200, 0.0, 0.2);
 
   hSelectedBJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsFirstJetPt" , "First b-jet pT;p_{T} (GeV/c)" , 50, 0.0, 500.0) );
   hSelectedBJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsSecondJetPt", "Second b-jet pT;p_{T} (GeV/c)", 50, 0.0, 500.0) );
@@ -168,6 +214,7 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
   bool passedPt             = false;
   bool passedDiscr          = false;
   int jet_index             = -1;
+  int trgBJets              = 0;
   int trgMatches            = 0;
   unsigned int ptCut_index  = 0;
   unsigned int etaCut_index = 0;
@@ -178,9 +225,12 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
   
   if (bTriggerMatchingApply)
     {
+
+      // std::cout << "" << std::endl;
       for (auto p: iEvent.triggerBJets()) 
 	{
-	  // std::cout << "HLTBJet: pt eta phi = " <<  p.pt() << ", " << p.eta() << ", " << p.phi() << std::endl;      
+	  trgBJets++;
+	  // std::cout << "HLTBJet " << trgBJets << "): pt eta phi = " <<  p.pt() << ", " << p.eta() << ", " << p.phi() << std::endl;      
 	  myTriggerBJetMomenta.push_back(p.p4());
 	}
     }
@@ -216,7 +266,7 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
     else
       {
 	trgMatches++;
-	
+
 	// Fill histograms for matched objects
 	if (trgMatches <= 2)
 	  {
@@ -224,6 +274,9 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
 	    hTriggerMatchedBJetEta[trgMatches-1]->Fill(jet.eta());
 	  }
       }
+    
+    // if (trgMatches>trgBJets) std::cout << "\tBAD! trgMatchets = " << trgMatches << ", trgBJets = " << trgBJets << std::endl;
+    // else std::cout << "GOOD! trgMatchets = " << trgMatches << ", trgBJets = " << trgBJets << std::endl;
 
     // jet identified as b jet
     output.fSelectedBJets.push_back(jet);
@@ -252,7 +305,7 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
   if (passedEta*passedPt*passedDiscr)
     {
       if (!bTriggerMatchingApply) passedTrgMatching = true;
-      else passedTrgMatching = (trgMatches == nTrgBJets);
+      else passedTrgMatching = (trgMatches >= 1); // fixme: need smarter implementation (according to trigger name)
     }
   
   // Determine if exact number of the selected bjets is found
@@ -373,20 +426,41 @@ bool BJetSelection::passTrgMatching(const Jet& bjet, std::vector<math::LorentzVe
   if (!bTriggerMatchingApply) return true;
 
   // http://cmsdoxygen.web.cern.ch/cmsdoxygen/CMSSW_8_0_27/doc/html/da/d54/namespacetrigger.html
-  double myMinDeltaR = 9999.0;
-  double myDeltaR    = 9999.0;
+  double dR_min = 9999.0;
+  double dR     = 9999.0;
+  double dPt    = 9999.0;
+  double dEta   = 9999.0;
+  double dPhi   = 9999.0;
 
   // For-loop: All HLTBJets
   for (auto& p: trgBJets) 
     {
-      myDeltaR    = ROOT::Math::VectorUtil::DeltaR(p, bjet.p4());
-      myMinDeltaR = std::min(myMinDeltaR, myDeltaR);
-      
+      dR = ROOT::Math::VectorUtil::DeltaR(p, bjet.p4());
+
+      if (dR < dR_min)
+	{
+	  dR_min = dR;
+	  dPt    = bjet.p4().pt() - p.pt();
+	  dEta   = std::fabs(bjet.p4().eta() - p.eta());
+	  dPhi   = ROOT::Math::VectorUtil::DeltaPhi(p, bjet.p4());
+	}      
     }
+
   // Fill histograms
-  hTriggerMatchDeltaR->Fill(myMinDeltaR);
-  std::cout << "passed trigger matching = " << (myMinDeltaR < fTriggerMatchingCone) << " (dR = " << myMinDeltaR << ")" << std::endl;
-  return (myMinDeltaR < fTriggerMatchingCone);
+  hTriggerMatchDeltaR->Fill(dR_min);
+  if (0) std::cout << "passed trigger matching = " << (dR_min < fTriggerMatchingCone) << ": dR = " << dR_min << ": dPt = " << dPt << ", dEta = " << dEta << ", dPhi = " << dPhi << std::endl;
+  
+  bool bIsTrgMatched = (dR_min < fTriggerMatchingCone);
+  
+  if (bIsTrgMatched)
+    {
+      hTriggerMatchedBJet_dPt->Fill( dPt );
+      hTriggerMatchedBJet_dEta->Fill( dEta );
+      hTriggerMatchedBJet_dPhi->Fill( dPhi );
+      hTriggerMatchedBJet_dR->Fill( dR_min );
+    }
+
+  return bIsTrgMatched;
 }
 
 void BJetSelection::SortFailedBJetsCands(Data &output, std::vector<math::LorentzVectorT<double>> myTriggerBJetMomenta)
@@ -426,7 +500,8 @@ void BJetSelection::SortFailedBJetsCands(Data &output, std::vector<math::Lorentz
 
   
   // Now put the trg-matched objects in the front
-  if (bTriggerMatchingApply)
+  /*
+    if (bTriggerMatchingApply)
     {
       for (auto it = output.fFailedBJetCands.begin(); it != output.fFailedBJetCands.end(); ++it) 
 	{
@@ -437,7 +512,7 @@ void BJetSelection::SortFailedBJetsCands(Data &output, std::vector<math::Lorentz
 	  output.fFailedBJetCands.insert(output.fFailedBJetCands.begin(), jet);
 	}
     }
-
+  */
   
   // For Debugging: Test moving the Trigger-Matched jets to the front
   /*

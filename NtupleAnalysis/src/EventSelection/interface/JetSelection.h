@@ -183,7 +183,15 @@ private:
   WrappedTH1 *hJTPassed;
   WrappedTH1 *hMHTPassed;
 
+  // Binnings
+  int nPtBins;
+  double fPtMin,fPtMax;
 
+  int  nEtaBins;
+  float fEtaMin,fEtaMax;
+
+  int  nHtBins;
+  float fHtMin,fHtMax;
 };
 
 #endif

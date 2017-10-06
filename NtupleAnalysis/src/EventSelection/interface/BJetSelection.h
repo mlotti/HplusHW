@@ -145,6 +145,10 @@ private:
   WrappedTH1* hTriggerBJets;
   std::vector<WrappedTH1*> hTriggerMatchedBJetPt;
   std::vector<WrappedTH1*> hTriggerMatchedBJetEta;
+  WrappedTH1* hTriggerMatchedBJet_dPt;
+  WrappedTH1* hTriggerMatchedBJet_dEta;
+  WrappedTH1* hTriggerMatchedBJet_dPhi;
+  WrappedTH1* hTriggerMatchedBJet_dR;
   std::vector<WrappedTH1*> hSelectedBJetPt;
   std::vector<WrappedTH1*> hSelectedBJetEta;
   std::vector<WrappedTH1*> hSelectedBJetBDisc;
