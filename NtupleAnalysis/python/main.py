@@ -331,11 +331,30 @@ class Process:
                 raise Exception("Unsupported input format!")
             del kwargs["blacklist"]
 
+        whitelist = []
+        if "whitelist" in kwargs.keys():
+            if isinstance(kwargs["whitelist"], str):
+                whitelist.append(kwargs["whitelist"])
+            elif isinstance(kwargs["whitelist"], list):
+                whitelist.extend(kwargs["whitelist"])
+            else:
+                raise Exception("Unsupported input format!")
+            del kwargs["whitelist"]
+
         # dataset._optionDefaults["input"] = "miniaod2tree*.root"
         dataset._optionDefaults["input"] = "histograms-*.root"
         dsetMgrCreator = dataset.readFromMulticrabCfg(directory=directory, *args, **kwargs)
         dsets = dsetMgrCreator.getDatasetPrecursors()
         dsetMgrCreator.close()
+
+        if len(whitelist) > 0:
+            for dset in dsets:
+                isOnWhiteList = False
+                for item in whitelist:
+                    if dset.getName().startswith(item):
+                        isOnWhiteList = True
+                if not isOnWhiteList:
+                    blacklist.append(dset.getName())
 
         for dset in dsets:
             isOnBlackList = False
@@ -343,7 +362,7 @@ class Process:
                 if dset.getName().startswith(item):
                     isOnBlackList = True
             if isOnBlackList:
-                print "Ignoring dataset because of blacklist options: '%s' ..."%dset.getName()
+                print "Ignoring dataset because of black/whitelist options: '%s' ..."%dset.getName()
             else:
                 self.addDataset(dset.getName(), dset.getFileNames(), dataVersion=dset.getDataVersion(), lumiFile=dsetMgrCreator.getLumiFile())
         return
