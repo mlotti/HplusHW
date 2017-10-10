@@ -25,6 +25,7 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/ElectronDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/MuonDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/JetDumper.h"
+#include "HiggsAnalysis/MiniAOD2TTree/interface/SoftBTagDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/TopDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/METDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/GenMETDumper.h"
@@ -51,8 +52,7 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
     private:
 	void fill(edm::Event&, const edm::EventSetup&);
 	void reset();
-        void endLuminosityBlock(const edm::LuminosityBlock&, const edm::EventSetup&);                                   
-
+        void endLuminosityBlock(const edm::LuminosityBlock&, const edm::EventSetup&);
 	bool isMC();
 
 	std::string hltProcessName;
@@ -73,6 +73,7 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
 	std::vector<edm::ParameterSet> electronCollections;
 	std::vector<edm::ParameterSet> muonCollections;
 	std::vector<edm::ParameterSet> jetCollections;
+	edm::ParameterSet softBTagCollections;
         std::vector<edm::ParameterSet> topCollections;
 	std::vector<edm::ParameterSet> metCollections;
 	std::vector<edm::ParameterSet> genMetCollections;
@@ -93,6 +94,7 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
 	ElectronDumper* electronDumper;
 	MuonDumper* muonDumper;
 	JetDumper* jetDumper;
+	SoftBTagDumper* softBTagDumper;
         TopDumper* topDumper;
 	METDumper* metDumper;
 	GenMETDumper* genMetDumper;

@@ -146,7 +146,7 @@ class AnalysisModuleSelector:
     def addOtherSource(self, label, dsetMgrCreator):
         self._otherSources.append(AnalysisModuleSelectorSource(dsetMgrCreator, label))
 
-    def doSelect(self, opts=None):
+    def doSelect(self, opts=None, printSelections=True):
         # Find available modules
         self._findCommonAvailableEras()
         self._findCommonAvailableSearchModes()
@@ -172,7 +172,8 @@ class AnalysisModuleSelector:
             if not self._disableSystematicsList:
                 self._selectedSystematicVariations = self._applySelectionOnModules("SystematicVariation", opts.systematicVariation, self._availableSystematicVariations, [""]) # pick only the nominal as default
             # Print as information a breakdown of selected eras, search modes, and optimization modes
-            self._printSelection()
+            if printSelections:
+                self._printSelection()
             # Now, the selected eras, search modes, and optimization modes are available with the getters
 
     def _findCommonAvailableEras(self):

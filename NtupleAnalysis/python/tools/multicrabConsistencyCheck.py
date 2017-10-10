@@ -34,14 +34,24 @@ def getNumberOfJobsFromMergedHistogramsFromDsetMgr(dsetMgr,myMergedDict):
         else:
             myMergedDict[dset.getName()] = n
 
-def checkConsistency(myDict, myMergedDict, name=None, printStatus=True):
+def checkConsistency(myDict, myMergedDict, name=None, printStatus=False):
     myGoodStatus = True
     myTable = []
     myKeys = myMergedDict.keys()
     myKeys.sort()
+
+    # For-loop: All datasets
     for m in myKeys:
         myStatus = False
+        
+        if 0:
+            print m
+            print myDict.keys()
+            print
+            
+        # For-loop: All keys
         for k in myDict.keys():
+            print "myDict[%s] = %s" % (k, myDict[k])
             if m == k:
                 myStatus = True
                 if myMergedDict[m] == myDict[k]:
@@ -55,19 +65,20 @@ def checkConsistency(myDict, myMergedDict, name=None, printStatus=True):
         if name == None:
             print "\nMulticrab consistency check:"
         else:
-            print "\nMulticrab consistency check (%s):"%name
+            print "\nMulticrab consistency check (%s):" % name
         col_width = [max(len(x) for x in col) for col in zip(*myTable)]
         for line in myTable:
             print "| %s | %s |"%(line[0].ljust(col_width[0]), line[1].ljust(col_width[1]))
         print
     if not myGoodStatus:
         raise Exception("Error: did not pass consistency check, see table above!")
-
-def checkConsistencyStandalone(multicrabDir, dsetMgr, name=None, printStatus=True):
-    print "*** multicrabConsistencyCheck.py: Skipping for now the check (code needs to be updated)" #TODO
     return
+
+def checkConsistencyStandalone(multicrabDir, dsetMgr, name=None, printStatus=False):
+    if printStatus:
+        print "=== multicrabConsistencyCheck.py: Unsure if obsolete or not! The code needs to checked"
     myDict = getNumberOfJobsFromMultiCrabCfg(multicrabDir)
     myMergedDict = {}
     getNumberOfJobsFromMergedHistogramsFromDsetMgr(dsetMgr, myMergedDict)
     checkConsistency(myDict, myMergedDict, name, printStatus)
-
+    return

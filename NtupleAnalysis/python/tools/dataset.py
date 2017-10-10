@@ -3951,7 +3951,7 @@ class DatasetManager:
         return
 
 
-    def merge(self, newName, nameList, keepSources=False, addition=False, silent=False, allowMissingDatasets=False):
+    def merge(self, newName, nameList, keepSources=False, addition=False, silent=True, allowMissingDatasets=False):
         '''
         Merge dataset.Dataset objects.
     
@@ -4668,7 +4668,7 @@ class DatasetManagerCreator:
                 value = _args[name]
                 if value is not None:
                     parameters.append("%s='%s'" % (name, value))
-        Print("Creating DatasetManager with %s" % (", ".join(parameters)), True )
+        Verbose("Creating DatasetManager with %s" % (", ".join(parameters)), True )
 
         # Create manager and datasets
         dataEra = _args.get("dataEra", None)
@@ -4728,7 +4728,7 @@ class DatasetManagerCreator:
         # Load luminosity automatically if the file exists
         lumiPath = self.getLumiFile()
         if os.path.exists(lumiPath):
-            Print("Loading data luminosities from %s" % (lumiPath), True)
+            Verbose("Loading data luminosities from %s" % (lumiPath), True)
             manager.loadLuminosities()
         return manager
 

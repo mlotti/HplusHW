@@ -102,16 +102,38 @@ def GetDatasetsFromDir(opts):
 
 def main(opts):
 
-    #optModes = ["", "OptChiSqrCutValue50", "OptChiSqrCutValue100", "OptChiSqrCutValue200"]
-    optModes = [""]                                                                                                                             
-
-    if opts.optMode != None:
-        optModes = [opts.optMode]
+    # optModes = [""]                                                                                                                             
+    # optModes = ["", "OptChiSqrCutValue50", "OptChiSqrCutValue100", "OptChiSqrCutValue200"]
+    optModes = [""]#,
+                #"OptTriggerOR['HLT_PFHT400_SixJet30_DoubleBTagCSV_p056']",
+                #"OptTriggerOR['HLT_PFHT450_SixJet40_BTagCSV_p056']"]
+                #"OptInvertedBJetsDiscrMaxCutValue0p82",
+                #"OptInvertedBJetsDiscrMaxCutValue0p8",
+                #"OptInvertedBJetsDiscrMaxCutValue0p75",
+                #"OptInvertedBJetsDiscrMaxCutValue0p7"]
+                #"OptInvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeRandom",
+                #"OptInvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeDescendingBDiscriminator",
+                #"OptInvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeRandom",
+                #"OptInvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeDescendingBDiscriminator"]
+                #"OptInvertedBJetsDiscrMaxCutValue0p85InvertedBJetsSortTypeRandom",
+                #"OptInvertedBJetsDiscrMaxCutValue0p85InvertedBJetsSortTypeDescendingBDiscriminator",
+                #"OptInvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeRandom",
+                #"OptInvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeDescendingBDiscriminator",
+                #"OptInvertedBJetsDiscrMaxCutValue0p75InvertedBJetsSortTypeRandom",
+                #"OptInvertedBJetsDiscrMaxCutValue0p75InvertedBJetsSortTypeDescendingBDiscriminator"]
+                # "OptNumberOfInvertedBJetsCutValue1InvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeRandom",
+                # "OptNumberOfInvertedBJetsCutValue1InvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeDescendingBDiscriminator",
+                # "OptNumberOfInvertedBJetsCutValue1InvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeRandom",
+                # "OptNumberOfInvertedBJetsCutValue1InvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeDescendingBDiscriminator",
+                # "OptNumberOfInvertedBJetsCutValue1InvertedBJetsDiscrMaxCutValue0p75InvertedBJetsSortTypeRandom",
+                # "OptNumberOfInvertedBJetsCutValue1InvertedBJetsDiscrMaxCutValue0p75InvertedBJetsSortTypeDescendingBDiscriminator"]
+    
+    #if opts.optMode != None:
+    #    optModes = [opts.optMode]
 
     # For-loop: All optimisation modes
     for opt in optModes:
         opts.optMode = opt
-
         # Setup & configure the dataset manager 
         datasetsMgr = GetDatasetsFromDir(opts)
         datasetsMgr.updateNAllEventsToPUWeighted()
@@ -150,8 +172,8 @@ def main(opts):
         # Apply TDR style
         style = tdrstyle.TDRStyle()
         style.setOptStat(True)
-        style.setGridX(False)
-        style.setGridY(False)
+        style.setGridX(True)
+        style.setGridY(True)
 
         # 1) Do the StandardSelections/AllSelections
         bType  = ""
@@ -160,13 +182,15 @@ def main(opts):
         hPaths = [os.path.join(folder, h) for h in hList]
         baselinePaths = []
         invertedPath  = []
-        for p in hPaths:
-            if "Baseline" in p:
-                baselinePaths.append(p)
-            if "Inverted" in p:
-                invertedPath.append(p)
-        for hBaseline, hInverted in zip(baselinePaths, invertedPath):
-            PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted)
+        if 1:
+            for p in hPaths:
+                if "Baseline" in p:
+                    baselinePaths.append(p)
+                if "Inverted" in p:
+                    invertedPath.append(p)
+            for hBaseline, hInverted in zip(baselinePaths, invertedPath):
+                # print "--- Plotting histogram", hBaseline
+                PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted)
 
         # 2) Do the topSelection histos
         if 0:
@@ -279,7 +303,7 @@ def PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted):
     _cutBox = None
     _rebinX = 1
     if opts.normaliseToOne:
-        _opts   = {"ymin": 1e-4, "ymaxfactor": 2.0}
+        _opts   = {"ymin": 3e-4, "ymaxfactor": 2.0}
     else:
         _opts   = {"ymin": 1e0, "ymaxfactor": 2.0}
     _format = "%0.0f"
@@ -292,6 +316,27 @@ def PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted):
         _xlabel = "m_{jj} (%s)" % (_units)
         _cutBox = {"cutValue": 80.399, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _opts["xmax"] = 400.0
+    if "chisqr" in hBaseline.lower():
+        _rebinX = 1
+        _units  = ""
+        _format = "%0.1f " + _units
+        _xlabel = "#chi^{2}"
+        _cutBox = {"cutValue": 10.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _opts["xmax"] = 100.0
+    if "ldgdijetpt" in hBaseline.lower():
+        _rebinX = 1
+        _units  = "GeV/c"
+        _format = "%0.0f " + _units
+        _xlabel = "p_{T} (%s)" % _units
+        _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _opts["xmax"] = 800.0
+    if "ldgdijetm" in hBaseline.lower():
+        _rebinX = 1
+        _units  = "GeV/c^{2}"
+        _format = "%0.0f " + _units
+        _xlabel = "m_{jj} (%s)" % _units
+        _cutBox = {"cutValue": 80.385, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _opts["xmax"] = 300.0
     if "trijetm" in hBaseline.lower():
         _rebinX = 4#5
         _units  = "GeV/c^{2}"
@@ -299,10 +344,12 @@ def PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted):
         _xlabel = "m_{jjb} (%s)" % _units
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _opts["xmax"] = 1000.0
-        #_opts["xmax"] = 1500.0
     if "pt" in hBaseline.lower():
         _rebinX = 2
         _format = "%0.0f GeV/c"
+        _cutBox = {"cutValue": 40., "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        ROOT.gStyle.SetNdivisions(8, "X")
+        _opts["xmax"] = 1000.0
     if "eta" in hBaseline.lower():
         _format = "%0.2f"
         _cutBox = {"cutValue": 0., "fillColor": 16, "box": False, "line": True, "greaterThan": True}
@@ -315,7 +362,7 @@ def PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted):
     if "bdisc" in hBaseline.lower():
         _format = "%0.2f"
     if "tetrajetm" in hBaseline.lower():
-        _rebinX = 4 #10
+        _rebinX = 10 #4
         if opts.useMC:
             _rebinX = 10
         _units  = "GeV/c^{2}"
@@ -329,7 +376,8 @@ def PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted):
                    xlabel       = _xlabel,
                    ylabel       = "Arbitrary Units / %s" % (_format),
                    log          = True, 
-                   rebinX       = _rebinX, cmsExtraText = "Preliminary", 
+                   rebinX       = _rebinX, 
+                   cmsExtraText = "Preliminary", 
                    createLegend = {"x1": 0.62, "y1": 0.78, "x2": 0.92, "y2": 0.92},
                    opts         = _opts,
                    opts2        = {"ymin": 0.6, "ymax": 1.4},
@@ -343,6 +391,8 @@ def PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted):
     saveName = hBaseline.replace("/", "_")
     saveName = saveName.replace("_Baseline_", "_")
     savePath = os.path.join(opts.saveDir, "BaselineVsInverted", opts.optMode)
+    if opts.useMC:
+        savePath = os.path.join(opts.saveDir, "BaselineVsInverted", "MC", opts.optMode)
     SavePlot(p, saveName, savePath) 
     return
 
@@ -356,7 +406,7 @@ def IsBaselineOrInverted(analysisType):
     return
 
 
-def SavePlot(plot, saveName, saveDir, saveFormats = [".png"]): #[".png", ".pdf"]):
+def SavePlot(plot, saveName, saveDir, saveFormats = [".png", ".pdf"]): #[".C", ".png", ".pdf"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
     
     # Check that path exists

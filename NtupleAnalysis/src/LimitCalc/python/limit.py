@@ -218,7 +218,7 @@ class BRLimits:
 
         # Open limits file
         msg = "Opening file '%s'" % (limitsfile)
-        Print(msg, True)
+        Verbose(msg, True)
         f = open(os.path.join(directory, limitsfile), "r")
         limits = json.load(f)
         f.close()
@@ -334,6 +334,15 @@ class BRLimits:
 
         # For-loop: All mass points
         for y in self.expectedMinus2:
+            if y < yMin:
+                yMin = y
+        return yMin
+
+    def getYMinMedian(self):
+        yMin = 1e6
+
+        # For-loop: All mass points
+        for y in self.expectedMedian:
             if y < yMin:
                 yMin = y
         return yMin

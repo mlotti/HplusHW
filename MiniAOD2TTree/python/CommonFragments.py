@@ -1,18 +1,67 @@
+'''
+
+Instructions:
+- Import this module
+- Call produceCustomisations just before cms.Path
+- Add process.CustomisationsSequence to the cms.Path
+
+'''
+#================================================================================================ 
+# Import modules
+#================================================================================================ 
 import FWCore.ParameterSet.Config as cms
 
-# How to use:
-# - Import this module
-# - Call produceCustomisations just before cms.Path
-# - Add process.CustomisationsSequence to the cms.Path
 
-def produceCustomisations(process,isData):
+#================================================================================================ 
+# Function definition
+#================================================================================================ 
+def produceCustomisations(process, isData):
     process.CustomisationsSequence = cms.Sequence()
+    produceJets(process, isData)
 #    reproduceJEC(process)
 #    reproduceElectronID(process)
     reproduceMETNoiseFilters(process)
-    reproduceMET(process,isData)
+    reproduceMET(process, isData)
     reproduceJEC(process)
     print "=== Customisations done"
+
+
+def produceJets(process, isData):
+    '''
+    JetToolbox twiki:
+    https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetToolbox
+    
+    Using the QGTagger with Jet Toolbox: 
+    https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetToolbox#QGTagger
+    
+    QuarkGluonLikelihood twiki: 
+    https://twiki.cern.ch/twiki/bin/view/CMS/QuarkGluonLikelihood
+    
+    More info:
+    https://twiki.cern.ch/twiki/bin/viewauth/CMS/QGDataBaseVersion
+    '''
+    process.load("Configuration.EventContent.EventContent_cff")
+    process.load("Configuration.StandardSequences.GeometryRecoDB_cff")
+    process.load('Configuration.StandardSequences.MagneticField_38T_cff')
+    process.load('Configuration.StandardSequences.Services_cff')
+    
+    JEC = ['L1FastJet','L2Relative','L3Absolute']
+    if isData:
+        JEC += ['L2L3Residual']
+
+    from JMEAnalysis.JetToolbox.jetToolbox_cff import jetToolbox
+    jetToolbox( process, 'ak4', 'ak4JetSubs', 'out', 
+                addQGTagger=True, addPUJetID=True, JETCorrLevels = JEC,
+                bTagDiscriminators = ['pfCombinedInclusiveSecondaryVertexV2BJetTags', 'pfCombinedMVAV2BJetTags','pfCombinedCvsBJetTags','pfCombinedCvsLJetTags'],
+                postFix='')
+
+    # Small fix required to add the variables ptD, axis2, mult. See:
+    # https://hypernews.cern.ch/HyperNews/CMS/get/jet-algorithms/418/1.html
+    getattr( process, 'patJetsAK4PFCHS').userData.userFloats.src += ['QGTagger'+'AK4PFCHS'+':ptD']
+    getattr( process, 'patJetsAK4PFCHS').userData.userFloats.src += ['QGTagger'+'AK4PFCHS'+':axis2']
+    getattr( process, 'patJetsAK4PFCHS').userData.userInts.src   += ['QGTagger'+'AK4PFCHS'+':mult']
+    return
+
 
 # ===== Reproduce jet collections with the latest JEC =====
 def reproduceJEC(process):
