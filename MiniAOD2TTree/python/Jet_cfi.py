@@ -1,4 +1,8 @@
+#================================================================================================
+# Import modules
+#================================================================================================
 import FWCore.ParameterSet.Config as cms
+
 
 # Workaround: use PSets because this module is loaded
 #JECpayloadAK4PFchs = cms.PSet(
@@ -12,11 +16,11 @@ Jets = cms.VPSet(
     cms.PSet(
         branchname = cms.untracked.string("Jets"),
 #        src = cms.InputTag("patJetsReapplyJECAK4CHS"), # made from ak4PFJetsCHS
-        src = cms.InputTag("updatedPatJetsUpdatedJEC"),
+        src = cms.InputTag("selectedPatJetsAK4PFCHS"),#updatedPatJetsUpdatedJEC"),
 #        src = cms.InputTag("selectedPatJetsForMetT1T2SmearCorr"),
 #        src = cms.InputTag("cleanedPatJets"),
 #        src = cms.InputTag("patJetsReapplyJEC"),
-	systVariations = cms.bool(True),
+	systVariations = cms.bool(False),
         srcJESup   = cms.InputTag("shiftedPatJetEnUp"),
 	srcJESdown = cms.InputTag("shiftedPatJetEnDown"),
         srcJERup   = cms.InputTag("shiftedPatSmearedJetResUp"),
@@ -30,7 +34,14 @@ Jets = cms.VPSet(
             "pfCombinedCvsBJetTags"
         ),
         userFloats = cms.vstring(
-#           "pileupJetId:fullDiscriminant"
+#            "pileupJetId:fullDiscriminant",
+            "AK4PFCHSpileupJetIdEvaluator:fullDiscriminant",
+            "QGTaggerAK4PFCHS:qgLikelihood",
+            "QGTaggerAK4PFCHS:ptD",
+            "QGTaggerAK4PFCHS:axis2",
+        ),       
+        userInts = cms.vstring(
+            "QGTaggerAK4PFCHS:mult",
         ),
     ),
 #    cms.PSet(

@@ -4,7 +4,6 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 
-
 EventInfoDumper::EventInfoDumper(edm::ConsumesCollector&& iConsumesCollector, const edm::ParameterSet& pset)
 : puSummaryToken(iConsumesCollector.consumes<std::vector<PileupSummaryInfo>>(pset.getParameter<edm::InputTag>("PileupSummaryInfoSrc"))),
   lheToken(iConsumesCollector.consumes<LHEEventProduct>(pset.getUntrackedParameter<edm::InputTag>("LHESrc", edm::InputTag("")))),
@@ -40,6 +39,8 @@ void EventInfoDumper::book(TTree* tree){
     tree->Branch("pvPtSumRatioToNext",&ptSumRatio);
     if(bookTopPt)
     tree->Branch("topPtWeight", &topPtWeight);
+
+    return;
 }
 
 bool EventInfoDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
@@ -123,7 +124,7 @@ bool EventInfoDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     if (bookTopPt && iEvent.getByToken(topPtToken, topPtHandle)) {
       topPtWeight = *(topPtHandle.product());
     }
-    
+
     return filter();
 }
 
@@ -132,4 +133,5 @@ bool EventInfoDumper::filter(){
 }
 
 void EventInfoDumper::reset(){
+  return;
 }

@@ -1153,8 +1153,8 @@ class QCDNormalizationTemplate:
             r.Print("V")
             raise Exception("Error: The TFitResultPtr is not valid! The fit failed...")
         
-        msg = "Successfully fitted histogram \"%s\"!" % h.GetName()
-        self.Print(ShellStyles.NoteLabel() + msg, True)
+        msg = "Successfully fitted histogram %s\"%s\"!%s" % (ShellStyles.SuccessStyle(), h.GetName(), ShellStyles.NormalStyle())
+        self.Print(ShellStyles.SuccessLabel() + msg, True)
 
         # Print full information of fit including covariance matrix and correlation
         if 0:
