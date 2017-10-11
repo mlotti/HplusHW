@@ -316,7 +316,7 @@ def DeleteTaskMergedRootFles(dirPath, taskName, opts):
         cmd += " %s" % (f)
         Verbose(cmd)
         ret = Execute(cmd)
-        PrintProgressBar(taskName + ", Delete ", index-1, len(files), "[" + fName + "]")
+        PrintProgressBar("Delete files", index-1, len(files), "[" + fName + "]")
     FinishProgressBar()
 
     # Print contents of task dir (after)?
@@ -1811,7 +1811,7 @@ def DeleteFiles(taskName, mergeFile, fileList, opts):
 
     # For-loop: All input files
     for index, f in enumerate(fileList):
-        PrintProgressBar(taskName + ", Delete", index, len(fileList), "[" + os.path.basename(f) + "]")
+        PrintProgressBar("Delete files", index, len(fileList), "[" + os.path.basename(f) + "]")
         if opts.filesInEOS:
             cmd = ConvertCommandToEOS("rm", opts) + " " + f
             Verbose(cmd)
@@ -2012,7 +2012,7 @@ def LinkFiles(taskName, fileList):
             # ret = Execute(cmd)
 
         # Update Progress bar
-        PrintProgressBar(taskName + ", Links ", index, len(fileList), "[" + os.path.basename(destFile) + "]")
+        PrintProgressBar("Create symbolic links ", index, len(fileList), "[" + os.path.basename(destFile) + "]")
     return
 
 def DoNotUseFuseMount(dirPath):
