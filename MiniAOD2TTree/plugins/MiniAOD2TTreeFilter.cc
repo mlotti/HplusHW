@@ -92,7 +92,7 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
     softBTagDumper = 0;
     if (iConfig.exists("SoftBTag")) {
       std::cout << "SoftBTag exists!" << std::endl;
-      softBTagCollections = iConfig.getParameter<edm::ParameterSet>("SoftBTag");
+      softBTagCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("SoftBTag");
       softBTagDumper = new SoftBTagDumper(consumesCollector(), softBTagCollections);
       softBTagDumper->book(Events);
     } else {
