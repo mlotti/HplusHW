@@ -50,10 +50,15 @@ protected:
   const Branch<std::vector<bool>> *fOriginatesFromUnknown;
   const Branch<std::vector<bool>> *fOriginatesFromW;
   const Branch<std::vector<bool>> *fOriginatesFromZ;
+  const Branch<std::vector<double>> *fAK4PFCHSpileupJetIdEvaluatorfullDiscriminant;
+  const Branch<std::vector<double>> *fQGTaggerAK4PFCHSaxis2;
+  const Branch<std::vector<double>> *fQGTaggerAK4PFCHSptD;
+  const Branch<std::vector<double>> *fQGTaggerAK4PFCHSqgLikelihood;
   const Branch<std::vector<float>> *fPfCombinedCvsBJetTags;
   const Branch<std::vector<float>> *fPfCombinedCvsLJetTags;
   const Branch<std::vector<float>> *fPfCombinedInclusiveSecondaryVertexV2BJetTags;
   const Branch<std::vector<float>> *fPfCombinedMVAV2BJetTags;
+  const Branch<std::vector<int>> *fQGTaggerAK4PFCHSmult;
   const Branch<std::vector<int>> *fHadronFlavour;
   const Branch<std::vector<int>> *fPartonFlavour;
 };
@@ -107,10 +112,15 @@ public:
   bool originatesFromUnknown() const { return this->fCollection->fOriginatesFromUnknown->value()[this->index()]; }
   bool originatesFromW() const { return this->fCollection->fOriginatesFromW->value()[this->index()]; }
   bool originatesFromZ() const { return this->fCollection->fOriginatesFromZ->value()[this->index()]; }
+  double AK4PFCHSpileupJetIdEvaluatorfullDiscriminant() const { return this->fCollection->fAK4PFCHSpileupJetIdEvaluatorfullDiscriminant->value()[this->index()]; }
+  double QGTaggerAK4PFCHSaxis2() const { return this->fCollection->fQGTaggerAK4PFCHSaxis2->value()[this->index()]; }
+  double QGTaggerAK4PFCHSptD() const { return this->fCollection->fQGTaggerAK4PFCHSptD->value()[this->index()]; }
+  double QGTaggerAK4PFCHSqgLikelihood() const { return this->fCollection->fQGTaggerAK4PFCHSqgLikelihood->value()[this->index()]; }
   float pfCombinedCvsBJetTags() const { return this->fCollection->fPfCombinedCvsBJetTags->value()[this->index()]; }
   float pfCombinedCvsLJetTags() const { return this->fCollection->fPfCombinedCvsLJetTags->value()[this->index()]; }
   float pfCombinedInclusiveSecondaryVertexV2BJetTags() const { return this->fCollection->fPfCombinedInclusiveSecondaryVertexV2BJetTags->value()[this->index()]; }
   float pfCombinedMVAV2BJetTags() const { return this->fCollection->fPfCombinedMVAV2BJetTags->value()[this->index()]; }
+  int QGTaggerAK4PFCHSmult() const { return this->fCollection->fQGTaggerAK4PFCHSmult->value()[this->index()]; }
   int hadronFlavour() const { return this->fCollection->fHadronFlavour->value()[this->index()]; }
   int partonFlavour() const { return this->fCollection->fPartonFlavour->value()[this->index()]; }
 
