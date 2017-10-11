@@ -109,6 +109,7 @@ class CrabTask:
         self.rootFilesEOS     = rootFiles
         self.mergedFiles      = []
         self.mergedFilesEOS   = []
+        self.preMergedFiles   = []
         self.mergedToInputMap = {}
         self.mergedToSizeMap  = {}
         self.taskDir          = os.path.dirname(logFiles[0].replace("/log", ""))
@@ -236,6 +237,13 @@ class CrabTask:
             return self.mergedFilesEOS
         else:
             return self.mergedFiles
+
+    def SetPreMergedFiles(self, preMergedFiles):
+        self.preMergedFiles = preMergedFiles
+        return
+
+    def GetPreMergedFiles(self):
+        return self.preMergedFiles
     
     def GetTaskName(self):
         return self.taskName
@@ -1110,7 +1118,7 @@ def delete(fileName, regexp, opts):
     fileMode = "UPDATE"
 
     # Open the ROOT file
-    Verbose("Opening ROOT file %s in %s mode." % (fileName, fileMode) )
+    Verbose("Opening ROOT file %s in %s mode (prefix=%s)" % (fileName, fileMode, prefix) )
     fIN = ROOT.TFile.Open(prefix + fileName, fileMode)
     if fIN == None:
         raise Exception("Could not open ROOT file %s. Does it exist?" % (fileName) )
@@ -1156,7 +1164,7 @@ def IsDataRootfile(fileName):
     fOUT = None
     while nAttempts < maxAttempts:
         try:
-            Verbose("Attempt #%s: Opening ROOT file %s in %s mode." % (nAttempts, fileName, fileMode) )
+            Verbose("Attempt #%s: Opening ROOT file %s in %s mode (prefix=%s)" % (nAttempts, fileName, fileMode, prefix) )
             fOUT = ROOT.TFile.Open(prefix + fileName, fileMode)
             fOUT.cd()
             break
@@ -1960,26 +1968,19 @@ def GetPreexistingMergedFiles(taskPath, opts):
     '''
     Returns a list with the full path of all pre-existing merged ROOT files
     '''
-    Verbose("GetPreexistingMergedFiles()", True)
-    
     if opts.filesInEOS:
         cmd = ConvertCommandToEOS("ls", opts) + " " + taskPath
     else:
         cmd = "ls"  + " " + taskPath
     Verbose(cmd)
     dirContents = Execute(cmd)
-    preMergedFiles = filter(lambda x: "histograms-" in x, dirContents)
 
-    # For-loop: All files
-    mergeSizeMap = {}
-    mergeTimeMap = {}
-    
-    # For-loop: All merged ROOT files
-    for f in preMergedFiles:
-        Verbose("Getting file size for file %s" % (f))
-        mergeSizeMap[f] = GetFileSize(taskPath + "/" + f, opts)
-        mergeTimeMap[f] = 0.0
-    return preMergedFiles, mergeSizeMap, mergeTimeMap
+    fullPaths = []
+    taskPath = taskPath.replace("/eos/uscms", "") # fixme: tmp ugly fix. 
+    for f in dirContents:
+        fullPaths.append( os.path.join(taskPath, f) )
+    preMergedFiles = filter(lambda x: "histograms-" in x, fullPaths)
+    return preMergedFiles
 
 
 def natural_sort(myList): 
@@ -2101,6 +2102,11 @@ def main(opts, args):
         if not rootFilesExist:
             continue    
 
+        # Check if pre-existing merged ROOT files alredy exist
+        preMergedFiles  = GetPreexistingMergedFiles(crabTask.GetTaskDir(), opts)
+        nPreMergedFiles = len(preMergedFiles)
+        crabTask.SetPreMergedFiles(preMergedFiles)
+
         # Split ROOT files according to user-defined options (maxFileSize or filesPerMerge)
         filesSplit = SplitRootFiles(crabTask.GetTaskName(), rootFiles, opts)
 
@@ -2135,8 +2141,9 @@ def main(opts, args):
             mcrabTask.AddCrabTaskObject(crabTask)
 
             # Determine if the new ROOT file to be created already exists
-            mergeFileExists = FileExists(mergeName, opts) 
-                
+            mergeFileExists = (mergeName in crabTask.GetPreMergedFiles())
+            # mergeFileExists = FileExists(mergeName, opts)  # also works but more time-consuming
+
             # If merged ROOT file already exists skip it or rename it as .backup
             if mergeFileExists and not opts.overwrite:
                
@@ -2245,18 +2252,27 @@ def DeleteFoldersAndWritePU(mcrabTask):
         for i, f in enumerate(crabTask.GetMergedFiles(), 0):
 
             # Definitions
-            taskName     = crabTask.GetTaskName()
-            sourceFiles  = crabTask.GetInputFilesForMergeFile(f)
-            nMergedFiles = len(crabTask.GetMergedFiles())
-
+            taskName       = crabTask.GetTaskName()
+            sourceFiles    = crabTask.GetInputFilesForMergeFile(f)
+            nMergedFiles   = len(crabTask.GetMergedFiles())
+            preMergedFiles = crabTask.GetPreMergedFiles()
+                        
             # Delete folders & calculate the clean-time (in seconds)
             Verbose("%s [from %d file(s)]" % (f, len(sourceFiles)), True)
             time_start = time.time()
-            if opts.filesPerMerge != 1:
+
+            # No duplicate folders to delete if file already existed (hence was cleaned)
+            mergeFileExists = (f in crabTask.GetPreMergedFiles())
+            if mergeFileExists:
                 PrintProgressBar("Clean merged ROOT files", i, nMergedFiles, os.path.basename(f))
-                DeleteFolders(f, ["Generated", "Commit", "dataVersion"], opts)
+                continue
             else:
-                PrintProgressBar("Clean merged ROOT files", 99, 100, "Skipped because filesPerMerge=%s" % (opts.filesPerMerge))
+                if opts.filesPerMerge != 1:
+                    PrintProgressBar("Clean merged ROOT files", i-1, nMergedFiles, os.path.basename(f))
+                    DeleteFolders(f, ["Generated", "Commit", "dataVersion"], opts)
+                    PrintProgressBar("Clean merged ROOT files", i, nMergedFiles, os.path.basename(f))
+                else:
+                    PrintProgressBar("Clean merged ROOT files", 99, 100, "Skipped because filesPerMerge=%s" % (opts.filesPerMerge))
             
             # Keep track of time
             crabTask.MakeMergedToCleanTimePair(os.path.basename(f), time.time() - time_start)
