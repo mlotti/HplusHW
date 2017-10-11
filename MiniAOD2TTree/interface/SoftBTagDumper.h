@@ -47,23 +47,23 @@ class SoftBTagDumper {
 	// Primary and Secondary Vertex Collections
 	short nGoodOfflinePV;
 	short nGoodOfflineSV;
-	float svPt;
-        float svEta;
-        float svPhi;
-        float svMass;
-        int   svNTks;
-        float svChi2;
+	std::vector<float> *svPt;
+	std::vector<float> *svEta;
+	std::vector<float> *svPhi;
+	std::vector<float> *svMass;
+	std::vector<int>   *svNTks;
+	std::vector<float> *svChi2;
 	/* Number of degrees of freedom (Ndof):
            Meant to be Double32_t for soft-assignment fitters:
            tracks may contribute to the vertex with fractional weights.
            The ndof is then = to the sum of the track weights.
            see e.g. CMS NOTE-2006/032, CMS NOTE-2004/002
 	*/
-        float svNdof;
-        float svDxy;
-        float svDxyErr;
-        float svD3d;
-        float svD3dErr;
-        float costhetasvpv;
+	std::vector<float> *svNdof;
+	std::vector<float> *svDxy;
+	std::vector<float> *svDxyErr;
+	std::vector<float> *svD3d;
+	std::vector<float> *svD3dErr;
+	std::vector<float> *costhetasvpv;
 };
 #endif
