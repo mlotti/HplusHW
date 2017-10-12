@@ -1179,7 +1179,6 @@ def IsDataRootfile(fileName):
         Verbose("Successfully opened %s in %s mode (after %s attempts)" % (fileName, fileMode, nAttempts) )
 
     # Definitions
-    hPU = None
     dataVersion = fOUT.Get("configInfo/dataVersion")
     dv_re = re.compile("data")  
     Verbose("The data version of file %s is %s"   % (fileName, dataVersion.GetTitle()))
@@ -1187,11 +1186,11 @@ def IsDataRootfile(fileName):
 
     # If dataset is not data, do nothing
     if not match:
-        return False
+        return False, fOUT
     else:
-        return True
+        return True, fOUT
 
-def WritePileupHistos(fileName, opts):
+def WritePileupHistos(fileName, fOUT, opts):
     '''
     If dataversion is NOT "data", return.
     Otherwise, read the PileUp.root file and
@@ -1200,7 +1199,11 @@ def WritePileupHistos(fileName, opts):
     '''
     #if not IsDataRootfile(fileName):
     #    return
+    prefix = ""
+    if opts.filesInEOS:
+        prefix = GetXrdcpPrefix(opts)
 
+    hPU     = None
     puFile = os.path.join(os.path.dirname(fileName), "PileUp.root")
     if FileExists(puFile, opts):
         Verbose("Opening ROOT file \"%s\"" % (fileName), False)
@@ -1458,8 +1461,6 @@ def GetXrdcpPrefix(opts):
 
 
 def GetFileOpenPrefix(opts):
-    Verbose("GetFileOpenPrefix()")
-
     if not opts.filesInEOS:
       return ""
 
@@ -2288,11 +2289,11 @@ def DeleteFoldersAndWritePU(mcrabTask):
         for j, f in enumerate(crabTask.GetMergedFiles(), 0):
 
             # Add pile-up histos (for data only!)
-            isData = IsDataRootfile(f)
+            isData, fOUT = IsDataRootfile(f)
             time_start = time.time()
             if isData:
                 PrintProgressBar("Write PU histos (isData=%s)" % (isData) , j, nMergedFiles, os.path.basename(f))
-                WritePileupHistos(f, opts)
+                WritePileupHistos(f, fOUT, opts)
             else:
                 PrintProgressBar("Write PU histos (isData=%s)" % (isData) , j, nMergedFiles, os.path.basename(f))
                 pass
