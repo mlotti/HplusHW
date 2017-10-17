@@ -455,7 +455,7 @@ if __name__ == "__main__":
     OPTMODE      = ""
     BATCHMODE    = True
     PRECISION    = 3
-    SIGNALMASS   = [200, 500, 800, 1000]
+    SIGNALMASS   = [200, 500, 800]#, 1000]
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False
