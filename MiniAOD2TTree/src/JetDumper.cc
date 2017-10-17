@@ -367,6 +367,7 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 }
 
 void JetDumper::reset(){
+
     for(size_t ic = 0; ic < inputCollections.size(); ++ic){
 	pt[ic].clear();
 	eta[ic].clear();

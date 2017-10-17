@@ -15,7 +15,9 @@ process = Process("SignalAnalysis"+obtainAnalysisSuffix(sys.argv))
 blacklist = []
 #blacklist = ["ChargedHiggs_TTToHplusBWB"]
 #blacklist = ["ChargedHiggs_HplusTB"]
-process.addDatasetsFromMulticrab(sys.argv[1],blacklist=blacklist)
+whitelist = []
+#whitelist = ["Tau_Run2016G_","TT"]
+process.addDatasetsFromMulticrab(sys.argv[1],blacklist=blacklist,whitelist=whitelist)
 
 # Add config
 from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections,applyAnalysisCommandLineOptions,setAngularCutsWorkingPoint
