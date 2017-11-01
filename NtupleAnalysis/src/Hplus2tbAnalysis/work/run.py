@@ -123,7 +123,7 @@ def main():
         Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
         process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=opts.excludeTasks)
     else:
-        myBlackList = []#["QCD_b"]
+        myBlackList = ["QCD_b"]
         Print("Adding all datasets from multiCRAB directory %s" % (opts.mcrab))
         Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
         regex =  "|".join(myBlackList)

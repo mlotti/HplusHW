@@ -5,7 +5,7 @@ USAGE:
 
 
 EXAMPLES:
-./plotQCD_FailedBJets.py -m FakeBMeasurement_GE2MediumPt40Pt30_GE0or3Loose_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_AlFailedBJetSort_170921_105355 --url
+./plotQCD_FailedBJet.py -m FakeBMeasurement_GE2MediumPt40Pt30_GE1LooseMaxDiscr0p7_StdSelections_TopCut100_AllSelections_TopCut10_RandomFailedBJetSort_171012_012105/ --plotEWK --url
 
 
 NOTE:
@@ -38,6 +38,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
+import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
 
 #================================================================================================ 
 # Function Definition
@@ -121,16 +122,37 @@ def GetDatasetsFromDir(opts):
 
 def main(opts):
 
+    # Obtain dsetMgrCreator and register it to module selector
+    dsetMgrCreator = dataset.readFromMulticrabCfg(directory=opts.mcrab)
 
-    #optModes = ["", "OptChiSqrCutValue50p0", "OptChiSqrCutValue100p0", "OptChiSqrCutValue200p0"]
-    optModes = ["",
-                "OptInvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeRandom",
-                "OptInvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeDescendingBDiscriminator",
-                "OptInvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeRandom",
-                "OptInvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeDescendingBDiscriminator"]
+    # Get list of eras, modes, and optimisation modes
+    erasList      = dsetMgrCreator.getDataEras()
+    modesList     = dsetMgrCreator.getSearchModes()
+    optList       = dsetMgrCreator.getOptimizationModes()
+    sysVarList    = dsetMgrCreator.getSystematicVariations()
+    sysVarSrcList = dsetMgrCreator.getSystematicVariationSources()
 
-    #if opts.optMode != None:
-    #    optModes = [opts.optMode]
+    # Todo: Print settings table
+    if 0:
+        print erasList
+        print
+        print modesList
+        print
+        print optList
+        print
+        print sysVarList
+        print
+        print sysVarSrcList
+
+    # If user does not define optimisation mode do all of them
+    if opts.optMode == None:
+        if len(optList) < 1:
+            optList.append("")
+        else:
+            pass
+        optModes = optList
+    else:
+        optModes = [opts.optMode]
 
     # For-loop: All optimisation modes
     for opt in optModes:

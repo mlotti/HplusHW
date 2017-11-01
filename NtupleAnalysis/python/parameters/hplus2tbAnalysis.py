@@ -16,6 +16,7 @@ trigger = PSet(
     triggerOR = [
         "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056", # scanned in range _v1--_v100 (=>remove the '_v' suffix)
         "HLT_PFHT450_SixJet40_BTagCSV_p056",       # scanned in range _v1--_v100 (=>remove the '_v' suffix)
+        "HLT_PFJet450", # for trg eff recovery in 2016H
         #"HLT_PFHT400_SixJet30", #Prescale 110 at inst. lumi 1.35E+34
         #"HLT_PFHT450_SixJet40", #Prescale 26 at inst. lumi 1.35E+34
         ],
@@ -217,10 +218,13 @@ fakeBMeasurement = PSet(
     numberOfBJetsCutValue             = 2,
     numberOfBJetsCutDirection         = "==", # options: ==, !=, <, <=, >, >=
     #
-    numberOfInvertedBJetsCutValue     = 0,
-    numberOfInvertedBJetsCutDirection = ">", # options: ==, !=, <, <=, >, >=
-    invertedBJetDiscr                 = bjetSelection.bjetDiscr,
-    invertedBJetWorkingPoint          = "Loose",
+    numberOfInvertedBJetsCutValue     = 1,        # i.e. additional to the selected b-jets
+    numberOfInvertedBJetsCutDirection = ">=",     # options: ==, !=, <, <=, >, >=
+    invertedBJetsSortType             = "Random", # options: "AscendingPt", "DescendingPt", "AscendingBDiscriminator", "DescendingBDiscriminator", "Random"
+    invertedBJetsDiscr                = bjetSelection.bjetDiscr,
+    invertedBJetsWorkingPoint         = "Loose",
+    invertedBJetsDiscrMaxCutValue     = 0.7,      # medium = 0.8484
+    invertedBJetsDiscrMaxCutDirection = "<",      # options: ==, !=, <, <=, >, >=
     )
 
 
@@ -270,4 +274,3 @@ allSelections = PSet(
     Verbose               = verbose,
     FakeBMeasurement      = fakeBMeasurement,
 )
-
