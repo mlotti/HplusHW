@@ -50,7 +50,7 @@
 #include "TMVA/Tools.h"
 #endif
 
-void TMVAClassificationTopRec( TString myMethodList = "", TString fout = "TMVA_TopRec.root")
+void TMVAClassificationTopRec( TString myMethodList = "", TString fout = "TMVA_TopRecNoCuts.root")
 
 {
    // The explicit loading of the shared libTMVA is done in TMVAlogon.C, defined in .rootrc
@@ -129,11 +129,11 @@ void TMVAClassificationTopRec( TString myMethodList = "", TString fout = "TMVA_T
    Use["SVM"]             = 0;
    // 
    // --- Boosted Decision Trees
-   Use["BDT"]             = 1; // uses Adaptive Boost
+   Use["BDT"]             = 0; // uses Adaptive Boost
    Use["BDTG"]            = 1; // uses Gradient Boost
-   Use["BDTB"]            = 1; // uses Bagging
-   Use["BDTD"]            = 1; // decorrelation + Adaptive Boost
-   Use["BDTF"]            = 1; // allow usage of fisher discriminant for node splitting 
+   Use["BDTB"]            = 0; // uses Bagging
+   Use["BDTD"]            = 0; // decorrelation + Adaptive Boost
+   Use["BDTF"]            = 0; // allow usage of fisher discriminant for node splitting 
    // 
    // --- Friedman's RuleFit method, ie, an optimised series of cuts ("rules")
    Use["RuleFit"]         = 0;
@@ -208,18 +208,24 @@ void TMVAClassificationTopRec( TString myMethodList = "", TString fout = "TMVA_T
      factory->AddVariable( "TrijetDijetMass","m_{W}","",'F');   
      factory->AddVariable( "TrijetBJetBDisc","b-tagged jet CSV","",'F');  
      factory->AddVariable( "TrijetSoftDrop_n2","SoftDrop_n2","",'F');  //to be added
-     // factory->AddVariable( "TrijetLdgJetPt","TrijetLdgJetPt","",'F');
-     // factory->AddVariable( "TrijetLdgJetEta","TrijetLdgJetEta","",'F');
-     // factory->AddVariable( "TrijetSubldgJetPt","TrijetSubldgJetPt","",'F');
-     // factory->AddVariable( "TrijetSubldgJetEta","TrijetSubldgJetEta","",'F');
+     factory->AddVariable( "TrijetLdgJetCvsL","Leading jet CvsL","",'F');
+     factory->AddVariable( "TrijetSubldgJetCvsL","Subleading jet CvsL","",'F');
+     factory->AddVariable( "TrijetLdgJetPtD","Leading jet p_{T}D","",'F');
+     factory->AddVariable( "TrijetSubldgJetPtD","Subleading jet p_{T}D","",'F');
+     factory->AddVariable( "TrijetLdgJetAxis2","Leading jet axis2","",'F');
+     factory->AddVariable( "TrijetSubldgJetAxis2","Subleading jet axis2","",'F');
+     factory->AddVariable( "TrijetLdgJetMult","Leading jet mult","",'I');
+     factory->AddVariable( "TrijetSubldgJetMult","Subleading jet mult","",'I');
 
   }
 
    // Read training and test data
    // (it is also possible to use ASCII format as input -> see TMVA Users Guide)OA
 
-  TString fnameS_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_171005_FULL/TT/res/histograms-TT.root";//"histograms_TTsd.root";
-  TString fnameB_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_171005_FULL/TT/res/histograms-TT.root";
+  //  TString fnameS_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_171012_TTfull/TT/res/histograms-TT.root";//"histograms_TTsd.root";
+  //  TString fnameB_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_171012_TTfull/TT/res/histograms-TT.root";
+  TString fnameS_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_171014_173553/TT/res/histograms-TT.root";//"histograms_TTsd.root";                            
+  TString fnameB_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_171014_173553/TT/res/histograms-TT.root";                                                     
 
    //   if (gSystem->AccessPathName( fname ))  // file does not exist in local directory
    //   gSystem->Exec("curl -O http://root.cern.ch/files/tmva_class_example.root");
@@ -265,12 +271,15 @@ void TMVAClassificationTopRec( TString myMethodList = "", TString fout = "TMVA_T
     // TCut mucuts = "LdgTrijetLdgJetBDisc > 0.8 && LdgTrijetLdgJetBDisc<1.01 &&   LdgTrijetSubldgJetBDisc > 0.8 && LdgTrijetSubldgJetBDisc < 1.01 && SubldgTrijetLdgJetBDisc > 0.8 && SubldgTrijetLdgJetBDisc < 1.01 && SubldgTrijetSubldgJetBDisc > 0.8 && SubldgTrijetSubldgJetBDisc < 1.01";
 
     // TCut mucutb = "LdgTrijetLdgJetBDisc > 0.8 && LdgTrijetLdgJetBDisc<1.01 &&   LdgTrijetSubldgJetBDisc > 0.8 && LdgTrijetSubldgJetBDisc < 1.01 && SubldgTrijetLdgJetBDisc > 0.8 && SubldgTrijetLdgJetBDisc < 1.01 && SubldgTrijetSubldgJetBDisc > 0.8 && SubldgTrijetSubldgJetBDisc < 1.01";
+
     
+    //    TCut mycuts = "TrijetBjetMass < 65 && TrijetBJetBDisc > 0.5 && TrijetLdgJetCvsL > -0.8 && TrijetSubldgJetCvsL > -0.8 && TrijetMass > 100 && TrijetMass < 240 && TrijetDijetMass < 120 && TrijetDijetPtDR < 500 &&  TrijetPtDR < 1000 && TrijetBJetLdgJetMass < 250 && TrijetBJetSubldgJetMass < 240";
 
-    TCut mycuts = "";
-    TCut mycutb = "";
-
-   // Tell the factory how to use the training and testing events
+    //    TCut mycutb = "TrijetBjetMass < 65 && TrijetBJetBDisc > 0.5 && TrijetLdgJetCvsL > -0.8 && TrijetSubldgJetCvsL > -0.8 && TrijetMass > 100 && TrijetMass < 240 && TrijetDijetMass < 120 && TrijetDijetPtDR < 500 &&  TrijetPtDR < 1000 && TrijetBJetLdgJetMass < 250 && TrijetBJetSubldgJetMass < 240";
+    
+     TCut mycuts = "";
+     TCut mycutb = "";
+    // Tell the factory how to use the training and testing events
    //
    // If no numbers of events are given, half of the events in the tree are used 
    // for training, and the other half for testing:
@@ -279,8 +288,9 @@ void TMVAClassificationTopRec( TString myMethodList = "", TString fout = "TMVA_T
    //    factory->PrepareTrainingAndTestTree( mycut,
    //                                         "NSigTrain=3000:NBkgTrain=3000:NSigTest=3000:NBkgTest=3000:SplitMode=Random:!V" );
    factory->PrepareTrainingAndTestTree( mycuts, mycutb,
-                                        "nTrain_Signal=45000:nTrain_Background=45000:NTest_Signal=45000:nTest_Background=45000:SplitMode=Random:NormMode=NumEvents:!V" );
-					//"nTrain_Signal=0:nTrain_Background=0:SplitMode=Random:NormMode=NumEvents:!V" );
+					//					"nTrain_Signal=70000:nTrain_Background=70000:NTest_Signal=70000:nTest_Background=70000:SplitMode=Random:NormMode=NumEvents:!V" );
+					"nTrain_Signal=70000:nTrain_Background=70000:NTest_Signal=70000:nTest_Background=70000:SplitMode=Random:NormMode=NumEvents:!V" );
+					//				"nTrain_Signal=0:nTrain_Background=0:SplitMode=Random:NormMode=NumEvents:!V" );
 
    // ---- Book MVA methods
    //
