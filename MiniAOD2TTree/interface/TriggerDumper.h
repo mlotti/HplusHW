@@ -82,6 +82,8 @@ class TriggerDumper {
 
         double L1MET_l1extra_x;
         double L1MET_l1extra_y;
+        double L1MET_pat_x;
+        double L1MET_pat_y;
 	double L1MET_x;
         double L1MET_y;
         bool bookL1EtSum;
