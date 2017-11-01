@@ -198,8 +198,21 @@ topSelection = PSet(
     dijetWithMaxDR_tetrajetBjet_dPhi_min        = +2.5, # Disable: 0.0, Default: +2.5
     dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept = +3.0, # Disable:-1.0, Default: +3.0
     dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff = -1.0, # Disable: 0.0, Default: -1.0
+    ReplaceJetsWithGenJets = False, #soti
 )
 
+#================================================================================================                  
+# Top selection BDT                                               
+#================================================================================================        
+topSelectionBDT = PSet(
+    # Basic values                 
+    MVACutValue     = 0.9,
+    MVACutDirection =  ">",   # options: ==, !=, <, <=, >, >=       
+    NjetsMaxValue      = 9,
+    NjetsMaxDirection  = "<=",    # options: ==, !=, <, <=, >, >=    
+    # For Testing (perfect jet resolution) 
+    ReplaceJetsWithGenJets = False,
+)
 
 #================================================================================================
 # MET trigger SF
@@ -269,6 +282,7 @@ allSelections = PSet(
     METSelection          = metSelection,
     TopologySelection     = topologySelection,
     TopSelection          = topSelection,
+    TopSelectionBDT       = topSelectionBDT,
     MuonSelection         = muVeto,
     Trigger               = trigger,
     Verbose               = verbose,
