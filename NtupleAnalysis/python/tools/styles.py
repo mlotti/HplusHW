@@ -308,7 +308,7 @@ ewkfakeFillStyle  = StyleCompound([StyleFill(fillColor=ROOT.kGreen+2)])
 qcdBEnrichedStyle = Style(ROOT.kOpenTriangleUp, ROOT.kOrange-3)
 qcdFillStyle      = StyleCompound([StyleFill(fillColor=ROOT.kOrange-2)])
 #qcdStyle          = Style(ROOT.kFullTriangleUp, ROOT.kOrange-2)
-qcdStyle          = StyleCompound([StyleLine(lineColor=ROOT.kOrange-2, lineStyle=ROOT.kSolid, lineWidth=4),StyleFill(fillColor=ROOT.kOrange-2, fillStyle=3004)])
+qcdStyle          = StyleCompound([StyleLine(lineColor=ROOT.kOrange-2, lineStyle=ROOT.kSolid, lineWidth=4),StyleFill(fillColor=ROOT.kOrange-2, fillStyle=3001)])
 singleTopStyle    = Style(ROOT.kOpenDiamond, ROOT.kTeal+9)
 stStyle           = Style(ROOT.kPlus, ROOT.kSpring+4)
 stsStyle          = Style(ROOT.kPlus, ROOT.kSpring-9)
@@ -370,7 +370,7 @@ signalFillStyleHToTB  = StyleCompound([StyleMarker(markerSize=0, markerColor=ROO
 signalStyleHToTB200 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kPink-2, markerSizes=None, markerStyle=4),
                                    StyleLine(lineColor=ROOT.kPink-2, lineStyle=ROOT.kDashed, lineWidth=4), 
                                    StyleFill(fillColor=ROOT.kPink-2, fillStyle=0)])
-signalStyleHToTB300 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kTeal+3, markerSizes=None, markerStyle=4),
+signalStyleHToTB1000 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kTeal+3, markerSizes=None, markerStyle=4),  #300
                                    StyleLine(lineColor=ROOT.kTeal+3, lineStyle=ROOT.kDashed, lineWidth=4), 
                                    StyleFill(fillColor=ROOT.kTeal+3, fillStyle=0)])
 signalStyleHToTB500 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kAzure-1, markerSizes=None, markerStyle=4),
@@ -379,7 +379,7 @@ signalStyleHToTB500 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.
 signalStyleHToTB800 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kSpring-4, markerSizes=None, markerStyle=4),
                                    StyleLine(lineColor=ROOT.kSpring-4, lineStyle=ROOT.kDashed, lineWidth=4), 
                                    StyleFill(fillColor=ROOT.kSpring-4, fillStyle=0)])
-signalStyleHToTB1000 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kYellow-7, markerSizes=None, markerStyle=4),
+signalStyleHToTB300 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kYellow-7, markerSizes=None, markerStyle=4),  #1000
                                    StyleLine(lineColor=ROOT.kYellow-7, lineStyle=ROOT.kDashed, lineWidth=4), 
                                    StyleFill(fillColor=ROOT.kYellow-7, fillStyle=0)])
 signalStyleHToTB2000 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kViolet-9, markerSizes=None, markerStyle=4),
