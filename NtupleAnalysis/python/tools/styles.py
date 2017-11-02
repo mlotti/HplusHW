@@ -336,7 +336,7 @@ invertedLineStyle = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.
                                    StyleFill(fillColor=ROOT.kRed, fillStyle=0)])
 altQCDStyle       = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange-2, markerSizes=None, markerStyle=ROOT.kFullDiamond),
                                    StyleLine(lineColor=ROOT.kOrange-2, lineStyle=ROOT.kSolid, lineWidth=3), 
-                                   StyleFill(fillColor=ROOT.kOrange-2, fillStyle=1001)])
+                                   StyleFill(fillColor=ROOT.kOrange-2, fillStyle=3001)])
 genuineBStyle     = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kGreen+2, markerSizes=None, markerStyle=ROOT.kCircle),
                                    StyleLine(lineColor=ROOT.kGreen+2, lineStyle=ROOT.kSolid, lineWidth=3), 
                                    StyleFill(fillColor=ROOT.kGreen+2, fillStyle=3001)])

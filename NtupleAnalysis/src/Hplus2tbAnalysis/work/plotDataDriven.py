@@ -281,6 +281,9 @@ def GetHistoKwargs(histoList, opts):
             kwargs["xlabel"] = "H_{2}"
             kwargs["opts"]   = {"xmin": 0.0, "xmax": 1.01}
             kwargs["cutBox"] = {"cutValue": 0.5, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": +1.0, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["moveLegend"] = {"dx": +0.0}
+            #kwargs["moveLegend"] = {"dx": -0.53, "dy": -0.5, "dh": 0.0}
         if "Centrality" in h:
             kwargs["ylabel"] = "Events / %.2f"
             kwargs["xlabel"] = "Centrality"
@@ -425,7 +428,7 @@ def DataMCHistograms(datasetsMgr, qcdDatasetName):
     # For-loop: All histograms in list
     for histoName in histoPaths:
 
-        if "HT" not in histoName:
+        if "Fox" not in histoName:
             continue
 
         if "JetEtaPhi" in histoName:

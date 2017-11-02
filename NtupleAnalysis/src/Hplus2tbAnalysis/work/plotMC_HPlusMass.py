@@ -139,7 +139,7 @@ def main(opts, signalMass):
         if 1:
             datasetsMgr.remove(filter(lambda name: "Data" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "QCD-b" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "QCD" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "QCD" in name, datasetsMgr.getAllDatasetNames()))
             #datasetsMgr.remove(filter(lambda name: "SingleTop" in name, datasetsMgr.getAllDatasetNames()))
             #datasetsMgr.remove(filter(lambda name: "DYJetsToQQHT" in name, datasetsMgr.getAllDatasetNames()))
             #datasetsMgr.remove(filter(lambda name: "TTZToQQ" in name, datasetsMgr.getAllDatasetNames()))
@@ -287,14 +287,23 @@ def PlotMC(datasetsMgr, histo, intLumi):
     # Customise styling
     p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineStyle(ROOT.kSolid))
 
-    if "QCD" in datasetsMgr.getAllDatasets():
-        p.histoMgr.forHisto("QCD", styles.getQCDFillStyle() )
+
+    if "QCD" in datasetsMgr.getAllDatasetNames():
+        #p.histoMgr.forHisto("QCD", styles.getQCDFillStyle() )
+        p.histoMgr.forHisto("QCD", styles.getAltQCDStyle() )
         p.histoMgr.setHistoDrawStyle("QCD", "HIST")
         p.histoMgr.setHistoLegendStyle("QCD", "F")
 
-    if "TT" in datasetsMgr.getAllDatasets():
+    if "TT" in datasetsMgr.getAllDatasetNames():
         p.histoMgr.setHistoDrawStyle("TT", "AP")
         p.histoMgr.setHistoLegendStyle("TT", "LP")
+
+
+    # Set legend labels
+    p.histoMgr.setHistoLegendLabelMany({
+            "EWK": "EWK",
+            "QCD": "QCD",
+            })
 
     # Customise style
     signalM = []
