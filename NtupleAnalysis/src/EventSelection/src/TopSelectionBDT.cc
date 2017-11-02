@@ -812,15 +812,15 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   vector <Jet> TopCandJet1, TopCandJet2, TopCandBJet;
   vector <math::XYZTLorentzVector> TopCandP4;
   bool isMaxIndex0, isMaxIndex1, isMaxIndex2;
-  int indexb = -1;
+  int indexb = 0;
   for (auto& bjet: jets){
     indexb++;
     isMaxIndex0 = !cfg_NjetsMax.passedCut(indexb);
-    int index1 = -1;
+    int index1 = 0;
     for (auto& jet1: jets){
       index1++;
       isMaxIndex1 = !cfg_NjetsMax.passedCut(index1);
-      int index2 = -1;
+      int index2 = 0;
       if (areSameJets(jet1, bjet)) continue;
       for (auto& jet2: jets){
 	index2++;
