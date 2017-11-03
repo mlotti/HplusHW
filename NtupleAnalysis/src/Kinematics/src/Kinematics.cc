@@ -54,7 +54,11 @@ public:
 			   float &MHT,
 			   float &Centrality);
 
-
+  std::vector<math::XYZTLorentzVector> SortInPt(std::vector<math::XYZTLorentzVector> Vector);
+  Bool_t IsBjet(math::XYZTLorentzVector jet,vector<GenJet> selectedBJets);
+  
+  double DeltaRmin(math::XYZTLorentzVector jet, vector<GenJet> jetSelection);
+  std::vector<math::XYZTLorentzVector> TrijetJets(vector<math::XYZTLorentzVector> JETS, vector<GenJet> selectedBJets);
 private:
   // Input parameters
   const double cfg_Verbose;
@@ -259,6 +263,24 @@ private:
   WrappedTH1 *h_MaxTriJetPt_dPhiAverage;
   WrappedTH1 *h_MaxTriJetPt_dRAverage;
 
+
+  //cosTheta
+  WrappedTH1 *h_CosTheta_Bjet1TopCM_TrijetLab;
+  WrappedTH1 *h_CosTheta_Bjet1TopCM_Zaxis;
+  WrappedTH1 *h_CosTheta_Bjet2TopCM_TrijetLab;
+  WrappedTH1 *h_CosTheta_Bjet2TopCM_Zaxis;
+  WrappedTH1 *h_CosTheta_Bjet3TopCM_TrijetLab;
+  WrappedTH1 *h_CosTheta_Bjet3TopCM_Zaxis;
+
+  WrappedTH1 *h_CosTheta_LdgTrijetLdgJetTopCM_TrijetLab;
+  WrappedTH1 *h_CosTheta_LdgTrijetSubldgJetTopCM_TrijetLab;
+  WrappedTH1 *h_CosTheta_LdgTrijetBjetTopCM_TrijetLab;
+
+  WrappedTH1 *h_CosTheta_SubldgTrijetLdgJetTopCM_TrijetLab;
+  WrappedTH1 *h_CosTheta_SubldgTrijetSubldgJetTopCM_TrijetLab;
+  WrappedTH1 *h_CosTheta_SubldgTrijetBjetTopCM_TrijetLab;
+
+
   // Correlations 
   WrappedTH2 *h_BQuark1_BQuark2_dEta_Vs_dPhi;
   WrappedTH2 *h_BQuark1_BQuark3_dEta_Vs_dPhi;
@@ -271,6 +293,9 @@ private:
   WrappedTH2 *h_Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi;  
   WrappedTH2 *h_Jet1Jet2_dEta_Vs_Jet1Jet2_Mass;
   WrappedTH2 *h_Jet3Jet4_dEta_Vs_Jet3Jet4_Mass;
+
+  WrappedTH2 *h_DPhiJ34vsDPhiJ56;
+  //next wrapped
 
 };
 
@@ -558,6 +583,30 @@ void Kinematics::book(TDirectory *dir) {
   h_BQuark2_BQuark4_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, th2, "BQuark2_BQuark4_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
   h_BQuark3_BQuark4_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, th2, "BQuark3_BQuark4_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
 
+  h_DPhiJ34vsDPhiJ56     = fHistoWrapper.makeTH<TH2F>(HistoLevel::kDebug, dir, "DPhiJ34vsDPhiJ56"     , ";#Delta #phi(j3,j4);#Delta #phi(j5,j6)"     , 40, 0.0, 3.15,     40  ,0.0, 3.15);
+
+  h_CosTheta_Bjet1TopCM_TrijetLab = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, dir, "CosTheta_Bjet1TopCM_TrijetLab",";cos#theta(Bjet1_{TopCM},Trijet_{Lab})",40, -1., 1.);
+  h_CosTheta_Bjet2TopCM_TrijetLab = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, dir, "CosTheta_Bjet2TopCM_TrijetLab",";cos#theta(Bjet2_{TopCM},Trijet_{Lab})",40, -1., 1.);
+  h_CosTheta_Bjet3TopCM_TrijetLab = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, dir, "CosTheta_Bjet3TopCM_TrijetLab",";cos#theta(Bjet3_{TopCM},Trijet_{Lab})",40, -1., 1.);
+  h_CosTheta_Bjet1TopCM_Zaxis     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, dir, "CosTheta_Bjet1TopCM_Zaxis",";cos#theta(Bjet1_{TopCM},zaxis)",40, -1., 1.);
+  h_CosTheta_Bjet2TopCM_Zaxis     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, dir, "CosTheta_Bjet2TopCM_Zaxis",";cos#theta(Bjet2_{TopCM},zaxis)",40, -1., 1.);
+  h_CosTheta_Bjet3TopCM_Zaxis     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, dir, "CosTheta_Bjet3TopCM_Zaxis",";cos#theta(Bjet3_{TopCM},zaxis)",40, -1., 1.);
+
+  h_CosTheta_LdgTrijetLdgJetTopCM_TrijetLab    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, dir, "CosTheta_LdgTrijetLdgJetTopCM_TrijetLab",";cos#theta(LdgTrijetLdgJet_{TopCM},Trije\
+t_{Lab})",40, -1., 1.);
+  h_CosTheta_LdgTrijetSubldgJetTopCM_TrijetLab = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, dir, "CosTheta_LdgTrijetSubldgJetTopCM_TrijetLab",";cos#theta(LdgTrijetSubldgJet_{TopCM}\
+,Trijet_{Lab})",40, -1., 1.);
+  h_CosTheta_LdgTrijetBjetTopCM_TrijetLab      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, dir, "CosTheta_LdgTrijetBjetTopCM_TrijetLab",";cos#theta(LdgTrijetBjet_{TopCM},Trijet_{L\
+ab})",40, -1., 1.);
+
+  h_CosTheta_SubldgTrijetLdgJetTopCM_TrijetLab    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, dir, "CosTheta_SubldgTrijetLdgJetTopCM_TrijetLab",";cos#theta(SubldgTrijetLdgJet_{Top\
+CM},Trijet_{Lab})",40, -1., 1.);
+  h_CosTheta_SubldgTrijetSubldgJetTopCM_TrijetLab = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, dir, "CosTheta_SubldgTrijetSubldgJetTopCM_TrijetLab",";cos#theta(SubldgTrijetSubldgJe\
+t_{TopCM},Trijet_{Lab})",40, -1., 1.);
+  h_CosTheta_SubldgTrijetBjetTopCM_TrijetLab      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, dir, "CosTheta_SubldgTrijetBjetTopCM_TrijetLab",";cos#theta(SubldgTrijetBjet_{TopCM},\
+Trijet_{Lab})",40, -1., 1.);
+
+  //next histogram
   return;
 }
 
@@ -818,7 +867,7 @@ void Kinematics::process(Long64_t entry) {
     
     // Filtering    
     if (!p.isLastCopy()) continue;
-    if ( !mcTools.IsQuark(genP_pdgId) ) continue;
+    // // if ( !mcTools.IsQuark(genP_pdgId) ) continue;
     // if (!p.isPrompt()) continue;
     // if (!p.isPromptDecayed()) continue;
     // if (!p.isPromptFinalState()) continue;
@@ -869,6 +918,7 @@ void Kinematics::process(Long64_t entry) {
 	row++;
       }
     
+    //    if (std::abs(genP_pdgId) == 6) TOP_p4.push_back(genP_p4);
     // b-quarks
     if(std::abs(genP_pdgId) == 5)
       {	
@@ -888,7 +938,7 @@ void Kinematics::process(Long64_t entry) {
     // W+
     if (mcTools.HasMother(p, +24) )
       {
-	std::cout << auxTools.ConvertIntVectorToString(genP_mothers) << std::endl;
+	//	std::cout << auxTools.ConvertIntVectorToString(genP_mothers) << std::endl;
 	if (genP_pdgId > 0) tbWMinus_Wqq_Quark_p4 = genP_p4;
 	else tbWMinus_Wqq_AntiQuark_p4 = genP_p4;
       }
@@ -1039,7 +1089,8 @@ void Kinematics::process(Long64_t entry) {
   std::vector<double> dPhi_ijk;
   std::vector<double> dR_ijk;
 
-  math::XYZTLorentzVector TriJetMaxPt_p4(0,0,0,0);
+  math::XYZTLorentzVector TriJetMaxPt_p4(0,0,0,0), SubldgTrijet_p4(0,0,0,0), j1(0,0,0,0), j2(0,0,0,0), j3(0,0,0,0);
+  vector<math::XYZTLorentzVector> LdgTrijet_JETS, SubldgTrijet_JETS;
 
   if (selJets_p4.size() > 2)
     {
@@ -1088,7 +1139,19 @@ void Kinematics::process(Long64_t entry) {
 	    dPhi_ijk.push_back(dEta_jk);	    
 
 	    math::XYZTLorentzVector p4 = *i + *j + *k;
-	    if ( p4.Pt() > TriJetMaxPt_p4.Pt() )  TriJetMaxPt_p4 = p4;
+	    Bool_t BjetInTrijet = IsBjet(*i,selectedBJets) || IsBjet(*j,selectedBJets) || IsBjet(*k,selectedBJets);
+
+	    if ( p4.Pt() > TriJetMaxPt_p4.Pt() && BjetInTrijet){
+	      SubldgTrijet_p4 = TriJetMaxPt_p4;
+	      SubldgTrijet_JETS.clear();
+	      SubldgTrijet_JETS.push_back(j1); SubldgTrijet_JETS.push_back(j2); SubldgTrijet_JETS.push_back(j3);
+	      TriJetMaxPt_p4 = p4;
+	      j1 = *i;
+	      j2 = *j;
+	      j3 = *k;
+	      LdgTrijet_JETS.clear();
+	      LdgTrijet_JETS.push_back(*i); LdgTrijet_JETS.push_back(*j); LdgTrijet_JETS.push_back(*k);
+	    }
 	    
 	    // Calculate
 	    dRSum   += (dR_ij   + dR_ik   + dR_jk  )/3;
@@ -1413,6 +1476,194 @@ void Kinematics::process(Long64_t entry) {
 	  h_BQuarkPair_dRMin_jet2_dR   ->Fill( ROOT::Math::VectorUtil::DeltaR(bQuarkPair_dRMin_p4, selJets_p4.at(1) ) );
 	}
     }
+
+
+
+
+  double jet_Pt, jet_Eta;
+  math::XYZTLorentzVector ldgJet_p4(0,0,0,0), temp_p4(0,0,0,0);
+  std::vector<math::XYZTLorentzVector> Jets_p4, BJets_p4;
+  std::vector<TLorentzVector> VecJets;
+
+  // For-Loop: Selected Jets
+  for (auto& jet: selectedJets)
+    {
+      math::XYZTLorentzVector jetP4;
+      jetP4 = jet.p4();
+      Jets_p4.push_back(jetP4);
+
+    } // For-loop: Selected Jets      
+
+  // For-Loop: Selected BJets
+  for (auto& jet: selectedBJets)
+    {
+      math::XYZTLorentzVector jetP4;
+      jetP4 = jet.p4();
+      BJets_p4.push_back(jetP4);
+
+    } // For-loop: Selected Jets      
+                                
+  Jets_p4 = SortInPt(Jets_p4);         
+  BJets_p4 = SortInPt(BJets_p4);         
+
+
+  int ilast = Jets_p4.size()-1;
+
+  
+  float dPhi_j3j4   = std::abs(ROOT::Math::VectorUtil::DeltaPhi(Jets_p4.at(2),Jets_p4.at(3)));
+  float dPhi_j5j6   = std::abs(ROOT::Math::VectorUtil::DeltaPhi(Jets_p4.at(4),Jets_p4.at(5)));
+
+  // float dPhi_j3j4 = std::abs(ROOT::Math::VectorUtil::DeltaPhi(Jets_p4.at(2),Jets_p4.at(3)));
+  // float dEta_j3j4 = std::abs(Jets_p4.at(2).Eta() - Jets_p4.at(3).Eta() );
+  // float dR_j3j4   = ROOT::Math::VectorUtil::DeltaR(Jets_p4.at(2),Jets_p4.at(3));
+
+  // float dPhi_j5j6 = std::abs(ROOT::Math::VectorUtil::DeltaPhi(Jets_p4.at(4),Jets_p4.at(5)));
+  // float dEta_j5j6 = std::abs(Jets_p4.at(4).Eta() - Jets_p4.at(5).Eta() );
+  // float dR_j5j6   = ROOT::Math::VectorUtil::DeltaR(Jets_p4.at(4),Jets_p4.at(5));
+
+  h_DPhiJ34vsDPhiJ56     -> Fill(dPhi_j3j4,dPhi_j5j6);
+
+  double cosTheta_Bjet1TopCM_TrijetLab, cosTheta_Bjet1TopCM_Zaxis, cosTheta_Bjet2TopCM_TrijetLab, cosTheta_Bjet2TopCM_Zaxis, cosTheta_Bjet3TopCM_TrijetLab, cosTheta_Bjet3TopCM_Zaxis;
+  double cosTheta_LdgTrijetLdgJetTopCM_TrijetLab, cosTheta_LdgTrijetSubldgJetTopCM_TrijetLab, cosTheta_LdgTrijetBjetTopCM_TrijetLab;
+  double cosTheta_SubldgTrijetLdgJetTopCM_TrijetLab, cosTheta_SubldgTrijetSubldgJetTopCM_TrijetLab, cosTheta_SubldgTrijetBjetTopCM_TrijetLab;
+
+  //
+  //  math::XYZTLorentzVector TriJetMaxPt_p4(0,0,0,0), SubldgTrijet_p4(0,0,0,0);
+  //  vector<math::XYZTLorentzVector> LdgTrijet_JETS, SubldgTrijet_JETS;
+  TLorentzVector TrijetLorentz;
+  TrijetLorentz.SetPtEtaPhiE(TriJetMaxPt_p4.pt(), TriJetMaxPt_p4.eta(), TriJetMaxPt_p4.phi(), TriJetMaxPt_p4.e());
+
+  int i=0; 
+  for (auto& bjet: selectedBJets){
+    TLorentzVector bjetP4;
+    bjetP4.SetPtEtaPhiE(bjet.pt(), bjet.eta(), bjet.phi(), bjet.e());
+    bjetP4.Boost(-TrijetLorentz.BoostVector());
+    
+    float b_theta = 2*atan(exp(-bjetP4.Eta()));                           
+    float t_theta = 2*atan(exp(-TrijetLorentz.Eta() ));                                  
+    if (i==0) {                                                                                
+      cosTheta_Bjet1TopCM_TrijetLab = std::cos(std::abs(b_theta-t_theta));        
+      cosTheta_Bjet1TopCM_Zaxis     = std::cos(b_theta);
+    }                                                                               
+    if (i==1){
+      cosTheta_Bjet2TopCM_TrijetLab = std::cos(std::abs(b_theta-t_theta));
+      cosTheta_Bjet2TopCM_Zaxis     = std::cos(b_theta);
+    }
+    if (i==2){
+      cosTheta_Bjet3TopCM_TrijetLab = std::cos(std::abs(b_theta-t_theta));
+      cosTheta_Bjet3TopCM_Zaxis     = std::cos(b_theta);
+    }
+    i=i+1;
+  }
+
+  TLorentzVector ldgtrijetJet1, ldgtrijetJet2, ldgtrijetB;
+  TLorentzVector subldgtrijetJet1, subldgtrijetJet2, subldgtrijetB;
+  //  trijet_check.Boost(-TrijetLorentz.BoostVector());
+
+  math::XYZTLorentzVector jet1, jet2, bjet, sjet1, sjet2, sbjet;
+  vector <math::XYZTLorentzVector> trijet_jets;
+  trijet_jets = TrijetJets(LdgTrijet_JETS, selectedBJets);
+  //  TrijetJets(SubldgTrijet_JETS, selectedBJets, sjet1, sjet2, sbjet);
+  jet1 = trijet_jets.at(0);
+  jet2 = trijet_jets.at(1);
+  bjet = trijet_jets.at(2);
+
+  ldgtrijetJet1.SetPtEtaPhiE(jet1.pt(), jet1.eta(), jet1.phi(), jet1.e());  
+  ldgtrijetJet2.SetPtEtaPhiE(jet2.pt(), jet2.eta(), jet2.phi(), jet2.e());  
+  ldgtrijetB.SetPtEtaPhiE(bjet.pt(), bjet.eta(), bjet.phi(), bjet.e());
+
+  subldgtrijetJet1.SetPtEtaPhiE(sjet1.pt(), sjet1.eta(), sjet1.phi(), sjet1.e());  
+  subldgtrijetJet2.SetPtEtaPhiE(sjet2.pt(), sjet2.eta(), sjet2.phi(), sjet2.e());  
+  subldgtrijetB.SetPtEtaPhiE(sbjet.pt(), sbjet.eta(), sbjet.phi(), sbjet.e());
+
+  //  std::cout<<ldgtrijetJet1.Pt()<<" "<<ldgtrijetJet2.Pt()<<" "<<ldgtrijetB.Pt()<<" "<<subldgtrijetJet1.Pt()<<" "<<subldgtrijetJet2.Pt()<<" "<<subldgtrijetB.Pt()<<std::endl;
+  //  std::cout<<jet1.pt()<<" "<<jet2.pt()<<" "<<bjet.pt()<<" "<<" "<<sjet1.pt()<<" "<<sjet2.pt()<<" "<<sbjet.pt()<<std::endl;
+
+  ldgtrijetJet1.Boost(-TrijetLorentz.BoostVector());
+  ldgtrijetJet2.Boost(-TrijetLorentz.BoostVector());
+  ldgtrijetB.Boost(-TrijetLorentz.BoostVector());
+
+  subldgtrijetJet1.Boost(-TrijetLorentz.BoostVector());
+  subldgtrijetJet2.Boost(-TrijetLorentz.BoostVector());
+  subldgtrijetB.Boost(-TrijetLorentz.BoostVector());
+
+  /*  //change for Kinematics
+
+  TLorentzVector TrijetLorentz;
+  TrijetLorentz.SetPtEtaPhiE(TopData.getLdgTrijet().Pt(),TopData.getLdgTrijet().Eta(),TopData.getLdgTrijet().Phi(),TopData.getLdgTrijet().E());
+  TLorentzVector trijet_check;
+  trijet_check = TrijetLorentz;
+
+  trijet_check.Boost(-TrijetLorentz.BoostVector()); //Check that trijet is at rest at its center of mass                                                                                 
+  //  std::cout<<"px = "<<trijet_check.Px()<<" py = "<<trijet_check.Py()<<" pz = "<<trijet_check.Pz()<<" E = "<<trijet_check.E()<<" M = "<<trijet_check.M()<<std::endl;                  
+
+  for (size_t i=0; i < bjetData.getSelectedBJets().size(); i++ ){
+    TLorentzVector bjetP4;
+    bjetP4.SetPtEtaPhiE(jetData.getAllJets().at(i).pt(),jetData.getAllJets().at(i).eta(),jetData.getAllJets().at(i).phi(),jetData.getAllJets().at(i).e());
+    bjetP4.Boost(-TrijetLorentz.BoostVector());
+
+    float b_theta = 2*atan(exp(-bjetP4.Eta()));
+    float t_theta = 2*atan(exp(-TrijetLorentz.Eta() ));
+
+    if (i==0) {
+      cosTheta_Bjet1TopCM_TrijetLab = std::cos(std::abs(b_theta-t_theta));
+      cosTheta_Bjet1TopCM_Zaxis     = std::cos(b_theta);
+    }
+    if (i==1){
+      cosTheta_Bjet2TopCM_TrijetLab = std::cos(std::abs(b_theta-t_theta));
+      cosTheta_Bjet2TopCM_Zaxis     = std::cos(b_theta);
+    }
+    if (i==2){
+      cosTheta_Bjet3TopCM_TrijetLab = std::cos(std::abs(b_theta-t_theta));
+      cosTheta_Bjet3TopCM_Zaxis     = std::cos(b_theta);
+    }
+  }
+
+  TLorentzVector ldgtrijetJet1, ldgtrijetJet2, ldgtrijetB;
+  TLorentzVector subldgtrijetJet1, subldgtrijetJet2, subldgtrijetB;
+  trijet_check.Boost(-TrijetLorentz.BoostVector());
+
+  ldgtrijetJet1.Boost(-TrijetLorentz.BoostVector());
+  ldgtrijetJet2.Boost(-TrijetLorentz.BoostVector());
+  ldgtrijetB.Boost(-TrijetLorentz.BoostVector());
+
+  subldgtrijetJet1.Boost(-TrijetLorentz.BoostVector());
+  subldgtrijetJet2.Boost(-TrijetLorentz.BoostVector());
+  subldgtrijetB.Boost(-TrijetLorentz.BoostVector());
+  */
+  float ldgtrijetJet1_theta    = 2*atan(exp(-ldgtrijetJet1.Eta()));
+  float ldgtrijetJet2_theta    = 2*atan(exp(-ldgtrijetJet2.Eta()));
+  float ldgtrijetB_theta       = 2*atan(exp(-ldgtrijetB.Eta()));
+  float subldgtrijetJet1_theta = 2*atan(exp(-subldgtrijetJet1.Eta()));
+  float subldgtrijetJet2_theta = 2*atan(exp(-subldgtrijetJet2.Eta()));
+  float subldgtrijetB_theta    = 2*atan(exp(-subldgtrijetB.Eta()));
+
+  float t_theta                = 2*atan(exp(-TrijetLorentz.Eta() ));
+
+  cosTheta_LdgTrijetLdgJetTopCM_TrijetLab       =  std::cos(std::abs(ldgtrijetJet1_theta-t_theta));
+  cosTheta_LdgTrijetSubldgJetTopCM_TrijetLab    =  std::cos(std::abs(ldgtrijetJet2_theta-t_theta));
+  cosTheta_LdgTrijetBjetTopCM_TrijetLab         =  std::cos(std::abs(ldgtrijetB_theta-t_theta));
+  cosTheta_SubldgTrijetLdgJetTopCM_TrijetLab    =  std::cos(std::abs(subldgtrijetJet1_theta-t_theta));
+  cosTheta_SubldgTrijetSubldgJetTopCM_TrijetLab =  std::cos(std::abs(subldgtrijetJet2_theta-t_theta));
+  cosTheta_SubldgTrijetBjetTopCM_TrijetLab      =  std::cos(std::abs(subldgtrijetB_theta-t_theta));
+
+  //change for Kinematics
+
+  h_CosTheta_Bjet1TopCM_TrijetLab -> Fill(cosTheta_Bjet1TopCM_TrijetLab);
+  h_CosTheta_Bjet1TopCM_Zaxis     -> Fill(cosTheta_Bjet1TopCM_Zaxis);
+  h_CosTheta_Bjet2TopCM_TrijetLab -> Fill(cosTheta_Bjet2TopCM_TrijetLab);
+  h_CosTheta_Bjet2TopCM_Zaxis     -> Fill(cosTheta_Bjet2TopCM_Zaxis);
+  h_CosTheta_Bjet3TopCM_TrijetLab -> Fill(cosTheta_Bjet3TopCM_TrijetLab);
+  h_CosTheta_Bjet3TopCM_Zaxis     -> Fill(cosTheta_Bjet3TopCM_Zaxis);
+
+
+  h_CosTheta_LdgTrijetLdgJetTopCM_TrijetLab       -> Fill(cosTheta_LdgTrijetLdgJetTopCM_TrijetLab);
+  h_CosTheta_LdgTrijetSubldgJetTopCM_TrijetLab    -> Fill(cosTheta_LdgTrijetSubldgJetTopCM_TrijetLab);
+  h_CosTheta_LdgTrijetBjetTopCM_TrijetLab         -> Fill(cosTheta_LdgTrijetBjetTopCM_TrijetLab);
+
+  h_CosTheta_SubldgTrijetLdgJetTopCM_TrijetLab    -> Fill(cosTheta_SubldgTrijetLdgJetTopCM_TrijetLab);
+  h_CosTheta_SubldgTrijetSubldgJetTopCM_TrijetLab -> Fill(cosTheta_SubldgTrijetSubldgJetTopCM_TrijetLab);
+  h_CosTheta_SubldgTrijetBjetTopCM_TrijetLab      -> Fill(cosTheta_SubldgTrijetBjetTopCM_TrijetLab);
 
   return;
 }
@@ -2148,3 +2399,77 @@ vector<genParticle> Kinematics::GetGenParticles(const vector<genParticle> genPar
   return particles;
   }
 
+
+std::vector<math::XYZTLorentzVector> Kinematics::SortInPt(std::vector<math::XYZTLorentzVector> Vector)
+{
+  int size = Vector.size();
+  for (int i=0; i<size-1; i++){
+    math::XYZTLorentzVector p4_i = Vector.at(i);
+    for (int j=i+1;  j<size; j++){
+      math::XYZTLorentzVector p4_j = Vector.at(j);
+      if (p4_i.pt() > p4_j.pt()) continue;
+      math::XYZTLorentzVector temp = p4_i;
+      Vector.at(i) = Vector.at(j);
+      Vector.at(j) = temp;
+    }
+  }
+  return Vector;
+}
+
+      
+  
+Bool_t Kinematics::IsBjet(math::XYZTLorentzVector jet, vector<GenJet> selectedBJets)
+{
+  for (auto& bjet: selectedBJets) 
+    {
+      double dR = ROOT::Math::VectorUtil::DeltaR(jet, bjet.p4());
+      if (dR < 0.01) return true;
+    }
+  return false;
+}
+
+double Kinematics::DeltaRmin(math::XYZTLorentzVector jet, vector<GenJet> jetSelection){
+  double drmin = 10000.0;
+  for (auto& j: jetSelection)
+    {
+      double dR = ROOT::Math::VectorUtil::DeltaR(jet, j.p4());
+      if (dR > drmin) continue;
+      drmin = dR;
+    }
+  return drmin;
+}
+
+vector <math::XYZTLorentzVector> Kinematics::TrijetJets(vector<math::XYZTLorentzVector> JETS, vector<GenJet> selectedBJets){
+  //Returns the vector of the vector of the jets that form the trijet 
+  //First two: Untagged jets sorted in pt (ldg, subldg)
+  //Third: Bjet 
+  math::XYZTLorentzVector bjet(0,0,0,0);
+
+  double drmin = 10000.0;
+  int b_index;
+
+  for (int i=0; i<JETS.size(); i++){
+    if (!IsBjet(JETS.at(i),selectedBJets) ) continue;
+    double dr = DeltaRmin(JETS.at(i),selectedBJets);
+    if (dr > drmin) continue;
+    bjet = JETS.at(i);
+    b_index = i;
+  }
+  
+  vector <math::XYZTLorentzVector> untagged;
+  for (int i=0; i<JETS.size(); i++){
+    if (i ==b_index) continue;
+    untagged.push_back(JETS.at(i));
+  }
+  
+  //ldg jet, subldg jet, bjet
+  untagged = SortInPt(untagged);
+  untagged.push_back(bjet);
+  // jet1 = untagged.at(0);
+  // jet2 = untagged.at(1);
+  //  std::cout<<jet1.pt()<<" "<<jet2.pt()<<" "<<bjet.pt()<<std::endl;
+  return untagged;
+}
+
+  
+  

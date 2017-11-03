@@ -8,6 +8,9 @@
 #include "DataFormat/interface/Jet.h"
 #include "Framework/interface/EventCounter.h"
 #include "Tools/interface/DirectionalCut.h"
+//soti
+//#include "EventSelection/interface/TopRec.h"
+//soti
 
 #include <string>
 #include <vector>
@@ -115,6 +118,9 @@ public:
     const double ChiSqr() const { return fChiSqr; }
     const unsigned int getNumberOfFits() const { return fNumberOfFits;}
 
+    //Soti
+    //    const TopRec getLdgTopRec() const {return LdgTopRec;}
+
     friend class TopSelection;
 
   private:
@@ -149,8 +155,10 @@ public:
     math::XYZTLorentzVector fDijetWithMinDR_p4;
     // DijetWithMaxDR
     math::XYZTLorentzVector fDijetWithMaxDR_p4;
+    //soti    TopRec LdgTopRec;
   };
-  
+
+
   // Main class
   /// Constructor with histogramming
   explicit TopSelection(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix = "");
@@ -304,7 +312,19 @@ private:
   WrappedTH1 *hLdgTrijetDiJetPt;
   WrappedTH1 *hLdgTrijetDiJetEta;
   WrappedTH1 *hLdgTrijetDiJetMass;
-
+  // Marina - start
+  WrappedTH1 *hLdgTrijetPtDR;
+  WrappedTH1 *hLdgTrijetDiJetPtDR;
+  WrappedTH1 *hLdgTrijetBJetMass;
+  WrappedTH1 *hLdgTrijetLdgJetPt;
+  WrappedTH1 *hLdgTrijetLdgJetEta;
+  WrappedTH1 *hLdgTrijetLdgJetBDisc;
+  WrappedTH1 *hLdgTrijetSubldgJetPt;
+  WrappedTH1 *hLdgTrijetSubldgJetEta;
+  WrappedTH1 *hLdgTrijetSubldgJetBDisc;
+  WrappedTH1 *hLdgTrijetBJetLdgJetMass;
+  WrappedTH1 *hLdgTrijetBJetSubldgJetMass;
+  // Marina - end
   WrappedTH1 *hSubldgTrijetPt;
   WrappedTH1 *hSubldgTrijetTopMassWMassRatio;
   WrappedTH1 *hSubldgTrijetMass;
@@ -320,6 +340,22 @@ private:
   WrappedTH1 *hSubldgTrijetDiJetPt;
   WrappedTH1 *hSubldgTrijetDiJetEta;
   WrappedTH1 *hSubldgTrijetDiJetMass;
+  // Marina - start
+  WrappedTH1 *hSubldgTrijetPtDR;
+  WrappedTH1 *hSubldgTrijetDiJetPtDR;
+  WrappedTH1 *hSubldgTrijetBJetMass;
+  WrappedTH1 *hSubldgTrijetLdgJetPt;
+  WrappedTH1 *hSubldgTrijetLdgJetEta;
+  WrappedTH1 *hSubldgTrijetLdgJetBDisc;
+  WrappedTH1 *hSubldgTrijetSubldgJetPt;
+  WrappedTH1 *hSubldgTrijetSubldgJetEta;
+  WrappedTH1 *hSubldgTrijetSubldgJetBDisc;
+  WrappedTH1 *hSubldgTrijetBJetLdgJetMass;
+  WrappedTH1 *hSubldgTrijetBJetSubldgJetMass;
+  // Marina - end
+  
+
+
 
   // Histograms (2D)
   WrappedTH2 *hTetrajetBJetDijetWithMaxDR_TetrajetBJetDijetWithMinDR_DPhiVsDPhi;

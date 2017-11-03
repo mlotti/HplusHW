@@ -108,8 +108,8 @@ jetSelection = PSet(
 # B-jet selection
 #================================================================================================
 bjetSelection = PSet(
-    triggerMatchingApply      = False, # Do NOT enable until the HLTBJet collection is fixed (no duplicates)
-    triggerMatchingCone       = 0.1,   # DeltaR for matching offline bjet with trigger::TriggerBjet
+    triggerMatchingApply      = False,
+    triggerMatchingCone       = 0.1,  # DeltaR for matching offline bjet with trigger::TriggerBjet
     jetPtCuts                 = [40.0, 40.0, 30.0],
     jetEtaCuts                = [2.4],
     bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
@@ -166,7 +166,7 @@ topologySelection = PSet(
     CparameterCutDirection       = "<=", 
     DparameterCutValue           = 100.0,   # 0.0 <= D <= 1.0
     DparameterCutDirection       = "<=",  
-    FoxWolframMomentCutValue     =   0.5,   # 0.0 <= H2 <= 1.0
+    FoxWolframMomentCutValue     = 100.0,   # 0.0 <= H2 <= 1.0
     FoxWolframMomentCutDirection = "<=", 
     AlphaTCutValue               = 1000.0,  # 0.0 <= alphaT ~ 2.0 (alphaT->0.5 for perfectly balanced events)
     AlphaTCutDirection           = "<=", 
@@ -179,12 +179,11 @@ topologySelection = PSet(
 # Top selection
 #================================================================================================
 topSelection = PSet(
-    # Basic values
-    ChiSqrCutValue     = 10.0,
+    ChiSqrCutValue     = 100.0,
     ChiSqrCutDirection =  "<",   # options: ==, !=, <, <=, >, >=
-    LowLdgTrijetMassCutValue      = 0.0,
+    LowLdgTrijetMassCutValue      = 150.0,
     LowLdgTrijetMassCutDirection  = ">=",
-    HighLdgTrijetMassCutValue      = 900000.0,
+    HighLdgTrijetMassCutValue      = 210.0,
     HighLdgTrijetMassCutDirection  = "<=",
     MassW              = 80.385,
     DiJetSigma         = 10.2,
@@ -199,10 +198,21 @@ topSelection = PSet(
     dijetWithMaxDR_tetrajetBjet_dPhi_min        = +2.5, # Disable: 0.0, Default: +2.5
     dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept = +3.0, # Disable:-1.0, Default: +3.0
     dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff = -1.0, # Disable: 0.0, Default: -1.0
-    # For Testing (perfect jet resolution)
-    ReplaceJetsWithGenJets = False,
+    ReplaceJetsWithGenJets = False, #soti
 )
 
+#================================================================================================                  
+# Top selection BDT                                               
+#================================================================================================        
+topSelectionBDT = PSet(
+    # Basic values                 
+    MVACutValue     = 0.9,
+    MVACutDirection =  ">",   # options: ==, !=, <, <=, >, >=       
+    NjetsMaxValue      = 9,
+    NjetsMaxDirection  = "<=",    # options: ==, !=, <, <=, >, >=    
+    # For Testing (perfect jet resolution) 
+    ReplaceJetsWithGenJets = False,
+)
 
 #================================================================================================
 # MET trigger SF
@@ -216,10 +226,10 @@ if 0:
 #================================================================================================
 fakeBMeasurement = PSet(
     prelimTopFitChiSqrCutValue        = 100.0,
-    prelimTopFitChiSqrCutDirection    =  "<",     # options: ==, !=, <, <=, >, >=
+    prelimTopFitChiSqrCutDirection    =  "<",   # options: ==, !=, <, <=, >, >=
     #
-    numberOfBJetsCutValue             = 2,        # default: 2
-    numberOfBJetsCutDirection         = "==",     # default: ==, options: ==, !=, <, <=, >, >=
+    numberOfBJetsCutValue             = 2,
+    numberOfBJetsCutDirection         = "==", # options: ==, !=, <, <=, >, >=
     #
     numberOfInvertedBJetsCutValue     = 1,        # i.e. additional to the selected b-jets
     numberOfInvertedBJetsCutDirection = ">=",     # options: ==, !=, <, <=, >, >=
@@ -272,6 +282,7 @@ allSelections = PSet(
     METSelection          = metSelection,
     TopologySelection     = topologySelection,
     TopSelection          = topSelection,
+    TopSelectionBDT       = topSelectionBDT,
     MuonSelection         = muVeto,
     Trigger               = trigger,
     Verbose               = verbose,
