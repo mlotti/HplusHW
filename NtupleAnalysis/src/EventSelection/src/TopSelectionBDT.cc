@@ -193,6 +193,10 @@ TopSelectionBDT::~TopSelectionBDT() {
   delete hAllTrijetPassBDT_pt;
   delete hAllTrijetPassBDTbPassCSV_pt;
   delete hTrijetPassBDT_bDisc;
+
+  delete hTrijetSameObjPassBDT;
+  delete hTrijetSameObjPassBDT_bTagged;
+
   // Histograms (2D)
   delete hNjetsVsNTrijets_beforeBDT;
   delete hNjetsVsNTrijets_afterBDT;
@@ -392,9 +396,9 @@ void TopSelectionBDT::bookHistograms(TDirectory* dir) {
 
   hFakeInTopDirMult     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "FakeInTopDirMult",";Fake Trijets in Top Direction mult", 670, 0, 670);;
 
-  hDeltaMVAmax_MCtruth_SameObjFakesPassBDT       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"DeltaMVAmax_MCtruth_SameObjFakesPassBDT",";#Delta BDTG response", 100, -2., 2.);
+  hDeltaMVAmax_MCtruth_SameObjFakesPassBDT       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"DeltaMVAmax_MCtruth_SameObjFakesPassBDT",";#Delta BDTG response", 100, -1., 1.);
   hDeltaMVAmin_MCtruth_SameObjFakes       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"DeltaMVAmin_MCtruth_SameObjFakes",";#Delta BDTG response", 100, -2., 2.) ;
-  hDeltaMVAmin_MCtruth_SameObjFakesPassBDT       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"DeltaMVAmin_MCtruth_SameObjFakesPassBDT",";#Delta BDTG response", 100, -2., 2.) ;
+  hDeltaMVAmin_MCtruth_SameObjFakesPassBDT       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"DeltaMVAmin_MCtruth_SameObjFakesPassBDT",";#Delta BDTG response", 100, -1., 1.) ;
   hMatchedTrijetMult_JetsGT9 =   fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "MatchedTrijetMult_JetsGT9",";Trijet Multiplicity", 3, 0, 3);
   hMatchedTrijetMult_JetsInc =   fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "MatchedTrijetMult_JetsInc",";Trijet Multiplicity", 3, 0, 3);
   hMVAvalue_DeltaMVAgt1       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"MVAvalue_DeltaMVAgt1",";BDTG response", 40, -1., 1.) ;
@@ -404,6 +408,10 @@ void TopSelectionBDT::bookHistograms(TDirectory* dir) {
   hAllTrijetPassBDTbPassCSV_pt      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "AllTrijetPassBDTbPassCSV_pt"   ,";p_{T} (GeV/c)", nPtBins     , fPtMin     , fPtMax);
   hTrijetPassBDT_bDisc              = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TrijetPassBDT_bDisc",";b-tag discr." , nBDiscBins  , fBDiscMin  , fBDiscMax);
   
+  hTrijetSameObjPassBDT        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"TrijetSameObjPassBDT",";BDTG response", (1-cfg_MVACutValue)*100, cfg_MVACutValue-0.1, 1);
+  hTrijetSameObjPassBDT_bTagged= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"TrijetSameObjPassBDT_bTagged",";BDTG response", (1-cfg_MVACutValue)*100, cfg_MVACutValue-0.1, 1);
+
+
   //next
   // Histograms (2D) 
   hTrijetCountForBDTcuts           = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdir,"TrijetCountVsBDTcuts",";BDT cut value;Trijet multiplicity", 19, -0.95,0.95, 200,0,200);
@@ -1242,18 +1250,22 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 
 
 
-    //*** Probability Plots: Trije combinations with same subjets (b-tag assignment)
+    //*** Probability Plots: Trijet combinations with same subjets (b-tag assignment)
     int NselectedMatched_sameOdj = 0;
     for (size_t j=0; j<MatchedJJB_index.size(); j++){
 
+      std::vector <double> VecMVApass;
+
       int matched_index = MatchedJJB_index.at(j);
+      
+      if (cfg_MVACut.passedCut(TopCandMVA.at(matched_index))) VecMVApass.push_back(TopCandMVA.at(matched_index));
 
       double MVA_min = TopCandMVA.at(matched_index);
-      double MVA_max = TopCandMVA.at(matched_index), BdiscrMax = TopCandBJet.at(matched_index).bjetDiscriminator();
-
+      double MVA_max = TopCandMVA.at(matched_index), BdiscrMax = TopCandBJet.at(matched_index).bjetDiscriminator();      
+      
       vector <int> wrongAssignmentTrijetIndex;                                                                           //Trijets with Wrong-assignment b-tagged jet -  indices
       wrongAssignmentTrijetIndex = GetWrongAssignmentTrijetIndex(matched_index,TopCandJet1, TopCandJet2, TopCandBJet);
-
+      
       bool selectedMatched_sameOdj = true;
       double DeltaMVA_max = -999.999, absDeltaMVA_max = -999.999, DeltaMVA_min = 999.999;
 
@@ -1262,6 +1274,8 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 
 	double DeltaMVAvalue = TopCandMVA.at(matched_index) - TopCandMVA.at(wrongAssignmentTrijetIndex.at(k));
 	
+	if (cfg_MVACut.passedCut(TopCandMVA.at(wrongAssignmentTrijetIndex.at(k)))) VecMVApass.push_back(TopCandMVA.at(wrongAssignmentTrijetIndex.at(k)));
+
 	//Find maximum and mivumum MVA value
 	if (TopCandMVA.at(wrongAssignmentTrijetIndex.at(k)) < MVA_min) MVA_min = TopCandMVA.at(wrongAssignmentTrijetIndex.at(k));
 
@@ -1295,9 +1309,24 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
       //MVA value of matched trijets when DeltaMVA > 1
       if (DeltaMVA_min > 1) hMVAvalue_DeltaMVAgt1 -> Fill(TopCandMVA.at(matched_index));
 
-      if (selectedMatched_sameOdj && BdiscrMax > 0.8484) NselectedMatched_sameOdj++;      
+      if (cfg_MVACut.passedCut(MVA_max)){
+	hTrijetSameObjPassBDT -> Fill(MVA_max);
+	if (BdiscrMax > 0.8484) hTrijetSameObjPassBDT_bTagged -> Fill (MVA_max);
+      }
+      
+      DeltaMVA_max = 0.0;
+      DeltaMVA_min = 999.999;
+      for (size_t ind1=0; ind1<VecMVApass.size()-1; ind1++){
+	for (size_t ind2=ind1; ind2<VecMVApass.size(); ind2++){
+	  if (ind1 == ind2) continue;
+	  double deltaBDT = VecMVApass.at(ind1) - VecMVApass.at(ind2);
+	  if ( std::abs(DeltaMVA_max) < std::abs(deltaBDT)) DeltaMVA_max = deltaBDT;
+	  if ( std::abs(DeltaMVA_min) > std::abs(deltaBDT)) DeltaMVA_min = deltaBDT;
+	}
+      }
 
-      if (!cfg_MVACut.passedCut(MVA_min)) continue;
+      //      if (!cfg_MVACut.passedCut(MVA_min)) continue;
+      if (VecMVApass.size() <= 1) continue;
       hDeltaMVAmax_MCtruth_SameObjFakesPassBDT -> Fill(DeltaMVA_max);
       hDeltaMVAmin_MCtruth_SameObjFakesPassBDT -> Fill(DeltaMVA_min);
       hDeltaMVAmaxVsTrijetPassBDTvalue         -> Fill(DeltaMVA_max, TopCandMVA.at(matched_index));

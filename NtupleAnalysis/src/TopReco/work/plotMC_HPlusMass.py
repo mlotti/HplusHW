@@ -240,11 +240,12 @@ def PlotMC(datasetsMgr, histo, intLumi):
     _opts   = {"ymin": 1e-3, "ymaxfactor": 1.0}
 
 
-    if "nmatchedtrijets" in histo.lower():
-        _xlabel = "Matched Trijets"
-    
-
-    if "trijetmass" in histo.lower():
+    if "nmatchedtrijet" in histo.lower():
+        _xlabel = "Truth-matched top candidates"
+        _opts["xmax"] = 4
+        _opts["xmin"] = 0
+        _format = "%0.0f "
+    elif "trijetmass" in histo.lower():
 #        _rebinX = 4
         logY    = False
         _units  = "GeV/c^{2}"
@@ -330,7 +331,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
                    ylabel       = "Arbitrary Units / %s" % (_format),
                    log          = logY,
                    rebinX       = _rebinX, cmsExtraText = "Preliminary", 
-                   createLegend = {"x1": 0.58, "y1": 0.65, "x2": 0.92, "y2": 0.92},
+                   createLegend = {"x1": 0.58, "y1": 0.85, "x2": 0.92, "y2": 0.72}, #"y2": 0.92
                    opts         = _opts,
                    opts2        = {"ymin": 0.6, "ymax": 1.4},
                    cutBox       = _cutBox,

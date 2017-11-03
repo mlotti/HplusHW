@@ -354,9 +354,12 @@ private:
   WrappedTH1 *hMVAvalue_DeltaMVAgt1;
   WrappedTH1 *hMatchedPassBDTmult_SameObjFakes;
 
-   WrappedTH1 *hAllTrijetPassBDT_pt;
-   WrappedTH1 *hAllTrijetPassBDTbPassCSV_pt;
-   WrappedTH1 *hTrijetPassBDT_bDisc;
+  WrappedTH1 *hAllTrijetPassBDT_pt;
+  WrappedTH1 *hAllTrijetPassBDTbPassCSV_pt;
+  WrappedTH1 *hTrijetPassBDT_bDisc;
+  
+  WrappedTH1 *hTrijetSameObjPassBDT;
+  WrappedTH1 *hTrijetSameObjPassBDT_bTagged;
 
   //next WrappedTH1
 
