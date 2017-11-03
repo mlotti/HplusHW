@@ -18,12 +18,11 @@
 class CommonPlots {
 public:
   enum AnalysisType {
-    kSignalAnalysis = 0,
-    kHplus2tbAnalysis= 0,
-    kHplusHadronic = 0,
-    kTopReco = 0,
-    kBTagEfficiencyAnalysis= 0,
+    kSignalAnalysis,
+    kHplus2tbAnalysis,
+    kBTagEfficiencyAnalysis,
     kTauAnalysis,
+    kTopReco,
     kMuAnalysis,
     kQCDMeasurement,
     kFakeBMeasurement,
