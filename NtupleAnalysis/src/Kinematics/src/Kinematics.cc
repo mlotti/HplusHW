@@ -1480,7 +1480,7 @@ void Kinematics::process(Long64_t entry) {
 
 
 
-  double jet_Pt, jet_Eta;
+  // double jet_Pt, jet_Eta;
   math::XYZTLorentzVector ldgJet_p4(0,0,0,0), temp_p4(0,0,0,0);
   std::vector<math::XYZTLorentzVector> Jets_p4, BJets_p4;
   std::vector<TLorentzVector> VecJets;
@@ -1507,7 +1507,7 @@ void Kinematics::process(Long64_t entry) {
   BJets_p4 = SortInPt(BJets_p4);         
 
 
-  int ilast = Jets_p4.size()-1;
+  // int ilast = Jets_p4.size()-1;
 
   
   float dPhi_j3j4   = std::abs(ROOT::Math::VectorUtil::DeltaPhi(Jets_p4.at(2),Jets_p4.at(3)));
@@ -2446,9 +2446,9 @@ vector <math::XYZTLorentzVector> Kinematics::TrijetJets(vector<math::XYZTLorentz
   math::XYZTLorentzVector bjet(0,0,0,0);
 
   double drmin = 10000.0;
-  int b_index;
-
-  for (int i=0; i<JETS.size(); i++){
+  size_t b_index = 0;
+  
+  for (size_t i=0; i<JETS.size(); i++){
     if (!IsBjet(JETS.at(i),selectedBJets) ) continue;
     double dr = DeltaRmin(JETS.at(i),selectedBJets);
     if (dr > drmin) continue;
@@ -2457,7 +2457,7 @@ vector <math::XYZTLorentzVector> Kinematics::TrijetJets(vector<math::XYZTLorentz
   }
   
   vector <math::XYZTLorentzVector> untagged;
-  for (int i=0; i<JETS.size(); i++){
+  for (size_t i=0; i<JETS.size(); i++){
     if (i ==b_index) continue;
     untagged.push_back(JETS.at(i));
   }

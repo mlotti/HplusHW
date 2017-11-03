@@ -234,16 +234,16 @@ private:
   vector <int> GetWrongAssignmentTrijetIndex(int matched_index, const std::vector<Jet>& TopCandJet1, const std::vector<Jet>& TopCandJet2, const std::vector<Jet>& TopCandBjet);
   // Input parameters
   int nSelectedBJets;
-  const double cfg_MVACutValue;
-  const double cfg_NjetsMaxValue;
-  const bool cfg_ReplaceJetsWithGenJets;
   const DirectionalCut<double> cfg_MVACut;
-  const DirectionalCut<double> cfg_NjetsMax;
+  const DirectionalCut<int> cfg_NjetsMaxCut;
+  const bool cfg_ReplaceJetsWithGenJets;
+
   // Event counter for passing selection
   Count cPassedTopSelectionBDT;
 
   // Sub counters
   Count cSubAll;
+  Count cSubPassedBDTCut;
 
   // Histograms (1D)
   WrappedTH1  *hBDTresponse;

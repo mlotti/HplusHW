@@ -45,7 +45,6 @@ private:
   // Non-common histograms
   // WrappedTH1 *hAssociatedTop_Pt;
   // WrappedTH1 *hAssociatedTop_Eta;
-  WrappedTH1 *hH2;
 };
 
 #include "Framework/interface/SelectorFactory.h"
@@ -94,8 +93,6 @@ void Hplus2tbAnalysis::book(TDirectory *dir) {
   // Book non-common histograms
   // hAssociatedTop_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTop_Pt", "Associated t pT;p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
   // hAssociatedTop_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTop_Eta", "Associated t eta;#eta", nBinsEta, minEta, maxEta);
-  TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kVital, dir, "Hplus2tbAnalysis");
-  hH2           = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "H2"         , ";H_{2}"      , 40, 0.0, 1.0);
   return;
 }
 
@@ -203,43 +200,37 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   //================================================================================================
   // 12) Top selection
   //================================================================================================
-  if (0) std::cout << "=== Top selection" << std::endl;
-   const TopSelection::Data topData = fTopSelection.analyze(fEvent, jetData, bjetData);
-   // if (!topData.passedSelection()) return;
+  /*
+    if (0) std::cout << "=== Top (ChiSq) selection" << std::endl;
+    const TopSelection::Data topData = fTopSelection.analyze(fEvent, jetData, bjetData);
+    // Apply preliminary chiSq cut
+    bool passPrelimChiSq = cfg_PrelimTopFitChiSqr.passedCut(topData.ChiSqr());
+    if (!passPrelimChiSq) return;
+  */
+  if (0) std::cout << "=== Top (BDT) selection" << std::endl;
+  const TopSelectionBDT::Data topData = fTopSelectionBDT.analyze(fEvent, jetData, bjetData);
+  // if (!topData.passedSelection()) return;
 
-   // // Apply preliminary chiSq cut
-   bool passPrelimChiSq = cfg_PrelimTopFitChiSqr.passedCut(topData.ChiSqr());
-   if (!passPrelimChiSq) return;
-
-  //================================================================================================                            
-  // 14) Top BDT selection                                                                                                     
-  //================================================================================================                                                              
-  if (0) std::cout << "=== Top BDT selection" << std::endl;
-  const TopSelectionBDT::Data topBDTData = fTopSelectionBDT.analyze(fEvent, jetData, bjetData);
-  if (!topBDTData.passedSelection()) return;
   //================================================================================================
   // Standard Selections
   //================================================================================================
   if (0) std::cout << "=== Standard Selections" << std::endl;
-  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, false);
+  // fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, false); //must fix TopSelection (output data)
   
   //================================================================================================
   // All Selections
-  //================================================================================================  //all selections
-  if (!topologyData.passedSelection()) return;   //soti
-  if (!topData.passedSelection()) return;        //soti
+  //================================================================================================
+  if (!topologyData.passedSelection()) return;
+  if (!topData.passedSelection()) return;
 
   if (0) std::cout << "=== All Selections" << std::endl;
   cSelected.increment();
 
-  hH2 -> Fill(topologyData.FoxWolframMoment());
-
-
   //================================================================================================
   // Fill final plots
   //===============================================================================================
-  fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, 1);
-  
+  // fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, 1); //must fix TopSelection (output data)
+ 
 
   //================================================================================================
   // Finalize

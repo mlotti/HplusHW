@@ -259,7 +259,7 @@ if __name__ == "__main__":
     # Default Values
     VERBOSE       = False
     NEVTS         = -1
-    HISTOLEVEL    = "Debug"
+    HISTOLEVEL    = "Informative" #"Debug"
     PUREWEIGHT    = True
     TOPPTREWEIGHT = True
     DOSYSTEMATICS = False

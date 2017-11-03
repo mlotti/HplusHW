@@ -205,13 +205,11 @@ topSelection = PSet(
 # Top selection BDT                                               
 #================================================================================================        
 topSelectionBDT = PSet(
-    # Basic values                 
-    MVACutValue     = 0.9,
-    MVACutDirection =  ">",   # options: ==, !=, <, <=, >, >=       
-    NjetsMaxValue      = 9,
-    NjetsMaxDirection  = "<=",    # options: ==, !=, <, <=, >, >=    
-    # For Testing (perfect jet resolution) 
-    ReplaceJetsWithGenJets = False,
+    MVACutValue            = 0.9,
+    MVACutDirection        =  ">",  # options: ==, !=, <, <=, >, >=
+    NjetsMaxCutValue       = 9,
+    NjetsMaxCutDirection   = "<=",  # options: ==, !=, <, <=, >, >=
+    ReplaceJetsWithGenJets = False, # For Testing (perfect jet resolution) 
 )
 
 #================================================================================================
