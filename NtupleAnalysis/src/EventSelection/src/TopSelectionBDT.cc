@@ -1130,13 +1130,13 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	// For-loop: All top candidates in top direction (Nested)
 	for (size_t j=0; j<MatchedTop_index.size(); j++)
 	  {
-	    if (i==MatchedTop_index.at(j)) realTop = true;
+	    if (i==(size_t) MatchedTop_index.at(j)) realTop = true;
 	  }
 	
 	// For-loop: All top candidates matched (Nested)
 	for (size_t j=0; j<MatchedJJB_index.size(); j++)
 	  {
-	    if (i==MatchedJJB_index.at(j)) realTopJJB = true;      
+	    if (i==(size_t) MatchedJJB_index.at(j)) realTopJJB = true;      
 	  }
 	
 	// In Top Direction
@@ -1217,6 +1217,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
     // Top-tagging Efficiency (per top candidate) - combinations with same subjets (b-tag assignment)
     //================================================================================================
     int NselectedMatched_sameOdj = 0;
+
     // For-loop: All top candidates matched
     for (size_t j=0; j<MatchedJJB_index.size(); j++)
       {
@@ -1231,7 +1232,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	bool selectedMatched_sameOdj = true;
 	double DeltaMVA_max = -999.999, absDeltaMVA_max = -999.999, DeltaMVA_min = 999.999;
 	
-	// For-loop: All wrongly-assigned top candidates
+	// For-loop: All wrongly-assigned top candidates (Nested)
 	for(size_t k=0; k< wrongAssignmentTrijetIndex.size(); k++)
 	  {
 	    
@@ -1240,126 +1241,82 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	    // Find maximum and mivumum MVA value
 	    if (TopCandMVA.at(wrongAssignmentTrijetIndex.at(k)) < MVA_min) MVA_min = TopCandMVA.at(wrongAssignmentTrijetIndex.at(k));
 	    
-	    if (TopCandMVA.at(wrongAssignmentTrijetIndex.at(k)) > MVA_max){                                                          
-	  MVA_max   = TopCandMVA.at(wrongAssignmentTrijetIndex.at(k));
-	  BdiscrMax = TopCandBJet.at(wrongAssignmentTrijetIndex.at(k)).bjetDiscriminator();
-	}
+	    if (TopCandMVA.at(wrongAssignmentTrijetIndex.at(k)) > MVA_max)
+	      {		
+		MVA_max   = TopCandMVA.at(wrongAssignmentTrijetIndex.at(k));
+		BdiscrMax = TopCandBJet.at(wrongAssignmentTrijetIndex.at(k)).bjetDiscriminator();
+	      }
+	    
+	    // Find maximum and minimum DeltaMVA value
+	    if ( DeltaMVA_max == -999.999)
+	      {
+		DeltaMVA_max = DeltaMVAvalue;
+		DeltaMVA_min = DeltaMVAvalue;
+	      }
+	    else if (std::abs(DeltaMVAvalue) > std::abs(DeltaMVA_max)){
+	      DeltaMVA_max = DeltaMVAvalue;
+	    }
+	    else{
+	      DeltaMVA_min =  DeltaMVAvalue;
+	    }
+	    
+	    if (std::abs(DeltaMVAvalue) > absDeltaMVA_max) absDeltaMVA_max = std::abs(DeltaMVAvalue);
+	    if (DeltaMVAvalue < 0) selectedMatched_sameOdj = false;
 
-	//Find maximum and minimum DeltaMVA value
-	if ( DeltaMVA_max == -999.999){
-	  DeltaMVA_max = DeltaMVAvalue;
-	  DeltaMVA_min = DeltaMVAvalue;
-	}
-	else if (std::abs(DeltaMVAvalue) > std::abs(DeltaMVA_max)){
-	  DeltaMVA_max = DeltaMVAvalue;
-	}
-	else{
-	  DeltaMVA_min =  DeltaMVAvalue;
-	}
+	  }// for(size_t k=0; k< wrongAssignmentTrijetIndex.size(); k++)
 
-	if (std::abs(DeltaMVAvalue) > absDeltaMVA_max) absDeltaMVA_max = std::abs(DeltaMVAvalue);
-	if (DeltaMVAvalue < 0)                         selectedMatched_sameOdj = false;
-      }
-      
+	// Fill histograms
+	hDeltaMVAmax_MCtruth_SameObjFakes    -> Fill(DeltaMVA_max);
+	hAbsDeltaMVAmax_MCtruth_SameObjFakes -> Fill(absDeltaMVA_max);
+	hDeltaMVAmin_MCtruth_SameObjFakes    -> Fill(DeltaMVA_min);
+	 
+	// MVA value of matched trijets when DeltaMVA > 1
+	if (DeltaMVA_min > 1) hMVAvalue_DeltaMVAgt1 -> Fill(TopCandMVA.at(matched_index));
+	
+	if (selectedMatched_sameOdj && BdiscrMax > 0.8484) NselectedMatched_sameOdj++;      
 
-      hDeltaMVAmax_MCtruth_SameObjFakes    -> Fill(DeltaMVA_max);
-      hAbsDeltaMVAmax_MCtruth_SameObjFakes -> Fill(absDeltaMVA_max);
-      hDeltaMVAmin_MCtruth_SameObjFakes    -> Fill(DeltaMVA_min);
+	// fixme
+	if (!cfg_MVACut.passedCut(MVA_min)) continue;
 
- 
-      //MVA value of matched trijets when DeltaMVA > 1
-      if (DeltaMVA_min > 1) hMVAvalue_DeltaMVAgt1 -> Fill(TopCandMVA.at(matched_index));
 
-      if (selectedMatched_sameOdj && BdiscrMax > 0.8484) NselectedMatched_sameOdj++;      
-
-      if (!cfg_MVACut.passedCut(MVA_min)) continue;
-      hDeltaMVAmax_MCtruth_SameObjFakesPassBDT -> Fill(DeltaMVA_max);
-      hDeltaMVAmin_MCtruth_SameObjFakesPassBDT -> Fill(DeltaMVA_min);
-      hDeltaMVAmaxVsTrijetPassBDTvalue         -> Fill(DeltaMVA_max, TopCandMVA.at(matched_index));
-      hDeltaMVAminVsTrijetPassBDTvalue         -> Fill(DeltaMVA_min, TopCandMVA.at(matched_index));
-            
-    }
+	// Fill histograms
+	hDeltaMVAmax_MCtruth_SameObjFakesPassBDT -> Fill(DeltaMVA_max);
+	hDeltaMVAmin_MCtruth_SameObjFakesPassBDT -> Fill(DeltaMVA_min);
+	hDeltaMVAmaxVsTrijetPassBDTvalue         -> Fill(DeltaMVA_max, TopCandMVA.at(matched_index));
+	hDeltaMVAminVsTrijetPassBDTvalue         -> Fill(DeltaMVA_min, TopCandMVA.at(matched_index));
+	
+      }// For-loop: All top candidates matched
 
     if (MatchedJJB_index.size() == GenTops.size())  hMatchedPassBDTmult_SameObjFakes -> Fill(NselectedMatched_sameOdj);
     if  (jets.size() > 9)                           hMatchedTrijetMult_JetsGT9 -> Fill(MCtrue_Bjet.size());
-
     hMatchedTrijetMult_JetsInc -> Fill(MatchedJJB_index.size());
   
-    for (size_t i = 0; i < TopCandMVA.size(); i++){
-      if (!cfg_MVACut.passedCut(TopCandMVA.at(i))) continue;
-      hAllTrijetPassBDT_pt -> Fill(TopCandP4.at(i).Pt());
-      hTrijetPassBDT_bDisc -> Fill(TopCandBJet.at(i).bjetDiscriminator());
-      if (TopCandBJet.at(i).bjetDiscriminator() > 0.8484) hAllTrijetPassBDTbPassCSV_pt -> Fill(TopCandP4.at(i).Pt());
-    }
+    // For-loop: All top candidates passing BDT cut
+    for (size_t i = 0; i < TopCandMVA.size(); i++)
+      {
+	if (!cfg_MVACut.passedCut(TopCandMVA.at(i))) continue;
+	hAllTrijetPassBDT_pt -> Fill(TopCandP4.at(i).Pt());
+	hTrijetPassBDT_bDisc -> Fill(TopCandBJet.at(i).bjetDiscriminator());
+	if (TopCandBJet.at(i).bjetDiscriminator() > 0.8484) hAllTrijetPassBDTbPassCSV_pt -> Fill(TopCandP4.at(i).Pt());
+      }// For-loop: All top candidates passing BDT cut
+    
+    }// if (event.isMC() && doMatching)
 
-  } //is MC event
-
-  // Fill output data
-  if  (cfg_MVACut.passedCut(MVAmax1) && cfg_MVACut.passedCut(MVAmax2) && tetrajetBjetPt_max > 0 )
-    {
-      output.fTrijet1Jet1     = leadingTrijetJet1;
-      output.fTrijet1Jet2     = leadingTrijetJet2;
-      output.fTrijet1BJet     = leadingTrijetBJet;
-      output.fTrijet1Dijet_p4 = leadingTrijetJet1.p4() +  leadingTrijetJet2.p4();
-      output.fTrijet1_p4      = leadingTrijetP4;
-      output.fTrijet2Jet1     = subleadingTrijetJet1;
-      output.fTrijet2Jet2     = subleadingTrijetJet2;
-      output.fTrijet2BJet     = subleadingTrijetBJet;
-      output.fTrijet2Dijet_p4 = subleadingTrijetJet1.p4() +  subleadingTrijetJet2.p4();
-      output.fTrijet2_p4      = subleadingTrijetP4;
-      output.fTetrajetBJet    = tetrajetBjet;
-      output.fLdgTetrajet_p4  = tetrajetP4;
-      double dijetMass = (leadingTrijetJet1.p4() +  leadingTrijetJet2.p4()).M();
+  // Fill output data  
+  output.fTrijet1Jet1     = leadingTrijetJet1;
+  output.fTrijet1Jet2     = leadingTrijetJet2;
+  output.fTrijet1BJet     = leadingTrijetBJet;
+  output.fTrijet1Dijet_p4 = leadingTrijetJet1.p4() +  leadingTrijetJet2.p4();
+  output.fTrijet1_p4      = leadingTrijetP4;
+  output.fTrijet2Jet1     = subleadingTrijetJet1;
+  output.fTrijet2Jet2     = subleadingTrijetJet2;
+  output.fTrijet2BJet     = subleadingTrijetBJet;
+  output.fTrijet2Dijet_p4 = subleadingTrijetJet1.p4() +  subleadingTrijetJet2.p4();
+  output.fTrijet2_p4      = subleadingTrijetP4;
+  output.fTetrajetBJet    = tetrajetBjet;
+  output.fLdgTetrajet_p4  = tetrajetP4;
+  output.bPassedSelection = (cfg_MVACut.passedCut(MVAmax1) && cfg_MVACut.passedCut(MVAmax2) && tetrajetBjetPt_max > 0 );
   
-      hLdgTrijetTopMassWMassRatio -> Fill(leadingTrijetP4.M()/dijetMass);
-      hLdgTrijetPt          -> Fill(leadingTrijetP4.Pt());
-      hLdgTrijetMass        -> Fill(leadingTrijetP4.M());
-      hLdgTrijetJet1Pt      -> Fill(leadingTrijetJet1.pt());
-      hLdgTrijetJet1Eta     -> Fill(leadingTrijetJet1.eta());
-      hLdgTrijetJet1BDisc   -> Fill(leadingTrijetJet1.bjetDiscriminator());
-      hLdgTrijetJet2Pt      -> Fill(leadingTrijetJet2.pt());
-      hLdgTrijetJet2Eta     -> Fill(leadingTrijetJet2.eta());
-      hLdgTrijetJet2BDisc   -> Fill(leadingTrijetJet2.bjetDiscriminator());
-      hLdgTrijetBJetPt      -> Fill(leadingTrijetBJet.pt());
-      hLdgTrijetBJetEta     -> Fill(leadingTrijetBJet.eta());
-      hLdgTrijetBJetBDisc   -> Fill(leadingTrijetBJet.bjetDiscriminator());
-      hLdgTrijetDiJetPt     -> Fill((leadingTrijetJet1.p4() + leadingTrijetJet2.p4()).Pt());
-      hLdgTrijetDiJetEta    -> Fill((leadingTrijetJet1.p4() + leadingTrijetJet2.p4()).Eta());
-      hLdgTrijetDiJetMass   -> Fill((leadingTrijetJet1.p4() + leadingTrijetJet2.p4()).M());
-      hLdgTrijetDijetDeltaR -> Fill(ROOT::Math::VectorUtil::DeltaR(leadingTrijetJet1.p4(), leadingTrijetJet2.p4()));
-  
-      //***Subleading Trijet Properties
-      hSubldgTrijetTopMassWMassRatio -> Fill(subleadingTrijetP4.M()/(subleadingTrijetJet1.p4() + subleadingTrijetJet2.p4()).M());
-  
-      hSubldgTrijetPt           -> Fill(subleadingTrijetP4.Pt());
-      hSubldgTrijetMass         -> Fill(subleadingTrijetP4.M());
-      hSubldgTrijetJet1Pt       -> Fill(subleadingTrijetJet1.pt());
-      hSubldgTrijetJet1Eta      -> Fill(subleadingTrijetJet1.eta());
-      hSubldgTrijetJet1BDisc    -> Fill(subleadingTrijetJet1.bjetDiscriminator());    
-      hSubldgTrijetJet2Pt       -> Fill(subleadingTrijetJet2.pt());
-      hSubldgTrijetJet2Eta      -> Fill(subleadingTrijetJet2.eta());
-      hSubldgTrijetJet2BDisc    -> Fill(subleadingTrijetJet2.bjetDiscriminator());
-      hSubldgTrijetBJetPt       -> Fill(subleadingTrijetBJet.pt());
-      hSubldgTrijetBJetEta      -> Fill(subleadingTrijetBJet.eta());
-      hSubldgTrijetBJetBDisc    -> Fill(subleadingTrijetBJet.bjetDiscriminator());
-      hSubldgTrijetDiJetPt      -> Fill((subleadingTrijetJet1.p4() + subleadingTrijetJet2.p4()).Pt());
-      hSubldgTrijetDiJetEta     -> Fill((subleadingTrijetJet1.p4() + subleadingTrijetJet2.p4()).Eta());
-      hSubldgTrijetDiJetMass    -> Fill((subleadingTrijetJet1.p4() + subleadingTrijetJet2.p4()).M());
-      hSubldgTrijetDijetDeltaR  -> Fill(ROOT::Math::VectorUtil::DeltaR(subleadingTrijetJet1.p4(), subleadingTrijetJet2.p4()));
-  
-      hTetrajetBJetPt    -> Fill(tetrajetBjet.pt());
-      hTetrajetBJetEta   -> Fill(tetrajetBjet.eta());
-      hTetrajetBJetBDisc -> Fill(tetrajetBjet.bjetDiscriminator());
-      hTetrajetPt        -> Fill(tetrajetP4.Pt());
-      hTetrajetMass      -> Fill(tetrajetP4.M());
-      hTetrajetEta       -> Fill(tetrajetP4.Eta());
-  
-      // // Passed all top selection cuts
-      // output.bPassedSelection = true;
-      // cPassedTopSelectionBDT.increment()
-
-    }//fixme
-
   //================================================================================================
   // Fill histograms (Before cuts)
   //================================================================================================
@@ -1409,23 +1366,69 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	}//if ( passBDTboth )
     }//if (MCtrue_Bjet.size() == GenTops.size())
   
+
+  // Replace all PF Jet 4-vectors with their matched GenJet 4-vectors
+  if (replaceJets) ReplaceJetsWithGenJets(output); //fixme: not tested!!!
+
+  //================================================================================================
   // Apply cuts
-  cSubPassedBDTCut.increment(); // fixme
+  //================================================================================================
+  bool haveFreeBJet = (tetrajetBjetPt_max > 0); 
+  if ( !passBDTboth ) return output; 
+  if ( !haveFreeBJet ) return output; 
+  cSubPassedBDTCut.increment();
 
   // Passed all top selection cuts
-  output.bPassedSelection = true;
   cPassedTopSelectionBDT.increment();
     
-  // Replace all PF Jet 4-vectors with their matched GenJet 4-vectors
-  if (replaceJets) ReplaceJetsWithGenJets(output); //not tested
-
-
+  //================================================================================================
   // Fill histograms (After cuts)
+  //================================================================================================
   hTopCandMass ->Fill(trijet1.M());
   hTopCandMass ->Fill(trijet2.M());
+  // Leading top candidate passing BDT  
+  double dijetMass = (leadingTrijetJet1.p4() +  leadingTrijetJet2.p4()).M();
+  hLdgTrijetTopMassWMassRatio -> Fill(leadingTrijetP4.M()/dijetMass);
+  hLdgTrijetPt          -> Fill(leadingTrijetP4.Pt());
+  hLdgTrijetMass        -> Fill(leadingTrijetP4.M());
+  hLdgTrijetJet1Pt      -> Fill(leadingTrijetJet1.pt());
+  hLdgTrijetJet1Eta     -> Fill(leadingTrijetJet1.eta());
+  hLdgTrijetJet1BDisc   -> Fill(leadingTrijetJet1.bjetDiscriminator());
+  hLdgTrijetJet2Pt      -> Fill(leadingTrijetJet2.pt());
+  hLdgTrijetJet2Eta     -> Fill(leadingTrijetJet2.eta());
+  hLdgTrijetJet2BDisc   -> Fill(leadingTrijetJet2.bjetDiscriminator());
+  hLdgTrijetBJetPt      -> Fill(leadingTrijetBJet.pt());
+  hLdgTrijetBJetEta     -> Fill(leadingTrijetBJet.eta());
+  hLdgTrijetBJetBDisc   -> Fill(leadingTrijetBJet.bjetDiscriminator());
+  hLdgTrijetDiJetPt     -> Fill((leadingTrijetJet1.p4() + leadingTrijetJet2.p4()).Pt());
+  hLdgTrijetDiJetEta    -> Fill((leadingTrijetJet1.p4() + leadingTrijetJet2.p4()).Eta());
+  hLdgTrijetDiJetMass   -> Fill((leadingTrijetJet1.p4() + leadingTrijetJet2.p4()).M());
+  hLdgTrijetDijetDeltaR -> Fill(ROOT::Math::VectorUtil::DeltaR(leadingTrijetJet1.p4(), leadingTrijetJet2.p4()));
+  // Subleading top candidate passing BDT
+  hSubldgTrijetTopMassWMassRatio -> Fill(subleadingTrijetP4.M()/(subleadingTrijetJet1.p4() + subleadingTrijetJet2.p4()).M());
+  hSubldgTrijetPt           -> Fill(subleadingTrijetP4.Pt());
+  hSubldgTrijetMass         -> Fill(subleadingTrijetP4.M());
+  hSubldgTrijetJet1Pt       -> Fill(subleadingTrijetJet1.pt());
+  hSubldgTrijetJet1Eta      -> Fill(subleadingTrijetJet1.eta());
+  hSubldgTrijetJet1BDisc    -> Fill(subleadingTrijetJet1.bjetDiscriminator());    
+  hSubldgTrijetJet2Pt       -> Fill(subleadingTrijetJet2.pt());
+  hSubldgTrijetJet2Eta      -> Fill(subleadingTrijetJet2.eta());
+  hSubldgTrijetJet2BDisc    -> Fill(subleadingTrijetJet2.bjetDiscriminator());
+  hSubldgTrijetBJetPt       -> Fill(subleadingTrijetBJet.pt());
+  hSubldgTrijetBJetEta      -> Fill(subleadingTrijetBJet.eta());
+  hSubldgTrijetBJetBDisc    -> Fill(subleadingTrijetBJet.bjetDiscriminator());
+  hSubldgTrijetDiJetPt      -> Fill((subleadingTrijetJet1.p4() + subleadingTrijetJet2.p4()).Pt());
+  hSubldgTrijetDiJetEta     -> Fill((subleadingTrijetJet1.p4() + subleadingTrijetJet2.p4()).Eta());
+  hSubldgTrijetDiJetMass    -> Fill((subleadingTrijetJet1.p4() + subleadingTrijetJet2.p4()).M());
+  hSubldgTrijetDijetDeltaR  -> Fill(ROOT::Math::VectorUtil::DeltaR(subleadingTrijetJet1.p4(), subleadingTrijetJet2.p4()));
+  // Ldg in pt free b-jet
+  hTetrajetBJetPt    -> Fill(tetrajetBjet.pt());
+  hTetrajetBJetEta   -> Fill(tetrajetBjet.eta());
+  hTetrajetBJetBDisc -> Fill(tetrajetBjet.bjetDiscriminator());
+  hTetrajetPt        -> Fill(tetrajetP4.Pt());
+  hTetrajetMass      -> Fill(tetrajetP4.M());
+  hTetrajetEta       -> Fill(tetrajetP4.Eta());
 
-
-  // Return data object
   return output;
   
 }
