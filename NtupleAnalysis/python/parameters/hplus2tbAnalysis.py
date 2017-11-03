@@ -206,7 +206,7 @@ topSelection = PSet(
 #================================================================================================        
 topSelectionBDT = PSet(
     # Basic values                 
-    MVACutValue     = 0.9,
+    MVACutValue     = 0.7,
     MVACutDirection =  ">",   # options: ==, !=, <, <=, >, >=       
     NjetsMaxValue      = 9,
     NjetsMaxDirection  = "<=",    # options: ==, !=, <, <=, >, >=    
