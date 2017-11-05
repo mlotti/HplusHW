@@ -223,8 +223,10 @@ if 0:
 # FakeB Measurement Options
 #================================================================================================
 fakeBMeasurement = PSet(
-    prelimTopFitChiSqrCutValue        = 100.0,
-    prelimTopFitChiSqrCutDirection    =  "<",   # options: ==, !=, <, <=, >, >=
+    #prelimTopFitChiSqrCutValue        = 100.0,
+    #prelimTopFitChiSqrCutDirection    =  "<",   # options: ==, !=, <, <=, >, >=
+    prelimTopMVACutValue              = -0.8,
+    prelimTopMVACutDirection          =  ">=",   # options: ==, !=, <, <=, >, >=
     #
     numberOfBJetsCutValue             = 2,
     numberOfBJetsCutDirection         = "==", # options: ==, !=, <, <=, >, >=

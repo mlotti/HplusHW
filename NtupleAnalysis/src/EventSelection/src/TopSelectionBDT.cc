@@ -13,11 +13,14 @@
 TopSelectionBDT::Data::Data()
 :
   bPassedSelection(false),
+  bHasFreeBJet(false),
+  fMVAmax1(-1.0),
   fTrijet1Jet1(),
   fTrijet1Jet2(),
   fTrijet1BJet(),
   fTrijet1Dijet_p4(),
   fTrijet1_p4(), 
+  fMVAmax2(-1.0),
   fTrijet2Jet1(),
   fTrijet2Jet2(),
   fTrijet2BJet(),
@@ -43,6 +46,7 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config, EventCounter& event
     cPassedTopSelectionBDT(fEventCounter.addCounter("passed top selection ("+postfix+")")),
     // Sub counters
     cSubAll(fEventCounter.addSubCounter("top selection ("+postfix+")", "All events")),
+    cSubPassedFreeBjetCut(fEventCounter.addSubCounter("top selection ("+postfix+")", "Passed Free Bjet cut")),
     cSubPassedBDTCut(fEventCounter.addSubCounter("top selection ("+postfix+")", "Passed BDT cut"))
 {
   initialize(config);
@@ -59,6 +63,7 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config)
   cPassedTopSelectionBDT(fEventCounter.addCounter("passed top selection")),
   // Sub counters
   cSubAll(fEventCounter.addSubCounter("top selection", "All events")),
+  cSubPassedFreeBjetCut(fEventCounter.addSubCounter("top selection", "Passed Free Bjet cut")),
   cSubPassedBDTCut(fEventCounter.addSubCounter("top selection", "Passed BDT cut"))
 {
   initialize(config);
@@ -1302,6 +1307,10 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
     
     }// if (event.isMC() && doMatching)
 
+
+  // Skip events where no free b-jet is available
+  // if (tetrajetBjet.p4().pt() <= 0) return output; // fixme
+
   // Fill output data  
   output.fTrijet1Jet1     = leadingTrijetJet1;
   output.fTrijet1Jet2     = leadingTrijetJet2;
@@ -1313,7 +1322,10 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   output.fTrijet2BJet     = subleadingTrijetBJet;
   output.fTrijet2Dijet_p4 = subleadingTrijetJet1.p4() +  subleadingTrijetJet2.p4();
   output.fTrijet2_p4      = subleadingTrijetP4;
-  output.fTetrajetBJet    = tetrajetBjet;
+  output.fTetrajetBJet    = tetrajetBjet; 
+  output.bHasFreeBJet     = (tetrajetBjetPt_max > 0); 
+  output.fMVAmax1         = MVAmax1;
+  output.fMVAmax2         = MVAmax2;
   output.fLdgTetrajet_p4  = tetrajetP4;
   output.bPassedSelection = (cfg_MVACut.passedCut(MVAmax1) && cfg_MVACut.passedCut(MVAmax2) && tetrajetBjetPt_max > 0 );
   
@@ -1373,9 +1385,10 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   //================================================================================================
   // Apply cuts
   //================================================================================================
-  bool haveFreeBJet = (tetrajetBjetPt_max > 0); 
+  if ( !output.hasFreeBJet() ) return output; 
+  cSubPassedFreeBjetCut.increment();
+
   if ( !passBDTboth ) return output; 
-  if ( !haveFreeBJet ) return output; 
   cSubPassedBDTCut.increment();
 
   // Passed all top selection cuts
