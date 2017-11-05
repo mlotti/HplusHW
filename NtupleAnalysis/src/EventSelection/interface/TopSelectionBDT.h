@@ -56,16 +56,19 @@ public:
     ~Data();
 
     // Status of passing event selection
-    bool passedSelection() const { return bPassedSelection; } 
+    bool passedSelection() const { return bPassedSelection; }    
     /// Status of GenuineB event (if false event is FakeB)
     bool isGenuineB() const { return bIsGenuineB; }
+    bool hasFreeBJet() const { return bHasFreeBJet; }
     // Trijet-1
+    const float getMVAmax1() const { return fMVAmax1; }
     const Jet getTrijet1Jet1() const { return fTrijet1Jet1; } 
     const Jet getTrijet1Jet2() const { return fTrijet1Jet2; } 
     const Jet getTrijet1BJet() const { return fTrijet1BJet; } 
     const math::XYZTLorentzVector getTrijet1DijetP4() const {return fTrijet1Dijet_p4; }
     const math::XYZTLorentzVector getTriJet1() const {return fTrijet1_p4; }
     // Trijet-2
+    const float getMVAmax2() const { return fMVAmax2; }
     const Jet getTrijet2Jet1() const { return fTrijet2Jet1; } 
     const Jet getTrijet2Jet2() const { return fTrijet2Jet2; } 
     const Jet getTrijet2BJet() const { return fTrijet2BJet; } 
@@ -140,14 +143,18 @@ public:
     /// Boolean for passing selection
     bool bPassedSelection;
     // GenuineB = All selected b-jets are genuine, FakeB=At least one selected b-jet is not genuine
-    bool bIsGenuineB;
+    bool bIsGenuineB;    
+    // A free bjet is left after the top reconstruction (for invariant mass)
+    bool bHasFreeBJet;
     /// Trijet-1
+    float fMVAmax1;
     Jet fTrijet1Jet1;
     Jet fTrijet1Jet2;
     Jet fTrijet1BJet;
     math::XYZTLorentzVector fTrijet1Dijet_p4;
     math::XYZTLorentzVector fTrijet1_p4;
     /// Trijet-2
+    float fMVAmax2;
     Jet fTrijet2Jet1;
     Jet fTrijet2Jet2;
     Jet fTrijet2BJet;
@@ -234,16 +241,17 @@ private:
   vector <int> GetWrongAssignmentTrijetIndex(int matched_index, const std::vector<Jet>& TopCandJet1, const std::vector<Jet>& TopCandJet2, const std::vector<Jet>& TopCandBjet);
   // Input parameters
   int nSelectedBJets;
-  const double cfg_MVACutValue;
-  const double cfg_NjetsMaxValue;
-  const bool cfg_ReplaceJetsWithGenJets;
   const DirectionalCut<double> cfg_MVACut;
-  const DirectionalCut<double> cfg_NjetsMax;
+  const DirectionalCut<int> cfg_NjetsMaxCut;
+  const bool cfg_ReplaceJetsWithGenJets;
+
   // Event counter for passing selection
   Count cPassedTopSelectionBDT;
 
   // Sub counters
   Count cSubAll;
+  Count cSubPassedFreeBjetCut;
+  Count cSubPassedBDTCut;
 
   // Histograms (1D)
   WrappedTH1  *hBDTresponse;

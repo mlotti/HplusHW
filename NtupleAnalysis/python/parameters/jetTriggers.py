@@ -6,63 +6,80 @@ import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
 #================================================================================================
 # General parameters
 #================================================================================================
-verbose               = True
+verbose               = False
 histogramAmbientLevel = "Debug"  # Options: Systematics, Vital, Informative, Debug
+
 
 #================================================================================================
 # Trigger
 #================================================================================================
 trigger = PSet(
+  # No need to specify version numbers, they are automatically scanned in range 1--100 (remove the '_v' suffix)
     triggerOR = [
-        "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056", # scanned in range _v1--_v100 (=>remove the '_v' suffix)
-        "HLT_PFHT450_SixJet40_BTagCSV_p056",       # scanned in range _v1--_v100 (=>remove the '_v' suffix)
-        "HLT_PFJet450", # for trg eff recovery in 2016H
-        #"HLT_PFHT400_SixJet30", #Prescale 110 at inst. lumi 1.35E+34
-        #"HLT_PFHT450_SixJet40", #Prescale 26 at inst. lumi 1.35E+34
-        ],
-    triggerOR2 = [],
-    )
+        "HLT_IsoMu24",
+      #  "HLT_PFHT300",
+      #  "HLT_PFHT350",
+      #  "HLT_PFHT400",
+      #  "HLT_PFHT475",
+      #  "HLT_PFHT400_SixJet30",
+      #  "HLT_PFHT450_SixJet40",
+        "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056",
+        "HLT_PFHT450_SixJet40_BTagCSV_p056",
+      #  "HLT_PFJet400",
+        "HLT_PFJet450",
+      #  "HLT_PFMET300",
+      #  "HLT_MET200",
+      #  "HLT_PFMET110_PFMHT110_IDTight",
+      #  "HLT_PFMET120_PFMHT120_IDTight",
+
+    ],
+  triggerOR2 = [],
+)
+
 
 
 #================================================================================================
 # Tau selection (sync with HToTauNu analysis)
 #================================================================================================
+# import HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters as signalAnalysis
+#tauSelection = signalAnalysis.tauSelection
+
 tauSelection = PSet(
     applyTriggerMatching = False,
-    triggerMatchingCone  =   0.1, # DeltaR for matching offline tau with trigger tau
-    tauPtCut             =  20.0, #
-    tauEtaCut            =   2.3, #
-    tauLdgTrkPtCut       =   0.0, #
-    prongs               =  -1,   # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
-    rtau                 =   0.0, # to disable set to 0.0
+    triggerMatchingCone  = 0.1,  # DeltaR for matching offline tau with trigger tau
+    tauPtCut             = 40.0, # for heavy H+, overriden in signalAnalysis.py for light H+
+    tauEtaCut            = 2.1,  #
+    tauLdgTrkPtCut       = 30.0, #
+    prongs               = 1,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
+    rtau                 = 0.0,  # to disable set to 0.0
     againstElectronDiscr = "againstElectronTightMVA6",
     againstMuonDiscr     = "againstMuonLoose3",
     isolationDiscr       = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
     )
 
-# HToTauNu (fixme: crashes if i disable ..)
+# HToTauNu (fixme: crashes if i disable ..)                                                                                                                                                                      
 if 1:
     # tau identification scale factors
     scaleFactors.assignTauIdentificationSF(tauSelection)
-    # tau misidentification scale factorss
+    # tau misidentification scale factors
     scaleFactors.assignTauMisidentificationSF(tauSelection, "eToTau", "full", "nominal")
     scaleFactors.assignTauMisidentificationSF(tauSelection, "muToTau", "full", "nominal")
     scaleFactors.assignTauMisidentificationSF(tauSelection, "jetToTau", "full", "nominal")
     # tau trigger SF
     scaleFactors.assignTauTriggerSF(tauSelection, "nominal")
+    
 
 #================================================================================================
 # MET filter
 #================================================================================================
 metFilter = PSet(
-    discriminators = [
-        "hbheNoiseTokenRun2Loose", # Loose is recommended
-        "Flag_HBHENoiseIsoFilter",
-        "Flag_EcalDeadCellTriggerPrimitiveFilter",
-        "Flag_CSCTightHaloFilter",
-        "Flag_eeBadScFilter",
-        "Flag_goodVertices"]
-    )
+    discriminators = ["hbheNoiseTokenRun2Loose", # Loose is recommended
+                      "Flag_HBHENoiseIsoFilter",
+                      "Flag_EcalDeadCellTriggerPrimitiveFilter",
+                      "Flag_CSCTightHaloFilter",
+                      "Flag_eeBadScFilter",
+                      "Flag_goodVertices"]
+)
 
 #================================================================================================
 # Electron veto
@@ -72,7 +89,7 @@ eVeto = PSet(
     electronEtaCut    = 2.5,
     electronID        = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
     electronIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
-    )
+)
 
 #================================================================================================
 # Muon veto
@@ -84,19 +101,27 @@ muVeto = PSet(
     muonIsolation     = "veto",      # loosest possible for vetoing ("veto"), "tight" for selecting
 )
 
+muSelection = PSet(
+    muonPtCut         = 26.0,
+    muonEtaCut        = 2.4,
+    muonID            = "muIDLoose", # loosest option for vetoing (options: muIDLoose, muIDMedium, muIDTight)                                                                                                                        
+    muonIsolation     = "veto",      # loosest possible for vetoing ("veto"), "tight" for selecting                                                                                                                                         
+)
+
+
 #================================================================================================
 # Jet selection
 #================================================================================================
 jetSelection = PSet(
-    jetType                  = "Jets",    # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
-    jetPtCuts                = [40.0, 40.0, 40.0, 40.0, 40.0, 40.0, 30.0],
+    jetType                  = "Jets", #"Jets",    # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
+    jetPtCuts                = [30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0], #[40.0, 40.0, 40.0, 40.0, 40.0, 40.0, 30.0],
     jetEtaCuts               = [2.4],
     numberOfJetsCutValue     = 7,
     numberOfJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
     jetIDDiscr               = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
     jetPUIDDiscr             = "",        # does not work at the moment 
     tauMatchingDeltaR        = 0.4,
-    HTCutValue               = 500.0,
+    HTCutValue               = 0.0, #ATHER 500 for HT plots.
     HTCutDirection           = ">=",
     JTCutValue               = 0.0,
     JTCutDirection           = ">=",
@@ -109,19 +134,18 @@ jetSelection = PSet(
 #================================================================================================
 bjetSelection = PSet(
     triggerMatchingApply      = False,
-    triggerMatchingCone       = 0.1,  # DeltaR for matching offline bjet with trigger::TriggerBjet
-    jetPtCuts                 = [40.0, 40.0, 30.0],
+    triggerMatchingCone       = 0.1,  # DeltaR for matching offline bjet with trigger::TriggerBjet                                                                           
+    jetPtCuts                 = [40.0, 30.0],#[40.0, 40.0, 30.0],
     jetEtaCuts                = [2.4],
     bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
     bjetDiscrWorkingPoint     = "Medium",
-    numberOfBJetsCutValue     = 3,
+    numberOfBJetsCutValue     = 2,
     numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
 )
 
 scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
                                     btagPayloadFilename    = "CSVv2.csv",
-                                    #btagEfficiencyFilename = "btageff_hybrid.json", #old
-                                    btagEfficiencyFilename = "btageff_hybrid_HToTB.json",
+                                    btagEfficiencyFilename = "btageff_TT.json",#"btageff_hybrid.json",
                                     direction              = "nominal")
 
 #================================================================================================
@@ -136,6 +160,7 @@ if 0:
         bjetMatchingDeltaR       = 0.1,
         )
 
+
 #================================================================================================
 # MET selection
 #================================================================================================
@@ -146,7 +171,8 @@ metSelection = PSet(
     METSignificanceCutDirection = ">",         # options: ==, !=, <, <=, >, >=
     METType                     = "MET_Type1", # options: MET_Type1, MET_Type1_NoHF, MET_Puppi, GenMET, L1MET, HLTMET, CaloMET
     applyPhiCorrections          = False
-    )
+)
+
 
 #================================================================================================
 # Topology selection
@@ -179,38 +205,32 @@ topologySelection = PSet(
 # Top selection
 #================================================================================================
 topSelection = PSet(
-    ChiSqrCutValue     = 100.0,
-    ChiSqrCutDirection =  "<",   # options: ==, !=, <, <=, >, >=
-    LowLdgTrijetMassCutValue      = 150.0,
+    # Basic values 
+    ChiSqrCutValue     = 10.0,
+    ChiSqrCutDirection =  "<",   # options: ==, !=, <, <=, >, >= 
+    LowLdgTrijetMassCutValue      = 0.0,
     LowLdgTrijetMassCutDirection  = ">=",
-    HighLdgTrijetMassCutValue      = 210.0,
+    HighLdgTrijetMassCutValue      = 900000.0,
     HighLdgTrijetMassCutDirection  = "<=",
     MassW              = 80.385,
     DiJetSigma         = 10.2,
     TriJetSigma        = 27.2,
     MaxJetsToUseInFit  = 8,
     MaxBJetsToUseInFit = 3,
-    # Distance cut
-    dijetWithMaxDR_tetrajetBjet_dR_min          =  0.0, # Disable: 0.0, Default: +3.0
-    dijetWithMaxDR_tetrajetBjet_dR_yIntercept   = -1.0, # Disable:-1.0, Default: +4.0
-    dijetWithMaxDR_tetrajetBjet_dR_slopeCoeff   =  0.0, # Disable: 0.0, Default: -1.0
-    # Angular cut
-    dijetWithMaxDR_tetrajetBjet_dPhi_min        = +2.5, # Disable: 0.0, Default: +2.5
-    dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept = +3.0, # Disable:-1.0, Default: +3.0
-    dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff = -1.0, # Disable: 0.0, Default: -1.0
-    ReplaceJetsWithGenJets = False, #soti
+    # Distance cut         
+    dijetWithMaxDR_tetrajetBjet_dR_min          =  0.0, # Disable: 0.0, Default: +3.0 
+    dijetWithMaxDR_tetrajetBjet_dR_yIntercept   = -1.0, # Disable:-1.0, Default: +4.0 
+    dijetWithMaxDR_tetrajetBjet_dR_slopeCoeff   =  0.0, # Disable: 0.0, Default: -1.0 
+    # Angular cut                                                                     
+    dijetWithMaxDR_tetrajetBjet_dPhi_min        = +2.5, # Disable: 0.0, Default: +2.5 
+    dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept = +3.0, # Disable:-1.0, Default: +3.0 
+    dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff = -1.0, # Disable: 0.0, Default: -1.0 
+    # For Testing (perfect jet resolution)                                            
+    ReplaceJetsWithGenJets = False,
 )
 
-#================================================================================================                  
-# Top selection BDT                                               
-#================================================================================================        
-topSelectionBDT = PSet(
-    MVACutValue            = 0.9,
-    MVACutDirection        =  ">",  # options: ==, !=, <, <=, >, >=
-    NjetsMaxCutValue       = 9,
-    NjetsMaxCutDirection   = "<=",  # options: ==, !=, <, <=, >, >=
-    ReplaceJetsWithGenJets = False, # For Testing (perfect jet resolution) 
-)
+
+
 
 #================================================================================================
 # MET trigger SF
@@ -223,31 +243,32 @@ if 0:
 # FakeB Measurement Options
 #================================================================================================
 fakeBMeasurement = PSet(
-    #prelimTopFitChiSqrCutValue        = 100.0,
-    #prelimTopFitChiSqrCutDirection    =  "<",   # options: ==, !=, <, <=, >, >=
-    prelimTopMVACutValue              = -0.8,
-    prelimTopMVACutDirection          =  ">=",   # options: ==, !=, <, <=, >, >=
-    #
-    numberOfBJetsCutValue             = 2,
-    numberOfBJetsCutDirection         = "==", # options: ==, !=, <, <=, >, >=
-    #
-    numberOfInvertedBJetsCutValue     = 1,        # i.e. additional to the selected b-jets
-    numberOfInvertedBJetsCutDirection = ">=",     # options: ==, !=, <, <=, >, >=
+    prelimTopFitChiSqrCutValue        = 100.0,
+    prelimTopFitChiSqrCutDirection    =  "<",     # options: ==, !=, <, <=, >, >=  
+    #                                                                              
+    numberOfBJetsCutValue             = 2,        # default: 2                     
+    numberOfBJetsCutDirection         = "==",     # default: ==, options: ==, !=, <, <=, >, >= 
+    #                                                                                          
+    numberOfInvertedBJetsCutValue     = 1,        # i.e. additional to the selected b-jets     
+    numberOfInvertedBJetsCutDirection = ">=",     # options: ==, !=, <, <=, >, >=              
     invertedBJetsSortType             = "Random", # options: "AscendingPt", "DescendingPt", "AscendingBDiscriminator", "DescendingBDiscriminator", "Random"
     invertedBJetsDiscr                = bjetSelection.bjetDiscr,
     invertedBJetsWorkingPoint         = "Loose",
-    invertedBJetsDiscrMaxCutValue     = 0.7,      # medium = 0.8484
-    invertedBJetsDiscrMaxCutDirection = "<",      # options: ==, !=, <, <=, >, >=
+    invertedBJetsDiscrMaxCutValue     = 0.7,      # medium = 0.8484   
+    invertedBJetsDiscrMaxCutDirection = "<",      # options: ==, !=, <, <=, >, >=  
     )
+
+
+
 
 
 #================================================================================================
 # Common plots options
 #================================================================================================
 commonPlotsOptions = PSet(
-    histogramSplitting         = [],    # Splitting of histograms as function of one or more parameters
+    histogramSplitting         = [],    # Splitting of histograms as function of one or more parameters 
     enableGenuineBHistograms   = False,
-    enablePUDependencyPlots    = True,  # Enable/Disable some debug-level plots
+    enablePUDependencyPlots    = True,  # Enable/Disable some debug-level plots 
     # Bin settings (final bin setting done in datacardGenerator, there also variable bin width is supported)
     nVerticesBins     = PSet(nBins = 100, axisMin =  0.0, axisMax =  100.0),
     ptBins            = PSet(nBins =  50, axisMin =  0.0, axisMax =  500.0),
@@ -258,15 +279,16 @@ commonPlotsOptions = PSet(
     deltaRBins        = PSet(nBins =  50, axisMin =  0.0, axisMax =   10.0),
     rtauBins          = PSet(nBins =  55, axisMin =  0.0, axisMax =    1.1), # HToTauNu
     njetsBins         = PSet(nBins =  18, axisMin =  0.0, axisMax =   18.0),
-    metBins           = PSet(nBins =  80, axisMin =  0.0, axisMax =  400.0), #  5 GeV bin width
+    metBins           = PSet(nBins =  80, axisMin =  0.0, axisMax =  400.0), #  5 GeV bin width 
     htBins            = PSet(nBins = 500, axisMin =  0.0, axisMax = 5000.0), # 10 GeV bin width 
     bjetDiscrBins     = PSet(nBins = 120, axisMin =  0.0, axisMax =    1.2),
-    angularCuts1DBins = PSet(nBins =  52, axisMin =  0.0, axisMax =  260.0), 
+    angularCuts1DBins = PSet(nBins =  52, axisMin =  0.0, axisMax =  260.0),
     topMassBins       = PSet(nBins = 300, axisMin =  0.0, axisMax = 1500.0), # 5 GeV bin width 
     wMassBins         = PSet(nBins = 200, axisMin =  0.0, axisMax = 1000.0), # 5 GeV bin width 
-    mtBins            = PSet(nBins = 800, axisMin =  0.0, axisMax = 4000.0), # 5 GeV bin width
-    invMassBins       = PSet(nBins = 800, axisMin =  0.0, axisMax = 4000.0), # 5 GeV bin width    
+    mtBins            = PSet(nBins = 800, axisMin =  0.0, axisMax = 4000.0), # 5 GeV bin width 
+    invMassBins       = PSet(nBins = 800, axisMin =  0.0, axisMax = 4000.0), # 5 GeV bin width 
 )
+
 
 #================================================================================================
 # Build all selections group
@@ -282,9 +304,9 @@ allSelections = PSet(
     METSelection          = metSelection,
     TopologySelection     = topologySelection,
     TopSelection          = topSelection,
-    TopSelectionBDT       = topSelectionBDT,
-    MuonSelection         = muVeto,
+    MuonSelection         = muSelection,#muVeto,#muSelection,#muVeto,
     Trigger               = trigger,
     Verbose               = verbose,
     FakeBMeasurement      = fakeBMeasurement,
 )
+

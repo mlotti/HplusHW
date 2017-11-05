@@ -100,30 +100,44 @@ JetSelection::~JetSelection() {
 }
 
 void JetSelection::initialize(const ParameterSet& config) {
-  
+
+  if(fCommonPlots){
+    nPtBins    = 2 * fCommonPlots->getPtBinSettings().bins();
+    fPtMin     = 2 * fCommonPlots->getPtBinSettings().min();
+    fPtMax     = 2 * fCommonPlots->getPtBinSettings().max();
+
+    nEtaBins   = fCommonPlots->getEtaBinSettings().bins();
+    fEtaMin    = fCommonPlots->getEtaBinSettings().min();
+    fEtaMax    = fCommonPlots->getEtaBinSettings().max();
+
+    nHtBins    = fCommonPlots->getHtBinSettings().bins();
+    fHtMin     = fCommonPlots->getHtBinSettings().min();
+    fHtMax     = fCommonPlots->getHtBinSettings().max();
+  }else{
+    nPtBins  = 50;
+    fPtMin   = 0;
+    fPtMax   = 500;
+
+    nEtaBins = 50;
+    fEtaMin  = -2.5;
+    fEtaMax  = 2.5;
+
+    nHtBins  = 240;
+    fHtMin   = 0;
+    fHtMax   = 2400;
+  }
 }
 
 void JetSelection::bookHistograms(TDirectory* dir) {
+
   TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "jetSelection_"+sPostfix);
 
-  // Fixed binning
-  const int nPtBins       = 2 * fCommonPlots->getPtBinSettings().bins();
-  const double fPtMin     = 2 * fCommonPlots->getPtBinSettings().min();
-  const double fPtMax     = 2 * fCommonPlots->getPtBinSettings().max();
-
-  const int  nEtaBins     = fCommonPlots->getEtaBinSettings().bins();
-  const float fEtaMin     = fCommonPlots->getEtaBinSettings().min();
-  const float fEtaMax     = fCommonPlots->getEtaBinSettings().max();
-
-  const int  nHtBins     = fCommonPlots->getHtBinSettings().bins();
-  const float fHtMin     = fCommonPlots->getHtBinSettings().min();
-  const float fHtMax     = fCommonPlots->getHtBinSettings().max();
-
   // Histograms (1D)
-  hJetPtAll     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "jetPtAll", "Jet pT, all;p_{T} (GeV/c)", 50, 0.0, 500.0);
-  hJetEtaAll    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "jetEtaAll", "Jet #eta, all;#eta", 50, -2.5, 2.5);
-  hJetPtPassed  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "jetPtPassed", "Jet pT, passed;p_{T} (GeV/c)", 50, 0.0, 500.0);
-  hJetEtaPassed = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "jetEtaPassed", "Jet Eta, passed", 50, -2.5, 2.5);
+  hJetPtAll     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "jetPtAll", "Jet pT, all;p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
+  hJetEtaAll    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "jetEtaAll", "Jet #eta, all;#eta", nEtaBins, fEtaMin, fEtaMax);
+  hJetPtPassed  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "jetPtPassed", "Jet pT, passed;p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
+  hJetEtaPassed = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "jetEtaPassed", "Jet Eta, passed", nEtaBins, fEtaMin, fEtaMax);
+
   hSelectedJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedJetsFirstJetPt"  , "First jet pT;p_{T} (GeV/c)"  , nPtBins, fPtMin, fPtMax) );
   hSelectedJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedJetsSecondJetPt" , "Second jet pT;p_{T} (GeV/c)" , nPtBins, fPtMin, fPtMax) );
   hSelectedJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedJetsThirdJetPt"  , "Third jet pT;p_{T} (GeV/c)"  , nPtBins, fPtMin, fPtMax) );
@@ -140,6 +154,7 @@ void JetSelection::bookHistograms(TDirectory* dir) {
   hSelectedJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedJetsSeventhJetEta", "Seventh jet #eta;#eta", nEtaBins, fEtaMin, fEtaMax) );
   hJetMatchingToTauDeltaR  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "JetMatchingToTauDeltaR" , "#DeltaR(jet, #tau)", 40, 0, 2);
   hJetMatchingToTauPtRatio = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "JetMatchingToTauPtRatio", "jet pT / #tau pT", 40, 0, 2);
+
   hHTAll     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "HTAll"    , ";H_{T}",  nHtBins, fHtMin, fHtMax); 
   hJTAll     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "JTAll"    , ";J_{T}",  nHtBins, fHtMin, fHtMax); 
   hMHTAll    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "MHTAll"   , ";MHT"  ,  30, 0.0,  300.0);
