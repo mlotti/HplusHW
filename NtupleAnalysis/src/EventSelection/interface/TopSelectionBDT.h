@@ -162,8 +162,6 @@ public:
     math::XYZTLorentzVector fTrijet2_p4;
     // Tetrajet
     Jet fTetrajetBJet;
-    math::XYZTLorentzVector fTetrajet1_p4;
-    math::XYZTLorentzVector fTetrajet2_p4;
     math::XYZTLorentzVector fLdgTetrajet_p4;
     math::XYZTLorentzVector fSubldgTetrajet_p4;
     // DijetWithMinDR
@@ -182,9 +180,9 @@ public:
   virtual void bookHistograms(TDirectory* dir);
   
   /// Use silentAnalyze if you do not want to fill histograms or increment counters
-  Data silentAnalyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
+  Data silentAnalyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const bool doMatching);
   /// analyze does fill histograms and incrementes counters
-  Data analyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
+  Data analyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const bool doMatching=true);
 
   TMVA::Reader *reader;
   
@@ -213,7 +211,7 @@ private:
   /// Initialisation called from constructor
   void initialize(const ParameterSet& config);
   /// The actual selection
-  Data privateAnalyze(const Event& event, const std::vector<Jet> jets, const std::vector<Jet> bjets);
+  Data privateAnalyze(const Event& event, const std::vector<Jet> selectedJets, const std::vector<Jet> selectedBjets, bool doMatching);
   // Returns true if the two jets are the same
   bool areSameJets(const Jet& jet1, const Jet& jet2);
   // Return true if a selected jet matches a selected bjet
