@@ -207,8 +207,8 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
     if (!passPrelimChiSq) return;
   */
   if (0) std::cout << "=== Top (BDT) selection" << std::endl;
-  const TopSelectionBDT::Data topData = fTopSelection.analyze(fEvent, jetData, bjetData);
-  bool passPrelimMVACut = cfg_PrelimTopMVACut.passedCut( std::max(topData.getMVAmax1(), topData.getMVAmax2()) );
+  const TopSelectionBDT::Data topData = fTopSelection.analyze(fEvent, jetData, bjetData, true);
+  bool passPrelimMVACut = cfg_PrelimTopMVACut.passedCut( std::max(topData.getMVAmax1(), topData.getMVAmax2()) ); //fixme?
   bool hasFreeBJet      = topData.hasFreeBJet();
   if (!hasFreeBJet) return;
   if (!passPrelimMVACut) return;
@@ -217,7 +217,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   // Standard Selections
   //================================================================================================
   if (0) std::cout << "=== Standard Selections" << std::endl;
-  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, false); //must fix TopSelection (output data)
+  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, false);
   
   //================================================================================================
   // All Selections
