@@ -41,6 +41,7 @@ struct TrijetSelection{
   std::vector<Jet> Jet1;
   std::vector<Jet> Jet2;
   std::vector<Jet> BJet;
+  std::vector <double> MVA;
   std::vector<math::XYZTLorentzVector> TrijetP4; //temporary
   std::vector<math::XYZTLorentzVector> DijetP4;  //temporary
 };
@@ -237,6 +238,9 @@ private:
   bool isRealMVATop(const Jet& trijetJet1, const Jet& trijetJet2, const Jet& trijetBJet, const std::vector<Jet>& MCtrue_LdgJet, const std::vector<Jet>& MCtrue_SubldgJet, const std::vector<Jet>& MCtrue_Bjet);
   bool isRealMVATop(const Jet& trijetJet1, const Jet& trijetJet2, const Jet& trijetBJet,const Jet& MCtrue_LdgJet, const Jet& MCtrue_SubldgJet, const Jet& MCtrue_Bjet);
   vector <int> GetWrongAssignmentTrijetIndex(int matched_index, const std::vector<Jet>& TopCandJet1, const std::vector<Jet>& TopCandJet2, const std::vector<Jet>& TopCandBjet);
+  TrijetSelection SortInMVAvalue(TrijetSelection TopCand);
+  bool foundFreeBjet(const Jet& trijet1Jet1, const Jet& trijet1Jet2, const Jet& trijet1BJet, const Jet& trijet2Jet1, const Jet& trijet2Jet2, const Jet& trijet2BJet , const std::vector<Jet>& bjets);
+  bool HasMother(const Event& event, const genParticle &p, const int mom_pdgId);
   // Input parameters
   int nSelectedBJets;
   const DirectionalCut<double> cfg_MVACut;
@@ -254,13 +258,8 @@ private:
   // Histograms (1D)
   WrappedTH1  *hBDTresponse;
   WrappedTH1  *hTopCandMass;
-  //  WrappedTH1  *hTetrajetMass;
-  WrappedTH1  *hSelectedTopPt1;
-  WrappedTH1  *hSelectedMatchedTopPt1;
-  WrappedTH1  *hSelectedTopPt2;
-  WrappedTH1  *hSelectedMatchedTopPt2;
 
-  WrappedTH1  *hLdgBjetPt;
+
   WrappedTH1  *hLdgTrijetTopMassWMassRatio;
   WrappedTH1  *hSubldgTrijetTopMassWMassRatio;
 
@@ -367,6 +366,17 @@ private:
   WrappedTH1 *hTrijetSameObjPassBDT;
   WrappedTH1 *hTrijetSameObjPassBDT_bTagged;
 
+  WrappedTH1 *hChHiggsBjetPt_TetrajetBjetMatched;
+  WrappedTH1 *hChHiggsBjetPt_foundTetrajetBjet;
+  WrappedTH1 *hHiggsBjetPt;
+  WrappedTH1 *hHiggsBjetPt_LdgBjetMatched;
+  WrappedTH1 *hLdgBjetPt;
+  WrappedTH1 *hLdgBjetPt_isLdgFreeBjet;
+  WrappedTH1 *hTrijetPtMaxMVASameFakeObj_BjetPassCSV;
+  WrappedTH1 *hTrijetPtMaxMVASameFakeObj;
+  WrappedTH1 *hNSelectedTrijets;
+  WrappedTH1 *hTopFromHiggsPt_isLdgMVATrijet;
+  WrappedTH1 *hTopFromHiggsPt;
   //next WrappedTH1
 
   // Histograms (2D)                                                                                                                             
@@ -375,7 +385,7 @@ private:
   WrappedTH2 *hTrijetCountForBDTcuts;
   WrappedTH2 *hDeltaMVAmaxVsTrijetPassBDTvalue;
   WrappedTH2 *hDeltaMVAminVsTrijetPassBDTvalue;
-  
+  WrappedTH2 *hFakeTrijetMassVsBDTvalue;
 };
 
 #endif
