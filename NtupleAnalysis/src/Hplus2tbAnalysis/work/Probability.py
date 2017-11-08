@@ -249,6 +249,7 @@ def main(opts, signalMass):
                         "AllTopQuarkPt_NonMatched",
                         "EventTrijetPt_MatchedBDT",
                         "AllTopQuarkPt_jjbMatchedBDT",
+                        "TrijetPtMaxMVASameFakeObj_BjetPassCSV",
                         ]
         denominators = [#"TopQuarkPt",
 #                        "TopQuarkPt_Matched",
@@ -269,6 +270,7 @@ def main(opts, signalMass):
                         "TopQuarkPt",
                         "EventTrijetPt_BDT",
                         "TopQuarkPt",
+                        "TrijetPtMaxMVASameFakeObj",
                         ]
         
 
@@ -518,6 +520,15 @@ def PlotProb(datasets, numPath, denPath):
         rebinX = 4
         xMax = 605.0
         xTitle = "generated top p_{T} [GeV]"
+        yTitle = "Efficiency"
+        yMin = 0.0
+        yMax = 1.1
+
+    if "SameFake" in numPath:
+        xMin = 95.0
+        rebinX = 4
+        xMax = 705.0
+        xTitle = "p_{T} [GeV]"
         yTitle = "Efficiency"
         yMin = 0.0
         yMax = 1.1

@@ -334,13 +334,13 @@ def PlotMC(datasetsMgr, histo, intLumi):
         _xlabel = "m_{jjb} (%s)" % _units
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _opts["xmax"] = 505 
-    elif "topcandmass" in histo.lower():
-        _rebinX = 2
-        _units  = "GeV/c^{2}"
-        _format = "%0.0f " + _units
-        _xlabel = "m_{jjb} (%s)" % _units
-        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 505 
+#    elif "topcandmass" in histo.lower():
+#        _rebinX = 2
+#        _units  = "GeV/c^{2}"
+#        _format = "%0.0f " + _units
+#        _xlabel = "m_{jjb} (%s)" % _units
+#        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+#        _opts["xmax"] = 505 
 
     elif "matched_mass" in histo.lower():
         _rebinX = 2
@@ -435,7 +435,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
         if opts.noQCD:
             save_path = savePath + opts.MVAcut + "/noQCD/"
     else:
-        save_path = savePath +"normToLumi/"+opts.MVAcut
+        save_path = savePath + opts.MVAcut + "normToLumi/"
         if opts.noQCD:
             save_path = savePath + opts.MVAcut + "/noQCD/"
 
@@ -495,7 +495,7 @@ if __name__ == "__main__":
     BATCHMODE    = True
     PRECISION    = 3
     #SIGNALMASS   = [200, 500, 800, 2000]
-    SIGNALMASS   = []
+#    SIGNALMASS   = [500]
     SIGNALMASS   = [300, 500,1000]
     INTLUMI      = -1.0
     SUBCOUNTERS  = False

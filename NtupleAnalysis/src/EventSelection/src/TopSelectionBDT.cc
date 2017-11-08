@@ -241,7 +241,8 @@ void TopSelectionBDT::initialize(const ParameterSet& config) {
   reader->AddVariable( "TrijetSubldgJetMult",     &TrijetSubldgJetMult     );
 
   // Read the xml file
-  reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TMVA_BDT/test/weights/TMVAClassification_BDTG.weights.xml");
+  //  reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TMVA_BDT/test/weights/TMVAClassification_BDTG.weights.xml");
+  reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/EventSelection/interface/weights/TMVAClassification_BDTG.weights.xml");
 }
 
 void TopSelectionBDT::bookHistograms(TDirectory* dir) {
@@ -744,7 +745,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	    // Top quark matched with a trijet
 	    FoundTop.push_back(isGenuine);
 	  }//For-loop: All top-quarks
-	//	std::cout<<"Number of tops from Higgs: "<<MCtrueTopFromH_LdgJet.size()<<std::endl;
+
         //BJet from Higgs-side                                                                                             
         for (size_t i=0; i<GenChargedHiggs_BQuark.size(); i++)
           {
@@ -771,7 +772,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   vector<int> mva;
   vector<float> mvaCut;
   float cut = -0.9;
-
+ 
   // For-loop: All BDT cut values
   for (int k=0; k<19; k++)
     {
@@ -846,7 +847,8 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	      TrijetSubldgJetAxis2     = jet2.QGTaggerAK4PFCHSaxis2();
 	      TrijetLdgJetMult         = jet1.QGTaggerAK4PFCHSmult();
 	      TrijetSubldgJetMult      = jet2.QGTaggerAK4PFCHSmult();
-	
+	      
+
 	      // Evaluate the MVA discriminator value
 	      float MVAoutput = reader->EvaluateMVA("BTDG method");
 
@@ -876,6 +878,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   // Fill Number of trijets passing BDT vs MVA cut value
   for (size_t m=0; m < mvaCut.size(); m++) hTrijetCountForBDTcuts -> Fill(mvaCut.at(m), mva.at(m));
   
+
   if (0) std::cout<<"Number of Top Candidates: "<<TopCand.MVA.size()<<std::endl;
   // Definitions
   double MVAmax1 = -999.999,  MVAmax2 = -999.999;
@@ -886,6 +889,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   Jet subleadingTrijetJet1, subleadingTrijetJet2, subleadingTrijetBJet;
   math::XYZTLorentzVector leadingTrijetP4, subleadingTrijetP4, tetrajetP4;
 
+  bool foundTrijet1 = false;
   
   //Soti NEW
   for (size_t i=0; i<TopCand.MVA.size(); i++)
@@ -902,24 +906,25 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
       
       // Save top candidate 4-momentum
       trijet1 = TopCand.TrijetP4.at(i);
+
+      foundTrijet1 = true;
       break;
     }
+  if (!foundTrijet1) return output;
 
   for (size_t i=0; i<TopCand.MVA.size(); i++)
     {
+      
       bool same0 = areSameJets(trijet1BJet, TopCand.Jet1.at(i)) || areSameJets(trijet1BJet, TopCand.Jet2.at(i)) || areSameJets(trijet1BJet, TopCand.BJet.at(i));
       bool same1 = areSameJets(trijet1Jet1, TopCand.Jet1.at(i)) || areSameJets(trijet1Jet1, TopCand.Jet2.at(i)) || areSameJets(trijet1Jet1, TopCand.BJet.at(i));
       bool same2 = areSameJets(trijet1Jet2, TopCand.Jet1.at(i)) || areSameJets(trijet1Jet2, TopCand.Jet2.at(i)) || areSameJets(trijet1Jet2, TopCand.BJet.at(i));
       // Skip top candidates with same jets as Leading in BDT trijet
       if (same0 || same1 || same2) continue; 
-
       //Skip if there are no free bjets left
       if (!foundFreeBjet(trijet1Jet1, trijet1Jet2, trijet1BJet, TopCand.Jet1.at(i), TopCand.Jet2.at(i), TopCand.BJet.at(i), bjets)) continue;
       double mvaValue = TopCand.MVA.at(i);
-
       // Find subleading in BDT value trijet
       if (mvaValue < MVAmax2) continue;
-
       MVAmax2 = mvaValue;
       // Save top candidate subjets
       trijet2Jet1 = TopCand.Jet1.at(i);
@@ -931,17 +936,22 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
     }// For-loop: All top candidates
     
   //Soti NEW
-  
+
 
   if (MVAmax1 <= -999.999 || MVAmax2 <= -999.999)
     {
-      // std::cout<<"MVAmax1 "<<MVAmax1<<" MVAmax2 "<<MVAmax2<<std::endl;
-      // std::cout<<"TopCand.MVA.size() "<<TopCand.MVA.size()<<std::endl;
+
+      //      std::cout<<"MVAmax1 "<<MVAmax1<<" MVAmax2 "<<MVAmax2<<" TopCand.MVA.size() "<<TopCand.MVA.size()<<std::endl;
       if(MVAmax1 <= -999.999 && MVAmax2 <= -999.999) hNSelectedTrijets -> Fill(0);
       else hNSelectedTrijets -> Fill(1);
       return output;
     }
   else  hNSelectedTrijets -> Fill(2);
+
+
+  //Return if no Top Candidates left
+  if (TopCand.MVA.size() < 2) return output;
+
   //================================================================================================  
   // Tetrajet candidates
   //================================================================================================  
@@ -1019,6 +1029,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
       tetrajetP4 = leadingTrijetP4 + tetrajetBjet.p4();
       hLdgBjetPt    -> Fill(ptBjet_max);
     }
+
   //================================================================================================
   // ldg b-tagging Efficiency (per selected bjet)
   //================================================================================================
@@ -1046,7 +1057,6 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 
       if (same1 || same2) hTopFromHiggsPt_isLdgMVATrijet -> Fill(MCtrueTopFromH_Bjet.at(0).pt());
     }
-
 
 
   //================================================================================================  
@@ -1621,8 +1631,8 @@ void TopSelectionBDT::ReplaceJetsWithGenJets(Data &output){
   output.fLdgTetrajet_p4    = output.getLdgTrijet()    + tetrajet_bjet_p4;
   output.fSubldgTetrajet_p4 = output.getSubldgTrijet() + tetrajet_bjet_p4;
 
-  // std::cout << "output.getLdgTrijet().M() = " << output.getLdgTrijet().M() << std::endl;
-  // std::cout << "output.fLdgTetrajet_p4.M() = " << output.fLdgTetrajet_p4.M() << "\n" << std::endl;
+  //std::cout << "output.getLdgTrijet().M() = " << output.getLdgTrijet().M() << std::endl;
+  //std::cout << "output.fLdgTetrajet_p4.M() = " << output.fLdgTetrajet_p4.M() << "\n" << std::endl;
   
   return;
 }
@@ -1773,8 +1783,12 @@ vector <int> TopSelectionBDT::GetWrongAssignmentTrijetIndex(int matched_index, c
 
 TrijetSelection TopSelectionBDT::SortInMVAvalue(TrijetSelection TopCand){
   size_t size = TopCand.MVA.size();
+
+  if (size < 1) return TopCand;
+
   for (size_t i=0; i<size-1; i++)
     {
+
       for  (size_t j=i+1; j<size; j++)
 	{
 	  Jet Jet1_i = TopCand.Jet1.at(i);
@@ -1783,7 +1797,7 @@ TrijetSelection TopSelectionBDT::SortInMVAvalue(TrijetSelection TopCand){
 	  double mva_i = TopCand.MVA.at(i);
 	  math::XYZTLorentzVector TrijetP4_i = TopCand.TrijetP4.at(i);
 	  math::XYZTLorentzVector DijetP4_i = TopCand.DijetP4.at(i);
-      
+
 	  Jet Jet1_j = TopCand.Jet1.at(j);
 	  Jet Jet2_j = TopCand.Jet2.at(j);
 	  Jet BJet_j = TopCand.BJet.at(j);
@@ -1805,9 +1819,11 @@ TrijetSelection TopSelectionBDT::SortInMVAvalue(TrijetSelection TopCand){
 	  TopCand.MVA.at(j)  = mva_i;
 	  TopCand.TrijetP4.at(j) = TrijetP4_i;
 	  TopCand.DijetP4.at(j) = DijetP4_i;
+
 	}
+
     }
-  
+
   return TopCand;
 }
 
