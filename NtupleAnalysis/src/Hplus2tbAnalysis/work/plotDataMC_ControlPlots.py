@@ -10,9 +10,10 @@ Usage:
 Examples:
 ./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_TopCut10_171012_011451 --folder jetSelection_ --url
 ./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_TopMVA0p90_171106_064503 --folder topbdtSelection_ -e "QCD_HT50to100|QCD_HT100to200|QCD_HT200to300|QCD_HT300to500"
+./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_TopMVA0p90_171106_064503/ --url --signalMass 500
 
 Last Used:
-./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_TopMVA0p90_171106_064503/ --url --signalMass 500
+./plotDataMC_ControlPlots.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/SignalAnalysis/Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_TopCut10_171012_011451 --folder topologySelection_
 '''
 
 #================================================================================================ 
@@ -297,8 +298,9 @@ def GetHistoKwargs(h, opts):
         #kwargs["xlabel"] = "CSVv2 discriminant"
         kwargs["xlabel"] = "b-jet discriminant"
         kwargs["ylabel"] = "Events / %.2f "
-        kwargs["cutBox"] = {"cutValue": 0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        kwargs["opts"]   = {"xmin": 0.0, "xmax": +1.01, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["cutBox"] = {"cutValue": 0.8484, "fillColor": 16, "box": True, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": 0.8, "xmax": +1.0, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["moveLegend"] = {"dx": -0.1, "dy": -0.55, "dh": 0.0}
  
     if "dgTrijetBJetPt" in h:
         units            = "GeV/c"
@@ -341,8 +343,9 @@ def GetHistoKwargs(h, opts):
         kwargs["rebinX"] = 2
         kwargs["xlabel"] = "b-jet discriminant"
         kwargs["ylabel"] = "Events / %.2f "
-        kwargs["cutBox"] = {"cutValue": 0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        kwargs["opts"]   = {"xmin": 0.0, "xmax": +1.01, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["cutBox"] = {"cutValue": 0.8484, "fillColor": 16, "box": True, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": 0.8, "xmax": +1.0, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["moveLegend"] = {"dx": -0.1, "dy": -0.55, "dh": 0.0}
 
     if  "dgTrijetJet1Eta" in h or "ldgTrijetJet2Eta" in h:
         kwargs["rebinX"] = 1
@@ -387,9 +390,9 @@ def GetHistoKwargs(h, opts):
         kwargs["xlabel"] = "b-jet discriminant"
         kwargs["ylabel"] = "Events / %.2f "
         kwargs["cutBox"] = {"cutValue": 0.8484, "fillColor": 16, "box": True, "line": True, "greaterThan": True}
-        kwargs["opts"]   = {"xmin": 0.0, "xmax": +1.01, "ymin": yMin, "ymaxfactor": yMaxF}
-        kwargs["moveLegend"] = {"dx": -0.2, "dy": -0.0, "dh": 0.0}
-    
+        kwargs["opts"]   = {"xmin": 0.8, "xmax": +1.0, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["moveLegend"] = {"dx": -0.1, "dy": -0.55, "dh": 0.0}
+
     if  h == "TetrajetBJetEta":
         kwargs["rebinX"] = 1
         kwargs["xlabel"] = "#eta"
@@ -449,7 +452,10 @@ def GetHistoKwargs(h, opts):
 
     if "HT" in h or "JT" in h:
         ROOT.gStyle.SetNdivisions(8, "X")
-        kwargs["rebinX"] = 5
+        if opts.folder == "topologySelection_":
+            kwargs["rebinX"] = 1
+        else:
+            kwargs["rebinX"] = 5
         units            = "GeV"
         if "HT" in h:
             kwargs["xlabel"] = "H_{T} (%s)" % units
@@ -488,7 +494,53 @@ def GetHistoKwargs(h, opts):
         kwargs["opts"]   = {"xmin": 0.8, "xmax": +1.0, "ymin": yMin, "ymaxfactor": yMaxF}
         kwargs["moveLegend"] = {"dx": -0.1, "dy": -0.55, "dh": 0.0}
 
-    #alex
+    if h == "btagSF":
+        kwargs["xlabel"] = "b-jet SF"
+        kwargs["ylabel"] = "Events / %.2f "
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": 3.0, "ymin": yMin, "ymaxfactor": yMaxF}
+
+    if h == "Met":
+        units            = "GeV"
+        kwargs["xlabel"] = "E_{T}^{miss} (%s)" % (units)
+        kwargs["ylabel"] = _yLabel + units
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": 800.0, "ymin": yMin, "ymaxfactor": yMaxF}
+
+    if "AlphaT" in h:
+        kwargs["ylabel"] = "Events / %.2f "
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": 1.2, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["cutBox"] = {"cutValue": 0.5, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+
+    if "planarity" in h.lower():
+        kwargs["ylabel"] = "Events / %.2f "
+
+    if "cparameter" in h.lower():
+        kwargs["ylabel"] = "Events / %.2f "
+        kwargs["cutBox"] = {"cutValue": 0.5, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["moveLegend"] = {"dx": -0.52, "dy": -0.0, "dh": 0.0}
+
+    if "centrality" in h.lower():
+        kwargs["ylabel"] = "Events / %.2f "
+
+    if "centrality" in h.lower():
+        kwargs["ylabel"] = "Events / %.2f "
+
+    if "circularity" in h.lower():
+        kwargs["ylabel"] = "Events / %.2f "
+
+    if "parameter" in h.lower():
+        kwargs["ylabel"] = "Events / %.2f "
+
+    if "foxwolfram" in h.lower():
+        kwargs["ylabel"] = "Events / %.2f "
+        kwargs["cutBox"] = {"cutValue": 0.5, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+
+    if "sphericity" in h.lower():
+        kwargs["ylabel"] = "Events / %.2f "
+
+    if "y23" in h:
+        kwargs["ylabel"] = "Events / %.2f "
+
+    # alex
     return kwargs
     
 
@@ -510,8 +562,7 @@ def DataMCHistograms(datasetsMgr, histoName):
         skipStrings = ["_Vs_", "Vs", "Matched", "MCtruth", "TopQuark", 
                        "RealSelected", "DeltaMVAgt1", "SelectedTop", 
                        "LdgTrijetFake", "LdgTrijetFakeJJB", "TrijetFake",
-                       "FakeInTopDir",
-                       "LdgTrijetFakeJJB_BDT", "LdgTrijetFake_BDT"]
+                       "FakeInTopDir", "LdgTrijetFakeJJB_BDT", "LdgTrijetFake_BDT"]
 
     if opts.folder == "counters":
         skipStrings = ["weighted"]
@@ -526,7 +577,11 @@ def DataMCHistograms(datasetsMgr, histoName):
     if opts.folder == "jetSelection_":
         skipStrings = ["JetMatching"]
     if opts.folder == "bjetSelection_":
-        skipStrings = ["MatchDeltaR"]
+        skipStrings = ["MatchDeltaR", "btagSFRelUncert", "_dEta", "_dPhi", "_dPt", "_dR"]
+    if opts.folder == "metSelection_":
+        skipStrings = [""]
+    if opts.folder == "topologySelection_":
+        skipStrings = ["_Vs_"]
     #alex
 
     # Skip histograms if they contain a given string
