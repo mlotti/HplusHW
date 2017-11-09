@@ -22,6 +22,7 @@ import sys
 import math
 import copy
 import os
+import re
 from optparse import OptionParser
 
 import ROOT
@@ -73,11 +74,11 @@ def GetListOfEwkDatasets():
     if 0: # TopSelection
         return  ["TT", "WJetsToQQ_HT_600ToInf", "SingleTop", "DYJetsToQQHT", "TTZToQQ",  "TTWJetsToQQ", "Diboson", "TTTT"]
     else: # TopSelectionBDT
-        #return  ["TT", "TTTT", "SingleTop", "TTZToQQ", "TTWJetsToQQ", "DYJetsToQQHT", "WJetsToQQ_HT_600ToInf", "Diboson"]
-        #return  ["TT", "TTTT", "SingleTop", "ttX", "DYJetsToQQHT", "WJetsToQQ_HT_600ToInf"]
-        #return  ["TT", "ttX", "TTTT", "SingleTop", "noTop"]
-        #return  ["TT", "ttX", "SingleTop", "noTop"]
-        return  ["TT", "SingleTop", "ttX", "noTop"]
+        if opts.afterTop:
+            return  ["TT", "SingleTop", "ttX", "noTop"]
+        else:
+            return  ["TT", "noTop", "SingleTop", "ttX"]
+
 
 def GetDatasetsFromDir(opts):
     Verbose("Getting datasets")
@@ -206,6 +207,10 @@ def GetHistoKwargs(h, opts):
         }
 
     kwargs = copy.deepcopy(_kwargs)
+    
+    if "pt" in h.lower():
+        units            = "GeV/c"
+        kwargs["ylabel"] = _yLabel + units
 
     if "eta" in h.lower():
         kwargs["ylabel"] = "Events / %.2f "
@@ -428,7 +433,7 @@ def GetHistoKwargs(h, opts):
         kwargs["ylabel"] = "Events / %.2f "
         kwargs["opts"]   = {"xmin": 0.0, "xmax": +0.25, "ymin": yMin, "ymaxfactor": yMaxF}
 
-    if "Vtx" in h:
+    if "vtx" in h.lower():
         kwargs["xlabel"] = "PV multiplicity"
         kwargs["cutBox"] = {"cutValue": 1.0, "fillColor": 16, "box": True, "line": True, "greaterThan": True}
 
@@ -437,6 +442,53 @@ def GetHistoKwargs(h, opts):
         kwargs["xlabel"] = "p_{T} (%s)" % units
         kwargs["ylabel"] = _yLabel + units
 
+    if h == "tauNpassed":
+        units            = "GeV/c"
+        kwargs["xlabel"] = "#tau-jet multiplicity"
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": 8.0, "ymin": yMin, "ymaxfactor": yMaxF}
+
+    if "HT" in h or "JT" in h:
+        ROOT.gStyle.SetNdivisions(8, "X")
+        kwargs["rebinX"] = 5
+        units            = "GeV"
+        if "HT" in h:
+            kwargs["xlabel"] = "H_{T} (%s)" % units
+        else:
+            kwargs["xlabel"] = "J_{T} (%s)" % units
+        kwargs["ylabel"] = _yLabel + units
+        kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+
+    if "MHT" in h:
+        kwargs["rebinX"] = 1
+        units            = "GeV"
+        kwargs["xlabel"] = "MHT (%s)" % units
+        kwargs["ylabel"] = _yLabel + units
+
+    regex = re.compile('selectedJets.*JetPt')
+    if(regex.search(h)):
+        ROOT.gStyle.SetNdivisions(8, "X")
+        kwargs["rebinX"] = 1
+        units            = "GeV"
+        kwargs["xlabel"] = "p_{T} (%s)" % units
+        kwargs["ylabel"] = _yLabel + units
+        kwargs["cutBox"] = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+
+    regex = re.compile('selectedBJets.*JetPt')
+    if(regex.search(h)):
+        #ROOT.gStyle.SetNdivisions(8, "X")
+        kwargs["rebinX"] = 1
+        kwargs["cutBox"] = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+
+    regex = re.compile('selectedBJets.*BDisc')
+    if(regex.search(h)):
+        ROOT.gStyle.SetNdivisions(8, "X")
+        kwargs["xlabel"] = "b-jet discriminant"
+        kwargs["ylabel"] = "Events / %.2f "
+        kwargs["cutBox"] = {"cutValue": 0.8484, "fillColor": 16, "box": True, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": 0.8, "xmax": +1.0, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["moveLegend"] = {"dx": -0.1, "dy": -0.55, "dh": 0.0}
+
+    #alex
     return kwargs
     
 
@@ -463,9 +515,19 @@ def DataMCHistograms(datasetsMgr, histoName):
 
     if opts.folder == "counters":
         skipStrings = ["weighted"]
-
     if opts.folder == "eSelection_Veto":
         skipStrings = ["Resolution"]
+    if opts.folder == "muSelection_Veto":
+        skipStrings = ["Resolution"]
+    if opts.folder == "tauSelection_Veto":
+        skipStrings = ["riggerMatch", "NprongsMatrix", "Resolution"]
+    if opts.folder == "PUDependency":
+        skipStrings = ["WithProbabilisticBtag", "AngularCuts", "AntiIsolatedTau", "NvtxTau"]
+    if opts.folder == "jetSelection_":
+        skipStrings = ["JetMatching"]
+    if opts.folder == "bjetSelection_":
+        skipStrings = ["MatchDeltaR"]
+    #alex
 
     # Skip histograms if they contain a given string
     for keyword in skipStrings:
@@ -576,7 +638,8 @@ if __name__ == "__main__":
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug' 
     FOLDER       = "topbdtSelection_" #jetSelection_
-
+    AFTERTOP     = False
+    
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
 
@@ -631,6 +694,9 @@ if __name__ == "__main__":
     parser.add_option("--folder", dest="folder", type="string", default = FOLDER,
                       help="ROOT file folder under which all histograms to be plotted are located [default: %s]" % (FOLDER) )
 
+    parser.add_option("--afterTop", dest="afterTop", action="store_true", default = AFTERTOP,
+                      help="Are histograms after TopSelection (changes order of adding bkgs in the MC stack) [default: %s]" % (AFTERTOP) )
+
     (opts, parseArgs) = parser.parse_args()
 
     # Require at least two arguments (script-name, path to multicrab)
@@ -653,10 +719,12 @@ if __name__ == "__main__":
         sys.exit()
 
     # Sanity check
-    allowedFolders = ["counters", "counters/weighted", "Weighting", "ForDataDrivenCtrlPlots", "ForDataDrivenCtrlPlotsEWKFakeB",
-                      "ForDataDrivenCtrlPlotsEWKGenuineB", "PUDependency", "eSelection_Veto", "muSelection_Veto",
-                      "tauSelection_Veto", "jetSelection_", "bjetSelection_", "metSelection_", "topologySelection_",
-                      "topbdtSelection_"]
+    allowedFolders = ["counters", "counters/weighted", "PUDependency", "Weighting", 
+                      "eSelection_Veto", "muSelection_Veto", "tauSelection_Veto",
+                      "ForDataDrivenCtrlPlotsEWKFakeB", "ForDataDrivenCtrlPlotsEWKGenuineB",
+                      "jetSelection_", "bjetSelection_", "metSelection_", 
+                      "topologySelection_", "topbdtSelection_", "ForDataDrivenCtrlPlots"]
+
     if opts.folder not in allowedFolders:
         Print("Invalid folder \"%s\"! Please select one of the following:" % (opts.folder), True)
         for m in allowedFolders:
