@@ -317,7 +317,7 @@ wzStyle           = Style(ROOT.kMultiply, ROOT.kPink-7)
 zjetsStyle        = Style(ROOT.kFullCross, ROOT.kRed-7)
 zzStyle           = Style(ROOT.kMultiply, ROOT.kPink-5)
 ttXStyle          = Style(ROOT.kOpenSquare, ROOT.kAzure-4)
-noTopStyle        = Style(ROOT.kOpenSquare, ROOT.kRed-9)
+noTopStyle        = Style(ROOT.kOpenSquare, ROOT.kRed+1) #ROOT.kRed-9)
 #StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kBlue-3, markerSizes=None, markerStyle=4),
 #                                   StyleLine(lineColor=ROOT.kBlue-3, lineStyle=ROOT.kSolid, lineWidth=4), 
 #                                   StyleFill(fillColor=ROOT.kBlue-3, fillStyle=3001)])
