@@ -187,7 +187,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   //================================================================================================
   if (0) std::cout << "=== MET selection" << std::endl;
   const METSelection::Data METData = fMETSelection.analyze(fEvent, nVertices);
-   if (!METData.passedSelection()) return;
+  // if (!METData.passedSelection()) return;
 
   //================================================================================================
   // 11) Topology selection
