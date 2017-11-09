@@ -520,6 +520,11 @@ class Process:
                     if useTopPtCorrection:
                         ttbarStatus = "1"
                     inputList.Add(ROOT.TNamed("isttbar", ttbarStatus))
+                    # intermediate H+ status for reweighting the NoNeutral samples
+                    intermediateStatus = "0"
+                    if dset.getName().find("IntermediateMassNoNeutral") > 0:
+                        intermediateStatus = "1"
+                    inputList.Add(ROOT.TNamed("isIntermediateNoNeutral", intermediateStatus))
                     # Pileup reweighting
                     (puAllEvents, puStatus) = self._parsePUweighting(dset, analyzer, aname, hPUs, inputList)
                     nAllEventsPUWeighted += puAllEvents
