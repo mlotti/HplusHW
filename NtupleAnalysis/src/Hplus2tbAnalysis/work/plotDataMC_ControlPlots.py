@@ -8,7 +8,6 @@ Usage:
 ./plotDataMC_ControlPlots.py -m <pseudo_mcrab_directory> [opts]
 
 Examples:
-./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_HLTBJetTrgMatch_TopCut10_H2Cut0p5_170720_104648 --url
 ./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_TopCut10_171012_011451 --folder jetSelection_ --url
 ./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_TopMVA0p90_171106_064503 --folder topbdtSelection_ -e "QCD_HT50to100|QCD_HT100to200|QCD_HT200to300|QCD_HT300to500"
 
@@ -71,7 +70,7 @@ def GetLumi(datasetsMgr):
 
 def GetListOfEwkDatasets():
     Verbose("Getting list of EWK datasets")
-    if 0: # TopSeleciton
+    if 0: # TopSelection
         return  ["TT", "WJetsToQQ_HT_600ToInf", "SingleTop", "DYJetsToQQHT", "TTZToQQ",  "TTWJetsToQQ", "Diboson", "TTTT"]
     else: # TopSelectionBDT
         #return  ["TT", "TTTT", "SingleTop", "TTZToQQ", "TTWJetsToQQ", "DYJetsToQQHT", "WJetsToQQ_HT_600ToInf", "Diboson"]
@@ -207,6 +206,11 @@ def GetHistoKwargs(h, opts):
         }
 
     kwargs = copy.deepcopy(_kwargs)
+
+    if "eta" in h.lower():
+        kwargs["ylabel"] = "Events / %.2f "
+        kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": yMin, "ymaxfactor": yMaxF}
 
     if h == "TrijetBDT_Mass": # before BDT cut
         units            = "GeV/c^{2}"
@@ -408,9 +412,30 @@ def GetHistoKwargs(h, opts):
         ROOT.gStyle.SetLabelSize(16.0, "X")
 
     if h == "counter":
-        kwargs["opts"]   = {"xmin": 15.0, "xmax": +21.0, "ymin": 1e0, "ymaxfactor": 1.2}
         #ROOT.gStyle.SetLabelSize(16.0, "X")
+        kwargs["opts"]   = {"xmin": 15.0, "xmax": +21.0, "ymin": 1e0, "ymaxfactor": 1.2}
         kwargs["moveLegend"] = {"dx": -0.52, "dy": -0.55, "dh": 0.0}
+
+    if "IsolPt" in h:
+        ROOT.gStyle.SetNdivisions(8, "X")
+        units            = "GeV/c"
+        kwargs["rebinX"] = 1
+        kwargs["xlabel"] = "p_{T} (%s)" % units
+        kwargs["ylabel"] = _yLabel + units
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +400.0, "ymin": yMin, "ymaxfactor": yMaxF}
+        
+    if "RelIsoAfter" in h or "RelIsoPassed" in h:
+        kwargs["ylabel"] = "Events / %.2f "
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +0.25, "ymin": yMin, "ymaxfactor": yMaxF}
+
+    if "Vtx" in h:
+        kwargs["xlabel"] = "PV multiplicity"
+        kwargs["cutBox"] = {"cutValue": 1.0, "fillColor": 16, "box": True, "line": True, "greaterThan": True}
+
+    if "electronPt" in h:
+        units            = "GeV/c"
+        kwargs["xlabel"] = "p_{T} (%s)" % units
+        kwargs["ylabel"] = _yLabel + units
 
     return kwargs
     
@@ -438,6 +463,9 @@ def DataMCHistograms(datasetsMgr, histoName):
 
     if opts.folder == "counters":
         skipStrings = ["weighted"]
+
+    if opts.folder == "eSelection_Veto":
+        skipStrings = ["Resolution"]
 
     # Skip histograms if they contain a given string
     for keyword in skipStrings:
