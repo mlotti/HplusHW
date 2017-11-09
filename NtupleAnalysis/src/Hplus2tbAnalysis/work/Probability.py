@@ -250,6 +250,8 @@ def main(opts, signalMass):
                         "EventTrijetPt_MatchedBDT",
                         "AllTopQuarkPt_jjbMatchedBDT",
                         "TrijetPtMaxMVASameFakeObj_BjetPassCSV",
+                        "SelectedTrijetsPt_BjetPassCSVdisc_afterCuts",
+                        "TrijetPt_PassBDT_BJetPassCSV",
                         ]
         denominators = [#"TopQuarkPt",
 #                        "TopQuarkPt_Matched",
@@ -271,6 +273,8 @@ def main(opts, signalMass):
                         "EventTrijetPt_BDT",
                         "TopQuarkPt",
                         "TrijetPtMaxMVASameFakeObj",
+                        "SelectedTrijetsPt_afterCuts",
+                        "TrijetPt_PassBDT",
                         ]
         
 
@@ -448,7 +452,7 @@ def PlotProb(datasets, numPath, denPath):
     saveName = "Eff_"+numPath.split("/")[-1]+"Over"+denPath.split("/")[-1]
     
     if "Pt" in numPath:
-        xMin = 90.0
+        xMin = 0.0
 #        rebinX = 2
         xMax = 600.0
         xTitle = "p_{T} (GeV)"

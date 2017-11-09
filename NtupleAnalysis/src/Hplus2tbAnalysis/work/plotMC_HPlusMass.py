@@ -435,7 +435,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
         if opts.noQCD:
             save_path = savePath + opts.MVAcut + "/noQCD/"
     else:
-        save_path = savePath + opts.MVAcut + "normToLumi/"
+        save_path = savePath + opts.MVAcut + "/normToLumi/"
         if opts.noQCD:
             save_path = savePath + opts.MVAcut + "/noQCD/"
 
@@ -495,7 +495,7 @@ if __name__ == "__main__":
     BATCHMODE    = True
     PRECISION    = 3
     #SIGNALMASS   = [200, 500, 800, 2000]
-#    SIGNALMASS   = [500]
+    SIGNALMASS   = []
     SIGNALMASS   = [300, 500,1000]
     INTLUMI      = -1.0
     SUBCOUNTERS  = False

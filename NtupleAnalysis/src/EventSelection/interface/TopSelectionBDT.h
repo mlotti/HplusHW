@@ -244,6 +244,7 @@ private:
   // Input parameters
   int nSelectedBJets;
   const DirectionalCut<double> cfg_MVACut;
+  const DirectionalCut<double> cfg_CSV_bDiscCut;
   const DirectionalCut<int> cfg_NjetsMaxCut;
   const bool cfg_ReplaceJetsWithGenJets;
 
@@ -377,6 +378,12 @@ private:
   WrappedTH1 *hNSelectedTrijets;
   WrappedTH1 *hTopFromHiggsPt_isLdgMVATrijet;
   WrappedTH1 *hTopFromHiggsPt;
+
+  WrappedTH1 *hSelectedTrijetsPt_BjetPassCSVdisc_afterCuts;
+  WrappedTH1 *hSelectedTrijetsPt_afterCuts;
+  WrappedTH1 *hTrijetPt_PassBDT_BJetPassCSV;
+  WrappedTH1 *hTrijetPt_PassBDT;
+
   //next WrappedTH1
 
   // Histograms (2D)                                                                                                                             

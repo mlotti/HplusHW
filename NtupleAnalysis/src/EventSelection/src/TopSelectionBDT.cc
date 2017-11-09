@@ -41,6 +41,7 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config, EventCounter& event
   : BaseSelection(eventCounter, histoWrapper, commonPlots, postfix),
     // Input parameters
     cfg_MVACut(config, "MVACut"),
+    cfg_CSV_bDiscCut(config, "CSV_bDiscCut"),
     cfg_NjetsMaxCut(config, "NjetsMaxCut"),
     cfg_ReplaceJetsWithGenJets(config.getParameter<bool>("ReplaceJetsWithGenJets")),
     // Event counter for passing selection
@@ -58,6 +59,7 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config)
 : BaseSelection(),
   // Input parameters
   cfg_MVACut(config, "MVACut"),
+  cfg_CSV_bDiscCut(config, "CSV_bDiscCut"),
   cfg_NjetsMaxCut(config, "NjetsMaxCut"),
   cfg_ReplaceJetsWithGenJets(config.getParameter<bool>("ReplaceJetsWithGenJets")),  
   // Event counter for passing selection
@@ -199,6 +201,12 @@ TopSelectionBDT::~TopSelectionBDT() {
   delete hNSelectedTrijets;
   delete hTopFromHiggsPt_isLdgMVATrijet;
   delete hTopFromHiggsPt;
+
+  delete hSelectedTrijetsPt_BjetPassCSVdisc_afterCuts;
+  delete hSelectedTrijetsPt_afterCuts;
+  delete hTrijetPt_PassBDT_BJetPassCSV;
+  delete hTrijetPt_PassBDT;
+
   // Histograms (2D)
   delete hNjetsVsNTrijets_beforeBDT;
   delete hNjetsVsNTrijets_afterBDT;
@@ -414,6 +422,11 @@ void TopSelectionBDT::bookHistograms(TDirectory* dir) {
   hNSelectedTrijets =   fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "NSelectedTrijets",";Number of Selected Trijets", 3, 0, 3);
   hTopFromHiggsPt_isLdgMVATrijet    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"TopFromHiggsPt_isLdgMVATrijet",";p_{T} (GeVc^{-1})",nPtBins     , fPtMin     , fPtMax);
   hTopFromHiggsPt    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"TopFromHiggsPt",";p_{T} (GeVc^{-1})",nPtBins     , fPtMin     , fPtMax);
+
+  hSelectedTrijetsPt_BjetPassCSVdisc_afterCuts   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SelectedTrijetsPt_BjetPassCSVdisc_afterCuts", ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
+  hSelectedTrijetsPt_afterCuts                   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SelectedTrijetsPt_afterCuts", ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
+  hTrijetPt_PassBDT_BJetPassCSV                  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TrijetPt_PassBDT_BJetPassCSV", ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
+  hTrijetPt_PassBDT                              = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TrijetPt_PassBDT", ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
 
   // Histograms (2D) 
   hTrijetCountForBDTcuts           = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdir, "TrijetCountVsBDTcuts",             ";BDT cut value;Trijet multiplicity", 19, -0.95,0.95, 200,0,200);
@@ -822,6 +835,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	      Dijet_p4  = jet1.p4() + jet2.p4();
 	      
 	      if(Trijet_p4.M() > 500) continue;
+	      if (!cfg_CSV_bDiscCut.passedCut(bjet.bjetDiscriminator())) continue;
 
 	      // Calculate variables
 	      double dr_sd = ROOT::Math::VectorUtil::DeltaR( jet1.p4(), jet2.p4());
@@ -1392,11 +1406,16 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	hDeltaMVAminVsTrijetPassBDTvalue         -> Fill(DeltaMVA_min, TopCand.MVA.at(matched_index));
 	
       }// For-loop: All top candidates matched
+   
+
+    //================================================================================================
+    // Fill histograms
+    //================================================================================================
 
     if (MatchedJJB_index.size() == GenTops.size())  hMatchedPassBDTmult_SameObjFakes -> Fill(NselectedMatched_sameOdj);
     if  (jets.size() > 9)                           hMatchedTrijetMult_JetsGT9 -> Fill(MCtrue_Bjet.size());
     hMatchedTrijetMult_JetsInc -> Fill(MatchedJJB_index.size());
-  
+    
     // For-loop: All top candidates passing BDT cut
     for (size_t i = 0; i < TopCand.MVA.size(); i++)
       {
@@ -1439,7 +1458,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   //================================================================================================
   // Fill histograms (Before cuts)
   //================================================================================================
-  hBDTmultiplicity           -> Fill(NpassBDT);                         //Number of trijets passing MVA selection
+  //  hBDTmultiplicity           -> Fill(NpassBDT);                         //Number of trijets passing MVA selection
   hTrijetMultiplicity        -> Fill(TopCand.MVA.size());               //Trijet multiplicity
   hNjetsVsNTrijets_beforeBDT -> Fill(jets.size(), TopCand.MVA.size());  //Trijet multiplicity as a function of Jet multiplicity  (Before MVA selection)   <---Constant
   hNjetsVsNTrijets_afterBDT  -> Fill(jets.size(), NpassBDT);            //Trijet multiplicity as a function of Jet multiplicity  (After MVA selection)
@@ -1504,6 +1523,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   //================================================================================================
   // Fill histograms (After cuts)
   //================================================================================================
+
   hTopCandMass ->Fill(output.fTrijet1_p4.M());
   hTopCandMass ->Fill(output.fTrijet2_p4.M());
   
@@ -1553,9 +1573,31 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   hTetrajetMass      -> Fill(output.fLdgTetrajet_p4.M());
   hTetrajetEta       -> Fill(output.fLdgTetrajet_p4.Eta());
 
-  return output;
+
+  //Efficiency plots (after all cuts)
+  if (output.fTrijet1BJet.bjetDiscriminator() >= 0.8484)  hSelectedTrijetsPt_BjetPassCSVdisc_afterCuts -> Fill(output.fTrijet1_p4.Pt());
+  if (output.fTrijet2BJet.bjetDiscriminator() >= 0.8484)  hSelectedTrijetsPt_BjetPassCSVdisc_afterCuts -> Fill(output.fTrijet2_p4.Pt());
+  hSelectedTrijetsPt_afterCuts -> Fill(output.fTrijet1_p4.Pt());
+  hSelectedTrijetsPt_afterCuts -> Fill(output.fTrijet2_p4.Pt());
 
   
+  for (size_t i=0; i<TopCand.MVA.size(); i++)
+    {
+      math::XYZTLorentzVector Trijet_p4;
+      Trijet_p4 = TopCand.TrijetP4.at(i);
+      if (!cfg_MVACut.passedCut(TopCand.MVA.at(i))) continue;
+      hTrijetPt_PassBDT -> Fill(Trijet_p4.Pt());
+      if (TopCand.BJet.at(i).bjetDiscriminator() < 0.8484) continue;
+      hTrijetPt_PassBDT_BJetPassCSV -> Fill(Trijet_p4.Pt());
+    }
+  
+  hBDTmultiplicity           -> Fill(NpassBDT);                         //Number of trijets passing MVA selection
+  
+
+
+
+  return output;
+
 }
 
 void TopSelectionBDT::ReplaceJetsWithGenJets(Data &output){
