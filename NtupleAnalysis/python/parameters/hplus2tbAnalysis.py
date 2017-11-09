@@ -42,6 +42,7 @@ tauSelection = PSet(
 
 # HToTauNu (fixme: crashes if i disable ..)
 if 1:
+    print "=== hplus2tbAnalysis.py:\n\tHToTauNu (fixme: crashes if i disable ..)"
     # tau identification scale factors
     scaleFactors.assignTauIdentificationSF(tauSelection)
     # tau misidentification scale factorss
