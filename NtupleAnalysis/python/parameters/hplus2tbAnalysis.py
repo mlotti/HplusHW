@@ -90,7 +90,8 @@ muVeto = PSet(
 #================================================================================================
 jetSelection = PSet(
     jetType                  = "Jets",    # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
-    jetPtCuts                = [40.0, 40.0, 40.0, 40.0, 40.0, 40.0, 30.0],
+#    jetPtCuts                = [40.0, 40.0, 40.0, 40.0, 40.0, 40.0, 30.0],
+    jetPtCuts                = [30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0],  #test for topSelection
     jetEtaCuts               = [2.4],
     numberOfJetsCutValue     = 7,
     numberOfJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
@@ -179,38 +180,40 @@ topologySelection = PSet(
 #================================================================================================
 # Top selection
 #================================================================================================
-#topSelection = PSet(
-#    ChiSqrCutValue     = 100.0,
-#    ChiSqrCutDirection =  "<",   # options: ==, !=, <, <=, >, >=
-#    LowLdgTrijetMassCutValue      = 150.0,
-#    LowLdgTrijetMassCutDirection  = ">=",
-#    HighLdgTrijetMassCutValue      = 210.0,
-#    HighLdgTrijetMassCutDirection  = "<=",
-#    MassW              = 80.385,
-#    DiJetSigma         = 10.2,
-#    TriJetSigma        = 27.2,
-#    MaxJetsToUseInFit  = 8,
-#    MaxBJetsToUseInFit = 3,
-#    # Distance cut
-#    dijetWithMaxDR_tetrajetBjet_dR_min          =  0.0, # Disable: 0.0, Default: +3.0
-#    dijetWithMaxDR_tetrajetBjet_dR_yIntercept   = -1.0, # Disable:-1.0, Default: +4.0
-#    dijetWithMaxDR_tetrajetBjet_dR_slopeCoeff   =  0.0, # Disable: 0.0, Default: -1.0
-#    # Angular cut
-#    dijetWithMaxDR_tetrajetBjet_dPhi_min        = +2.5, # Disable: 0.0, Default: +2.5
-#    dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept = +3.0, # Disable:-1.0, Default: +3.0
-#    dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff = -1.0, # Disable: 0.0, Default: -1.0
-#    ReplaceJetsWithGenJets = False, #soti
-#)
+topSelection = PSet(
+    ChiSqrCutValue     = 100.0,
+    ChiSqrCutDirection =  "<",   # options: ==, !=, <, <=, >, >=
+    LowLdgTrijetMassCutValue      = 150.0,
+    LowLdgTrijetMassCutDirection  = ">=",
+    HighLdgTrijetMassCutValue      = 210.0,
+    HighLdgTrijetMassCutDirection  = "<=",
+    MassW              = 80.385,
+    DiJetSigma         = 10.2,
+    TriJetSigma        = 27.2,
+    MaxJetsToUseInFit  = 8,
+    MaxBJetsToUseInFit = 3,
+    # Distance cut
+    dijetWithMaxDR_tetrajetBjet_dR_min          =  0.0, # Disable: 0.0, Default: +3.0
+    dijetWithMaxDR_tetrajetBjet_dR_yIntercept   = -1.0, # Disable:-1.0, Default: +4.0
+    dijetWithMaxDR_tetrajetBjet_dR_slopeCoeff   =  0.0, # Disable: 0.0, Default: -1.0
+    # Angular cut
+    dijetWithMaxDR_tetrajetBjet_dPhi_min        = +2.5, # Disable: 0.0, Default: +2.5
+    dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept = +3.0, # Disable:-1.0, Default: +3.0
+    dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff = -1.0, # Disable: 0.0, Default: -1.0
+    ReplaceJetsWithGenJets = False, 
+)
 
 #================================================================================================                  
 # Top selection BDT                                               
 #================================================================================================        
 topSelectionBDT = PSet(
-    MVACutValue            = 0.95,
+    MVACutValue            = 0.8,
     MVACutDirection        =  ">=", # options: ==, !=, <, <=, >, >=
-    NjetsMaxCutValue       = 8,     # default: -1,
-    NjetsMaxCutDirection   = "<=",  # default: ">="
+    NjetsMaxCutValue       = -1,     # default: -1,
+    NjetsMaxCutDirection   = ">=",  # default: ">="
     ReplaceJetsWithGenJets = False, # For Testing (perfect jet resolution) 
+    CSV_bDiscCutValue      = 0.8484, #Temporary
+    CSV_bDiscCutDirection  = ">=",
 )
 
 #================================================================================================

@@ -29,6 +29,16 @@
 #include "TBranch.h"
 #include <TLorentzVector.h>
 
+struct TrijetSelections{
+  std::vector<Jet> Jet1;
+  std::vector<Jet> Jet2;
+  std::vector<Jet> BJet;
+  std::vector <double> MVA;
+  std::vector<math::XYZTLorentzVector> TrijetP4; //temporary                                                                                                                                                                                                       
+  std::vector<math::XYZTLorentzVector> DijetP4;  //temporary                                                                                                                                                                                                       
+};
+
+
 class TopReco: public BaseSelector {
 public:
   explicit TopReco(const ParameterSet& config, const TH1* skimCounters);
@@ -89,7 +99,7 @@ private:
   Count              cBTaggingSFCounter;
   METSelection       fMETSelection;
   TopologySelection  fTopologySelection;
-  TopSelection       fTopSelection;
+  //  TopSelection       fTopSelection;
   //  TopSelectionBDT    fTopSelectionBDT;
   Count              cSelected;
     
@@ -119,6 +129,9 @@ private:
   WrappedTH1Triplet *hLdgJetMult;
   WrappedTH1Triplet *hSubldgJetMult;
 
+  WrappedTH1Triplet *hLdgJetQGLikelihood;
+  WrappedTH1Triplet *hSubldgJetQGLikelihood;
+
   WrappedTH1Triplet *hBJetCvsL;
   WrappedTH1Triplet *hBJetPtD;
   WrappedTH1Triplet *hBJetAxis2;
@@ -129,6 +142,8 @@ private:
   WrappedTH1Triplet *hAllJetAxis2;
   WrappedTH1Triplet *hAllJetMult;
   WrappedTH1Triplet *hAllJetBdisc;
+
+  WrappedTH1Triplet *hAllJetQGLikelihood;
 
   WrappedTH1Triplet *hCJetCvsL;
   WrappedTH1Triplet *hCJetPtD;
@@ -190,7 +205,8 @@ private:
   TBranch *TrijetSubldgJetAxis2_S;
   TBranch *TrijetLdgJetMult_S;
   TBranch *TrijetSubldgJetMult_S;
-  
+  TBranch *TrijetLdgJetQGLikelihood_S;
+  TBranch *TrijetSubldgJetQGLikelihood_S;
 
   TBranch *weight_B;
   TBranch *TrijetPtDR_B;
@@ -217,6 +233,8 @@ private:
   TBranch *TrijetSubldgJetAxis2_B;
   TBranch *TrijetLdgJetMult_B;
   TBranch *TrijetSubldgJetMult_B;
+  TBranch *TrijetLdgJetQGLikelihood_B;
+  TBranch *TrijetSubldgJetQGLikelihood_B;
 
 
 
@@ -232,6 +250,24 @@ TopReco::TopReco(const ParameterSet& config, const TH1* skimCounters)
     cfg_PtBinSetting(config.getParameter<ParameterSet>("CommonPlots.ptBins")),
     cfg_EtaBinSetting(config.getParameter<ParameterSet>("CommonPlots.etaBins")),
     cfg_PhiBinSetting(config.getParameter<ParameterSet>("CommonPlots.phiBins")),
+
+    /*cfg_PrelimTopMVACut(config, "FakeBMeasurement.prelimTopMVACut"),
+    fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kTopReco, fHistoWrapper),
+    cAllEvents(fEventCounter.addCounter("all events")),
+    cTrigger(fEventCounter.addCounter("passed trigger")),
+    fMETFilterSelection(config.getParameter<ParameterSet>("METFilter"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    cVertexSelection(fEventCounter.addCounter("passed PV")),
+    fElectronSelection(config.getParameter<ParameterSet>("ElectronSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
+    fMuonSelection(config.getParameter<ParameterSet>("MuonSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
+    fTauSelection(config.getParameter<ParameterSet>("TauSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
+    fJetSelection(config.getParameter<ParameterSet>("JetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    cBTaggingSFCounter(fEventCounter.addCounter("b tag SF")),
+    fMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fTopSelection(config.getParameter<ParameterSet>("TopSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    cSelected(fEventCounter.addCounter("Selected Events"))
+    */
     cfg_MassBinSetting(config.getParameter<ParameterSet>("CommonPlots.invMassBins")),// Problem Here!!
     cfg_DeltaEtaBinSetting(config.getParameter<ParameterSet>("CommonPlots.deltaEtaBins")),
     cfg_DeltaPhiBinSetting(config.getParameter<ParameterSet>("CommonPlots.deltaPhiBins")),
@@ -250,9 +286,9 @@ TopReco::TopReco(const ParameterSet& config, const TH1* skimCounters)
     fMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
 
-    fTopSelection(config.getParameter<ParameterSet>("TopSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    //    fTopSelection(config.getParameter<ParameterSet>("TopSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     //    fTopSelectionBDT(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-
+    
     cSelected(fEventCounter.addCounter("Selected Events"))
 
 { }
@@ -271,7 +307,7 @@ void TopReco::book(TDirectory *dir) {
   fBJetSelection.bookHistograms(dir);
   fMETSelection.bookHistograms(dir);
   fTopologySelection.bookHistograms(dir);
-  fTopSelection.bookHistograms(dir);
+  //  fTopSelection.bookHistograms(dir);
   //  fTopSelectionBDT.bookHistograms(dir);
 
   
@@ -349,6 +385,8 @@ void TopReco::book(TDirectory *dir) {
   hSubldgJetAxis2 = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "SubldgJetAxis2",";axis2",50,0.0,0.2);
   hLdgJetMult     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "LdgJetMult",";mult",50,0,50);
   hSubldgJetMult  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "SubldgJetMult",";mult",50,0,50);
+  hLdgJetQGLikelihood  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "LdgJetQGLikelihood",";Quark-Gluon Likelihood",100,0.0,1.0);
+  hSubldgJetQGLikelihood  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "SubldgJetQGLikelihood",";Quark-Gluon Likelihood",100,0.0,1.0);
 
 
   hBJetCvsL     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "BJetCvsL",";CvsL discr", 200,-1,1);
@@ -367,7 +405,7 @@ void TopReco::book(TDirectory *dir) {
   hAllJetAxis2    = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "AllJetAxis2",";axis2",50,0,0.2);
   hAllJetMult     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "AllJetMult",";mult",50,0,50);
   hAllJetBdisc    = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs,"AllJetBdisc",";b-tag discr",100,0.0,1.0);
-
+  hAllJetQGLikelihood  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "AllJetQGLikelihood",";Quark-Gluon Likelihood",100,0.0,1.0);
   //Matching check
   hNmatchedTop     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug,myInclusiveDir,"NmatchedTrijets",";NTrijet_{matched}",4,-0.5,3.5);
   hNmatchedTrijets = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug,myInclusiveDir,"NmatchedTrijetCand",";NTrijet_{matched}",4,-0.5,3.5);
@@ -412,13 +450,16 @@ void TopReco::book(TDirectory *dir) {
   TrijetSoftDrop_n2_S       = treeS -> Branch ("TrijetSoftDrop_n2",       &TrijetSoftDrop_n2_S,      "TrijetSoftDrop_n2_S/F"       );
   //...
   TrijetLdgJetCvsL_S       = treeS -> Branch ("TrijetLdgJetCvsL",         &TrijetLdgJetCvsL_S,       "TrijetLdgJetCvsL_S/F"        );
-  TrijetSubldgJetCvsL_S    = treeS -> Branch ("TrijetSubldgJetCvsL",      &TrijetSubldgJetCvsL_S,     "TrijetSubldgJetCvsL_S/F"      );
+  TrijetSubldgJetCvsL_S    = treeS -> Branch ("TrijetSubldgJetCvsL",      &TrijetSubldgJetCvsL_S,     "TrijetSubldgJetCvsL_S/F"    );
   TrijetLdgJetPtD_S        = treeS -> Branch ("TrijetLdgJetPtD",          &TrijetLdgJetPtD_S,        "TrijetLdgJetPtD_S/F"         );
   TrijetSubldgJetPtD_S     = treeS -> Branch ("TrijetSubldgJetPtD",       &TrijetSubldgJetPtD_S,     "TrijetSubldgJetPtD_S/F"      );
   TrijetLdgJetAxis2_S      = treeS -> Branch ("TrijetLdgJetAxis2",        &TrijetLdgJetAxis2_S,      "TrijetLdgJetAxis2_S/F"       );
   TrijetSubldgJetAxis2_S   = treeS -> Branch ("TrijetSubldgJetAxis2",     &TrijetSubldgJetAxis2_S,   "TrijetSubldgJetAxis2_S/F"    );
   TrijetLdgJetMult_S       = treeS -> Branch ("TrijetLdgJetMult",         &TrijetLdgJetMult_S,       "TrijetLdgJetMult_S/I"        );
   TrijetSubldgJetMult_S    = treeS -> Branch ("TrijetSubldgJetMult",      &TrijetSubldgJetMult_S,    "TrijetSubldgJetMult_S/I"     );
+
+  TrijetLdgJetQGLikelihood_S    = treeS -> Branch ("TrijetLdgJetQGLikelihood",&TrijetLdgJetQGLikelihood_S, "TrijetLdgJetQGLikelihood_S/F");
+  TrijetSubldgJetQGLikelihood_S    = treeS -> Branch ("TrijetSubldgJetQGLikelihood",&TrijetSubldgJetQGLikelihood_S, "TrijetSubldgJetQGLikelihood_S/F");
 
   weight_B                  = treeB -> Branch ("eventWeight",             &weight_B,                 "eventWeight_B/F"             );
 
@@ -446,6 +487,9 @@ void TopReco::book(TDirectory *dir) {
   TrijetSubldgJetAxis2_B   = treeB -> Branch ("TrijetSubldgJetAxis2",     &TrijetSubldgJetAxis2_B,   "TrijetSubldgJetAxis2_B/F"    );
   TrijetLdgJetMult_B       = treeB -> Branch ("TrijetLdgJetMult",         &TrijetLdgJetMult_B,       "TrijetLdgJetMult_B/I"        );
   TrijetSubldgJetMult_B    = treeB -> Branch ("TrijetSubldgJetMult",      &TrijetSubldgJetMult_B,    "TrijetSubldgJetMult_B/I"     );
+
+  TrijetLdgJetQGLikelihood_B    = treeB -> Branch ("TrijetLdgJetQGLikelihood",&TrijetLdgJetQGLikelihood_B, "TrijetLdgJetQGLikelihood_B/F");
+  TrijetSubldgJetQGLikelihood_B    = treeB -> Branch ("TrijetSubldgJetQGLikelihood",&TrijetSubldgJetQGLikelihood_B, "TrijetSubldgJetQGLikelihood_B/F");
 
 
   //next branch
@@ -740,7 +784,7 @@ void TopReco::process(Long64_t entry) {
   //================================================================================================
   // if (0){ //soti removed topSelection
   //   if(0) std::cout << "=== Top selection" << std::endl;
-  //   const TopSelection::Data TopData = fTopSelection.analyze(fEvent, jetData, bjetData);
+  //  const TopSelection::Data TopData = fTopSelection.analyze(fEvent, jetData, bjetData);
   //   if (!TopData.passedSelection()) return;
   // }
 
@@ -748,7 +792,7 @@ void TopReco::process(Long64_t entry) {
   //================================================================================================                            
   // 14) Top BDT selection                                                                                                     
   //================================================================================================                                                              
-  // if (0) std::cout << "=== Top BDT selection" << std::endl;
+  //  if (0) std::cout << "=== Top BDT selection" << std::endl;
   // const TopSelectionBDT::Data topBDTData = fTopSelectionBDT.analyze(fEvent, jetData, bjetData);
 
 
@@ -767,6 +811,7 @@ void TopReco::process(Long64_t entry) {
 
   float trijetLdgJetCvsL_S, trijetSubldgJetCvsL_S, trijetLdgJetPtD_S, trijetSubldgJetPtD_S, trijetLdgJetAxis2_S, trijetSubldgJetAxis2_S;
   int trijetLdgJetMult_S, trijetSubldgJetMult_S;
+  float trijetLdgJetQGLikelihood_S, trijetSubldgJetQGLikelihood_S;
 
   float eventWeight_B;
 
@@ -774,6 +819,7 @@ void TopReco::process(Long64_t entry) {
 
   float trijetLdgJetCvsL_B, trijetSubldgJetCvsL_B, trijetLdgJetPtD_B, trijetSubldgJetPtD_B, trijetLdgJetAxis2_B, trijetSubldgJetAxis2_B;
   int trijetLdgJetMult_B, trijetSubldgJetMult_B;
+  float trijetLdgJetQGLikelihood_B, trijetSubldgJetQGLikelihood_B;
 
   //next variable 
   // TTree Variables (Event-Weight)
@@ -804,6 +850,9 @@ void TopReco::process(Long64_t entry) {
   TrijetLdgJetMult_S           -> SetAddress(&trijetLdgJetMult_S);
   TrijetSubldgJetMult_S        -> SetAddress(&trijetSubldgJetMult_S);
 
+  TrijetLdgJetQGLikelihood_S-> SetAddress(&trijetLdgJetQGLikelihood_S);
+  TrijetSubldgJetQGLikelihood_S-> SetAddress(&trijetSubldgJetQGLikelihood_S);
+
   weight_B                     -> SetAddress(&eventWeight_B);
   TrijetPtDR_B                 -> SetAddress(&trijetPtDR_B);
   TrijetDijetPtDR_B            -> SetAddress(&trijetDijetPtDR_B);
@@ -829,6 +878,9 @@ void TopReco::process(Long64_t entry) {
   TrijetSubldgJetAxis2_B       -> SetAddress(&trijetSubldgJetAxis2_B);
   TrijetLdgJetMult_B           -> SetAddress(&trijetLdgJetMult_B);
   TrijetSubldgJetMult_B        -> SetAddress(&trijetSubldgJetMult_B);
+
+  TrijetLdgJetQGLikelihood_B-> SetAddress(&trijetLdgJetQGLikelihood_B);
+  TrijetSubldgJetQGLikelihood_B-> SetAddress(&trijetSubldgJetQGLikelihood_B);
 
   //next address
 
@@ -1015,7 +1067,7 @@ void TopReco::process(Long64_t entry) {
     //================================================================================================//                      
     //                                    Top Candidates                                              //
     //================================================================================================//
-    TrijetSelection TopCandidates;
+    TrijetSelections TopCandidates;
     int index0 = -1;
     for (auto& jet0: jetData.getSelectedJets()){
       index0++;
@@ -1326,6 +1378,9 @@ void TopReco::process(Long64_t entry) {
       hLdgJetMult         -> Fill(isGenuineTop, TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSmult());
       hSubldgJetMult      -> Fill(isGenuineTop, TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSmult());
 
+      hLdgJetQGLikelihood    -> Fill(isGenuineTop, TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSqgLikelihood());
+      hSubldgJetQGLikelihood -> Fill(isGenuineTop, TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSqgLikelihood());
+
       hBJetCvsL           -> Fill(isGenuineTop, TopCandidates.BJet.at(i).pfCombinedCvsLJetTags());
       hBJetPtD            -> Fill(isGenuineTop, TopCandidates.BJet.at(i).QGTaggerAK4PFCHSptD());
       hBJetAxis2          -> Fill(isGenuineTop, TopCandidates.BJet.at(i).QGTaggerAK4PFCHSaxis2());
@@ -1364,6 +1419,9 @@ void TopReco::process(Long64_t entry) {
 	trijetSubldgJetAxis2_S    = TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSaxis2();
 	trijetLdgJetMult_S        = TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSmult();
 	trijetSubldgJetMult_S     = TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSmult();
+
+	trijetLdgJetQGLikelihood_S        = TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSqgLikelihood();
+	trijetSubldgJetQGLikelihood_S     = TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSqgLikelihood();
       
       
 	treeS -> Fill();
@@ -1394,6 +1452,8 @@ void TopReco::process(Long64_t entry) {
 	trijetLdgJetMult_B        = TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSmult();
 	trijetSubldgJetMult_B     = TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSmult();
 
+	trijetLdgJetQGLikelihood_B        = TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSqgLikelihood();
+	trijetSubldgJetQGLikelihood_B     = TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSqgLikelihood();
 	
 	treeB -> Fill();
 	
@@ -1417,6 +1477,7 @@ void TopReco::process(Long64_t entry) {
       hAllJetAxis2        -> Fill(true, jet.QGTaggerAK4PFCHSaxis2());
       hAllJetMult         -> Fill(true, jet.QGTaggerAK4PFCHSmult());
       hAllJetBdisc        -> Fill(true, jet.bjetDiscriminator());
+      hAllJetQGLikelihood -> Fill(true, jet.QGTaggerAK4PFCHSqgLikelihood());
     }
   
 
