@@ -60,6 +60,12 @@ def produceJets(process, isData):
     getattr( process, 'patJetsAK4PFCHS').userData.userFloats.src += ['QGTagger'+'AK4PFCHS'+':ptD']
     getattr( process, 'patJetsAK4PFCHS').userData.userFloats.src += ['QGTagger'+'AK4PFCHS'+':axis2']
     getattr( process, 'patJetsAK4PFCHS').userData.userInts.src   += ['QGTagger'+'AK4PFCHS'+':mult']
+
+    # Marina
+    jetToolbox( process, "ak8", "ak8JetSubs", "out",
+                addSoftDrop=True, addSoftDropSubjets=True, addNsub=True,
+                postFix='')
+    
     return
 
 
