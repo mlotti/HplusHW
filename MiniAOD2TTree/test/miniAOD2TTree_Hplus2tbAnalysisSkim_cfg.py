@@ -130,9 +130,11 @@ process.load("HiggsAnalysis/MiniAOD2TTree/Tau_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Electron_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Muon_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Jet_cfi")
+process.load("HiggsAnalysis/MiniAOD2TTree/SecondaryVertex_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Top_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/MET_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/METNoiseFilter_cfi")
+
 process.METNoiseFilter.triggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getMETFilteringProcess())) 
 print "check tau",process.Taus_TauPOGRecommendation[0]
 process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
@@ -153,10 +155,6 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	LHESrc                      = cms.untracked.InputTag("externalLHEProducer"),
 	OfflinePrimaryVertexSrc     = cms.InputTag("offlineSlimmedPrimaryVertices"),
 	TopPtProducer               = cms.InputTag("TopPtProducer"),
-    ),
-    SoftBTag = cms.PSet(
-	PrimaryVertexSrc   = cms.InputTag("offlineSlimmedPrimaryVertices"),
-        SecondaryVertexSrc = cms.InputTag("slimmedSecondaryVertices"), 
     ),
     Trigger = cms.PSet(
 	TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess())),
@@ -186,6 +184,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     Electrons = process.Electrons,
     Muons     = process.Muons,
     Jets      = process.Jets,
+    SoftBTag  = process.SoftBTag,
     Top       = process.Top,
     METs      = process.METs,
     GenWeights = cms.VPSet(

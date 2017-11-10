@@ -42,6 +42,7 @@ tauSelection = PSet(
 
 # HToTauNu (fixme: crashes if i disable ..)
 if 1:
+    print "=== hplus2tbAnalysis.py:\n\tHToTauNu (fixme: crashes if i disable ..)"
     # tau identification scale factors
     scaleFactors.assignTauIdentificationSF(tauSelection)
     # tau misidentification scale factorss
@@ -89,7 +90,8 @@ muVeto = PSet(
 #================================================================================================
 jetSelection = PSet(
     jetType                  = "Jets",    # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
-    jetPtCuts                = [40.0, 40.0, 40.0, 40.0, 40.0, 40.0, 30.0],
+#    jetPtCuts                = [40.0, 40.0, 40.0, 40.0, 40.0, 40.0, 30.0],
+    jetPtCuts                = [30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0],  #test for topSelection
     jetEtaCuts               = [2.4],
     numberOfJetsCutValue     = 7,
     numberOfJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
@@ -108,8 +110,8 @@ jetSelection = PSet(
 # B-jet selection
 #================================================================================================
 bjetSelection = PSet(
-    triggerMatchingApply      = False, # Do NOT enable until the HLTBJet collection is fixed (no duplicates)
-    triggerMatchingCone       = 0.1,   # DeltaR for matching offline bjet with trigger::TriggerBjet
+    triggerMatchingApply      = False,
+    triggerMatchingCone       = 0.1,  # DeltaR for matching offline bjet with trigger::TriggerBjet
     jetPtCuts                 = [40.0, 40.0, 30.0],
     jetEtaCuts                = [2.4],
     bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
@@ -166,7 +168,7 @@ topologySelection = PSet(
     CparameterCutDirection       = "<=", 
     DparameterCutValue           = 100.0,   # 0.0 <= D <= 1.0
     DparameterCutDirection       = "<=",  
-    FoxWolframMomentCutValue     =   0.5,   # 0.0 <= H2 <= 1.0
+    FoxWolframMomentCutValue     = 100.0,   # 0.0 <= H2 <= 1.0
     FoxWolframMomentCutDirection = "<=", 
     AlphaTCutValue               = 1000.0,  # 0.0 <= alphaT ~ 2.0 (alphaT->0.5 for perfectly balanced events)
     AlphaTCutDirection           = "<=", 
@@ -179,12 +181,11 @@ topologySelection = PSet(
 # Top selection
 #================================================================================================
 topSelection = PSet(
-    # Basic values
-    ChiSqrCutValue     = 10.0,
+    ChiSqrCutValue     = 100.0,
     ChiSqrCutDirection =  "<",   # options: ==, !=, <, <=, >, >=
-    LowLdgTrijetMassCutValue      = 0.0,
+    LowLdgTrijetMassCutValue      = 150.0,
     LowLdgTrijetMassCutDirection  = ">=",
-    HighLdgTrijetMassCutValue      = 900000.0,
+    HighLdgTrijetMassCutValue      = 210.0,
     HighLdgTrijetMassCutDirection  = "<=",
     MassW              = 80.385,
     DiJetSigma         = 10.2,
@@ -199,10 +200,21 @@ topSelection = PSet(
     dijetWithMaxDR_tetrajetBjet_dPhi_min        = +2.5, # Disable: 0.0, Default: +2.5
     dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept = +3.0, # Disable:-1.0, Default: +3.0
     dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff = -1.0, # Disable: 0.0, Default: -1.0
-    # For Testing (perfect jet resolution)
-    ReplaceJetsWithGenJets = False,
+    ReplaceJetsWithGenJets = False, 
 )
 
+#================================================================================================                  
+# Top selection BDT                                               
+#================================================================================================        
+topSelectionBDT = PSet(
+    MVACutValue            = 0.8,
+    MVACutDirection        =  ">=", # options: ==, !=, <, <=, >, >=
+    NjetsMaxCutValue       = -1,     # default: -1,
+    NjetsMaxCutDirection   = ">=",  # default: ">="
+    ReplaceJetsWithGenJets = False, # For Testing (perfect jet resolution) 
+    CSV_bDiscCutValue      = 0.8484, #Temporary
+    CSV_bDiscCutDirection  = ">=",
+)
 
 #================================================================================================
 # MET trigger SF
@@ -215,11 +227,13 @@ if 0:
 # FakeB Measurement Options
 #================================================================================================
 fakeBMeasurement = PSet(
-    prelimTopFitChiSqrCutValue        = 100.0,
-    prelimTopFitChiSqrCutDirection    =  "<",     # options: ==, !=, <, <=, >, >=
+    #prelimTopFitChiSqrCutValue        = 100.0,
+    #prelimTopFitChiSqrCutDirection    =  "<",   # options: ==, !=, <, <=, >, >=
+    prelimTopMVACutValue              = -0.8,
+    prelimTopMVACutDirection          =  ">=",   # options: ==, !=, <, <=, >, >=
     #
-    numberOfBJetsCutValue             = 2,        # default: 2
-    numberOfBJetsCutDirection         = "==",     # default: ==, options: ==, !=, <, <=, >, >=
+    numberOfBJetsCutValue             = 2,
+    numberOfBJetsCutDirection         = "==", # options: ==, !=, <, <=, >, >=
     #
     numberOfInvertedBJetsCutValue     = 1,        # i.e. additional to the selected b-jets
     numberOfInvertedBJetsCutDirection = ">=",     # options: ==, !=, <, <=, >, >=
@@ -271,7 +285,8 @@ allSelections = PSet(
     METFilter             = metFilter,
     METSelection          = metSelection,
     TopologySelection     = topologySelection,
-    TopSelection          = topSelection,
+    #TopSelection          = topSelection,
+    TopSelectionBDT       = topSelectionBDT,
     MuonSelection         = muVeto,
     Trigger               = trigger,
     Verbose               = verbose,

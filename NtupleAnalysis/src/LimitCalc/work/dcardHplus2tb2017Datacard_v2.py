@@ -48,22 +48,22 @@ HeavyMassPoints = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 2000, 3000
 MassPoints      = LightMassPoints + HeavyMassPoints
 
 # Combine options
-BlindAnalysis                          = True  # True, unless you have a green light for unblinding!
-MinimumStatUncertainty                 = 0.5   # Minimum stat. uncertainty to set to bins with zero events
-OptionCombineSingleColumnUncertainties = False # Approxmation that makes limit running faster (normally not needed)
-OptionConvertFromShapeToConstantList   = []    # Convert these  nuisances from shape to constant (Approx. that  makes limits run faster & converge more easily)
-OptionDisplayEventYieldSummary         = False # Print "Event yield summary" (TableProducer.py)
-OptionDoControlPlots                   = False # Produce control plots defined at end of this file
-OptionDoTBbarForHeavy                  = False # Flag related to combination of different channels in 2012 (obsolete)
-OptionGenuineTauBackgroundSource       = "MC_FakeAndGenuineTauNotSeparated" # Choose "MC_FakeAndGenuineTauNotSeparated" or "Embedding"
-OptionIncludeSystematics               = False # Shape systematics (Need pseudo-multicrab produced with doSystematics=True)
-OptionLimitOnSigmaBr                   = True  # Set to true for heavy H+
-OptionMassShape                        = "LdgTetrajetMass" # Distribution used in limit extraction
-OptionNumberOfDecimalsInSummaries      = 1
-OptionSeparateShapeAndNormalizationFromSystVariationList=[] # Separate in the following shape nuisances the shape and normalization components
-ToleranceForLuminosityDifference       = 0.05  # Tolerance for throwing error on luminosity difference ("0.01" means that a 1% is required)
-ToleranceForMinimumRate                = 0.0   # Tolerance for almost zero rate (columns with smaller rate are suppressed)
-labelPrefix                            = ""    # Prefix for the labels of datacard columns, e.g. "Hplus2tb_" #fixme: breaks if not empty string
+BlindAnalysis                          = True  # True, unless you have a green light for unblinding! [default: True]
+MinimumStatUncertainty                 = 0.5   # Minimum stat. uncertainty to set to bins with zero events [default: 0.5]
+OptionCombineSingleColumnUncertainties = False # Approxmation that makes limit running faster (normally not needed) [default: False]
+OptionConvertFromShapeToConstantList   = []    # Convert these nuisances from shape to constant (Approx. that makes limits run faster & converge more easily) [default: []]
+OptionDisplayEventYieldSummary         = False # Print "Event yield summary" (TableProducer.py) [default: False]
+OptionDoControlPlots                   = False # Produce control plots defined at end of this file [default: False]
+OptionDoTBbarForHeavy                  = False # Flag related to combination of different channels in 2012 (obsolete) [default: False]
+OptionGenuineTauBackgroundSource       = "MC_FakeAndGenuineTauNotSeparated" # Choose "MC_FakeAndGenuineTauNotSeparated" or "Embedding" [default: "MC_FakeAndGenuineTauNotSeparated"]
+OptionIncludeSystematics               = False # Shape systematics (Need pseudo-multicrab produced with doSystematics=True) [default: False]
+OptionLimitOnSigmaBr                   = True  # Set to true for heavy H+ [default: True]
+OptionMassShape                        = "LdgTetrajetMass" # Distribution used in limit extraction [default: "LdgTetrajetMass"]
+OptionNumberOfDecimalsInSummaries      = 1 # [default: 1]
+OptionSeparateShapeAndNormalizationFromSystVariationList=[] # Separate in the following shape nuisances the shape and normalization components [default: []]
+ToleranceForLuminosityDifference       = 0.05  # Tolerance for throwing error on luminosity difference ("0.01" means that a 1% is required) [default: 0.05]
+ToleranceForMinimumRate                = 0.0   # Tolerance for almost zero rate (columns with smaller rate are suppressed) [default: 0.0]
+labelPrefix                            = ""    # Prefix for the labels of datacard columns, e.g. "Hplus2tb_" #fixme: breaks if not empty string [default: ""]
 
 # Options for tables, figures etc.
 OptionBr   = 0.01  # Br(t->bH+)
@@ -75,12 +75,11 @@ OptionSqrtS= 13    # sqrt(s)
 SignalRateCounter         = "Selected events"            # fixme: what is this for?
 FakeRateCounter           = "EWKfaketaus:SelectedEvents" # fixme: what is this for?
 shapeHistoName            = None                         # Path where the shape histogram is located
+if OptionMassShape == "LdgTetrajetMass":
+    shapeHistoName = "LdgTetrajetMass_AfterAllSelections"
 histoPathInclusive        = "ForDataDrivenCtrlPlots"
 ShapeHistogramsDimensions = systematics.getBinningForPlot(shapeHistoName) # Get the new binning for the shape histogram
 DataCardName             += "_" + OptionMassShape
-
-if OptionMassShape == "LdgTetrajetMass":
-    shapeHistoName = "LdgTetrajetMass_AfterAllSelections"
 
 #================================================================================================  
 # Observation definition (how to retrieve number of observed events)
@@ -168,15 +167,26 @@ for mass in MassPoints:
 
 # FakeB dataset
 # ===============
-myFakeB = DataGroup(label             = labelPrefix + "FakeBmeasurement",  #fixme: QCDMeasurement
-                    landsProcess      = 2, #fixme: what is it for?
-                    validMassPoints   = MassPoints,
-                    datasetType       = "Embedding", #fixme: what is it for?
-                    datasetDefinition = "FakeBMeasurementTrijetMass",
-                    nuisances         = myLumiSystematics,
-                    shapeHistoName    = shapeHistoName,
-                    histoPath         = histoPathInclusive)
-DataGroups.append(myFakeB)
+if 0:
+    myQCD = DataGroup(label             = labelPrefix + "FakeBmeasurement",  #fixme: QCDMeasurement
+                      landsProcess      = 2, #fixme: what is it for?
+                      validMassPoints   = MassPoints,
+                      datasetType       = "Embedding", #fixme: what is it for?
+                      datasetDefinition = "FakeBMeasurementTrijetMass",
+                      nuisances         = myLumiSystematics,
+                      shapeHistoName    = shapeHistoName,
+                      histoPath         = histoPathInclusive)
+else:
+    myQCD = DataGroup(label             = labelPrefix + "QCD",  #fixme: QCDMeasurement
+                      landsProcess      = 2, #fixme: what is it for?
+                      validMassPoints   = MassPoints,
+                      datasetType       = "Embedding", #fixme: what is it for?
+                      datasetDefinition = "QCD",
+                      nuisances         = myLumiSystematics,
+                      shapeHistoName    = shapeHistoName,
+                      histoPath         = histoPathInclusive)
+    
+DataGroups.append(myQCD)
 
 
 # Option to use a data-driven method ("embedding")

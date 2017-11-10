@@ -2124,7 +2124,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   // Standard Selections
   //================================================================================================
   if (0) std::cout << "=== Inverted: Standard Selections" << std::endl;
-  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, true);
+  // fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, true); //fixme
 
   // Get the failed bjet candidates randomly shuffled. Put any trg-matched objects in the front  
   const std::vector<Jet> failedBJetsUsedAsBJets = topData.getFailedBJetsUsedAsBJetsInFit();
@@ -2318,7 +2318,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   // Fill final plots
   //================================================================================================
-  fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, 1);
+  // fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, 1); //fixme
 
   index = -1;
   // For-loop: Only failed BJets used as bjets in top fit
