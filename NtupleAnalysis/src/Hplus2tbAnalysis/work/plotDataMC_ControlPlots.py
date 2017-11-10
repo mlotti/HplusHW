@@ -194,9 +194,6 @@ def main(opts):
                 newOrder.insert(len(newOrder), s) 
                 datasetsMgr.selectAndReorder(newOrder)
 
-            if "subldg" not in h.lower():
-                continue #alex
-
             # Plot the histograms!
             DataMCHistograms(datasetsMgr, h)
             
