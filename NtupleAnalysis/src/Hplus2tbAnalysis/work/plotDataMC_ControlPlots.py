@@ -126,16 +126,18 @@ def main(opts):
         datasetsMgr.loadLuminosities() # from lumi.json
 
         # Set/Overwrite cross-sections
+        datasetsToRemove = ["QCD-b", "QCD_HT50to100", "QCD_HT100to200", "QCD_HT200to300"]# "QCD_HT300to500"]
         for d in datasetsMgr.getAllDatasets():
             if "ChargedHiggs" in d.getName():
                 datasetsMgr.getDataset(d.getName()).setCrossSection(1.0) # ATLAS 13 TeV H->tb exclusion limits
-                
+                if d.getName() != opts.signal:
+                    datasetsToRemove.append(d.getName())
+
         if opts.verbose:
             datasetsMgr.PrintCrossSections()
             datasetsMgr.PrintLuminosities()
 
         # Custom Filtering of datasets 
-        datasetsToRemove = ["QCD-b", "QCD_HT50to100", "QCD_HT100to200", "QCD_HT200to300"]# "QCD_HT300to500"]
         for i, d in enumerate(datasetsToRemove, 0):
             msg = "Removing dataset %s" % d
             Print(ShellStyles.WarningLabel() + msg + ShellStyles.NormalStyle(), i==0)
@@ -145,16 +147,19 @@ def main(opts):
 
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
-   
+  
         # Re-order datasets (different for inverted than default=baseline)
         newOrder = ["Data"]
-        if opts.signalMass != 0:
-            signal = "ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass
-            newOrder.extend([signal])
-        else:
-            newOrder.extend(["QCD-Data"])
-        newOrder.extend(["QCD"])
-        newOrder.extend(GetListOfEwkDatasets())
+        for i, d in enumerate(datasetsMgr.getAllDatasets(), 0):
+            print d.getName()
+            if d.isData():
+                continue
+            else:
+                newOrder.append(d.getName())
+            # Move signal to top
+            if opts.signal in newOrder:
+                s = newOrder.pop(i)
+                newOrder.insert(1, s) #after "Data"
         datasetsMgr.selectAndReorder(newOrder)
         
         # Merge EWK samples
@@ -168,6 +173,8 @@ def main(opts):
         # Apply TDR style
         style = tdrstyle.TDRStyle()
         style.setOptStat(True)
+        style.setGridX(opts.gridX)
+        style.setGridY(opts.gridY)
 
         # Do Data-MC histograms with DataDriven QCD
         folder     = opts.folder
@@ -596,11 +603,9 @@ def DataMCHistograms(datasetsMgr, histoName):
     # Create the plotting object
     p = plots.DataMCPlot(datasetsMgr, histoName, saveFormats=[])
 
-    # Apply QCD data-driven style
+    # Apply style
     if opts.signalMass != 0:
-        signal = "ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass
-        mHPlus = "%s" % int(opts.signalMass)
-        p.histoMgr.forHisto(signal, styles.getSignalStyleHToTB_M(mHPlus))
+        p.histoMgr.forHisto(opts.signal, styles.getSignalStyleHToTB_M(opts.signalMass))
 
     # p.histoMgr.forHisto(opts.signalMass, styles.getSignalStyleHToTB())
     p.histoMgr.setHistoLegendLabelMany({
@@ -617,8 +622,10 @@ def DataMCHistograms(datasetsMgr, histoName):
     plots.drawPlot(p, saveName, **kwargs_) #the "**" unpacks the kwargs_ dictionary
 
     # Replace bin labels
-    replaceBinLabels(p, saveName)
+    if opts.folder == "counters":
+        replaceBinLabels(p, saveName)
 
+    # Save the plots in custom list of saveFormats
     SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode, opts.folder), [".png"] )
     return
 
@@ -678,6 +685,8 @@ if __name__ == "__main__":
     ANALYSISNAME = "Hplus2tbAnalysis"
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
+    GRIDX        = False
+    GRIDY        = False
     OPTMODE      = None
     BATCHMODE    = True
     PRECISION    = 3
@@ -725,7 +734,13 @@ if __name__ == "__main__":
     parser.add_option("--mergeEWK", dest="mergeEWK", action="store_true", default=MERGEEWK, 
                       help="Merge all EWK samples into a single sample called \"EWK\" [default: %s]" % MERGEEWK)
 
-    parser.add_option("--signalMass", dest="signalMass", type=float, default=SIGNALMASS, 
+    parser.add_option("--gridX", dest="gridX", action="store_true", default=GRIDX, 
+                      help="Enable the x-axis grid lines [default: %s]" % GRIDX)
+
+    parser.add_option("--gridY", dest="gridY", action="store_true", default=GRIDY, 
+                      help="Enable the y-axis grid lines [default: %s]" % GRIDY)
+
+    parser.add_option("--signalMass", dest="signalMass", type=int, default=SIGNALMASS, 
                      help="Mass value of signal to use [default: %s]" % SIGNALMASS)
 
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR, 
@@ -772,6 +787,8 @@ if __name__ == "__main__":
         for m in allowedMass:
             Print(m, False)
         sys.exit()
+    else:
+        opts.signal = "ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass
 
     # Sanity check
     allowedFolders = ["counters", "counters/weighted", "PUDependency", "Weighting", 
