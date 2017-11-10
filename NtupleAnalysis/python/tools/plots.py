@@ -337,7 +337,7 @@ _datasetMerge = {
     "WZ"    : "Diboson",
     "ZZ"    : "Diboson",
 
-    "ttbb_4FS_ckm_amcatnlo_madspin_pythia8"     : "TTBB",
+    "ttbb_4FS2_ckm_amcatnlo_madspin_pythia8"     : "TTBB",
 
     #"ChargedHiggs_HplusTB_HplusToTauNu_M_200": "ChargedHiggs_HplusTB_HplusToTauNu_M_200",
     #"ChargedHiggs_HplusTB_HplusToTauB_M_200": "ChargedHiggs_HplusTB_HplusToTauNu_M_200",
@@ -348,7 +348,10 @@ _datasetMerge = {
     "TTTT"                 : "ttX",
     "WJetsToQQ_HT_600ToInf": "noTop",
     "DYJetsToQQ_HT180"     : "noTop",
-    "Diboson_HT180"        : "noTop",
+    #"Diboson_HT180"        : "noTop",
+    "WWTo4Q"               : "noTop",
+    "ZZTo4Q"               : "noTop",
+    "WZ"                   : "noTop",
 
     #"TTWJetsToQQ"          : "TTWJetsToQQ",
     #"TTZToQQ"              : "TTZToQQ",
@@ -391,9 +394,9 @@ _datasetOrder.extend([
     "DYJetsToLL",
     "DYJetsToLLHT",
     "DYJetsToQQHT",  # Htb
-    "ttX", # Htb
     "noTop", #Htb
     "SingleTop",
+    "ttX", # Htb
     "WJetsToQQ_HT_600ToInf", # Htb
     "TTZToQQ",     # Htb
     "TTWJetsToQQ", # Htb

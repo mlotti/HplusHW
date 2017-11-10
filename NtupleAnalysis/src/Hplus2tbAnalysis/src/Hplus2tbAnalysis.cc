@@ -231,7 +231,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   //================================================================================================
   // Fill final plots
   //===============================================================================================
-  fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, 1); //must fix TopSelection (output data)
+  fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, 1);
  
   //================================================================================================
   // Finalize
