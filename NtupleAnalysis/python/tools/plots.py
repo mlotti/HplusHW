@@ -54,6 +54,7 @@ import aux
 # Global Definitions
 #================================================================================================
 _lightHplusMasses        = [ 80,  90, 100, 120, 140, 150, 155, 160]
+_intermediateHplusMasses = [145,175]
 _heavyHplusMasses        = [180, 200, 220, 250, 300, 350, 400, 500, 600, 700, 750,  800, 1000, 2000, 3000]
 _heavyHplusToTBbarMasses = [180, 200, 220, 250, 300, 350, 400, 500, 600, 800, 1000, 2000, 3000]
 
@@ -151,6 +152,10 @@ _physicalToLogical = {
 for mass in _lightHplusMasses:
     _physicalToLogical["ChargedHiggs_TTToHplusBWB_HplusToTauNu_M_%d"%(mass)] = "TTToHplusBWB_M%d"%mass
 
+for mass in _intermediateHplusMasses:
+    _physicalToLogical[" ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTBNoNeutral_M%d"%mass
+    _physicalToLogical[" ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassWithNeutral_M_%d"%(mass)] = "HplusTBWithNeutral_M%d"%mass
+
 for mass in _heavyHplusMasses:
     _physicalToLogical["ChargedHiggs_HplusTB_HplusToTauNu_M_%d"%(mass)] = "HplusTB_M%d"%mass
 
@@ -246,8 +251,8 @@ _physicalToLogical.update({
 _ttSignalMerge    = {}
 _tSignalMerge     = {}
 _lightSignalMerge = {}
-#for mass in _lightHplusMasses:
 
+#for mass in _lightHplusMasses:
     #_lightSignalMerge["TTToHplus_M%d"%mass] = "TTOrTToHplus_M%d"%mass
     #_lightSignalMerge["Hplus_taunu_M%d" % mass] = "TTOrTToHplus_M%d"%mass
 
@@ -348,6 +353,10 @@ _datasetMerge = {
     #"ZJetsToQQ_HT600toInf" : "ZJetsToQQ_HT600toInf",
     #"ZZTo4Q"               : "ZZTo4Q",
     }
+
+for mass in _intermediateHplusMasses:
+    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTB_M%d"%mass
+    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassWithNeutral_M_%d"%(mass)] = "HplusTB_M%d"%mass
 
 #================================================================================================
 # Dataset ordering (default)
