@@ -491,8 +491,9 @@ def getSignalStyleHToTB():
 def getSignalStyleHToTB():
     return signalFillStyleHToTB
 
-def getSignalStyleHToTB_M(mass):
+def getSignalStyleHToTB_M(myMass):
 
+    mass = str(myMass)
     if mass == "200":
         return signalStyleHToTB200
     elif mass == "300":
