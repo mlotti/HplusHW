@@ -26,8 +26,8 @@ if testWithData:
 else:
     dataVersion  = "80Xmc" 
     datasetFiles = [
-        #'/store/mc/RunIISummer16MiniAODv2/ChargedHiggs_HplusTB_HplusToTB_M-500_13TeV_amcatnlo_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/100000/0A978AC8-86DD-E611-9594-002590E7DD98.root',
-        #'/store/mc/RunIISummer16MiniAODv2/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v2/00000/0028537E-E758-E711-9315-0025905A497A.root',
+        '/store/mc/RunIISummer16MiniAODv2/ChargedHiggs_HplusTB_HplusToTB_M-500_13TeV_amcatnlo_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/100000/0A978AC8-86DD-E611-9594-002590E7DD98.root',
+        '/store/mc/RunIISummer16MiniAODv2/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v2/00000/0028537E-E758-E711-9315-0025905A497A.root',
     ]
     
 # For debugging purposes
@@ -38,6 +38,7 @@ EvtNum_1    = 240
 RunNum_2    = 1
 LumiBlock_2 = 2
 EvtNum_2    = 260
+
 
 #================================================================================================  
 # Setup the Process
@@ -106,15 +107,13 @@ print "="*len(title)
 print msgAlign.format(dataVersion.version, dataVersion.getGlobalTag(), dataVersion.getMETFilteringProcess(), dataVersion.getTriggerProcess())
 print 
 
-
-# Set up electron MVA ID 
+# Set up electron MVA ID
 # https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentificationRun2
 from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
 switchOnVIDElectronIdProducer(process, DataFormat.MiniAOD)
 
 for idmod in ['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring16_GeneralPurpose_V1_cff']:
     setupAllVIDIdsInModule(process, idmod, setupVIDElectronSelection)
-
 
 #================================================================================================
 # Load processes
@@ -125,9 +124,11 @@ process.load("HiggsAnalysis/MiniAOD2TTree/Tau_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Electron_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Muon_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Jet_cfi")
+process.load("HiggsAnalysis/MiniAOD2TTree/SecondaryVertex_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Top_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/MET_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/METNoiseFilter_cfi")
+
 process.METNoiseFilter.triggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getMETFilteringProcess())) 
 print "check tau",process.Taus_TauPOGRecommendation[0]
 process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
@@ -148,10 +149,6 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	LHESrc                      = cms.untracked.InputTag("externalLHEProducer"),
 	OfflinePrimaryVertexSrc     = cms.InputTag("offlineSlimmedPrimaryVertices"),
 	TopPtProducer               = cms.InputTag("TopPtProducer"),
-    ),
-    SoftBTag = cms.PSet(
-	PrimaryVertexSrc   = cms.InputTag("offlineSlimmedPrimaryVertices"),
-        SecondaryVertexSrc = cms.InputTag("slimmedSecondaryVertices"), 
     ),
     Trigger = cms.PSet(
 	TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess())),
@@ -181,6 +178,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     Electrons = process.Electrons,
     Muons     = process.Muons,
     Jets      = process.Jets,
+    SoftBTag  = process.SoftBTag,
     Top       = process.Top,
     METs      = process.METs,
     GenWeights = cms.VPSet(
