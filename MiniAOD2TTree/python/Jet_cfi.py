@@ -28,10 +28,22 @@ Jets = cms.VPSet(
 #        jecPayload = JECpayloadAK4PFchs.payload,
 
         discriminators = cms.vstring( #https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80X
+            "pfJetBProbabilityBJetTags",
+            "pfJetProbabilityBJetTags",
+            "pfTrackCountingHighEffBJetTags",
+            "pfSimpleSecondaryVertexHighEffBJetTags",
+            "pfSimpleInclusiveSecondaryVertexHighEffBJetTags",
+            "pfCombinedSecondaryVertexV2BJetTags",
             "pfCombinedInclusiveSecondaryVertexV2BJetTags",
-            "pfCombinedMVAV2BJetTags", 
-            "pfCombinedCvsLJetTags", 
-            "pfCombinedCvsBJetTags"
+            "softPFMuonBJetTags",
+            "softPFElectronBJetTags",
+            "pfCombinedMVAV2BJetTags",
+            "pfCombinedCvsLJetTags",
+            "pfCombinedCvsBJetTags",
+            "tightpfCombinedSecondaryVertexV2BJetTags",
+            "tightpfCombinedInclusiveSecondaryVertexV2BJetTags",
+            "tightpfCombinedCvsLJetTags",
+            "tightpfCombinedCvsBJetTags"
         ),
         userFloats = cms.vstring(
             "pileupJetId:fullDiscriminant",

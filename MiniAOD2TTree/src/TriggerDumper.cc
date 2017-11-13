@@ -59,6 +59,8 @@ void TriggerDumper::book(const edm::Run& iRun, HLTConfigProvider hltConfig){
   if(bookL1EtSum){
     //theTree->Branch("L1MET_l1extra_x",&L1MET_l1extra_x);
     //theTree->Branch("L1MET_l1extra_y",&L1MET_l1extra_y);
+    theTree->Branch("L1MET_pat_x",&L1MET_pat_x);
+    theTree->Branch("L1MET_pat_y",&L1MET_pat_y);
     theTree->Branch("L1MET_x",&L1MET_x);
     theTree->Branch("L1MET_y",&L1MET_y);
     theTree->Branch("HLTMET_x",&HLTMET_x);
@@ -215,6 +217,8 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     L1MET_x  = 0;  
     L1MET_y  = 0;
+    L1MET_pat_x  = 0;
+    L1MET_pat_y  = 0;
     HLTMET_x = 0;
     HLTMET_y = 0;
     // edm::Handle<pat::TriggerObjectStandAloneCollection> patTriggerObjects;
@@ -227,13 +231,13 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	
 	// Unpack trigger names into indices
 	patTriggerObject.unpackPathNames(names);
-	/*
-	  if(patTriggerObject.id(trigger::TriggerL1ETM)){
-	  L1MET_x = patTriggerObject.p4().x(); 
-	  L1MET_y = patTriggerObject.p4().y();
-	  std::cout << "Trigger L1ETM (pat) " << patTriggerObject.p4().Pt() << std::endl;
-	  }
-	*/
+	
+	if(patTriggerObject.id(trigger::TriggerL1ETM)){
+	  L1MET_pat_x = patTriggerObject.p4().x(); 
+	  L1MET_pat_y = patTriggerObject.p4().y();
+	  //std::cout << "Trigger L1ETM (pat) " << patTriggerObject.p4().Pt() << std::endl;
+	}
+	
 
 	// Trigger object is of type MET (see: http://cmsdoxygen.web.cern.ch/cmsdoxygen/CMSSW_8_0_27/doc/html/da/d54/namespacetrigger.html)
 	if(patTriggerObject.id(trigger::TriggerMET)){
@@ -415,6 +419,8 @@ void TriggerDumper::reset(){
 
     L1MET_x = 0;
     L1MET_y = 0;
+    L1MET_pat_x = 0;
+    L1MET_pat_y = 0;
     HLTMET_x = 0;
     HLTMET_y = 0;
 
