@@ -68,6 +68,12 @@ private:
   const double cfg_jetEtCut;
   const double cfg_jetEtaCut;
   const int cfg_nJets;
+
+  edm::EDGetTokenT<edm::View<pat::Jet>> cfg_ak8jetToken;
+  const double cfg_ak8jetEtCut;
+  const double cfg_ak8jetEtaCut;
+  const int cfg_ak8nJets;
+  
   // Marina - start
   edm::EDGetTokenT<edm::View<pat::PackedCandidate> > cfg_pfcandsToken;
   // Marina - end
@@ -119,12 +125,18 @@ Hplus2tbAnalysisSync::Hplus2tbAnalysisSync(const edm::ParameterSet& iConfig)
   : cfg_verbose(iConfig.getParameter<bool>("Verbose")),
     cfg_trgResultsToken(consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("TriggerResults"))),
     cfg_triggerBits(iConfig.getParameter<std::vector<std::string> >("HLTPaths")),
+    
     cfg_jetToken(consumes<edm::View<pat::Jet>>(iConfig.getParameter<edm::InputTag>("JetCollection"))),
     cfg_jetUserFloats(iConfig.getParameter<std::vector<std::string> >("JetUserFloats")),
     cfg_jetEtCut(iConfig.getParameter<double>("JetEtCut")),
     cfg_jetEtaCut(iConfig.getParameter<double>("JetEtaCut")),
     cfg_nJets(iConfig.getParameter<int>("NJets")),
     
+    cfg_ak8jetToken(consumes<edm::View<pat::Jet>>(iConfig.getParameter<edm::InputTag>("AK8JetCollection"))),
+    cfg_ak8jetEtCut(iConfig.getParameter<double>("AK8JetEtCut")),
+    cfg_ak8jetEtaCut(iConfig.getParameter<double>("AK8JetEtaCut")),
+    cfg_ak8nJets(iConfig.getParameter<int>("AK8NJets")),
+
     // Marina
     cfg_pfcandsToken(consumes<edm::View<pat::PackedCandidate> >(iConfig.getParameter<edm::InputTag>("PackedCandidatesCollection"))),
     
@@ -262,6 +274,28 @@ bool Hplus2tbAnalysisSync::filter(edm::Event& iEvent, const edm::EventSetup& iSe
 	    nJets++;
 	}
     }
+    // ============================================================================================================================================================================= AK8 Jets
+    edm::Handle<edm::View<pat::Jet> > AK8jethandle;
+    iEvent.getByToken(cfg_ak8jetToken, AK8jethandle);
+    int ak8nJets = 0;
+    if (AK8jethandle.isValid())
+      {
+	
+	// FOr-loop: All AK8 jets
+	for (unsigned i=0; i<AK8jethandle->size(); ++i)
+	  {
+	    const pat::Jet& obj = AK8jethandle->at(i);
+	    
+	    if (obj.p4().pt() < cfg_ak8jetEtCut) continue;
+	    if (fabs(obj.p4().eta()) > cfg_ak8jetEtaCut) continue;
+	    
+	    std::cout<<"Fat Jet ="<<i<<"   Pt = "<<obj.p4().pt()<<"   Eta = "<<obj.p4().eta()<<std::endl;
+	    
+	    
+	    
+	    ak8nJets++;
+	  }
+      }
     
     //============================================================================================================================================================================== Electrons
    
