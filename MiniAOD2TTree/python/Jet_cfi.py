@@ -34,7 +34,7 @@ Jets = cms.VPSet(
             "pfCombinedCvsBJetTags"
         ),
         userFloats = cms.vstring(
-#            "pileupJetId:fullDiscriminant",
+            "pileupJetId:fullDiscriminant",
             "AK4PFCHSpileupJetIdEvaluator:fullDiscriminant",
             "QGTaggerAK4PFCHS:qgLikelihood",
             "QGTaggerAK4PFCHS:ptD",
