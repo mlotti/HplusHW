@@ -89,8 +89,8 @@ muVeto = PSet(
 #================================================================================================
 jetSelection = PSet(
     jetType                  = "Jets",    # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
-#    jetPtCuts                = [40.0, 40.0, 40.0, 40.0, 40.0, 40.0, 30.0],
-    jetPtCuts                = [30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0],  #test for topSelection
+    jetPtCuts                = [40.0, 40.0, 40.0, 40.0, 40.0, 40.0, 30.0],
+#    jetPtCuts                = [30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0],  #test for topSelection
     jetEtaCuts               = [2.4],
     numberOfJetsCutValue     = 7,
     numberOfJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
@@ -206,12 +206,13 @@ topSelection = PSet(
 # Top selection BDT                                               
 #================================================================================================        
 topSelectionBDT = PSet(
+    MVACuts                = [0.8, 0.8],
     MVACutValue            = 0.8,
     MVACutDirection        =  ">=", # options: ==, !=, <, <=, >, >=
     NjetsMaxCutValue       = -1,     # default: -1,
     NjetsMaxCutDirection   = ">=",  # default: ">="
     ReplaceJetsWithGenJets = False, # For Testing (perfect jet resolution) 
-    CSV_bDiscCutValue      = 0.8484, #Temporary
+    CSV_bDiscCutValue      = 0.8484, #-100., #0.8484, #Temporary
     CSV_bDiscCutDirection  = ">=",
 )
 

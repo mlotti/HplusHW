@@ -41,6 +41,7 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config, EventCounter& event
   : BaseSelection(eventCounter, histoWrapper, commonPlots, postfix),
     // Input parameters
     cfg_MVACut(config, "MVACut"),
+    cfg_MVACuts(config.getParameter<std::vector<float>>("MVACuts")),
     cfg_CSV_bDiscCut(config, "CSV_bDiscCut"),
     cfg_NjetsMaxCut(config, "NjetsMaxCut"),
     cfg_ReplaceJetsWithGenJets(config.getParameter<bool>("ReplaceJetsWithGenJets")),
@@ -59,6 +60,7 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config)
 : BaseSelection(),
   // Input parameters
   cfg_MVACut(config, "MVACut"),
+  cfg_MVACuts(config.getParameter<std::vector<float>>("MVACuts")),
   cfg_CSV_bDiscCut(config, "CSV_bDiscCut"),
   cfg_NjetsMaxCut(config, "NjetsMaxCut"),
   cfg_ReplaceJetsWithGenJets(config.getParameter<bool>("ReplaceJetsWithGenJets")),  
@@ -199,7 +201,20 @@ TopSelectionBDT::~TopSelectionBDT() {
   delete hTrijetPtMaxMVASameFakeObj_BjetPassCSV;
   delete hTrijetPtMaxMVASameFakeObj;
   delete hNSelectedTrijets;
+
   delete hTopFromHiggsPt_isLdgMVATrijet;
+  delete hTopFromHiggsPt_isSubldgMVATrijet;
+  delete hTopFromHiggsPt_isMVATrijet;
+  delete hDeltaPtOverPt_TopFromH_LdgMVATrijet;
+  delete hDeltaEta_TopFromH_LdgMVATrijet;
+  delete hDeltaPhi_TopFromH_LdgMVATrijet;
+  delete hDeltaR_TopFromH_LdgMVATrijet;
+
+  delete hDeltaPtOverPt_TopFromH_SubldgMVATrijet;
+  delete hDeltaEta_TopFromH_SubldgMVATrijet;
+  delete hDeltaPhi_TopFromH_SubldgMVATrijet;
+  delete hDeltaR_TopFromH_SubldgMVATrijet;
+
   delete hTopFromHiggsPt;
 
   delete hSelectedTrijetsPt_BjetPassCSVdisc_afterCuts;
@@ -247,10 +262,14 @@ void TopSelectionBDT::initialize(const ParameterSet& config) {
   reader->AddVariable( "TrijetSubldgJetAxis2",    &TrijetSubldgJetAxis2    );
   reader->AddVariable( "TrijetLdgJetMult",        &TrijetLdgJetMult        );
   reader->AddVariable( "TrijetSubldgJetMult",     &TrijetSubldgJetMult     );
+  reader->AddVariable( "TrijetLdgJetQGLikelihood",     &TrijetLdgJetQGLikelihood);
+  reader->AddVariable( "TrijetSubldgJetQGLikelihood",  &TrijetSubldgJetQGLikelihood);
 
   // Read the xml file
-  //  reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TMVA_BDT/test/weights/TMVAClassification_BDTG.weights.xml");
-  reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/EventSelection/interface/weights/TMVAClassification_BDTG.weights.xml");
+  //reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TMVA_BDT/test/weights/TMVAClassification_BDTG.weights.xml");
+  reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TMVA_BDT/test/weights_21var/TMVAClassification_BDTG.weights.xml");
+  //reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TMVA_BDT/test/weights_rmTopMass//TMVAClassification_BDTG.weights.xml");
+  //reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/EventSelection/interface/weights/TMVAClassification_BDTG.weights.xml");
 }
 
 void TopSelectionBDT::bookHistograms(TDirectory* dir) {
@@ -265,14 +284,14 @@ void TopSelectionBDT::bookHistograms(TDirectory* dir) {
   const float fEtaMin     = fCommonPlots->getEtaBinSettings().min();
   const float fEtaMax     = fCommonPlots->getEtaBinSettings().max();
 
-  // const int nDEtaBins     = fCommonPlots->getDeltaEtaBinSettings().bins();
-  // const double fDEtaMin   = fCommonPlots->getDeltaEtaBinSettings().min();
-  // const double fDEtaMax   = fCommonPlots->getDeltaEtaBinSettings().max();
-
-  // const int nDPhiBins     = fCommonPlots->getDeltaPhiBinSettings().bins();
-  // const double fDPhiMin   = fCommonPlots->getDeltaPhiBinSettings().min();
-  // const double fDPhiMax   = fCommonPlots->getDeltaPhiBinSettings().max();
-
+  const int nDEtaBins     = fCommonPlots->getDeltaEtaBinSettings().bins();
+  const double fDEtaMin   = fCommonPlots->getDeltaEtaBinSettings().min();
+  const double fDEtaMax   = fCommonPlots->getDeltaEtaBinSettings().max();
+  
+  const int nDPhiBins     = fCommonPlots->getDeltaPhiBinSettings().bins();
+  const double fDPhiMin   = fCommonPlots->getDeltaPhiBinSettings().min();
+  const double fDPhiMax   = fCommonPlots->getDeltaPhiBinSettings().max();
+  
   const int nDRBins       = fCommonPlots->getDeltaRBinSettings().bins();
   const double fDRMin     = fCommonPlots->getDeltaRBinSettings().min();
   const double fDRMax     = fCommonPlots->getDeltaRBinSettings().max();
@@ -411,17 +430,30 @@ void TopSelectionBDT::bookHistograms(TDirectory* dir) {
   
   hTrijetPtMaxMVASameFakeObj_BjetPassCSV = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TrijetPtMaxMVASameFakeObj_BjetPassCSV"    ,";p_{T} (GeV/c)"      , nPtBins     , fPtMin     , fPtMax);
   hTrijetPtMaxMVASameFakeObj             = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TrijetPtMaxMVASameFakeObj"    ,";p_{T} (GeV/c)"      , nPtBins     , fPtMin     , fPtMax);
-  hChHiggsBjetPt_TetrajetBjetMatched     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "ChHiggsBjetPt_TetrajetBjetPt_Matched"    ,";p_{T} (GeV/c)"      , nPtBins     , fPtMin , fPtMax);
-  hChHiggsBjetPt_foundTetrajetBjet       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "ChHiggsBjetPt_foundTetrajetBjet"    ,";p_{T} (GeV/c)"      , nPtBins     , fPtMin     , fPtMax);
+  hChHiggsBjetPt_TetrajetBjetMatched     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "ChHiggsBjetPt_TetrajetBjetPt_Matched"    ,";p_{T} (GeV/c)"      , nPtBins*4     , fPtMin , fPtMax*4);
+  hChHiggsBjetPt_foundTetrajetBjet       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "ChHiggsBjetPt_foundTetrajetBjet"    ,";p_{T} (GeV/c)"      , nPtBins*4     , fPtMin     , fPtMax*4);
 
-  hHiggsBjetPt                = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "HiggsBjetPt"    ,";p_{T} (GeV/c)"      , nPtBins     , fPtMin     , fPtMax);
-  hHiggsBjetPt_LdgBjetMatched = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "HiggsBjetPt_LdgBjetMatched"    ,";p_{T} (GeV/c)"      , nPtBins     , fPtMin     , fPtMax);
-  hLdgBjetPt                  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"LdgBjetPt",";p_{T} (GeVc^{-1})",nPtBins     , fPtMin     , fPtMax);
-  hLdgBjetPt_isLdgFreeBjet    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"LdgBjetPt_isLdgFreeBjet",";p_{T} (GeVc^{-1})",nPtBins     , fPtMin     , fPtMax);
+  hHiggsBjetPt                = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "HiggsBjetPt"    ,";p_{T} (GeV/c)"      , nPtBins*4     , fPtMin     , fPtMax*4);
+  hHiggsBjetPt_LdgBjetMatched = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "HiggsBjetPt_LdgBjetMatched"    ,";p_{T} (GeV/c)"      , nPtBins*4     , fPtMin     , fPtMax*4);
+  hLdgBjetPt                  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"LdgBjetPt",";p_{T} (GeVc^{-1})",nPtBins*4     , fPtMin     , fPtMax*4);
+  hLdgBjetPt_isLdgFreeBjet    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"LdgBjetPt_isLdgFreeBjet",";p_{T} (GeVc^{-1})",nPtBins*4     , fPtMin     , fPtMax*4);
   //  hJetPt                      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "JetPt",";p_{T} (GeV/c)"      , nPtBins     , fPtMin     , fPtMax);
   hNSelectedTrijets =   fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "NSelectedTrijets",";Number of Selected Trijets", 3, 0, 3);
-  hTopFromHiggsPt_isLdgMVATrijet    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"TopFromHiggsPt_isLdgMVATrijet",";p_{T} (GeVc^{-1})",nPtBins     , fPtMin     , fPtMax);
-  hTopFromHiggsPt    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"TopFromHiggsPt",";p_{T} (GeVc^{-1})",nPtBins     , fPtMin     , fPtMax);
+  hTopFromHiggsPt_isLdgMVATrijet       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"TopFromHiggsPt_isLdgMVATrijet",";p_{T} (GeVc^{-1})",nPtBins*4     , fPtMin     , fPtMax*4);
+  hTopFromHiggsPt_isSubldgMVATrijet    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"TopFromHiggsPt_isSubldgMVATrijet",";p_{T} (GeVc^{-1})",nPtBins*4     , fPtMin     , fPtMax*4);
+  hTopFromHiggsPt_isMVATrijet          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"TopFromHiggsPt_isMVATrijet",";p_{T} (GeVc^{-1})",nPtBins*4     , fPtMin     , fPtMax*4);
+
+  hDeltaPtOverPt_TopFromH_LdgMVATrijet = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"DeltaPtOverPt_TopFromH_LdgMVATrijet","#;Delta P_{T}/P_{T}", nPtBins     , fPtMin     , fPtMax);
+  hDeltaEta_TopFromH_LdgMVATrijet      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"DeltaEta_TopFromH_LdgMVATrijet",";#Delta #eta", nDEtaBins, fDEtaMin, fDEtaMax);
+  hDeltaPhi_TopFromH_LdgMVATrijet      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"DeltaPhi_TopFromH_LdgMVATrijet",";#Delta #phi", nDPhiBins , fDPhiMin , fDPhiMax);
+  hDeltaR_TopFromH_LdgMVATrijet        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"DeltaR_TopFromH_LdgMVATrijet",";#Delta R", nDRBins, fDRMin, fDRMax);
+
+  hDeltaPtOverPt_TopFromH_SubldgMVATrijet = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"DeltaPtOverPt_TopFromH_SubldgMVATrijet","#;Delta P_{T}/P_{T}", nPtBins     , fPtMin     , fPtMax);
+  hDeltaEta_TopFromH_SubldgMVATrijet      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"DeltaEta_TopFromH_SubldgMVATrijet",";#Delta #eta", nDEtaBins, fDEtaMin, fDEtaMax);
+  hDeltaPhi_TopFromH_SubldgMVATrijet      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"DeltaPhi_TopFromH_SubldgMVATrijet",";#Delta #phi", nDPhiBins , fDPhiMin , fDPhiMax);
+  hDeltaR_TopFromH_SubldgMVATrijet        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"DeltaR_TopFromH_SubldgMVATrijet",";#Delta R", nDRBins, fDRMin, fDRMax);
+
+  hTopFromHiggsPt    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir,"TopFromHiggsPt",";p_{T} (GeVc^{-1})",nPtBins*4     , fPtMin     , fPtMax*4);
 
   hSelectedTrijetsPt_BjetPassCSVdisc_afterCuts   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SelectedTrijetsPt_BjetPassCSVdisc_afterCuts", ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
   hSelectedTrijetsPt_afterCuts                   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SelectedTrijetsPt_afterCuts", ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
@@ -498,8 +530,8 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   std::vector<genParticle> GenChargedHiggs_BQuark;
   std::vector<genParticle> GenTops;
   std::vector<genParticle> GenTops_BQuark;
-  std::vector<genParticle> GenTops_LdgQuark;
   std::vector<genParticle> GenTops_SubldgQuark;
+  std::vector<genParticle> GenTops_LdgQuark;
 
   vector <Jet> MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet, MC_BJets;
   vector <Jet> MCtrueTopFromH_LdgJet, MCtrueTopFromH_SubldgJet, MCtrueTopFromH_Bjet, MCtrue_ChargedHiggsBjet, MCtrue_TopJets;
@@ -758,7 +790,6 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	    // Top quark matched with a trijet
 	    FoundTop.push_back(isGenuine);
 	  }//For-loop: All top-quarks
-
         //BJet from Higgs-side                                                                                             
         for (size_t i=0; i<GenChargedHiggs_BQuark.size(); i++)
           {
@@ -834,7 +865,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	      Trijet_p4 = bjet.p4() + jet1.p4() + jet2.p4();
 	      Dijet_p4  = jet1.p4() + jet2.p4();
 	      
-	      if(Trijet_p4.M() > 500) continue;
+	      if(Trijet_p4.M() > 500) continue; //fixme
 	      if (!cfg_CSV_bDiscCut.passedCut(bjet.bjetDiscriminator())) continue;
 
 	      // Calculate variables
@@ -842,26 +873,27 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	      double softDrop_n2 = min(jet2.pt(), jet1.pt()) / ( (jet2.pt() + jet1.pt()) * dr_sd * dr_sd);
 
 	      // Calculate our 19 discriminating variables for MVA use
-	      TrijetPtDR               = Trijet_p4.Pt() * ROOT::Math::VectorUtil::DeltaR( Dijet_p4  , bjet.p4() );
-	      TrijetDijetPtDR          = Dijet_p4.Pt()  * ROOT::Math::VectorUtil::DeltaR( jet1.p4() , jet2.p4() );
-	      TrijetBjetMass           = bjet.p4().M();
-	      TrijetLdgJetBDisc        = jet1.bjetDiscriminator();
-	      TrijetSubldgJetBDisc     = jet2.bjetDiscriminator();
-	      TrijetBJetLdgJetMass     = (bjet.p4() + jet1.p4()).M();
-	      TrijetBJetSubldgJetMass  = (bjet.p4() + jet2.p4()).M();
-	      TrijetMass               = Trijet_p4.M();
-	      TrijetDijetMass          = Dijet_p4.M();
-	      TrijetBJetBDisc          = bjet.bjetDiscriminator();
-	      TrijetSoftDrop_n2        = softDrop_n2;
-	      TrijetLdgJetCvsL         = jet1.pfCombinedCvsLJetTags();
-	      TrijetSubldgJetCvsL      = jet2.pfCombinedCvsLJetTags();
-	      TrijetLdgJetPtD          = jet1.QGTaggerAK4PFCHSptD();
-	      TrijetSubldgJetPtD       = jet2.QGTaggerAK4PFCHSptD();
-	      TrijetLdgJetAxis2        = jet1.QGTaggerAK4PFCHSaxis2();
-	      TrijetSubldgJetAxis2     = jet2.QGTaggerAK4PFCHSaxis2();
-	      TrijetLdgJetMult         = jet1.QGTaggerAK4PFCHSmult();
-	      TrijetSubldgJetMult      = jet2.QGTaggerAK4PFCHSmult();
-	      
+	      TrijetPtDR                  = Trijet_p4.Pt() * ROOT::Math::VectorUtil::DeltaR( Dijet_p4  , bjet.p4() );
+	      TrijetDijetPtDR             = Dijet_p4.Pt()  * ROOT::Math::VectorUtil::DeltaR( jet1.p4() , jet2.p4() );
+	      TrijetBjetMass              = bjet.p4().M();
+	      TrijetLdgJetBDisc           = jet1.bjetDiscriminator();
+	      TrijetSubldgJetBDisc        = jet2.bjetDiscriminator();
+	      TrijetBJetLdgJetMass        = (bjet.p4() + jet1.p4()).M();
+	      TrijetBJetSubldgJetMass     = (bjet.p4() + jet2.p4()).M();
+	      TrijetMass                  = Trijet_p4.M();
+	      TrijetDijetMass             = Dijet_p4.M();
+	      TrijetBJetBDisc             = bjet.bjetDiscriminator();
+	      TrijetSoftDrop_n2           = softDrop_n2;
+	      TrijetLdgJetCvsL            = jet1.pfCombinedCvsLJetTags();
+	      TrijetSubldgJetCvsL         = jet2.pfCombinedCvsLJetTags();
+	      TrijetLdgJetPtD             = jet1.QGTaggerAK4PFCHSptD();
+	      TrijetSubldgJetPtD          = jet2.QGTaggerAK4PFCHSptD();
+	      TrijetLdgJetAxis2           = jet1.QGTaggerAK4PFCHSaxis2();
+	      TrijetSubldgJetAxis2        = jet2.QGTaggerAK4PFCHSaxis2();
+	      TrijetLdgJetMult            = jet1.QGTaggerAK4PFCHSmult();
+	      TrijetSubldgJetMult         = jet2.QGTaggerAK4PFCHSmult();
+	      TrijetLdgJetQGLikelihood    = jet1.QGTaggerAK4PFCHSqgLikelihood();
+	      TrijetSubldgJetQGLikelihood = jet2.QGTaggerAK4PFCHSqgLikelihood();
 
 	      // Evaluate the MVA discriminator value
 	      float MVAoutput = reader->EvaluateMVA("BTDG method");
@@ -875,7 +907,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	      TopCand.Jet2.push_back(getLeadingSubleadingJet(jet1,jet2,"subleading"));
 	      TopCand.BJet.push_back(bjet);
 
-	      if (cfg_MVACut.passedCut(MVAoutput)) NpassBDT++;
+	      if (cfg_MVACut.passedCut(MVAoutput)) NpassBDT++;    //fixme - cut value changed
 	      // Determine top candidate multiplicity after BDT cut
 	      for (int m=0; m<19; m++) 
 		{
@@ -903,9 +935,11 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   Jet subleadingTrijetJet1, subleadingTrijetJet2, subleadingTrijetBJet;
   math::XYZTLorentzVector leadingTrijetP4, subleadingTrijetP4, tetrajetP4;
 
+  std::vector<int> TrijetSelection_index;  //vector with indices of two tops with highest BDT value
+
   bool foundTrijet1 = false;
   
-  //Soti NEW
+  //NEW
   for (size_t i=0; i<TopCand.MVA.size(); i++)
     {
       if ( (size_t)(isBJet(TopCand.Jet1.at(i),bjets) + isBJet(TopCand.Jet2.at(i),bjets) + isBJet(TopCand.BJet.at(i),bjets)) ==  bjets.size()) continue;
@@ -922,6 +956,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
       trijet1 = TopCand.TrijetP4.at(i);
 
       foundTrijet1 = true;
+      TrijetSelection_index.push_back(i);
       break;
     }
   if (!foundTrijet1) return output;
@@ -946,12 +981,13 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
       trijet2BJet = TopCand.BJet.at(i);
       // Save top candidate 4-momentum
       trijet2     = TopCand.TrijetP4.at(i);
+      TrijetSelection_index.push_back(i);
       break;
     }// For-loop: All top candidates
     
-  //Soti NEW
+  //NEW
 
-
+ 
   if (MVAmax1 <= -999.999 || MVAmax2 <= -999.999)
     {
 
@@ -963,9 +999,10 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   else  hNSelectedTrijets -> Fill(2);
 
 
-  //Return if no Top Candidates left
+  //Return if one or less Top Candidates left
   if (TopCand.MVA.size() < 2) return output;
-
+  
+  
   //================================================================================================  
   // Tetrajet candidates
   //================================================================================================  
@@ -1065,21 +1102,60 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   if (haveMatchedTopFromHiggs)
     {
       hTopFromHiggsPt -> Fill(MCtrueTopFromH_Bjet.at(0).pt());
+      
+      bool LdgTopIsTopFromH = isRealMVATop(leadingTrijetJet1, leadingTrijetJet2, leadingTrijetBJet, MCtrueTopFromH_LdgJet.at(0), MCtrueTopFromH_SubldgJet.at(0), MCtrueTopFromH_Bjet.at(0));
+      bool SubldgTopIsTopFromH = isRealMVATop(subleadingTrijetJet1, subleadingTrijetJet2, subleadingTrijetBJet, MCtrueTopFromH_LdgJet.at(0), MCtrueTopFromH_SubldgJet.at(0), MCtrueTopFromH_Bjet.at(0));
 
-      bool same1 = areSameJets(leadingTrijetJet1, MCtrueTopFromH_LdgJet.at(0))    && areSameJets(leadingTrijetJet2 , MCtrueTopFromH_SubldgJet.at(0)) && areSameJets(leadingTrijetBJet,  MCtrueTopFromH_Bjet.at(0));
-      bool same2 = areSameJets(leadingTrijetJet1, MCtrueTopFromH_SubldgJet.at(0)) && areSameJets(leadingTrijetJet2, MCtrueTopFromH_LdgJet.at(0))    && areSameJets(leadingTrijetBJet,  MCtrueTopFromH_Bjet.at(0));
+      if (LdgTopIsTopFromH)                         hTopFromHiggsPt_isLdgMVATrijet    -> Fill(MCtrueTopFromH_Bjet.at(0).pt());
+      if (SubldgTopIsTopFromH)                      hTopFromHiggsPt_isSubldgMVATrijet -> Fill(MCtrueTopFromH_Bjet.at(0).pt());
+      if (LdgTopIsTopFromH || SubldgTopIsTopFromH)  hTopFromHiggsPt_isMVATrijet       -> Fill (MCtrueTopFromH_Bjet.at(0).pt());
+      
+      math::XYZTLorentzVector TopFromHiggsP4;
+      TopFromHiggsP4 = MCtrueTopFromH_LdgJet.at(0).p4() + MCtrueTopFromH_SubldgJet.at(0).p4() + MCtrueTopFromH_Bjet.at(0).p4();
 
-      if (same1 || same2) hTopFromHiggsPt_isLdgMVATrijet -> Fill(MCtrueTopFromH_Bjet.at(0).pt());
+      hDeltaPtOverPt_TopFromH_LdgMVATrijet -> Fill((TopFromHiggsP4.Pt() - leadingTrijetP4.Pt())/TopFromHiggsP4.Pt());
+      hDeltaEta_TopFromH_LdgMVATrijet      -> Fill(TopFromHiggsP4.Eta() - leadingTrijetP4.Eta());
+      hDeltaPhi_TopFromH_LdgMVATrijet      -> Fill(ROOT::Math::VectorUtil::DeltaPhi(TopFromHiggsP4, leadingTrijetP4));
+      hDeltaR_TopFromH_LdgMVATrijet        -> Fill(ROOT::Math::VectorUtil::DeltaR(TopFromHiggsP4, leadingTrijetP4));
+
+      hDeltaPtOverPt_TopFromH_SubldgMVATrijet -> Fill((TopFromHiggsP4.Pt() - subleadingTrijetP4.Pt())/TopFromHiggsP4.Pt());
+      hDeltaEta_TopFromH_SubldgMVATrijet      -> Fill(TopFromHiggsP4.Eta() - subleadingTrijetP4.Eta());
+      hDeltaPhi_TopFromH_SubldgMVATrijet      -> Fill(ROOT::Math::VectorUtil::DeltaPhi(TopFromHiggsP4, subleadingTrijetP4));
+      hDeltaR_TopFromH_SubldgMVATrijet        -> Fill(ROOT::Math::VectorUtil::DeltaR(TopFromHiggsP4, subleadingTrijetP4));
+      
     }
 
 
   //================================================================================================  
   // Top-tagging Efficiency (per selected top)
   //================================================================================================
-  bool passBDT1       = cfg_MVACut.passedCut(MVAmax1);
-  bool passBDT2       = cfg_MVACut.passedCut(MVAmax2);
-  bool passBDT1or2    = cfg_MVACut.passedCut(max(MVAmax1, MVAmax2));
+
+  // bool passBDT1       = cfg_MVACut.passedCut(MVAmax1);
+  // bool passBDT2       = cfg_MVACut.passedCut(MVAmax2);
+  // bool passBDT1or2    = cfg_MVACut.passedCut(max(MVAmax1, MVAmax2));
+  // bool passBDTboth    = passBDT1*passBDT2;
+
+  bool passBDT1       = false;
+  bool passBDT2       = false;
+
+  //BDT values of leading, subleading in BDT top candidates
+  unsigned int MVACut_index  = 0;
+  for (size_t i=0; i < TrijetSelection_index.size(); i++)
+    {
+      int index = TrijetSelection_index.at(i);
+      const float mvaCut = cfg_MVACuts.at(MVACut_index);
+      if (TopCand.MVA.at(index) > mvaCut)
+	{
+	  if (i==0) passBDT1 = true;
+	  if (i==1) passBDT2 = true;
+	}
+      if (MVACut_index  < cfg_MVACuts.size()-1  ) MVACut_index++;
+
+    }
+
+  bool passBDT1or2 = passBDT1 || passBDT2;
   bool passBDTboth    = passBDT1*passBDT2;
+
   bool inTopDir1      = false;
   bool inTopDir2      = false;
   bool inTopDir1or2   = false;
@@ -1318,13 +1394,13 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
       }
     
     if (TopMatched) hMatchedBDTmult -> Fill(matchedTpassBDT);
-
-    bool passBDTboth = cfg_MVACut.passedCut(min(MVAmax1,MVAmax2));
+    
+    //    bool passBDTboth = cfg_MVACut.passedCut(min(MVAmax1,MVAmax2));    //fixme needed?
     if (MatchedJJB_index.size() == GenTops.size() && passBDTboth )
       {
       hMatchedjjbBDTmult -> Fill(matchedJJBpassBDT);
       hRealSelectedTopMult -> Fill (RealSelectedTop);
-    }
+      }
     hFakeInTopDirMult -> Fill (fakeInTopDir);
 
     //================================================================================================
@@ -1453,7 +1529,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   // output.fTetrajet1_p4      = tetrajetP4;
   // output.fTetrajet2_p4      = tetrajetP4;
   output.fLdgTetrajet_p4    = tetrajetP4;
-  output.fSubldgTetrajet_p4 = tetrajetP4;
+  output.fSubldgTetrajet_p4 = subleadingTrijetP4 + tetrajetBjet.p4();
 
   //================================================================================================
   // Fill histograms (Before cuts)
@@ -1894,8 +1970,10 @@ bool TopSelectionBDT::HasMother(const Event& event, const genParticle &p, const 
       int mom_index =  p.mothers().at(iMom);
       const genParticle m = event.genparticles().getGenParticles()[mom_index];
       //      const genParticle m = fEvent->genparticles().getGenParticles()[mom_index];
-      if (m.pdgId() == mom_pdgId) return true;
-      if (m.pdgId() == p.pdgId()) return HasMother(event, m, mom_pdgId);
+      int motherID = m.pdgId();
+      int particleID = p.pdgId();
+      if (std::abs(motherID) == mom_pdgId) return true;
+      if (std::abs(motherID) == std::abs(particleID)) return HasMother(event, m, mom_pdgId);
       //      else continue;
 
     }

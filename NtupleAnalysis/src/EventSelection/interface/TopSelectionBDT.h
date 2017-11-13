@@ -207,6 +207,9 @@ public:
   Float_t TrijetLdgJetMult;
   Float_t TrijetSubldgJetMult;
 
+  Float_t TrijetLdgJetQGLikelihood;
+  Float_t TrijetSubldgJetQGLikelihood;
+
 
 private:
   /// Initialisation called from constructor
@@ -247,7 +250,7 @@ private:
   const DirectionalCut<double> cfg_CSV_bDiscCut;
   const DirectionalCut<int> cfg_NjetsMaxCut;
   const bool cfg_ReplaceJetsWithGenJets;
-
+  const std::vector<float> cfg_MVACuts;
   // Event counter for passing selection
   Count cPassedTopSelectionBDT;
 
@@ -377,6 +380,19 @@ private:
   WrappedTH1 *hTrijetPtMaxMVASameFakeObj;
   WrappedTH1 *hNSelectedTrijets;
   WrappedTH1 *hTopFromHiggsPt_isLdgMVATrijet;
+  WrappedTH1 *hTopFromHiggsPt_isSubldgMVATrijet;
+  WrappedTH1 *hTopFromHiggsPt_isMVATrijet;
+
+  WrappedTH1 *hDeltaPtOverPt_TopFromH_LdgMVATrijet;
+  WrappedTH1 *hDeltaEta_TopFromH_LdgMVATrijet;
+  WrappedTH1 *hDeltaPhi_TopFromH_LdgMVATrijet;
+  WrappedTH1 *hDeltaR_TopFromH_LdgMVATrijet;
+
+  WrappedTH1 *hDeltaPtOverPt_TopFromH_SubldgMVATrijet;
+  WrappedTH1 *hDeltaEta_TopFromH_SubldgMVATrijet;
+  WrappedTH1 *hDeltaPhi_TopFromH_SubldgMVATrijet;
+  WrappedTH1 *hDeltaR_TopFromH_SubldgMVATrijet;
+
   WrappedTH1 *hTopFromHiggsPt;
 
   WrappedTH1 *hSelectedTrijetsPt_BjetPassCSVdisc_afterCuts;
