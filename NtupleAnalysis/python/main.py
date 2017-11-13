@@ -235,7 +235,7 @@ class Dataset:
 # Class Definition
 #================================================================================================
 class Process:
-    def __init__(self, outputPrefix="analysis", outputPostfix="", maxEvents=-1):
+    def __init__(self, outputPrefix="analysis", outputPostfix="", maxEvents={}):
         ROOT.gSystem.Load("libHPlusAnalysis.so")
 
         self._verbose       = _debugMode
@@ -591,10 +591,13 @@ class Process:
             readCallsStart = ROOT.TFile.GetFileReadCalls()
             timeStart = time.time()
             clockStart = time.clock()
-            
-            if self._maxEvents > 0:
-                tchain.SetCacheEntryRange(0, self._maxEvents)
-                tchain.Process(tselector, "", self._maxEvents)
+
+            if dset.getName() in self._maxEvents.keys():
+                tchain.SetCacheEntryRange(0, self._maxEvents[dset.getName()])
+                tchain.Process(tselector, "", self._maxEvents[dset.getName()])
+            #if self._maxEvents > 0:
+            #    tchain.SetCacheEntryRange(0, self._maxEvents)
+            #    tchain.Process(tselector, "", self._maxEvents)
             else:
                 tchain.Process(tselector)
             if _debugMemoryConsumption:
