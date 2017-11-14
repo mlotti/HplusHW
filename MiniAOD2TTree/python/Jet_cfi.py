@@ -56,6 +56,31 @@ Jets = cms.VPSet(
             "QGTaggerAK4PFCHS:mult",
         ),
     ),
+
+    # Marina
+    cms.PSet(
+        branchname = cms.untracked.string("AK8Jets"),
+        src        = cms.InputTag("selectedPatJetsAK8PFCHS"),
+        systVariations = cms.bool(False),
+
+        discriminators = cms.vstring(
+            "pfCombinedInclusiveSecondaryVertexV2BJetTags",
+            "pfCombinedMVAV2BJetTags",
+            "pfCombinedCvsLJetTags",
+            "pfCombinedCvsBJetTags"
+            ),
+        userFloats = cms.vstring(
+            "NjettinessAK8CHS:tau1",
+            "NjettinessAK8CHS:tau2",
+            "NjettinessAK8CHS:tau3",
+            "NjettinessAK8CHS:tau4",
+            ),
+
+        userInts = cms.vstring(
+            ),
+        ),
+    
+
 #    cms.PSet(
 #        branchname = cms.untracked.string("JetsPuppi"),
 ##        src = cms.InputTag("patJetsReapplyJECPuppi"), # made from ak4PFJets

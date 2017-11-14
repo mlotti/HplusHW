@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/ElectronDumper.h"
+#include "HiggsAnalysis/MiniAOD2TTree/interface/MiniIsolation.h"
 
 #include <algorithm>
 
@@ -25,7 +26,14 @@ ElectronDumper::ElectronDumper(edm::ConsumesCollector&& iConsumesCollector, std:
     gsfElectronToken = new edm::EDGetTokenT<edm::View<reco::GsfElectron>>[inputCollections.size()];
     rhoToken = new edm::EDGetTokenT<double>[inputCollections.size()];
 //    electronIDToken = new edm::EDGetTokenT<edm::ValueMap<bool>>[inputCollections.size()*nDiscriminators];
-    
+
+    // Marina - Start
+    pfcandsToken      = new edm::EDGetTokenT<edm::View<pat::PackedCandidate>>[inputCollections.size()];
+    relMiniIso        = new std::vector<float>[inputCollections.size()];
+    effAreaMiniIso    = new std::vector<float>[inputCollections.size()];
+    // Marina - End
+
+
     for(size_t i = 0; i < inputCollections.size(); ++i){
         edm::InputTag inputtag = inputCollections[i].getParameter<edm::InputTag>("src");
         electronToken[i] = iConsumesCollector.consumes<edm::View<pat::Electron>>(inputtag);
@@ -40,6 +48,11 @@ ElectronDumper::ElectronDumper(edm::ConsumesCollector&& iConsumesCollector, std:
             electronIDToken[i*discriminatorNames.size()+j] = iConsumesCollector.consumes<edm::ValueMap<bool>>(discrTag);
         }
         */
+	
+	// Marina - Start
+	edm::InputTag pfcandinputtag = inputCollections[i].getParameter<edm::InputTag>("pfcands");
+	pfcandsToken[i] = iConsumesCollector.consumes<edm::View<pat::PackedCandidate>>(pfcandinputtag);
+	// Marina - end
     }
     
     useFilter = false;
@@ -65,7 +78,12 @@ void ElectronDumper::book(TTree* tree){
         tree->Branch((name+"_effAreaIsoDeltaBeta").c_str(),&effAreaIsoDeltaBetaCorrected[i]);
 
         MCelectron[i].book(tree, name, "MCelectron");
-        
+	
+	// Marina - start
+	tree->Branch((name+"_relMiniIso").c_str(), &relMiniIso[i]);
+	tree->Branch((name+"_effAreaMiniIso").c_str(), &effAreaMiniIso[i]);
+	// Marina - end
+	
         std::vector<std::string> discriminatorNames = inputCollections[i].getParameter<std::vector<std::string> >("discriminators");
         for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
             // Convert dashes into underscores
@@ -83,10 +101,16 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
       iEvent.getByToken(genParticleToken, genParticlesHandle);
     
     for(size_t ic = 0; ic < inputCollections.size(); ++ic){
-	edm::Handle<edm::View<pat::Electron>> electronHandle;
-	iEvent.getByToken(electronToken[ic], electronHandle);
+        edm::Handle<edm::View<pat::Electron>> electronHandle;
+        iEvent.getByToken(electronToken[ic], electronHandle);
+	
+	// Marina - start
+	edm::Handle<edm::View<pat::PackedCandidate> > pfcandHandle;
+        iEvent.getByToken(pfcandsToken[ic], pfcandHandle);
+	// Marina - end
+	
 	if(electronHandle.isValid()){
-            // Setup also handle for GsfElectrons (needed for ID)
+	    // Setup also handle for GsfElectrons (needed for ID)
             edm::Handle<edm::View<reco::GsfElectron>> gsfHandle;
             iEvent.getByToken(gsfElectronToken[ic], gsfHandle);
             // Setup handles for rho
@@ -137,7 +161,12 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                   - rho * ea, 0.0);
                 double eaIso = eaisolation / obj.pt();
                 effAreaIsoDeltaBetaCorrected[ic].push_back(eaIso);
-
+		
+		// Marina - start
+		relMiniIso[ic].push_back(getMiniIsolation_DeltaBeta(pfcandHandle, dynamic_cast<const reco::Candidate *>(&obj), 0.05, 0.2, 10., false));
+		effAreaMiniIso[ic].push_back(getMiniIsolation_EffectiveArea(pfcandHandle, dynamic_cast<const reco::Candidate *>(&obj), 0.05, 0.2, 10., false, false, *rhoHandle));
+		// Marina - end
+		
 
 		/*                
 		for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
@@ -194,9 +223,14 @@ void ElectronDumper::reset(){
       effAreaIsoDeltaBetaCorrected[ic].clear();
 
       MCelectron[ic].reset();
-    }                                                                                                                                                             
+      
+      // Marina - start
+      relMiniIso[ic].clear();
+      effAreaMiniIso[ic].clear();
+      // Marina - end
+    }                                                                                                                                             
     for(size_t ic = 0; ic < inputCollections.size()*nDiscriminators; ++ic){                                                                                       
       discriminators[ic].clear();                                                                                                                                 
-    }                                                                                                                                                             
-  }                                                                                                                                                               
+    }                                                                                                                                                            
+  }                                                                                                                                                             
 }
