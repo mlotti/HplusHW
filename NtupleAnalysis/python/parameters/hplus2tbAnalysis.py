@@ -206,14 +206,16 @@ topSelection = PSet(
 # Top selection BDT                                               
 #================================================================================================        
 topSelectionBDT = PSet(
-    MVACuts                = [0.8, 0.8],
-    MVACutValue            = 0.8,
+    MVACuts                = [0.8, 0.8], #FIXME: Set individual cut values for each top candidate  
+    MVACutValue            = 0.8,        #FIXME: Set individual cut values for each top candidate  
     MVACutDirection        =  ">=", # options: ==, !=, <, <=, >, >=
     NjetsMaxCutValue       = -1,     # default: -1,
     NjetsMaxCutDirection   = ">=",  # default: ">="
     ReplaceJetsWithGenJets = False, # For Testing (perfect jet resolution) 
     CSV_bDiscCutValue      = 0.8484, #-100., #0.8484, #Temporary
     CSV_bDiscCutDirection  = ">=",
+    MassCutValue           = 400,
+    MassCutDirection       = "<",
 )
 
 #================================================================================================

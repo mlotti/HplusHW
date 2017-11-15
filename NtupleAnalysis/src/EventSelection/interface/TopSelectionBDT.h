@@ -244,9 +244,12 @@ private:
   TrijetSelection SortInMVAvalue(TrijetSelection TopCand);
   bool foundFreeBjet(const Jet& trijet1Jet1, const Jet& trijet1Jet2, const Jet& trijet1BJet, const Jet& trijet2Jet1, const Jet& trijet2Jet2, const Jet& trijet2BJet , const std::vector<Jet>& bjets);
   bool HasMother(const Event& event, const genParticle &p, const int mom_pdgId);
+  int getTopFromHiggs(TrijetSelection TopCand, const Jet&  MCtrueTopFromH_LdgJet, const Jet& MCtrueTopFromH_SubldgJet, const Jet& MCtrueTopFromH_Bjet);
+
   // Input parameters
   int nSelectedBJets;
   const DirectionalCut<double> cfg_MVACut;
+  const DirectionalCut<double> cfg_MassCut;
   const DirectionalCut<double> cfg_CSV_bDiscCut;
   const DirectionalCut<int> cfg_NjetsMaxCut;
   const bool cfg_ReplaceJetsWithGenJets;
@@ -307,50 +310,45 @@ private:
   WrappedTH1  *hSubldgTrijetDijetDeltaR;
 
   WrappedTH1 *hTopQuarkPt;
-  WrappedTH1 *hTopQuarkPt_MatchedBDT;
-  WrappedTH1 *hTopQuarkPt_Matched;
+  WrappedTH1 *hTopQuarkPt_InTopDirBDT;
+  WrappedTH1 *hTopQuarkPt_InTopDir;
   WrappedTH1 *hTrijetPt_BDT;
-  WrappedTH1 *hTrijetMass_NotMatchedBDT;
+  WrappedTH1 *hAllTopQuarkPt_InTopDir;
+  WrappedTH1 *hAllTopQuarkPt_InTopDirBDT;
   WrappedTH1 *hAllTopQuarkPt_Matched;
   WrappedTH1 *hAllTopQuarkPt_MatchedBDT;
-  WrappedTH1 *hAllTopQuarkPt_jjbMatched;
-  WrappedTH1 *hAllTopQuarkPt_jjbMatchedBDT;
 
   WrappedTH1 *hLdgTrijetFake;
   WrappedTH1 *hLdgTrijetFake_BDT;
-  WrappedTH1 *hLdgTrijetFakeJJB;
-  WrappedTH1 *hLdgTrijetFakeJJB_BDT;
   WrappedTH1 *hTopQuarkPt_BDT;
 
   WrappedTH1 *hBDTmultiplicity;
-  WrappedTH1 *hTrijetTopMatchedNonJJBMatched_Mass;
+  WrappedTH1 *hTrijetInTopDirNonMatched_Mass;
+  WrappedTH1 *hTrijetInTopDir_Mass;
   WrappedTH1 *hTrijetTopMatched_Mass;
-  WrappedTH1 *hTrijetTopJJBMatched_Mass;
+  WrappedTH1 *hInTopDirBDTmult;
   WrappedTH1 *hMatchedBDTmult;
-  WrappedTH1 *hMatchedjjbBDTmult;
   WrappedTH1 *hEventTrijetPt_BDT;
-  WrappedTH1 *hEventTrijetPt_MatchedBDT;
-  WrappedTH1 *hEventTrijetPt_MatchedjjbBDT;
+  WrappedTH1 *hEventTrijetPt_InTopDirBDT;
+  WrappedTH1 *hTrijetNotInTopDirPt;
+  WrappedTH1 *hTrijetNotInTopDirPt_BDT;
   WrappedTH1 *hTrijetFakePt;
   WrappedTH1 *hTrijetFakePt_BDT;
-  WrappedTH1 *hTrijetFakeJJBPt;
-  WrappedTH1 *hTrijetFakeJJBPt_BDT;
   WrappedTH1 *hDeltaRMinTopTrijet;
 
   WrappedTH1 *hEventTrijetPt2T_BDT;
-  WrappedTH1 *hEventTrijetPt2T_MatchedjjbBDT;
+  WrappedTH1 *hEventTrijetPt2T_MatchedBDT;
 
-  WrappedTH1 *hEventTrijetPt2T_Matchedjjb;
-  WrappedTH1 *hAllTopQuarkPt_NonMatched;
-  WrappedTH1 *hAllTopQuarkMass_NonMatched;
+  WrappedTH1 *hEventTrijetPt2T_Matched;
+  WrappedTH1 *hAllTopQuarkPt_NotInTopDir;
 
   WrappedTH1 *hEventTrijetPt;
   WrappedTH1 *hEventTrijetPt2T;
   WrappedTH1 *hRealSelectedTopMult;
   WrappedTH1 *hTrijetMultiplicity;
   WrappedTH1 *hTrijetBDT_Mass;
-  WrappedTH1 *hTrijetJJBMatched_BDTvalue;
-  WrappedTH1 *hTrijetJJBNonMatched_BDTvalue;
+  WrappedTH1 *hTrijetMatched_BDTvalue;
+  WrappedTH1 *hTrijetNonMatched_BDTvalue;
   WrappedTH1 *hNjets;
   WrappedTH1 *hDeltaMVAmax_MCtruth_SameObjFakes;
   WrappedTH1 *hAbsDeltaMVAmax_MCtruth_SameObjFakes;
@@ -400,6 +398,41 @@ private:
   WrappedTH1 *hTrijetPt_PassBDT_BJetPassCSV;
   WrappedTH1 *hTrijetPt_PassBDT;
 
+
+  WrappedTH1 *hChHiggsBjetPt_TetrajetBjetMatched_afterCuts;
+  WrappedTH1 *hChHiggsBjetPt_foundTetrajetBjet_afterCuts;
+  WrappedTH1 *hHiggsBjetPt_afterCuts;
+  WrappedTH1 *hHiggsBjetPt_LdgBjetMatched_afterCuts;
+  WrappedTH1 *hLdgBjetPt_afterCuts;
+  WrappedTH1 *hLdgBjetPt_isLdgFreeBjet_afterCuts;
+
+  WrappedTH1 *hTopFromHiggsPt_isLdgMVATrijet_afterCuts;
+  WrappedTH1 *hTopFromHiggsPt_isSubldgMVATrijet_afterCuts;
+  WrappedTH1 *hTopFromHiggsPt_isMVATrijet_afterCuts;
+  WrappedTH1 *hDeltaPtOverPt_TopFromH_LdgMVATrijet_afterCuts;
+  WrappedTH1 *hDeltaEta_TopFromH_LdgMVATrijet_afterCuts;
+  WrappedTH1 *hDeltaPhi_TopFromH_LdgMVATrijet_afterCuts;
+  WrappedTH1 *hDeltaR_TopFromH_LdgMVATrijet_afterCuts;
+
+  WrappedTH1 *hDeltaPtOverPt_TopFromH_SubldgMVATrijet_afterCuts;
+  WrappedTH1 *hDeltaEta_TopFromH_SubldgMVATrijet_afterCuts;
+  WrappedTH1 *hDeltaPhi_TopFromH_SubldgMVATrijet_afterCuts;
+  WrappedTH1 *hDeltaR_TopFromH_SubldgMVATrijet_afterCuts;
+
+  WrappedTH1 *hTopFromHiggsPt_afterCuts;
+
+  WrappedTH1 *hDeltaCSV_TopFromHBJet_LdgMVATrijetBjet_afterCuts;
+  WrappedTH1 *hDeltaBDT_TopFromH_LdgMVATrijet_afterCuts;
+
+  WrappedTH1 *hDeltaCSV_TopFromHBJet_SubldgMVATrijetBjet_afterCuts;
+  WrappedTH1 *hDeltaBDT_TopFromH_SubldgMVATrijet_afterCuts;
+
+  WrappedTH1 *hDeltaPtOverPt_HiggsBjetPt_TetrajetBjetMatched_afterCuts;
+  WrappedTH1 *hDeltaEta_HiggsBjetPt_TetrajetBjetMatched_afterCuts;
+  WrappedTH1 *hDeltaPhi_HiggsBjetPt_TetrajetBjetMatched_afterCuts;
+  WrappedTH1 *hDeltaR_HiggsBjetPt_TetrajetBjetMatched_afterCuts;
+  WrappedTH1 *hDeltaCSV_HiggsBjetPt_TetrajetBjetMatched_afterCuts;
+
   //next WrappedTH1
 
   // Histograms (2D)                                                                                                                             
@@ -409,6 +442,14 @@ private:
   WrappedTH2 *hDeltaMVAmaxVsTrijetPassBDTvalue;
   WrappedTH2 *hDeltaMVAminVsTrijetPassBDTvalue;
   WrappedTH2 *hFakeTrijetMassVsBDTvalue;
+  WrappedTH2 *hTopFromHiggsPtVSAssocTopPt;
+  WrappedTH2 *DEta_Trijet1TetrajetBjet_Vs_DEta_Trijet2TetrajetBjet;
+  WrappedTH2 *DPhi_Trijet1TetrajetBjet_Vs_DPhi_Trijet2TetrajetBjet;
+  WrappedTH2 *DR_Trijet1TetrajetBjet_Vs_DR_Trijet2TetrajetBjet;
+  WrappedTH2 *DEta_TopFromHBjetFromH_Vs_DEta_AssocTopBjetFromH;
+  WrappedTH2 *DPhi_TopFromHBjetFromH_Vs_DPhi_AssocTopBjetFromH;
+  WrappedTH2 *DR_TopFromHBjetFromH_Vs_DR_AssocTopBjetFromH;
+
 };
 
 #endif
