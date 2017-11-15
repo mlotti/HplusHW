@@ -42,7 +42,8 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config, EventCounter& event
     cfg_MassCut(config, "MassCut"),
     //    cfg_MVACuts(config.getParameter<std::vector<float>>("MVACuts")),
     cfg_CSV_bDiscCut(config, "CSV_bDiscCut"),
-    cfg_NjetsMaxCut(config, "NjetsMaxCut"),
+    cfg_NjetsMax(config.getParameter<unsigned int>("NjetsMax")),
+    cfg_NBjetsMax(config.getParameter<unsigned int>("NBjetsMax")),
     cfg_ReplaceJetsWithGenJets(config.getParameter<bool>("ReplaceJetsWithGenJets")),
     // Event counter for passing selection
     cPassedTopSelectionBDT(fEventCounter.addCounter("passed top selection ("+postfix+")")),
@@ -52,7 +53,6 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config, EventCounter& event
     cSubPassedBDTCut(fEventCounter.addSubCounter("top selection ("+postfix+")", "Passed BDT cut"))
 {
   initialize(config);
-  nSelectedBJets = -1;
 }
 
 TopSelectionBDT::TopSelectionBDT(const ParameterSet& config)
@@ -62,7 +62,8 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config)
   cfg_MassCut(config, "MassCut"),
   //  cfg_MVACuts(config.getParameter<std::vector<float>>("MVACuts")),
   cfg_CSV_bDiscCut(config, "CSV_bDiscCut"),
-  cfg_NjetsMaxCut(config, "NjetsMaxCut"),
+  cfg_NjetsMax(config.getParameter<int>("NjetsMax")),
+  cfg_NBjetsMax(config.getParameter<int>("NBjetsMax")),
   cfg_ReplaceJetsWithGenJets(config.getParameter<bool>("ReplaceJetsWithGenJets")),  
   // Event counter for passing selection
   cPassedTopSelectionBDT(fEventCounter.addCounter("passed top selection")),
@@ -567,7 +568,6 @@ void TopSelectionBDT::bookHistograms(TDirectory* dir) {
 
 TopSelectionBDT::Data TopSelectionBDT::silentAnalyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const bool doMatching) {
   ensureSilentAnalyzeAllowed(event.eventID());
-  nSelectedBJets = bjetData.getSelectedBJets().size();
 
   // Disable histogram filling and counter
   disableHistogramsAndCounters();
@@ -577,9 +577,48 @@ TopSelectionBDT::Data TopSelectionBDT::silentAnalyze(const Event& event, const J
 }
 
 
+TopSelectionBDT::Data TopSelectionBDT::silentAnalyzeWithoutBJets(const Event& event, 
+								 const JetSelection::Data& jetData,
+								 const BJetSelection::Data& bjetData,
+								 bool doMatching,
+								 const std::string failedBJetsSortType) {
+  ensureSilentAnalyzeAllowed(event.eventID());
+  
+  // Disable histogram filling and counter
+  disableHistogramsAndCounters();  
+  
+  // Ready to analyze 
+  Data data = privateAnalyze(event, jetData.getSelectedJets(), GetBjetsToBeUsedInFit(bjetData, cfg_NBjetsMax, failedBJetsSortType), doMatching);
+  
+  // Save the failed bjets used in the top fit (only the failed (inverted) bjets)
+  data.fFailedBJetsUsedAsBJetsInFit = GetFailedBJetsUsedAsBJetsInFit();
+
+  // Re-enable histogram filling and counter
+  enableHistogramsAndCounters();
+  return data;
+}
+
+TopSelectionBDT::Data TopSelectionBDT::analyzeWithoutBJets(const Event& event, 
+							   const JetSelection::Data& jetData,
+							   const BJetSelection::Data& bjetData,
+							   bool doMatching,
+							   const std::string failedBJetsSortType) {
+  ensureSilentAnalyzeAllowed(event.eventID());
+
+  // Ready to analyze 
+  Data data = privateAnalyze(event, jetData.getSelectedJets(), GetBjetsToBeUsedInFit(bjetData, cfg_NBjetsMax, failedBJetsSortType), doMatching);
+
+  // Save the failed bjets used in the top fit (only the failed (inverted) bjets)
+  data.fFailedBJetsUsedAsBJetsInFit = GetFailedBJetsUsedAsBJetsInFit();
+  
+  // Re-enable histogram filling and counter
+  enableHistogramsAndCounters();
+  return data;
+}
+
+
 TopSelectionBDT::Data TopSelectionBDT::analyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const bool doMatching) {
   ensureAnalyzeAllowed(event.eventID());
-  nSelectedBJets = bjetData.getSelectedBJets().size();
 
   // Ready to analyze
   TopSelectionBDT::Data data = privateAnalyze(event, jetData.getSelectedJets(), bjetData.getSelectedBJets(), doMatching);
@@ -589,6 +628,10 @@ TopSelectionBDT::Data TopSelectionBDT::analyze(const Event& event, const JetSele
   return data;
 }
 
+
+//alex
+
+//alex
 
 TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const std::vector<Jet> selectedJets, const std::vector<Jet> selectedBjets, bool doMatching) {
   if (0) std::cout << "=== TopSelectionBDT::privateAnalyze()" << std::endl;
@@ -602,17 +645,11 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   bool replaceJets = event.isMC()*cfg_ReplaceJetsWithGenJets; // fixme - not tested
 
   // Only resize if their size exceeds max allowed value
-  unsigned int nJetsMax = (unsigned int) cfg_NjetsMaxCut.getCutValue();
-  std::vector<Jet> jets = selectedJets;
-  const std::vector<Jet> bjets = selectedBjets;
-  if (jets.size() > nJetsMax)
-    {
-      if (0) std::cout << "\tResising jets vector (size=" << jets.size() << ") to size=" << cfg_NjetsMaxCut.getCutValue() << std::endl;
-      jets.resize(nJetsMax);
-      //std::cout << "cfg_NjetsMaxCut.getCutDirection() = " << cfg_NjetsMaxCut.getCutDirection() << std::endl;
-      //std::cout << "cfg_NjetsMaxCut.getCutDirectionString() = " << cfg_NjetsMaxCut.getCutDirectionString() << std::endl;
-    }
-
+  std::vector<Jet> jets  = selectedJets;
+  std::vector<Jet> bjets = selectedBjets;
+  if (jets.size() > cfg_NjetsMax)  jets.resize(cfg_NjetsMax);
+  if (bjets.size() > cfg_NBjetsMax) bjets.resize(cfg_NBjetsMax);
+  
   if (0) std::cout << "\nnJets = " << jets.size() << ", \033[1;31mnBJets = " << bjets.size() << "\033[0m" << std::endl;
   hNjets -> Fill(jets.size());
 
@@ -2230,4 +2267,62 @@ bool TopSelectionBDT::HasMother(const Event& event, const genParticle &p, const 
     }
 
   return false;
+}
+
+
+const std::vector<Jet> TopSelectionBDT::GetJetsToBeUsedInFit(const JetSelection::Data& jetData,
+							     const unsigned int maxNumberOfJets)
+{
+  // Get the selected jets
+  std::vector<Jet> jets = jetData.getSelectedJets();
+  
+  // Only resize if their size exceeds max allowed value
+  if (jets.size() > maxNumberOfJets) jets.resize(maxNumberOfJets);
+  return jets;
+}
+
+
+const std::vector<Jet> TopSelectionBDT::GetBjetsToBeUsedInFit(const BJetSelection::Data& bjetData,
+							      const unsigned int maxNumberOfBJets, 
+							      const std::string jetSortType)
+{
+  // If there are some bjets use them (depends on cuts)
+  std::vector<Jet> bjetsForFit      = bjetData.getSelectedBJets();
+  const unsigned int nSelectedBJets = bjetData.getSelectedBJets().size();
+
+  // Append the vector of all failed bjets to the end of the bjets vector
+  // Use case: QCD Measurement where we invert at least 1 b-jet => may have less than 3 b-jets available (min for di-top fit and inv mass) 
+  if (bjetsForFit.size() < maxNumberOfBJets)
+    {      
+
+      std::vector<Jet> failedBJets;
+      if (jetSortType.compare("Random") == 0 ) failedBJets = bjetData.getFailedBJetCandsShuffled();
+      else if  (jetSortType.compare("AscendingPt") == 0 ) failedBJets = bjetData.getFailedBJetCandsAscendingPt();
+      else if  (jetSortType.compare("DescendingPt") == 0 ) failedBJets = bjetData.getFailedBJetCandsDescendingPt();
+      else if  (jetSortType.compare("AscendingBDiscriminator") == 0 ) failedBJets = bjetData.getFailedBJetCandsAscendingDiscr();
+      else if  (jetSortType.compare("DescendingBDiscriminator") == 0 ) failedBJets = bjetData.getFailedBJetCandsDescendingDiscr();
+      else
+	{
+	  throw hplus::Exception("logic") << "Uknown jet sort type \"" << jetSortType << "\" passed to TopSelection class. "
+					  << "Please select one of the following:\n\t\"Random\", \"AscendingPt\", \"DescendingPt\", \"AscendingBDiscriminator\", \"DescendingBDiscriminator\".";
+	}
+
+      // Save the failed bjets that will be used to replace bjets in top fit (for studying their properties)
+      const unsigned int nFailedBJetsUsedAsBJetsInFit = maxNumberOfBJets - nSelectedBJets;
+      myFailedBJetsUsedAsBJetsInFit = failedBJets;
+      myFailedBJetsUsedAsBJetsInFit.resize(nFailedBJetsUsedAsBJetsInFit);
+      if (0) std::cout << "nFailedBJetsUsedAsBJetsInFit = " << maxNumberOfBJets << " - " << nSelectedBJets << " = " << nFailedBJetsUsedAsBJetsInFit << std::endl;
+
+      // Now insert the customly sorted failed bjet vector to the end of the selected bjets vector
+      bjetsForFit.insert(bjetsForFit.end(), failedBJets.begin(), failedBJets.end()); 
+    }
+
+
+  // Truncate the bjets vector to correct size
+  if (bjetsForFit.size() > maxNumberOfBJets) bjetsForFit.resize(maxNumberOfBJets);
+
+  // Finally sort by descending pt value (http://en.cppreference.com/w/cpp/algorithm/sort)      
+  std::sort(bjetsForFit.begin(), bjetsForFit.end(), [](const Jet& a, const Jet& b){return a.pt() > b.pt();});
+
+  return bjetsForFit;
 }

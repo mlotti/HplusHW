@@ -27,12 +27,11 @@ public:
 private:
   // Input parameters
   const DirectionalCut<double> cfg_PrelimTopMVACut;
-  // const DirectionalCut<float> cfg_PrelimTopFitChiSqr;
   const DirectionalCut<int> cfg_NumberOfBJets;
   const DirectionalCut<int> cfg_NumberOfInvertedBJets;
   const std::string cfg_InvertedBJetsDiscriminator;
   const std::string cfg_InvertedBJetsDiscriminatorWP;
-  const DirectionalCut<float> cfg_InvertedBJetsDiscrMax;
+  const DirectionalCut<double> cfg_InvertedBJetsDiscrMax;
   const std::string cfg_InvertedBJetsSortType;
   const std::string cfg_BaselineBJetsDiscriminator;
   const std::string cfg_BaselineBJetsDiscriminatorWP;
@@ -340,7 +339,6 @@ REGISTER_SELECTOR(FakeBMeasurement);
 
 FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCounters)
   : BaseSelector(config, skimCounters),
-    // cfg_PrelimTopFitChiSqr(config, "FakeBMeasurement.prelimTopFitChiSqrCut"),
     cfg_PrelimTopMVACut(config, "FakeBMeasurement.prelimTopMVACut"),
     cfg_NumberOfBJets(config, "FakeBMeasurement.numberOfBJetsCut"),
     cfg_NumberOfInvertedBJets(config, "FakeBMeasurement.numberOfInvertedBJetsCut"),
@@ -365,14 +363,14 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
     cBaselineBTaggingSFCounter(fEventCounter.addCounter("Baseline: b tag SF")),
     fBaselineMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
     fBaselineTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
-    fBaselineTopSelection(config.getParameter<ParameterSet>("TopSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
+    fBaselineTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
     cBaselineSelected(fEventCounter.addCounter("Baseline: selected events")),
     // Inverted selection
     cInvertedBTaggingCounter(fEventCounter.addCounter("Inverted: passed b-jet selection")),
     cInvertedBTaggingSFCounter(fEventCounter.addCounter("Inverted: b tag SF")),
     fInvertedMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
     fInvertedTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
-    fInvertedTopSelection(config.getParameter<ParameterSet>("TopSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
+    fInvertedTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
     cInvertedSelected(fEventCounter.addCounter("Inverted: selected events"))
 { }
 
@@ -1706,6 +1704,7 @@ void FakeBMeasurement::process(Long64_t entry) {
   // Disable histogram filling and counter with silent analyze
   // const BJetSelection::Data bjetData = fBJetSelection.silentAnalyze(fEvent, jetData);
 
+
   // Baseline Selection
   if (bjetData.passedSelection())
     {
@@ -1718,8 +1717,9 @@ void FakeBMeasurement::process(Long64_t entry) {
       if (!passInverted) return;
 
       // Do the inverted analysis
-      DoInvertedAnalysis(jetData, bjetData, nVertices); 
+      DoInvertedAnalysis(jetData, bjetData, nVertices);
     }
+
   return;
 }
 
@@ -1831,7 +1831,7 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   */
   if (0) std::cout << "=== Baseline: Top selection" << std::endl;
   const TopSelectionBDT::Data topData = fBaselineTopSelection.analyze(fEvent, jetData, bjetData);
-  bool passPrelimMVACut = cfg_PrelimTopMVACut.passedCut( std::max(topData.getMVAmax1(), topData.getMVAmax2()) ); //fixme?
+  bool passPrelimMVACut = cfg_PrelimTopMVACut.passedCut( std::max(topData.getMVAmax1(), topData.getMVAmax2()) ); // fixme?
   bool hasFreeBJet      = topData.hasFreeBJet();
   if (!hasFreeBJet) return;
   if (!passPrelimMVACut) return;
@@ -2135,8 +2135,8 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   // 12) Top selection
   //================================================================================================
-  if (1) std::cout << "=== Inverted: Top selection" << std::endl;
-  const TopSelectionBDT::Data topData = fInvertedTopSelection.analyzeWithoutBJets(fEvent, jetData, bjetData, cfg_InvertedBJetsSortType);
+  if (0) std::cout << "=== Inverted: Top selection" << std::endl;
+  const TopSelectionBDT::Data topData = fInvertedTopSelection.analyzeWithoutBJets(fEvent, jetData, bjetData, true, cfg_InvertedBJetsSortType);
   bool passPrelimMVACut = cfg_PrelimTopMVACut.passedCut( std::max(topData.getMVAmax1(), topData.getMVAmax2()) ); //fixme?
   bool hasFreeBJet      = topData.hasFreeBJet();
   if (!hasFreeBJet) return;
