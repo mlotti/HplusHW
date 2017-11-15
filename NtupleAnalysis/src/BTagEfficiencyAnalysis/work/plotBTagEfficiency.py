@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+'''
+
+/plotBTagEfficiency_HybridQCD.py -m <mcrab_dir> [options]
+
+'''
 
 import os
 import sys

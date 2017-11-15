@@ -10,9 +10,11 @@ USAGE:
 ./run.py -m <path-to-multicrab-directory> -n 10 -e "Keyword1|Keyword2|Keyword3"
 
 Example:
-./run.py -m <path-to-multicrab-directory> --analysisType HToTB -i 'JetHT|TT|QCD|WJets' -n -1
-./run.py -m <path-to-multicrab-directory> -n 1000 -e "Charged"
-./run.py -m <path-to-multicrab-directory> -n 1000 -i "QCD|TT|WJets"
+./run.py -m <path-to-multicrab-directory> --analysisType HToTB -e "Charged|DY|QCD_b|WZ|ZZ|TTTT|ST_|WJets|TTWJets|TTZ|WW"
+./run.py -m <path-to-multicrab-directory> --analysisType HToTB -i 'JetHT|TT|QCD|WJets'
+
+Last used:
+./run.py -m <path-to-multicrab-directory> --analysisType HToTB -e "Charged|DY|QCD_b|WZ|ZZ|TTTT|ST_|WJets|TTWJets|TTZ|WW"
 
 ROOT:
 The available ROOT options for the Error-Ignore-Level are (const Int_t):
