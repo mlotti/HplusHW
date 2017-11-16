@@ -17,13 +17,12 @@ import FWCore.ParameterSet.Config as cms
 #================================================================================================ 
 def produceCustomisations(process, isData):
     process.CustomisationsSequence = cms.Sequence()
-#    produceJets(process, isData)
+    produceJets(process, isData)
 #    reproduceJEC(process)
 #    reproduceElectronID(process)
     reproduceMETNoiseFilters(process)
     reproduceMET(process, isData)
-#    reproduceJEC(process)
-    produceJets(process, isData)
+    reproduceJEC(process)
     print "=== Customisations done"
 
 
@@ -54,7 +53,6 @@ def produceJets(process, isData):
     jetToolbox( process, 'ak4', 'ak4JetSubs', 'out', 
                 addQGTagger=True, addPUJetID=True, JETCorrLevels = JEC,
                 bTagDiscriminators = ['pfCombinedInclusiveSecondaryVertexV2BJetTags', 'pfCombinedMVAV2BJetTags','pfCombinedCvsBJetTags','pfCombinedCvsLJetTags'],
-                updateCollection='cleanedPatJets', JETCorrPayload="AK4PFchs",
                 postFix='')
 
     # Small fix required to add the variables ptD, axis2, mult. See:
