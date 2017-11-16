@@ -255,7 +255,7 @@ def doPlot(name, genuineBDataset, fakeBDataset, errorlevel, optimizationMode, lu
     drawPlot(myPlot, "%s_%s" % ("Hybrid", name), **GetKwargs(name, opts))
     
     # Save the plot in custom formats
-    msgList = SavePlot(myPlot, name, os.path.join(opts.saveDir, opts.analysisName), saveFormats = [".png"])
+    msgList = SavePlot(myPlot, name, os.path.join(opts.saveDir, opts.analysisName), saveFormats = [".C", ".png", ".pdf"])
     
     return results, msgList
 
