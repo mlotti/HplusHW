@@ -112,7 +112,12 @@ class CrabTask:
         self.preMergedFiles   = []
         self.mergedToInputMap = {}
         self.mergedToSizeMap  = {}
-        self.taskDir          = os.path.dirname(logFiles[0].replace("/log", ""))
+        if len(logFiles) > 0:
+            self.taskDir      = os.path.dirname(logFiles[0].replace("/log", ""))
+        elif len(rootFiles) > 0:
+            self.taskDir      = os.path.dirname(rootFiles[0].replace("/log", ""))
+        else:
+            self.taskDir      = None
         self.HOST             = socket.gethostname()
         self.opts             = opts
         self.mergeTimeMap     = {} # mergeFile -> mergeTime  (in seconds)
@@ -772,8 +777,9 @@ def ConvertCommandToEOS(cmd, opts):
     Convert a given command to EOS-path. Used when working solely with EOS
     and files are not copied to local working directory
     '''
-    Verbose("ConvertCommandToEOS()", True)
-    
+    if not opts.filesInEOS:
+        return cmd
+
     # Define a map mapping bash command with EOS commands
     cmdMap = {}
     cmdMap["ls"]    = "eos ls"
@@ -1035,9 +1041,12 @@ def GetHaddCommand(opts, mergeName, inputFiles, path_prefix=""):
 
 def hadd(opts, mergeName, inputFiles, path_prefix=""):
     '''
+    This merges ROOT files containing histograms or/and Trees, 
+    using the utility hadd in $ROOTSYS/bin/hadd. 
+
+    To use that at the shell command line, simply type hadd to get online help.
+    hadd result.root file1.root file2.root ... filen.root
     '''
-    Verbose("hadd()", True)
-    
     # Get the command to be executedq
     cmd = GetHaddCommand(opts, mergeName, inputFiles, path_prefix)
 
@@ -1872,11 +1881,11 @@ def GetTaskLogFiles(taskName, opts):
 
     # Alternative to glob, which for unknown reasons sometimes doesn't work for EOS
     if len(logFiles) < 1:
-        msg = "Found %d ROOT files. Retrying with alternative method (not glob)" % (len(rootFilesList))
-        Print(NoteStyle() + msg + NormalStyle(), False)
+        msg = "Found %d ROOT files. Retrying with alternative method (not glob)" % (len(logFiles))
+        Verbose(NoteStyle() + msg + NormalStyle(), False)
         
         # Get the command & execute it
-        cmd = ConvertCommandToEOS("ls", opts) + " " + tmp
+        cmd = ConvertCommandToEOS("ls", opts) + " " + pathName
         ret = Execute(cmd)
         logFiles = [pathName + f for f in ret if ".log.tar.gz" in f]
 
@@ -1898,15 +1907,15 @@ def GetTaskRootFiles(taskName, basename, opts):
     if opts.filesInEOS:
         pathName = ConvertPathToEOS(taskName, taskName, "", opts, isDir=True)
     else:
-        pathName = os.path.join(taskName, "results", "miniaod*.root")
+        pathName = os.path.join(taskName, "results")#, "miniaod*.root")
 
     Verbose("Obtaining ROOT files for task %s from %s with glob" % (taskName, pathName), True)
-    rootFilesList = glob.glob(pathName + "miniaod*.root")
+    rootFilesList = glob.glob(os.path.join(pathName,"miniaod*.root"))
 
     # Alternative to glob, which for unknown reasons sometimes doesn't work for EOS
     if len(rootFilesList) < 1:
         msg = "Found %d ROOT files. Retrying with alternative method (not glob)" % (len(rootFilesList))
-        Print(NoteStyle() + msg + NormalStyle(), False)
+        Verbose(NoteStyle() + msg + NormalStyle(), False)
 
         # Get the command & execute it
         cmd = ConvertCommandToEOS("ls", opts) + " " + pathName
@@ -1919,7 +1928,7 @@ def GetTaskRootFiles(taskName, basename, opts):
 
     # Sort the list naturally (alphanumeric strings)
     rootFilesList = natural_sort(rootFilesList)
-    
+
     # Remove the path form the list
     Verbose("Found %s ROOT files" % (len(rootFilesList) ) )
     if basename:
@@ -2174,6 +2183,7 @@ def main(opts, args):
             ret    = -1
             cmd    = GetMergeCommand(mergeName, inputFiles, opts)
             suffix = "%s to %s -> %s" % (firstFile, lastFile, os.path.basename(mergeName))
+
             try:
                 PrintProgressBar("Merge ROOT files", index-1, len(filesSplit), suffix)
                 ret = MergeFiles(mergeName, inputFiles, opts)

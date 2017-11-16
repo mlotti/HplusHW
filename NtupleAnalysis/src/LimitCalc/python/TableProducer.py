@@ -92,8 +92,10 @@ def createBinByBinStatUncertHistograms(hRate, minimumStatUncertainty=0.5, xmin=N
             else:
                 hUp.SetBinContent(i, hUp.GetBinContent(i) + hUp.GetBinError(i))
             
-            hDown.SetBinContent(i, hDown.GetBinContent(i)-hDown.GetBinError(i))
-
+            statBinDown = hDown.GetBinContent(i)-hDown.GetBinError(i)
+            # hDown.SetBinContent(i, statBinDown) # Bug fix (8Nov2017)
+            hDown.SetBinContent(i, max(0, statBinDown))
+                    
             # Clear uncertainty bins, because they have no effect on LandS/Combine
             for j in range(1, hRate.GetNbinsX()+1):
                 hUp.SetBinError(j, 0.0)

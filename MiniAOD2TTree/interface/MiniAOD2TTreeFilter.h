@@ -73,7 +73,7 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
 	std::vector<edm::ParameterSet> electronCollections;
 	std::vector<edm::ParameterSet> muonCollections;
 	std::vector<edm::ParameterSet> jetCollections;
-	edm::ParameterSet softBTagCollections;
+	std::vector<edm::ParameterSet> softBTagCollections;
         std::vector<edm::ParameterSet> topCollections;
 	std::vector<edm::ParameterSet> metCollections;
 	std::vector<edm::ParameterSet> genMetCollections;
