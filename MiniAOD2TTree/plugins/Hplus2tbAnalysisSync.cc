@@ -289,6 +289,8 @@ bool Hplus2tbAnalysisSync::filter(edm::Event& iEvent, const edm::EventSetup& iSe
 	    if (obj.p4().pt() < cfg_ak8jetEtCut) continue;
 	    if (fabs(obj.p4().eta()) > cfg_ak8jetEtaCut) continue;
 	    
+	    
+
 	    std::cout<<"Fat Jet ="<<i<<"   Pt = "<<obj.p4().pt()<<"   Eta = "<<obj.p4().eta()<<std::endl;
 	    
 	    
@@ -332,8 +334,25 @@ bool Hplus2tbAnalysisSync::filter(edm::Event& iEvent, const edm::EventSetup& iSe
 	
 	// Find a way to do the MVA thingie
 	float mvaValue = (*electronMVAHandle)[ref];
+	float AbsEta = fabs(obj.p4().eta());
 	
+	bool isLoose = false;
+	if (AbsEta <= 0.8 and mvaValue >= -0.041)
+	  {
+	    isLoose = true;
+	  }
+	if (AbsEta > 0.8 and AbsEta < 1.479 and mvaValue >= 0.383)
+	  {
+	    isLoose = true;
+	  }
+	if (AbsEta >= 1.479 and mvaValue >= -0.515)
+	  {
+	    isLoose = true;
+	  }
+	
+	//std::cout<<"Electron "<<iEle<<"  with mva value = "<<mvaValue<<"   and |eta|="<<AbsEta<<"  is Loose ="<<isLoose<<std::endl;
 	// Apply acceptance cuts
+	if (!isLoose) continue;	
 	if (miniRelIsoEA > cfg_electronMiniRelIsoEA) continue;
 	if(obj.p4().pt() < cfg_electronPtCut) continue;
 	if(fabs(obj.p4().eta()) > cfg_electronEtaCut) continue;
@@ -367,7 +386,6 @@ bool Hplus2tbAnalysisSync::filter(edm::Event& iEvent, const edm::EventSetup& iSe
         
 	// Apply muon selections
 	double miniRelIsoEA = getMiniIsolation_EffectiveArea(pfcandHandle, dynamic_cast<const reco::Candidate *>(&obj), 0.05, 0.2, 10., false, false, *rhoHandle);
-	
 	
 	if (cfg_muonID == "loose" || cfg_muonID == "Loose") 
 	  {
