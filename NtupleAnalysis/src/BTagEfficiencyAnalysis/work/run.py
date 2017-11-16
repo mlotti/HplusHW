@@ -14,7 +14,7 @@ Example:
 ./run.py -m <path-to-multicrab-directory> --analysisType HToTB -i 'JetHT|TT|QCD|WJets'
 
 Last used:
-./run.py -m <path-to-multicrab-directory> --analysisType HToTB -e "Charged|DY|QCD_b|WZ|ZZ|TTTT|ST_|WJets|TTWJets|TTZ|WW"
+./run.py -m <path-to-multicrab-directory> --analysisType HToTB -e "Charged|DY|QCD_b|WZ|ZZ|TTTT|ST_|TTWJets|TTZ|WW"
 
 ROOT:
 The available ROOT options for the Error-Ignore-Level are (const Int_t):
