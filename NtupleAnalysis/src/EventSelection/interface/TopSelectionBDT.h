@@ -61,6 +61,9 @@ public:
     /// Status of GenuineB event (if false event is FakeB)
     bool isGenuineB() const { return bIsGenuineB; }
     bool hasFreeBJet() const { return bHasFreeBJet; }
+    // FakeB Measurement
+    const std::vector<Jet>& getJetsUsedAsBJetsInFit() const { return fJetsUsedAsBJetsInFit;}
+    const std::vector<Jet>& getFailedBJetsUsedAsBJetsInFit() const { return fFailedBJetsUsedAsBJetsInFit;}
     // Trijet-1
     const float getMVAmax1() const { return fMVAmax1; }
     const Jet getTrijet1Jet1() const { return fTrijet1Jet1; } 
@@ -145,6 +148,9 @@ public:
     bool bPassedSelection;
     // GenuineB = All selected b-jets are genuine, FakeB=At least one selected b-jet is not genuine
     bool bIsGenuineB;    
+    // FakeB Measurement
+    std::vector<Jet> fJetsUsedAsBJetsInFit;
+    std::vector<Jet> fFailedBJetsUsedAsBJetsInFit;
     // A free bjet is left after the top reconstruction (for invariant mass)
     bool bHasFreeBJet;
     /// Trijet-1
@@ -184,7 +190,9 @@ public:
   Data silentAnalyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const bool doMatching);
   /// analyze does fill histograms and incrementes counters
   Data analyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const bool doMatching=true);
-
+  // analyze for FakeBMeasurement
+  Data silentAnalyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData,  bool doMatching=true, const std::string failedBJetsSortType="Random");
+  Data analyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData,  bool doMatching=true, const std::string failedBJetsSortType="Random");
   TMVA::Reader *reader;
   
   Float_t TrijetPtDR;
@@ -206,6 +214,9 @@ public:
   Float_t TrijetSubldgJetAxis2;
   Float_t TrijetLdgJetMult;
   Float_t TrijetSubldgJetMult;
+
+  Float_t TrijetLdgJetQGLikelihood;
+  Float_t TrijetSubldgJetQGLikelihood;
 
 
 private:
@@ -231,7 +242,6 @@ private:
   
   const genParticle GetLastCopy(const std::vector<genParticle> genParticles, const genParticle &p);
 
-    //Soti
   Jet getLeadingSubleadingJet(const Jet& jet0, const Jet& jet1, string selectedJet);
   bool isMatchedJet(const Jet& jet, const std::vector<Jet>& jets);
   bool isWsubjet(const Jet& jet, const std::vector<Jet>& jets1, const std::vector<Jet>& jets2);
@@ -241,13 +251,27 @@ private:
   TrijetSelection SortInMVAvalue(TrijetSelection TopCand);
   bool foundFreeBjet(const Jet& trijet1Jet1, const Jet& trijet1Jet2, const Jet& trijet1BJet, const Jet& trijet2Jet1, const Jet& trijet2Jet2, const Jet& trijet2BJet , const std::vector<Jet>& bjets);
   bool HasMother(const Event& event, const genParticle &p, const int mom_pdgId);
-  // Input parameters
-  int nSelectedBJets;
-  const DirectionalCut<double> cfg_MVACut;
-  const DirectionalCut<double> cfg_CSV_bDiscCut;
-  const DirectionalCut<int> cfg_NjetsMaxCut;
-  const bool cfg_ReplaceJetsWithGenJets;
+  int getTopFromHiggs(TrijetSelection TopCand, const Jet&  MCtrueTopFromH_LdgJet, const Jet& MCtrueTopFromH_SubldgJet, const Jet& MCtrueTopFromH_Bjet);
 
+  const std::vector<Jet> GetJetsToBeUsedInFit(const JetSelection::Data& jetData,
+					      const unsigned int maxNumberOfJets);
+
+  const std::vector<Jet> GetBjetsToBeUsedInFit(const BJetSelection::Data& bjetData,
+					       const unsigned int maxNumberOfBJets,
+					       const std::string jetSortType="Random");
+  
+  const std::vector<Jet>& GetFailedBJetsUsedAsBJetsInFit(void) const { return myFailedBJetsUsedAsBJetsInFit;} 
+
+
+  // Input parameters
+  const DirectionalCut<double> cfg_MVACut;
+  const DirectionalCut<double> cfg_MassCut;
+  const DirectionalCut<double> cfg_CSV_bDiscCut;
+  const unsigned int cfg_NjetsMax;
+  const unsigned int cfg_NBjetsMax;
+  const bool cfg_ReplaceJetsWithGenJets;
+  const std::vector<float> cfg_MVACuts;
+  std::vector<Jet> myFailedBJetsUsedAsBJetsInFit;
   // Event counter for passing selection
   Count cPassedTopSelectionBDT;
 
@@ -259,7 +283,6 @@ private:
   // Histograms (1D)
   WrappedTH1  *hBDTresponse;
   WrappedTH1  *hTopCandMass;
-
 
   WrappedTH1  *hLdgTrijetTopMassWMassRatio;
   WrappedTH1  *hSubldgTrijetTopMassWMassRatio;
@@ -304,50 +327,45 @@ private:
   WrappedTH1  *hSubldgTrijetDijetDeltaR;
 
   WrappedTH1 *hTopQuarkPt;
-  WrappedTH1 *hTopQuarkPt_MatchedBDT;
-  WrappedTH1 *hTopQuarkPt_Matched;
+  WrappedTH1 *hTopQuarkPt_InTopDirBDT;
+  WrappedTH1 *hTopQuarkPt_InTopDir;
   WrappedTH1 *hTrijetPt_BDT;
-  WrappedTH1 *hTrijetMass_NotMatchedBDT;
+  WrappedTH1 *hAllTopQuarkPt_InTopDir;
+  WrappedTH1 *hAllTopQuarkPt_InTopDirBDT;
   WrappedTH1 *hAllTopQuarkPt_Matched;
   WrappedTH1 *hAllTopQuarkPt_MatchedBDT;
-  WrappedTH1 *hAllTopQuarkPt_jjbMatched;
-  WrappedTH1 *hAllTopQuarkPt_jjbMatchedBDT;
 
   WrappedTH1 *hLdgTrijetFake;
   WrappedTH1 *hLdgTrijetFake_BDT;
-  WrappedTH1 *hLdgTrijetFakeJJB;
-  WrappedTH1 *hLdgTrijetFakeJJB_BDT;
   WrappedTH1 *hTopQuarkPt_BDT;
 
   WrappedTH1 *hBDTmultiplicity;
-  WrappedTH1 *hTrijetTopMatchedNonJJBMatched_Mass;
+  WrappedTH1 *hTrijetInTopDirNonMatched_Mass;
+  WrappedTH1 *hTrijetInTopDir_Mass;
   WrappedTH1 *hTrijetTopMatched_Mass;
-  WrappedTH1 *hTrijetTopJJBMatched_Mass;
+  WrappedTH1 *hInTopDirBDTmult;
   WrappedTH1 *hMatchedBDTmult;
-  WrappedTH1 *hMatchedjjbBDTmult;
   WrappedTH1 *hEventTrijetPt_BDT;
-  WrappedTH1 *hEventTrijetPt_MatchedBDT;
-  WrappedTH1 *hEventTrijetPt_MatchedjjbBDT;
+  WrappedTH1 *hEventTrijetPt_InTopDirBDT;
+  WrappedTH1 *hTrijetNotInTopDirPt;
+  WrappedTH1 *hTrijetNotInTopDirPt_BDT;
   WrappedTH1 *hTrijetFakePt;
   WrappedTH1 *hTrijetFakePt_BDT;
-  WrappedTH1 *hTrijetFakeJJBPt;
-  WrappedTH1 *hTrijetFakeJJBPt_BDT;
   WrappedTH1 *hDeltaRMinTopTrijet;
 
   WrappedTH1 *hEventTrijetPt2T_BDT;
-  WrappedTH1 *hEventTrijetPt2T_MatchedjjbBDT;
+  WrappedTH1 *hEventTrijetPt2T_MatchedBDT;
 
-  WrappedTH1 *hEventTrijetPt2T_Matchedjjb;
-  WrappedTH1 *hAllTopQuarkPt_NonMatched;
-  WrappedTH1 *hAllTopQuarkMass_NonMatched;
+  WrappedTH1 *hEventTrijetPt2T_Matched;
+  WrappedTH1 *hAllTopQuarkPt_NotInTopDir;
 
   WrappedTH1 *hEventTrijetPt;
   WrappedTH1 *hEventTrijetPt2T;
   WrappedTH1 *hRealSelectedTopMult;
   WrappedTH1 *hTrijetMultiplicity;
   WrappedTH1 *hTrijetBDT_Mass;
-  WrappedTH1 *hTrijetJJBMatched_BDTvalue;
-  WrappedTH1 *hTrijetJJBNonMatched_BDTvalue;
+  WrappedTH1 *hTrijetMatched_BDTvalue;
+  WrappedTH1 *hTrijetNonMatched_BDTvalue;
   WrappedTH1 *hNjets;
   WrappedTH1 *hDeltaMVAmax_MCtruth_SameObjFakes;
   WrappedTH1 *hAbsDeltaMVAmax_MCtruth_SameObjFakes;
@@ -377,12 +395,60 @@ private:
   WrappedTH1 *hTrijetPtMaxMVASameFakeObj;
   WrappedTH1 *hNSelectedTrijets;
   WrappedTH1 *hTopFromHiggsPt_isLdgMVATrijet;
+  WrappedTH1 *hTopFromHiggsPt_isSubldgMVATrijet;
+  WrappedTH1 *hTopFromHiggsPt_isMVATrijet;
+
+  WrappedTH1 *hDeltaPtOverPt_TopFromH_LdgMVATrijet;
+  WrappedTH1 *hDeltaEta_TopFromH_LdgMVATrijet;
+  WrappedTH1 *hDeltaPhi_TopFromH_LdgMVATrijet;
+  WrappedTH1 *hDeltaR_TopFromH_LdgMVATrijet;
+
+  WrappedTH1 *hDeltaPtOverPt_TopFromH_SubldgMVATrijet;
+  WrappedTH1 *hDeltaEta_TopFromH_SubldgMVATrijet;
+  WrappedTH1 *hDeltaPhi_TopFromH_SubldgMVATrijet;
+  WrappedTH1 *hDeltaR_TopFromH_SubldgMVATrijet;
+
   WrappedTH1 *hTopFromHiggsPt;
 
   WrappedTH1 *hSelectedTrijetsPt_BjetPassCSVdisc_afterCuts;
   WrappedTH1 *hSelectedTrijetsPt_afterCuts;
   WrappedTH1 *hTrijetPt_PassBDT_BJetPassCSV;
   WrappedTH1 *hTrijetPt_PassBDT;
+
+
+  WrappedTH1 *hChHiggsBjetPt_TetrajetBjetMatched_afterCuts;
+  WrappedTH1 *hChHiggsBjetPt_foundTetrajetBjet_afterCuts;
+  WrappedTH1 *hHiggsBjetPt_afterCuts;
+  WrappedTH1 *hHiggsBjetPt_LdgBjetMatched_afterCuts;
+  WrappedTH1 *hLdgBjetPt_afterCuts;
+  WrappedTH1 *hLdgBjetPt_isLdgFreeBjet_afterCuts;
+
+  WrappedTH1 *hTopFromHiggsPt_isLdgMVATrijet_afterCuts;
+  WrappedTH1 *hTopFromHiggsPt_isSubldgMVATrijet_afterCuts;
+  WrappedTH1 *hTopFromHiggsPt_isMVATrijet_afterCuts;
+  WrappedTH1 *hDeltaPtOverPt_TopFromH_LdgMVATrijet_afterCuts;
+  WrappedTH1 *hDeltaEta_TopFromH_LdgMVATrijet_afterCuts;
+  WrappedTH1 *hDeltaPhi_TopFromH_LdgMVATrijet_afterCuts;
+  WrappedTH1 *hDeltaR_TopFromH_LdgMVATrijet_afterCuts;
+
+  WrappedTH1 *hDeltaPtOverPt_TopFromH_SubldgMVATrijet_afterCuts;
+  WrappedTH1 *hDeltaEta_TopFromH_SubldgMVATrijet_afterCuts;
+  WrappedTH1 *hDeltaPhi_TopFromH_SubldgMVATrijet_afterCuts;
+  WrappedTH1 *hDeltaR_TopFromH_SubldgMVATrijet_afterCuts;
+
+  WrappedTH1 *hTopFromHiggsPt_afterCuts;
+
+  WrappedTH1 *hDeltaCSV_TopFromHBJet_LdgMVATrijetBjet_afterCuts;
+  WrappedTH1 *hDeltaBDT_TopFromH_LdgMVATrijet_afterCuts;
+
+  WrappedTH1 *hDeltaCSV_TopFromHBJet_SubldgMVATrijetBjet_afterCuts;
+  WrappedTH1 *hDeltaBDT_TopFromH_SubldgMVATrijet_afterCuts;
+
+  WrappedTH1 *hDeltaPtOverPt_HiggsBjetPt_TetrajetBjetMatched_afterCuts;
+  WrappedTH1 *hDeltaEta_HiggsBjetPt_TetrajetBjetMatched_afterCuts;
+  WrappedTH1 *hDeltaPhi_HiggsBjetPt_TetrajetBjetMatched_afterCuts;
+  WrappedTH1 *hDeltaR_HiggsBjetPt_TetrajetBjetMatched_afterCuts;
+  WrappedTH1 *hDeltaCSV_HiggsBjetPt_TetrajetBjetMatched_afterCuts;
 
   //next WrappedTH1
 
@@ -393,6 +459,14 @@ private:
   WrappedTH2 *hDeltaMVAmaxVsTrijetPassBDTvalue;
   WrappedTH2 *hDeltaMVAminVsTrijetPassBDTvalue;
   WrappedTH2 *hFakeTrijetMassVsBDTvalue;
+  WrappedTH2 *hTopFromHiggsPtVSAssocTopPt;
+  WrappedTH2 *DEta_Trijet1TetrajetBjet_Vs_DEta_Trijet2TetrajetBjet;
+  WrappedTH2 *DPhi_Trijet1TetrajetBjet_Vs_DPhi_Trijet2TetrajetBjet;
+  WrappedTH2 *DR_Trijet1TetrajetBjet_Vs_DR_Trijet2TetrajetBjet;
+  WrappedTH2 *DEta_TopFromHBjetFromH_Vs_DEta_AssocTopBjetFromH;
+  WrappedTH2 *DPhi_TopFromHBjetFromH_Vs_DPhi_AssocTopBjetFromH;
+  WrappedTH2 *DR_TopFromHBjetFromH_Vs_DR_AssocTopBjetFromH;
+
 };
 
 #endif

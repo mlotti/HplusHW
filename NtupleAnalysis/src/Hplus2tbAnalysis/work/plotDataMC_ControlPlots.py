@@ -127,7 +127,7 @@ def main(opts):
         datasetsMgr.loadLuminosities() # from lumi.json
 
         # Set/Overwrite cross-sections
-        datasetsToRemove = ["QCD-b", "QCD_HT50to100", "QCD_HT100to200", "QCD_HT200to300"]# "QCD_HT300to500"]
+        datasetsToRemove = ["QCD-b"]#, "QCD_HT50to100", "QCD_HT100to200"]#, "QCD_HT200to300"]#, "QCD_HT300to500"]
         for d in datasetsMgr.getAllDatasets():
             if "ChargedHiggs" in d.getName():
                 datasetsMgr.getDataset(d.getName()).setCrossSection(1.0) # ATLAS 13 TeV H->tb exclusion limits
@@ -224,7 +224,8 @@ def GetHistoKwargs(h, opts):
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
         "opts"             : {"ymin": yMin, "ymaxfactor": yMaxF},
-        "opts2"            : {"ymin": 0.0, "ymax": 2.0},
+        #"opts2"            : {"ymin": 0.0, "ymax": 2.0},
+        "opts2"            : {"ymin": 0.59, "ymax": 1.41},
         "log"              : logY,
         "moveLegend"       : _moveLegend,
         }
