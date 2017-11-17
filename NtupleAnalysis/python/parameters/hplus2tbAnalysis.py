@@ -113,8 +113,8 @@ bjetSelection = PSet(
 #================================================================================================
 scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
                                     btagPayloadFilename    = "CSVv2.csv",
-                                    #btagEfficiencyFilename = "btageff_hybrid.json", #old
-                                    btagEfficiencyFilename = "btageff_hybrid_HToTB.json",
+                                    #btagEfficiencyFilename = "btageff_hybrid_HToTB.json",
+                                    btagEfficiencyFilename = "btageff_HToTB.json",
                                     direction              = "nominal")
 
 #================================================================================================
@@ -187,7 +187,7 @@ topologySelection = PSet(
 #================================================================================================        
 topSelectionBDT = PSet(
     # MVACuts                = [0.8, 0.8], #FIXME: Set individual cut values for each top candidate  
-    MVACutValue            = 0.8,        #FIXME: Set individual cut values for each top candidate  
+    MVACutValue            = 0.9,        #FIXME: Set individual cut values for each top candidate  
     MVACutDirection        =  ">=",  # options: ==, !=, <, <=, >, >=
     NjetsMax               = 999,     # [default: 999]
     NBjetsMax              = 999,     # [default: 999]
