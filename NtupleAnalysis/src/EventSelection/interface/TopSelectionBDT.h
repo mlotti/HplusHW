@@ -62,8 +62,8 @@ public:
     bool isGenuineB() const { return bIsGenuineB; }
     bool hasFreeBJet() const { return bHasFreeBJet; }
     // FakeB Measurement
-    const std::vector<Jet>& getJetsUsedAsBJetsInFit() const { return fJetsUsedAsBJetsInFit;}
-    const std::vector<Jet>& getFailedBJetsUsedAsBJetsInFit() const { return fFailedBJetsUsedAsBJetsInFit;}
+    const std::vector<Jet>& getJetsUsedAsBJets() const { return fJetsUsedAsBJets;}
+    const std::vector<Jet>& getFailedBJetsUsedAsBJets() const { return fFailedBJetsUsedAsBJets;}
     // Trijet-1
     const float getMVAmax1() const { return fMVAmax1; }
     const Jet getTrijet1Jet1() const { return fTrijet1Jet1; } 
@@ -149,8 +149,8 @@ public:
     // GenuineB = All selected b-jets are genuine, FakeB=At least one selected b-jet is not genuine
     bool bIsGenuineB;    
     // FakeB Measurement
-    std::vector<Jet> fJetsUsedAsBJetsInFit;
-    std::vector<Jet> fFailedBJetsUsedAsBJetsInFit;
+    std::vector<Jet> fJetsUsedAsBJets;
+    std::vector<Jet> fFailedBJetsUsedAsBJets;
     // A free bjet is left after the top reconstruction (for invariant mass)
     bool bHasFreeBJet;
     /// Trijet-1
@@ -253,14 +253,14 @@ private:
   bool HasMother(const Event& event, const genParticle &p, const int mom_pdgId);
   int getTopFromHiggs(TrijetSelection TopCand, const Jet&  MCtrueTopFromH_LdgJet, const Jet& MCtrueTopFromH_SubldgJet, const Jet& MCtrueTopFromH_Bjet);
 
-  const std::vector<Jet> GetJetsToBeUsedInFit(const JetSelection::Data& jetData,
-					      const unsigned int maxNumberOfJets);
+  const std::vector<Jet> GetJetsToBeUsed(const JetSelection::Data& jetData,
+					 const unsigned int maxNumberOfJets);
 
-  const std::vector<Jet> GetBjetsToBeUsedInFit(const BJetSelection::Data& bjetData,
-					       const unsigned int maxNumberOfBJets,
-					       const std::string jetSortType="Random");
+  const std::vector<Jet> GetBjetsToBeUsed(const BJetSelection::Data& bjetData,
+					  const unsigned int maxNumberOfBJets,
+					  const std::string jetSortType="Random");
   
-  const std::vector<Jet>& GetFailedBJetsUsedAsBJetsInFit(void) const { return myFailedBJetsUsedAsBJetsInFit;} 
+  const std::vector<Jet>& GetFailedBJetsUsedAsBJets(void) const { return myFailedBJetsUsedAsBJets;} 
 
 
   // Input parameters
@@ -271,7 +271,7 @@ private:
   const unsigned int cfg_NBjetsMax;
   const bool cfg_ReplaceJetsWithGenJets;
   const std::vector<float> cfg_MVACuts;
-  std::vector<Jet> myFailedBJetsUsedAsBJetsInFit;
+  std::vector<Jet> myFailedBJetsUsedAsBJets;
   // Event counter for passing selection
   Count cPassedTopSelectionBDT;
 
