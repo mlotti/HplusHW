@@ -3,15 +3,15 @@
 Description:
 
 Usage:
-./plotQCD_BaseVsInv.py -m <pseudo_mcrab> [opts]
+./plot_BaseVsInv.py -m <pseudo_mcrab> [opts]
 
 Examples:
-./plotQCD_BaseVsInv.py -m FakeBMeasurement_170728_040545/ -o "" --url
-./plotQCD_BaseVsInv.py -m FakeBMeasurement_170728_040545/ -o "" --url --normaliseToOne
-./plotQCD_BaseVsInv.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170703_031128_CtrlTriggers_QCDTemplateFit --mergeEWK -e "QCD|Charged" -o "OptTriggerOR['HLT_PFHT400_SixJet30']ChiSqrCutValue100"
+./plot_BaseVsInv.py -m FakeBMeasurement_170728_040545/ -o "" --url
+./plot_BaseVsInv.py -m FakeBMeasurement_170728_040545/ -o "" --url --normaliseToOne
+./plot_BaseVsInv.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170703_031128_CtrlTriggers_QCDTemplateFit --mergeEWK -e "QCD|Charged" -o "OptTriggerOR['HLT_PFHT400_SixJet30']ChiSqrCutValue100"
 
 Last Used:
-./plotQCD_BaseVsInv.py -m FakeBMeasurement_SignalTriggers_NoTrgMatch_StdSelections_TopCut_AllSelections_TopCut10_170728_040545/ --url --normaliseToOne
+./plot_BaseVsInv.py -m FakeBMeasurement_SignalTriggers_NoTrgMatch_StdSelections_TopCut_AllSelections_TopCut10_170728_040545/ --url --normaliseToOne
 '''
 
 #================================================================================================ 
@@ -69,7 +69,8 @@ def GetLumi(datasetsMgr):
 
 def GetListOfEwkDatasets():
     Verbose("Getting list of EWK datasets")
-    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    return ["TT", "noTop", "SingleTop", "ttX"]
+    #return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
 
 
 def GetDatasetsFromDir(opts):
@@ -188,14 +189,22 @@ def main(opts):
                     baselinePaths.append(p)
                 if "Inverted" in p:
                     invertedPath.append(p)
+
             for hBaseline, hInverted in zip(baselinePaths, invertedPath):
-                # print "--- Plotting histogram", hBaseline
+                if "AfterStandardS" in hBaseline:
+                    #print "--- Skipping histogram", hBaseline
+                    continue
+                if "AfterAllSelections" in hBaseline:
+                    #print "--- Skipping histogram", hBaseline
+                    continue
+                
+                print "--- Plotting histogram", hBaseline
                 PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted)
 
         # 2) Do the topSelection histos
-        if 0:
+        if 1:
             analysisType     = "Inverted"
-            folder           = "topSelection_%s" % (analysisType)            
+            folder           = "topbdtSelection_%s" % (analysisType)            
             invertedList     = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(folder)
             invertedPaths    = [os.path.join(folder, h) for h in invertedList]
             baselinePaths    = [p.replace("Inverted", "Baseline") for p in invertedPaths]
@@ -393,9 +402,8 @@ def PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted):
     savePath = os.path.join(opts.saveDir, "BaselineVsInverted", opts.optMode)
     if opts.useMC:
         savePath = os.path.join(opts.saveDir, "BaselineVsInverted", "MC", opts.optMode)
-    SavePlot(p, saveName, savePath) 
+    SavePlot(p, saveName, savePath, saveFormats = [".png"])
     return
-
 
 def IsBaselineOrInverted(analysisType):
     analysisTypes = ["Baseline", "Inverted"]
@@ -406,7 +414,7 @@ def IsBaselineOrInverted(analysisType):
     return
 
 
-def SavePlot(plot, saveName, saveDir, saveFormats = [".png", ".pdf"]): #[".C", ".png", ".pdf"]):
+def SavePlot(plot, saveName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
     
     # Check that path exists
@@ -539,4 +547,4 @@ if __name__ == "__main__":
     main(opts)
 
     if not opts.batchMode:
-        raw_input("=== plotHistograms.py: Press any key to quit ROOT ...")
+        raw_input("=== plot_BaseVsInv.py: Press any key to quit ROOT ...")

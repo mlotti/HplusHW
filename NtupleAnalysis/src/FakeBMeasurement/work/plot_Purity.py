@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 '''
 Usage:
-./plotQCD_Purity.py -m <pseudo_mcrab_directory> [opts]
+./plot_Purity.py -m <pseudo_mcrab_directory> [opts]
 
 Examples:
-./plotQCD_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar -e "QCD|Charged" --plotEWK -o OptChiSqrCutValue100  
-./plotQCD_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar  -e "QCD|Charged" -plotEWK -o OptChiSqrCutValue100  
-./plotQCD_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170630_045528_IsGenuineBEventBugFix_TopChiSqrVar -e "QCD|Charged" --plotEWK -o OptChiSqrCutValue100  
-./plotQCD_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170627_124436_BJetsGE2_TopChiSqrVar_AllSamples --plotEWK -e 'QCD|Charged'
+./plot_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar -e "QCD|Charged" --plotEWK -o OptChiSqrCutValue100  
+./plot_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar  -e "QCD|Charged" -plotEWK -o OptChiSqrCutValue100  
+./plot_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170630_045528_IsGenuineBEventBugFix_TopChiSqrVar -e "QCD|Charged" --plotEWK -o OptChiSqrCutValue100  
+./plot_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170627_124436_BJetsGE2_TopChiSqrVar_AllSamples --plotEWK -e 'QCD|Charged'
 
 NOTE:
 If unsure about the parameter settings a pseudo-multicrab do:
@@ -90,7 +90,8 @@ def GetLumi(datasetsMgr):
 
 def GetListOfEwkDatasets():
     Verbose("Getting list of EWK datasets")
-    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    return ["TT", "noTop", "SingleTop", "ttX"]
+    #return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
 
 
 def GetDatasetsFromDir(opts):
@@ -134,18 +135,6 @@ def main(opts):
     sysVarList    = dsetMgrCreator.getSystematicVariations()
     sysVarSrcList = dsetMgrCreator.getSystematicVariationSources()
 
-    # Todo: Print settings table
-    if 0:
-        print erasList
-        print
-        print modesList
-        print
-        print optList
-        print
-        print sysVarList
-        print 
-        print sysVarSrcList
-        
     # If user does not define optimisation mode do all of them
     if opts.optMode == None:
         if len(optList) < 1:
@@ -181,7 +170,10 @@ def main(opts):
                
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
-   
+
+        # Print (merged) data
+        datasetsMgr.PrintInfo()
+
         # Re-order datasets (different for inverted than default=baseline)
         if 0:
             newOrder = ["Data"]
@@ -399,7 +391,7 @@ def PlotPurity(datasetsMgr, histoName):
     return
 
 
-def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]): #[".png", ".C", ".pdf"]):
+def SavePlot(plot, plotName, saveDir, saveFormats = [".png"]): #[".png", ".C", ".pdf"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
 
     # Check that path exists

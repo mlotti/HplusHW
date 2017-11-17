@@ -1838,10 +1838,6 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
 
   // If 1 or more untagged genuine bjets are found the event is considered fakeB. Otherwise genuineB  
   bool isGenuineB = topData.isGenuineB();
-  // bool isGenuineB = IsGenuineBEvent(bjetData.getSelectedBJets().size());
-  // bool isGenuineB = bjetData.isGenuineB();
-  // bool isGenuineB = IsGenuineBEvent(topData.getJetsUsedAsBJetsInFit());
-  // bool isGenuineB = bjetData.isGenuineB(); // not correct for inverted
   
   //================================================================================================
   // Standard Selections
@@ -2137,30 +2133,31 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   if (0) std::cout << "=== Inverted: Top selection" << std::endl;
   const TopSelectionBDT::Data topData = fInvertedTopSelection.analyzeWithoutBJets(fEvent, jetData, bjetData, true, cfg_InvertedBJetsSortType);
-  bool passPrelimMVACut = cfg_PrelimTopMVACut.passedCut( std::max(topData.getMVAmax1(), topData.getMVAmax2()) ); //fixme?
+  bool passPrelimMVACut = cfg_PrelimTopMVACut.passedCut( std::min(topData.getMVAmax1(), topData.getMVAmax2()) );
+  // bool passPrelimMVACut = cfg_PrelimTopMVACut.passedCut( std::max(topData.getMVAmax1(), topData.getMVAmax2()) );
   bool hasFreeBJet      = topData.hasFreeBJet();
   if (!hasFreeBJet) return;
   if (!passPrelimMVACut) return;
 
   // If 1 or more untagged genuine bjets are found the event is considered fakeB. Otherwise genuineB
   bool isGenuineB = topData.isGenuineB();
-  // bool isGenuineB = IsGenuineBEvent(topData.getJetsUsedAsBJetsInFit());
+  // bool isGenuineB = IsGenuineBEvent(topData.getJetsUsedAsBJets());
   // bool isGenuineB = bjetData.isGenuineB(); // not correct for inverted
 
   //================================================================================================
   // Standard Selections
   //================================================================================================
   if (0) std::cout << "=== Inverted: Standard Selections" << std::endl;
-  // fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, true); //fixme - alex
+  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, true);
 
   // Get the failed bjet candidates randomly shuffled. Put any trg-matched objects in the front  
-  const std::vector<Jet> failedBJetsUsedAsBJets = topData.getFailedBJetsUsedAsBJetsInFit();
-  const std::vector<Jet> jetsUsedAsBJets        = topData.getJetsUsedAsBJetsInFit();
+  const std::vector<Jet> failedBJetsUsedAsBJets = topData.getFailedBJetsUsedAsBJets();
+  const std::vector<Jet> jetsUsedAsBJets        = topData.getJetsUsedAsBJets();
    
   // Fill Triplets  (Inverted)
   hInverted_LdgTrijetMass_AfterStandardSelections->Fill(isGenuineB, topData.getLdgTrijet().M());
   hInverted_Njets_AfterStandardSelections->Fill(isGenuineB, jetData.getSelectedJets().size());
-  hInverted_NBjets_AfterStandardSelections->Fill(isGenuineB, topData.getJetsUsedAsBJetsInFit().size());
+  hInverted_NBjets_AfterStandardSelections->Fill(isGenuineB, topData.getJetsUsedAsBJets().size());
   // hInverted_NBjets_AfterStandardSelections->Fill(isGenuineB, bjetData.getSelectedBJets().size());
 
   int index = -1;
@@ -2346,7 +2343,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   // Fill final plots
   //================================================================================================
-  // fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, 1); //fixme - alex
+  fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, 1);
 
   index = -1;
   // For-loop: Only failed BJets used as bjets in top fit
