@@ -191,18 +191,11 @@ def main(opts):
                     invertedPath.append(p)
 
             for hBaseline, hInverted in zip(baselinePaths, invertedPath):
-                if "AfterStandardS" in hBaseline:
-                    #print "--- Skipping histogram", hBaseline
-                    continue
-                if "AfterAllSelections" in hBaseline:
-                    #print "--- Skipping histogram", hBaseline
-                    continue
-                
-                print "--- Plotting histogram", hBaseline
+                #print "--- Plotting histogram", hBaseline
                 PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted)
 
         # 2) Do the topSelection histos
-        if 1:
+        if 0:
             analysisType     = "Inverted"
             folder           = "topbdtSelection_%s" % (analysisType)            
             invertedList     = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(folder)

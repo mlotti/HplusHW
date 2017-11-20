@@ -155,6 +155,8 @@ def main(opts):
         datasetsMgr.updateNAllEventsToPUWeighted()
         datasetsMgr.loadLuminosities() # from lumi.json
         
+        PrintPSet("TopologySelection", datasetsMgr)
+
         # Set/Overwrite cross-sections
         for d in datasetsMgr.getAllDatasets():
             if "ChargedHiggs" in d.getName():
@@ -193,8 +195,8 @@ def main(opts):
 
         # Do the Purity Triplets?
         if 0:
-            bType  = "" # ["", "EWKFakeB", "EWKGenuineB"]
-            folder = "FakeBPurity" + bType
+            bType  = ["", "EWKFakeB", "EWKGenuineB"]
+            folder = "FakeBPurity" + bType[0]
             hList  = datasetsMgr.getDataset("EWK").getDirectoryContent(folder)
             for hName in hList:
                 PlotPurity(datasetsMgr, os.path.join(folder, hName))
@@ -215,8 +217,24 @@ def main(opts):
                 continue
             if "JetEtaPhi" in h:
                 continue
-            PlotPurity(datasetsMgr, os.path.join(folder, h))
+            PlotPurity(datasetsMgr, folder, h)
 
+    return
+
+def PrintPSet(selection, datasetsMgr):
+    selection = "\"%s\":"  % (selection)
+    thePSets = datasetsMgr.getAllDatasets()[0].getParameterSet()
+
+    # First drop everything before the selection
+    thePSet_1 = thePSets.split(selection)[-1]
+
+    # Then drop everything after the selection
+    thePSet_2 = thePSet_1.split("},")[0]
+
+    # Final touch
+    thePSet = selection + thePSet_2
+
+    Print(thePSet, True)
     return
 
 def getHistos(datasetsMgr, histoName):
@@ -238,16 +256,15 @@ def IsBaselineOrInverted(analysisType):
     return
 
 
-def PlotPurity(datasetsMgr, histoName):
+def PlotPurity(datasetsMgr, folder, hName):
     '''
     Create plots with "FakeB=Data-EWKGenuineB"
     '''
-    Verbose("Plotting histogram %s for Data, EWK, QCD " % (histoName), True)
-
-    # Which folder to use (redundant)
-    defaultFolder  = "FakeBPurity" 
-    genuineBFolder = defaultFolder + "EWKGenuineB"
-    fakeBFolder    = defaultFolder + "EWKFakeB"
+    # Which folder
+    genuineBFolder = folder + "EWKGenuineB"
+    fakeBFolder    = folder + "EWKFakeB"
+    histoName      = os.path.join(folder, hName)
+    hNameGenuineB  = os.path.join(genuineBFolder, hName)
 
     # Customize the histograms (BEFORE calculating purity obviously otherwise numbers are nonsense)
     _cutBox = None
@@ -312,11 +329,13 @@ def PlotPurity(datasetsMgr, histoName):
 
     # Get histos (Data, EWK) for Inclusive
     p1 = plots.ComparisonPlot(*getHistos(datasetsMgr, histoName) )
+    p2 = plots.ComparisonPlot(*getHistos(datasetsMgr, hNameGenuineB) )
     p1.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
+    p2.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
 
     # Clone histograms 
     Data = p1.histoMgr.getHisto("Data").getRootHisto().Clone("Data")
-    EWK  = p1.histoMgr.getHisto("EWK").getRootHisto().Clone("EWK")
+    EWK  = p2.histoMgr.getHisto("EWK").getRootHisto().Clone("EWK")
     QCD  = p1.histoMgr.getHisto("Data").getRootHisto().Clone("QCD")
 
     # Rebin histograms (Before calculating Purity)
@@ -329,12 +348,12 @@ def PlotPurity(datasetsMgr, histoName):
 
     # Comparison plot. The first argument is the reference histo. All other histograms are compared with respect to that. 
     QCD_Purity, xMin, xMax, binList, valueDict, upDict, downDict = getPurityHisto(QCD, Data, inclusiveBins=False, printValues=False)
-    EWK_Purity, xMin, xMax, binList, valueDict, upDict, downDict = getPurityHisto(EWK, Data, inclusiveBins=False, printValues=False)
+    EWK_Purity, xMin, xMax, binList, valueDict, upDict, downDict = getPurityHisto(EWK, Data, inclusiveBins=False, printValues=True)
 
     # Create TGraphs
     if 0:
         gQCD_Purity = MakeGraph(ROOT.kFullTriangleUp, ROOT.kOrange, binList, valueDict, upDict, downDict)
-        gEWK_Purity = MakeGraph(ROOT.kFullTriangleDown, ROOT.kPurple, binList, valueDict, upDict, downDict)
+        gEWK_Purity = MakeGraph(ROOT.kFullTriangleDown, ROOT.kBlue, binList, valueDict, upDict, downDict)
         
     # Make the plots
     if opts.plotEWK:
