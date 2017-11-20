@@ -369,7 +369,9 @@ bool BJetSelection::_getIsGenuineB(bool bIsMC, const std::vector<Jet>& selectedB
     {
       // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagMCTools#Jet_flavour_in_PAT
       // bool isFakeB = (abs(bjet.pdgId()) != 5); // For data pdgId==0
-      bool isFakeB = (abs(bjet.hadronFlavour()) != 5); // For data pdgId==0
+
+      // See: https://hypernews.cern.ch/HyperNews/CMS/get/btag/1482.html 
+      bool isFakeB = (abs(bjet.hadronFlavour()) != 5);
       if (isFakeB) nFakes++;
     }
   return (nFakes==0);
