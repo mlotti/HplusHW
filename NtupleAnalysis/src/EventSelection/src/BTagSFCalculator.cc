@@ -400,6 +400,8 @@ BTagSFInputStash::BTagJetFlavorType BTagSFCalculator::getFlavorTypeForEfficiency
     return BTagSFInputStash::kCJet;
   } else if (str == "Light") {
     return BTagSFInputStash::kUDSGJet;
+  } else if (str == "G") {
+    return BTagSFInputStash::kUDSGJet;
   }
   throw hplus::Exception("config") << "Unknown flavor '" << str << "'!";
 }
