@@ -118,7 +118,7 @@ public:
 					       const TopologySelection::Data& topologyData,
 					       // const TopSelection::Data& topData,
 					       const TopSelectionBDT::Data& topData,
-					       bool bIsInverted); //HToTB-specific
+					       bool bIsGenuineB); //HToTB-specific
   void fillControlPlotsAfterTopologicalSelections(const Event& event, bool withoutTau=false, bool withMu=false);
   void fillControlPlotsAfterAllSelections(const Event& event, bool withoutTau=false);
   void fillControlPlotsAfterAllSelections(const Event& event, int isInverted);  //HToTB-specific

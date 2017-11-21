@@ -1082,14 +1082,14 @@ void CommonPlots::fillControlPlotsAfterStandardSelections(const Event& event,
 							  const TopologySelection::Data& topologyData,
 							  // const TopSelection::Data& topData, 
 							  const TopSelectionBDT::Data& topData, 
-							  bool bIsInverted) {
+							  bool bIsGenuineB) {
   fJetData      = jetData;
   fBJetData     = bjetData;
   fTopologyData = topologyData;
   fTopData      = topData;
   fMETData      = METData;
-  if (bIsInverted) bIsGenuineB = topData.isGenuineB();
-  else bIsGenuineB = bjetData.isGenuineB();
+  // if (bIsInverted) bIsGenuineB = topData.isGenuineB();
+  // else bIsGenuineB = bjetData.isGenuineB();
 
   // Fill Histogram Triplets
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNVerticesAfterStdSelections, bIsGenuineB, iVertices);

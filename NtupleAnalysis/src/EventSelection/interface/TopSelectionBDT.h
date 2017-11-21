@@ -62,8 +62,8 @@ public:
     bool isGenuineB() const { return bIsGenuineB; }
     bool hasFreeBJet() const { return bHasFreeBJet; }
     // FakeB Measurement
-    const std::vector<Jet>& getJetsUsedAsBJetsInFit() const { return fJetsUsedAsBJetsInFit;}
-    const std::vector<Jet>& getFailedBJetsUsedAsBJetsInFit() const { return fFailedBJetsUsedAsBJetsInFit;}
+    // const std::vector<Jet>& getJetsUsedAsBJets() const { return fJetsUsedAsBJets;}
+    // const std::vector<Jet>& getFailedBJetsUsedAsBJets() const { return fFailedBJetsUsedAsBJets;}
     // Trijet-1
     const float getMVAmax1() const { return fMVAmax1; }
     const Jet getTrijet1Jet1() const { return fTrijet1Jet1; } 
@@ -149,8 +149,8 @@ public:
     // GenuineB = All selected b-jets are genuine, FakeB=At least one selected b-jet is not genuine
     bool bIsGenuineB;    
     // FakeB Measurement
-    std::vector<Jet> fJetsUsedAsBJetsInFit;
-    std::vector<Jet> fFailedBJetsUsedAsBJetsInFit;
+    std::vector<Jet> fJetsUsedAsBJets;
+    std::vector<Jet> fFailedBJetsUsedAsBJets;
     // A free bjet is left after the top reconstruction (for invariant mass)
     bool bHasFreeBJet;
     /// Trijet-1
@@ -191,8 +191,8 @@ public:
   /// analyze does fill histograms and incrementes counters
   Data analyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const bool doMatching=true);
   // analyze for FakeBMeasurement
-  Data silentAnalyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData,  bool doMatching=true, const std::string failedBJetsSortType="Random");
-  Data analyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData,  bool doMatching=true, const std::string failedBJetsSortType="Random");
+  Data silentAnalyzeWithoutBJets(const Event& event, const std::vector<Jet> selectedJets, const std::vector<Jet> selectedBjets, bool doMatching=true);
+  Data analyzeWithoutBJets(const Event& event, const std::vector<Jet> selectedJets, const std::vector<Jet> selectedBjets, bool doMatching=true);
   TMVA::Reader *reader;
   
   Float_t TrijetPtDR;
@@ -214,7 +214,6 @@ public:
   Float_t TrijetSubldgJetAxis2;
   Float_t TrijetLdgJetMult;
   Float_t TrijetSubldgJetMult;
-
   Float_t TrijetLdgJetQGLikelihood;
   Float_t TrijetSubldgJetQGLikelihood;
 
@@ -224,24 +223,16 @@ private:
   void initialize(const ParameterSet& config);
   /// The actual selection
   Data privateAnalyze(const Event& event, const std::vector<Jet> selectedJets, const std::vector<Jet> selectedBjets, bool doMatching);
-  // Returns true if the two jets are the same
+  /// Returns true if the two jets are the same
   bool areSameJets(const Jet& jet1, const Jet& jet2);
-  // Return true if a selected jet matches a selected bjet
+  /// Return true if a selected jet matches a selected bjet
   bool isBJet(const Jet& jet1, const std::vector<Jet>& bjets);
-  // Replaces all output objects with MCJet information (N.B: Wherever possible!)
-  void ReplaceJetsWithGenJets(Data &output);
-
   /// Determine if event is GenuineB or FakeB  and store internally
   bool _getIsGenuineB(bool bIsMC, const std::vector<Jet>& selectedBjets);  
-
   /// Determine if top candidate is MC matched
   bool _getIsMatchedTop(bool isMC, Jet bjet, Jet jet1, Jet jet2, TrijetSelection mcTrueTrijets);
-  
-  
   virtual std::vector<genParticle> GetGenParticles(const std::vector<genParticle> genParticles, const int pdgId);
-  
   const genParticle GetLastCopy(const std::vector<genParticle> genParticles, const genParticle &p);
-
   Jet getLeadingSubleadingJet(const Jet& jet0, const Jet& jet1, string selectedJet);
   bool isMatchedJet(const Jet& jet, const std::vector<Jet>& jets);
   bool isWsubjet(const Jet& jet, const std::vector<Jet>& jets1, const std::vector<Jet>& jets2);
@@ -253,25 +244,13 @@ private:
   bool HasMother(const Event& event, const genParticle &p, const int mom_pdgId);
   int getTopFromHiggs(TrijetSelection TopCand, const Jet&  MCtrueTopFromH_LdgJet, const Jet& MCtrueTopFromH_SubldgJet, const Jet& MCtrueTopFromH_Bjet);
 
-  const std::vector<Jet> GetJetsToBeUsedInFit(const JetSelection::Data& jetData,
-					      const unsigned int maxNumberOfJets);
-
-  const std::vector<Jet> GetBjetsToBeUsedInFit(const BJetSelection::Data& bjetData,
-					       const unsigned int maxNumberOfBJets,
-					       const std::string jetSortType="Random");
-  
-  const std::vector<Jet>& GetFailedBJetsUsedAsBJetsInFit(void) const { return myFailedBJetsUsedAsBJetsInFit;} 
-
-
   // Input parameters
   const DirectionalCut<double> cfg_MVACut;
   const DirectionalCut<double> cfg_MassCut;
   const DirectionalCut<double> cfg_CSV_bDiscCut;
   const unsigned int cfg_NjetsMax;
   const unsigned int cfg_NBjetsMax;
-  const bool cfg_ReplaceJetsWithGenJets;
   const std::vector<float> cfg_MVACuts;
-  std::vector<Jet> myFailedBJetsUsedAsBJetsInFit;
   // Event counter for passing selection
   Count cPassedTopSelectionBDT;
 
