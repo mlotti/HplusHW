@@ -22,6 +22,7 @@ public:
     kHplus2tbAnalysis,
     kBTagEfficiencyAnalysis,
     kTauAnalysis,
+    kTopReco,
     kMuAnalysis,
     kQCDMeasurement,
     kFakeBMeasurement,
@@ -115,8 +116,9 @@ public:
 					       const BJetSelection::Data& bjetData, 
 					       const METSelection::Data& METData, 
 					       const TopologySelection::Data& topologyData,
-					       const TopSelection::Data& topData,
-					       bool bIsInverted); //HToTB-specific
+					       // const TopSelection::Data& topData,
+					       const TopSelectionBDT::Data& topData,
+					       bool bIsGenuineB); //HToTB-specific
   void fillControlPlotsAfterTopologicalSelections(const Event& event, bool withoutTau=false, bool withMu=false);
   void fillControlPlotsAfterAllSelections(const Event& event, bool withoutTau=false);
   void fillControlPlotsAfterAllSelections(const Event& event, int isInverted);  //HToTB-specific
@@ -364,7 +366,8 @@ private:
   BJetSelection::Data fBJetData;
   METSelection::Data fMETData;
   TopologySelection::Data fTopologyData;
-  TopSelection::Data fTopData;
+  // TopSelection::Data fTopData;
+  TopSelectionBDT::Data fTopData;
   AngularCutsCollinear::Data fBackToBackAngularCutsData;
 
   /// Helper

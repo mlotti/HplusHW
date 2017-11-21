@@ -337,10 +337,21 @@ _datasetMerge = {
     "WZ"    : "Diboson",
     "ZZ"    : "Diboson",
 
-    "ttbb_4FS_ckm_amcatnlo_madspin_pythia8"     : "TTBB",
+    "ttbb_4FS2_ckm_amcatnlo_madspin_pythia8"     : "TTBB",
 
     #"ChargedHiggs_HplusTB_HplusToTauNu_M_200": "ChargedHiggs_HplusTB_HplusToTauNu_M_200",
     #"ChargedHiggs_HplusTB_HplusToTauB_M_200": "ChargedHiggs_HplusTB_HplusToTauNu_M_200",
+
+    # Htb
+    "TTWJetsToQQ"          : "ttX",
+    "TTZToQQ"              : "ttX",
+    "TTTT"                 : "ttX",
+    "WJetsToQQ_HT_600ToInf": "noTop",
+    "DYJetsToQQ_HT180"     : "noTop",
+    #"Diboson_HT180"        : "noTop",
+    "WWTo4Q"               : "noTop",
+    "ZZTo4Q"               : "noTop",
+    "WZ"                   : "noTop",
 
     #"TTWJetsToQQ"          : "TTWJetsToQQ",
     #"TTZToQQ"              : "TTZToQQ",
@@ -383,7 +394,9 @@ _datasetOrder.extend([
     "DYJetsToLL",
     "DYJetsToLLHT",
     "DYJetsToQQHT",  # Htb
+    "noTop", #Htb
     "SingleTop",
+    "ttX", # Htb
     "WJetsToQQ_HT_600ToInf", # Htb
     "TTZToQQ",     # Htb
     "TTWJetsToQQ", # Htb
@@ -401,8 +414,10 @@ _legendLabels = {
     "Data"     : "Data",
     "EWK"      : "EWK",
     "Diboson"  : "Diboson",
+    "ttX"      : "t#bar{t} + X",
+    "noTop"    : "No t",
     "SingleTop": "Single t",
-    "QCD"      : "Mis-ID. #tau_{h} (data)",
+    "QCD"      : "QCD",#"Mis-ID. #tau_{h} (data)",
     "QCD-b"    : "QCD (b enr.)",
     "QCDdata"  : "Mis-ID. #tau_{h} (data)", #"QCD (data driven)"
 
@@ -545,6 +560,8 @@ _plotStyles = {
     "EWK"           : styles.wStyle,
     "QCD"           : styles.qcdStyle,
     "QCD-b"         : styles.qcdBEnrichedStyle,
+    "ttX"           : styles.ttXStyle,
+    "noTop"         : styles.noTopStyle,
     "QCDdata"       : styles.qcdStyle,
     "SingleTop"     : styles.stStyle,
     "TT"            : styles.ttStyle,

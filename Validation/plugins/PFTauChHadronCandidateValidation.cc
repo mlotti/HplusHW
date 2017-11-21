@@ -102,13 +102,16 @@ void PFTauChHadronCandidateValidation::analyze( const edm::Event& iEvent, const 
 	    diffNtracksNcands->Fill((nSignalTrk + nIsolTrk) - (nSignalCnd + nIsolCnd));
 
 	    TLorentzVector p4sum(0,0,0,0);
-	    const reco::PFCandidateRefVector signalCands = PFTaus->at(i).signalPFCands();
+	    /*
+	      const reco::PFCandidateRefVector signalCands = PFTaus->at(i).signalPFCands();
 	    for(size_t iC = 0; iC < signalCands.size(); ++iC){
 		p4sum += TLorentzVector(signalCands[iC]->px(),
                                         signalCands[iC]->py(),
 		                        signalCands[iC]->pz(),
 		                        signalCands[iC]->energy());
 	    }
+	    Alexandros - 02 Oct 2017: Disabled due to compilation errors
+	    */
 	    signalConePtSum->Fill(p4sum.Pt()/pftaupt);
 
 	    TLorentzVector lCand = TLorentzVector(0,0,0,0);

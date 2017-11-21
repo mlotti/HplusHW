@@ -8,7 +8,7 @@
 
 class L1TauGeneratedCollection: public ParticleCollection<double> {
 public:
-  explicit L1TauGeneratedCollection(const std::string& prefix="L1Tau")
+  explicit L1TauGeneratedCollection(const std::string& prefix="L1Taus")
   : ParticleCollection(prefix)
   {
 

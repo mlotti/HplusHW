@@ -1,12 +1,21 @@
 #!/usr/bin/env python
 '''
-USAGE:
-./plotQCD_FailedBJet.py -m <pseudo_mcrab_directory> [opts]
+Description:
+Plots properties of all failed b-jets (aka inverted b-jets) in triplets:
+a) Inclusive
+b) GenuineB
+c) FakeB
+Thesee b-jets are taken from topData.getFailedBJetsUsedAsBJetsInFit() and 
+include the b-jets with a "Loose" (instead of "Medium") discriminator WP.
 
+Usage:
+./plot_FailedBJet.py -m <pseudo_mcrab_directory> [opts]
 
-EXAMPLES:
-./plotQCD_FailedBJets.py -m FakeBMeasurement_GE2MediumPt40Pt30_GE0or3Loose_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_AlFailedBJetSort_170921_105355 --url
+Examples:
+./plot_FailedBJet.py -m FakeBMeasurement_GE2MediumPt40Pt30_GE1LooseMaxDiscr0p7_StdSelections_TopCut100_AllSelections_TopCut10_RandomFailedBJetSort_171012_012105/ --plotEWK --url
 
+Last Used::
+./plot_FailedBJet.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171115_101036 -e "Charged" --url --plotEWK
 
 NOTE:
 If unsure about the parameter settings a pseudo-multicrab do:
@@ -38,6 +47,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
+import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
 
 #================================================================================================ 
 # Function Definition
@@ -88,7 +98,8 @@ def GetLumi(datasetsMgr):
 
 def GetListOfEwkDatasets():
     Verbose("Getting list of EWK datasets")
-    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    #return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    return ["TT", "noTop", "SingleTop", "ttX"]
 
 
 def GetDatasetsFromDir(opts):
@@ -121,16 +132,37 @@ def GetDatasetsFromDir(opts):
 
 def main(opts):
 
+    # Obtain dsetMgrCreator and register it to module selector
+    dsetMgrCreator = dataset.readFromMulticrabCfg(directory=opts.mcrab)
 
-    #optModes = ["", "OptChiSqrCutValue50p0", "OptChiSqrCutValue100p0", "OptChiSqrCutValue200p0"]
-    optModes = ["",
-                "OptInvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeRandom",
-                "OptInvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeDescendingBDiscriminator",
-                "OptInvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeRandom",
-                "OptInvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeDescendingBDiscriminator"]
+    # Get list of eras, modes, and optimisation modes
+    erasList      = dsetMgrCreator.getDataEras()
+    modesList     = dsetMgrCreator.getSearchModes()
+    optList       = dsetMgrCreator.getOptimizationModes()
+    sysVarList    = dsetMgrCreator.getSystematicVariations()
+    sysVarSrcList = dsetMgrCreator.getSystematicVariationSources()
 
-    #if opts.optMode != None:
-    #    optModes = [opts.optMode]
+    # Todo: Print settings table
+    if 0:
+        print erasList
+        print
+        print modesList
+        print
+        print optList
+        print
+        print sysVarList
+        print
+        print sysVarSrcList
+
+    # If user does not define optimisation mode do all of them
+    if opts.optMode == None:
+        if len(optList) < 1:
+            optList.append("")
+        else:
+            pass
+        optModes = optList
+    else:
+        optModes = [opts.optMode]
 
     # For-loop: All optimisation modes
     for opt in optModes:
@@ -156,6 +188,7 @@ def main(opts):
                
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
+        datasetsMgr.PrintInfo()
    
         # Re-order datasets (different for inverted than default=baseline)
         if 0:
@@ -322,11 +355,11 @@ def PlotHisto(datasetsMgr, histoName):
                    )
     
     # Save plot in all formats
-    SavePlot(p, histoName, os.path.join(opts.saveDir, "FailedBJet", opts.optMode))#, saveFormats = [".png"] )
+    SavePlot(p, histoName, os.path.join(opts.saveDir, "FailedBJet", opts.optMode), saveFormats = [".png"] )
     return
 
 
-def SavePlot(plot, plotName, saveDir, saveFormats = [".pdf", ".png"]):
+def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".pdf", ".png"]):
     # Check that path exists
     if not os.path.exists(saveDir):
         os.makedirs(saveDir)
@@ -453,4 +486,4 @@ if __name__ == "__main__":
     main(opts)
 
     if not opts.batchMode:
-        raw_input("=== plotHistograms.py: Press any key to quit ROOT ...")
+        raw_input("=== plotQCD_FailedBJet.py: Press any key to quit ROOT ...")
