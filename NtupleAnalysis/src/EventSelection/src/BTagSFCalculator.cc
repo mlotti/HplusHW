@@ -76,7 +76,8 @@ BTagSFInputStash::BTagSFInputStash() { }
 
 // Destructor
 BTagSFInputStash::~BTagSFInputStash() {
-  std::vector<std::vector<BTagSFInputItem*>> collections = { fBToB, fCToB, fGToB, fUdsToB };
+  // std::vector<std::vector<BTagSFInputItem*>> collections = { fBToB, fCToB, fGToB, fUdsToB };
+std::vector<std::vector<BTagSFInputItem*>> collections = { fBToB, fCToB, fUdsgToB };
   for (auto& container: collections) {
     for (size_t i = 0; i < container.size(); ++i) {
       delete container[i];
@@ -110,7 +111,8 @@ const float BTagSFInputStash::getInputValueByPt(BTagJetFlavorType flavor, float 
 
 // Define overflow bin
 void BTagSFInputStash::setOverflowBinByPt(const std::string& label) {
-  std::vector<std::vector<BTagSFInputItem*>> collections = { fBToB, fCToB, fGToB, fUdsToB };
+  //  std::vector<std::vector<BTagSFInputItem*>> collections = { fBToB, fCToB, fGToB, fUdsToB };
+  std::vector<std::vector<BTagSFInputItem*>> collections = { fBToB, fCToB, fUdsgToB };
   size_t i = 0;
   for (auto& container: collections) {
     if (!container.size()) {
@@ -142,10 +144,8 @@ const std::vector<BTagSFInputItem*>& BTagSFInputStash::getConstCollection(BTagJe
     return fBToB;
   else if (flavor == kCJet)
     return fCToB;
-  else if (flavor == kGJet)
-    return fGToB;
-  else if (flavor == kUDSJet)
-    return fUdsToB;
+  else if (flavor == kUDSGJet)
+    return fUdsgToB;
   throw hplus::Exception("Logic") << "Unknown flavor requested! " << flavor;
 }
 
@@ -155,16 +155,15 @@ std::vector<BTagSFInputItem*>& BTagSFInputStash::getCollection(BTagJetFlavorType
     return fBToB;
   else if (flavor == kCJet)
     return fCToB;
-  else if (flavor == kGJet)
-    return fGToB;
-  else if (flavor == kUDSJet)
-    return fUdsToB;
+  else if (flavor == kUDSGJet)
+    return fUdsgToB;
   throw hplus::Exception("Logic") << "Unknown flavor requested! " << flavor;
 }
 
 // Debug prints
 void BTagSFInputStash::debug() const {
-  std::vector<std::vector<BTagSFInputItem*>> collections = { fBToB, fCToB, fGToB, fUdsToB };
+  // std::vector<std::vector<BTagSFInputItem*>> collections = { fBToB, fCToB, fGToB, fUdsToB };
+  std::vector<std::vector<BTagSFInputItem*>> collections = { fBToB, fCToB, fUdsgToB };
   for (auto p: collections) {
     for (auto pp: p) {
       pp->debug();
@@ -192,12 +191,15 @@ BTagSFCalculator::BTagSFCalculator(const ParameterSet& config)
   fSFUp.setOverflowBinByPt("SFup");
   fSFDown.setOverflowBinByPt("SFdown");
   // Debug prints
-  //fEfficiencies.debug();
-  //fEfficienciesUp.debug();
-  //fEfficienciesDown.debug();
-  //fSF.debug();
-  //fSFUp.debug();
-  //fSFDown.debug();
+
+  // std::cout << "\n=== BTagSFCalculator::BTagSFCalculator() - DEBUG" << std::endl;
+  // fEfficiencies.debug();
+  // fEfficienciesUp.debug();
+  // fEfficienciesDown.debug();
+  // fSF.debug();
+  // fSFUp.debug();
+  // fSFDown.debug();
+
   // Check validity of input
   if (!sizeOfEfficiencyList(BTagSFInputStash::kBJet, "nominal") || !sizeOfSFList(BTagSFInputStash::kBJet, "nominal")) {
     isActive = false;
@@ -231,16 +233,24 @@ const float BTagSFCalculator::calculateSF(const std::vector<Jet>& selectedJets, 
         passedBJetSelection = true;
       }
     }
-    // Obtain jet flavor
-    int flavor = std::abs(jet.pdgId());
-    BTagSFInputStash::BTagJetFlavorType flavorType = BTagSFInputStash::kUDSJet; // Default value, used also for flavor == 0
+    // Obtain jet flavor using patJet::hadronFlavour() 
+    // see: https://hypernews.cern.ch/HyperNews/CMS/get/btag/1482/1/1/1/1/1.html
+    int flavor = std::abs(jet.hadronFlavour());
+    // int flavor = std::abs(jet.pdgId());
+
+    BTagSFInputStash::BTagJetFlavorType flavorType = BTagSFInputStash::kUDSGJet; // Default value
     if (flavor == 5) { // b jet
       flavorType = BTagSFInputStash::kBJet;
     } else if (flavor == 4) { // c jet
       flavorType = BTagSFInputStash::kCJet;
-    } else if (flavor == 21) { // g jet
-      flavorType = BTagSFInputStash::kGJet;
+    } else if (flavor == 0) { // uds or g jet
+      flavorType = BTagSFInputStash::kUDSGJet;
     }
+    else 
+      {
+	throw hplus::Exception("Logic") << "Jet has unexpected flavor '" << flavor << "'";
+      }
+
     // Calculate SF
     // Assuming that the SF's of the jets are independent (BTV POG recommendation)
     // Such approach simplifies notably the error propagation
@@ -361,8 +371,9 @@ void BTagSFCalculator::handleSFInput(boost::optional<std::vector<ParameterSet>> 
     BTagSFInputStash::BTagJetFlavorType flavor = getFlavorTypeForSF(p.getParameter<int>("jetFlavor"));
     std::vector<BTagSFInputStash::BTagJetFlavorType> flavorCollection;
     if (flavor == BTagSFInputStash::kUDSGJet) {
-      flavorCollection.push_back(BTagSFInputStash::kUDSJet);
-      flavorCollection.push_back(BTagSFInputStash::kGJet);
+      // flavorCollection.push_back(BTagSFInputStash::kUDSJet);
+      // flavorCollection.push_back(BTagSFInputStash::kGJet);
+      flavorCollection.push_back(BTagSFInputStash::kUDSGJet);
     } else {
       flavorCollection.push_back(flavor);
     }
@@ -379,24 +390,26 @@ void BTagSFCalculator::handleSFInput(boost::optional<std::vector<ParameterSet>> 
       //std::cout << "sf " << pflavor << std::endl;
     }
   }
+
   //std::cout << fBToBSF.size() << " " << fCToBSF.size() << " " << fGToBSF.size() << " " << fUdsToBSF.size() << std::endl;
+  return;
 }
 
-// Get flavor type for efficiency
+// Get flavor type for efficiency (from .json file evaluated with BTagEfficiencyAnalysis)
 BTagSFInputStash::BTagJetFlavorType BTagSFCalculator::getFlavorTypeForEfficiency(const std::string& str) const {
   if (str == "B") {
     return BTagSFInputStash::kBJet;
   } else if (str == "C") {
     return BTagSFInputStash::kCJet;
   } else if (str == "Light") {
-    return BTagSFInputStash::kUDSJet;
+    return BTagSFInputStash::kUDSGJet;
   } else if (str == "G") {
-    return BTagSFInputStash::kGJet;
+    return BTagSFInputStash::kUDSGJet;
   }
   throw hplus::Exception("config") << "Unknown flavor '" << str << "'!";
 }
 
-// Get flavor type for scale factor
+// Get flavor type for scale factor (from .csv file provided by BTagging POG)
 BTagSFInputStash::BTagJetFlavorType BTagSFCalculator::getFlavorTypeForSF(int i) const {
   if (i == 0) {
     return BTagSFInputStash::kBJet;

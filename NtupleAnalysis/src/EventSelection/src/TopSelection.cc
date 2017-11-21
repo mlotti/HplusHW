@@ -339,7 +339,7 @@ TopSelection::Data TopSelection::silentAnalyzeWithoutBJets(const Event& event,
   // Disable histogram filling and counter
   disableHistogramsAndCounters();  
   // Ready to analyze 
-  Data data = privateAnalyzeWithoutBJets(event, GetJetsToBeUsedInFit(jetData, cfg_MaxJetsToUseInFit), GetBjetsToBeUsedInFit(bjetData, cfg_MaxBJetsToUseInFit, failedBJetsSortType) );
+  Data data = privateAnalyze(event, GetJetsToBeUsedInFit(jetData, cfg_MaxJetsToUseInFit), GetBjetsToBeUsedInFit(bjetData, cfg_MaxBJetsToUseInFit, failedBJetsSortType) );  
 
   // Save the failed bjets used in the top fit (only the failed (inverted) bjets)
   data.fFailedBJetsUsedAsBJetsInFit = GetFailedBJetsUsedAsBJetsInFit();

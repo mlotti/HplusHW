@@ -89,6 +89,16 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
       std::cout << "Config: JetDumper ignored, because 'Jets' is missing from config" << std::endl;
     }
 
+    softBTagDumper = 0;
+    if (iConfig.exists("SoftBTag")) {
+      std::cout << "SoftBTag exists!" << std::endl;
+      softBTagCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("SoftBTag");
+      softBTagDumper = new SoftBTagDumper(consumesCollector(), softBTagCollections);
+      softBTagDumper->book(Events);
+    } else {
+      std::cout << "Config: SoftBTagDumper ignored, because 'SoftBTag' is missing from config" << std::endl;
+    }
+
     topDumper = 0;
     if (iConfig.exists("Top")) {
         topCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("Top");
@@ -188,6 +198,7 @@ bool MiniAOD2TTreeFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSet
 	if (trgDumper) trgDumper->triggerMatch(trigger::TriggerMuon,muonDumper->selected());
     }
     if (jetDumper) accept = accept && jetDumper->fill(iEvent,iSetup);
+    if (softBTagDumper) accept = accept && softBTagDumper->fill(iEvent,iSetup);
     if (topDumper) accept = accept && topDumper->fill(iEvent,iSetup);
     if (metDumper) accept = accept && metDumper->fill(iEvent,iSetup);
     if (genMetDumper) accept = accept && genMetDumper->fill(iEvent,iSetup);

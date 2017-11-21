@@ -57,6 +57,22 @@ public:
     return false; // never reached
   }
 
+  T getCutValue(void) const{ return fValue;}
+  DirectionalCutType getCutDirection(void) const{ return fCutDirection;}
+  std::string getCutDirectionString(void) const{
+    if (fCutDirection == kEQ) return "==";
+    else if (fCutDirection == kNEQ) return "!=";
+    else if (fCutDirection == kGT) return ">";
+    else if (fCutDirection == kGEQ) return ">=";
+    else if (fCutDirection == kLT) return "<";
+    else if (fCutDirection == kLEQ) return "<=";
+    else
+      {
+	throw hplus::Exception("config") << "DirectionalCut: invalid cut direction (" << fCutDirection << ")! Options are: ==, !=, >, >=, <, <=";
+	return "UNKNOWN";
+      }
+  }
+  
 private:
   T fValue;
   DirectionalCutType fCutDirection;

@@ -41,7 +41,7 @@ class EventInfoDumper {
         edm::EDGetTokenT<LHEEventProduct> lheToken;
         edm::EDGetTokenT<edm::View<reco::Vertex> > vertexToken;
         edm::EDGetTokenT<double> topPtToken;
-        
+	
 	unsigned long long event;
 	unsigned int run,lumi;
 	float instLumi;
@@ -59,5 +59,6 @@ class EventInfoDumper {
 
 	bool bookLumiScalers;
 	bool bookTopPt;
+
 };
 #endif
