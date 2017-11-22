@@ -17,12 +17,13 @@ import FWCore.ParameterSet.Config as cms
 #================================================================================================ 
 def produceCustomisations(process, isData):
     process.CustomisationsSequence = cms.Sequence()
-    produceJets(process, isData)
+#    produceJets(process, isData)
 #    reproduceJEC(process)
     reproduceElectronID(process)      # Marina (To produce MVA)
     reproduceMETNoiseFilters(process)
     reproduceMET(process, isData)
-    reproduceJEC(process)
+#    reproduceJEC(process)
+    produceJets(process, isData)
     print "=== Customisations done"
 
 
@@ -53,13 +54,14 @@ def produceJets(process, isData):
     jetToolbox( process, 'ak4', 'ak4JetSubs', 'out', 
                 addQGTagger=True, addPUJetID=True, JETCorrLevels = JEC,
                 bTagDiscriminators = ['pfCombinedInclusiveSecondaryVertexV2BJetTags', 'pfCombinedMVAV2BJetTags','pfCombinedCvsBJetTags','pfCombinedCvsLJetTags'],
+                updateCollection='cleanedPatJets', JETCorrPayload="AK4PFchs",
                 postFix='')
 
     # Small fix required to add the variables ptD, axis2, mult. See:
     # https://hypernews.cern.ch/HyperNews/CMS/get/jet-algorithms/418/1.html
-    getattr( process, 'patJetsAK4PFCHS').userData.userFloats.src += ['QGTagger'+'AK4PFCHS'+':ptD']
-    getattr( process, 'patJetsAK4PFCHS').userData.userFloats.src += ['QGTagger'+'AK4PFCHS'+':axis2']
-    getattr( process, 'patJetsAK4PFCHS').userData.userInts.src   += ['QGTagger'+'AK4PFCHS'+':mult']
+    getattr( process, 'updatedPatJetsAK4PFCHS').userData.userFloats.src += ['QGTagger'+'AK4PFCHS'+':ptD']
+    getattr( process, 'updatedPatJetsAK4PFCHS').userData.userFloats.src += ['QGTagger'+'AK4PFCHS'+':axis2']
+    getattr( process, 'updatedPatJetsAK4PFCHS').userData.userInts.src   += ['QGTagger'+'AK4PFCHS'+':mult']
 
     jetToolbox( process, "ak8", "ak8JetSubs", "out",
                 addSoftDrop=True, addSoftDropSubjets=True, addNsub=True, addNsubSubjets=True,
