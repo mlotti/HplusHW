@@ -18,6 +18,7 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/BaseDumper.h"
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/FourVectorDumper.h"
 
 namespace reco {
@@ -35,7 +36,7 @@ class MuonDumper : public BaseDumper {
 
     private:
 	void fillMCMatchInfo(size_t ic, edm::Handle<reco::GenParticleCollection>& genParticles, const pat::Muon& muon);
-      
+	
         edm::EDGetTokenT<edm::View<pat::Muon>> *muonToken;
         edm::EDGetTokenT<reco::GenParticleCollection> genParticleToken;
         edm::EDGetTokenT<edm::View<reco::Vertex>> vertexToken;
@@ -49,6 +50,13 @@ class MuonDumper : public BaseDumper {
         std::vector<bool> *isTightMuon;
         std::vector<float> *relIsoDeltaBetaCorrected03; // isol cone 0.3
         std::vector<float> *relIsoDeltaBetaCorrected04; // isol cone 0.4
+
+	// Marina - start
+	edm::EDGetTokenT<double> *rhoToken;
+	edm::EDGetTokenT<edm::View<pat::PackedCandidate> > *pfcandsToken;
+	std::vector<float> *relMiniIso;
+	std::vector<float> *effAreaMiniIso;
+        // Marina - end     
 
         // 4-vector for generator muon
         FourVectorDumper *MCmuon;

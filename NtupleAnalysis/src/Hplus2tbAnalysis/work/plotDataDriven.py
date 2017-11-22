@@ -115,6 +115,8 @@ def main(opts):
 
         # Setup & configure the dataset manager 
         datasetsMgr = GetDatasetsFromDir(opts)
+        
+        PrintPSet("TopologySelection", datasetsMgr)
         datasetsMgr.updateNAllEventsToPUWeighted()
         datasetsMgr.loadLuminosities() # from lumi.json
 
@@ -214,6 +216,8 @@ def GetHistoKwargs(histoList, opts):
             kwargs["ylabel"] = "Events / %.0f"
             kwargs["xlabel"] = "Jets Multiplicity"
             kwargs["cutBox"] = {"cutValue": 7.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+            kwargs["opts"]   = {"xmin": 7.0, "xmax": +16.0, "ymin": 1e+0, "ymaxfactor": 10}
+            ROOT.gStyle.SetNdivisions(10, "X")
         if "JetPt" in h:                
             units            = "GeV/c"
             kwargs["ylabel"] = "Events / %.0f " + units
@@ -251,7 +255,8 @@ def GetHistoKwargs(histoList, opts):
             kwargs["xlabel"] = "H_{T} (%s)"  % units
             kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["rebinX"] = 5
-            kwargs["opts"]   = {"xmin": 500.0, "xmax": 4100, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["opts"]   = {"xmin": 500.0, "xmax": 3000, "ymin": 1e+0, "ymaxfactor": 10}
+            # kwargs["opts"]   = {"xmin": 500.0, "xmax": 4100, "ymin": 1e+0, "ymaxfactor": 10}
         if "MHT" in h:
             units            = "GeV"
             kwargs["ylabel"] = "Events / %.0f " + units
@@ -278,6 +283,9 @@ def GetHistoKwargs(histoList, opts):
             kwargs["xlabel"] = "H_{2}"
             kwargs["opts"]   = {"xmin": 0.0, "xmax": 1.01}
             kwargs["cutBox"] = {"cutValue": 0.5, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": +1.0, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["moveLegend"] = {"dx": +0.0}
+            #kwargs["moveLegend"] = {"dx": -0.53, "dy": -0.5, "dh": 0.0}
         if "Centrality" in h:
             kwargs["ylabel"] = "Events / %.2f"
             kwargs["xlabel"] = "Centrality"
@@ -390,8 +398,8 @@ def GetHistoKwargs(histoList, opts):
         if "TopMassWMassRatio" in h:
             kwargs["ylabel"] = "Events / %.1f"
             kwargs["xlabel"] = "R_{3/2}"
-            #kwargs["cutBox"] = {"cutValue": (173.21/80.385), "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["cutBox"] = {"cutValue": (172.5/80.385), "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+            kwargs["cutBox"] = {"cutValue": (173.21/80.385), "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+            # kwargs["cutBox"] = {"cutValue": (172.5/80.385), "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             #kwargs["cutBox"] = {"cutValue": 2.1, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             #kwargs["opts"]   = {"xmin": 0, "xmax": +10.0, "ymin": 1e+0, "ymaxfactor": 1.2}
             kwargs["opts"]   = {"xmin": 0, "xmax": +10.0, "ymin": 1e+0, "ymaxfactor": 10}
@@ -422,8 +430,8 @@ def DataMCHistograms(datasetsMgr, qcdDatasetName):
     # For-loop: All histograms in list
     for histoName in histoPaths:
 
-        #if "Mass" not in histoName:
-        #    continue
+        if "Fox" not in histoName:
+            continue
 
         if "JetEtaPhi" in histoName:
             continue
@@ -490,6 +498,22 @@ def DataMCHistograms(datasetsMgr, qcdDatasetName):
         # Draw and save the plot
         plots.drawPlot(p, saveName, **kwargs_) #the "**" unpacks the kwargs_ dictionary
         SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode) )
+    return
+
+def PrintPSet(selection, datasetsMgr):
+    selection = "\"%s\":"  % (selection)
+    thePSets = datasetsMgr.getAllDatasets()[0].getParameterSet()
+
+    # First drop everything before the selection
+    thePSet_1 = thePSets.split(selection)[-1]
+
+    # Then drop everything after the selection
+    thePSet_2 = thePSet_1.split("},")[0]
+
+    # Final touch
+    thePSet = selection + thePSet_2
+
+    Print(thePSet, True)
     return
 
 def getHisto(datasetsMgr, datasetName, histoName):
@@ -585,7 +609,7 @@ if __name__ == "__main__":
     MERGEEWK     = False
     URL          = False
     NOERROR      = True
-    SAVEDIR      = "/publicweb/a/aattikis/Results/"
+    SAVEDIR      = "/publicweb/a/aattikis/DataDriven/"
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug' 
 

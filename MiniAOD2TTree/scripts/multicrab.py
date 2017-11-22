@@ -906,7 +906,7 @@ def PrintTaskSummary(reportDict):
     Verbose("PrintTaskSummary()")
     
     reports  = []    
-    msgAlign = "{:<3} {:<45} {:^16} {:^16} {:^16} {:^16} {:^16} {:^16} {:^16} {:^16} {:^16} {:^16}"
+    msgAlign = "{:<3} {:<50} {:^16} {:^16} {:^16} {:^16} {:^16} {:^16} {:^16} {:^16} {:^16} {:^16}"
     header   = msgAlign.format("#", "Task",
                                "%s%s" % (colors.GRAY  , "Idle"    ),
                                "%s%s" % (colors.RED   , "Failed"  ),
@@ -919,7 +919,7 @@ def PrintTaskSummary(reportDict):
                                "%s%s" % (colors.CYAN  , "Out"     ),
                                "%s%s" % (colors.WHITE , "Status"  ),
                                )
-    hLine = colors.WHITE + "="*170
+    hLine = colors.WHITE + "="*175
     reports.append(hLine)
     reports.append(header)
     reports.append(hLine)

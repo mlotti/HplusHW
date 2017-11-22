@@ -577,6 +577,15 @@ hplus2tbAnalysisDatasets.extend(datasetsTTZToQQ)
 # hplus2tbAnalysisDatasets.extend(datasetsTTJets) #-ve weights
 
 
+#Ather Add here...                               
+JetTriggersDatasets = []
+#JetTriggersDatasets.extend(datasetsJetHTData)  
+JetTriggersDatasets.extend(datasetsMuonData)
+#JetTriggersDatasets.extend(datasetsSignalTB) 
+JetTriggersDatasets.extend(datasetsTop)
+#JetTriggersDatasets.extend(datasetsQCD_HT)   
+JetTriggersDatasets.extend(datasetsQCDMuEnriched)
+
 #================================================================================================ 
 # Class Definition
 #================================================================================================ 
@@ -620,7 +629,7 @@ class DatasetGroup:
         Create dataset grouping in a dictionary for easy access.
         '''
 
-        analyses = ["SignalAnalysis", "Hplus2tbAnalysis", "TauLeg", "METLeg", "L1Study", "All"]
+        analyses = ["SignalAnalysis", "Hplus2tbAnalysis", "JetTriggers", "TauLeg", "METLeg", "L1Study", "All"]
         if self.analysis not in analyses:
             raise Exception("Unknown analysis \"%s\". Please select one of the following: \"%s" % (self.analysis, "\", \"".join(analyses) + "\".") )
 
@@ -629,6 +638,7 @@ class DatasetGroup:
         self.GroupDict["TauLeg"]           = tauLegDatasets
         self.GroupDict["METLeg"]           = metLegDatasets
         self.GroupDict["L1Study"]          = l1Datasets
+        self.GroupDict["JetTriggers"]      = JetTriggersDatasets
         self.GroupDict["All"]              = signalAnalysisDatasets + hplus2tbAnalysisDatasets + metLegDatasets + metLegDatasets
         return
 

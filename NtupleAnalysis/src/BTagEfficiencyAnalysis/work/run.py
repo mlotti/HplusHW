@@ -10,9 +10,13 @@ USAGE:
 ./run.py -m <path-to-multicrab-directory> -n 10 -e "Keyword1|Keyword2|Keyword3"
 
 Example:
-./run.py -m <path-to-multicrab-directory> --analysisType HToTB -i 'JetHT|TT|QCD|WJets' -n -1
-./run.py -m <path-to-multicrab-directory> -n 1000 -e "Charged"
-./run.py -m <path-to-multicrab-directory> -n 1000 -i "QCD|TT|WJets"
+./run.py -m <path-to-multicrab-directory> --analysisType HToTB -e "Charged|DY|QCD_b|WZ|ZZ|TTTT|ST_|WJets|TTWJets|TTZ|WW"
+./run.py -m <path-to-multicrab-directory> --analysisType HToTB -i 'JetHT|TT|QCD|WJets'
+<<<<<<< HEAD
+./run.py -m <path-to-multicrab-directory> --analysisType HToTB -e "Charged|DY|QCD_b|WZ|ZZ|TTTT|ST_|TTWJets|TTZ|WW"
+
+Last used:
+./run.py -m /uscms_data/d3/aattikis/workspace/multicrab/multicrab_Hplus2tbAnalysis_v8027_20171002T1247 --analysisType HToTB -e "Charged|DY|QCD_b|WZ|ZZ|TTTT|ST_|TTWJets|TTZ|WW"
 
 ROOT:
 The available ROOT options for the Error-Ignore-Level are (const Int_t):
@@ -43,7 +47,7 @@ from optparse import OptionParser
 
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
 from HiggsAnalysis.NtupleAnalysis.AnalysisBuilder import AnalysisBuilder
-
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 
 import ROOT
     
@@ -123,10 +127,10 @@ def main():
     # Add the datasets (according to user options)
     # ================================================================================================
     if (opts.includeOnlyTasks):
-        Print("Adding only dataset %s from multiCRAB directory %s" % (opts.includeOnlyTasks, opts.mcrab))
+        Print("Adding only dataset \"%s\" from multiCRAB directory %s" % (opts.includeOnlyTasks, opts.mcrab))
         process.addDatasetsFromMulticrab(opts.mcrab, includeOnlyTasks=opts.includeOnlyTasks)
     elif (opts.excludeTasks):
-        Print("Adding all datasets except %s from multiCRAB directory %s" % (opts.excludeTasks, opts.mcrab))
+        Print("Adding all datasets except \"%s\" from multiCRAB directory %s" % (opts.excludeTasks, opts.mcrab))
         Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
         process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=opts.excludeTasks)
     else:
@@ -294,8 +298,10 @@ if __name__ == "__main__":
     if opts.analysisType not in allowedAnalysis:
         raise Exception("Invalid analysis selection \"%s\"! Valid options are: %s" % (opts.analysisType, ", ".join(allowedAnalysis)))
     else:
-        msg = "Calculating b-tag SF for analysis-type \"%s\" using multicrab dir \"%s\". Proceed? " % (opts.analysisType, opts.mcrab)
-        AskUser(msg, True)
+        #msg = "Calculating b-tag SF for analysis-type \"%s\" using multicrab dir \"%s\". Proceed? " % (opts.analysisType, opts.mcrab)
+        #AskUser(msg, True)
+        msg = "Calculating b-tag SF for analysis-type \"%s\" using multicrab dir \"%s\"." % (opts.analysisType, opts.mcrab)
+        Print(ShellStyles.NoteStyle() + msg + ShellStyles.NormalStyle() , True)
 
     if opts.mcrab == None:
         raise Exception("Please provide input multicrab directory with -m")
