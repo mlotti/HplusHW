@@ -247,6 +247,9 @@ signalHH150Style = signalHHStyle.clone()
 signalHH155Style = signalHHStyle.clone()
 signalHH160Style = signalHHStyle.clone()
 
+signal145Style = signalStyle.clone()
+signal175Style = signalStyle.clone()
+
 signal180Style = signalStyle.clone()
 signal190Style = signalStyle.clone()
 """

@@ -625,6 +625,10 @@ for mass in _lightHplusMasses:
 
     _plotStyles["TTOrTToHplus_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
 
+for mass in _intermediateHplusMasses:
+    _plotStyles["TTToHplus_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
+    _plotStyles["HplusTB_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
+
 for mass in _heavyHplusMasses:
     _plotStyles["HplusTB_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
 
