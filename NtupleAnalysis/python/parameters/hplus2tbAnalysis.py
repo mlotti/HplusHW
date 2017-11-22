@@ -191,7 +191,6 @@ topSelectionBDT = PSet(
     MVACutDirection        =  ">=",  # options: ==, !=, <, <=, >, >=
     NjetsMax               = 999,     # [default: 999]
     NBjetsMax              = 999,     # [default: 999]
-    ReplaceJetsWithGenJets = False,  # For Testing (perfect jet resolution) 
     CSV_bDiscCutValue      = 0.8484, #-100., #0.8484, #Temporary
     CSV_bDiscCutDirection  = ">=",
     MassCutValue           = 400,
@@ -204,14 +203,17 @@ topSelectionBDT = PSet(
 fakeBMeasurement = PSet(
     prelimTopMVACutValue              = -0.8,     # [default: -0.8]
     prelimTopMVACutDirection          =  ">=",    # [default: ">="]
+    # CSVv2-Medium requirements (Baseline b-jets)
     numberOfBJetsCutValue             = 2,        # [default: 2]
     numberOfBJetsCutDirection         = "==",     # [default: "=="]
+    # CSVv2-Loose requirements (Inverted b-jets)
     numberOfInvertedBJetsCutValue     = 1,        # [default: 1]
     numberOfInvertedBJetsCutDirection = ">=",     # [default: ">="]
     invertedBJetsDiscr                = bjetSelection.bjetDiscr,
     invertedBJetsDiscrMaxCutValue     = 0.8,      # [default: 0.7]
     invertedBJetsDiscrMaxCutDirection = "<=",     # [default: "<="]
     invertedBJetsWorkingPoint         = "Loose",  # [default: "Loose"]
+    # Does this make any difference?
     invertedBJetsSortType             = "Random", # [default: "Random"] ("AscendingPt", "DescendingPt", "AscendingBDiscriminator", "DescendingBDiscriminator", "Random")
     )
 

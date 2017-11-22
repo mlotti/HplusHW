@@ -44,7 +44,6 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config, EventCounter& event
     cfg_CSV_bDiscCut(config, "CSV_bDiscCut"),
     cfg_NjetsMax(config.getParameter<unsigned int>("NjetsMax")),
     cfg_NBjetsMax(config.getParameter<unsigned int>("NBjetsMax")),
-    cfg_ReplaceJetsWithGenJets(config.getParameter<bool>("ReplaceJetsWithGenJets")),
     // Event counter for passing selection
     cPassedTopSelectionBDT(fEventCounter.addCounter("passed top selection ("+postfix+")")),
     // Sub counters
@@ -64,7 +63,6 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config)
   cfg_CSV_bDiscCut(config, "CSV_bDiscCut"),
   cfg_NjetsMax(config.getParameter<int>("NjetsMax")),
   cfg_NBjetsMax(config.getParameter<int>("NBjetsMax")),
-  cfg_ReplaceJetsWithGenJets(config.getParameter<bool>("ReplaceJetsWithGenJets")),  
   // Event counter for passing selection
   cPassedTopSelectionBDT(fEventCounter.addCounter("passed top selection")),
   // Sub counters
@@ -578,38 +576,32 @@ TopSelectionBDT::Data TopSelectionBDT::silentAnalyze(const Event& event, const J
 
 
 TopSelectionBDT::Data TopSelectionBDT::silentAnalyzeWithoutBJets(const Event& event, 
-								 const JetSelection::Data& jetData,
-								 const BJetSelection::Data& bjetData,
-								 bool doMatching,
-								 const std::string failedBJetsSortType) {
+								 const std::vector<Jet> selectedJets,
+								 const std::vector<Jet> selectedBJets,
+								 bool doMatching) 
+{
   ensureSilentAnalyzeAllowed(event.eventID());
   
   // Disable histogram filling and counter
   disableHistogramsAndCounters();  
   
   // Ready to analyze 
-  Data data = privateAnalyze(event, jetData.getSelectedJets(), GetBjetsToBeUsedInFit(bjetData, cfg_NBjetsMax, failedBJetsSortType), doMatching);
+  Data data = privateAnalyze(event, selectedJets, selectedBJets, doMatching);
   
-  // Save the failed bjets used in the top fit (only the failed (inverted) bjets)
-  data.fFailedBJetsUsedAsBJetsInFit = GetFailedBJetsUsedAsBJetsInFit();
-
   // Re-enable histogram filling and counter
   enableHistogramsAndCounters();
   return data;
 }
 
 TopSelectionBDT::Data TopSelectionBDT::analyzeWithoutBJets(const Event& event, 
-							   const JetSelection::Data& jetData,
-							   const BJetSelection::Data& bjetData,
-							   bool doMatching,
-							   const std::string failedBJetsSortType) {
+							   const std::vector<Jet> selectedJets,
+							   const std::vector<Jet> selectedBJets,
+							   bool doMatching)
+{
   ensureSilentAnalyzeAllowed(event.eventID());
 
   // Ready to analyze 
-  Data data = privateAnalyze(event, jetData.getSelectedJets(), GetBjetsToBeUsedInFit(bjetData, cfg_NBjetsMax, failedBJetsSortType), doMatching);
-
-  // Save the failed bjets used in the top fit (only the failed (inverted) bjets)
-  data.fFailedBJetsUsedAsBJetsInFit = GetFailedBJetsUsedAsBJetsInFit();
+  Data data = privateAnalyze(event, selectedJets, selectedBJets, doMatching); 
   
   // Re-enable histogram filling and counter
   enableHistogramsAndCounters();
@@ -629,20 +621,16 @@ TopSelectionBDT::Data TopSelectionBDT::analyze(const Event& event, const JetSele
 }
 
 
-//alex
-
-//alex
-
 TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const std::vector<Jet> selectedJets, const std::vector<Jet> selectedBjets, bool doMatching) {
-  if (0) std::cout << "=== TopSelectionBDT::privateAnalyze()" << std::endl;
   Data output;
   cSubAll.increment();
+
+  // Initialise variables
+  output.fJetsUsedAsBJets = selectedBjets; // inclusive (both bjets and failed b-jets)
+  output.bIsGenuineB = _getIsGenuineB(event.isMC(), output.fJetsUsedAsBJets);
   
   // Sanity check
   if (selectedBjets.size() < 3) return output;
-
-  // In order to replace PF Jets with GenJets event must be MC and user must enable the dedicated flag
-  bool replaceJets = event.isMC()*cfg_ReplaceJetsWithGenJets; // fixme - not tested
 
   // Only resize if their size exceeds max allowed value
   std::vector<Jet> jets  = selectedJets;
@@ -1730,10 +1718,6 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	}//if ( passBDTboth )
     }//if (MCtrue_Bjet.size() == GenTops.size())
   
-
-  // Replace all PF Jet 4-vectors with their matched GenJet 4-vectors
-  if (replaceJets) ReplaceJetsWithGenJets(output); //fixme: not tested!!!
-
   //================================================================================================
   // Apply cuts
   //================================================================================================
@@ -1952,94 +1936,23 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 
 }
 
-void TopSelectionBDT::ReplaceJetsWithGenJets(Data &output){
-  // Use only for testing:
-  // This was introduced to see the best-case-scenario of this chi-square top fit
-  // It replaces, post-fit (hence does not affect chi-sq values) the 4-vectors
-  // of PF jets with those of the MC-matched ones (GenJets). It should tell us 
-  // how much improvement we expect if we had perfect resolution
-
-
-  // Declare variables
-  math::XYZTLorentzVector trijet1_jet1_p4;
-  math::XYZTLorentzVector trijet1_jet2_p4;
-  math::XYZTLorentzVector trijet1_bjet_p4;
-
-  math::XYZTLorentzVector trijet2_jet1_p4;
-  math::XYZTLorentzVector trijet2_jet2_p4;
-  math::XYZTLorentzVector trijet2_bjet_p4;
-
-  math::XYZTLorentzVector tetrajet_bjet_p4;
-
-  // Assign values
-  trijet1_jet1_p4 = output.fTrijet1Jet1.p4();
-  trijet1_jet2_p4 = output.fTrijet1Jet2.p4();
-  trijet1_bjet_p4 = output.fTrijet1BJet.p4();
-
-  trijet2_jet1_p4 = output.fTrijet2Jet1.p4();
-  trijet2_jet2_p4 = output.fTrijet2Jet2.p4();
-  trijet2_bjet_p4 = output.fTrijet2BJet.p4();
-
-  // Overwrite values
-  if (output.fTrijet1Jet1.MCjet() != nullptr )  trijet1_jet1_p4 = output.fTrijet1Jet1.MCjet()->p4();
-  if (output.fTrijet1Jet2.MCjet() != nullptr )  trijet1_jet2_p4 = output.fTrijet1Jet2.MCjet()->p4();
-  if (output.fTrijet1BJet.MCjet() != nullptr )  trijet1_bjet_p4 = output.fTrijet1BJet.MCjet()->p4();
-
-  if (output.fTrijet2Jet1.MCjet() != nullptr )  trijet2_jet1_p4 = output.fTrijet2Jet1.MCjet()->p4();
-  if (output.fTrijet2Jet2.MCjet() != nullptr )  trijet2_jet2_p4 = output.fTrijet2Jet2.MCjet()->p4();
-  if (output.fTrijet2BJet.MCjet() != nullptr )  trijet2_bjet_p4 = output.fTrijet2BJet.MCjet()->p4();
-
-  // Assign Trijet-1
-  // output.fTrijet1Jet1 = jets.at(j1); // Can't do this MCjet is not an object of type "Jet"
-  // output.fTrijet1Jet2 = jets.at(j2); // Can't do this MCjet is not an object of type "Jet"
-  // output.fTrijet1BJet = jets.at(b1); // Can't do this MCjet is not an object of type "Jet"
-  output.fTrijet1Dijet_p4 = trijet1_jet1_p4 + trijet1_jet2_p4;
-  output.fTrijet1_p4      = output.fTrijet1Dijet_p4 + trijet1_bjet_p4;
-
-  // Assign Trijet-2
-  // output.fTrijet2Jet1 = jets.at(j3); // Can't do this MCjet is not an object of type "Jet"
-  // output.fTrijet2Jet2 = jets.at(j4); // Can't do this MCjet is not an object of type "Jet"
-  // output.fTrijet2BJet = jets.at(b2); // Can't do this MCjet is not an object of type "Jet"
-  output.fTrijet2Dijet_p4 = trijet2_jet1_p4 + trijet2_jet2_p4;
-  output.fTrijet2_p4      = output.fTrijet2Dijet_p4 + trijet2_bjet_p4;
-
-  // DiJets with min/max dR separation
-  double dR12 = ROOT::Math::VectorUtil::DeltaR(trijet1_jet1_p4, trijet1_jet2_p4);
-  double dR34 = ROOT::Math::VectorUtil::DeltaR(trijet2_jet1_p4, trijet2_jet2_p4);
-  if (dR12 < dR34) 
-    {
-      output.fDijetWithMinDR_p4 = trijet1_jet1_p4 + trijet1_jet2_p4;
-      output.fDijetWithMaxDR_p4 = trijet2_jet1_p4 + trijet2_jet2_p4;
-    }
-  else 
-    {
-      output.fDijetWithMaxDR_p4 = trijet2_jet1_p4 + trijet2_jet2_p4;
-      output.fDijetWithMinDR_p4 = trijet1_jet1_p4 + trijet1_jet2_p4;
-    }
-      
-  // Tetrajet b-jet (for Invariant Mass)
-  tetrajet_bjet_p4 = output.getTetrajetBJet().p4();
-  if (output.getTetrajetBJet().MCjet() != nullptr ) tetrajet_bjet_p4 = output.getTetrajetBJet().MCjet()->p4();
-
-  // Ldg here means use the LdgTrijet
-  output.fLdgTetrajet_p4    = output.getLdgTrijet()    + tetrajet_bjet_p4;
-  output.fSubldgTetrajet_p4 = output.getSubldgTrijet() + tetrajet_bjet_p4;
-
-  //std::cout << "output.getLdgTrijet().M() = " << output.getLdgTrijet().M() << std::endl;
-  //std::cout << "output.fLdgTetrajet_p4.M() = " << output.fLdgTetrajet_p4.M() << "\n" << std::endl;
-  
-  return;
-}
-
 bool TopSelectionBDT::_getIsGenuineB(bool bIsMC, const std::vector<Jet>& selectedBjets){
   if (!bIsMC) return false;
 
-  // GenuineB=All selected b-jets in the event are genuine (using jet-flavour from MC)
+  // GenuineB=All selected b-jets in the event are genuine (using pat::Jet hadronFlavour() from MC)
+  // jet is considered a b-jet if hadronFlavour=5
+  // jet is considered a c-jet if hadronFlavour=4
+  // jet is considered a light-flavour or gluon jet if hadronFlavour=0
+
   unsigned int nFakes=0;
   for(const Jet& bjet: selectedBjets)
     {
       // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagMCTools#Jet_flavour_in_PAT
-      bool isFakeB = (abs(bjet.pdgId()) != 5); // For data pdgId==0
+      // bool isFakeB = (abs(bjet.pdgId()) != 5); // For data pdgId==0
+
+      // See: https://hypernews.cern.ch/HyperNews/CMS/get/btag/1482.html
+      bool isFakeB = (abs(bjet.hadronFlavour()) != 5); // For data pdgId==0
+
       if (isFakeB) nFakes++;
     }
   return (nFakes==0);
@@ -2267,62 +2180,4 @@ bool TopSelectionBDT::HasMother(const Event& event, const genParticle &p, const 
     }
 
   return false;
-}
-
-
-const std::vector<Jet> TopSelectionBDT::GetJetsToBeUsedInFit(const JetSelection::Data& jetData,
-							     const unsigned int maxNumberOfJets)
-{
-  // Get the selected jets
-  std::vector<Jet> jets = jetData.getSelectedJets();
-  
-  // Only resize if their size exceeds max allowed value
-  if (jets.size() > maxNumberOfJets) jets.resize(maxNumberOfJets);
-  return jets;
-}
-
-
-const std::vector<Jet> TopSelectionBDT::GetBjetsToBeUsedInFit(const BJetSelection::Data& bjetData,
-							      const unsigned int maxNumberOfBJets, 
-							      const std::string jetSortType)
-{
-  // If there are some bjets use them (depends on cuts)
-  std::vector<Jet> bjetsForFit      = bjetData.getSelectedBJets();
-  const unsigned int nSelectedBJets = bjetData.getSelectedBJets().size();
-
-  // Append the vector of all failed bjets to the end of the bjets vector
-  // Use case: QCD Measurement where we invert at least 1 b-jet => may have less than 3 b-jets available (min for di-top fit and inv mass) 
-  if (bjetsForFit.size() < maxNumberOfBJets)
-    {      
-
-      std::vector<Jet> failedBJets;
-      if (jetSortType.compare("Random") == 0 ) failedBJets = bjetData.getFailedBJetCandsShuffled();
-      else if  (jetSortType.compare("AscendingPt") == 0 ) failedBJets = bjetData.getFailedBJetCandsAscendingPt();
-      else if  (jetSortType.compare("DescendingPt") == 0 ) failedBJets = bjetData.getFailedBJetCandsDescendingPt();
-      else if  (jetSortType.compare("AscendingBDiscriminator") == 0 ) failedBJets = bjetData.getFailedBJetCandsAscendingDiscr();
-      else if  (jetSortType.compare("DescendingBDiscriminator") == 0 ) failedBJets = bjetData.getFailedBJetCandsDescendingDiscr();
-      else
-	{
-	  throw hplus::Exception("logic") << "Uknown jet sort type \"" << jetSortType << "\" passed to TopSelection class. "
-					  << "Please select one of the following:\n\t\"Random\", \"AscendingPt\", \"DescendingPt\", \"AscendingBDiscriminator\", \"DescendingBDiscriminator\".";
-	}
-
-      // Save the failed bjets that will be used to replace bjets in top fit (for studying their properties)
-      const unsigned int nFailedBJetsUsedAsBJetsInFit = maxNumberOfBJets - nSelectedBJets;
-      myFailedBJetsUsedAsBJetsInFit = failedBJets;
-      myFailedBJetsUsedAsBJetsInFit.resize(nFailedBJetsUsedAsBJetsInFit);
-      if (0) std::cout << "nFailedBJetsUsedAsBJetsInFit = " << maxNumberOfBJets << " - " << nSelectedBJets << " = " << nFailedBJetsUsedAsBJetsInFit << std::endl;
-
-      // Now insert the customly sorted failed bjet vector to the end of the selected bjets vector
-      bjetsForFit.insert(bjetsForFit.end(), failedBJets.begin(), failedBJets.end()); 
-    }
-
-
-  // Truncate the bjets vector to correct size
-  if (bjetsForFit.size() > maxNumberOfBJets) bjetsForFit.resize(maxNumberOfBJets);
-
-  // Finally sort by descending pt value (http://en.cppreference.com/w/cpp/algorithm/sort)      
-  std::sort(bjetsForFit.begin(), bjetsForFit.end(), [](const Jet& a, const Jet& b){return a.pt() > b.pt();});
-
-  return bjetsForFit;
 }

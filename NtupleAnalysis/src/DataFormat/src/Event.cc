@@ -10,7 +10,7 @@ Event::Event(const ParameterSet& config):
   fMET_Type1("MET_Type1"),
   fMET(config.getParameter<std::string>("METSelection.METType", "MET_Type1")),
   fCaloMET("CaloMET"),
-  fL1MET("L1MET"),
+  fL1MET("L1MET_pat"),
   fL1extraMET("L1MET_l1extra"),
   fGenWeight("GenWeight"),
   fTopPtWeight("topPtWeight"),

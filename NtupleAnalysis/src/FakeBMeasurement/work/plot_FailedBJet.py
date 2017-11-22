@@ -1,12 +1,21 @@
 #!/usr/bin/env python
 '''
-USAGE:
-./plotQCD_FailedBJet.py -m <pseudo_mcrab_directory> [opts]
+Description:
+Plots properties of all failed b-jets (aka inverted b-jets) in triplets:
+a) Inclusive
+b) GenuineB
+c) FakeB
+Thesee b-jets are taken from topData.getFailedBJetsUsedAsBJetsInFit() and 
+include the b-jets with a "Loose" (instead of "Medium") discriminator WP.
 
+Usage:
+./plot_FailedBJet.py -m <pseudo_mcrab_directory> [opts]
 
-EXAMPLES:
-./plotQCD_FailedBJet.py -m FakeBMeasurement_GE2MediumPt40Pt30_GE1LooseMaxDiscr0p7_StdSelections_TopCut100_AllSelections_TopCut10_RandomFailedBJetSort_171012_012105/ --plotEWK --url
+Examples:
+./plot_FailedBJet.py -m FakeBMeasurement_GE2MediumPt40Pt30_GE1LooseMaxDiscr0p7_StdSelections_TopCut100_AllSelections_TopCut10_RandomFailedBJetSort_171012_012105/ --plotEWK --url
 
+Last Used::
+./plot_FailedBJet.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171115_101036 -e "Charged" --url --plotEWK
 
 NOTE:
 If unsure about the parameter settings a pseudo-multicrab do:
@@ -89,7 +98,8 @@ def GetLumi(datasetsMgr):
 
 def GetListOfEwkDatasets():
     Verbose("Getting list of EWK datasets")
-    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    #return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    return ["TT", "noTop", "SingleTop", "ttX"]
 
 
 def GetDatasetsFromDir(opts):
@@ -178,6 +188,7 @@ def main(opts):
                
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
+        datasetsMgr.PrintInfo()
    
         # Re-order datasets (different for inverted than default=baseline)
         if 0:
@@ -344,11 +355,11 @@ def PlotHisto(datasetsMgr, histoName):
                    )
     
     # Save plot in all formats
-    SavePlot(p, histoName, os.path.join(opts.saveDir, "FailedBJet", opts.optMode))#, saveFormats = [".png"] )
+    SavePlot(p, histoName, os.path.join(opts.saveDir, "FailedBJet", opts.optMode), saveFormats = [".png"] )
     return
 
 
-def SavePlot(plot, plotName, saveDir, saveFormats = [".pdf", ".png"]):
+def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".pdf", ".png"]):
     # Check that path exists
     if not os.path.exists(saveDir):
         os.makedirs(saveDir)
@@ -475,4 +486,4 @@ if __name__ == "__main__":
     main(opts)
 
     if not opts.batchMode:
-        raw_input("=== plotHistograms.py: Press any key to quit ROOT ...")
+        raw_input("=== plotQCD_FailedBJet.py: Press any key to quit ROOT ...")
