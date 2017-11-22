@@ -356,7 +356,7 @@ _datasetMerge = {
     #"Diboson_HT180"        : "noTop",
     "WWTo4Q"               : "noTop",
     "ZZTo4Q"               : "noTop",
-    "WZ"                   : "noTop",
+#    "WZ"                   : "noTop",
 
     #"TTWJetsToQQ"          : "TTWJetsToQQ",
     #"TTZToQQ"              : "TTZToQQ",
@@ -376,6 +376,8 @@ _datasetOrder = ["Data"]
 for process in ["TTToHplusBWB_M%d", "TTToHplusBHminusB_M%d", "TTToHplus_M%d", "Hplus_taunu_t-channel_M%d", "Hplus_taunu_tW-channel_M%d", "Hplus_taunu_s-channel_M%d", "Hplus_taunu_M%d", "TTOrTToHplus_M%d"]:
     for mass in _lightHplusMasses:
         _datasetOrder.append(process%mass)
+for mass in _intermediateHplusMasses:
+    _datasetOrder.append("HplusTB_M%d"%mass)
 for mass in _heavyHplusMasses:
     _datasetOrder.append("HplusTB_M%d"%mass)
 _datasetOrder.extend([
@@ -546,6 +548,9 @@ for mass in _lightHplusMasses:
     _legendLabels["Hplus_taunu_M%d"%mass] = "t#rightarrowH^{+} m_{H^{+}}=%d" % mass
 
     _legendLabels["TTOrTToHplus_M%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
+
+for mass in _intermediateHplusMasses:
+    _legendLabels["TTToHplus_M%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
 
 for mass in _heavyHplusMasses:
     _legendLabels["HplusTB_M%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
