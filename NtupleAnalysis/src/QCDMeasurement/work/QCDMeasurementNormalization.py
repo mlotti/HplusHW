@@ -34,7 +34,7 @@ analysis = "QCDMeasurement"
 _rebinFactor = 5
 
 #=== Set to true if you want to use HT binned WJets samples instead of inclusive
-useWJetsHT = True
+useWJetsHT = False
 
 #=== Set tau pT bins to be used
 selectOnlyBins = [] #["1"] # use all bins
