@@ -158,6 +158,7 @@ for mass in _intermediateHplusMasses:
 
 for mass in _heavyHplusMasses:
     _physicalToLogical["ChargedHiggs_HplusTB_HplusToTauNu_M_%d"%(mass)] = "HplusTB_M%d"%mass
+    _physicalToLogical["ChargedHiggs_HplusTB_HplusToTauNu_HeavyMass_M_%d"%(mass)] = "HplusTB_M%d"%mass
 
 for mass in _heavyHplusToTBbarMasses:
     _physicalToLogical["ChargedHiggs_HplusTB_HplusToTB_M%d"%(mass)] = "HplusToTBbar_M%d" % mass
