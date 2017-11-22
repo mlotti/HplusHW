@@ -55,6 +55,7 @@ Jets = cms.VPSet(
         userInts = cms.vstring(
             "QGTaggerAK4PFCHS:mult",
         ),
+        checkSubjets = cms.bool(False),
     ),
 
     # Marina
@@ -78,8 +79,25 @@ Jets = cms.VPSet(
 
         userInts = cms.vstring(
             ),
+        
+        checkSubjets = cms.bool(False),
         ),
     
+    # AK8 SoftDrop Subjets
+    cms.PSet(
+        branchname = cms.untracked.string("AK8JetsSoftDrop"),
+        src        = cms.InputTag("packedPatJetsAK8PFCHSSoftDrop"),
+        systVariations = cms.bool(False),
+
+        discriminators = cms.vstring(
+            "pfCombinedInclusiveSecondaryVertexV2BJetTags",
+            ),
+        userFloats = cms.vstring(
+            ),
+        userInts = cms.vstring(
+            ),
+        checkSubjets = cms.bool(True),
+        ),
 
 #    cms.PSet(
 #        branchname = cms.untracked.string("JetsPuppi"),
