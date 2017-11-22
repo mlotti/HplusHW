@@ -126,7 +126,8 @@ scaleFactors.setupBtagSFInformation(btagPset=bjetSelection,
                                     btagPayloadFilename="CSVv2.csv",
                                     #btagEfficiencyFilename="btageff_TTJets.json",
                                     #btagEfficiencyFilename="btageff_WJetsHT.json",
-                                    btagEfficiencyFilename="btageff_hybrid.json",
+                                    #btagEfficiencyFilename="btageff_hybrid.json",
+                                    btagEfficiencyFilename="btageff_hybrid_HToTB.json",
                                     direction="nominal")
 
 #====== MET selection

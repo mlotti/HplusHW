@@ -13,3 +13,4 @@
 #include "EventSelection/interface/JetCorrelations.h"
 #include "EventSelection/interface/TopologySelection.h"
 #include "EventSelection/interface/TopSelection.h"
+#include "EventSelection/interface/TopSelectionBDT.h"

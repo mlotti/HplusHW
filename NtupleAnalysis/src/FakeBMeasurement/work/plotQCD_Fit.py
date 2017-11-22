@@ -84,6 +84,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 import HiggsAnalysis.FakeBMeasurement.QCDNormalization as QCDNormalization
+import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
 
 #================================================================================================ 
 # Function Definition
@@ -117,7 +118,7 @@ def GetLumi(datasetsMgr):
 
 def GetListOfEwkDatasets():
     Verbose("Getting list of EWK datasets")
-    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"] #DEFAULT!
 
 def GetHistoKwargs(histoName):
     '''
@@ -218,16 +219,36 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
 def main(opts):
     Verbose("main function")
 
-    optModes = [""]
-    #optModes = ["", "OptChiSqrCutValue40", "OptChiSqrCutValue60", "OptChiSqrCutValue80", "OptChiSqrCutValue100", "OptChiSqrCutValue120", "OptChiSqrCutValue140"]
-    #optModes = ["",
-    #            "OptInvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeRandom",
-    #            "OptInvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeDescendingBDiscriminator",
-    #            "OptInvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeRandom",
-    #            "OptInvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeDescendingBDiscriminator"]
+    # Obtain dsetMgrCreator and register it to module selector
+    dsetMgrCreator = dataset.readFromMulticrabCfg(directory=opts.mcrab)
 
+    # Get list of eras, modes, and optimisation modes
+    erasList      = dsetMgrCreator.getDataEras()
+    modesList     = dsetMgrCreator.getSearchModes()
+    optList       = dsetMgrCreator.getOptimizationModes()
+    sysVarList    = dsetMgrCreator.getSystematicVariations()
+    sysVarSrcList = dsetMgrCreator.getSystematicVariationSources()
 
-    if opts.optMode != None:
+    # Todo: Print settings table
+    if 0:
+        print erasList
+        print
+        print modesList
+        print
+        print optList
+        print
+        print sysVarList
+        print 
+        print sysVarSrcList
+        
+    # If user does not define optimisation mode do all of them
+    if opts.optMode == None:
+        if len(optList) < 1:
+            optList.append("")
+        else:
+            pass
+        optModes = optList
+    else:
         optModes = [opts.optMode]
 
     # For-loop: All opt Mode
@@ -236,6 +257,7 @@ def main(opts):
 
         # Setup & configure the dataset manager 
         datasetsMgr = GetDatasetsFromDir(opts)
+        
         datasetsMgr.updateNAllEventsToPUWeighted()
         datasetsMgr.loadLuminosities() # from lumi.json
         if opts.verbose:
@@ -310,10 +332,14 @@ def PlotAndFitTemplates(datasetsMgr, histoName, inclusiveFolder, opts):
     FakeB_inverted.Add(EWK_inverted, -1)
 
     # Rebin the EWK-MC histo (significant fit improvement - opposite effect for QCD fit)
-    EWK_baseline.RebinX(2)
-    EWK_inverted.RebinX(2)
-    FakeB_inverted.RebinX(1) #FIXME: Optimal is 1 (i.e. bin width of 10 GeV/c^{2})
-
+    EWK_baseline.RebinX(1)
+    EWK_inverted.RebinX(1)
+    if 0:
+        print "+"*100
+        Print("FIXME: Optimal is 1 (i.e. bin width of 10 GeV/c^{2})")
+        print "+"*100
+        FakeB_inverted.RebinX(2)
+    
     # Create the final plot object
     compareHistos = [EWK_baseline]
     p = plots.ComparisonManyPlot(FakeB_inverted, compareHistos, saveFormats=[])
@@ -396,14 +422,17 @@ def PlotAndFitTemplates(datasetsMgr, histoName, inclusiveFolder, opts):
     #=========================================================================================
     '''
     Optimal fit (Chi2/D.O.F = 3.2)
-    FITMIN  ;  80
-    FITMAX  : 800
-    BinWidth:  10 GeV/c^2
-    par3    : -3.9174e-01 (fixed)
+    TrialNumber:   1  ,     2,   3  ,     4 ,   5  ,    6,    7  ,
+    Chi2/DOF   :   2.6,   2.1,   2.4,    7.4,   2.6,  3.2,    1.5,
+    FITMIN     :  80.0,  80.0,  80.0,   80.0,  80.0,  80.0, 120.0,
+    FITMAX     : 800.0, 500.0, 600.0,  500.0, 800.0, 800.0, 500.0,
+    BinWidth   :  10  ,   5  ,  10  ,   10 ,   10  ,   5  ,   5  ,
+    
+    par3       : -3.9174e-01 (fixed) for ALL
     '''
     Print("Setting the fit-function to the EWK template", False)
-    FITMIN_EWK =  80 
-    FITMAX_EWK = 800 
+    FITMIN_EWK = 120
+    FITMAX_EWK = 500
     par0 = [+7.1817e-01,   0.0,   1.0] # cb_norm 
     par1 = [+1.7684e+02, 150.0, 200.0] # cb_mean
     par2 = [+2.7287e+01,  20.0,  40.0] # cb_sigma (fixed for chiSq=2)
@@ -422,34 +451,36 @@ def PlotAndFitTemplates(datasetsMgr, histoName, inclusiveFolder, opts):
     # QCD
     #=========================================================================================
     '''
-    Optimal fit (Chi2/D.O.F = 25.6)
-    FITMIN  :   80
-    FITMAX  : 1000
-    BinWidth:  5 GeV/c^2
-    f_{QCD} : ~0.75118 +/- 0.00740 (data-driven plots looked great with this value)
+    Optimal fit (Chi2/D.O.F = 2.9)
+    TrialNumber:   1,    2,    3,      4,    5,
+    Chi2/DOF   : 1.9,   2.9,     ,      ,  2.0,
+    FITMIN     : 120,    90,   90,    90,  120,
+    FITMAX     : 1000,  800,  700,   800,  900,
+    bPtochos   : True, True, True, False, True,
+    BinWidth   :    5,    5,    5,    10,    5,
     '''
     Print("Setting the fit-function to the QCD template", False)
-    FITMIN_QCD =  120  # 120
-    FITMAX_QCD = 1000 #1000
-    bPtochos   = False #True
+    FITMIN_QCD =  120
+    FITMAX_QCD =  900
+    bPtochos   = True
     if bPtochos:
-        par0 = [9.55e-01,   0.0 ,    1.0] # lognorm_norm
-        par1 = [2.33e+02,   0.0 , 1000.0] # lognorm_mean
-        par2 = [1.44e+00,   0.5 ,   10.0] # lognorm_shape
-        par3 = [2.2e-03 ,   0.0 ,    1.0] # exp_const
-        par4 = [-6.2e-03,  -1.0 ,    0.0] # exp_coeff
-        par5 = [2.17e+02, 200.0 ,  250.0] # gaus_mean
-        par6 = [3.08e+01,   0.0 ,  100.0] # gaus_sigma
+        par0 = [  0.92,   0.0,   1.0] # lognorm_norm
+        par1 = [220.00, 180.0, 500.0] # lognorm_mean
+        par2 = [  1.44,   0.4,  10.0] # lognorm_shape
+        par3 = [   0.0,   0.0,   1.0] # exp_const
+        par4 = [  -0.01, -2.0,   0.0] # exp_coeff
+        par5 = [220.00, 100.0, 400.0] # gaus_mean
+        par6 = [ 40.00,   0.0,  60.0] # gaus_sigma
         template_FakeB_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunction", boundary=0, norm=1, rejectPoints=0), FITMIN_QCD, FITMAX_QCD)
         template_FakeB_Inverted.setDefaultFitParam(defaultInitialValue = [par0[0], par1[0], par2[0], par3[0], par4[0] , par5[0], par6[0] ],
                                                    defaultLowerLimit   = [par0[1], par1[1], par2[1], par3[1], par4[1] , par5[1], par6[1] ],
                                                    defaultUpperLimit   = [par0[2], par1[2], par2[2], par3[2], par4[2] , par5[2], par6[2] ])
     else:
-        par0 = [8.9743e-01,   0.0 ,    1.0] # lognorm_norm
-        par1 = [2.3242e+02, 200.0 , 1000.0] # lognorm_mean
-        par2 = [1.4300e+00,   0.5,    10.0] # lognorm_shape
-        par3 = [2.2589e+02, 100.0 ,  500.0] # gaus_mean
-        par4 = [4.5060e+01,   0.0 ,  100.0] # gaus_sigma
+        par0 = [  0.92,   0.0,   1.0] # lognorm_norm
+        par1 = [220.00, 180.0, 500.0] # lognorm_mean
+        par2 = [  1.44,   0.4,  10.0] # lognorm_shape
+        par3 = [220.00, 100.0, 400.0] # gaus_mean
+        par4 = [ 40.00,   0.0,  60.0] # gaus_sigma
         template_FakeB_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunctionAlt", boundary=0, norm=1, rejectPoints=0), FITMIN_QCD, FITMAX_QCD)
         template_FakeB_Inverted.setDefaultFitParam(defaultInitialValue = [par0[0], par1[0], par2[0], par3[0], par4[0] ],
                                                    defaultLowerLimit   = [par0[1], par1[1], par2[1], par3[1], par4[1] ],
@@ -471,10 +502,28 @@ def PlotAndFitTemplates(datasetsMgr, histoName, inclusiveFolder, opts):
     #=========================================================================================
     # Fit individual templates to histogram "Data_baseline", with custom fit options
     #=========================================================================================
+    '''
+    [X,Y] = [EWK, QCD]
+
+    Optimal fit (Chi2/D.O.F = 2.9)
+    Chi2/DOF   :    5.8,      5.8,     4.1,    11.0,    10.8,     5.9,     5.3,     5.3,      5.3,
+    FITMIN     :     90,       90,      90,    80.0,    80.0,    90.0,    90.0,    90.0,    100.0,
+    FITMAX     :    900,      900,     900,   900.0,   900.0,   900.0,   900.0,   900.0,   1000.0,
+    TrialNumber:   [1,1],   [2,1], [1,2]  ,   [1.1],   [3,1],   [4,1],   [5,5],   [6,5],   [7,5],
+    f_{QCD}    : 0.79312, 0.65312, 0.82592, 0.76059, 0.75231, 0.79595, 0.79837, 0.66670, 0.72374,
+    StdSel D/B : 0.9    , 1.0    ,  ~0.90 ,    0.95,   ~0.95,   ~0.95,   ~0.95,     1.0,   
+    AllSel D/B :        ,        ,        ,        ,        ,        ,        ,     1.1,
+    '''
     fitOptions  = "R L W 0 Q" #"R B L W 0 Q M"
-    FITMIN_DATA =   80
+    FITMIN_DATA =  100
     FITMAX_DATA = 1000
     manager.calculateNormalizationCoefficients(Data_baseline, fitOptions, FITMIN_DATA, FITMAX_DATA)
+
+    # Warn user that entrie data region should be used for fitting! If not appropriate cuts must be applied
+    msg = "CAREFUL: The QCD Measurement method assumes that the INCLUSIVE data are fitted!"
+    msg+= " If you do not want to fit the entire region, you MUST cut away in the analysis the region excluded from the fit!"
+    if FITMIN_DATA > 0 or FITMAX_DATA < 1000:
+        Print(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle(), True) 
     
     Verbose("Write the normalisation factors to a python file", True)
     fileName = os.path.join(opts.mcrab, "QCDInvertedNormalizationFactors%s.py"% ( getModuleInfoString(opts) ) )
@@ -482,13 +531,8 @@ def PlotAndFitTemplates(datasetsMgr, histoName, inclusiveFolder, opts):
     
     # Not really needed to plot the histograms again
     if 1:
-        #saveName = fileName.replace("/", "_").replace(".py", "")
         saveName = histoName
-
-        # Draw the histograms
         plots.drawPlot(p, saveName, **GetHistoKwargs(histoName) ) #the "**" unpacks the kwargs_ 
-
-        # Save plot in all formats
         SavePlot(p, saveName, os.path.join(opts.saveDir, "Fit", opts.optMode) ) 
     return
 

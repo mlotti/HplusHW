@@ -181,6 +181,11 @@ def PurityHistograms(datasetsMgr, qcdDatasetName):
 
     # For-loop: All histograms in list
     for histoName in histoPaths:
+        if "_Vs_" in histoName:
+            continue
+
+        if "subldg" in histoName.lower():
+            continue
 
         kwargs_  = histoKwargs[histoName]
         saveName = histoName.replace("/", "_")
@@ -320,10 +325,11 @@ def GetHistoKwargs(histoList, opts):
             kwargs["xlabel"] = "p_{T} (%s)"  % units
         if "LdgTrijetMass" in h:
             units            = "GeV/c^{2}"
+            kwargs["rebinX"] = 1 # Cannot be bigger than 1 here! (Must rebin BEFORE calculating the purity)
             kwargs["ylabel"] = yAxis + "/ %.0f " + units
             kwargs["xlabel"] = "m_{jjb} (%s)"  % units
             kwargs["cutBox"] = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": 1200.0, "ymin": yMin, "ymax": yMax}
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": 1000.0, "ymin": yMin, "ymax": yMax}
             startBlind       = 150
             endBlind         = 200
             kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind)
@@ -398,6 +404,19 @@ def GetHistoKwargs(histoList, opts):
             kwargs["xlabel"] = "#eta"
             kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": yMin, "ymax": yMax}
+        if "HT" in h:
+            units            = "GeV/c^{2}"
+            kwargs["ylabel"] = yAxis + "/ %.0f"
+            kwargs["xlabel"] = "H_{T} (%s)" % (units)
+            kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+            kwargs["opts"]   = {"xmin": 500.0, "xmax": +1500, "ymin": yMin, "ymax": yMax}
+            ROOT.gStyle.SetNdivisions(8, "X")
+        if "MET" in h:
+            units            = "GeV"
+            kwargs["ylabel"] = yAxis + "/ %.0f"
+            kwargs["xlabel"] = "E_{T}^{miss} (%s)" % (units)
+            kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": +400, "ymin": yMin, "ymax": yMax}
         histoKwargs[h] = kwargs
     return histoKwargs
     
