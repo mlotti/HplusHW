@@ -98,9 +98,9 @@ def main():
     # ================================================================================================
     # Setup the process
     # ================================================================================================
-    #from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import obtainAnalysisSuffix
-    #process = Process("QCDMeasurement"+obtainAnalysisSuffix(sys.argv))
-    process = Process(prefix, postfix, opts.nEvts)
+    maxEvents = {}
+    maxEvents["All"] = opts.nEvts
+    process = Process(prefix, postfix, maxEvents)
 
 
     # ================================================================================================
