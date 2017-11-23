@@ -9,10 +9,12 @@ Usage:
 
 Examples:
 ./plot_Folder.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_TopCut10_171012_011451 --folder jetSelection_ --url
-
+./plot_Folder.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurement --ratio
+./plot_Folder.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurementEWKGenuineB --onlyMC
+./plot_Folder.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurementEWKFakeB --onlyMC --nostack
 
 Last Used:
-./plot_Folder.py -m  --folder topologySelection_
+./plot_Folder.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurementEWKGenuineB --onlyMC && ./plot_Folder.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurementEWKFakeB --onlyMC && ./plot_Folder.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurement --ratio
 '''
 
 #================================================================================================ 
@@ -74,10 +76,7 @@ def GetListOfEwkDatasets():
     if 0: # TopSelection
         return  ["TT", "WJetsToQQ_HT_600ToInf", "SingleTop", "DYJetsToQQHT", "TTZToQQ",  "TTWJetsToQQ", "Diboson", "TTTT"]
     else: # TopSelectionBDT
-        if opts.afterTop:
-            return  ["TT", "SingleTop", "ttX", "noTop"]
-        else:
-            return  ["TT", "noTop", "SingleTop", "ttX"]
+        return  ["TT", "noTop", "SingleTop", "ttX"]
 
 
 def GetDatasetsFromDir(opts):
@@ -146,24 +145,26 @@ def main(opts):
 
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
-  
-        # Re-order datasets (different for inverted than default=baseline)
-        newOrder = ["Data"]
-        for i, d in enumerate(datasetsMgr.getAllDatasets(), 0):
-            if d.isData():
-                continue
-            else:
-                newOrder.append(d.getName())
+        
+        # Get Luminosity
+        intLumi = datasetsMgr.getDataset("Data").getLuminosity()
 
-        # Re-arrange dataset order if after top selection!
-        if opts.afterTop:
-            s = newOrder.pop( newOrder.index("noTop") )
-            newOrder.insert(len(newOrder), s) #after "Data"
+        # Re-order datasets (different for inverted than default=baseline)
+        newOrder = []
+        # For-loop: All MC datasets
+        for d in datasetsMgr.getMCDatasets():
+            newOrder.append(d.getName())
 
         # Move signal to top
         if opts.signal in newOrder:
             s = newOrder.pop( newOrder.index(opts.signal) )
-            newOrder.insert(1, s)
+            newOrder.insert(0, s)
+
+        # Add Data to list of samples!
+        if not opts.onlyMC:
+            newOrder.insert(0, "Data")
+            
+        # Apply new dataset order!
         datasetsMgr.selectAndReorder(newOrder)
         
         # Merge EWK samples
@@ -173,7 +174,7 @@ def main(opts):
 
         # Print dataset information
         datasetsMgr.PrintInfo()
-
+        
         # Apply TDR style
         style = tdrstyle.TDRStyle()
         style.setOptStat(True)
@@ -185,7 +186,7 @@ def main(opts):
         histoList  = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(folder)
         histoPaths = [os.path.join(folder, h) for h in histoList]
         for h in histoPaths:
-            
+
             # Re-arrange dataset order if after top selection!
             if "AfterAllSelections" in h:
                 s = newOrder.pop( newOrder.index("noTop") )
@@ -193,8 +194,7 @@ def main(opts):
                 datasetsMgr.selectAndReorder(newOrder)
 
             # Plot the histograms!
-            DataMCHistograms(datasetsMgr, h)
-            
+            DataMCHistograms(datasetsMgr, h, intLumi)
     return
 
 def GetHistoKwargs(h, opts):
@@ -203,20 +203,19 @@ def GetHistoKwargs(h, opts):
         _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": -0.12}    
     logY    = True
     _yLabel = "Events / %.0f "
-    yMin    = 1e-1
+    yMin    = 1e0
     if logY:
         yMaxF = 10
     else:
         yMaxF = 1.2
         
-
     _kwargs = {
         "ylabel"           : _yLabel,
         "rebinX"           : 1,
         "rebinY"           : None,
         "ratioYlabel"      : "Data/MC",
-        "ratio"            : not opts.onlyMC,
-        "stackMCHistograms": not opts.onlyMC,
+        "ratio"            : opts.ratio,
+        "stackMCHistograms": not opts.nostack,
         "ratioInvert"      : False, 
         "addMCUncertainty" : False, 
         "addLuminosityText": True,
@@ -446,12 +445,18 @@ def GetHistoKwargs(h, opts):
         ROOT.gStyle.SetLabelSize(16.0, "X")
         #ROOT.gStyle.SetLabelFont(62, "X")
         #ROOT.gStyle.SetLabelOffset(1.0)
-        kwargs["moveLegend"] = {"dx": -0.52, "dy": -0.55, "dh": 0.0}
-
+        if opts.ratio:
+            kwargs["moveLegend"] = {"dx": -0.52, "dy": -0.55, "dh": 0.0}
+        else:
+            kwargs["moveLegend"] = {"dx": -0.52, "dy": -0.45, "dh": 0.0}
+            
+        
     if h == "counter":
-        xMin = 15
-        kwargs["opts"]   = {"xmin": xMin, "xmax": +21.0, "ymin": 1e0, "ymaxfactor": 1.2}
-        kwargs["cutBox"] = {"cutValue": xMin+2, "fillColor": 16, "box": False, "line": True, "greaterThan": True} #indicate btag SF
+        ROOT.gStyle.SetLabelSize(16.0, "X")
+        xMin = 17
+        xMax = 29
+        kwargs["opts"]   = {"xmin": xMin, "xmax": xMax, "ymin": 1e0, "ymax": 1e7} #"ymaxfactor": yMaxF}
+        #kwargs["cutBox"] = {"cutValue": xMin+2, "fillColor": 16, "box": False, "line": True, "greaterThan": True} #indicate btag SF
 
     if "IsolPt" in h:
         ROOT.gStyle.SetNdivisions(8, "X")
@@ -660,7 +665,7 @@ def getHistos(datasetsMgr, histoName):
     h2.setName("EWK")
     return [h1, h2]
 
-def DataMCHistograms(datasetsMgr, histoName):
+def DataMCHistograms(datasetsMgr, histoName, intLumi):
     Verbose("Plotting Data-MC Histograms")
 
     # Skip 2-D plots
@@ -702,7 +707,12 @@ def DataMCHistograms(datasetsMgr, histoName):
     kwargs_  = GetHistoKwargs(saveName, opts)
 
     # Create the plotting object
-    p = plots.DataMCPlot(datasetsMgr, histoName, saveFormats=[])
+    if opts.onlyMC:        
+        p = plots.MCPlot(datasetsMgr, histoName, saveFormats=[], normalizeToLumi=intLumi)
+        #p.setLuminosity(intLumi)
+        #p.histoMgr.normalizeMCToLuminosity(intLumi)
+    else:
+        p = plots.DataMCPlot(datasetsMgr, histoName, saveFormats=[])
 
     # Apply style
     if opts.signalMass != 0:
@@ -734,18 +744,30 @@ def replaceBinLabels(p, histoName):
     '''
     https://root.cern.ch/doc/master/classTAttText.html#T5
     '''
+    # myBinList = []
+    # if histoName == "counter" or histoName == "weighted/counter":
+    #     myBinList = ["#geq 7 jets", "#geq 3 b-jets", "b-jets SF", "E_{T}^{miss}", "Topology", "TopReco"]
+    # elif "bjet" in histoName:
+    #     myBinList = ["All", "#eta", "p_{T}", "CSVv2 (M)", "Trg Match", "#geq 3"]
+    # elif "jet" in histoName:
+    #     myBinList = ["All", "jet ID", "PU ID", "#tau match", "#eta", "p_{T}", "#geq 7", "H_{T}", "J_{T}", "MHT"]
+    # else:
+    #     pass
+    # for i in range(0, len(myBinList)):
+    #     p.getFrame().GetXaxis().SetBinLabel(i+1, myBinList[i])
+    #     #p.getFrame().GetXaxis().GetBinLabel(i+1).SetTextAngle(90) #not correct
+    # return
     myBinList = []
-    if histoName == "counter" or histoName == "weighted/counter":
-        myBinList = ["#geq 7 jets", "#geq 3 b-jets", "b-jets SF", "E_{T}^{miss}", "Topology", "TopReco"]
-    elif "bjet" in histoName:
-        myBinList = ["All", "#eta", "p_{T}", "CSVv2 (M)", "Trg Match", "#geq 3"]
-    elif "jet" in histoName:
-        myBinList = ["All", "jet ID", "PU ID", "#tau match", "#eta", "p_{T}", "#geq 7", "H_{T}", "J_{T}", "MHT"]
-    else:
-        pass
+    if "counter" not in histoName:
+        return
+    myBinList = ["SR: #geq 3 b-jets", "SR: b-jets SF", "SR: E_{T}^{miss}", "SR: Topology", "SR: TopReco", "SR: Selected",
+                 "CR: #geq 3 b-jets", "CR: b-jets SF", "CR: E_{T}^{miss}", "CR: Topology", "CR: TopReco", "CR: Selected"]
+
+    #for i in range(0, p.getFrame().GetXaxis().GetNbins()):
+    #    p.getFrame().GetXaxis().SetBinLabel(i+1, "")   
+
     for i in range(0, len(myBinList)):
         p.getFrame().GetXaxis().SetBinLabel(i+1, myBinList[i])
-        #p.getFrame().GetXaxis().GetBinLabel(i+1).SetTextAngle(90) #not correct
     return
 
 def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
@@ -802,18 +824,18 @@ if __name__ == "__main__":
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False
-    MCONLY       = False
     SIGNALMASS   = 500
     MERGEEWK     = False
     URL          = False
     NOERROR      = True
-    SAVEDIR      = "/publicweb/a/aattikis/DataMC/"
+    SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/DataMC/"
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug' 
     FOLDER       = "FailedBJetGenuineB" #jetSelection_
-    AFTERTOP     = False
     ONLYMC       = False
-    
+    RATIO        = False
+    NOSTACK      = False
+
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
 
@@ -828,9 +850,6 @@ if __name__ == "__main__":
 
     parser.add_option("--analysisName", dest="analysisName", type="string", default=ANALYSISNAME,
                       help="Override default analysisName [default: %s]" % ANALYSISNAME)
-
-    parser.add_option("--mcOnly", dest="mcOnly", action="store_true", default=MCONLY,
-                      help="Plot only MC info [default: %s]" % MCONLY)
 
     parser.add_option("--intLumi", dest="intLumi", type=float, default=INTLUMI,
                       help="Override the integrated lumi [default: %s]" % INTLUMI)
@@ -874,11 +893,14 @@ if __name__ == "__main__":
     parser.add_option("--folder", dest="folder", type="string", default = FOLDER,
                       help="ROOT file folder under which all histograms to be plotted are located [default: %s]" % (FOLDER) )
 
-    parser.add_option("--afterTop", dest="afterTop", action="store_true", default = AFTERTOP,
-                      help="Are histograms after TopSelection (changes order of adding bkgs in the MC stack) [default: %s]" % (AFTERTOP) )
-
     parser.add_option("--onlyMC", dest="onlyMC", action="store_true", default = ONLYMC,
                       help="Only draw MC datasets, no data: [default: %s]" % (ONLYMC) )
+
+    parser.add_option("--ratio", dest="ratio", action="store_true", default = RATIO,
+                      help="Draw ratio canvas for Data/MC curves? [default: %s]" % (RATIO) )
+
+    parser.add_option("--nostack", dest="nostack", action="store_true", default = NOSTACK,
+                      help="Do not stack MC histograms [default: %s]" % (NOSTACK) )
 
     (opts, parseArgs) = parser.parse_args()
 
@@ -924,7 +946,9 @@ if __name__ == "__main__":
         sys.exit()
     
     # Overwrite if certain strings found in folder name
-    opts.onlyMC = "EWKFakeB" in opts.folder and "EWKGenuineB" not in opts.folder
+    if 0:
+        opts.onlyMC = "EWKFakeB" in opts.folder
+        opts.onlyMC =  "EWKGenuineB" in opts.folder
 
     # Call the main function
     main(opts)

@@ -9,9 +9,10 @@ Examples:
 ./plot_BaseVsInv.py -m FakeBMeasurement_170728_040545/ -o "" --url
 ./plot_BaseVsInv.py -m FakeBMeasurement_170728_040545/ -o "" --url --normaliseToOne
 ./plot_BaseVsInv.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170703_031128_CtrlTriggers_QCDTemplateFit --mergeEWK -e "QCD|Charged" -o "OptTriggerOR['HLT_PFHT400_SixJet30']ChiSqrCutValue100"
+./plot_BaseVsInv.py -m FakeBMeasurement_SignalTriggers_NoTrgMatch_StdSelections_TopCut_AllSelections_TopCut10_170728_040545/ --url --normaliseToOne
 
 Last Used:
-./plot_BaseVsInv.py -m FakeBMeasurement_SignalTriggers_NoTrgMatch_StdSelections_TopCut_AllSelections_TopCut10_170728_040545/ --url --normaliseToOne
+./plot_BaseVsInv.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657/ --normaliseToOne && ./plot_BaseVsInv.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657/ --normaliseToOne --useMC
 '''
 
 #================================================================================================ 
@@ -103,66 +104,57 @@ def GetDatasetsFromDir(opts):
 
 def main(opts):
 
-    # optModes = [""]                                                                                                                             
-    # optModes = ["", "OptChiSqrCutValue50", "OptChiSqrCutValue100", "OptChiSqrCutValue200"]
-    optModes = [""]#,
-                #"OptTriggerOR['HLT_PFHT400_SixJet30_DoubleBTagCSV_p056']",
-                #"OptTriggerOR['HLT_PFHT450_SixJet40_BTagCSV_p056']"]
-                #"OptInvertedBJetsDiscrMaxCutValue0p82",
-                #"OptInvertedBJetsDiscrMaxCutValue0p8",
-                #"OptInvertedBJetsDiscrMaxCutValue0p75",
-                #"OptInvertedBJetsDiscrMaxCutValue0p7"]
-                #"OptInvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeRandom",
-                #"OptInvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeDescendingBDiscriminator",
-                #"OptInvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeRandom",
-                #"OptInvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeDescendingBDiscriminator"]
-                #"OptInvertedBJetsDiscrMaxCutValue0p85InvertedBJetsSortTypeRandom",
-                #"OptInvertedBJetsDiscrMaxCutValue0p85InvertedBJetsSortTypeDescendingBDiscriminator",
-                #"OptInvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeRandom",
-                #"OptInvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeDescendingBDiscriminator",
-                #"OptInvertedBJetsDiscrMaxCutValue0p75InvertedBJetsSortTypeRandom",
-                #"OptInvertedBJetsDiscrMaxCutValue0p75InvertedBJetsSortTypeDescendingBDiscriminator"]
-                # "OptNumberOfInvertedBJetsCutValue1InvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeRandom",
-                # "OptNumberOfInvertedBJetsCutValue1InvertedBJetsDiscrMaxCutValue1p0InvertedBJetsSortTypeDescendingBDiscriminator",
-                # "OptNumberOfInvertedBJetsCutValue1InvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeRandom",
-                # "OptNumberOfInvertedBJetsCutValue1InvertedBJetsDiscrMaxCutValue0p8InvertedBJetsSortTypeDescendingBDiscriminator",
-                # "OptNumberOfInvertedBJetsCutValue1InvertedBJetsDiscrMaxCutValue0p75InvertedBJetsSortTypeRandom",
-                # "OptNumberOfInvertedBJetsCutValue1InvertedBJetsDiscrMaxCutValue0p75InvertedBJetsSortTypeDescendingBDiscriminator"]
+    # Apply TDR style
+    style = tdrstyle.TDRStyle()
+    style.setOptStat(False)
+    style.setGridX(True)
+    style.setGridY(True)
+
+    # Obtain dsetMgrCreator and register it to module selector
+    dsetMgrCreator = dataset.readFromMulticrabCfg(directory=opts.mcrab)
     
-    #if opts.optMode != None:
-    #    optModes = [opts.optMode]
+    # Get list of eras, modes, and optimisation modes
+    erasList      = dsetMgrCreator.getDataEras()
+    modesList     = dsetMgrCreator.getSearchModes()
+    optList       = dsetMgrCreator.getOptimizationModes()
+    sysVarList    = dsetMgrCreator.getSystematicVariations()
+    sysVarSrcList = dsetMgrCreator.getSystematicVariationSources()
+
+    # If user does not define optimisation mode do all of them
+    if opts.optMode == None:
+        optModes = optList
+    else:
+        optModes = [opts.optMode]
 
     # For-loop: All optimisation modes
     for opt in optModes:
         opts.optMode = opt
+
         # Setup & configure the dataset manager 
         datasetsMgr = GetDatasetsFromDir(opts)
         datasetsMgr.updateNAllEventsToPUWeighted()
         datasetsMgr.loadLuminosities() # from lumi.json
+
+        PrintPSet("TopSelectionBDT", datasetsMgr)
+
+        # Print dataset info?
         if opts.verbose:
             datasetsMgr.PrintCrossSections()
             datasetsMgr.PrintLuminosities()
 
-        # Set/Overwrite cross-sections
-        for d in datasetsMgr.getAllDatasets():
-            if "ChargedHiggs" in d.getName():
-                datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
+        # Set signal cross-section
+        datasetsMgr.getDataset(opts.signal).setCrossSection(1.0)
 
-        # Remove dataset ? 
-        datasetsMgr.remove(filter(lambda name: "Charged" in name, datasetsMgr.getAllDatasetNames()))
-        if not opts.useMC:
-            datasetsMgr.remove(filter(lambda name: "QCD" in name, datasetsMgr.getAllDatasetNames()))
+        # Remove unwanted datasets
+        if 0:
+            datasetsMgr.remove(filter(lambda name: "QCD-b" in name, datasetsMgr.getAllDatasetNames()))
                
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
+        
+        # Get Luminosity
+        opts.intLumi = datasetsMgr.getDataset("Data").getLuminosity()
    
-        # Re-order datasets (different for inverted than default=baseline)
-        newOrder = ["Data"]
-        newOrder.extend(GetListOfEwkDatasets())
-        if opts.useMC:
-            newOrder.append("QCD")
-        datasetsMgr.selectAndReorder(newOrder)
-
         # Merge EWK samples
         datasetsMgr.merge("EWK", GetListOfEwkDatasets())
         plots._plotStyles["EWK"] = styles.getAltEWKStyle()
@@ -170,41 +162,42 @@ def main(opts):
         # Print dataset information
         datasetsMgr.PrintInfo()
 
-        # Apply TDR style
-        style = tdrstyle.TDRStyle()
-        style.setOptStat(True)
-        style.setGridX(True)
-        style.setGridY(True)
+        # Get all the histograms and their paths
+        hList  = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(opts.folder)
+        hPaths = [os.path.join(opts.folder, h) for h in hList]
 
-        # 1) Do the StandardSelections/AllSelections
-        bType  = ""
-        folder = "ForFakeBMeasurement" + bType        
-        hList  = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(folder)
-        hPaths = [os.path.join(folder, h) for h in hList]
+        # Create two lists of paths: one for "Baseline" (SR)  and one for "Inverted" (CR)
         baselinePaths = []
-        invertedPath  = []
-        if 1:
-            for p in hPaths:
-                if "Baseline" in p:
-                    baselinePaths.append(p)
-                if "Inverted" in p:
-                    invertedPath.append(p)
+        invertedPaths = []
+        for p in hPaths:
+            if "Baseline" in p:
+                baselinePaths.append(p)
+            if "Inverted" in p:
+                invertedPaths.append(p)
 
-            for hBaseline, hInverted in zip(baselinePaths, invertedPath):
-                #print "--- Plotting histogram", hBaseline
-                PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted)
+        # For-loop: All histogram pairs (Baseline-Inverted aka SR-CR)
+        for hBaseline, hInverted in zip(baselinePaths, invertedPaths):
+            Verbose("Plotting histogram \"%s\"" % hBaseline, False)
+            if "IsGenuineB" in hBaseline:
+                continue
+            PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted)
 
-        # 2) Do the topSelection histos
-        if 0:
-            analysisType     = "Inverted"
-            folder           = "topbdtSelection_%s" % (analysisType)            
-            invertedList     = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(folder)
-            invertedPaths    = [os.path.join(folder, h) for h in invertedList]
-            baselinePaths    = [p.replace("Inverted", "Baseline") for p in invertedPaths]
-            for hBaseline, hInverted in zip(baselinePaths, invertedPaths):
-                if "Vs" in hBaseline: #skip TH2
-                    continue
-                PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted)
+    return
+
+def PrintPSet(selection, datasetsMgr):
+    selection = "\"%s\":"  % (selection)
+    thePSets = datasetsMgr.getAllDatasets()[0].getParameterSet()
+
+    # First drop everything before the selection
+    thePSet_1 = thePSets.split(selection)[-1]
+
+    # Then drop everything after the selection
+    thePSet_2 = thePSet_1.split("},")[0]
+
+    # Final touch
+    thePSet = selection + thePSet_2 + "}"
+
+    Print(thePSet, True)
     return
 
 def getHistos(datasetsMgr, dataset, hBaseline, hInverted):
@@ -218,90 +211,105 @@ def getHistos(datasetsMgr, dataset, hBaseline, hInverted):
 
 def PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted):
 
-    # Get the Inclusive (Data, EWK)
-    p1 = plots.ComparisonPlot(*getHistos(datasetsMgr, "Data", hBaseline, hInverted))
-    p1.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
+    # Create corresponding paths for GenuineB and FakeB histograms (not only Inclusive) 
+    hBaseline_Inclusive = hBaseline #no extra string 
+    hInverted_Inclusive = hInverted #no extra string 
+    hBaseline_GenuineB  = hBaseline_Inclusive.replace(opts.folder, opts.folder + "EWKGenuineB")
+    hInverted_GenuineB  = hInverted_Inclusive.replace(opts.folder, opts.folder + "EWKGenuineB")
+    hBaseline_FakeB     = hBaseline_Inclusive.replace(opts.folder, opts.folder + "EWKFakeB")
+    hInverted_FakeB     = hInverted_Inclusive.replace(opts.folder, opts.folder + "EWKFakeB")
 
-    p2 = plots.ComparisonPlot(*getHistos(datasetsMgr, "EWK", hBaseline, hInverted))
-    p2.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
+    # Create the histograms in the Baseline (SR) and Inverted (CR) regions
+    pBaseline_Inclusive = plots.DataMCPlot(datasetsMgr, hBaseline_Inclusive)
+    pBaseline_GenuineB  = plots.DataMCPlot(datasetsMgr, hBaseline_GenuineB )
+    pBaseline_FakeB     = plots.DataMCPlot(datasetsMgr, hBaseline_FakeB    )
+    pInverted_Inclusive = plots.DataMCPlot(datasetsMgr, hInverted_Inclusive)
+    pInverted_GenuineB  = plots.DataMCPlot(datasetsMgr, hInverted_GenuineB )
+    pInverted_FakeB     = plots.DataMCPlot(datasetsMgr, hInverted_FakeB )
 
-    if opts.useMC:
-        p3 = plots.ComparisonPlot(*getHistos(datasetsMgr, "QCD", hBaseline, hInverted))
-        p3.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
+    # Extract the correct SR and CR histograms
+    baseline_Data        = pBaseline_Inclusive.histoMgr.getHisto("Data").getRootHisto().Clone("Baseline-Data")
+    baseline_QCD         = pBaseline_Inclusive.histoMgr.getHisto("QCD").getRootHisto().Clone("Baseline-QCD")
+    baseline_EWKGenuineB = pBaseline_GenuineB.histoMgr.getHisto("EWK").getRootHisto().Clone("Baseline-EWKGenuineB")
+    baseline_EWKFakeB    = pBaseline_FakeB.histoMgr.getHisto("EWK").getRootHisto().Clone("Baseline-EWKFakeB")
+    inverted_Data        = pInverted_Inclusive.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted-Data")
+    inverted_QCD         = pInverted_Inclusive.histoMgr.getHisto("QCD").getRootHisto().Clone("Inverted-QCD")
+    inverted_EWKGenuineB = pInverted_GenuineB.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted-EWKGenuineB") 
+    inverted_EWKFakeB    = pInverted_FakeB.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted-EWKFakeB")
 
-    # Get Baseline histos
-    baseline_Data = p1.histoMgr.getHisto("Baseline-Data").getRootHisto().Clone()
-    baseline_QCD  = p1.histoMgr.getHisto("Baseline-Data").getRootHisto().Clone("Baseline-QCD")
-    baseline_EWK  = p2.histoMgr.getHisto("Baseline-EWK").getRootHisto().Clone()
-    if opts.useMC:
-        baseline_QCDMC= p3.histoMgr.getHisto("Baseline-QCD").getRootHisto().Clone("Baseline-QCDMC")
+    # Subtract EWKGenuineB from Data to get FakeB (= QCD_inclusive + EWK_genuineB)
+    if opts.useMC: 
+        # FakeB = QCD + EWKFakeB
+        baseline_FakeB = baseline_QCD.Clone("Baseline-FakeB")
+        inverted_FakeB = inverted_QCD.Clone("Inverted-FakeB")
 
-    # Get Inverted histos
-    inverted_Data = p1.histoMgr.getHisto("Inverted-Data").getRootHisto().Clone()
-    inverted_QCD  = p1.histoMgr.getHisto("Inverted-Data").getRootHisto().Clone("Inverted-QCD")
-    inverted_EWK  = p2.histoMgr.getHisto("Inverted-EWK").getRootHisto().Clone()
-    if opts.useMC:
-        inverted_QCDMC  = p3.histoMgr.getHisto("Inverted-QCD").getRootHisto().Clone("Inverted-QCDMC")
+        # Add the EWKFakeB
+        baseline_FakeB.Add(baseline_EWKFakeB, +1)
+        inverted_FakeB.Add(inverted_EWKFakeB, +1)
+    else:
+        # FakeB = Data -EWKGenuineB
+        baseline_FakeB = baseline_Data.Clone("Baseline-FakeB")
+        inverted_FakeB = inverted_Data.Clone("Inverted-FakeB")
 
-    # Subtract EWK from Data to get QCD
-    baseline_QCD.Add(baseline_EWK, -1)
-    inverted_QCD.Add(inverted_EWK, -1)
-
-    # Option: Use QCD-MC instead of QCD=Data-EWK
-    if opts.useMC:
-        baseline_QCD = baseline_QCDMC
-        inverted_QCD = inverted_QCDMC
+        # Subtract the EWK GenuineB
+        baseline_FakeB.Add(baseline_EWKGenuineB, -1)
+        inverted_FakeB.Add(inverted_EWKGenuineB, -1)
 
     # Normalize histograms to unit area
     if opts.normaliseToOne:
-        baseline_Data.Scale(1.0/baseline_Data.Integral())
-        baseline_QCD.Scale(1.0/baseline_QCD.Integral())
-        baseline_EWK.Scale(1.0/baseline_EWK.Integral())
-        inverted_Data.Scale(1.0/inverted_Data.Integral())
-        inverted_QCD.Scale(1.0/inverted_QCD.Integral())
-        inverted_EWK.Scale(1.0/inverted_EWK.Integral())
+        baseline_FakeB.Scale(1.0/baseline_FakeB.Integral())
+        inverted_FakeB.Scale(1.0/inverted_FakeB.Integral())
 
     # Create the final plot object
-    p = plots.ComparisonManyPlot(baseline_QCD, [inverted_QCD], saveFormats=[])
-        
-    # Apply styles
-    if opts.useMC:
-        p.histoMgr.forHisto("Baseline-QCDMC" , styles.getBaselineStyle() )
-        p.histoMgr.forHisto("Inverted-QCDMC" , styles.getInvertedStyle() )
-    else:
-        p.histoMgr.forHisto("Baseline-QCD" , styles.getBaselineStyle() )
-        p.histoMgr.forHisto("Inverted-QCD" , styles.getInvertedStyle() )
-        
-    # Set draw style
-    if opts.useMC:
-        p.histoMgr.setHistoDrawStyle("Baseline-QCDMC", "AP")
-        p.histoMgr.setHistoDrawStyle("Inverted-QCDMC", "HIST")        
-    else:
-        p.histoMgr.setHistoDrawStyle("Baseline-QCD", "AP")
-        p.histoMgr.setHistoDrawStyle("Inverted-QCD", "HIST")
+    p = plots.ComparisonManyPlot(baseline_FakeB, [inverted_FakeB], saveFormats=[])
+    p.setLuminosity(opts.intLumi)
 
-    # Set legend style
-    if opts.useMC:
-        p.histoMgr.setHistoLegendStyle("Baseline-QCDMC", "LP")
-        p.histoMgr.setHistoLegendStyle("Inverted-QCDMC", "F")
-    else:
-        p.histoMgr.setHistoLegendStyle("Baseline-QCD", "LP")
-        p.histoMgr.setHistoLegendStyle("Inverted-QCD", "F")    
+    # Apply histogram styles
+    p.histoMgr.forHisto("Baseline-FakeB" , styles.getBaselineStyle() )
+    p.histoMgr.forHisto("Inverted-FakeB" , styles.getInvertedStyle() )
+        
+    # Set draw/legend style
+    p.histoMgr.setHistoDrawStyle("Baseline-FakeB", "AP")
+    p.histoMgr.setHistoDrawStyle("Inverted-FakeB", "HIST")
+    p.histoMgr.setHistoLegendStyle("Baseline-FakeB", "LP")
+    p.histoMgr.setHistoLegendStyle("Inverted-FakeB", "F")
         
     # Set legend labels
     if opts.useMC:
         p.histoMgr.setHistoLegendLabelMany({
-                "Baseline-QCDMC" : "QCD-MC (Baseline)",
-                "Inverted-QCDMC" : "QCD-MC (Inverted)",
-                })
+                #"Baseline-FakeB" : "Fake-B (Baseline)",
+                #"Inverted-FakeB" : "Fake-B (Inverted)",
+                "Baseline-FakeB" : "Baseline (MC)",
+                "Inverted-FakeB" : "Inverted (MC)",
+         
+       })
     else:
         p.histoMgr.setHistoLegendLabelMany({
-                "Baseline-QCD" : "QCD (Baseline)",
-                "Inverted-QCD" : "QCD (Inverted)",
+                "Baseline-FakeB" : "Baseline",
+                "Inverted-FakeB" : "Inverted",
                 })
-        
+
+    # Get histogram keyword arguments
+    kwargs_ = GetHistoKwargs(hBaseline_Inclusive, opts)
 
     # Draw the histograms
+    plots.drawPlot(p, hBaseline_Inclusive, **kwargs_)
+
+    # Save plot in all formats    
+    saveName = hBaseline_Inclusive.split("/")[-1]
+    saveName = saveName.replace("Baseline_", "")
+
+
+    print "add signal!"
+    if opts.useMC:
+        savePath = os.path.join(opts.saveDir, "BaselineVsInverted", "MC", opts.optMode)
+    else:
+        savePath = os.path.join(opts.saveDir, "BaselineVsInverted", opts.optMode)
+    SavePlot(p, saveName, savePath, saveFormats = [".png"])
+    return
+
+def GetHistoKwargs(histoName, opts):
+    hName   = histoName.lower()
     _cutBox = None
     _rebinX = 1
     if opts.normaliseToOne:
@@ -310,60 +318,122 @@ def PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted):
         _opts   = {"ymin": 1e0, "ymaxfactor": 2.0}
     _format = "%0.0f"
     _xlabel = None
+    _ratio  = True
 
-    if "dijetm" in hBaseline.lower():
+        
+    if "dijetm" in hName:
         _rebinX = 2
         _units  = "GeV/c^{2}"
         _format = "%0.0f " + _units
         _xlabel = "m_{jj} (%s)" % (_units)
         _cutBox = {"cutValue": 80.399, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _opts["xmax"] = 400.0
-    if "chisqr" in hBaseline.lower():
+    if "mvamax" in hName:
+        _rebinX = 1
+        _units  = ""
+        _format = "%0.2f " + _units
+        _xlabel = "BDT discriminant"
+        _cutBox = {"cutValue": 0.7, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        #_cutBox = {"cutValue": 0.9, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+    if "nbjets" in hName:
+        _units  = ""
+        _format = "%0.0f " + _units
+        _cutBox = {"cutValue": 3.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _opts["xmin"] =  2.0
+        _opts["xmax"] = 10.0
+    if "njets" in hName:
+        _units  = ""
+        _format = "%0.0f " + _units
+        #_cutBox = {"cutValue": 7.0, "fillColor": 16, "box": True, "line": True, "greaterThan": True}
+        _opts["xmin"] = 7.0
+        _opts["xmax"] = 20.0
+    if "btagdisc" in hName:
+        _rebinX = 2
+        _units  = ""
+        _format = "%0.2f " + _units
+        _cutBox = {"cutValue": 0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+    if "chisqr" in hName:
         _rebinX = 1
         _units  = ""
         _format = "%0.1f " + _units
         _xlabel = "#chi^{2}"
         _cutBox = {"cutValue": 10.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _opts["xmax"] = 100.0
-    if "ldgdijetpt" in hBaseline.lower():
+    if "ldgdijetpt" in hName:
         _rebinX = 1
         _units  = "GeV/c"
         _format = "%0.0f " + _units
         _xlabel = "p_{T} (%s)" % _units
         _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _opts["xmax"] = 800.0
-    if "ldgdijetm" in hBaseline.lower():
+    if "ldgdijetm" in hName:
         _rebinX = 1
         _units  = "GeV/c^{2}"
         _format = "%0.0f " + _units
         _xlabel = "m_{jj} (%s)" % _units
         _cutBox = {"cutValue": 80.385, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _opts["xmax"] = 300.0
-    if "trijetm" in hBaseline.lower():
+    if "trijetm" in hName:
         _rebinX = 4#5
         _units  = "GeV/c^{2}"
         _format = "%0.0f " + _units
         _xlabel = "m_{jjb} (%s)" % _units
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 1000.0
-    if "pt" in hBaseline.lower():
+        if "allselections" in hName:
+            _opts["xmax"] = 400.0
+        else:
+            _opts["xmax"] = 800.0
+    if "pt" in hName:
         _rebinX = 2
         _format = "%0.0f GeV/c"
         _cutBox = {"cutValue": 40., "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        ROOT.gStyle.SetNdivisions(8, "X")
-        _opts["xmax"] = 1000.0
-    if "eta" in hBaseline.lower():
+        if "jet1" in hName:
+            _opts["xmax"] = 1000.0
+        elif "jet2" in hName:
+            _opts["xmax"] = 800.0
+        elif "jet3" in hName:
+            _opts["xmax"] = 600.0
+        elif "jet4" in hName:
+            _opts["xmax"] = 400.0
+        elif "jet5" in hName:
+            _opts["xmax"] = 300.0
+        elif "jet6" in hName:
+            _opts["xmax"] = 250.0
+        elif "jet7" in hName:
+            _opts["xmax"] = 200.0
+        else:
+            _opts["xmax"] = 600.0
+        #ROOT.gStyle.SetNdivisions(8, "X")
+
+    if "eta" in hName:
         _format = "%0.2f"
         _cutBox = {"cutValue": 0., "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _opts["xmin"] = -3.0
         _opts["xmax"] = +3.0
-    if "deltaeta" in hBaseline.lower():
+    if "deltaeta" in hName:
         _format = "%0.2f"
-        _opts["xmin"] =  0.0
+        _opts["xmin"] = 0.0
         _opts["xmax"] = 6.0
-    if "bdisc" in hBaseline.lower():
+        if "tetrajetbjet" in hName:
+            _xlabel = "#Delta#eta (b_{jjb}, b_{free})"
+    if "deltaphi" in hName:
+        _units  = "rads"
+        _format = "%0.2f " + _units
+        _opts["xmin"] = 0.0
+        _opts["xmax"] = 3.2
+        if "tetrajetbjet" in hName:
+            _xlabel = "#Delta#phi (b_{jjb}, b_{free}) (%s)" % (_units)
+
+    if "deltar" in hName:
         _format = "%0.2f"
-    if "tetrajetm" in hBaseline.lower():
+        _opts["xmin"] = 0.0
+        _opts["xmax"] = 6.0
+        if "tetrajetbjet" in hName:
+            _xlabel = "#DeltaR (b_{jjb}, b_{free})"
+
+    if "bdisc" in hName:
+        _format = "%0.2f"
+    if "tetrajetm" in hName:
         _rebinX = 10 #4
         if opts.useMC:
             _rebinX = 10
@@ -372,41 +442,28 @@ def PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted):
         _xlabel = "m_{jjbb} (%s)" % (_units)
         _opts["xmax"] = 3000.0
         #_opts["xmax"] = 3500.0
-
-    plots.drawPlot(p, 
-                   hBaseline,  
-                   xlabel       = _xlabel,
-                   ylabel       = "Arbitrary Units / %s" % (_format),
-                   log          = True, 
-                   rebinX       = _rebinX, 
-                   cmsExtraText = "Preliminary", 
-                   createLegend = {"x1": 0.62, "y1": 0.78, "x2": 0.92, "y2": 0.92},
-                   opts         = _opts,
-                   opts2        = {"ymin": 0.6, "ymax": 1.4},
-                   ratio        = True,
-                   ratioInvert  = False, 
-                   ratioYlabel  = "Ratio",
-                   cutBox       = _cutBox,
-                   )
-
-    # Save plot in all formats    
-    saveName = hBaseline.replace("/", "_")
-    saveName = saveName.replace("_Baseline_", "_")
-    savePath = os.path.join(opts.saveDir, "BaselineVsInverted", opts.optMode)
-    if opts.useMC:
-        savePath = os.path.join(opts.saveDir, "BaselineVsInverted", "MC", opts.optMode)
-    SavePlot(p, saveName, savePath, saveFormats = [".png"])
-    return
-
-def IsBaselineOrInverted(analysisType):
-    analysisTypes = ["Baseline", "Inverted"]
-    if analysisType not in analysisTypes:
-        raise Exception("Invalid analysis type \"%s\". Please select one of the following: %s" % (analysisType, "\"" + "\", \"".join(analysisTypes) + "\"") )
-    else:
-        pass
-    return
-
-
+        
+    _kwargs = {
+        "xlabel"           : _xlabel,
+        "ylabel"           : "Arbitrary Units / %s" % (_format),
+        "rebinX"           : _rebinX, 
+        "rebinY"           : None,
+        "ratioYlabel"      : "SR/CR", #Ratio",
+        "ratio"            : _ratio,
+        "ratioInvert"      : True, 
+        "addMCUncertainty" : True,
+        "addLuminosityText": True,
+        "addCmsText"       : True,
+        "cmsExtraText"     : "Preliminary",
+        "opts"             : _opts,
+        "opts2"            : {"ymin": 0.6, "ymax": 1.4},
+        "log"              : True,
+        "createLegend"     : {"x1": 0.64, "y1": 0.78, "x2": 0.92, "y2": 0.92},
+        #"moveLegend"       : {"dx": -0.1, "dy": -0.01, "dh": 0.1},
+        "cutBox"           : _cutBox,
+        }
+    return _kwargs
+        
 def SavePlot(plot, saveName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
     
@@ -454,18 +511,16 @@ if __name__ == "__main__":
     DATAERA      = "Run2016"
     OPTMODE      = ""
     BATCHMODE    = True
-    PRECISION    = 3
-    INTLUMI      = -1.0
-    SUBCOUNTERS  = False
-    LATEX        = False
     MERGEEWK     = True
     URL          = False
     NOERROR      = True
     SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
-    NORMALISE    = True
+    NORMALISE    = False
     USEMC        = False
+    SIGNALMASS   = 500
+    FOLDER       = "ForFakeBMeasurement"
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -481,9 +536,6 @@ if __name__ == "__main__":
 
     parser.add_option("--analysisName", dest="analysisName", type="string", default=ANALYSISNAME,
                       help="Override default analysisName [default: %s]" % ANALYSISNAME)
-
-    parser.add_option("--intLumi", dest="intLumi", type=float, default=INTLUMI,
-                      help="Override the integrated lumi [default: %s]" % INTLUMI)
 
     parser.add_option("--searchMode", dest="searchMode", type="string", default=SEARCHMODE,
                       help="Override default searchMode [default: %s]" % SEARCHMODE)
@@ -518,6 +570,12 @@ if __name__ == "__main__":
     parser.add_option("--useMC", dest="useMC", action="store_true", default=USEMC, 
                       help="Use QCD MC instead of QCD=Data-EWK? [default: %s]" % (USEMC) )
 
+    parser.add_option("--signalMass", dest="signalMass", type=int, default=SIGNALMASS,
+                      help="Mass value of signal to use [default: %s]" % SIGNALMASS)
+
+    parser.add_option("--folder", dest="folder", type="string", default = FOLDER,
+                      help="ROOT file folder under which all histograms to be plotted are located [default: %s]" % (FOLDER) )
+
     (opts, parseArgs) = parser.parse_args()
 
     # Require at least two arguments (script-name, path to multicrab)
@@ -535,6 +593,16 @@ if __name__ == "__main__":
     if not opts.mergeEWK:
         Print("Cannot draw the Baseline Vs Inverted histograms without the option --mergeEWK. Exit", True)
         sys.exit()
+
+    # Sanity check
+    allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 2000, 3000]
+    if opts.signalMass!=0 and opts.signalMass not in allowedMass:
+        Print("Invalid signal mass point (=%.0f) selected! Please select one of the following:" % (opts.signalMass), True)
+        for m in allowedMass:
+            Print(m, False)
+        sys.exit()
+    else:
+        opts.signal = "ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass
 
     # Call the main function
     main(opts)
