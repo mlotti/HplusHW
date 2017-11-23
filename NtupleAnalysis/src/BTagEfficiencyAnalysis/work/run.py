@@ -122,7 +122,7 @@ def main():
     # ================================================================================================
     maxEvents = {}
     maxEvents["All"] = opts.nEvts
-    process = Process(prefix, postfix, opts.nEvts)
+    process = Process(prefix, postfix, maxEvents)
 
             
     # ================================================================================================

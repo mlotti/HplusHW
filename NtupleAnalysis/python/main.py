@@ -592,22 +592,12 @@ class Process:
             timeStart = time.time()
             clockStart = time.clock()
 
-            # Determine how many events to run on for given dataset
-            if len(self._maxEvents.keys()) < 1:
-                tchain.SetCacheEntryRange(0, -1)
-                tchain.Process(tselector, "", -1)
-            elif "All" in self._maxEvents:
-                if len(self._maxEvents) == 1:
-                    tchain.SetCacheEntryRange(0, self._maxEvents["All"])
-                    tchain.Process(tselector, "", self._maxEvents["All"])
-                else:
-                    msg  = "Ambiguous selection for number of max events to run"
-                    msg += "If \"all\" is selected no other datasets options are allowed. Got: "
-                    msg += "\n\t".join(self._maxEvents.keys())
-                    raise Exception(msg)
-            elif dset.getName() in self._maxEvents.keys():
+            if dset.getName() in self._maxEvents.keys():
                 tchain.SetCacheEntryRange(0, self._maxEvents[dset.getName()])
                 tchain.Process(tselector, "", self._maxEvents[dset.getName()])
+            #if self._maxEvents > 0:
+            #    tchain.SetCacheEntryRange(0, self._maxEvents)
+            #    tchain.Process(tselector, "", self._maxEvents)
             else:
                 tchain.Process(tselector)
             if _debugMemoryConsumption:
