@@ -597,8 +597,11 @@ class Process:
                 tchain.Process(tselector)
             elif "All" in self._maxEvents:
                 if len(self._maxEvents) == 1:
-                    tchain.SetCacheEntryRange(0, self._maxEvents["All"])
-                    tchain.Process(tselector, "", self._maxEvents["All"])
+                    if self._maxEvents["All"] == -1:
+                        tchain.Process(tselector)
+                    else:
+                        tchain.SetCacheEntryRange(0, self._maxEvents["All"])
+                        tchain.Process(tselector, "", self._maxEvents["All"])
                 else:
                     msg  = "Ambiguous selection for number of max events to run"
                     msg += "If \"all\" is selected no other datasets options are allowed. Got: "
