@@ -249,32 +249,7 @@ signalHH160Style = signalHHStyle.clone()
 
 signal180Style = signalStyle.clone()
 signal190Style = signalStyle.clone()
-"""
-# Problem with StyleCompound: solid signal histo in control plots. 13122016/SL
-signal200Style = StyleCompound([
-        Style(ROOT.kFullCross, ROOT.kBlue), 
-        StyleMarker(markerSize=1.2, markerColor=ROOT.kBlue, markerSizes=None, markerStyle=ROOT.kFullCross),
-        StyleFill(fillStyle=1001, fillColor=ROOT.kBlue), 
-        StyleLine(lineStyle=ROOT.kDashed, lineWidth=3, lineColor=ROOT.kBlue) ])
-signal220Style = signalStyle.clone()
-signal250Style = signalStyle.clone()
-signal300Style = StyleCompound([
-        Style(ROOT.kFullTriangleUp, ROOT.kRed), 
-        StyleMarker(markerSize=1.2, markerColor=ROOT.kRed, markerSizes=None, markerStyle=ROOT.kFullTriangleUp),
-        StyleFill(fillStyle=1001, fillColor=ROOT.kRed), 
-        StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kRed) ])
-signal350Style = signalStyle.clone()
-signal400Style = StyleCompound([
-        Style(ROOT.kFullTriangleDown, ROOT.kSpring+5), 
-        StyleMarker(markerSize=1.2, markerColor=ROOT.kSpring+5, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
-        StyleFill(fillStyle=1001, fillColor=ROOT.kSpring+5), 
-        StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kSpring+5) ])
-signal500Style = StyleCompound([
-        Style(ROOT.kFullCircle, ROOT.kBlue+3), 
-        StyleMarker(markerSize=1.2, markerColor=ROOT.kBlue+3, markerSizes=None, markerStyle=ROOT.kFullCircle),
-        StyleFill(fillStyle=1001, fillColor=ROOT.kBlue+3), 
-        StyleLine(lineStyle=ROOT.kDashed, lineWidth=3, lineColor=ROOT.kBlue+3) ])
-"""
+
 signal200Style = signalStyle.clone()
 signal220Style = signalStyle.clone()
 signal250Style = signalStyle.clone()
@@ -291,6 +266,40 @@ signal1500Style = signalStyle.clone()
 signal2000Style = signalStyle.clone()
 signal3000Style = signalStyle.clone()
 
+
+# Problem with StyleCompound: solid signal histo in control plots. 13122016/SL
+signal200Style = StyleCompound([
+        Style(ROOT.kFullCross, ROOT.kBlue), 
+#        StyleMarker(markerSize=1.2, markerColor=ROOT.kBlue, markerSizes=None, markerStyle=ROOT.kFullCross),
+#        StyleFill(fillStyle=1001, fillColor=ROOT.kBlue), 
+        StyleLine(lineStyle=ROOT.kDashed, lineWidth=3, lineColor=ROOT.kBlue) ])
+signal220Style = signalStyle.clone()
+signal250Style = signalStyle.clone()
+signal300Style = StyleCompound([
+        Style(ROOT.kFullCross, ROOT.kRed), 
+#        StyleMarker(markerSize=1.2, markerColor=ROOT.kRed, markerSizes=None, markerStyle=ROOT.kFullTriangleUp),
+#        StyleFill(fillStyle=1001, fillColor=ROOT.kRed), 
+        StyleLine(lineStyle=ROOT.kDashed, lineWidth=3, lineColor=ROOT.kRed) ])
+signal350Style = signalStyle.clone()
+signal400Style = StyleCompound([
+        Style(ROOT.kFullTriangleDown, ROOT.kSpring+5), 
+#        StyleMarker(markerSize=1.2, markerColor=ROOT.kSpring+5, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
+#        StyleFill(fillStyle=1001, fillColor=ROOT.kSpring+5), 
+        StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kSpring+5) ])
+#signal500Style = StyleCompound([
+#        Style(ROOT.kFullCircle, ROOT.kBlue+3), 
+#        StyleMarker(markerSize=1.2, markerColor=ROOT.kBlue+3, markerSizes=None, markerStyle=ROOT.kFullCircle),
+#        StyleFill(fillStyle=1001, fillColor=ROOT.kBlue+3), 
+#        StyleLine(lineStyle=ROOT.kDashed, lineWidth=3, lineColor=ROOT.kBlue+3) ])
+signal500Style = StyleCompound([
+        Style(ROOT.kFullCross, ROOT.kPink+3),
+#        StyleMarker(markerSize=1.2, markerColor=ROOT.kBlue+3, markerSizes=None, markerStyle=ROOT.kFullCircle),
+#        StyleFill(fillStyle=1001, fillColor=ROOT.kBlue+3),
+        StyleLine(lineStyle=ROOT.kDashed, lineWidth=3, lineColor=ROOT.kPink+3) ])
+
+###
+
+
 dibStyle          = Style(ROOT.kMultiply, ROOT.kBlue-4)
 dyStyle           = Style(ROOT.kStar, ROOT.kTeal-9)
 ewkFillStyle      = StyleCompound([StyleFill(fillColor=ROOT.kMagenta-2)])
@@ -298,13 +307,15 @@ ewkStyle          = Style(ROOT.kFullTriangleDown, ROOT.kRed-4)
 ewkfakeFillStyle  = StyleCompound([StyleFill(fillColor=ROOT.kGreen+2)])
 qcdBEnrichedStyle = Style(ROOT.kOpenTriangleUp, ROOT.kOrange-3)
 qcdFillStyle      = StyleCompound([StyleFill(fillColor=ROOT.kOrange-2)])
-qcdStyle          = Style(ROOT.kFullTriangleUp, ROOT.kOrange-2)
+#qcdStyle          = Style(ROOT.kFullTriangleUp, ROOT.kOrange-2)
+qcdStyle          = StyleCompound([StyleLine(lineColor=ROOT.kOrange-2, lineStyle=ROOT.kSolid, lineWidth=4),StyleFill(fillColor=ROOT.kOrange-2, fillStyle=3001)])
 singleTopStyle    = Style(ROOT.kOpenDiamond, ROOT.kTeal+9)
 stStyle           = Style(ROOT.kPlus, ROOT.kSpring+4)
 stsStyle          = Style(ROOT.kPlus, ROOT.kSpring-9)
 sttStyle          = Style(ROOT.kPlus, ROOT.kSpring-7)
 sttwStyle         = stStyle
-ttStyle           = Style(ROOT.kFullSquare, ROOT.kMagenta-2)
+#ttStyle           = Style(ROOT.kFullSquare, ROOT.kMagenta-2)
+ttStyle           = StyleCompound([StyleLine(lineColor=ROOT.kMagenta-2, lineStyle=ROOT.kSolid, lineWidth=3),StyleFill(fillColor=ROOT.kMagenta-2, fillStyle=1001)])
 ttbbStyle         = Style(ROOT.kOpenCross, ROOT.kPink-9)
 ttjetsStyle       = Style(ROOT.kPlus, ROOT.kMagenta-4)
 ttttStyle         = Style(ROOT.kFullStar, ROOT.kYellow-9)
@@ -316,6 +327,7 @@ wwStyle           = Style(ROOT.kMultiply, ROOT.kPink-9)
 wzStyle           = Style(ROOT.kMultiply, ROOT.kPink-7)
 zjetsStyle        = Style(ROOT.kFullCross, ROOT.kRed-7)
 zzStyle           = Style(ROOT.kMultiply, ROOT.kPink-5)
+
 baselineStyle     = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kBlue, markerSizes=None, markerStyle=ROOT.kFullTriangleUp),
                                    StyleLine(lineColor=ROOT.kBlue, lineStyle=ROOT.kSolid, lineWidth=3), 
                                    StyleFill(fillColor=ROOT.kBlue, fillStyle=1001)])
@@ -336,7 +348,7 @@ invertedLineStyle = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.
                                    StyleFill(fillColor=ROOT.kRed, fillStyle=0)])
 altQCDStyle       = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange-2, markerSizes=None, markerStyle=ROOT.kFullDiamond),
                                    StyleLine(lineColor=ROOT.kOrange-2, lineStyle=ROOT.kSolid, lineWidth=3), 
-                                   StyleFill(fillColor=ROOT.kOrange-2, fillStyle=3001)])
+                                   StyleFill(fillColor=ROOT.kOrange-2, fillStyle=1001)])
 genuineBStyle     = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kGreen+2, markerSizes=None, markerStyle=ROOT.kCircle),
                                    StyleLine(lineColor=ROOT.kGreen+2, lineStyle=ROOT.kSolid, lineWidth=3), 
                                    StyleFill(fillColor=ROOT.kGreen+2, fillStyle=3001)])
@@ -358,7 +370,7 @@ signalFillStyleHToTB  = StyleCompound([StyleMarker(markerSize=0, markerColor=ROO
 signalStyleHToTB200 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kPink-2, markerSizes=None, markerStyle=4),
                                    StyleLine(lineColor=ROOT.kPink-2, lineStyle=ROOT.kDashed, lineWidth=4), 
                                    StyleFill(fillColor=ROOT.kPink-2, fillStyle=0)])
-signalStyleHToTB300 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kTeal+3, markerSizes=None, markerStyle=4),
+signalStyleHToTB1000 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kTeal+3, markerSizes=None, markerStyle=4),  #300
                                    StyleLine(lineColor=ROOT.kTeal+3, lineStyle=ROOT.kDashed, lineWidth=4), 
                                    StyleFill(fillColor=ROOT.kTeal+3, fillStyle=0)])
 signalStyleHToTB500 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kAzure-1, markerSizes=None, markerStyle=4),
@@ -367,9 +379,14 @@ signalStyleHToTB500 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.
 signalStyleHToTB800 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kSpring-4, markerSizes=None, markerStyle=4),
                                    StyleLine(lineColor=ROOT.kSpring-4, lineStyle=ROOT.kDashed, lineWidth=4), 
                                    StyleFill(fillColor=ROOT.kSpring-4, fillStyle=0)])
-signalStyleHToTB1000 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kYellow-7, markerSizes=None, markerStyle=4),
-                                   StyleLine(lineColor=ROOT.kYellow-7, lineStyle=ROOT.kDashed, lineWidth=4), 
-                                   StyleFill(fillColor=ROOT.kYellow-7, fillStyle=0)])
+
+signalStyleHToTB300 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kRed+2, markerSizes=None, markerStyle=4),
+                                   StyleLine(lineColor=ROOT.kRed+2, lineStyle=ROOT.kDashed, lineWidth=4), 
+                                   StyleFill(fillColor=ROOT.kRed+2, fillStyle=0)])
+
+#signalStyleHToTB300 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kYellow-7, markerSizes=None, markerStyle=4),  #1000
+#                                   StyleLine(lineColor=ROOT.kYellow-7, lineStyle=ROOT.kDashed, lineWidth=4), 
+#                                   StyleFill(fillColor=ROOT.kYellow-7, fillStyle=0)])
 signalStyleHToTB2000 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kViolet-9, markerSizes=None, markerStyle=4),
                                    StyleLine(lineColor=ROOT.kViolet-9, lineStyle=ROOT.kDashed, lineWidth=4), 
                                    StyleFill(fillColor=ROOT.kViolet-9, fillStyle=0)])

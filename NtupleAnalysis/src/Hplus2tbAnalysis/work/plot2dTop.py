@@ -36,11 +36,11 @@ kwargs = {
     "optMode"        : "",
     #"savePath"       : "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_06September2016/figures/M_200/",
     #"savePath"       : None,
-    "refDataset"     : "TT",#"ChargedHiggs_HplusTB_HplusToTB_M_500",
+    "refDataset"     : "ChargedHiggs_HplusTB_HplusToTB_M_1000",#"ChargedHiggs_HplusTB_HplusToTB_M_500",
 #    "savePath"       : "/publicweb/s/skonstan/MyPlots/CorrelationPlots/",
-    "savePath"       : "/publicweb/s/skonstan/Hplus2tbAnalysis/HplusMasses/topbdtSelection_/MVA09",
+    "savePath"       : "/publicweb/s/skonstan/Hplus2tbAnalysis/HplusMasses/topbdtSelectionTH2_/",
     #"savePath"       : "/publicweb/a/aattikis/EvtShapeVars/",
-    "saveFormats"    : ["_TT"+".pdf"],
+    "saveFormats"    : ["_1000"+".pdf"],
     "normalizeTo"    : "One", #One", "XSection", "Luminosity"
     "zMin"           : None,
     "zMax"           : None,
@@ -72,7 +72,14 @@ hNames = [
 #    "TrijetCandidate/TrijetMass_BjetLdgJetMass","TrijetCandidateGenuine/TrijetMass_BjetLdgJetMass","TrijetCandidateFake/TrijetMass_BjetLdgJetMass",
 #    "TrijetCandidate/TrijetMass_BjetSubldgJetMass","TrijetCandidateGenuine/TrijetMass_BjetSubldgJetMass","TrijetCandidateFake/TrijetMass_BjetSubldgJetMass",
 #    "TrijetCandidate/TrijetMass_DijetMass","TrijetCandidateGenuine/TrijetMass_DijetMass","TrijetCandidateFake/TrijetMass_DijetMass",
-    "topbdtSelection_/TrijetCountVsBDTcuts","topbdtSelection_/NjetsVsNTrijets_beforeBDT", "topbdtSelection_/NjetsVsNTrijets_afterBDT","topbdtSelection_/DeltaBDTmaxVsTrijetPassBDTvalue","topbdtSelection_/DeltaBDTminVsTrijetPassBDTvalue",
+    "topbdtSelectionTH2_/TrijetCountVsBDTcuts","topbdtSelectionTH2_/NjetsVsNTrijets_beforeBDT", "topbdtSelectionTH2_/NjetsVsNTrijets_afterBDT","topbdtSelectionTH2_/DeltaBDTmaxVsTrijetPassBDTvalue","topbdtSelectionTH2_/DeltaBDTminVsTrijetPassBDTvalue", 
+"topbdtSelectionTH2_/TopFromHiggsPtVSAssocTopPt",
+"topbdtSelectionTH2_/DEta_Dijet1TetrajetBjet_Vs_DEta_Dijet2TetrajetBjet",
+"topbdtSelectionTH2_/DPhi_Dijet1TetrajetBjet_Vs_DPhi_Dijet2TetrajetBjet",
+"topbdtSelectionTH2_/DR_Dijet1TetrajetBjet_Vs_DR_Dijet2TetrajetBjet",
+"topbdtSelectionTH2_/DEta_WFromHBjetFromH_Vs_DEta_WFromAssocTopBjetFromH",
+"topbdtSelectionTH2_/DPhi_WFromHBjetFromH_Vs_DPhi_WFromAssocTopBjetFromH",
+"topbdtSelectionTH2_/DR_WFromHBjetFromH_Vs_DR_WFromAssocTopBjetFromH",
     
 ]
 

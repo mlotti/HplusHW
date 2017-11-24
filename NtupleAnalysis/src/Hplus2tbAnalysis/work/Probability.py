@@ -191,6 +191,7 @@ def main(opts, signalMass):
             datasetsMgr.remove(filter(lambda name: "TTZToQQ" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "TTWJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "TTTT" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "TT" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "FakeBMeasurementTrijetMass" in name, datasetsMgr.getAllDatasetNames()))
             #datasetsMgr.remove(filter(lambda name: "M_" in name and "M_" + str(opts.signalMass) not in name, datasetsMgr.getAllDatasetNames()))
 
@@ -230,44 +231,37 @@ def main(opts, signalMass):
             histoList  = datasetsMgr.getDataset(datasetOrder[0]).getDirectoryContent(folder)
             histoPaths1 = [os.path.join(folder, h) for h in histoList]
         
-
-        numerators   = [#"TopQuarkPt_MatchedBDT",
-                        "TopQuarkPt_MatchedBDT",
-#                        "TrijetMass_NotMatchedBDT",
+        numerators   = ["TopQuarkPt_InTopDirBDT",
+                        "AllTopQuarkPt_InTopDirBDT",
                         "AllTopQuarkPt_MatchedBDT",
-                        "AllTopQuarkPt_jjbMatchedBDT",
-#                        LdgTrijetFake_BDT",
-#                        "LdgTrijetFakeJJB_BDT",
-#                        "EventTrijetPt_MatchedBDT",
+                        "TrijetNotInTopDirPt_BDT",
                         "TrijetFakePt_BDT",
-                        "TrijetFakeJJBPt_BDT",
+                        "AllTopQuarkPt_InTopDir",
                         "AllTopQuarkPt_Matched",
-                        "AllTopQuarkPt_jjbMatched",
-                        "EventTrijetPt2T_MatchedjjbBDT",
-                        "EventTrijetPt2T_MatchedjjbBDT",
-                        "EventTrijetPt2T_MatchedjjbBDT",
-                        "AllTopQuarkPt_NonMatched",
-                        "EventTrijetPt_MatchedBDT",
-                        "AllTopQuarkPt_jjbMatchedBDT",
+                        "EventTrijetPt2T_MatchedBDT",
+                        "EventTrijetPt2T_MatchedBDT",
+                        "EventTrijetPt2T_MatchedBDT",
+                        "AllTopQuarkPt_NotInTopDir",
+                        "EventTrijetPt_InTopDirBDT",
+                        "AllTopQuarkPt_MatchedBDT",
                         "TrijetPtMaxMVASameFakeObj_BjetPassCSV",
                         "SelectedTrijetsPt_BjetPassCSVdisc_afterCuts",
                         "TrijetPt_PassBDT_BJetPassCSV",
+                        "TopFromHiggsPt_isLdgMVATrijet_afterCuts",
+                        "TopFromHiggsPt_isSubldgMVATrijet_afterCuts",
+                        "TopFromHiggsPt_isMVATrijet_afterCuts",
+                        "LdgBjetPt_isLdgFreeBjet",
+                        "ChHiggsBjetPt_TetrajetBjetPt_Matched_afterCuts",
                         ]
-        denominators = [#"TopQuarkPt",
-#                        "TopQuarkPt_Matched",
-                        "TrijetPt_BDT",
+        denominators = ["TrijetPt_BDT",
+                        "AllTopQuarkPt_InTopDir",
                         "AllTopQuarkPt_Matched",
-                        "AllTopQuarkPt_jjbMatched",
-#                        "LdgTrijetFake",
-#                        "LdgTrijetFakeJJB",
-#                        "EventTrijetPt_BDT",
+                        "TrijetNotInTopDirPt",
                         "TrijetFakePt",
-                        "TrijetFakeJJBPt",
                         "TopQuarkPt",
                         "TopQuarkPt",
-#OB                        "EventTrijetPt_BDT",
                         "EventTrijetPt2T_BDT",
-                        "EventTrijetPt2T_Matchedjjb",
+                        "EventTrijetPt2T_Matched",
                         "EventTrijetPt2T",
                         "TopQuarkPt",
                         "EventTrijetPt_BDT",
@@ -275,6 +269,11 @@ def main(opts, signalMass):
                         "TrijetPtMaxMVASameFakeObj",
                         "SelectedTrijetsPt_afterCuts",
                         "TrijetPt_PassBDT",
+                        "TopFromHiggsPt_afterCuts",
+                        "TopFromHiggsPt_afterCuts",
+                        "TopFromHiggsPt_afterCuts",
+                        "LdgBjetPt",
+                        "ChHiggsBjetPt_foundTetrajetBjet_afterCuts",
                         ]
         
 
@@ -366,13 +365,14 @@ def PlotProb(datasets, numPath, denPath):
 #        n.normalizeToOne()
         d = dataset.getDatasetRootHisto(denPath).getHistogram()
         
-        n.Rebin(5)
-        d.Rebin(5)
+        n.Rebin(6)
+        d.Rebin(6)
 
         if d.GetEntries() == 0 or n.GetEntries() == 0:
             continue
 
-
+        if n.GetEntries() > d.GetEntries():
+            continue
         # Check Negatives
         CheckNegatives(n, d, True)
         
@@ -407,6 +407,7 @@ def PlotProb(datasets, numPath, denPath):
         if (n.GetRMS()  == 0 or d.GetRMS()  == 0): continue
         if (n.Integral(1,nBins) == 0 or d.Integral(1,nBins) == 0): continue
         
+#        if not (ROOT.TEfficiency.CheckConsistency(n,d)): continue;
         effic = ROOT.TEfficiency(n,d)
         effic.SetStatisticOption(statOption)
         
@@ -423,7 +424,7 @@ def PlotProb(datasets, numPath, denPath):
             styles.signalStyleHToTB500.apply(eff)
 #            styles.ttStyle.apply(eff)
             eff.SetLineStyle(1)
-            eff.SetLineWidth(2)
+            eff.SetLineWidth(3)
             eff.SetLineColor(619)
             legend = "TT"
         elif "M_500" in datasetName:
@@ -454,7 +455,7 @@ def PlotProb(datasets, numPath, denPath):
     if "Pt" in numPath:
         xMin = 0.0
 #        rebinX = 2
-        xMax = 600.0
+        xMax = 705.0
         xTitle = "p_{T} (GeV)"
         yTitle = "Efficiency"
         yMin = 0.0
@@ -495,16 +496,16 @@ def PlotProb(datasets, numPath, denPath):
     if "Fake" in numPath:
         xMin = 90.0
         rebinX = 4                                                                                                                                                                      
-        xMax = 700.0
+        xMax = 705.0
         xTitle = "p_{T} (GeV)"
         yTitle = "Misidentification rate"
         yMin = 0.0
-        yMax = 0.11
+        yMax = 0.15
 
     if "Event" in numPath:
         rebinX = 1
-        xMin = 90.0
-        xMax = 700.0
+        xMin = 95.0
+        xMax = 705.0
         xTitle = "p_{T} (GeV)"
         yTitle = "Efficiency"
         yMin = 0.0
@@ -519,10 +520,10 @@ def PlotProb(datasets, numPath, denPath):
         yMin = 0.0
         yMax = 0.15
 
-    if "AllTopQuarkPt_jjbMatchedBDT" in numPath and "TopQuarkPt" in denPath:
-        xMin = 95.0
+    if "AllTopQuarkPt_MatchedBDT" in numPath and "TopQuarkPt" in denPath:
+        xMin = 5.0
         rebinX = 4
-        xMax = 605.0
+        xMax = 705.0
         xTitle = "generated top p_{T} [GeV]"
         yTitle = "Efficiency"
         yMin = 0.0
@@ -787,8 +788,9 @@ if __name__ == "__main__":
     BATCHMODE    = True
     PRECISION    = 3
     #SIGNALMASS   = [200, 500, 800, 2000]
-    SIGNALMASS   = [ ]
-#    SIGNALMASS   = [200, 500, 1000, 800]
+#    SIGNALMASS   = [200, 300, 1000]
+    #SIGNALMASS   = [300, 500, 1000]
+    SIGNALMASS   = []
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False

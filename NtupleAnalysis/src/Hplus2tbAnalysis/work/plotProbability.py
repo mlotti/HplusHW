@@ -248,9 +248,9 @@ def main(opts, signalMass):
 #                        "AllTopQuarkPt_MatchedBDT",
 #                        "AllTopQuarkPt_jjbMatchedBDT",
 #                        "LdgTrijetFake_BDT",
-                        "LdgTrijetFakeJJB_BDT",
+                        "LdgTrijetFake_BDT",
                         "TrijetFakePt_BDT",
-                        "TrijetFakeJJBPt_BDT",
+                        "TrijetFakePt_BDT",
 
                         ]
         denominators = [#"TopQuarkPt",
@@ -259,9 +259,9 @@ def main(opts, signalMass):
 #                        "AllTopQuarkPt_Matched",
 #                        "AllTopQuarkPt_jjbMatched",
 #                        "LdgTrijetFake",
-                        "LdgTrijetFakeJJB",
+                        "LdgTrijetFake",
                         "TrijetFakePt",
-                        "TrijetFakeJJBPt",
+                        "TrijetFakePt",
                         ]
         
 
@@ -511,11 +511,11 @@ def PlotProb(datasets, numPath, denPath):
     if "Fake" in numPath:
         xMin = 95.0
         rebinX = 1                                                                                                                                                                      
-        xMax = 605.0
+        xMax = 705.0
         xTitle = "candidate p_{T} [GeV]"
         yTitle = "Misidentification rate"
         yMin = 0.0
-        yMax = 0.11
+        yMax = 0.15
         
     else:
         xMin = 0.0

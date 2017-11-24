@@ -407,8 +407,8 @@ void TopReco::book(TDirectory *dir) {
   hAllJetBdisc    = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs,"AllJetBdisc",";b-tag discr",100,0.0,1.0);
   hAllJetQGLikelihood  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "AllJetQGLikelihood",";Quark-Gluon Likelihood",100,0.0,1.0);
   //Matching check
-  hNmatchedTop     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug,myInclusiveDir,"NmatchedTrijets",";NTrijet_{matched}",4,-0.5,3.5);
-  hNmatchedTrijets = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug,myInclusiveDir,"NmatchedTrijetCand",";NTrijet_{matched}",4,-0.5,3.5);
+  hNmatchedTop     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital,myInclusiveDir,"NmatchedTrijets",";NTrijet_{matched}",4,-0.5,3.5);
+  hNmatchedTrijets = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital,myInclusiveDir,"NmatchedTrijetCand",";NTrijet_{matched}",4,-0.5,3.5);
   hGenTop_Pt       = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs,"GenTop_Pt", ";p_{T} (GeV/c)", 2*nBinsPt, minPt , 2*maxPt);
 
   hTrijetDrMin          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug,myInclusiveDir,"TrijetDrMin",";#Delta R", 50,0.0,0.5);
@@ -498,31 +498,31 @@ void TopReco::book(TDirectory *dir) {
 }
 
 
-/*                                                                                                                                                                                                                                                                 
-  Get all gen particles by pdgId                                                                                                                                                                                                                                   
+/*                                                                                                                                                                                            
+  Get all gen particles by pdgId                                                                                                                
 */
 vector<genParticle> TopReco::GetGenParticles(const vector<genParticle> genParticles, const int pdgId)
 {
   std::vector<genParticle> particles;
 
-  // For-loop: All genParticles                                                                                                                                                                                                                                    
+  // For-loop: All genParticles                                                                                                                                     
   for (auto& p: genParticles){
 
-    // Find last copy of a given particle                                                                                                                                                                                                                          
+    // Find last copy of a given particle                                                                                                                             
     if (!p.isLastCopy()) continue;
 
-    // Consider only particles                                                                                                                                                                                                                                     
+    // Consider only particles                                                                                                                          
     if (std::abs(p.pdgId()) != pdgId) continue;
 
-    // Save this particle                                                                                                                                                                                                                                          
+    // Save this particle                                                                                                                                         
     particles.push_back(p);
   }
   return particles;
 }
 
 
-/*                                                                                                                                                                                                                                                                 
-  Get the last copy of a particle.                                                                                                                                                                                                                                 
+/*                                                                                                                                                                                                  
+  Get the last copy of a particle.                                                                                                                                                                                    
 */
 const genParticle TopReco::GetLastCopy(const vector<genParticle> genParticles, const genParticle &p){
 
@@ -543,12 +543,12 @@ const genParticle TopReco::GetLastCopy(const vector<genParticle> genParticles, c
 Jet TopReco::getLeadingSubleadingJet(const Jet& jet0, const Jet& jet1, string selectedJet){
   if (selectedJet != "leading" && selectedJet!="subleading") std::cout<<"WARNING! Unknown option "<<selectedJet<<". Function getLeadingSubleadingJet returns leading Jet"<<std::endl;
   Jet leadingJet, subleadingJet;
-  if (jet0.pt() > jet1.pt()){                                                                                                                                                                                                                         
-    leadingJet    = jet0;                                                                                                                                                                                                               
-    subleadingJet = jet1;                                                                                                                                                                                                               
-  }                                                                                                                                                                                                                                                   
-  else{                                                                                                                                                                                                                                               
-    leadingJet    = jet1;                                                                                                                                                                                                               
+  if (jet0.pt() > jet1.pt()){                                                                                                                                                                                         
+    leadingJet    = jet0;                                                                                                                                                                                           
+    subleadingJet = jet1;                                                                                                                                                                              
+  }                                                                                                                                                                                                                
+  else{                                                                                                                                                                           
+    leadingJet    = jet1;                                                                                                                                                                               
     subleadingJet = jet0;
   }
 
@@ -966,10 +966,13 @@ void TopReco::process(Long64_t entry) {
       double dPtmin = 99999.9;
       for (auto& bjet: jetData.getSelectedJets()){
 	double dR  = ROOT::Math::VectorUtil::DeltaR( bjet.p4(), BQuark.p4());
-	double dPt = std::abs(bjet.pt() - BQuark.pt());
+	double dPt = std::abs(bjet.pt() - BQuark.pt())/BQuark.pt();
+	double dEta = std::abs(bjet.eta() - BQuark.eta());
+	double dPhi = std::abs(ROOT::Math::VectorUtil::DeltaPhi( bjet.p4(), BQuark.p4()));
 	if (dR > 0.4)     continue;
 	if (dR > dRmin)   continue;
-	if (dPt > dPtmin) continue;
+	//	if (dPt > dPtmin) continue;
+	if (dPt > 1. || dEta > 0.3 || dPhi > 0.3) continue;
 	dRmin  = dR;
 	dPtmin = dPt;
 	mcMatched_BJet = bjet;
@@ -988,32 +991,40 @@ void TopReco::process(Long64_t entry) {
       Jet mcMatched_SubldgJet;
       
       double dR1min, dR2min, dPt1min, dPt2min;
+      double dEta1min, dEta2min, dPhi1min, dPhi2min;
       dR1min = dR2min = dPt1min = dPt2min = 99999.9;
+      dEta1min = dEta2min = dPhi1min = dPhi2min = 99999.9;
+      
 
       for (auto& jet: jetData.getSelectedJets()){
+	bool same = false;
 	for (size_t k=0; k<GenTops.size(); k++){
 	  if (dRminB.at(k) < 0.4){
-	    if( areSameJets(jet,MC_BJets.at(k))) continue; //Skip the jets that are matched with bquarks
+	    if( areSameJets(jet,MC_BJets.at(k))) same = true; //Skip the jets that are matched with bquarks
 	  }
 	}
-		
+	if (same) continue;
 	double dR1 = ROOT::Math::VectorUtil::DeltaR(jet.p4(), LdgQuark.p4());
 	double dR2 = ROOT::Math::VectorUtil::DeltaR(jet.p4(), SubldgQuark.p4());
 	
 	if (std::min(dR1, dR2) > 0.4) continue;
 	
-	double dPt1 = std::abs(jet.pt() - LdgQuark.pt());
-	double dPt2 = std::abs(jet.pt() - SubldgQuark.pt());
+	double dPt1 = std::abs(jet.pt() - LdgQuark.pt())/LdgQuark.pt();
+	double dPt2 = std::abs(jet.pt() - SubldgQuark.pt())/SubldgQuark.pt();
+	double dEta1 = std::abs(jet.eta() - LdgQuark.eta());
+	double dEta2 = std::abs(jet.eta() - SubldgQuark.eta());
+	double dPhi1 = std::abs( ROOT::Math::VectorUtil::DeltaPhi(jet.p4(), LdgQuark.p4()));
+	double dPhi2 = std::abs( ROOT::Math::VectorUtil::DeltaPhi(jet.p4(), SubldgQuark.p4()));
 
 	if (dR1 < dR2)
 	  {
-	    if (dR1 < dR1min && dPt1 < dPt1min)
+	    if (dR1 < dR1min && dPt1 < 1. && dEta1 < 0.3 && dPhi1 < 0.3)
 	      {
 		dR1min = dR1;
 		dPt1min= dPt1;
 		mcMatched_LdgJet = jet;
 	      }
-	    else if (dR2 <= 0.4 && dR2 < dR2min && dPt2 < dPt2min)
+	    else if (dR2 <= 0.4 && dR2 < dR2min && dPt2 < 1. && dEta2 < 0.3 && dPhi2 < 0.3)
 	      {
 		dR2min  = dR2;
 		dPt2min = dPt2;
@@ -1022,13 +1033,13 @@ void TopReco::process(Long64_t entry) {
 	  }
 	else
 	  {
-	    if (dR2 < dR2min && dPt2 < dPt2min)
+	    if (dR2 < dR2min && dPt2 < 1. && dEta2 < 0.3 && dPhi2 < 0.3)
 	      {
 		dR2min  = dR2;
 		dPt2min = dPt2;
 		mcMatched_SubldgJet = jet;
 	      }
-	    else if (dR1 <= 0.4 && dR1 < dR1min && dPt1 < dPt1min)
+	    else if (dR1 <= 0.4 && dR1 < dR1min && dPt1 < 1. && dEta1 < 0.3 && dPhi1 < 0.3)
 	      {
 		dR1min  = dR1;
 		dPt1min = dPt1;
@@ -1059,7 +1070,14 @@ void TopReco::process(Long64_t entry) {
     
     //=======	  
 
-
+    if (MCtrue_Bjet.size() == 2){
+      //      std::cout<<"2 bjets"<<std::endl;
+      if (areSameJets(MCtrue_Bjet.at(0), MCtrue_Bjet.at(1))) std::cout<<"sameBB"<<std::endl;
+      if (areSameJets(MCtrue_LdgJet.at(0), MCtrue_LdgJet.at(1))) std::cout<<"sameLdgLdg"<<std::endl;
+      if (areSameJets(MCtrue_SubldgJet.at(0), MCtrue_SubldgJet.at(1))) std::cout<<"sameSubldgSubldg"<<std::endl;
+      if (areSameJets(MCtrue_LdgJet.at(0), MCtrue_SubldgJet.at(1)) || areSameJets(MCtrue_LdgJet.at(1), MCtrue_SubldgJet.at(0))) std::cout<<"sameLdgSubldg"<<std::endl;
+      if (areSameJets(MCtrue_Bjet.at(0), MCtrue_Bjet.at(1)) || areSameJets(MCtrue_LdgJet.at(0), MCtrue_LdgJet.at(1)) ||areSameJets(MCtrue_SubldgJet.at(0), MCtrue_SubldgJet.at(1)) ||areSameJets(MCtrue_LdgJet.at(0), MCtrue_SubldgJet.at(1)) || areSameJets(MCtrue_LdgJet.at(1), MCtrue_SubldgJet.at(0))) std::cout<<"==="<<std::endl;
+    }
 
 
 
@@ -1090,42 +1108,18 @@ void TopReco::process(Long64_t entry) {
 	    TopCandidates.BJet.push_back(jet0);
 	    TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet1,jet2,"leading"));
 	    TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet1,jet2,"subleading"));
-	    
-	  //   if (jet1.pt() > jet2.pt()){
-	  //     TopCandidates.Jet1.push_back(jet1);
-	  //     TopCandidates.Jet2.push_back(jet2);
-	  //   }
-	  //   else{
-	  //     TopCandidates.Jet1.push_back(jet2);
-	  //     TopCandidates.Jet2.push_back(jet1);
-	  //   }
 	  }
 	  
 	  else if ( isBJet(jet1, MCtrue_Bjet)    ||  (isWsubjet(jet0,MCtrue_LdgJet, MCtrue_SubldgJet)  &&  isWsubjet(jet2,MCtrue_LdgJet, MCtrue_SubldgJet))){
 	    TopCandidates.BJet.push_back(jet1);
 	    TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet0,jet2,"leading"));
 	    TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet0,jet2,"subleading"));
-	    // if (jet0.pt() > jet2.pt()){
-	    //   TopCandidates.Jet1.push_back(jet0);
-	    //   TopCandidates.Jet2.push_back(jet2);
-	    // }
-	    // else{
-	    //   TopCandidates.Jet1.push_back(jet2);
-	    //   TopCandidates.Jet2.push_back(jet0);
-	    // }
+
 	  }
 	  else if ( isBJet(jet2, MCtrue_Bjet)    ||  (isWsubjet(jet0,MCtrue_LdgJet, MCtrue_SubldgJet)  &&  isWsubjet(jet1,MCtrue_LdgJet, MCtrue_SubldgJet))){
 	    TopCandidates.BJet.push_back(jet2);
 	    TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet0,jet1,"leading"));
 	    TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet0,jet1,"subleading"));
-	    // if (jet0.pt() > jet1.pt()){
-	    //   TopCandidates.Jet1.push_back(jet0);
-	    //   TopCandidates.Jet2.push_back(jet1);
-	    // }
-	    // else{
-	    //   TopCandidates.Jet1.push_back(jet1);
-	    //   TopCandidates.Jet2.push_back(jet0);
-	    // }
 	  }
 	  
 	  //********************************** One of the dijet subjets matched*********************************//
@@ -1137,28 +1131,11 @@ void TopReco::process(Long64_t entry) {
 	      TopCandidates.BJet.push_back(jet1);
 	      TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet0,jet2,"leading"));
 	      TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet0,jet2,"subleading"));
-
-	      // if (jet0.pt() > jet2.pt()){
-	      // 	TopCandidates.Jet1.push_back(jet0);
-              //   TopCandidates.Jet2.push_back(jet2);
-              // }
-              // else{
-              //   TopCandidates.Jet1.push_back(jet2);
-              //   TopCandidates.Jet2.push_back(jet0);
-              // }
 	    }
 	    else{
 	      TopCandidates.BJet.push_back(jet2);
 	      TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet0,jet1,"leading"));
 	      TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet0,jet1,"subleading"));
-	      // if (jet0.pt() > jet1.pt()){
-	      // 	TopCandidates.Jet1.push_back(jet0);
-	      // 	TopCandidates.Jet2.push_back(jet1);
-              // }
-              // else{
-              //   TopCandidates.Jet1.push_back(jet1);
-              //   TopCandidates.Jet2.push_back(jet0);
-	      // }
             }
 	  }
 	  else if (isWsubjet(jet1,MCtrue_LdgJet, MCtrue_SubldgJet)){
@@ -1167,27 +1144,11 @@ void TopReco::process(Long64_t entry) {
 	      TopCandidates.BJet.push_back(jet0);
 	      TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet1,jet2,"leading"));
 	      TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet1,jet2,"subleading"));
-	      // if (jet1.pt() > jet2.pt()){
-	      // 	TopCandidates.Jet1.push_back(jet1);
-	      // 	TopCandidates.Jet2.push_back(jet2);
-              // }
-              // else{
-              //   TopCandidates.Jet1.push_back(jet2);
-              //   TopCandidates.Jet2.push_back(jet1);
-	      // }
             }
             else{
 	      TopCandidates.BJet.push_back(jet2);
 	      TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet0,jet1,"leading"));
 	      TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet0,jet1,"subleading"));
-              // if (jet0.pt() > jet1.pt()){
-	      // 	TopCandidates.Jet1.push_back(jet0);
-              //   TopCandidates.Jet2.push_back(jet1);
-              // }
-              // else{
-              //   TopCandidates.Jet1.push_back(jet1);
-              //   TopCandidates.Jet2.push_back(jet0);
-              // }
             }
           }
 	  else if (isWsubjet(jet2,MCtrue_LdgJet, MCtrue_SubldgJet)){
@@ -1196,27 +1157,11 @@ void TopReco::process(Long64_t entry) {
 	      TopCandidates.BJet.push_back(jet0);
 	      TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet1,jet2,"leading"));
 	      TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet1,jet2,"subleading"));
-	      // if (jet1.pt() > jet2.pt()){
-	      // 	TopCandidates.Jet1.push_back(jet1);
-	      // 	TopCandidates.Jet2.push_back(jet2);
-              // }
-              // else{
-              //   TopCandidates.Jet1.push_back(jet2);
-              //   TopCandidates.Jet2.push_back(jet1);
-	      // }
             }
             else{
 	      TopCandidates.BJet.push_back(jet1);
 	      TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet0,jet2,"leading"));
 	      TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet0,jet2,"subleading"));
-              // if (jet0.pt() > jet2.pt()){
-	      // 	TopCandidates.Jet1.push_back(jet0);
-              //   TopCandidates.Jet2.push_back(jet2);
-              // }
-              // else{
-              //   TopCandidates.Jet1.push_back(jet2);
-              //   TopCandidates.Jet2.push_back(jet0);
-              // }
             }
           }
 
@@ -1229,40 +1174,16 @@ void TopReco::process(Long64_t entry) {
 	    TopCandidates.BJet.push_back(jet0);
 	    TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet1,jet2,"leading"));
 	    TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet1,jet2,"subleading"));	    
-	    // if (jet1.pt() > jet2.pt()){
-	    //   TopCandidates.Jet1.push_back(jet1);
-	    //   TopCandidates.Jet2.push_back(jet2);
-	    // }
-	    // else{
-            //   TopCandidates.Jet1.push_back(jet2);
-            //   TopCandidates.Jet2.push_back(jet1);
-	    // }
 	  }
 	  else if (jet1.bjetDiscriminator() > jet0.bjetDiscriminator() && jet1.bjetDiscriminator() > jet2.bjetDiscriminator()){
 	    TopCandidates.BJet.push_back(jet1);	    
 	    TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet0,jet2,"leading"));
 	    TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet0,jet2,"subleading"));
-	    // if (jet0.pt() > jet2.pt()){
-	    //   TopCandidates.Jet1.push_back(jet0);
-	    //   TopCandidates.Jet2.push_back(jet2);
-	    // }
-	    // else{
-	    //   TopCandidates.Jet1.push_back(jet2);
-	    //   TopCandidates.Jet2.push_back(jet0);
-	    // }	 
 	  }
 	  else if (jet2.bjetDiscriminator() > jet0.bjetDiscriminator() && jet2.bjetDiscriminator() > jet1.bjetDiscriminator()){
 	    TopCandidates.BJet.push_back(jet2);
 	    TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet0,jet1,"leading"));
 	    TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet0,jet1,"subleading"));
-	    // if (jet0.pt() > jet1.pt()){
-	    //   TopCandidates.Jet1.push_back(jet0);
-	    //   TopCandidates.Jet2.push_back(jet1);
-	    // }
-	    // else{
-	    //   TopCandidates.Jet1.push_back(jet1);
-	    //   TopCandidates.Jet2.push_back(jet0);
-	    // }
 	  }
 	}	  	 	  
       }

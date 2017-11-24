@@ -136,7 +136,7 @@ def main(opts, signalMass):
         # Remove datasets
         if 1:
             datasetsMgr.remove(filter(lambda name: "Data" in name, datasetsMgr.getAllDatasetNames()))
-            #datasetsMgr.remove(filter(lambda name: "QCD_b" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr.remove(filter(lambda name: "QCD_b" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "QCD_HT" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "SingleTop" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "DYJetsToQQHT" in name, datasetsMgr.getAllDatasetNames()))
@@ -145,6 +145,7 @@ def main(opts, signalMass):
             datasetsMgr.remove(filter(lambda name: "WJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "Diboson" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "TTTT" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr.remove(filter(lambda name: "TT" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "FakeBMeasurementTrijetMass" in name, datasetsMgr.getAllDatasetNames()))
             #datasetsMgr.remove(filter(lambda name: "M_" in name and "M_" + str(opts.signalMass) not in name, datasetsMgr.getAllDatasetNames()))
         
@@ -318,6 +319,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
         _xlabel = "p_{T}  (%s)" % (_units)
         _format = "%0.0f " + _units
         _opts["xmax"] = 800
+
     elif "ldgtrijetpt" in histo.lower():
         _rebinX = 2
 #        logY    = False
@@ -334,13 +336,14 @@ def PlotMC(datasetsMgr, histo, intLumi):
         _xlabel = "m_{jjb} (%s)" % _units
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _opts["xmax"] = 505 
-#    elif "topcandmass" in histo.lower():
-#        _rebinX = 2
-#        _units  = "GeV/c^{2}"
-#        _format = "%0.0f " + _units
-#        _xlabel = "m_{jjb} (%s)" % _units
-#        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-#        _opts["xmax"] = 505 
+
+    elif "topcandmass" in histo.lower():
+        _rebinX = 2
+        _units  = "GeV/c^{2}"
+        _format = "%0.0f " + _units
+        _xlabel = "m_{jjb} (%s)" % _units
+        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _opts["xmax"] = 505 
 
     elif "matched_mass" in histo.lower():
         _rebinX = 2
@@ -367,6 +370,24 @@ def PlotMC(datasetsMgr, histo, intLumi):
     elif "bdtmultiplicity" in histo.lower():
         _opts["xmax"] = 15
 
+    elif "mult" or "nselectedtrijets" in histo.lower():
+        _rebinX = 1
+        
+    elif "deltaeta" or "deltaphi" in histo.lower():
+        _rebinX = 4
+
+    if "deltaptoverpt" in histo.lower():
+        _opts["xmax"] = 15.5
+        _opts["xmin"] = -15.5
+    
+    if "delta" in histo.lower():
+        _format = "%0.1f"
+
+    if "deltacsv" in histo.lower():
+        _format = "%0.2f"
+
+    if "deltabdt_topfromh_ldgmvatrijet_aftercuts" in histo.lower():
+        _format = "%0.2f"
 
     else:
         pass
