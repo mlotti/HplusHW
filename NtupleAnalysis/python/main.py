@@ -594,8 +594,7 @@ class Process:
 
             # Determine how many events to run on for given dataset
             if len(self._maxEvents.keys()) < 1:
-                tchain.SetCacheEntryRange(0, -1)
-                tchain.Process(tselector, "", -1)
+                tchain.Process(tselector)
             elif "All" in self._maxEvents:
                 if len(self._maxEvents) == 1:
                     tchain.SetCacheEntryRange(0, self._maxEvents["All"])
