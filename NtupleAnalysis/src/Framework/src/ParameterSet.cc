@@ -43,3 +43,9 @@ bool ParameterSet::isMC() const {
   }
   return fIsMC;
 }
+
+bool ParameterSet::exists(const std::string& name) const {
+  boost::optional<const boost::property_tree::ptree&> child = fConfig.get_child_optional(name);
+  if(!child) return false;
+  return true;
+}

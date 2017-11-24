@@ -187,7 +187,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   //================================================================================================
   if (0) std::cout << "=== MET selection" << std::endl;
   const METSelection::Data METData = fMETSelection.analyze(fEvent, nVertices);
-   if (!METData.passedSelection()) return;
+  // if (!METData.passedSelection()) return;
 
   //================================================================================================
   // 11) Topology selection
@@ -217,7 +217,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   // Standard Selections
   //================================================================================================
   if (0) std::cout << "=== Standard Selections" << std::endl;
-  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, false);
+  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, bjetData.isGenuineB());
   
   //================================================================================================
   // All Selections
@@ -231,7 +231,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   //================================================================================================
   // Fill final plots
   //===============================================================================================
-  fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, 1); //must fix TopSelection (output data)
+  fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, 1);
  
   //================================================================================================
   // Finalize

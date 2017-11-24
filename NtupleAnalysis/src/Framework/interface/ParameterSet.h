@@ -81,7 +81,8 @@ public:
   }
   
   bool isMC() const;
-
+  bool exists(const std::string&) const;
+  
 private:
   template <typename T, typename PChild>
   std::vector<T> toVector(const PChild& child) {

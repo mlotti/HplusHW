@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 '''
 Usage:
-./plotQCD_Purity.py -m <pseudo_mcrab_directory> [opts]
+./plot_Purity.py -m <pseudo_mcrab_directory> [opts]
 
 Examples:
-./plotQCD_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar -e "QCD|Charged" --plotEWK -o OptChiSqrCutValue100  
-./plotQCD_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar  -e "QCD|Charged" -plotEWK -o OptChiSqrCutValue100  
-./plotQCD_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170630_045528_IsGenuineBEventBugFix_TopChiSqrVar -e "QCD|Charged" --plotEWK -o OptChiSqrCutValue100  
-./plotQCD_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170627_124436_BJetsGE2_TopChiSqrVar_AllSamples --plotEWK -e 'QCD|Charged'
+./plot_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar -e "QCD|Charged" --plotEWK -o OptChiSqrCutValue100  
+./plot_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar  -e "QCD|Charged" -plotEWK -o OptChiSqrCutValue100  
+./plot_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170630_045528_IsGenuineBEventBugFix_TopChiSqrVar -e "QCD|Charged" --plotEWK -o OptChiSqrCutValue100  
+./plot_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170627_124436_BJetsGE2_TopChiSqrVar_AllSamples --plotEWK -e 'QCD|Charged'
 
 NOTE:
 If unsure about the parameter settings a pseudo-multicrab do:
@@ -90,7 +90,8 @@ def GetLumi(datasetsMgr):
 
 def GetListOfEwkDatasets():
     Verbose("Getting list of EWK datasets")
-    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    return ["TT", "noTop", "SingleTop", "ttX"]
+    #return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
 
 
 def GetDatasetsFromDir(opts):
@@ -134,18 +135,6 @@ def main(opts):
     sysVarList    = dsetMgrCreator.getSystematicVariations()
     sysVarSrcList = dsetMgrCreator.getSystematicVariationSources()
 
-    # Todo: Print settings table
-    if 0:
-        print erasList
-        print
-        print modesList
-        print
-        print optList
-        print
-        print sysVarList
-        print 
-        print sysVarSrcList
-        
     # If user does not define optimisation mode do all of them
     if opts.optMode == None:
         if len(optList) < 1:
@@ -166,6 +155,8 @@ def main(opts):
         datasetsMgr.updateNAllEventsToPUWeighted()
         datasetsMgr.loadLuminosities() # from lumi.json
         
+        PrintPSet("TopologySelection", datasetsMgr)
+
         # Set/Overwrite cross-sections
         for d in datasetsMgr.getAllDatasets():
             if "ChargedHiggs" in d.getName():
@@ -174,19 +165,23 @@ def main(opts):
         if opts.verbose:
             datasetsMgr.PrintCrossSections()
             datasetsMgr.PrintLuminosities()
-            
-        # Custom Filtering of datasets 
-        if 0:
-            datasetsMgr.remove(filter(lambda name: "Charged" in name and not "M_500" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr.PrintInfo()
+
+        # Filter the datasets 
+        datasetsMgr.remove(filter(lambda name: "Charged" in name, datasetsMgr.getAllDatasetNames()))
+        #datasetsMgr.remove(filter(lambda name: "Charged" in name and not "M_500" in name, datasetsMgr.getAllDatasetNames()))
                
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
-   
+
         # Re-order datasets (different for inverted than default=baseline)
         if 0:
             newOrder = ["Data"]
             newOrder.extend(GetListOfEwkDatasets())
             datasetsMgr.selectAndReorder(newOrder)
+
+        # Print post-merged data dataset summary
+        datasetsMgr.PrintInfo()
 
         # Merge EWK samples
         datasetsMgr.merge("EWK", GetListOfEwkDatasets())
@@ -201,8 +196,8 @@ def main(opts):
 
         # Do the Purity Triplets?
         if 0:
-            bType  = "" # ["", "EWKFakeB", "EWKGenuineB"]
-            folder = "FakeBPurity" + bType
+            bType  = ["", "EWKFakeB", "EWKGenuineB"]
+            folder = "FakeBPurity" + bType[0]
             hList  = datasetsMgr.getDataset("EWK").getDirectoryContent(folder)
             for hName in hList:
                 PlotPurity(datasetsMgr, os.path.join(folder, hName))
@@ -223,8 +218,24 @@ def main(opts):
                 continue
             if "JetEtaPhi" in h:
                 continue
-            PlotPurity(datasetsMgr, os.path.join(folder, h))
+            PlotPurity(datasetsMgr, folder, h)
 
+    return
+
+def PrintPSet(selection, datasetsMgr):
+    selection = "\"%s\":"  % (selection)
+    thePSets = datasetsMgr.getAllDatasets()[0].getParameterSet()
+
+    # First drop everything before the selection
+    thePSet_1 = thePSets.split(selection)[-1]
+
+    # Then drop everything after the selection
+    thePSet_2 = thePSet_1.split("},")[0]
+
+    # Final touch
+    thePSet = selection + thePSet_2
+
+    Print(thePSet, True)
     return
 
 def getHistos(datasetsMgr, histoName):
@@ -246,21 +257,20 @@ def IsBaselineOrInverted(analysisType):
     return
 
 
-def PlotPurity(datasetsMgr, histoName):
+def PlotPurity(datasetsMgr, folder, hName):
     '''
     Create plots with "FakeB=Data-EWKGenuineB"
     '''
-    Verbose("Plotting histogram %s for Data, EWK, QCD " % (histoName), True)
-
-    # Which folder to use (redundant)
-    defaultFolder  = "FakeBPurity" 
-    genuineBFolder = defaultFolder + "EWKGenuineB"
-    fakeBFolder    = defaultFolder + "EWKFakeB"
+    # Which folder
+    genuineBFolder = folder + "EWKGenuineB"
+    fakeBFolder    = folder + "EWKFakeB"
+    histoName      = os.path.join(folder, hName)
+    hNameGenuineB  = os.path.join(genuineBFolder, hName)
 
     # Customize the histograms (BEFORE calculating purity obviously otherwise numbers are nonsense)
     _cutBox = None
     _rebinX = 1
-    _opts   = {"ymin": 1e-3, "ymax": 1.0} #"ymaxfactor": 1.2}
+    _opts   = {"ymin": 1e-2, "ymax": 1.0} #"ymaxfactor": 1.2}
     _format = "%0.0f"
     #_opts["xmax"] = xMax
     _xlabel = None
@@ -320,11 +330,13 @@ def PlotPurity(datasetsMgr, histoName):
 
     # Get histos (Data, EWK) for Inclusive
     p1 = plots.ComparisonPlot(*getHistos(datasetsMgr, histoName) )
+    p2 = plots.ComparisonPlot(*getHistos(datasetsMgr, hNameGenuineB) )
     p1.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
+    p2.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
 
     # Clone histograms 
     Data = p1.histoMgr.getHisto("Data").getRootHisto().Clone("Data")
-    EWK  = p1.histoMgr.getHisto("EWK").getRootHisto().Clone("EWK")
+    EWK  = p2.histoMgr.getHisto("EWK").getRootHisto().Clone("EWK") # EWKGenuineB
     QCD  = p1.histoMgr.getHisto("Data").getRootHisto().Clone("QCD")
 
     # Rebin histograms (Before calculating Purity)
@@ -336,13 +348,13 @@ def PlotPurity(datasetsMgr, histoName):
     QCD.Add(EWK, -1)
 
     # Comparison plot. The first argument is the reference histo. All other histograms are compared with respect to that. 
-    QCD_Purity, xMin, xMax, binList, valueDict, upDict, downDict = getPurityHisto(QCD, Data, inclusiveBins=False, printValues=False)
+    QCD_Purity, xMin, xMax, binList, valueDict, upDict, downDict = getPurityHisto(QCD, Data, inclusiveBins=False, printValues=True)
     EWK_Purity, xMin, xMax, binList, valueDict, upDict, downDict = getPurityHisto(EWK, Data, inclusiveBins=False, printValues=False)
 
     # Create TGraphs
     if 0:
         gQCD_Purity = MakeGraph(ROOT.kFullTriangleUp, ROOT.kOrange, binList, valueDict, upDict, downDict)
-        gEWK_Purity = MakeGraph(ROOT.kFullTriangleDown, ROOT.kPurple, binList, valueDict, upDict, downDict)
+        gEWK_Purity = MakeGraph(ROOT.kFullTriangleDown, ROOT.kBlue, binList, valueDict, upDict, downDict)
         
     # Make the plots
     if opts.plotEWK:
@@ -382,12 +394,12 @@ def PlotPurity(datasetsMgr, histoName):
                    histoName,  
                    xlabel        = _xlabel,
                    ylabel        = _ylabel,
-                   log           = False, 
+                   log           = True, 
                    rebinX       = 1, # must be done BEFORE calculating purity
                    cmsExtraText  = "Preliminary", 
                    createLegend  = {"x1": 0.76, "y1": 0.80, "x2": 0.92, "y2": 0.92},
                    opts          = _opts,
-                   opts2         = {"ymin": 1e-5, "ymax": 1e0},
+                   opts2         = {"ymin": 0.5, "ymax": 1.5},
                    ratio         = False,
                    ratioInvert   = False, 
                    ratioYlabel   = "Ratio",
@@ -399,7 +411,7 @@ def PlotPurity(datasetsMgr, histoName):
     return
 
 
-def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]): #[".png", ".C", ".pdf"]):
+def SavePlot(plot, plotName, saveDir, saveFormats = [".png"]): #[".png", ".C", ".pdf"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
 
     # Check that path exists

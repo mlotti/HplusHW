@@ -13,6 +13,13 @@ hplusPrintCounters.py --dataEra "Run2016" --printInfo --mode "events" --mergeFor
 hplusPrintCounters.py --dataEra "Run2016" --printInfo --mode "eff" --mergeForDataMC
 hplusPrintCounters.py --dataEra "Run2016" --printInfo --mergeForDataMC --mode "events" --weighted --includeTasks "QCD_Pt|TT_ext3|ZJets|Run2016G|Run2016F_PromptReco_v1_278801_278808" --mainCounterOnly
 
+Examples:
+hplusPrintCounters.py --mainCounterOnly --weighted --dataEra "Run2016" Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_TopCut10_171012_011451 --noerror --mergeForDataMC --mergeData --mergeMC
+hplusPrintCounters.py --mainCounterOnly --weighted --dataEra "Run2016" --mergeData Hplus2tbAnalysis_TopMVA0p80_171106_063722 --includeTasks "JetHT|TT"
+hplusPrintCounters.py --mainCounterOnly --weighted --dataEra "Run2016" --mergeData Hplus2tbAnalysis_TopMVA0p80_171106_063722 --includeTasks "JetHT|WJ|DY|WW|WZ" --noerror
+
+Last Used:
+hplusPrintCounters.py --mainCounterOnly --weighted --dataEra "Run2016" Hplus2tbAnalysis_TopMVA0p80_171106_063722 --mergeForDataMC --mergeData --mergeMC --excludeTasks "Charged|QCD_HT50to100|QCD_HT100to200|QCD_HT200to300|QCD_HT300to500"
 
 Useful Links:
 https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsChFullyHadronic

@@ -109,9 +109,10 @@ def main():
     # ================================================================================================
     # Setup the process
     # ================================================================================================
-    process = Process(prefix, postfix, opts.nEvts)
-
-            
+    maxEvents = {}
+    maxEvents["All"] = opts.nEvts
+    process = Process(prefix, postfix, maxEvents)
+                
     # ================================================================================================
     # Add the datasets (according to user options)
     # ================================================================================================
@@ -259,7 +260,7 @@ if __name__ == "__main__":
     # Default Values
     VERBOSE       = False
     NEVTS         = -1
-    HISTOLEVEL    = "Informative" #"Debug"
+    HISTOLEVEL    = "Debug" #"Informative" #"Debug"
     PUREWEIGHT    = True
     TOPPTREWEIGHT = True
     DOSYSTEMATICS = False

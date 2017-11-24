@@ -1,9 +1,4 @@
 #!/usr/bin/env python
-'''
-
-/plotBTagEfficiency_HybridQCD.py -m <mcrab_dir> [options]
-
-'''
 
 import os
 import sys
@@ -108,33 +103,49 @@ def treatNegativeBins(h):
         if h.GetBinContent(i) < 0.0:
             h.SetBinContent(i, 0.0)
 
-def doPlot(name, dset, errorlevel, optimizationMode, lumi):
+def doPlot(name, dset1, dset2, errorlevel, optimizationMode, lumi):
     print shellStyles.HighlightStyle()+"Generating plots for dataset '%s'"%name+shellStyles.NormalStyle()
     s = optimizationMode.split("BjetDiscrWorkingPoint")
     discrName = s[0].replace("OptBjetDiscr","")
     discrWP = s[1]
     
-    myPartons = ["B", "C", "G", "Light"]
-    myPartonLabels = ["b#rightarrowb", "c#rightarrowb", "g#rightarrowb", "uds#rightarrowb"]
+#    myPartons = ["B", "C", "G", "Light"]
+#    myPartonLabels = ["b#rightarrowb", "c#rightarrowb", "g#rightarrowb", "uds#rightarrowb"]
+    myPartons = ["B", "C", "Light"]                                                                                                                                                                                                     
+    myPartonLabels = ["b#rightarrowb", "c#rightarrowb", "guds#rightarrowb"] 
     histoObjects = []
     results = []
+        
     for i in range(len(myPartons)):
         n = "All%sjets"%myPartons[i]
-        dsetHisto = dset.getDatasetRootHisto(n)
+        #dsetHisto = dset.getDatasetRootHisto(n)
+        if myPartons[i] == "B":
+            dsetHisto = dset1.getDatasetRootHisto(n)
+        #if (myPartons[i] == "C" or myPartons[i] == "G" or myPartons[i] == "Light"):
+        if (myPartons[i] == "C" or myPartons[i] == "Light"):
+            dsetHisto = dset2.getDatasetRootHisto(n)
         dsetHisto.normalizeToLuminosity(lumi)
         hAll = dsetHisto.getHistogram()
         #(hAll, hAllName) = dset.getRootHisto(n)
         if hAll == None:
             raise Exception("Error: could not find histogram '%s'!"%n)
         treatNegativeBins(hAll)
+
+
         n = "Selected%sjets"%myPartons[i]
-        dsetHisto = dset.getDatasetRootHisto(n)
+        if myPartons[i] == "B":  
+            dsetHisto = dset1.getDatasetRootHisto(n)
+        if (myPartons[i] == "C" or myPartons[i] == "G" or myPartons[i] == "Light"):
+            dsetHisto = dset2.getDatasetRootHisto(n)
         dsetHisto.normalizeToLuminosity(lumi)
         hPassed = dsetHisto.getHistogram()
         #(hPassed, hPassedName) = dset.getRootHisto(n)
         if hPassed == None:
             raise Exception("Error: could not find histogram '%s'!"%n)
         treatNegativeBins(hPassed)
+
+
+
         # Find proper binning
         myBinEdges = []
         for k in range(1, hPassed.GetNbinsX()+1):
@@ -170,6 +181,7 @@ def doPlot(name, dset, errorlevel, optimizationMode, lumi):
         #hobj = histograms.HistoGraph(gEff, myPartonLabels[i], legendStyle="P", drawStyle="")
         hobj.setIsDataMC(False, True)
         histoObjects.append(hobj)
+   
     myPlot = plots.PlotBase(histoObjects)
     #myPlot.setLuminosity(-1) # Do not set 
     myPlot.setEnergy("13")
@@ -190,7 +202,7 @@ def doPlot(name, dset, errorlevel, optimizationMode, lumi):
                             #stackMCHistograms=False, addMCUncertainty=True,
                             addLuminosityText=False,
                             cmsTextPosition="outframe")
-    drawPlot(myPlot, "%s_%s"%(dset.name, name), **myParams)
+    drawPlot(myPlot, "%s_%s"%("Hybrid", name), **myParams)
     return results
 
 def main():
@@ -209,8 +221,8 @@ def main():
         raise Exception("Please provide input multicrab directory with -m")
     if not os.path.exists(opts.mcrab):
         raise Exception("The input root file '%s' does not exist!"%opts.mcrab)
-    if opts.dataset == None:
-        raise Exception("Please provide dataset name with -d")
+    #if opts.dataset == None:
+    #    raise Exception("Please provide dataset name with -d")
 
     # Find module names
     #myNames = findModuleNames(opts.mcrab, "BTagEfficiency")
@@ -224,6 +236,7 @@ def main():
     myModuleSelector.printSelectedCombinationCount()
     #for n in myNames:
     results = []
+
     #for era in myModuleSelector.getSelectedEras(): #degug
     for era in ["Run2016"]:
         msg = "=== FIXME:\n\tRunning only over era \"%s\". The function myModuleSelector.getSelectedEras does not seem to work. Press any key to proceed" % (era)
@@ -237,9 +250,14 @@ def main():
                 plots.mergeRenameReorderForDataMC(dsetMgr)
                 lumi = dsetMgr.getDataset("Data").getLuminosity()
                 for dset in dsetMgr.getMCDatasets():
+                    print ("THE dset is", dset.name)
                     print dset.name
-                    if dset.name.startswith(opts.dataset):
-                        results.extend(doPlot("btageff_%s_%s_%s"%(era, searchMode, optimizationMode), dset, opts.errorlevel, optimizationMode, lumi))
+                    if dset.name.startswith("TT"):
+                        dset1 = dset
+                    if dset.name.startswith("QCD"): #if dset.name.startswith(opts.dataset):
+                        dset2 = dset
+                print "The datasets are .....................", dset1.name, dset2.name
+                results.extend(doPlot("btageff_%s_%s_%s"%(era, searchMode, optimizationMode), dset1, dset2, opts.errorlevel, optimizationMode, lumi))
                   #dsetMgr.close()
     print "\nFigures generated"
     
@@ -247,7 +265,7 @@ def main():
         print item
     
     # Write results to a json file
-    filename = "btageff_%s.json"%opts.dataset
+    filename = "btageff_HybridQCD.json"
     with open(filename, 'w') as outfile:
         json.dump(results, outfile)
     print "Written results to %s"%filename

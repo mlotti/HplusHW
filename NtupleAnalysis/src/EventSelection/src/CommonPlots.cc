@@ -630,9 +630,6 @@ void CommonPlots::book(TDirectory *dir, bool isData) {
 						       "SubldgTrijetBjetPt_AfterAllSelections", ";p_{T} (GeV/c);N_{events}",
 						       2*fPtBinSettings.bins(), fPtBinSettings.min(), 2*fPtBinSettings.max());
 
-      fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlSubldgTrijetTopMassWMassRatioAfterAllSelections,
-						       "SubldgTrijetTopMassWMassRatioAfterAllSelections", ";R_{32}", 100 , 0.0, 10.0);
-
       fHistoSplitter.createShapeHistogramTriplet<TH2F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlSubldgTrijetPt_Vs_SubldgTrijetDijetPtAfterAllSelections, 
 						       "SubldgTrijetPt_Vs_SubldgTrijetDijetPtAfterAllSelections" ,";p_{T} (GeV/c);p_{T} (GeV/c)",
 						       2*fPtBinSettings.bins(), fPtBinSettings.min(), 2*fPtBinSettings.max(), 
@@ -1085,14 +1082,14 @@ void CommonPlots::fillControlPlotsAfterStandardSelections(const Event& event,
 							  const TopologySelection::Data& topologyData,
 							  // const TopSelection::Data& topData, 
 							  const TopSelectionBDT::Data& topData, 
-							  bool bIsInverted) {
+							  bool bIsGenuineB) {
   fJetData      = jetData;
   fBJetData     = bjetData;
   fTopologyData = topologyData;
   fTopData      = topData;
   fMETData      = METData;
-  if (bIsInverted) bIsGenuineB = topData.isGenuineB();
-  else bIsGenuineB = bjetData.isGenuineB();
+  // if (bIsInverted) bIsGenuineB = topData.isGenuineB();
+  // else bIsGenuineB = bjetData.isGenuineB();
 
   // Fill Histogram Triplets
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNVerticesAfterStdSelections, bIsGenuineB, iVertices);

@@ -50,14 +50,14 @@ TauSelection::TauSelection(const ParameterSet& config, EventCounter& eventCounte
   fTauRtauCut(config.getParameter<float>("rtau")),
   fVetoMode(false),
   // tau identification SF
-  fTauIDSF(config.getParameter<float>("tauIdentificationSF")), 
+  //fTauIDSF(config.getParameter<float>("tauIdentificationSF")), 
   // tau misidentification SF
-  fEToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "E")),
-  fEToTauMisIDSFValue(assignTauMisIDSFValue(config, "E")),
-  fMuToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "Mu")),
-  fMuToTauMisIDSFValue(assignTauMisIDSFValue(config, "Mu")),
-  fJetToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "Jet")),
-  fJetToTauMisIDSFValue(assignTauMisIDSFValue(config, "Jet")),
+  //fEToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "E")),
+  //fEToTauMisIDSFValue(assignTauMisIDSFValue(config, "E")),
+  //fMuToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "Mu")),
+  //fMuToTauMisIDSFValue(assignTauMisIDSFValue(config, "Mu")),
+  //fJetToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "Jet")),
+  //fJetToTauMisIDSFValue(assignTauMisIDSFValue(config, "Jet")),
   // tau trigger SF
   fTauTriggerSFReader(config.getParameterOptional<ParameterSet>("tauTriggerSF")),
   // Event counter for passing selection
@@ -82,7 +82,24 @@ TauSelection::TauSelection(const ParameterSet& config, EventCounter& eventCounte
   cSubPassedTauSelectionMultipleTaus(fEventCounter.addSubCounter("tau selection ("+postfix+")", "multiple selected taus")),
   cSubPassedAntiIsolatedTauSelection(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed anti-isolated tau selection")),
   cSubPassedAntiIsolatedTauSelectionMultipleTaus(fEventCounter.addSubCounter("tau selection ("+postfix+")", "multiple anti-isolated taus"))
-{ 
+{
+  
+  if(config.exists("tauIdentificationSF")){
+    // tau identification SF
+    fTauIDSF = config.getParameter<float>("tauIdentificationSF");
+    // tau misidentification SF
+    fEToTauMisIDSFRegion = assignTauMisIDSFRegion(config, "E");
+    fEToTauMisIDSFValue  = assignTauMisIDSFValue(config, "E");
+    fMuToTauMisIDSFRegion = assignTauMisIDSFRegion(config, "Mu");
+    fMuToTauMisIDSFValue = assignTauMisIDSFValue(config, "Mu");
+    fJetToTauMisIDSFRegion = assignTauMisIDSFRegion(config, "Jet");
+    fJetToTauMisIDSFValue = assignTauMisIDSFValue(config, "Jet");
+  }
+  
+  if(config.exists("tauTriggerSF")){
+    //  fTauTriggerSFReader = GenericScaleFactor(config.getParameterOptional<ParameterSet>("tauTriggerSF"));
+  }
+  
   initialize(config, postfix);
 } 
 
@@ -97,12 +114,12 @@ TauSelection::TauSelection(const ParameterSet& config, const std::string& postfi
   fTauRtauCut(config.getParameter<float>("rtau")),
   fVetoMode(false),
   // tau misidentification SF
-  fEToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "E")),
-  fEToTauMisIDSFValue(assignTauMisIDSFValue(config, "E")),
-  fMuToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "Mu")),
-  fMuToTauMisIDSFValue(assignTauMisIDSFValue(config, "Mu")),
-  fJetToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "Jet")),
-  fJetToTauMisIDSFValue(assignTauMisIDSFValue(config, "Jet")),
+  //fEToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "E")),
+  //fEToTauMisIDSFValue(assignTauMisIDSFValue(config, "E")),
+  //fMuToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "Mu")),
+  //fMuToTauMisIDSFValue(assignTauMisIDSFValue(config, "Mu")),
+  //fJetToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "Jet")),
+  //fJetToTauMisIDSFValue(assignTauMisIDSFValue(config, "Jet")),
   // tau trigger SF
   fTauTriggerSFReader(config.getParameterOptional<ParameterSet>("tauTriggerSF")),
   // Event counter for passing selection
@@ -127,7 +144,17 @@ TauSelection::TauSelection(const ParameterSet& config, const std::string& postfi
   cSubPassedTauSelectionMultipleTaus(fEventCounter.addSubCounter("tau selection", "multiple selected taus")),
   cSubPassedAntiIsolatedTauSelection(fEventCounter.addSubCounter("tau selection", "Passed anti-isolated tau selection")),
   cSubPassedAntiIsolatedTauSelectionMultipleTaus(fEventCounter.addSubCounter("tau selection", "multiple anti-isolated taus"))
-{ 
+{
+  if(config.exists("tauIdentificationSF")){
+    // tau misidentification SF
+    fEToTauMisIDSFRegion = assignTauMisIDSFRegion(config, "E");
+    fEToTauMisIDSFValue  = assignTauMisIDSFValue(config, "E");
+    fMuToTauMisIDSFRegion = assignTauMisIDSFRegion(config, "Mu");
+    fMuToTauMisIDSFValue = assignTauMisIDSFValue(config, "Mu");
+    fJetToTauMisIDSFRegion = assignTauMisIDSFRegion(config, "Jet");
+    fJetToTauMisIDSFValue = assignTauMisIDSFValue(config, "Jet");
+  }
+  
   initialize(config, postfix);
   bookHistograms(new TDirectory());
 }
