@@ -1356,7 +1356,7 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
     higgs = "h"
     if scenario == "lowMH-LHCHXSWG":
         higgs = "H"
-
+    print "check 2-----------------------------"
     # Create excluded area
     if not blinded:    
         obs = graphs["obs"]
@@ -1505,13 +1505,13 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
     if isinstance(finalstateText, list):
         captionLines += len(finalstateText) - 1
 
-    if regime == "heavy":
+    if regime == "heavy" or regime == "tb":
         x = 0.52
         y = -0.25#-0.11
         #if scenario.replace("-LHCHXSWG", "") in ["lightstop", "mhmaxup"]:
         #    y += 0.05
     elif regime == "light":
-        x = 0.2
+        x = 0.4
         y = -0.05
     else:
         x = 0.52
@@ -1526,7 +1526,7 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
     name = os.path.basename(name)
     name = name.replace("-","_")
     
-    if regime == "heavy":
+    if regime == "heavy" or regime == "tb":
         frameXmin = 180
         frameXmax = 500
         if "_mA" in name:
@@ -1570,10 +1570,12 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
         histograms.addText(x+0.01, y+0.84, processHeavy, size=size)
     elif regime == "combined":
         histograms.addText(x, y, processCombination, size=size)
+    elif regime == "tb":
+        histograms.addText(x+0.01, y+0.84, processHeavyHtb, size=size)
     else:
         raise Exception("Unknown option for regime")
     y -= captionLineSpacing
-    print "check finalstateText",finalstateText,x,y
+    #print "check finalstateText",finalstateText,x,y
     if isinstance(finalstateText, str):
         histograms.addText(x+0.01, y+0.84, finalstateText, size=size)
         y -= captionLineSpacing

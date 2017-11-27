@@ -48,9 +48,9 @@ def main():
             jsonfile = match.group(0)
 #    jsonfile = "limits_heavy2016.json"
 #    jsonfile = "limits2016/limitsForMSSMplots_ICHEP_v3_heavy.json"
-    jsonfile = "limits2016/limits_heavy_20171011.json"
+    jsonfile = "limits2016/limits_tb.json"
 #    limits = limit.BRLimits(limitsfile=jsonfile,configfile="configurationHeavy.json")
-    limits = limit.BRLimits(limitsfile=jsonfile,configfile="limits2016/heavyHplus_configuration.json")
+    limits = limit.BRLimits(limitsfile=jsonfile,configfile="limits2016/heavyHplusTB_configuration.json")
 
     # Enable OpenGL
     ROOT.gEnv.SetValue("OpenGL.CanvasPreferGL", 1)
@@ -75,7 +75,7 @@ def main():
 
     global db
     db = BRXSDB.BRXSDatabaseInterface(rootfile)
-    db.BRvariable= "2*0.001*tHp_xsec*BR_Hp_taunu"  # XSEC only for H-, multiply with 2 to get H+ and H- ; multiply by 0.001 to fb -> pb
+    db.BRvariable= "2*0.001*tHp_xsec*BR_Hp_tb"  # XSEC only for H-, multiply with 2 to get H+ and H- ; multiply by 0.001 to fb -> pb
     for i,m in enumerate(masses):
         db.addExperimentalBRLimit(m,brs[i])
 
@@ -134,7 +134,8 @@ def main():
     jsonWriter = JsonWriter()
     for key in graphs.keys():
         print "Graph--------------------------------",key
-        graphs[key] = db.graphToTanBeta(graphs[key],xVariable,selection,highTanbRegion=True)
+        graphs[key] = db.graphToTanBetaCombined(graphs[key],xVariable,selection)
+        ####graphs[key] = db.graphToTanBeta(graphs[key],xVariable,selection,highTanbRegion=True)
         #if key == "obs":
             #obsplus = db.getTheorUncert(graphs[key],xVariable,selection,"+")
             #graphs["obs_th_plus"] = db.graphToTanBeta(obsplus,xVariable,selection)
@@ -172,16 +173,17 @@ def main():
 
     jsonWriter.addGraph("Allowed",graphs["Allowed"])
 
-    jsonWriter.addParameter("name","limitsTanb_heavy_"+scenario)
+    jsonWriter.addParameter("name","limitsTanb_hp2tb_"+scenario)
     jsonWriter.addParameter("scenario",scenario)
     jsonWriter.addParameter("luminosity",limits.getLuminosity())
-    jsonWriter.addParameter("finalStateText",limits.getFinalstateText())
+    jsonWriter.addParameter("finalStateText","")
     jsonWriter.addParameter("mHplus",limit.mHplus())
     jsonWriter.addParameter("selection",selection)
-    jsonWriter.addParameter("regime","heavy")
-    jsonWriter.write("MSSMLimitHeavy_"+scenario+".json")
-
-    limit.doTanBetaPlotHeavy("limitsTanb_heavy_"+scenario, graphs, limits.getLuminosity(), limits.getFinalstateText(), limit.mHplus(), scenario)
+    jsonWriter.addParameter("regime","tb")
+    jsonWriter.write("MSSMLimit_hp2tb_"+scenario+".json")
+    
+    limit.doTanBetaPlot("limitsTanb_hp2tb_"+scenario, graphs, limits.getLuminosity(), limits.getFinalstateText(), limit.mHplus(), scenario, "tb")
+    print "Wrote","MSSMLimit_hp2tb_"+scenario+".json"
     sys.exit()	
  
    # mH+ -> mA
