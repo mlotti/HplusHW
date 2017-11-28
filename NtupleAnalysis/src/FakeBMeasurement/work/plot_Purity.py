@@ -9,6 +9,9 @@ Examples:
 ./plot_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170630_045528_IsGenuineBEventBugFix_TopChiSqrVar -e "QCD|Charged" --plotEWK -o OptChiSqrCutValue100  
 ./plot_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170627_124436_BJetsGE2_TopChiSqrVar_AllSamples --plotEWK -e 'QCD|Charged'
 
+Last Used:
+./plot_Purity.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDT0p70_AllSelections_BDT0p70to0p90_RandomSort_171124_144802 --url --doQCD
+
 NOTE:
 If unsure about the parameter settings a pseudo-multicrab do:
 root -l /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar/TT/res/histograms-TT.root
@@ -88,10 +91,12 @@ def GetLumi(datasetsMgr):
     return lumi
 
 
-def GetListOfEwkDatasets():
+def GetListOfEwkDatasets(datasetsMgr):
     Verbose("Getting list of EWK datasets")
-    return ["TT", "noTop", "SingleTop", "ttX"]
-    #return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    if "noTop" in datasetsMgr.getAllDatasetNames():
+        return ["TT", "noTop", "SingleTop", "ttX"]
+    else:
+        return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
 
 
 def GetDatasetsFromDir(opts):
@@ -177,14 +182,14 @@ def main(opts):
         # Re-order datasets (different for inverted than default=baseline)
         if 0:
             newOrder = ["Data"]
-            newOrder.extend(GetListOfEwkDatasets())
+            newOrder.extend(GetListOfEwkDatasets(datasetsMgr))
             datasetsMgr.selectAndReorder(newOrder)
 
         # Print post-merged data dataset summary
         datasetsMgr.PrintInfo()
 
         # Merge EWK samples
-        datasetsMgr.merge("EWK", GetListOfEwkDatasets())
+        datasetsMgr.merge("EWK", GetListOfEwkDatasets(datasetsMgr))
         plots._plotStyles["EWK"] = styles.getAltEWKStyle()
             
         # Print dataset information
@@ -209,7 +214,8 @@ def main(opts):
         hList.extend([h for h in allHistos if "AllSelections" in h and "_Vs" not in h])
 
         # Only do these histos
-        myHistos = ["Njets", "LdgTrijetMass", "TetrajetBjetPt", "LdgTetrajetMass", "LdgTetrajetMass"]
+        #myHistos = ["Njets", "LdgTrijetMass", "TetrajetBjetPt", "LdgTetrajetMass", "LdgTetrajetMass", "HT"]
+        myHistos = ["Njets", "NBjets", "LdgTrijetMass", "TetrajetBjetPt", "LdgTetrajetMass", "LdgTetrajetMass", "HT"]
 
         # For-loop: All histos
         for h in hList:
@@ -330,7 +336,11 @@ def PlotPurity(datasetsMgr, folder, hName):
 
     # Get histos (Data, EWK) for Inclusive
     p1 = plots.ComparisonPlot(*getHistos(datasetsMgr, histoName) )
-    p2 = plots.ComparisonPlot(*getHistos(datasetsMgr, hNameGenuineB) )
+    if opts.doQCD:
+        p2 = plots.ComparisonPlot(*getHistos(datasetsMgr, histoName) ) #hNameGenuineB) )
+    else:
+        p2 = plots.ComparisonPlot(*getHistos(datasetsMgr, hNameGenuineB) )
+
     p1.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
     p2.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
 
@@ -394,8 +404,8 @@ def PlotPurity(datasetsMgr, folder, hName):
                    histoName,  
                    xlabel        = _xlabel,
                    ylabel        = _ylabel,
-                   log           = True, 
-                   rebinX       = 1, # must be done BEFORE calculating purity
+                   log           = False, 
+                   rebinX        = 1, # must be done BEFORE calculating purity
                    cmsExtraText  = "Preliminary", 
                    createLegend  = {"x1": 0.76, "y1": 0.80, "x2": 0.92, "y2": 0.92},
                    opts          = _opts,
@@ -550,6 +560,7 @@ if __name__ == "__main__":
     SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug' 
+    DOQCD        = False
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -593,6 +604,9 @@ if __name__ == "__main__":
     parser.add_option("--histoLevel", dest="histoLevel", action="store", default = HISTOLEVEL,
                       help="Histogram ambient level (default: %s)" % (HISTOLEVEL))
 
+    parser.add_option("--doQCD", dest="doQCD", action="store_true", default = DOQCD,
+                      help="Plot QCD Purity instead of Fake-B purity (default: %s)" % (DOQCD))
+
     parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
                       help="List of datasets in mcrab to include")
 
@@ -616,4 +630,4 @@ if __name__ == "__main__":
     main(opts)
 
     if not opts.batchMode:
-        raw_input("=== plotHistograms.py: Press any key to quit ROOT ...")
+        raw_input("=== plot_Purity.py: Press any key to quit ROOT ...")
