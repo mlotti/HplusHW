@@ -19,13 +19,14 @@ skim = cms.EDFilter("Hplus2tbAnalysisSync",
     NJets          = cms.int32(0),
 
     # AK8 Jets
-    #AK8JetCollection = cms.InputTag("slimmedJetsAK4"),
+    AK8JetCollection = cms.InputTag("slimmedJetsAK8"),
     #AK8JetUserFloats = cms.vstring(
     #    
     #    ),
-    #AK8JetEtCut      = cms.double(100),
-    #AK8JetEtaCut     = cms.double(2.4),
-    
+    AK8JetEtCut      = cms.double(100),
+    AK8JetEtaCut     = cms.double(2.4),
+    AK8NJets         = cms.int32(0),
+
     PackedCandidatesCollection = cms.InputTag("packedPFCandidates"),
 
     # Taus
