@@ -5,7 +5,7 @@ Muons = cms.VPSet(
         branchname = cms.untracked.string("Muons"),
         src = cms.InputTag("slimmedMuons"),
         # Marina
-        rhoSource = cms.InputTag("fixedGridRhoFastjetAll"), # for MiniIsolation calculation
+        rhoSource = cms.InputTag("fixedGridRhoFastjetCentralNeutral"), # For MiniIsolation
         
         discriminators = cms.vstring(),
         

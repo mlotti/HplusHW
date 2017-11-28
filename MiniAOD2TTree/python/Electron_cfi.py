@@ -17,6 +17,7 @@ Electrons = cms.VPSet(
         # Marina
         pfcands     = cms.InputTag("packedPFCandidates"),
         ElectronMVA = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values"),
+        rhoSourceMiniIso = cms.InputTag("fixedGridRhoFastjetCentralNeutral"),
     )
 )
 
