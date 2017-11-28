@@ -5,16 +5,17 @@ Script that plots Data/MC for all histograms under a given folder (passsed as op
 Good for sanity checks for key points in the cut-flow
 
 Usage:
-./plot_Folder.py -m <pseudo_mcrab_directory> [opts]
+./plot_DataMC.py -m <pseudo_mcrab_directory> [opts]
 
 Examples:
-./plot_Folder.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_TopCut10_171012_011451 --folder jetSelection_ --url
-./plot_Folder.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurement --ratio
-./plot_Folder.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurementEWKGenuineB --onlyMC
-./plot_Folder.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurementEWKFakeB --onlyMC --nostack
+./plot_DataMC.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_TopCut10_171012_011451 --folder jetSelection_ --url
+./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurement --ratio
+./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurementEWKGenuineB --onlyMC
+./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurementEWKFakeB --onlyMC --nostack
+./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurementEWKGenuineB --onlyMC && ./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurementEWKFakeB --onlyMC && ./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurement --ratio
 
 Last Used:
-./plot_Folder.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurementEWKGenuineB --onlyMC && ./plot_Folder.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurementEWKFakeB --onlyMC && ./plot_Folder.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurement --ratio
+./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDT0p40_AllSelections_BDT0p40to0p90_RandomSort_171127_034851 --folder ForFakeBMeasurement --url
 '''
 
 #================================================================================================ 
@@ -71,12 +72,12 @@ def GetLumi(datasetsMgr):
     Verbose("Luminosity = %s (pb)" % (lumi), True)
     return lumi
 
-def GetListOfEwkDatasets():
+def GetListOfEwkDatasets(datasetsMgr):
     Verbose("Getting list of EWK datasets")
-    if 0: # TopSelection
-        return  ["TT", "WJetsToQQ_HT_600ToInf", "SingleTop", "DYJetsToQQHT", "TTZToQQ",  "TTWJetsToQQ", "Diboson", "TTTT"]
-    else: # TopSelectionBDT
+    if "noTop" in datasetsMgr.getAllDatasetNames():
         return  ["TT", "noTop", "SingleTop", "ttX"]
+    else: # TopSelectionBDT
+        return  ["TT", "WJetsToQQ_HT_600ToInf", "SingleTop", "DYJetsToQQHT", "TTZToQQ",  "TTWJetsToQQ", "Diboson", "TTTT"]
 
 
 def GetDatasetsFromDir(opts):
@@ -169,7 +170,7 @@ def main(opts):
         
         # Merge EWK samples
         if opts.mergeEWK:
-            datasetsMgr.merge("EWK", GetListOfEwkDatasets())
+            datasetsMgr.merge("EWK", GetListOfEwkDatasets(datasetsMgr))
             plots._plotStyles["EWK"] = styles.getAltEWKStyle()
 
         # Print dataset information
@@ -189,11 +190,14 @@ def main(opts):
 
             # Re-arrange dataset order if after top selection!
             if "AfterAllSelections" in h:
-                s = newOrder.pop( newOrder.index("noTop") )
-                newOrder.insert(len(newOrder), s) 
-                datasetsMgr.selectAndReorder(newOrder)
+                if "noTop" in datasetsMgr.getAllDatasetNames():
+                    s = newOrder.pop( newOrder.index("noTop") )
+                    newOrder.insert(len(newOrder), s) 
+                    datasetsMgr.selectAndReorder(newOrder)
 
             # Plot the histograms!
+            if "jet" in h.lower():
+                continue
             DataMCHistograms(datasetsMgr, h, intLumi)
     return
 
@@ -238,6 +242,14 @@ def GetHistoKwargs(h, opts):
         kwargs["ylabel"] = "Events / %.2f "
         kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": yMin, "ymaxfactor": yMaxF}
+
+    if "mvamax" in h.lower():
+        units            = ""
+        kwargs["ylabel"] = "Events / %.2f " + units
+        kwargs["xlabel"] = "MVA discriminant"
+        kwargs["cutBox"] = {"cutValue": 0.9, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": -1.0, "xmax": +1.0, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["moveLegend"] = {"dx": -0.49}
 
     if h == "TrijetBDT_Mass": # before BDT cut
         units            = "GeV/c^{2}"
@@ -948,10 +960,10 @@ if __name__ == "__main__":
     # Overwrite if certain strings found in folder name
     if 0:
         opts.onlyMC = "EWKFakeB" in opts.folder
-        opts.onlyMC =  "EWKGenuineB" in opts.folder
+        opts.onlyMC = "EWKGenuineB" in opts.folder
 
     # Call the main function
     main(opts)
 
     if not opts.batchMode:
-        raw_input("=== plot_Folder.py: Press any key to quit ROOT ...")
+        raw_input("=== plot_DataMC.py: Press any key to quit ROOT ...")

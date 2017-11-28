@@ -155,39 +155,12 @@ topologySelection = PSet(
     CentralityCutDirection       = "<=",
 )
 
-
-#================================================================================================
-# Top selection
-#================================================================================================
-# topSelection = PSet(
-#     ChiSqrCutValue     = 100.0,
-#     ChiSqrCutDirection =  "<",   # options: ==, !=, <, <=, >, >=
-#     LowLdgTrijetMassCutValue      = 150.0,
-#     LowLdgTrijetMassCutDirection  = ">=",
-#     HighLdgTrijetMassCutValue      = 210.0,
-#     HighLdgTrijetMassCutDirection  = "<=",
-#     MassW              = 80.385,
-#     DiJetSigma         = 10.2,
-#     TriJetSigma        = 27.2,
-#     MaxJetsToUseInFit  = 8,
-#     MaxBJetsToUseInFit = 3,
-#     # Distance cut
-#     dijetWithMaxDR_tetrajetBjet_dR_min          =  0.0, # Disable: 0.0, Default: +3.0
-#     dijetWithMaxDR_tetrajetBjet_dR_yIntercept   = -1.0, # Disable:-1.0, Default: +4.0
-#     dijetWithMaxDR_tetrajetBjet_dR_slopeCoeff   =  0.0, # Disable: 0.0, Default: -1.0
-#     # Angular cut
-#     dijetWithMaxDR_tetrajetBjet_dPhi_min        = +2.5, # Disable: 0.0, Default: +2.5
-#     dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept = +3.0, # Disable:-1.0, Default: +3.0
-#     dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff = -1.0, # Disable: 0.0, Default: -1.0
-#     ReplaceJetsWithGenJets = False, 
-# )
-
 #================================================================================================
 # Top selection BDT                                               
 #================================================================================================        
 topSelectionBDT = PSet(
     # MVACuts                = [0.8, 0.8], #FIXME: Set individual cut values for each top candidate  
-    MVACutValue            = 0.9,        #FIXME: Set individual cut values for each top candidate  
+    MVACutValue            = 0.9,     # [default: 0.9]
     MVACutDirection        =  ">=",   # [default: ">="] options: ==, !=, <, <=, >, >=
     NjetsMax               = 999,     # [default: 999]
     NBjetsMax              = 999,     # [default: 999]
@@ -201,7 +174,7 @@ topSelectionBDT = PSet(
 # FakeB Measurement Options
 #================================================================================================
 fakeBMeasurement = PSet(
-    prelimTopMVACutValue              = 0.7,      # [default: -0.8]
+    prelimTopMVACutValue              = 0.5,      # [default: -0.8]
     prelimTopMVACutDirection          =  ">=",    # [default: ">="]
     # CSVv2-Medium requirements (Baseline b-jets)
     numberOfBJetsCutValue             = 2,        # [default: 2]
@@ -258,7 +231,6 @@ allSelections = PSet(
     METFilter             = metFilter,
     METSelection          = metSelection,
     TopologySelection     = topologySelection,
-    #TopSelection          = topSelection,
     TopSelectionBDT       = topSelectionBDT,
     MuonSelection         = muVeto,
     Trigger               = trigger,

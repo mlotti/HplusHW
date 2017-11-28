@@ -68,10 +68,12 @@ def GetLumi(datasetsMgr):
     return lumi
 
 
-def GetListOfEwkDatasets():
+def GetListOfEwkDatasets(datasetsMgr):
     Verbose("Getting list of EWK datasets")
-    return ["TT", "noTop", "SingleTop", "ttX"]
-    #return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    if "noTop" in datasetsMgr.getAllDatasetNames():
+        return ["TT", "noTop", "SingleTop", "ttX"]
+    else:
+        return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
 
 
 def GetDatasetsFromDir(opts):
@@ -156,7 +158,7 @@ def main(opts):
         opts.intLumi = datasetsMgr.getDataset("Data").getLuminosity()
    
         # Merge EWK samples
-        datasetsMgr.merge("EWK", GetListOfEwkDatasets())
+        datasetsMgr.merge("EWK", GetListOfEwkDatasets(datasetsMgr))
         plots._plotStyles["EWK"] = styles.getAltEWKStyle()
 
         # Print dataset information
@@ -299,8 +301,6 @@ def PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted):
     saveName = hBaseline_Inclusive.split("/")[-1]
     saveName = saveName.replace("Baseline_", "")
 
-
-    print "add signal!"
     if opts.useMC:
         savePath = os.path.join(opts.saveDir, "BaselineVsInverted", "MC", opts.optMode)
     else:
