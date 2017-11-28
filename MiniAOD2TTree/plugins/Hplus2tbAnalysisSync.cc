@@ -460,10 +460,12 @@ bool Hplus2tbAnalysisSync::filter(edm::Event& iEvent, const edm::EventSetup& iSe
     if (nElectrons <= cfg_electronNCut) nEventsPassedElectronVeto++;
     if (nMuons     <= cfg_muonNCut)     nEventsPassedMuonVeto++;
     if (nTaus      <= cfg_tauNCut)      nEventsPassedTauVeto++;
+
     
-    // Apply Electron Veto
-    if(nElectrons > cfg_electronNCut) return false;
-    if (cfg_verbose) std::cout << "=== nElectrons:\n\t" << nElectrons << " < " << cfg_electronNCut << std::endl;
+    // Apply Muon Veto
+    if(nMuons > cfg_muonNCut) return false;
+    if (cfg_verbose) std::cout << "=== Passed Muons:\n\t" << nMuons << " < " << cfg_muonNCut << std::endl;
+    
     
     std::cout<<"======================================="<<std::endl;
     std::cout<<"run="<<iEvent.run()<<" lumi="<<iEvent.luminosityBlock()<<" evt="<<iEvent.id().event()<<std::endl;
@@ -485,12 +487,11 @@ bool Hplus2tbAnalysisSync::filter(edm::Event& iEvent, const edm::EventSetup& iSe
 	  } 
       }
 
-
-    // Apply Muon Veto
-    if(nMuons > cfg_muonNCut) return false;
-    if (cfg_verbose) std::cout << "=== Passed Muons:\n\t" << nMuons << " < " << cfg_muonNCut << std::endl;
-
-
+    
+    // Apply Electron Veto
+    if(nElectrons > cfg_electronNCut) return false;
+    if (cfg_verbose) std::cout << "=== nElectrons:\n\t" << nElectrons << " < " << cfg_electronNCut << std::endl;
+    
     // Apply Tau Veto
     //if (nTaus > cfg_tauNCut) return false;
     //if (cfg_verbose) std::cout<< "=== Passed Taus:\n\t" << nTaus << " < "<< cfg_tauNCut << std::endl;

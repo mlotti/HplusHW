@@ -12,10 +12,10 @@ from HiggsAnalysis.MiniAOD2TTree.tools.HChOptions import getOptionsDataVersion
 #================================================================================================  
 # Options
 #================================================================================================  
-maxEvents    = 1000
+maxEvents    = 10000
 maxWarnings  = 100
 reportEvery  = 100
-testWithData = False
+testWithData = True
 if testWithData:
     dataVersion  = "80Xdata"
     datasetFiles = [
@@ -26,8 +26,8 @@ if testWithData:
 else:
     dataVersion  = "80Xmc" 
     datasetFiles = [
-        #'/store/mc/RunIISummer16MiniAODv2/ChargedHiggs_HplusTB_HplusToTB_M-500_13TeV_amcatnlo_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/100000/0A978AC8-86DD-E611-9594-002590E7DD98.root',
-        '/store/mc/RunIISummer16MiniAODv2/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v2/00000/0028537E-E758-E711-9315-0025905A497A.root',
+        '/store/mc/RunIISummer16MiniAODv2/ChargedHiggs_HplusTB_HplusToTB_M-500_13TeV_amcatnlo_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/100000/0A978AC8-86DD-E611-9594-002590E7DD98.root',
+#        '/store/mc/RunIISummer16MiniAODv2/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v2/00000/0028537E-E758-E711-9315-0025905A497A.root',
         ]
     
 # For debugging purposes
