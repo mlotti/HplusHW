@@ -1,7 +1,11 @@
-# TWiki: https://twiki.cern.ch/twiki/bin/view/CMS/PdmV2016Analysis
-#lumiMask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON.txt" # ICHEP dataset 271036-276811
-#lumiMask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt" # without L1T certification?
-lumiMask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Final/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt"
+'''
+For GOLDEN JSON files see:
+https://twiki.cern.ch/twiki/bin/view/CMS/PdmV2016Analysis
+'''
+# lumiMask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON.txt" # ICHEP dataset 271036-276811
+# lumiMask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt" # without L1T certification?
+# lumiMask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Final/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt" #PromptReco
+lumiMask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Final/ReReco/Final/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt" #ReReco
 
 #================================================================================================ 
 # Class Definition
@@ -33,82 +37,83 @@ class Dataset:
 #================================================================================================ 
 datasetsTauData03Feb = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FTau%2FRun2016*-PromptReco-v2%2FMINIAOD"
-datasetsTauData03Feb.append(Dataset('/Tau/Run2016B-03Feb2017_ver2-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_273150-275376_13TeV_PromptReco_Collisions16_JSON_Run2016B.txt"))                          
-datasetsTauData03Feb.append(Dataset('/Tau/Run2016C-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_275420-276283_13TeV_PromptReco_Collisions16_JSON_Run2016C.txt"))                               
-datasetsTauData03Feb.append(Dataset('/Tau/Run2016D-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276315-276437_13TeV_PromptReco_Collisions16_JSON_Run2016D_MET80.txt"))                         
-datasetsTauData03Feb.append(Dataset('/Tau/Run2016D-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276453-276811_13TeV_PromptReco_Collisions16_JSON_Run2016D_noMET80.txt"))                       
-datasetsTauData03Feb.append(Dataset('/Tau/Run2016E-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276824-277420_13TeV_PromptReco_Collisions16_JSON_Run2016E.txt"))                         
-datasetsTauData03Feb.append(Dataset('/Tau/Run2016F-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_277816-278800_13TeV_PromptReco_Collisions16_JSON_Run2016F_HIP.txt"))                     
-datasetsTauData03Feb.append(Dataset('/Tau/Run2016F-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_278801-278808_13TeV_PromptReco_Collisions16_JSON_Run2016F_HIPfixed.txt"))                
-datasetsTauData03Feb.append(Dataset('/Tau/Run2016G-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_278816-280385_13TeV_PromptReco_Collisions16_JSON_Run2016G.txt"))                         
+datasetsTauData03Feb.append(Dataset('/Tau/Run2016B-03Feb2017_ver2-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_273150-275376_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016B.txt"))
+datasetsTauData03Feb.append(Dataset('/Tau/Run2016C-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_275656-276283_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016C.txt"))
+datasetsTauData03Feb.append(Dataset('/Tau/Run2016D-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276315-276437_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016D_MET80.txt"))
+datasetsTauData03Feb.append(Dataset('/Tau/Run2016D-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276453-276811_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016D_noMET80.txt"))
+datasetsTauData03Feb.append(Dataset('/Tau/Run2016E-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276831-277420_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016E.txt"))
+datasetsTauData03Feb.append(Dataset('/Tau/Run2016F-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_277932-278800_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016F_HIP.txt"))
+datasetsTauData03Feb.append(Dataset('/Tau/Run2016F-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_278801-278808_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016F_HIPfixed.txt"))
+datasetsTauData03Feb.append(Dataset('/Tau/Run2016G-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_278820-280385_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016G.txt"))
 #datasetsTauData03Feb.append(Dataset('/Tau/Run2016H-PromptReco-v1/MINIAOD', dataVersion="80Xdata2016H", dasQuery=das, lumiMask="Cert_281613-284044_13TeV_PromptReco_Collisions16_JSON_Run2016H.txt"))                  
-datasetsTauData03Feb.append(Dataset('/Tau/Run2016H-03Feb2017_ver2-v1/MINIAOD', dataVersion="80Xdata2016H", dasQuery=das, lumiMask="Cert_281613-284044_13TeV_PromptReco_Collisions16_JSON_Run2016H.txt"))               
-datasetsTauData03Feb.append(Dataset('/Tau/Run2016H-03Feb2017_ver3-v1/MINIAOD', dataVersion="80Xdata2016H", dasQuery=das, lumiMask="Cert_281613-284044_13TeV_PromptReco_Collisions16_JSON_Run2016H.txt"))
+datasetsTauData03Feb.append(Dataset('/Tau/Run2016H-03Feb2017_ver2-v1/MINIAOD', dataVersion="80Xdata2016H", dasQuery=das, lumiMask="Cert_281613-284035_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016H.txt"))
+datasetsTauData03Feb.append(Dataset('/Tau/Run2016H-03Feb2017_ver3-v1/MINIAOD', dataVersion="80Xdata2016H", dasQuery=das, lumiMask="Cert_284036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016H.txt"))
 datasetsTauData = datasetsTauData03Feb
 
 datasetsTauData18Apr = []
-datasetsTauData18Apr.append(Dataset('/Tau/Run2016B-18Apr2017_ver2-v1/MINIAOD', dataVersion="80Xdata18Apr", dasQuery=das, lumiMask="Cert_273150-275376_13TeV_PromptReco_Collisions16_JSON_Run2016B.txt"))
-datasetsTauData18Apr.append(Dataset('/Tau/Run2016C-18Apr2017-v1/MINIAOD', dataVersion="80Xdata18Apr", dasQuery=das, lumiMask="Cert_275420-276283_13TeV_PromptReco_Collisions16_JSON_Run2016C.txt"))
-datasetsTauData18Apr.append(Dataset('/Tau/Run2016D-18Apr2017-v1/MINIAOD', dataVersion="80Xdata18Apr", dasQuery=das, lumiMask="Cert_276315-276437_13TeV_PromptReco_Collisions16_JSON_Run2016D_MET80.txt"))
-datasetsTauData18Apr.append(Dataset('/Tau/Run2016D-18Apr2017-v1/MINIAOD', dataVersion="80Xdata18Apr", dasQuery=das, lumiMask="Cert_276453-276811_13TeV_PromptReco_Collisions16_JSON_Run2016D_noMET80.txt"))
-datasetsTauData18Apr.append(Dataset('/Tau/Run2016E-18Apr2017-v1/MINIAOD', dataVersion="80Xdata18Apr", dasQuery=das, lumiMask="Cert_276824-277420_13TeV_PromptReco_Collisions16_JSON_Run2016E.txt"))
-datasetsTauData18Apr.append(Dataset('/Tau/Run2016F-18Apr2017-v1/MINIAOD', dataVersion="80Xdata18Apr", dasQuery=das, lumiMask="Cert_277816-278800_13TeV_PromptReco_Collisions16_JSON_Run2016F_HIP.txt"))
-datasetsTauData18Apr.append(Dataset('/Tau/Run2016F-18Apr2017-v1/MINIAOD', dataVersion="80Xdata18Apr", dasQuery=das, lumiMask="Cert_278801-278808_13TeV_PromptReco_Collisions16_JSON_Run2016F_HIPfixed.txt"))
-datasetsTauData18Apr.append(Dataset('/Tau/Run2016G-18Apr2017-v1/MINIAOD', dataVersion="80Xdata18Apr", dasQuery=das, lumiMask="Cert_278816-280385_13TeV_PromptReco_Collisions16_JSON_Run2016G.txt"))
-datasetsTauData18Apr.append(Dataset('/Tau/Run2016H-18Apr2017-v1/MINIAOD', dataVersion="80Xdata18Apr", dasQuery=das, lumiMask="Cert_281613-284044_13TeV_PromptReco_Collisions16_JSON_Run2016H.txt"))
+datasetsTauData18Apr.append(Dataset('/Tau/Run2016B-18Apr2017_ver2-v1/MINIAOD', dataVersion="80Xdata18Apr", dasQuery=das, lumiMask="Cert_273150-275376_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016B.txt"))
+datasetsTauData18Apr.append(Dataset('/Tau/Run2016C-18Apr2017-v1/MINIAOD', dataVersion="80Xdata18Apr", dasQuery=das, lumiMask="Cert_275656-276283_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016C.txt"))
+datasetsTauData18Apr.append(Dataset('/Tau/Run2016D-18Apr2017-v1/MINIAOD', dataVersion="80Xdata18Apr", dasQuery=das, lumiMask="Cert_276315-276437_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016D_MET80.txt"))
+datasetsTauData18Apr.append(Dataset('/Tau/Run2016D-18Apr2017-v1/MINIAOD', dataVersion="80Xdata18Apr", dasQuery=das, lumiMask="Cert_276453-276811_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016D_noMET80.txt"))
+datasetsTauData18Apr.append(Dataset('/Tau/Run2016E-18Apr2017-v1/MINIAOD', dataVersion="80Xdata18Apr", dasQuery=das, lumiMask="Cert_276831-277420_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016E.txt"))
+datasetsTauData18Apr.append(Dataset('/Tau/Run2016F-18Apr2017-v1/MINIAOD', dataVersion="80Xdata18Apr", dasQuery=das, lumiMask="Cert_277932-278800_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016F_HIP.txt"))
+datasetsTauData18Apr.append(Dataset('/Tau/Run2016F-18Apr2017-v1/MINIAOD', dataVersion="80Xdata18Apr", dasQuery=das, lumiMask="Cert_278801-278808_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016F_HIPfixed.txt"))
+datasetsTauData18Apr.append(Dataset('/Tau/Run2016G-18Apr2017-v1/MINIAOD', dataVersion="80Xdata18Apr", dasQuery=das, lumiMask="Cert_278820-280385_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016G.txt"))
+datasetsTauData18Apr.append(Dataset('/Tau/Run2016H-18Apr2017-v1/MINIAOD', dataVersion="80Xdata18Apr", dasQuery=das, lumiMask="Cert_281613-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016H.txt"))
 
 datasetsTauData07Aug2017 = []
-datasetsTauData07Aug2017.append(Dataset('/Tau/Run2016B-07Aug17_ver1-v1/MINIAOD', dataVersion="80Xdata18Apr", dasQuery=das, lumiMask="Cert_273150-275376_13TeV_PromptReco_Collisions16_JSON_Run2016B.txt"))
-datasetsTauData07Aug2017.append(Dataset('/Tau/Run2016C-07Aug17-v1/MINIAOD', dataVersion="80Xdata18Apr", dasQuery=das, lumiMask="Cert_275420-276283_13TeV_PromptReco_Collisions16_JSON_Run2016C.txt"))
-datasetsTauData07Aug2017.append(Dataset('/Tau/Run2016E-07Aug17-v1/MINIAOD', dataVersion="80Xdata18Apr", dasQuery=das, lumiMask="Cert_276824-277420_13TeV_PromptReco_Collisions16_JSON_Run2016E.txt"))
-
+datasetsTauData07Aug2017.append(Dataset('/Tau/Run2016B-07Aug17_ver1-v1/MINIAOD', dataVersion="80Xdata18Apr", dasQuery=das, lumiMask="Cert_273150-275376_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016B.txt"))
+datasetsTauData07Aug2017.append(Dataset('/Tau/Run2016C-07Aug17-v1/MINIAOD', dataVersion="80Xdata18Apr", dasQuery=das, lumiMask="Cert_275656-276283_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016C.txt"))
+datasetsTauData07Aug2017.append(Dataset('/Tau/Run2016E-07Aug17-v1/MINIAOD', dataVersion="80Xdata18Apr", dasQuery=das, lumiMask="Cert_276831-277420_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016E.txt"))
 
 datasetsJetHTData_03Feb2017 = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FJetHT%2FRun2016*-03Feb2017*-v*%2FMINIAOD"
-datasetsJetHTData_03Feb2017.append(Dataset('/JetHT/Run2016B-03Feb2017_ver2-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Hplus2tb/Cert_273150-275376_13TeV_PromptReco_Collisions16_JSON_Run2016B.txt"))
-datasetsJetHTData_03Feb2017.append(Dataset('/JetHT/Run2016C-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Hplus2tb/Cert_275656-276283_13TeV_PromptReco_Collisions16_JSON_Run2016C.txt"))
-datasetsJetHTData_03Feb2017.append(Dataset('/JetHT/Run2016D-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Hplus2tb/Cert_276315-276811_13TeV_PromptReco_Collisions16_JSON_Run2016D.txt"))
-datasetsJetHTData_03Feb2017.append(Dataset('/JetHT/Run2016E-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Hplus2tb/Cert_276831-277420_13TeV_PromptReco_Collisions16_JSON_Run2016E.txt"))
-datasetsJetHTData_03Feb2017.append(Dataset('/JetHT/Run2016F-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Hplus2tb/Cert_277932-278800_13TeV_PromptReco_Collisions16_JSON_Run2016F_HIP.txt"))
-datasetsJetHTData_03Feb2017.append(Dataset('/JetHT/Run2016F-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Hplus2tb/Cert_278801-278808_13TeV_PromptReco_Collisions16_JSON_Run2016F_HIPfixed.txt"))
-datasetsJetHTData_03Feb2017.append(Dataset('/JetHT/Run2016G-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Hplus2tb/Cert_278820-280385_13TeV_PromptReco_Collisions16_JSON_Run2016G.txt"))
-datasetsJetHTData_03Feb2017.append(Dataset('/JetHT/Run2016H-03Feb2017_ver2-v1/MINIAOD', dataVersion="80Xdata2016H", dasQuery=das, lumiMask="Hplus2tb/Cert_281613-284035_13TeV_PromptReco_Collisions16_JSON_Run2016H.txt"))
-datasetsJetHTData_03Feb2017.append(Dataset('/JetHT/Run2016H-03Feb2017_ver3-v1/MINIAOD', dataVersion="80Xdata2016H", dasQuery=das, lumiMask="Hplus2tb/Cert_284036-284044_13TeV_PromptReco_Collisions16_JSON_Run2016H.txt"))
+datasetsJetHTData_03Feb2017.append(Dataset('/JetHT/Run2016B-03Feb2017_ver2-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_273150-275376_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016B.txt"))
+datasetsJetHTData_03Feb2017.append(Dataset('/JetHT/Run2016C-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_275656-276283_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016C.txt"))
+datasetsJetHTData_03Feb2017.append(Dataset('/JetHT/Run2016D-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276315-276811_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016D.txt"))
+datasetsJetHTData_03Feb2017.append(Dataset('/JetHT/Run2016E-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276831-277420_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016E.txt"))
+datasetsJetHTData_03Feb2017.append(Dataset('/JetHT/Run2016F-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_277932-278800_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016F_HIP.txt"))
+datasetsJetHTData_03Feb2017.append(Dataset('/JetHT/Run2016F-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_278801-278808_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016F_HIPfixed.txt"))
+datasetsJetHTData_03Feb2017.append(Dataset('/JetHT/Run2016G-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_278820-280385_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016G.txt"))
+datasetsJetHTData_03Feb2017.append(Dataset('/JetHT/Run2016H-03Feb2017_ver2-v1/MINIAOD', dataVersion="80Xdata2016H", dasQuery=das, lumiMask="Cert_281613-284035_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016H.txt"))
+datasetsJetHTData_03Feb2017.append(Dataset('/JetHT/Run2016H-03Feb2017_ver3-v1/MINIAOD', dataVersion="80Xdata2016H", dasQuery=das, lumiMask="Cert_284036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016H.txt"))
 
 datasetsJetHTData_18Apr2017 = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FJetHT%2FRun2016*-18Apr2017*-v*%2FMINIAOD"
-datasetsJetHTData_18Apr2017.append(Dataset('/JetHT/Run2016B-18Apr2017_ver2-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Hplus2tb/Cert_273150-275376_13TeV_PromptReco_Collisions16_JSON_Run2016B.txt"))
-datasetsJetHTData_18Apr2017.append(Dataset('/JetHT/Run2016C-18Apr2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Hplus2tb/Cert_275656-276283_13TeV_PromptReco_Collisions16_JSON_Run2016C.txt"))
-datasetsJetHTData_18Apr2017.append(Dataset('/JetHT/Run2016D-18Apr2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Hplus2tb/Cert_276315-276811_13TeV_PromptReco_Collisions16_JSON_Run2016D.txt"))
-datasetsJetHTData_18Apr2017.append(Dataset('/JetHT/Run2016E-18Apr2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Hplus2tb/Cert_276831-277420_13TeV_PromptReco_Collisions16_JSON_Run2016E.txt"))
-datasetsJetHTData_18Apr2017.append(Dataset('/JetHT/Run2016F-18Apr2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Hplus2tb/Cert_277932-278800_13TeV_PromptReco_Collisions16_JSON_Run2016F_HIP.txt"))
-datasetsJetHTData_18Apr2017.append(Dataset('/JetHT/Run2016F-18Apr2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Hplus2tb/Cert_278801-278808_13TeV_PromptReco_Collisions16_JSON_Run2016F_HIPfixed.txt"))
-datasetsJetHTData_18Apr2017.append(Dataset('/JetHT/Run2016G-18Apr2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Hplus2tb/Cert_278820-280385_13TeV_PromptReco_Collisions16_JSON_Run2016G.txt"))
-datasetsJetHTData_18Apr2017.append(Dataset('/JetHT/Run2016H-18Apr2017-v1/MINIAOD', dataVersion="80Xdata2016H", dasQuery=das, lumiMask="Hplus2tb/Cert_281613-284044_13TeV_PromptReco_Collisions16_JSON_Run2016H.txt"))
+datasetsJetHTData_18Apr2017.append(Dataset('/JetHT/Run2016B-18Apr2017_ver2-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_273150-275376_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016B.txt"))
+datasetsJetHTData_18Apr2017.append(Dataset('/JetHT/Run2016C-18Apr2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_275656-276283_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016C.txt"))
+datasetsJetHTData_18Apr2017.append(Dataset('/JetHT/Run2016D-18Apr2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276315-276811_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016D.txt"))
+datasetsJetHTData_18Apr2017.append(Dataset('/JetHT/Run2016E-18Apr2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276831-277420_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016E.txt"))
+datasetsJetHTData_18Apr2017.append(Dataset('/JetHT/Run2016F-18Apr2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_277932-278800_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016F_HIP.txt"))
+datasetsJetHTData_18Apr2017.append(Dataset('/JetHT/Run2016F-18Apr2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_278801-278808_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016F_HIPfixed.txt"))
+datasetsJetHTData_18Apr2017.append(Dataset('/JetHT/Run2016G-18Apr2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_278820-280385_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016G.txt"))
+datasetsJetHTData_18Apr2017.append(Dataset('/JetHT/Run2016H-18Apr2017-v1/MINIAOD', dataVersion="80Xdata2016H", dasQuery=das, lumiMask="Cert_281613-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016H.txt"))
 
 
 datasetsMuonData03Feb = []
-datasetsMuonData03Feb.append(Dataset('/SingleMuon/Run2016B-03Feb2017_ver2-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_273150-275376_13TeV_PromptReco_Collisions16_JSON_Run2016B.txt")) # Tau used when SingleMuon same
-datasetsMuonData03Feb.append(Dataset('/SingleMuon/Run2016C-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_275420-276283_13TeV_PromptReco_Collisions16_JSON_Run2016C.txt"))
-datasetsMuonData03Feb.append(Dataset('/SingleMuon/Run2016D-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276315-276811_13TeV_PromptReco_Collisions16_JSON_Run2016D.txt"))
-datasetsMuonData03Feb.append(Dataset('/SingleMuon/Run2016E-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276824-277420_13TeV_PromptReco_Collisions16_JSON_Run2016E.txt"))
-datasetsMuonData03Feb.append(Dataset('/SingleMuon/Run2016F-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_277816-278800_13TeV_PromptReco_Collisions16_JSON_Run2016F_HIP.txt"))
-datasetsMuonData03Feb.append(Dataset('/SingleMuon/Run2016F-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_278801-278808_13TeV_PromptReco_Collisions16_JSON_Run2016F_HIPfixed.txt"))
-datasetsMuonData03Feb.append(Dataset('/SingleMuon/Run2016G-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_278816-280385_13TeV_PromptReco_Collisions16_JSON_Run2016G.txt"))
+# Tau used when SingleMuon same
+datasetsMuonData03Feb.append(Dataset('/SingleMuon/Run2016B-03Feb2017_ver2-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_273150-275376_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016B.txt"))
+datasetsMuonData03Feb.append(Dataset('/SingleMuon/Run2016C-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_275656-276283_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016C.txt"))
+datasetsMuonData03Feb.append(Dataset('/SingleMuon/Run2016D-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276315-276811_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016D.txt"))
+datasetsMuonData03Feb.append(Dataset('/SingleMuon/Run2016E-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276831-277420_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016E.txt"))
+datasetsMuonData03Feb.append(Dataset('/SingleMuon/Run2016F-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_277932-278800_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016F_HIP.txt"))
+datasetsMuonData03Feb.append(Dataset('/SingleMuon/Run2016F-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_278801-278808_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016F_HIPfixed.txt"))
+datasetsMuonData03Feb.append(Dataset('/SingleMuon/Run2016G-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_278820-280385_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016G.txt"))
 #datasetsMuonData03Feb.append(Dataset('/SingleMuon/Run2016H-PromptReco-v1/MINIAOD', dataVersion="80Xdata2016H", dasQuery=das, lumiMask="Cert_281010-281202_13TeV_PromptReco_Collisions16_JSON_Run2016H.txt")) 
-datasetsMuonData03Feb.append(Dataset('/SingleMuon/Run2016H-03Feb2017_ver2-v1/MINIAOD', dataVersion="80Xdata2016H", dasQuery=das, lumiMask="Cert_281613-284044_13TeV_PromptReco_Collisions16_JSON_Run2016H.txt"))
-datasetsMuonData03Feb.append(Dataset('/SingleMuon/Run2016H-03Feb2017_ver3-v1/MINIAOD', dataVersion="80Xdata2016H", dasQuery=das, lumiMask="Cert_281613-284044_13TeV_PromptReco_Collisions16_JSON_Run2016H.txt"))
+datasetsMuonData03Feb.append(Dataset('/SingleMuon/Run2016H-03Feb2017_ver2-v1/MINIAOD', dataVersion="80Xdata2016H", dasQuery=das, lumiMask="Cert_281613-284035_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016H.txt"))
+datasetsMuonData03Feb.append(Dataset('/SingleMuon/Run2016H-03Feb2017_ver3-v1/MINIAOD', dataVersion="80Xdata2016H", dasQuery=das, lumiMask="Cert_284036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016H.txt"))
 
 datasetsMuonData18Apr = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FSingleMuon%2FRun2016*-PromptReco-v2%2FMINIAOD"
-datasetsMuonData18Apr.append(Dataset('/SingleMuon/Run2016B-18Apr2017_ver2-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_273150-275376_13TeV_PromptReco_Collisions16_JSON_Run2016B.txt")) # Tau used when SingleMuon same
-datasetsMuonData18Apr.append(Dataset('/SingleMuon/Run2016C-18Apr2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_275420-276283_13TeV_PromptReco_Collisions16_JSON_Run2016C.txt"))
-datasetsMuonData18Apr.append(Dataset('/SingleMuon/Run2016D-18Apr2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276315-276811_13TeV_PromptReco_Collisions16_JSON_Run2016D.txt"))
-datasetsMuonData18Apr.append(Dataset('/SingleMuon/Run2016E-18Apr2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276830-277420_13TeV_PromptReco_Collisions16_JSON_Run2016E.txt"))
-datasetsMuonData18Apr.append(Dataset('/SingleMuon/Run2016F-18Apr2017-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_277816-278800_13TeV_PromptReco_Collisions16_JSON_Run2016F_HIP.txt"))
-datasetsMuonData18Apr.append(Dataset('/SingleMuon/Run2016F-18Apr2017-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_278801-278808_13TeV_PromptReco_Collisions16_JSON_Run2016F_HIPfixed.txt"))
-datasetsMuonData18Apr.append(Dataset('/SingleMuon/Run2016G-18Apr2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_278816-280385_13TeV_PromptReco_Collisions16_JSON_Run2016G.txt"))
-datasetsMuonData18Apr.append(Dataset('/SingleMuon/Run2016H-18Apr2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_281613-284044_13TeV_PromptReco_Collisions16_JSON_Run2016H.txt"))
+# Tau used when SingleMuon same
+datasetsMuonData18Apr.append(Dataset('/SingleMuon/Run2016B-18Apr2017_ver2-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_273150-275376_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016B.txt"))
+datasetsMuonData18Apr.append(Dataset('/SingleMuon/Run2016C-18Apr2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_275656-276283_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016C.txt"))
+datasetsMuonData18Apr.append(Dataset('/SingleMuon/Run2016D-18Apr2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276315-276811_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016D.txt"))
+datasetsMuonData18Apr.append(Dataset('/SingleMuon/Run2016E-18Apr2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276831-277420_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016E.txt"))
+datasetsMuonData18Apr.append(Dataset('/SingleMuon/Run2016F-18Apr2017-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_277932-278800_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016F_HIP.txt"))
+datasetsMuonData18Apr.append(Dataset('/SingleMuon/Run2016F-18Apr2017-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_278801-278808_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016F_HIPfixed.txt"))
+datasetsMuonData18Apr.append(Dataset('/SingleMuon/Run2016G-18Apr2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_278820-280385_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016G.txt"))
+datasetsMuonData18Apr.append(Dataset('/SingleMuon/Run2016H-18Apr2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_281613-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016H.txt"))
 
 
 datasetsZeroBiasData = []
@@ -116,8 +121,6 @@ das = ""
 datasetsZeroBiasData.append(Dataset('/ZeroBias/Run2016G-PromptReco-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask=lumiMask))
 datasetsZeroBiasData.append(Dataset('/ZeroBias/Run2016H-PromptReco-v2/MINIAOD', dataVersion="80Xdata2016H", dasQuery=das, lumiMask=lumiMask))
 datasetsZeroBiasData.append(Dataset('/ZeroBias/Run2016H-PromptReco-v3/MINIAOD', dataVersion="80Xdata2016H", dasQuery=das, lumiMask=lumiMask))
-
-
 
 #================================================================================================ 
 # MC-RunIISpring16, reHLT
