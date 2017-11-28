@@ -98,12 +98,12 @@ from CRABClient.UserUtilities import getUsernameFromSiteDB
 # See: https://github.com/dmwm/CRABClient/blob/master/src/python/CRABClient/ClientUtilities.py
 from CRABClient.ClientUtilities import LOGLEVEL_MUTE
 from CRABClient.UserUtilities import getConsoleLogLevel
-
-try:
-    import HiggsAnalysis.MiniAOD2TTree.tools.git as git
-    from HiggsAnalysis.MiniAOD2TTree.tools.datasets import *
-except:
-    from datasets import *
+ 
+#try: #sami please fix me-28Nov2017 (alex)
+import HiggsAnalysis.MiniAOD2TTree.tools.git as git
+from HiggsAnalysis.MiniAOD2TTree.tools.datasets import *
+#except: #sami please fix me-28Nov2017 (alex)
+#    from datasets import *
 
 #================================================================================================ 
 # Global Definitions
