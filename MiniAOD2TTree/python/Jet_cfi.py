@@ -58,7 +58,7 @@ Jets = cms.VPSet(
         checkSubjets = cms.bool(False),
     ),
 
-    # Marina
+    # AK8 (aka fat-jets)
     cms.PSet(
         branchname = cms.untracked.string("AK8Jets"),
         src        = cms.InputTag("selectedPatJetsAK8PFCHS"),
@@ -83,7 +83,7 @@ Jets = cms.VPSet(
         checkSubjets = cms.bool(False),
         ),
     
-    # AK8 SoftDrop Subjets
+    # AK8 - SoftDrop Subjets
     cms.PSet(
         branchname = cms.untracked.string("AK8JetsSoftDrop"),
         src        = cms.InputTag("packedPatJetsAK8PFCHSSoftDrop"),
