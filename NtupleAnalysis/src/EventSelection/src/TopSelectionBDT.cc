@@ -314,7 +314,7 @@ void TopSelectionBDT::initialize(const ParameterSet& config) {
   // Read the xml file
   //  reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/EventSelection/interface/weights/TMVAClassification_BDTG.weights.xml");
   //  reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TMVA_BDT/test/weights_new/TMVAClassification_BDTG.weights.xml");
-  reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TMVA_BDT/test/weights/TMVAClassification_BDTG.weights.xml");
+  reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TMVA_BDT/test/weights_NewTrainingFP/TMVAClassification_BDTG.weights.xml");
 }
 
 void TopSelectionBDT::bookHistograms(TDirectory* dir) {
@@ -674,6 +674,9 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   vector <Jet> MCtrueAssocTop_LdgJet, MCtrueAssocTop_SubldgJet, MCtrueAssocTop_Bjet;
   std::vector<bool> FoundTop;
 
+  const double twoSigmaDpt = 0.32;
+  const double dRcut    = 0.4;
+
   if (event.isMC()){
     
     int nGenuineTops = 0;
@@ -793,7 +796,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	    genParticle BQuark = GenTops_BQuark.at(i);
 	    Jet mcMatched_BJet;
 	    double dRmin  = 99999.9;
-	    double dPtmin = 99999.9;
+	    double dPtOverPtmin = 99999.9;
 	    
 	    // For-loop: All selected jets
 	    for (auto& bjet: jets)
@@ -802,26 +805,23 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 
 		//NEW
 		//double dPt = std::abs(bjet.pt() - BQuark.pt());
-		double dPt = std::abs(bjet.pt() - BQuark.pt())/BQuark.pt();
-		double dEta = std::abs(bjet.eta() - BQuark.eta());
-		double dPhi = std::abs(ROOT::Math::VectorUtil::DeltaPhi( bjet.p4(), BQuark.p4()));
+		double dPtOverPt = std::abs((bjet.pt() - BQuark.pt())/BQuark.pt());
 		//NEW
 
-		// Only consider dR < 0.4
-		if (dR > 0.4) continue;
+		// Only consider dR < dRcut
+		if (dR > dRcut) continue;
 		
 		// Find minimum dR
 		if (dR > dRmin) continue;
 		
 		//NEW
-		// Find minimum dPt
-		//if (dPt > dPtmin) continue;
-		if (dPt > 1. || dEta > 0.3 || dPhi > 0.3) continue;
+		// Find minimum dPtOverPt
+		if (dPtOverPt > twoSigmaDpt) continue;
 		//NEW
 
 		// Store values
 		dRmin  = dR;
-		dPtmin = dPt;
+		dPtOverPtmin = dPtOverPt;
 		mcMatched_BJet = bjet;
 	      }// For-loop: selected jets
 	    
@@ -845,8 +845,8 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	    Jet mcMatched_LdgJet;
 	    Jet mcMatched_SubldgJet;
 	    
-	    double dR1min, dR2min, dPt1min, dPt2min;
-	    dR1min = dR2min = dPt1min = dPt2min = 99999.9;
+	    double dR1min, dR2min, dPtOverPt1min, dPtOverPt2min;
+	    dR1min = dR2min = dPtOverPt1min = dPtOverPt2min = 99999.9;
 	    
 	    // For-loop: All selected jets
 	    for (auto& jet: jets)
@@ -855,7 +855,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 		// For-loop: All top-quarks
 		for (size_t k=0; k<GenTops.size(); k++)
 		  {
-		    if (dRminB.at(k) < 0.4)
+		    if (dRminB.at(k) < dRcut)
 		      {
 			// Skip the jets that are matched with bquarks
 			if( areSameJets(jet,MC_BJets.at(k))) same = true;
@@ -866,19 +866,13 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 		double dR1 = ROOT::Math::VectorUtil::DeltaR(jet.p4(), LdgQuark.p4());
 		double dR2 = ROOT::Math::VectorUtil::DeltaR(jet.p4(), SubldgQuark.p4());
 		
-		// Require both jets to be within dR <= 0.4
-		if (std::min(dR1, dR2) > 0.4) continue;
+		// Require both jets to be within dR <= dRcut
+		if (std::min(dR1, dR2) > dRcut) continue;
 	    
-		// Calculate dPt for each jet in top-decay dijet
+		// Calculate dPtOverPt for each jet in top-decay dijet
 		//NEW
-		//double dPt1 = std::abs(jet.pt() - LdgQuark.pt());
-		//double dPt2 = std::abs(jet.pt() - SubldgQuark.pt());
-		double dPt1 = std::abs(jet.pt() - LdgQuark.pt())/LdgQuark.pt();
-		double dPt2 = std::abs(jet.pt() - SubldgQuark.pt())/SubldgQuark.pt();
-		double dEta1 = std::abs(jet.eta() - LdgQuark.eta());
-		double dEta2 = std::abs(jet.eta() - SubldgQuark.eta());
-		double dPhi1 = std::abs(ROOT::Math::VectorUtil::DeltaPhi(jet.p4(), LdgQuark.p4()));
-                double dPhi2 = std::abs(ROOT::Math::VectorUtil::DeltaPhi(jet.p4(), SubldgQuark.p4()));
+		double dPtOverPt1 = std::abs((jet.pt() - LdgQuark.pt())/LdgQuark.pt());
+		double dPtOverPt2 = std::abs((jet.pt() - SubldgQuark.pt())/SubldgQuark.pt());
 		//NEW
 		
 		// Find which of the two is the correct match
@@ -886,48 +880,56 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 		  {
 		    // Is Jet1 closer in eta-phi AND has smaller pT difference?
 		    //NEW
-		    //if (dR1 < dR1min && dPt1 < dPt1min)
-		    if (dR1 < dR1min && dPt1 < 1. && dEta1 < 0.3 && dPhi1 < 0.3)
+		    if (dR1 < dR1min)
 		      {
-			dR1min = dR1;
-			dPt1min= dPt1;
-			mcMatched_LdgJet = jet;
+			if (dPtOverPt1 < twoSigmaDpt)
+			  {
+			    dR1min = dR1;
+			    dPtOverPt1min= dPtOverPt1;
+			    mcMatched_LdgJet = jet;
+			  }
 		      }
 		    //NEW
 		    // Is Jet2 closer in eta-phi AND has smaller pT difference?
-		    //else if (dR2 <= 0.4 && dR2 < dR2min && dPt2 < dPt2min)
-		    else if (dR2 <= 0.4 && dR2 < dR2min && dPt2 < 1. && dEta2 < 0.3 && dPhi2 < 0.3)
+		    else if (dR2 <= dRcut && dR2 < dR2min)
 		      {
-			dR2min  = dR2;
-			dPt2min = dPt2;
-			mcMatched_SubldgJet = jet;
+			if (dPtOverPt2 < twoSigmaDpt)
+			  {
+			    dR2min  = dR2;
+			    dPtOverPt2min = dPtOverPt2;
+			    mcMatched_SubldgJet = jet;
+			  }
 		      }
 		  }
 		else
 		  {
 		    //NEW
 		    // Is Jet2 closer in eta-phi AND has smaller pT difference?
-		    //if (dR2 < dR2min && dPt2 < dPt2min)
-		    if (dR2 < dR2min && dPt2 < 1. && dEta2 < 0.3 && dPhi2 < 0.3)
+		    if (dR2 < dR2min)
 		      {
-			dR2min  = dR2;
-			dPt2min = dPt2;
-			mcMatched_SubldgJet = jet;
+			if (dPtOverPt2 < twoSigmaDpt)
+			  {
+			    dR2min  = dR2;
+			    dPtOverPt2min = dPtOverPt2;
+			    mcMatched_SubldgJet = jet;
+			  }
 		      }
 		    //NEW
 		    // Is Jet2 closer in eta-phi AND has smaller pT difference?
-		    //else if (dR1 <= 0.4 && dR1 < dR1min && dPt1 < dPt1min)
-		    else if (dR1 <= 0.4 && dR1 < dR1min && dPt1 < 1. && dEta1 < 0.3 && dPhi1 < 0.3)
+		    else if (dR1 <= dRcut && dR1 < dR1min)
 		      {
-			dR1min  = dR1;
-			dPt1min = dPt1;
-			mcMatched_LdgJet = jet;
+			if  (dPtOverPt1 < twoSigmaDpt)
+			  {
+			    dR1min  = dR1;
+			    dPtOverPt1min = dPtOverPt1;
+			    mcMatched_LdgJet = jet;
+			  }
 		      }
 		  }
 	      }//For-loop: All selected jets
 	    
 	    // Check if TOP is genuine
-	    bool isGenuine = (dR1min<= 0.4 && dR2min <= 0.4 && dRminB.at(i) <= 0.4);
+	    bool isGenuine = (dR1min<= dRcut && dR2min <= dRcut && dRminB.at(i) <= dRcut);
 
 	    if (isGenuine)
 	      {
@@ -975,14 +977,14 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
                 for (auto& topJet: MCtrue_TopJets) if (areSameJets(jet, topJet)) same = true;
 		if (same) continue;
                 double dR_Hb = ROOT::Math::VectorUtil::DeltaR(jet.p4(),GenChargedHiggs_BQuark.at(i).p4());
-		double dPt_Hb = std::abs(jet.pt() - GenChargedHiggs_BQuark.at(i).pt())/GenChargedHiggs_BQuark.at(i).pt();		
-                if (dR_Hb > 0.4 || dR_Hb > dRmin) continue;
-		if (dPt_Hb > 1.) continue;
+		double dPtOverPt_Hb = std::abs(jet.pt() - GenChargedHiggs_BQuark.at(i).pt())/GenChargedHiggs_BQuark.at(i).pt();		
+                if (dR_Hb > dRcut || dR_Hb > dRmin) continue;
+		if (dPtOverPt_Hb > twoSigmaDpt) continue;
                 dRmin = dR_Hb;
                 mcMatched_ChargedHiggsBjet = jet;
 		//NEW
               }
-            if (dRmin <= 0.4) MCtrue_ChargedHiggsBjet.push_back(mcMatched_ChargedHiggsBjet);
+            if (dRmin <= dRcut) MCtrue_ChargedHiggsBjet.push_back(mcMatched_ChargedHiggsBjet);
           }
 
 
@@ -1384,16 +1386,16 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	  double dR_t2 = ROOT::Math::VectorUtil::DeltaR(top.p4(), trijet2);
 
 	  // Is the trijet in top's direction
-	  if (dR_t1 < 0.4 ) realInTopDir1 = true; 
-	  if (dR_t2 < 0.4 ) realInTopDir2 = true; 
+	  if (dR_t1 < dRcut ) realInTopDir1 = true; 
+	  if (dR_t2 < dRcut ) realInTopDir2 = true; 
 
 	  // Is the trijet matched?
-	  if (min(dR_t1, dR_t2) > 0.4) IsInTopDirection = false;
+	  if (min(dR_t1, dR_t2) > dRcut) IsInTopDirection = false;
 
 	  // Define booleans
-	  bool inTopDir1    = (dR_t1 < 0.4);
-	  bool inTopDir2    = (dR_t2 < 0.4);
-	  bool inTopDir1or2 = min(dR_t1, dR_t2) < 0.4;
+	  bool inTopDir1    = (dR_t1 < dRcut);
+	  bool inTopDir2    = (dR_t2 < dRcut);
+	  bool inTopDir1or2 = min(dR_t1, dR_t2) < dRcut;
 
 	  // Fill histograms
 	  hTopQuarkPt ->Fill(top.pt());
@@ -1489,7 +1491,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	    }
       
 	  // In Top direction
-	  if (dR_tmin < 0.4)
+	  if (dR_tmin < dRcut)
 	    {
 	      // Save top candidate
 	      InTopDir_index.push_back(inTopDir_index);
@@ -1497,7 +1499,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	      
 	      bool inTopDirPassedBDT = cfg_MVACut.passedCut(TopCand.MVA.at(inTopDir_index));
 	      if ( inTopDirPassedBDT ) hAllTopQuarkPt_InTopDirBDT -> Fill(top.pt()); 
-	    }// if (dR_tmin < 0.4)
+	    }// if (dR_tmin < dRcut)
 	  else hAllTopQuarkPt_NotInTopDir-> Fill(top.pt()); 
 
 	}// For-loop: All top quarks

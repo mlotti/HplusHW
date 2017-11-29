@@ -109,9 +109,10 @@ def main():
     # ================================================================================================
     # Setup the process
     # ================================================================================================
-    process = Process(prefix, postfix, opts.nEvts)
-
-            
+    maxEvents = {}
+    maxEvents["All"] = opts.nEvts
+    process = Process(prefix, postfix, maxEvents)
+                
     # ================================================================================================
     # Add the datasets (according to user options)
     # ================================================================================================
@@ -123,7 +124,7 @@ def main():
         Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
         process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=opts.excludeTasks)
     else:
-        myBlackList = []#["QCD_b"]
+        myBlackList = ["QCD_b"]
         Print("Adding all datasets from multiCRAB directory %s" % (opts.mcrab))
         Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
         regex =  "|".join(myBlackList)
@@ -259,7 +260,7 @@ if __name__ == "__main__":
     # Default Values
     VERBOSE       = False
     NEVTS         = -1
-    HISTOLEVEL    = "Debug"
+    HISTOLEVEL    = "Debug" #"Informative" #"Debug"
     PUREWEIGHT    = True
     TOPPTREWEIGHT = True
     DOSYSTEMATICS = False
