@@ -595,6 +595,26 @@ if __name__ == "__main__":
         sys.exit()
 
     # Sanity check
+    allowedFolders = ["counters", "counters/weighted", "Weighting", "ForDataDrivenCtrlPlots", 
+                      "ForDataDrivenCtrlPlotsEWKFakeB", "ForDataDrivenCtrlPlotsEWKGenuineB", "PUDependency", 
+                      "Selection_Veto", "muSelection_Veto", "tauSelection_Veto", 
+                      "jetSelection_", "bjetSelection_", "metSelection_Baseline",
+                      "topologySelection_Baseline", "topbdtSelection_Baseline", 
+                      "topbdtSelectionTH2_Baseline", "metSelection_Inverted", 
+                      "topologySelection_Inverted", "topbdtSelection_Inverted",
+                      "topbdtSelectionTH2_Inverted", "ForFakeBNormalization", 
+                      "ForFakeBNormalizationEWKFakeB", "ForFakeBNormalizationEWKGenuineB",
+                      "FailedBJet", "FailedBJetFakeB", "FailedBJetGenuineB", "ForFakeBMeasurement", 
+                      "ForFakeBMeasurementEWKFakeB", "ForFakeBMeasurementEWKGenuineB"]
+
+
+    if opts.folder not in allowedFolders:
+        Print("Invalid folder \"%s\"! Please select one of the following:" % (opts.folder), True)
+        for m in allowedFolders:
+            Print(m, False)
+        sys.exit()
+
+    # Sanity check
     allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 2000, 3000]
     if opts.signalMass!=0 and opts.signalMass not in allowedMass:
         Print("Invalid signal mass point (=%.0f) selected! Please select one of the following:" % (opts.signalMass), True)

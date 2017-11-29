@@ -108,23 +108,39 @@ def GetHistoKwargs(histoName):
     Verbose("Creating a map of histoName <-> kwargs")
 
     # Definitions
-    _opts         = {}
-    logY          = False
+    _opts = {}
+    logY  = True
     if logY:
         _opts     = {"ymin": 1e0, "ymaxfactor": 5.0}
     else:
         #_opts     = {"ymin": 1e0, "ymax": 0.08} #"ymaxfactor": 1.2}
         _opts     = {"ymin": 1e0, "ymaxfactor": 1.2}
-    _units        = "GeV/c^{2}"
-    _opts["xmin"] =  50
-    _opts["xmax"] = 400
-    #_opts["xmin"] =    0
-    #_opts["xmax"] = 1000
+
+    if "mass" in histoName.lower():
+        _units        = "GeV/c^{2}"
+        _xlabel       = "m_{jjb} (%s)" % (_units)
+        _opts["xmin"] =  50
+        _opts["xmax"] = 400
+        if "tetrajet" in histoName.lower():
+            _opts["xmin"] =  100
+            _opts["xmax"] = 1000
+    elif "met" in histoName.lower():
+        _units        = "GeV"
+        _xlabel       = "E_{T}^{miss} (%s)" % (_units)
+        _opts["xmin"] =   0
+        _opts["xmax"] = 250
+        if logY:
+            _opts     = {"ymin": 1e0, "ymaxfactor": 2.0}
+    else:
+        _units        = "rads"
+        _xlabel       = "#Delta#phi (%s)" % (_units)
+        _opts["xmin"] = 0.0
+        _opts["xmax"] = 3.2
 
     # Define plotting options
     kwargs = {
-        "xlabel"      : "m_{jjb} (%s)" % (_units),
-        "ylabel"      : "Arbitrary Units / %s" % (_units),
+        "xlabel"      : _xlabel,
+        "ylabel"      : "Arbitrary Units / %.0f " +  _units,
         "log"         : logY,
         "opts"        : _opts,
         "opts2"       : {"ymin": 0.0, "ymax": 2.0},
@@ -292,14 +308,18 @@ def main(opts):
         # histoName  = "LdgTrijetMass_AfterStandardSelections"
         histoName  = "LdgTrijetMass_AfterAllSelections"
         
-        # folderName = "ForFakeBMeasurement"
-        # histoName  = "DeltaRLdgTrijetBJetTetrajetBJet_AfterStandardSelections"
-        # histoName  = "DeltaRLdgTrijetBJetTetrajetBJet_AfterAllSelections"
-        # histoName  = "LdgTetrajetMass_AfterStandardSelections"
-        # histoName  = "LdgTetrajetMass_AfterAllSelections"
-        # histoName    = "SubLdgTrijetM_AfterAllSelections"
-        # histoName    = "DeltaPhiLdgTrijetBJetTetrajetBJet_AfterStandardSelections"
-        
+        folderName = "ForFakeBMeasurement"
+        if 1:
+            histoName  = "MET_AfterStandardSelections"
+            #histoName  = "LdgTetrajetMass_AfterStandardSelections"
+            #histoName = "DeltaPhiLdgTrijetBJetTetrajetBJet_AfterStandardSelections"
+            #histoName = "DeltaRLdgTrijetBJetTetrajetBJet_AfterStandardSelections"
+        else:
+            histoName  = "MET_AfterAllSelections"
+            #histoName  = "LdgTetrajetMass_AfterAllSelections"
+            #histoName = "DeltaPhiLdgTrijetBJetTetrajetBJet_AfterAllSelections"
+            #histoName = "DeltaRLdgTrijetBJetTetrajetBJet_AfterAllSelections"
+
         PlotAndFitTemplates(datasetsMgr, histoName, folderName, opts)
     return
 
@@ -367,7 +387,7 @@ def PlotAndFitTemplates(datasetsMgr, histoName, inclusiveFolder, opts):
     inverted_EWKFakeB.RebinX(rebinX)
     inverted_FakeB.RebinX(rebinX)
 
-    if 0:
+    if 1:
         print "DISABLE for calculation of TRANSFER FACTOR!"
         baseline_Data.Scale(1.0/baseline_Data.Integral())
         inverted_Data.Scale(1.0/inverted_Data.Integral())
@@ -378,8 +398,8 @@ def PlotAndFitTemplates(datasetsMgr, histoName, inclusiveFolder, opts):
         
     # Create the final plot object
     #compareHistoList = [inverted_FakeB, baseline_FakeB] #, baseline_EWKGenuineB]
-    if 0:
-        compareHistoList = [baseline_FakeB]
+    if 1:
+        compareHistoList = [baseline_FakeB, inverted_FakeB]
         p = plots.ComparisonManyPlot(baseline_EWKGenuineB, compareHistoList, saveFormats=[])
     else:
         compareHistoList = [baseline_EWKGenuineB, baseline_FakeB]
