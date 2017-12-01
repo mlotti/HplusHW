@@ -245,12 +245,14 @@ private:
   int getTopFromHiggs(TrijetSelection TopCand, const Jet&  MCtrueTopFromH_LdgJet, const Jet& MCtrueTopFromH_SubldgJet, const Jet& MCtrueTopFromH_Bjet);
 
   // Input parameters
+  const DirectionalCut<double> cfg_LdgMVACut;
+  const DirectionalCut<double> cfg_SubldgMVACut;
   const DirectionalCut<double> cfg_MVACut;
   const DirectionalCut<double> cfg_MassCut;
   const DirectionalCut<double> cfg_CSV_bDiscCut;
   const unsigned int cfg_NjetsMax;
   const unsigned int cfg_NBjetsMax;
-  const std::vector<float> cfg_MVACuts;
+
   // Event counter for passing selection
   Count cPassedTopSelectionBDT;
 
@@ -429,6 +431,11 @@ private:
   WrappedTH1 *hDeltaR_HiggsBjetPt_TetrajetBjetMatched_afterCuts;
   WrappedTH1 *hDeltaCSV_HiggsBjetPt_TetrajetBjetMatched_afterCuts;
 
+  WrappedTH1 *hChHiggdBJetPt_passCSV;
+  WrappedTH1 *hChHiggdBJetPt_passCSV_LdgTopReco;
+  WrappedTH1 *hChHiggdBJetPt_passCSV_SubldgTopReco;
+  // WrappedTH1 *hChHiggdBJetPt_passCSV_LdgFreeBjet;
+  // WrappedTH1 *hChHiggdBJetPt_passCSV_SubldgFreeBjet;
   //next WrappedTH1
 
   // Histograms (2D)                                                                                                                             
@@ -439,12 +446,12 @@ private:
   WrappedTH2 *hDeltaMVAminVsTrijetPassBDTvalue;
   WrappedTH2 *hFakeTrijetMassVsBDTvalue;
   WrappedTH2 *hTopFromHiggsPtVSAssocTopPt;
-  WrappedTH2 *DEta_Trijet1TetrajetBjet_Vs_DEta_Trijet2TetrajetBjet;
-  WrappedTH2 *DPhi_Trijet1TetrajetBjet_Vs_DPhi_Trijet2TetrajetBjet;
-  WrappedTH2 *DR_Trijet1TetrajetBjet_Vs_DR_Trijet2TetrajetBjet;
-  WrappedTH2 *DEta_TopFromHBjetFromH_Vs_DEta_AssocTopBjetFromH;
-  WrappedTH2 *DPhi_TopFromHBjetFromH_Vs_DPhi_AssocTopBjetFromH;
-  WrappedTH2 *DR_TopFromHBjetFromH_Vs_DR_AssocTopBjetFromH;
+  WrappedTH2 *DEta_Dijet1TetrajetBjet_Vs_DEta_Dijet2TetrajetBjet;
+  WrappedTH2 *DPhi_Dijet1TetrajetBjet_Vs_DPhi_Dijet2TetrajetBjet;
+  WrappedTH2 *DR_Dijet1TetrajetBjet_Vs_DR_Dijet2TetrajetBjet;
+  WrappedTH2 *DEta_WFromHBjetFromH_Vs_DEta_WFromAssocTopBjetFromH;
+  WrappedTH2 *DPhi_WFromHBjetFromH_Vs_DPhi_WFromAssocTopBjetFromH;
+  WrappedTH2 *DR_WFromHBjetFromH_Vs_DR_WFromAssocTopBjetFromH;
 
 };
 
