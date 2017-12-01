@@ -170,7 +170,6 @@ class FakeBNormalizationManager:
             #     fakeRateErrorPart1 = errorPropagation.errorPropagationForProduct(w, wError, self._TF[binLabel], self._TFError[binLabel])
             #     fakeRateErrorPart2 = errorPropagation.errorPropagationForProduct(w, wError, self._ewkNormalization[binLabel], self._ewkNormalizationError[binLabel])
             #     fakeRateError = ROOT.TMath.Sqrt(fakeRateErrorPart1**2 + fakeRateErrorPart2**2)
-            print type(binLabel)
             self._TF[binLabel]       = TF
             self._TF_Error[binLabel] = TF_Error
             self._TF_Up[binLabel]    = TF_Up

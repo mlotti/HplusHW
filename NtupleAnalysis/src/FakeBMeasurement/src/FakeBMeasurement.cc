@@ -2319,7 +2319,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   if (!topologyData.passedSelection()) return;
   if (!topData.passedSelection()) return;
-
+  
   if (0) std::cout << "=== Inverted: All Selections" << std::endl;
   cInvertedSelected.increment();
 

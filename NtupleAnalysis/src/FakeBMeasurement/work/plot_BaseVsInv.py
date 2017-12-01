@@ -333,7 +333,7 @@ def GetHistoKwargs(histoName, opts):
         _units  = ""
         _format = "%0.2f " + _units
         _xlabel = "BDT discriminant"
-        _cutBox = {"cutValue": 0.7, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _cutBox = {"cutValue": 0.8, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         #_cutBox = {"cutValue": 0.9, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
     if "nbjets" in hName:
         _units  = ""
