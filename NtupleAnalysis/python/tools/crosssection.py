@@ -205,16 +205,27 @@ backgroundCrossSections = CrossSectionList(
             "8": 54.838, # [9], took value for CTEQ PDF since CTEQ6L1 was used in pythia simulation
             "13": 64.46, # [13] from Andrea: WW -> lnqq : 52pb + WW -> lnln : 12.46pb
             }),
+    CrossSection("WWToLNuQQ", {
+            "13": 49.997, #[17] 
+            }),
+    CrossSection("WWTo2L2Nu", {
+            "13": 12.178, #[17]
+            }),
+    CrossSection("WWTo4Q, {
+            "13": 51.723 , #[17]
+            }),
     CrossSection("WZ", {
             "7": 18.2, # [3]
             "8": 33.21, # [9], took value for CTEQ PDF since CTEQ6L1 was used in pythia simulation
             #"13": 29.8 + 18.6, # [13] W+ Z/a* + W- Z/a*, MCFM 6.6 m(l+l-) > 40 GeV
-            "13": 28.55 + 18.19, # [17]
+            #"13": 28.55 + 18.19, # [17]
+            "13": 47.13, # [17] 
             }),
     CrossSection("ZZ", {
             "7": 5.9, # [3]
             "8": 17.654, # [9], took value for CTEQ PDF since CTEQ6L1 was used in pythia simulation, this is slightly questionmark, since the computed value is for m(ll) > 12
-            "13": 15.4, # [13]
+            #"13": 15.4, # [13]
+            "13": 16.523, # [17] 
             }),
     CrossSection("TTJets_FullLept", {
             "8": 245.8* 26.1975/249.50, # [10], BR from [11]
@@ -252,7 +263,7 @@ backgroundCrossSections = CrossSectionList(
             #"8": 36703.2, # [9], NNLO
             #}),
     CrossSection("WJetsToLNu", {
-            "13": 20508.9*3, # [13] 20508.9*3, McM for the MLM dataset: 5.069e4
+            "13": 20508.9*3, # [13,17] 20508.9*3, McM for the MLM dataset: 5.069e4
             }),
     CrossSection("WJetsToLNu_HT_0To70", {
             "13": 20508.9*3, # set to inclusive xsect as HT_0To70 is skimmed from the inclusive sample
@@ -309,12 +320,12 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("DYJetsToLL_M_50", {
             "7": 3048.0, # [4], NNLO
             "8": 3531.9, # [9], NNLO
-            "13": 2008.4*3.0 # [14]
+            "13": 1921.8*3.0 # [14], NNLO
             }),
     CrossSection("DYJetsToLL_M_50_HERWIGPP", {
             "7": 3048.0, # [4], NNLO
             "8": 3531.9, # [9], NNLO
-            "13": 2008.4*3.0 # [14]
+            "13": 1921.8*3.0 # [14]
             }),
     CrossSection("DYJetsToLL_M_50_TauHLT", {
             "7": 3048.0, # [4], NNLO
@@ -448,43 +459,21 @@ backgroundCrossSections = CrossSectionList(
             "8": 1.76, # [8]
             }),
     CrossSection("ST_tW_antitop_5f_inclusiveDecays", {
-            "13": 30.09, # [19] #FIXME what is the source for this number? 
-            }),
-    CrossSection("ST_tW_antitop_5f_DS_inclusiveDecays", {
             "13": 35.85, # [19]
             }),
     CrossSection("ST_tW_top_5f_inclusiveDecays", {
-            "13": 30.11, # [19] #FIXME what is the source for this number?
-            }),
-    CrossSection("ST_tW_top_5f_DS_inclusiveDecays", {
             "13": 35.85, # [19]
             }),
-    CrossSection("ST_t_channel_antitop_4f_leptonDecays", {
-            "13": 80.95, # [19]
-            }),
-    CrossSection("ST_t_channel_top_4f_leptonDecays", {
-            "13": 136.02, # [19]
-            }),
-    CrossSection("ST_s_channel_4f_leptonDecays", {
-            "13": 10.32, # [19] #FIXME what is the source for this number?
-            }),
-            ########################################### test for 743, modified
     CrossSection("ST_t_channel_antitop_4f_inclusiveDecays", {
             "13": 80.95, # [19]
-            }),
-           ########################################### UUSI
-    CrossSection("ST_s_channel_4f_InclusiveDecays", {
-            "13": 10.32, # [19] #FIXME what is the source for this number?
-            }),
-    CrossSection("ST_tW_top_4f_inclusiveDecays", {
-            "13": 35.85, # [19]
             }),
     CrossSection("ST_t_channel_top_4f_inclusiveDecays", {
             "13": 136.02, # [19]
             }),
-    CrossSection("ST_s_channel_4f_InclusiveDecays", {
-            "13": 10.32, # [19] #FIXME what is the source for this number?
+    CrossSection("ST_s_channel_4f_inclusiveDecays", {
+            "13": 11.36, # [19]
             }),
+
     ########################################### Added for H+->tb
     CrossSection("QCD_bEnriched_HT100to200", {
             "13": 1.318e+06, # 1.318e+06 +- 6.249e+03 pb [16] (only 1 input file used)
