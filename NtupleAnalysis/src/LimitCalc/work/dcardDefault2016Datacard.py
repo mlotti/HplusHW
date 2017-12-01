@@ -20,7 +20,7 @@ MassPoints=LightMassPoints[:]+HeavyMassPoints[:]
 # Options
 OptionIncludeSystematics=True # Include shape systematics (multicrabs must beproduced with doSystematics=True)
 OptionDoControlPlots= not True #FIXME: If you want control plots, switch this to true!
-OptionUseWJetsHT = not True # Use HT binned WJets samples instead of inclusive for WJets background
+OptionUseWJetsHT = False # Use HT binned WJets samples instead of inclusive for WJets background
 OptionDoMergeEWKttbar = False #FIXME: if true, Wjets+DY+diboson into one background and for heavy H+, also merges ttbar and singleTop into one background
 BlindAnalysis=True
 OptionBlindThreshold=None # If signal exceeds this fraction of expected events, data is blinded; set to None to disable

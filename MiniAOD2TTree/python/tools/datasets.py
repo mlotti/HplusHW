@@ -265,6 +265,7 @@ datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_Intermedi
 datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M-175_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 #datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M-180_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 #datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M-190_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M-200_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 
 datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassWithNeutral_M-145_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v3/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 #datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassWithNeutral_M-150_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v3/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
@@ -275,6 +276,7 @@ datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_Intermedi
 datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassWithNeutral_M-175_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v3/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 #datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassWithNeutral_M-180_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v3/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 #datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassWithNeutral_M-190_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v3/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassWithNeutral_M-200_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v5/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 
 # Light H+
 datasetsSignalTauNu.append(Dataset('/ChargedHiggs_TTToHplusBWB_HplusToTauNu_M-80_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))

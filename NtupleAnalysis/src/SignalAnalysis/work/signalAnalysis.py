@@ -13,12 +13,15 @@ from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
 from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import obtainAnalysisSuffix 
 maxEvents = {}
 #maxEvents["TT"] = 100
+#maxEvents["All"] = 100
+#maxEvents["^T\S+"] = 200
+#maxEvents["Charged"] = 100
 process = Process("SignalAnalysis"+obtainAnalysisSuffix(sys.argv),maxEvents=maxEvents)
 blacklist = []
 #blacklist = ["ChargedHiggs_TTToHplusBWB"]
 #blacklist = ["ChargedHiggs_HplusTB"]
 whitelist = []
-whitelist = ["Tau_Run2016C_","TT"]
+#whitelist = ["Tau_Run2016C_","TT"]
 process.addDatasetsFromMulticrab(sys.argv[1],blacklist=blacklist,whitelist=whitelist)
 
 # Add config

@@ -165,22 +165,23 @@ def main(opts):
         if opts.verbose:
             datasetsMgr.PrintCrossSections()
             datasetsMgr.PrintLuminosities()
-            
-        # Custom Filtering of datasets 
-        if 0:
-            datasetsMgr.remove(filter(lambda name: "Charged" in name and not "M_500" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr.PrintInfo()
+
+        # Filter the datasets 
+        datasetsMgr.remove(filter(lambda name: "Charged" in name, datasetsMgr.getAllDatasetNames()))
+        #datasetsMgr.remove(filter(lambda name: "Charged" in name and not "M_500" in name, datasetsMgr.getAllDatasetNames()))
                
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
-
-        # Print (merged) data
-        datasetsMgr.PrintInfo()
 
         # Re-order datasets (different for inverted than default=baseline)
         if 0:
             newOrder = ["Data"]
             newOrder.extend(GetListOfEwkDatasets())
             datasetsMgr.selectAndReorder(newOrder)
+
+        # Print post-merged data dataset summary
+        datasetsMgr.PrintInfo()
 
         # Merge EWK samples
         datasetsMgr.merge("EWK", GetListOfEwkDatasets())
@@ -269,7 +270,7 @@ def PlotPurity(datasetsMgr, folder, hName):
     # Customize the histograms (BEFORE calculating purity obviously otherwise numbers are nonsense)
     _cutBox = None
     _rebinX = 1
-    _opts   = {"ymin": 1e-3, "ymax": 1.0} #"ymaxfactor": 1.2}
+    _opts   = {"ymin": 1e-2, "ymax": 1.0} #"ymaxfactor": 1.2}
     _format = "%0.0f"
     #_opts["xmax"] = xMax
     _xlabel = None
@@ -335,7 +336,7 @@ def PlotPurity(datasetsMgr, folder, hName):
 
     # Clone histograms 
     Data = p1.histoMgr.getHisto("Data").getRootHisto().Clone("Data")
-    EWK  = p2.histoMgr.getHisto("EWK").getRootHisto().Clone("EWK")
+    EWK  = p2.histoMgr.getHisto("EWK").getRootHisto().Clone("EWK") # EWKGenuineB
     QCD  = p1.histoMgr.getHisto("Data").getRootHisto().Clone("QCD")
 
     # Rebin histograms (Before calculating Purity)
@@ -347,8 +348,8 @@ def PlotPurity(datasetsMgr, folder, hName):
     QCD.Add(EWK, -1)
 
     # Comparison plot. The first argument is the reference histo. All other histograms are compared with respect to that. 
-    QCD_Purity, xMin, xMax, binList, valueDict, upDict, downDict = getPurityHisto(QCD, Data, inclusiveBins=False, printValues=False)
-    EWK_Purity, xMin, xMax, binList, valueDict, upDict, downDict = getPurityHisto(EWK, Data, inclusiveBins=False, printValues=True)
+    QCD_Purity, xMin, xMax, binList, valueDict, upDict, downDict = getPurityHisto(QCD, Data, inclusiveBins=False, printValues=True)
+    EWK_Purity, xMin, xMax, binList, valueDict, upDict, downDict = getPurityHisto(EWK, Data, inclusiveBins=False, printValues=False)
 
     # Create TGraphs
     if 0:
@@ -393,12 +394,12 @@ def PlotPurity(datasetsMgr, folder, hName):
                    histoName,  
                    xlabel        = _xlabel,
                    ylabel        = _ylabel,
-                   log           = False, 
+                   log           = True, 
                    rebinX       = 1, # must be done BEFORE calculating purity
                    cmsExtraText  = "Preliminary", 
                    createLegend  = {"x1": 0.76, "y1": 0.80, "x2": 0.92, "y2": 0.92},
                    opts          = _opts,
-                   opts2         = {"ymin": 1e-5, "ymax": 1e0},
+                   opts2         = {"ymin": 0.5, "ymax": 1.5},
                    ratio         = False,
                    ratioInvert   = False, 
                    ratioYlabel   = "Ratio",
