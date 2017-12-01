@@ -159,22 +159,27 @@ topologySelection = PSet(
 # Top selection BDT                                               
 #================================================================================================        
 topSelectionBDT = PSet(
-    # MVACuts                = [0.8, 0.8], #FIXME: Set individual cut values for each top candidate  
-    MVACutValue            = 0.9,     # [default: 0.9]
-    MVACutDirection        =  ">=",   # [default: ">="] options: ==, !=, <, <=, >, >=
+    LdgMVACutValue         = 0.8,     # [default: 0.9]
+    LdgMVACutDirection     =  ">=",   # [default: ">="]
+    SubldgMVACutValue      = 0.8,     # [default: 0.9]
+    SubldgMVACutDirection  =  ">=",   # [default: ">="]
     NjetsMax               = 999,     # [default: 999]
     NBjetsMax              = 999,     # [default: 999]
-    CSV_bDiscCutValue      = 0.8484,  #-100., #0.8484, #Temporary
+    # Speed-up calculation by skipping top candidates failing some criteria
+    CSV_bDiscCutValue      = 0.5426,  # [default: 0.8484] #Do not evaluate top candidate if b-jet assigned as b from top fails this cut
     CSV_bDiscCutDirection  = ">=",    # [default: ">="]
     MassCutValue           = 600.0,   # [default: 400.0]
     MassCutDirection       = "<=",    # [default: "<"]
+    # FIXME: Phase this out (currently only used in plots)
+    MVACutValue            = 0.8,     # [default: 0.9]
+    MVACutDirection        =  ">=",   # [default: ">="]
 )
 
 #================================================================================================
 # FakeB Measurement Options
 #================================================================================================
 fakeBMeasurement = PSet(
-    prelimTopMVACutValue              = 0.5,      # [default: -0.8]
+    prelimTopMVACutValue              = 0.4,      # [default: 0.4]
     prelimTopMVACutDirection          =  ">=",    # [default: ">="]
     # CSVv2-Medium requirements (Baseline b-jets)
     numberOfBJetsCutValue             = 2,        # [default: 2]
