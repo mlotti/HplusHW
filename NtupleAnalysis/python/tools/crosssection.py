@@ -221,7 +221,7 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("WWTo2L2Nu", {
             "13": 12.178, #[17]
             }),
-    CrossSection("WWTo4Q, {
+    CrossSection("WWTo4Q", {
             "13": 51.723 , #[17]
             }),
     CrossSection("WZ", {
