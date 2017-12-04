@@ -522,21 +522,27 @@ backgroundCrossSections = CrossSectionList(
             }),
     CrossSection("QCD_HT300to500", {
             "13": 3.475e+05, # 3.475e+05 +- 1.464e+02 pb [16]
+            #"13": 351300, # CMS AN-16-411 (approved for publication as HIG-17-022)
             }),
     CrossSection("QCD_HT500to700", {
             "13": 3.208e+04, # 3.208e+04 +- 1.447e+01 pb [16]
+            #"13": 31630, # CMS AN-16-411 (approved for publication as HIG-17-022)
             }),
     CrossSection("QCD_HT700to1000", {
             "13": 6.833e+03, # 6.833e+03 +- 1.668e+00 pb [16]
+            #"13": 6802, # CMS AN-16-411 (approved for publication as HIG-17-022)
             }),
     CrossSection("QCD_HT1000to1500", {
             "13": 1.208e+03, # 1.208e+03 +- 5.346e-01 pb [16]
+            #"13": 1206, # CMS AN-16-411 (approved for publication as HIG-17-022)
             }),
     CrossSection("QCD_HT1500to2000", {
             "13": 1.201e+02, # 1.201e+02 +- 5.823e-02 pb [16]
+            #"13": 120.4, # CMS AN-16-411 (approved for publication as HIG-17-022)
             }),
     CrossSection("QCD_HT2000toInf", {
             "13": 2.526e+01, # 2.526e+01 +- 1.728e-02 pb [16]
+            #"13": 25.25, # CMS AN-16-411 (approved for publication as HIG-17-022)
             }),
     CrossSection("TTTT", {
             "13": 9.103e-03, #9.103e-03 +- 1.401e-05 pb [16]
