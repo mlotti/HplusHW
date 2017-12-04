@@ -68,10 +68,12 @@ def GetLumi(datasetsMgr):
     return lumi
 
 
-def GetListOfEwkDatasets():
+def GetListOfEwkDatasets(datasetsMgr):
     Verbose("Getting list of EWK datasets")
-    return ["TT", "noTop", "SingleTop", "ttX"]
-    #return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    if "noTop" in datasetsMgr.getAllDatasetNames():
+        return ["TT", "noTop", "SingleTop", "ttX"]
+    else:
+        return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
 
 
 def GetDatasetsFromDir(opts):
@@ -156,7 +158,7 @@ def main(opts):
         opts.intLumi = datasetsMgr.getDataset("Data").getLuminosity()
    
         # Merge EWK samples
-        datasetsMgr.merge("EWK", GetListOfEwkDatasets())
+        datasetsMgr.merge("EWK", GetListOfEwkDatasets(datasetsMgr))
         plots._plotStyles["EWK"] = styles.getAltEWKStyle()
 
         # Print dataset information
@@ -299,8 +301,6 @@ def PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted):
     saveName = hBaseline_Inclusive.split("/")[-1]
     saveName = saveName.replace("Baseline_", "")
 
-
-    print "add signal!"
     if opts.useMC:
         savePath = os.path.join(opts.saveDir, "BaselineVsInverted", "MC", opts.optMode)
     else:
@@ -333,7 +333,7 @@ def GetHistoKwargs(histoName, opts):
         _units  = ""
         _format = "%0.2f " + _units
         _xlabel = "BDT discriminant"
-        _cutBox = {"cutValue": 0.7, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _cutBox = {"cutValue": 0.8, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         #_cutBox = {"cutValue": 0.9, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
     if "nbjets" in hName:
         _units  = ""
@@ -592,6 +592,26 @@ if __name__ == "__main__":
     # Sanity check
     if not opts.mergeEWK:
         Print("Cannot draw the Baseline Vs Inverted histograms without the option --mergeEWK. Exit", True)
+        sys.exit()
+
+    # Sanity check
+    allowedFolders = ["counters", "counters/weighted", "Weighting", "ForDataDrivenCtrlPlots", 
+                      "ForDataDrivenCtrlPlotsEWKFakeB", "ForDataDrivenCtrlPlotsEWKGenuineB", "PUDependency", 
+                      "Selection_Veto", "muSelection_Veto", "tauSelection_Veto", 
+                      "jetSelection_", "bjetSelection_", "metSelection_Baseline",
+                      "topologySelection_Baseline", "topbdtSelection_Baseline", 
+                      "topbdtSelectionTH2_Baseline", "metSelection_Inverted", 
+                      "topologySelection_Inverted", "topbdtSelection_Inverted",
+                      "topbdtSelectionTH2_Inverted", "ForFakeBNormalization", 
+                      "ForFakeBNormalizationEWKFakeB", "ForFakeBNormalizationEWKGenuineB",
+                      "FailedBJet", "FailedBJetFakeB", "FailedBJetGenuineB", "ForFakeBMeasurement", 
+                      "ForFakeBMeasurementEWKFakeB", "ForFakeBMeasurementEWKGenuineB"]
+
+
+    if opts.folder not in allowedFolders:
+        Print("Invalid folder \"%s\"! Please select one of the following:" % (opts.folder), True)
+        for m in allowedFolders:
+            Print(m, False)
         sys.exit()
 
     # Sanity check

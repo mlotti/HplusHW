@@ -134,6 +134,11 @@ def main(opts):
                 if d.getName() != opts.signal:
                     datasetsToRemove.append(d.getName())
 
+
+        datasetsMgr.PrintCrossSections()
+        print "EXITING!"
+        sys.exit()
+
         if opts.verbose:
             datasetsMgr.PrintCrossSections()
             datasetsMgr.PrintLuminosities()

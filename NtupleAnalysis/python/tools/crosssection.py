@@ -115,7 +115,7 @@ class CrossSectionList:
 # [16] https://twiki.cern.ch/twiki/bin/view/CMS/HowToGenXSecAnalyzer#Running_the_GenXSecAnalyzer_on_a
 # [17] https://twiki.cern.ch/twiki/bin/view/CMS/SummaryTable1G25ns#DY_Z and https://arxiv.org/pdf/1105.0020v1.pdf
 # [18] top mass 172.5, https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
-# [19} https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
+# [19] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
 
 backgroundCrossSections = CrossSectionList(
     CrossSection("QCD_Pt_15to30", {
@@ -203,7 +203,17 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("WW", {
             "7": 43.0, # [3]
             "8": 54.838, # [9], took value for CTEQ PDF since CTEQ6L1 was used in pythia simulation
-            "13": 64.46, # [13] from Andrea: WW -> lnqq : 52pb + WW -> lnln : 12.46pb
+            #"13": 64.46, # [13] from Andrea: WW -> lnqq : 52pb + WW -> lnln : 12.46pb
+            "13": 118.7, # [13] from Andrea: WW -> lnqq : 52pb + WW -> lnln : 12.46pb
+            }),
+    CrossSection("WWToLNuQQ", {
+            "13": 49.997, #[17] 
+            }),
+    CrossSection("WWTo2L2Nu", {
+            "13": 12.178, #[17]
+            }),
+    CrossSection("WWTo4Q", {
+            "13": 51.723 , #[17]
             }),
     CrossSection("WWToLNuQQ", {
             "13": 49.997, #[17] 
@@ -522,21 +532,27 @@ backgroundCrossSections = CrossSectionList(
             }),
     CrossSection("QCD_HT300to500", {
             "13": 3.475e+05, # 3.475e+05 +- 1.464e+02 pb [16]
+            #"13": 351300, # CMS AN-16-411 (approved for publication as HIG-17-022)
             }),
     CrossSection("QCD_HT500to700", {
             "13": 3.208e+04, # 3.208e+04 +- 1.447e+01 pb [16]
+            #"13": 31630, # CMS AN-16-411 (approved for publication as HIG-17-022)
             }),
     CrossSection("QCD_HT700to1000", {
             "13": 6.833e+03, # 6.833e+03 +- 1.668e+00 pb [16]
+            #"13": 6802, # CMS AN-16-411 (approved for publication as HIG-17-022)
             }),
     CrossSection("QCD_HT1000to1500", {
             "13": 1.208e+03, # 1.208e+03 +- 5.346e-01 pb [16]
+            #"13": 1206, # CMS AN-16-411 (approved for publication as HIG-17-022)
             }),
     CrossSection("QCD_HT1500to2000", {
             "13": 1.201e+02, # 1.201e+02 +- 5.823e-02 pb [16]
+            #"13": 120.4, # CMS AN-16-411 (approved for publication as HIG-17-022)
             }),
     CrossSection("QCD_HT2000toInf", {
             "13": 2.526e+01, # 2.526e+01 +- 1.728e-02 pb [16]
+            #"13": 25.25, # CMS AN-16-411 (approved for publication as HIG-17-022)
             }),
     CrossSection("TTTT", {
             "13": 9.103e-03, #9.103e-03 +- 1.401e-05 pb [16]
@@ -550,14 +566,13 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("WJetsToQQ_HT_600ToInf", {
             "13": 9.936e+01, #9.936e+01 +- 4.407e-01 pb [16] (inputFiles="0EA1D6CA-931A-E611-BFCD-BCEE7B2FE01D.root")
             }),
-    CrossSection("WWTo4Q", {
-            "13": 4.520e+01, #4.520e+01 +- 3.608e-02 pb [16] (inputFiles="0A4AE358-861F-E611-A48C-44A84225C851.root")
-            }),
     CrossSection("ZJetsToQQ_HT600toInf", {
-            "13": 5.822e+02, #5.822e+02 +- 7.971e-02 pb [16] (inputFiles="0E546A76-E03A-E611-9259-0CC47A4DEDEE.root")
+            #"13": 5.822e+02, #5.822e+02 +- 7.971e-02 pb [16] (inputFiles="0E546A76-E03A-E611-9259-0CC47A4DEDEE.root")
+            "13": 5.67, # CMS AN-16-411 (approved for publication as HIG-17-022)
             }),
     CrossSection("ZZTo4Q", {
             "13": 6.883e+00, #6.883e+00 +- 3.718e-02 pb [16] (inputFiles="024C4223-171B-E611-81E5-0025904E4064.root")
+            #check
             }),
     CrossSection("ttbb_4FS_ckm_amcatnlo_madspin_pythia8", {
             "13": 1.393e+01, #1.393e+01 +- 3.629e-02 pb [16] (inputFiles="0641890F-F72C-E611-9EA8-02163E014B5F.root")

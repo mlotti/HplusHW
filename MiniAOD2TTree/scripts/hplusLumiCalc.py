@@ -89,8 +89,9 @@ PBARLENGTH  = 10
 # Recommended minimum bias xsection
 minBiasXsecNominal = 69200 #from https://twiki.cern.ch/twiki/bin/viewauth/CMS/POGRecipesICHEP2016
 
-# JSON files
-NormTagJSON     = "/afs/cern.ch/user/l/lumipro/public/normtag_file/normtag_DATACERT.json"
+# JSON files (https://twiki.cern.ch/twiki/bin/view/CMS/TWikiLUM)
+NormTagJSON     = "/cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json" #2016 pp run
+#NormTagJSON     = "/afs/cern.ch/user/l/lumipro/public/normtag_file/normtag_DATACERT.json"
 PileUpJSON_2016 = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/PileUp/pileup_latest.txt"
 PileUpJSON_2015 = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/PileUp/pileup_latest.txt"
 

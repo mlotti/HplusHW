@@ -162,8 +162,8 @@ bool MuonDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 
 		// Marina - start
-                double relIsoMini = getMiniIsolation_DeltaBeta(pfcandHandle, dynamic_cast<const reco::Candidate *>(&obj), 0.05, 0.2, 10., false);
-		double relIsoMiniEffArea = getMiniIsolation_EffectiveArea(pfcandHandle, dynamic_cast<const reco::Candidate *>(&obj), 0.05, 0.2, 10., false, false, *rhoHandle);
+                //double relIsoMini = getMiniIsolation_DeltaBeta(pfcandHandle, dynamic_cast<const reco::Candidate *>(&obj), 0.05, 0.2, 10., false);
+		//double relIsoMiniEffArea = getMiniIsolation_EffectiveArea(pfcandHandle, dynamic_cast<const reco::Candidate *>(&obj), 0.05, 0.2, 10., false, false, *rhoHandle);
 		
 		//std::cout<<"Relative Isolation (Delta Bet) = "<<relIsoMini<<std::endl;
 		//std::cout<<"Relative Isolation (Effective Area) = "<<relIsoMiniEffArea<<std::endl;
