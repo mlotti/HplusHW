@@ -127,6 +127,7 @@ def GetHistoKwargs(histoName):
         _opts["xmax"] = 400
         _cutBox       = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         if "tetrajet" in histoName.lower():
+            _rebinX = 1 #fixme
             _opts["xmin"] =  100
             _opts["xmax"] = 1000
     elif "met" in histoName.lower():
@@ -303,12 +304,12 @@ def main(opts):
         folderName = "ForFakeBNormalization"        
         selections = "_AfterAllSelections" # "AfterStandardSelections
         histoName  = "LdgTrijetMass" + selections
-        if 0:
+        if 1:
             folderName = "ForFakeBMeasurement"
-            histoName  = "MET" + selections
+            #histoName  = "MET" + selections
             histoName  = "LdgTetrajetMass" + selections
-            histoName  = "DeltaPhiLdgTrijetBJetTetrajetBJet" + selections
-            histoName  = "DeltaRLdgTrijetBJetTetrajetBJet" + selections
+            #histoName  = "DeltaPhiLdgTrijetBJetTetrajetBJet" + selections
+            #histoName  = "DeltaRLdgTrijetBJetTetrajetBJet" + selections
 
         PlotHistogramsAndCalculateTF(datasetsMgr, histoName, folderName, opts)
     return
