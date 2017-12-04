@@ -23,6 +23,8 @@ and another for execution. It is also assumed that all the software are installe
 variable set correctly on the execution shell.
 
 USAGE (LXPLUS):
+cd CMSSW_X_Y_Z
+cmsenv
 hplusJsonLumicalc.py <json_file>
 
 USAGE (LPC (r outside LXPLUS in general):
@@ -212,10 +214,10 @@ def CallBrilcalc(BeamStatus, CorrectionTag, LumiUnit, InputFile, printOutput=Tru
         Print("http://cms-service-lumi.web.cern.ch/cms-service-lumi/brilwsdoc.html")
         sys.exit()
 
-    # Set correct environment
-    os.environ["BRIL"]    = "BRIL=brilconda-3.1.3"
-    os.environ["BRILDIR"] = "BRILDIR=/afs/cern.ch/cms/lumi/$BRIL"
-    os.environ["PATH"]    = "PATH=$HOME/.local/bin:$BRILDIR/bin:$PATH"
+    # Set correct environment (needed?)
+    # os.environ["BRIL"]    = "BRIL=brilconda-3.1.3"
+    # os.environ["BRILDIR"] = "BRILDIR=/afs/cern.ch/cms/lumi/$BRIL"
+    # os.environ["PATH"]    = "PATH=$HOME/.local/bin:$BRILDIR/bin:$PATH"
     # Above 3 lines are analogous to thsee 3 lines in a sh script:
     # export BRIL=brilconda-3.1.3
     # export BRILDIR=/afs/cern.ch/cms/lumi/$BRIL
@@ -318,7 +320,15 @@ def main(opts, args):
 
     # if lumi.joson already exists, load
     if os.path.exists(opts.logFile):
-        raise Exception("Destination file \"%s\% already exists. Ue --overwrite/-o option to overwrite" % (opts.logFile) )
+        # raise Exception("Destination file \"%s\% already exists. Ue --overwrite/-o option to overwrite" % (opts.logFile) )
+        msg    = "Destination log file \"%s\" already exists. Delete it?" % (opts.logFile)
+        cmd    = "rm -f " + opts.logFile
+        resume = AskUser(msg, True)
+        if resume:
+            os.system(cmd)
+        else:
+            Print("Aborting!", True)
+            sys.exit()
 
     # Execute the command
     ret, output =  CallBrilcalc(BeamStatus='"STABLE BEAMS"', CorrectionTag=opts.normTag, LumiUnit=opts.lumiUnit, InputFile=opts.jsonFile)
