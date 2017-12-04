@@ -212,6 +212,15 @@ def CallBrilcalc(BeamStatus, CorrectionTag, LumiUnit, InputFile, printOutput=Tru
         Print("http://cms-service-lumi.web.cern.ch/cms-service-lumi/brilwsdoc.html")
         sys.exit()
 
+    # Set correct environment
+    os.environ["BRIL"]    = "BRIL=brilconda-3.1.3"
+    os.environ["BRILDIR"] = "BRILDIR=/afs/cern.ch/cms/lumi/$BRIL"
+    os.environ["PATH"]    = "PATH=$HOME/.local/bin:$BRILDIR/bin:$PATH"
+    # Above 3 lines are analogous to thsee 3 lines in a sh script:
+    # export BRIL=brilconda-3.1.3
+    # export BRILDIR=/afs/cern.ch/cms/lumi/$BRIL
+    # export PATH=$HOME/.local/bin:$BRILDIR/bin:$PATH
+
     # Execute the command (e.g. brilcalc lumi -b "STABLE BEAMS" --normtag opts.normTag -u /pb -i opts.jsonFile)
     cmd     = [exe, "lumi", "-b", BeamStatus, "--normtag", CorrectionTag, "-u", LumiUnit, "-i", InputFile]
     cmd_ssh = ["-c", "offsite"]
@@ -309,7 +318,7 @@ def main(opts, args):
 
     # if lumi.joson already exists, load
     if os.path.exists(opts.logFile):
-        raise Exception("Destination file \"%s\% already exists. USe --overwrite/-o option to overwrite" % (opts.logFile) )
+        raise Exception("Destination file \"%s\% already exists. Ue --overwrite/-o option to overwrite" % (opts.logFile) )
 
     # Execute the command
     ret, output =  CallBrilcalc(BeamStatus='"STABLE BEAMS"', CorrectionTag=opts.normTag, LumiUnit=opts.lumiUnit, InputFile=opts.jsonFile)
