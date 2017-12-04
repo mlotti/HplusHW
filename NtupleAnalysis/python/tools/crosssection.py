@@ -215,6 +215,15 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("WWTo4Q", {
             "13": 51.723 , #[17]
             }),
+    CrossSection("WWToLNuQQ", {
+            "13": 49.997, #[17] 
+            }),
+    CrossSection("WWTo2L2Nu", {
+            "13": 12.178, #[17]
+            }),
+    CrossSection("WWTo4Q, {
+            "13": 51.723 , #[17]
+            }),
     CrossSection("WZ", {
             "7": 18.2, # [3]
             "8": 33.21, # [9], took value for CTEQ PDF since CTEQ6L1 was used in pythia simulation
@@ -474,6 +483,7 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("ST_s_channel_4f_inclusiveDecays", {
             "13": 11.36, # [19]
             }),
+
     ########################################### Added for H+->tb
     CrossSection("QCD_bEnriched_HT100to200", {
             "13": 1.318e+06, # 1.318e+06 +- 6.249e+03 pb [16] (only 1 input file used)
