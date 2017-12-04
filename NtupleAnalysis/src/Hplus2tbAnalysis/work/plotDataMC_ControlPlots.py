@@ -127,17 +127,13 @@ def main(opts):
         datasetsMgr.loadLuminosities() # from lumi.json
 
         # Set/Overwrite cross-sections
-        datasetsToRemove = ["QCD-b"]#, "QCD_HT50to100", "QCD_HT100to200"]#, "QCD_HT200to300"]#, "QCD_HT300to500"]
+        datasetsToRemove = ["QCD-b", "QCD_HT50to100", "QCD_HT100to200", "QCD_HT200to300"] # QCD_HT removed should NOT make a noticable difference
+        #datasetsToRemove = ["QCD-b"]
         for d in datasetsMgr.getAllDatasets():
             if "ChargedHiggs" in d.getName():
                 datasetsMgr.getDataset(d.getName()).setCrossSection(1.0) # ATLAS 13 TeV H->tb exclusion limits
                 if d.getName() != opts.signal:
                     datasetsToRemove.append(d.getName())
-
-
-        datasetsMgr.PrintCrossSections()
-        print "EXITING!"
-        sys.exit()
 
         if opts.verbose:
             datasetsMgr.PrintCrossSections()
