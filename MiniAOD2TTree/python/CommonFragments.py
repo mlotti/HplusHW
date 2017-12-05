@@ -19,7 +19,7 @@ def produceCustomisations(process, isData):
     process.CustomisationsSequence = cms.Sequence()
 #    produceJets(process, isData)
 #    reproduceJEC(process)
-#    reproduceElectronID(process)
+    reproduceElectronID(process)      # Marina (To produce MVA)
     reproduceMETNoiseFilters(process)
     reproduceMET(process, isData)
 #    reproduceJEC(process)
@@ -64,7 +64,7 @@ def produceJets(process, isData):
     getattr( process, 'updatedPatJetsAK4PFCHS').userData.userInts.src   += ['QGTagger'+'AK4PFCHS'+':mult']
 
     jetToolbox( process, "ak8", "ak8JetSubs", "out",
-                addSoftDrop=True, addSoftDropSubjets=True, addNsub=True,
+                addSoftDrop=True, addSoftDropSubjets=True, addNsub=True, addNsubSubjets=True,
                 postFix='')
     
     return
@@ -112,7 +112,9 @@ def reproduceElectronID(process):
     print "=== Customisation: reproducing electron ID discriminators"
     switchOnVIDElectronIdProducer(process, DataFormat.MiniAOD)
     # define which IDs we want to produce and add them to the VID producer
-    for idmod in ['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_PHYS14_PU20bx25_nonTrig_V1_cff']:
+    for idmod in ['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring16_GeneralPurpose_V1_cff',
+                  #'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_PHYS14_PU20bx25_nonTrig_V1_cff', 
+                  ]:   # Marina
         setupAllVIDIdsInModule(process, idmod, setupVIDElectronSelection)
     process.CustomisationsSequence += process.egmGsfElectronIDSequence
 

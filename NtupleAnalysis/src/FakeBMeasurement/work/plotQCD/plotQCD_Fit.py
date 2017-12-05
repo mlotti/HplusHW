@@ -1,20 +1,50 @@
 #!/usr/bin/env python
 '''
 Description:
-This scipt plots the TH1 histograms that compare EWK with QCD shapes, 
-for Baseline and Inverted analysis modes.
+This script produces QCD normalization factors by running a fitting script.
+The steps followed are the following:
+1) The user defines the histograms to be used as templates. Two are needed:
+   a) Baseline EWK (MC)
+   b) Inverted QCD (Data)
+This will be used in the fitting processes to extract the templates for:
+   a) EWK
+   b) QCD
+This step gives us the two fitted templates:
+   a) fit_EWKInclusive_Baseline_Inclusive.png
+   b) fit_QCD_Inverted_Inclusive.png
 
-For the definition of the counter class see:
-HiggsAnalysis/NtupleAnalysis/scripts
+2) The two extracted templates (from fits) are then used to fit on "Baseline Data" 
+(our Signal Region) as a linear combination with the fraction of QCD (f) as the only 
+free parameter of the fit:
+N = fQCD + (1-f)EWK
+This step gives us the final fit and the fit parameter:
+   a) finalFit_Inclusive.png 
+   b) finalFit_Inclusive_log.png
+   c) f = Fraction of QCD Events
 
-For more counter tricks and optios see also:
-HiggsAnalysis/NtupleAnalysis/scripts/hplusPrintCounters.py
+In addition to the above, the normalisation factor is also extrated:
+   a) R = nQCDBaseline / nQCDInverted
+   b) R = nFakeBaseline / nFakeInverted 
+where the later is not used in any way (HToTauNu legacy)
+These normalisation factor are saved under:
+   <pseudo_mcrab_directory> QCDInvertedNormalizationFactors_Run2016_80to1000.py
+in an automatically-generated python class. 
+
+This file/class is later used (read) by the makeInvertedPseudoMulticrab.py in order to normalise
+properly the "Control-Region" data.
+
 
 Usage:
 ./plotQCD_Fit.py -m <pseudo_mcrab_directory> [opts]
 
+
 Examples:
-./plotQCD_Fit.py -m FakeBMeasurement_StdSelections_TopCut100_AllSelections_HLTBJetTrgMatch_TopCut10_H2Cut0p5_170720_104631/ --url -o ""
+./plotQCD_Fit.py -m FakeBMeasurement_SignalTriggers_NoTrgMatch_StdSelections_TopCut_AllSelections_TopCut10_170725_030408/ --url -o ""
+
+
+Last Used:
+./plotQCD_Fit.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/QCDMeaurement/Jet6Pt40Jet7Pt30/FakeBMeasurement_GE2MediumPt40Pt30_GE1ExtraLooseWithManyMaxDiscrWP_StdSelections_TopCut100_AllSelections_TopCut10_H2Cut0p5_RandomFailedBJetSort_170929_005352 -o OptInvertedBJetsDiscrMaxCutValue0p7 --url
+
 
 Fit options:
 https://root.cern.ch/root/htmldoc/guides/users-guide/FittingHistograms.html#the-th1fit-method
@@ -41,6 +71,7 @@ from optparse import OptionParser
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
+ROOT.gErrorIgnoreLevel = ROOT.kFatal #kPrint = 0,  kInfo = 1000, kWarning = 2000, kError = 3000, kBreak = 4000, kSysError = 5000, kFatal = 6000
 from ROOT import *
 
 import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
@@ -53,6 +84,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 import HiggsAnalysis.FakeBMeasurement.QCDNormalization as QCDNormalization
+import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
 
 #================================================================================================ 
 # Function Definition
@@ -65,7 +97,6 @@ def Print(msg, printHeader=False):
     else:
         print "\t", msg
     return
-
 
 def Verbose(msg, printHeader=True, verbose=False):
     if not opts.verbose:
@@ -87,7 +118,7 @@ def GetLumi(datasetsMgr):
 
 def GetListOfEwkDatasets():
     Verbose("Getting list of EWK datasets")
-    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"] #DEFAULT!
 
 def GetHistoKwargs(histoName):
     '''
@@ -121,7 +152,6 @@ def GetHistoKwargs(histoName):
         }
     return kwargs
 
-
 def GetDatasetsFromDir(opts):
     Verbose("Getting datasets")
     
@@ -149,285 +179,6 @@ def GetDatasetsFromDir(opts):
         raise Exception("This should never be reached")
     return datasets
     
-
-def main(opts):
-    Verbose("main function")
-
-    #optModes = ["", "OptChiSqrCutValue40", "OptChiSqrCutValue60", "OptChiSqrCutValue80", "OptChiSqrCutValue100", "OptChiSqrCutValue120", "OptChiSqrCutValue140"]
-    optModes = [""]
-
-    if opts.optMode != None:
-        optModes = [opts.optMode]
-
-    # For-loop: All opt Mode
-    for opt in optModes:
-        opts.optMode = opt
-
-        # Setup & configure the dataset manager 
-        datasetsMgr = GetDatasetsFromDir(opts)
-        datasetsMgr.updateNAllEventsToPUWeighted()
-        datasetsMgr.loadLuminosities() # from lumi.json
-        if opts.verbose:
-            datasetsMgr.PrintCrossSections()
-            datasetsMgr.PrintLuminosities()
-            
-        # Get the PSets:
-        thePSets = datasetsMgr.getDataset("TT").getParameterSet()
-        if 0:
-            Print("Printing the PSet:\n" + thePSets, True)
-            sys.exit()
-
-        # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
-        plots.mergeRenameReorderForDataMC(datasetsMgr) 
-        
-        # Remove datasets
-        removeList = ["QCD", "QCD-b", "Charged"]
-        for d in removeList:
-            datasetsMgr.remove(filter(lambda name: d in name, datasetsMgr.getAllDatasetNames()))
-        datasetsMgr.PrintInfo()
-        
-        # Re-order datasets (different for inverted than default=baseline)
-        newOrder = ["Data"]
-        newOrder.extend(GetListOfEwkDatasets())
-        datasetsMgr.selectAndReorder(newOrder)
-
-        # Merge EWK samples
-        datasetsMgr.merge("EWK", GetListOfEwkDatasets())
-            
-        # Print dataset information
-        datasetsMgr.PrintInfo()
-
-        # Apply TDR style
-        style = tdrstyle.TDRStyle()
-        style.setOptStat(True)
-        style.setGridX(False)
-        style.setGridY(False)
-        
-        # Do the fit on the histo after ALL selections (incl. topology cuts)
-        histoName  = "LdgTrijetMass_AfterStandardSelections" #"Inverted_TopMassReco_LdgTrijetM_AfterAllSelections"
-        folderName = "ForDataDrivenCtrlPlots" #"ForFakeBMeasurement"
-        PlotAndFitTemplates(datasetsMgr, histoName, folderName, opts)
-    return
-
-def PlotAndFitTemplates(datasetsMgr, histoName, folderName, opts, doFakeB = False):
-    Verbose("PlotAndFitTemplates()")
-
-    # Definitions
-    inclusiveFolder = folderName
-    genuineBFolder  = folderName + "EWKGenuineB"
-    fakeBFolder     = folderName + "EWKFakeB"
-    if doFakeB:
-        ewkFolder = genuineBFolder
-        bkgName   = "FakeB"
-    else:
-        ewkFolder = inclusiveFolder
-        bkgName   = "QCD"
-
-    # Create the plotters
-    p1 = plots.DataMCPlot(datasetsMgr, "%s/%s" % (inclusiveFolder, histoName) )
-    p2 = plots.DataMCPlot(datasetsMgr, "%s/%s" % (ewkFolder      , histoName) )
-    p3 = plots.DataMCPlot(datasetsMgr, "%s/%s" % (inclusiveFolder, histoName) )
-    p4 = plots.DataMCPlot(datasetsMgr, "%s/%s" % (ewkFolder      , histoName) )
-    
-    if 0:
-        p1.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinX(2))
-        p2.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinX(2))
-        p3.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinX(2))
-        p4.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinX(2))
-        
-    # Get the histograms
-    Data_baseline  = p1.histoMgr.getHisto("Data").getRootHisto().Clone("Baseline Data") #also legend entry name
-    FakeB_baseline = p1.histoMgr.getHisto("Data").getRootHisto().Clone("Baseline " + bkgName)
-    EWK_baseline   = p2.histoMgr.getHisto("EWK").getRootHisto().Clone("Baseline EWK")
-    Data_inverted  = p3.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted Data")
-    FakeB_inverted = p3.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted " + bkgName)
-    EWK_inverted   = p4.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted EWK")
-
-    # Create FakeB histos: FakeB = (Data - EWK)
-    #Print(ShellStyles.WarningLabel() + msg, True)
-    FakeB_baseline.Add(EWK_baseline, -1)
-    FakeB_inverted.Add(EWK_inverted, -1)
-
-    # Create the final plot object
-    compareHistos = [EWK_baseline]
-    p = plots.ComparisonManyPlot(FakeB_inverted, compareHistos, saveFormats=[])
-    p.setLuminosity(GetLumi(datasetsMgr))
-
-    # Apply styles
-    p.histoMgr.forHisto("Inverted " + bkgName, styles.getFakeBStyle() )
-    p.histoMgr.forHisto("Baseline EWK", styles.getAltEWKStyle() )
-
-    # Set draw style
-    p.histoMgr.setHistoDrawStyle("Inverted " + bkgName, "P")
-    p.histoMgr.setHistoDrawStyle("Baseline EWK", "AP")
-
-    # Set legend style
-    p.histoMgr.setHistoLegendStyle("Inverted " + bkgName, "P")
-    p.histoMgr.setHistoLegendStyle("Baseline EWK" , "LP")
-    # p.histoMgr.setHistoLegendStyleAll("LP")
-
-    # Set legend labels
-    if doFakeB:
-        p.histoMgr.setHistoLegendLabelMany({
-                "Baseline EWKGenuineB": "EWK (GenuineB)",
-                "Inverted FakeB"      : "Fake-b",
-                })
-    else:
-        p.histoMgr.setHistoLegendLabelMany({
-                "Baseline EWK"       : "EWK",
-                "Inverted " + bkgName: "QCD",
-                })
-
-    #=========================================================================================
-    # Set Minimizer Options
-    #=========================================================================================
-    '''
-    https://root.cern.ch/root/htmldoc/guides/users-guide/FittingHistograms.html#the-th1fit-method
-    https://root.cern.ch/root/html/src/ROOT__Math__MinimizerOptions.h.html#a14deB
-    '''
-    if 0:
-        ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Migrad")
-        ROOT.Math.MinimizerOptions.SetDefaultStrategy(2) # Speed = 0, Balance = 1, Robustness = 2
-        ROOT.Math.MinimizerOptions.SetDefaultMaxFunctionCalls(5000) # set maximum of function calls
-        ROOT.Math.MinimizerOptions.SetDefaultMaxIterations(5000) # set maximum iterations (one iteration can have many function calls)
-    if 0:
-        ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Simplex")
-        ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Minimize")
-        ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "MigradImproved")
-        ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Scan")
-        ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Seek")
-        ROOT.Math.MinimizerOptions.SetDefaultErrorDef(1) # error definition (=1. for getting 1 sigma error for chi2 fits)
-        ROOT.Math.MinimizerOptions.SetDefaultMaxFunctionCalls(1000000) # set maximum of function calls
-        ROOT.Math.MinimizerOptions.SetDefaultMaxIterations(1000000) # set maximum iterations (one iteration can have many function calls)
-        ROOT.Math.MinimizerOptions.SetDefaultPrecision(-1) # precision in the objective function calculation (value <= 0 means left to default)
-        ROOT.Math.MinimizerOptions.SetDefaultPrintLevel(1) # None = -1, Reduced = 0, Normal = 1, ExtraForProblem = 2, Maximum = 3 
-        ROOT.Math.MinimizerOptions.SetDefaultTolerance(1e-03)  # Minuit/Minuit2 converge when the EDM is less a given tolerance. (default 1e-03)
-    if 1:
-        hLine  = "="*45
-        title  = "{:^45}".format("Minimzer Options")
-        print "\t", hLine
-        print "\t", title
-        print "\t", hLine
-        minOpt = ROOT.Math.MinimizerOptions()
-        minOpt.Print()
-        print "\t", hLine, "\n"
-
-    #=========================================================================================
-    # Start fit process
-    #=========================================================================================
-    binLabels = ["Inclusive"]
-    FITMIN    =   80
-    FITMAX    = 1000
-    #moduleInfoString = opts.dataEra + "_" + opts.searchMode + "_" + opts.optMode
-    moduleInfoString = opts.optMode
-
-    #=========================================================================================
-    # Create templates (EWK fakes, EWK genuine, QCD; data template is created by manager)
-    #=========================================================================================
-    manager = QCDNormalization.QCDNormalizationManagerDefault(binLabels, opts.mcrab, moduleInfoString)
-    template_EWKFakeB_Baseline     = manager.createTemplate("EWKFakeB_Baseline")
-    template_EWKFakeB_Inverted     = manager.createTemplate("EWKFakeB_Inverted")
-    template_EWKInclusive_Baseline = manager.createTemplate("EWKInclusive_Baseline")
-    template_EWKInclusive_Inverted = manager.createTemplate("EWKInclusive_Inverted")
-    template_FakeB_Baseline        = manager.createTemplate("QCD_Baseline")
-    template_FakeB_Inverted        = manager.createTemplate("QCD_Inverted")
-        
-    #======================================================================2==================
-    # EWK
-    #=========================================================================================
-    default = False
-    if default:
-        par0 = [+7.1817e-01,   0.0,   1.0] # cb_norm 
-        par1 = [+1.7684e+02, 150.0, 200.0] # cb_mean
-        par2 = [+2.7287e+01,  20.0,  40.0] # cb_sigma (fixed for chiSq=2)
-        par3 = [-3.9174e-01,  -0.5,   0.0] # cb_alpha (fixed for chiSq=2)
-        par4 = [+2.5104e+01,   0.0,  50.0] # cb_n
-        par5 = [+7.4724e-05,   0.0,   1.0] # expo_norm
-        par6 = [-4.6848e-02,  -1.0,   0.0] # expo_a
-        par7 = [+2.1672e+02, 200.0, 250.0] # gaus_mean (fixed for chiSq=2)
-        par8 = [+6.3201e+01,  20.0,  80.0] # gaus_sigma
-        template_EWKInclusive_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=0, norm=1, rejectPoints=0), FITMIN, FITMAX)
-        template_EWKInclusive_Baseline.setDefaultFitParam(defaultInitialValue = None,
-                                                          defaultLowerLimit   = [par0[1], par1[1], par2[0], par3[0], par4[1], par5[1], par6[1], par7[0], par8[1]],
-                                                          defaultUpperLimit   = [par0[2], par1[2], par2[0], par3[0], par4[2], par5[2], par6[2], par7[0], par8[2]])
-    else:
-        par0 = [+7.1817e-01,   0.0,   1.0] # cb_norm 
-        par1 = [+1.7684e+02, 100.0, 200.0] # cb_mean
-        par2 = [+2.7287e+01,  00.0, 100.0] # cb_sigma (fixed for chiSq=2)
-        par3 = [-3.9174e-01,  -1.0,   0.0] # cb_alpha (fixed for chiSq=2)
-        par4 = [+2.5104e+01,   0.0, 100.0] # cb_n
-        par5 = [+7.4724e-05,   0.0,   1.0] # expo_norm
-        par6 = [-4.6848e-02,  -1.0,   0.0] # expo_a
-        par7 = [+2.1672e+02, 200.0, 300.0] # gaus_mean (fixed for chiSq=2)
-        par8 = [+6.3201e+01,   0.0, 100.0] # gaus_sigma        
-        template_EWKInclusive_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=0, norm=1, rejectPoints=0), FITMIN, FITMAX)
-        template_EWKInclusive_Baseline.setDefaultFitParam(defaultInitialValue = None,
-                                                          defaultLowerLimit   = [par0[1], par1[1], par2[0], par3[1], par4[1], par5[1], par6[1], par7[0], par8[1]],
-                                                          defaultUpperLimit   = [par0[2], par1[2], par2[0], par3[2], par4[2], par5[2], par6[2], par7[0], par8[2]])
-
-
-    #=========================================================================================
-    # FakeB/QCD
-    #=========================================================================================
-    default = True
-    if default:
-        par0 = [8.9743e-01,   0.0 ,    1.0] # lognorm_norm
-        par1 = [2.3242e+02, 300.0 , 1000.0] # lognorm_mean
-        par2 = [1.4300e+00,   0.5,    10.0] # lognorm_shape
-        par3 = [2.2589e+02, 100.0 ,  500.0] # gaus_mean
-        par4 = [4.5060e+01,   0.0 ,  100.0] # gaus_sigma
-    else:
-        par0 = [8.9743e-01,   0.0 ,    1.0] # lognorm_norm
-        par1 = [2.3242e+02, 200.0 ,  400.0] # lognorm_mean
-        par2 = [1.4300e+00,   0.5,    10.0] # lognorm_shape
-        par3 = [2.2589e+02,  00.0 ,  300.0] # gaus_mean
-        par4 = [4.5060e+01,   0.0 ,  100.0] # gaus_sigma
-    template_FakeB_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunctionAlt", boundary=0, norm=1, rejectPoints=0), FITMIN, FITMAX)
-    template_FakeB_Inverted.setDefaultFitParam(defaultInitialValue = None,
-                                               defaultLowerLimit   = [par0[1], par1[1], par2[1], par3[1], par4[1] ],
-                                               defaultUpperLimit   = [par0[2], par1[2], par2[2], par3[2], par4[2] ])    
-        
-    #=========================================================================================
-    # Set histograms to the templates
-    #=========================================================================================
-    if doFakeB:
-        template_EWKFakeB_Baseline.setHistogram(EWKGenuineB_baseline, "Inclusive")
-        template_EWKFakeB_Inverted.setHistogram(EWKGenuineB_inverted, "Inclusive")
-        template_EWKInclusive_Baseline.setHistogram(EWKGenuineB_baseline, "Inclusive")
-        template_EWKInclusive_Inverted.setHistogram(EWKGenuineB_inverted, "Inclusive")
-    else:
-        template_EWKFakeB_Baseline.setHistogram(EWK_baseline, "Inclusive")
-        template_EWKFakeB_Inverted.setHistogram(EWK_inverted, "Inclusive")
-        template_EWKInclusive_Baseline.setHistogram(EWK_baseline, "Inclusive")
-        template_EWKInclusive_Inverted.setHistogram(EWK_inverted, "Inclusive")
-    template_FakeB_Baseline.setHistogram(FakeB_baseline, "Inclusive")
-    template_FakeB_Inverted.setHistogram(FakeB_inverted, "Inclusive")
-
-    #=========================================================================================
-    # Make plots of templates
-    #=========================================================================================
-    manager.plotTemplates()
-    
-    #=========================================================================================
-    # Fit individual templates to histogram "data_baseline", with custom fit options
-    #=========================================================================================
-    fitOptions = "R B L W 0 Q M"
-    manager.calculateNormalizationCoefficients(Data_baseline, fitOptions, FITMIN, FITMAX)
-    
-    # Only for when the measurement is done in bins
-    fileName = os.path.join(opts.mcrab, "QCDInvertedNormalizationFactors%s.py"% ( getModuleInfoString(opts) ) )
-    manager.writeNormFactorFile(fileName, opts)
-    
-    if 1:        
-        saveName = fileName.replace("/", "_").replace(".py", "")        
-
-        # Draw the histograms
-        plots.drawPlot(p, saveName, **GetHistoKwargs(histoName) ) #the "**" unpacks the kwargs_ 
-
-        # Save plot in all formats
-        SavePlot(p, saveName, os.path.join(opts.saveDir, "Fit") ) 
-    return
-
 def getHisto(datasetsMgr, datasetName, histoName, analysisType):
     Verbose("getHisto()", True)
 
@@ -462,10 +213,329 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
         plot.saveAs(saveName, formats=saveFormats)
     return
 
-
 #================================================================================================ 
 # Main
 #================================================================================================ 
+def main(opts):
+    Verbose("main function")
+
+    # Obtain dsetMgrCreator and register it to module selector
+    dsetMgrCreator = dataset.readFromMulticrabCfg(directory=opts.mcrab)
+
+    # Get list of eras, modes, and optimisation modes
+    erasList      = dsetMgrCreator.getDataEras()
+    modesList     = dsetMgrCreator.getSearchModes()
+    optList       = dsetMgrCreator.getOptimizationModes()
+    sysVarList    = dsetMgrCreator.getSystematicVariations()
+    sysVarSrcList = dsetMgrCreator.getSystematicVariationSources()
+
+    # Todo: Print settings table
+    if 0:
+        print erasList
+        print
+        print modesList
+        print
+        print optList
+        print
+        print sysVarList
+        print 
+        print sysVarSrcList
+        
+    # If user does not define optimisation mode do all of them
+    if opts.optMode == None:
+        if len(optList) < 1:
+            optList.append("")
+        else:
+            pass
+        optModes = optList
+    else:
+        optModes = [opts.optMode]
+
+    # For-loop: All opt Mode
+    for opt in optModes:
+        opts.optMode = opt
+
+        # Setup & configure the dataset manager 
+        datasetsMgr = GetDatasetsFromDir(opts)
+        
+        datasetsMgr.updateNAllEventsToPUWeighted()
+        datasetsMgr.loadLuminosities() # from lumi.json
+        if opts.verbose:
+            datasetsMgr.PrintCrossSections()
+            datasetsMgr.PrintLuminosities()
+            
+        # Get the PSets:
+        thePSets = datasetsMgr.getDataset("TT").getParameterSet()
+        if 0:
+            Print("Printing the PSet:\n" + thePSets, True)
+            sys.exit()
+
+        # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
+        plots.mergeRenameReorderForDataMC(datasetsMgr) 
+        
+        # Remove datasets
+        removeList = ["QCD", "QCD-b", "Charged"]
+        for d in removeList:
+            datasetsMgr.remove(filter(lambda name: d in name, datasetsMgr.getAllDatasetNames()))
+        if 0:
+            datasetsMgr.PrintInfo()
+        
+        # Re-order datasets (different for inverted than default=baseline)
+        newOrder = ["Data"]
+        newOrder.extend(GetListOfEwkDatasets())
+        datasetsMgr.selectAndReorder(newOrder)
+
+        # Merge EWK samples
+        datasetsMgr.merge("EWK", GetListOfEwkDatasets())
+            
+        # Print dataset information
+        datasetsMgr.PrintInfo()
+
+        # Apply TDR style
+        style = tdrstyle.TDRStyle()
+        style.setOptStat(True)
+        style.setGridX(False)
+        style.setGridY(False)
+        
+        # Do the fit on the histo after ALL selections (incl. topology cuts)
+        folderName = "ForFakeBNormalization"
+        histoName  = "LdgTrijetMass_AfterStandardSelections"
+        PlotAndFitTemplates(datasetsMgr, histoName, folderName, opts)
+    return
+
+def PlotAndFitTemplates(datasetsMgr, histoName, inclusiveFolder, opts):
+    Verbose("PlotAndFitTemplates()")
+
+    # Variable definition
+    bkgName         = "QCD"
+    genuineBFolder  = inclusiveFolder + "EWKGenuineB"
+    fakeBFolder     = inclusiveFolder + "EWKFakeB"
+    baselineHisto   = "%s/%s" % (inclusiveFolder, "Baseline_" + histoName)
+    invertedHisto   = "%s/%s" % (inclusiveFolder, "Inverted_" + histoName)
+
+    # Create the histograms
+    pBaseline  = plots.DataMCPlot(datasetsMgr, baselineHisto)
+    pInverted  = plots.DataMCPlot(datasetsMgr, invertedHisto)
+            
+    # Get the desired histograms (Baseline)
+    Data_baseline  = pBaseline.histoMgr.getHisto("Data").getRootHisto().Clone("Baseline Data") #also legend entry name
+    FakeB_baseline = pBaseline.histoMgr.getHisto("Data").getRootHisto().Clone("Baseline " + bkgName)
+    EWK_baseline   = pBaseline.histoMgr.getHisto("EWK").getRootHisto().Clone("Baseline EWK")
+
+    # Get the desired histograms (Inverted)
+    # Data_inverted  = pInverted.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted Data") #not needed
+    FakeB_inverted = pInverted.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted " + bkgName)
+    EWK_inverted   = pInverted.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted EWK")
+
+    # Subtact EWK-M Cfrom Data (QCD = Data - EWK)
+    FakeB_baseline.Add(EWK_baseline, -1)
+    FakeB_inverted.Add(EWK_inverted, -1)
+
+    # Rebin the EWK-MC histo (significant fit improvement - opposite effect for QCD fit)
+    EWK_baseline.RebinX(1)
+    EWK_inverted.RebinX(1)
+    if 0:
+        print "+"*100
+        Print("FIXME: Optimal is 1 (i.e. bin width of 10 GeV/c^{2})")
+        print "+"*100
+        FakeB_inverted.RebinX(2)
+    
+    # Create the final plot object
+    compareHistos = [EWK_baseline]
+    p = plots.ComparisonManyPlot(FakeB_inverted, compareHistos, saveFormats=[])
+
+    # Apply styles
+    p.histoMgr.forHisto("Inverted " + bkgName, styles.getFakeBStyle() )
+    p.histoMgr.forHisto("Baseline EWK", styles.getAltEWKStyle() )
+
+    # Set draw style
+    p.histoMgr.setHistoDrawStyle("Inverted " + bkgName, "P")
+    p.histoMgr.setHistoDrawStyle("Baseline EWK", "AP")
+
+    # Set legend style
+    p.histoMgr.setHistoLegendStyle("Inverted " + bkgName, "P")
+    p.histoMgr.setHistoLegendStyle("Baseline EWK" , "LP")
+
+    # Set legend labels
+    p.histoMgr.setHistoLegendLabelMany({
+            "Baseline EWK"       : "EWK",
+            "Inverted " + bkgName: "QCD",
+            })
+    
+    #=========================================================================================
+    # Set Minimizer Options
+    #=========================================================================================
+    '''
+    https://root.cern.ch/root/htmldoc/guides/users-guide/FittingHistograms.html#the-th1fit-method
+    https://root.cern.ch/root/html/src/ROOT__Math__MinimizerOptions.h.html#a14deB
+    '''
+    if 0:
+        ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Migrad")
+        ROOT.Math.MinimizerOptions.SetDefaultStrategy(1) # Speed = 0, Balance = 1, Robustness = 2
+        ROOT.Math.MinimizerOptions.SetDefaultMaxFunctionCalls(5000) # set maximum of function calls
+        ROOT.Math.MinimizerOptions.SetDefaultMaxIterations(5000) # set maximum iterations (one iteration can have many function calls)
+    if 0:
+        ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Simplex")
+        ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Minimize")
+        ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "MigradImproved")
+        ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Scan")
+        ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Seek")
+        ROOT.Math.MinimizerOptions.SetDefaultErrorDef(1) # error definition (=1. for getting 1 sigma error for chi2 fits)
+        ROOT.Math.MinimizerOptions.SetDefaultMaxFunctionCalls(1000000) # set maximum of function calls
+        ROOT.Math.MinimizerOptions.SetDefaultMaxIterations(1000000) # set maximum iterations (one iteration can have many function calls)
+        ROOT.Math.MinimizerOptions.SetDefaultPrecision(-1) # precision in the objective function calculation (value <= 0 means left to default)
+        ROOT.Math.MinimizerOptions.SetDefaultPrintLevel(1) # None = -1, Reduced = 0, Normal = 1, ExtraForProblem = 2, Maximum = 3 
+        ROOT.Math.MinimizerOptions.SetDefaultTolerance(1e-03)  # Minuit/Minuit2 converge when the EDM is less a given tolerance. (default 1e-03)
+    if 1:
+        hLine  = "="*45
+        title  = "{:^45}".format("Minimizer Options")
+        print "\t", hLine
+        print "\t", title
+        print "\t", hLine
+        minOpt = ROOT.Math.MinimizerOptions()
+        minOpt.Print()
+        print "\t", hLine, "\n"
+
+    #=========================================================================================
+    # Start fit process
+    #=========================================================================================
+    binLabels = ["Inclusive"]
+    moduleInfoString = opts.optMode #opts.dataEra + "_" + opts.searchMode + "_" + opts.optMode
+
+    #=========================================================================================
+    # Create templates (EWK fakes, EWK genuine, QCD; data template is created by manager)
+    #=========================================================================================
+    manager = QCDNormalization.QCDNormalizationManagerDefault(binLabels, opts.mcrab, moduleInfoString)
+
+    Print("Creating the normalization templates with appropriate template names", True)
+    template_EWKFakeB_Baseline     = manager.createTemplate("EWKFakeB_Baseline") #fixme-unused
+    template_EWKFakeB_Inverted     = manager.createTemplate("EWKFakeB_Inverted") #fixme-unused
+
+    template_EWKInclusive_Baseline = manager.createTemplate("EWKInclusive_Baseline")
+    template_EWKInclusive_Inverted = manager.createTemplate("EWKInclusive_Inverted")
+    
+    template_FakeB_Baseline        = manager.createTemplate("QCD_Baseline")
+    template_FakeB_Inverted        = manager.createTemplate("QCD_Inverted")
+
+    #========================================================================================
+    # EWK
+    #=========================================================================================
+    '''
+    Optimal fit (Chi2/D.O.F = 3.2)
+    TrialNumber:   1  ,     2,   3  ,     4 ,   5  ,    6,    7  ,
+    Chi2/DOF   :   2.6,   2.1,   2.4,    7.4,   2.6,  3.2,    1.5,
+    FITMIN     :  80.0,  80.0,  80.0,   80.0,  80.0,  80.0, 120.0,
+    FITMAX     : 800.0, 500.0, 600.0,  500.0, 800.0, 800.0, 500.0,
+    BinWidth   :  10  ,   5  ,  10  ,   10 ,   10  ,   5  ,   5  ,
+    
+    par3       : -3.9174e-01 (fixed) for ALL
+    '''
+    Print("Setting the fit-function to the EWK template", False)
+    FITMIN_EWK = 120
+    FITMAX_EWK = 500
+    par0 = [+7.1817e-01,   0.0,   1.0] # cb_norm 
+    par1 = [+1.7684e+02, 150.0, 200.0] # cb_mean
+    par2 = [+2.7287e+01,  20.0,  40.0] # cb_sigma (fixed for chiSq=2)
+    par3 = [-3.9174e-01,  -1.0,   0.0] # cb_alpha (fixed for chiSq=2)
+    par4 = [+2.5104e+01,   0.0,  50.0] # cb_n
+    par5 = [+7.4724e-05,   0.0,   1.0] # expo_norm
+    par6 = [-4.6848e-02,  -1.0,   0.0] # expo_a
+    par7 = [+2.1672e+02, 200.0, 250.0] # gaus_mean (fixed for chiSq=2)
+    par8 = [+6.3201e+01,  20.0,  80.0] # gaus_sigma
+    template_EWKInclusive_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=0, norm=1, rejectPoints=0), FITMIN_EWK, FITMAX_EWK)
+    template_EWKInclusive_Baseline.setDefaultFitParam(defaultInitialValue = None,
+                                                      defaultLowerLimit   = [par0[1], par1[1], par2[1], par3[0], par4[1], par5[1], par6[1], par7[1], par8[1]],
+                                                      defaultUpperLimit   = [par0[2], par1[2], par2[2], par3[0], par4[2], par5[2], par6[2], par7[2], par8[2]])
+
+    #=========================================================================================
+    # QCD
+    #=========================================================================================
+    '''
+    Optimal fit (Chi2/D.O.F = 2.9)
+    TrialNumber:   1,    2,    3,      4,    5,
+    Chi2/DOF   : 1.9,   2.9,     ,      ,  2.0,
+    FITMIN     : 120,    90,   90,    90,  120,
+    FITMAX     : 1000,  800,  700,   800,  900,
+    bPtochos   : True, True, True, False, True,
+    BinWidth   :    5,    5,    5,    10,    5,
+    '''
+    Print("Setting the fit-function to the QCD template", False)
+    FITMIN_QCD =  120
+    FITMAX_QCD =  900
+    bPtochos   = True
+    if bPtochos:
+        par0 = [  0.92,   0.0,   1.0] # lognorm_norm
+        par1 = [220.00, 180.0, 500.0] # lognorm_mean
+        par2 = [  1.44,   0.4,  10.0] # lognorm_shape
+        par3 = [   0.0,   0.0,   1.0] # exp_const
+        par4 = [  -0.01, -2.0,   0.0] # exp_coeff
+        par5 = [220.00, 100.0, 400.0] # gaus_mean
+        par6 = [ 40.00,   0.0,  60.0] # gaus_sigma
+        template_FakeB_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunction", boundary=0, norm=1, rejectPoints=0), FITMIN_QCD, FITMAX_QCD)
+        template_FakeB_Inverted.setDefaultFitParam(defaultInitialValue = [par0[0], par1[0], par2[0], par3[0], par4[0] , par5[0], par6[0] ],
+                                                   defaultLowerLimit   = [par0[1], par1[1], par2[1], par3[1], par4[1] , par5[1], par6[1] ],
+                                                   defaultUpperLimit   = [par0[2], par1[2], par2[2], par3[2], par4[2] , par5[2], par6[2] ])
+    else:
+        par0 = [  0.92,   0.0,   1.0] # lognorm_norm
+        par1 = [220.00, 180.0, 500.0] # lognorm_mean
+        par2 = [  1.44,   0.4,  10.0] # lognorm_shape
+        par3 = [220.00, 100.0, 400.0] # gaus_mean
+        par4 = [ 40.00,   0.0,  60.0] # gaus_sigma
+        template_FakeB_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunctionAlt", boundary=0, norm=1, rejectPoints=0), FITMIN_QCD, FITMAX_QCD)
+        template_FakeB_Inverted.setDefaultFitParam(defaultInitialValue = [par0[0], par1[0], par2[0], par3[0], par4[0] ],
+                                                   defaultLowerLimit   = [par0[1], par1[1], par2[1], par3[1], par4[1] ],
+                                                   defaultUpperLimit   = [par0[2], par1[2], par2[2], par3[2], par4[2] ])    
+        
+    #=========================================================================================
+    # Set histograms to the templates
+    #=========================================================================================
+    Print("Adding the appropriate histogram to each of the the templates", False)
+    template_EWKFakeB_Baseline.setHistogram(EWK_baseline, "Inclusive") #fixme
+    template_EWKFakeB_Inverted.setHistogram(EWK_inverted, "Inclusive") #fixme
+
+    template_EWKInclusive_Baseline.setHistogram(EWK_baseline, "Inclusive")
+    template_EWKInclusive_Inverted.setHistogram(EWK_inverted, "Inclusive")
+
+    template_FakeB_Baseline.setHistogram(FakeB_baseline, "Inclusive")
+    template_FakeB_Inverted.setHistogram(FakeB_inverted, "Inclusive")
+
+    #=========================================================================================
+    # Fit individual templates to histogram "Data_baseline", with custom fit options
+    #=========================================================================================
+    '''
+    [X,Y] = [EWK, QCD]
+
+    Optimal fit (Chi2/D.O.F = 2.9)
+    Chi2/DOF   :    5.8,      5.8,     4.1,    11.0,    10.8,     5.9,     5.3,     5.3,      5.3,
+    FITMIN     :     90,       90,      90,    80.0,    80.0,    90.0,    90.0,    90.0,    100.0,
+    FITMAX     :    900,      900,     900,   900.0,   900.0,   900.0,   900.0,   900.0,   1000.0,
+    TrialNumber:   [1,1],   [2,1], [1,2]  ,   [1.1],   [3,1],   [4,1],   [5,5],   [6,5],   [7,5],
+    f_{QCD}    : 0.79312, 0.65312, 0.82592, 0.76059, 0.75231, 0.79595, 0.79837, 0.66670, 0.72374,
+    StdSel D/B : 0.9    , 1.0    ,  ~0.90 ,    0.95,   ~0.95,   ~0.95,   ~0.95,     1.0,   
+    AllSel D/B :        ,        ,        ,        ,        ,        ,        ,     1.1,
+    '''
+    fitOptions  = "R L W 0 Q" #"R B L W 0 Q M"
+    FITMIN_DATA =  100
+    FITMAX_DATA = 1000
+    manager.calculateNormalizationCoefficients(Data_baseline, fitOptions, FITMIN_DATA, FITMAX_DATA)
+
+    # Warn user that entrie data region should be used for fitting! If not appropriate cuts must be applied
+    msg = "CAREFUL: The QCD Measurement method assumes that the INCLUSIVE data are fitted!"
+    msg+= " If you do not want to fit the entire region, you MUST cut away in the analysis the region excluded from the fit!"
+    if FITMIN_DATA > 0 or FITMAX_DATA < 1000:
+        Print(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle(), True) 
+    
+    Verbose("Write the normalisation factors to a python file", True)
+    fileName = os.path.join(opts.mcrab, "QCDInvertedNormalizationFactors%s.py"% ( getModuleInfoString(opts) ) )
+    manager.writeNormFactorFile(fileName, opts)
+    
+    # Not really needed to plot the histograms again
+    if 1:
+        saveName = histoName
+        plots.drawPlot(p, saveName, **GetHistoKwargs(histoName) ) #the "**" unpacks the kwargs_ 
+        SavePlot(p, saveName, os.path.join(opts.saveDir, "Fit", opts.optMode) ) 
+    return
+
 if __name__ == "__main__":
     '''
     https://docs.python.org/3/library/argparse.html

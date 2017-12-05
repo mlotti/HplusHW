@@ -77,6 +77,7 @@ AK8Jets = cms.PSet(
 
     userInts = cms.vstring(
         ),
+    checkSubjets = cms.bool(True),
     )
    
 
@@ -96,6 +97,23 @@ AK4JetsPUPPI = cms.PSet(
     userFloats = cms.vstring(
         ),
     )
+
+    
+# AK8 - SoftDrop Subjets
+AK8JetsSoftDrop = cms.PSet(
+    branchname = cms.untracked.string("AK8JetsSoftDrop"),
+    src        = cms.InputTag("packedPatJetsAK8PFCHSSoftDrop"),
+    systVariations = cms.bool(False),
+
+    discriminators = cms.vstring(
+        "pfCombinedInclusiveSecondaryVertexV2BJetTags",
+        ),
+    userFloats = cms.vstring(
+        ),
+    userInts = cms.vstring(
+        ),
+    checkSubjets = cms.bool(True),
+    ),
 
 
 Jets = cms.VPSet()
