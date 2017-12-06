@@ -38,9 +38,10 @@ TopSelectionBDT::Data::~Data() { }
 TopSelectionBDT::TopSelectionBDT(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix)
   : BaseSelection(eventCounter, histoWrapper, commonPlots, postfix),
     // Input parameters
+    cfg_LdgMVACut(config, "LdgMVACut"), //alex
+    cfg_SubldgMVACut(config, "SubldgMVACut"), //alex
     cfg_MVACut(config, "MVACut"),
     cfg_MassCut(config, "MassCut"),
-    //    cfg_MVACuts(config.getParameter<std::vector<float>>("MVACuts")),
     cfg_CSV_bDiscCut(config, "CSV_bDiscCut"),
     cfg_NjetsMax(config.getParameter<unsigned int>("NjetsMax")),
     cfg_NBjetsMax(config.getParameter<unsigned int>("NBjetsMax")),
@@ -57,9 +58,10 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config, EventCounter& event
 TopSelectionBDT::TopSelectionBDT(const ParameterSet& config)
 : BaseSelection(),
   // Input parameters
+  cfg_LdgMVACut(config, "LdgMVACut"), //alex
+  cfg_SubldgMVACut(config, "SubldgMVACut"), //alex
   cfg_MVACut(config, "MVACut"),
   cfg_MassCut(config, "MassCut"),
-  //  cfg_MVACuts(config.getParameter<std::vector<float>>("MVACuts")),
   cfg_CSV_bDiscCut(config, "CSV_bDiscCut"),
   cfg_NjetsMax(config.getParameter<int>("NjetsMax")),
   cfg_NBjetsMax(config.getParameter<int>("NBjetsMax")),
@@ -796,7 +798,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	    genParticle BQuark = GenTops_BQuark.at(i);
 	    Jet mcMatched_BJet;
 	    double dRmin  = 99999.9;
-	    double dPtOverPtmin = 99999.9;
+	    // double dPtOverPtmin = 99999.9;
 	    
 	    // For-loop: All selected jets
 	    for (auto& bjet: jets)
@@ -821,7 +823,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 
 		// Store values
 		dRmin  = dR;
-		dPtOverPtmin = dPtOverPt;
+		// dPtOverPtmin = dPtOverPt;
 		mcMatched_BJet = bjet;
 	      }// For-loop: selected jets
 	    
@@ -1051,7 +1053,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	      Trijet_p4 = bjet.p4() + jet1.p4() + jet2.p4();
 	      Dijet_p4  = jet1.p4() + jet2.p4();
 	      
-	      //	      if(Trijet_p4.M() > 400) continue; //fixme
+	      // if(Trijet_p4.M() > 400) continue; //fixme
 	      if (!cfg_MassCut.passedCut(Trijet_p4.M())) continue;
 	      if (!cfg_CSV_bDiscCut.passedCut(bjet.bjetDiscriminator())) continue;
 
@@ -1336,8 +1338,13 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   bool passBDT1       = cfg_MVACut.passedCut(MVAmax1);
   bool passBDT2       = cfg_MVACut.passedCut(MVAmax2);
   bool passBDT1or2    = cfg_MVACut.passedCut(max(MVAmax1, MVAmax2));
-  bool passBDTboth    = passBDT1*passBDT2;
-
+  // bool passBDTboth    = passBDT1*passBDT2; //alex
+  
+  // alex
+  bool passLdgMVA     = cfg_LdgMVACut.passedCut(MVAmax1);
+  bool passSubldgMVA  = cfg_SubldgMVACut.passedCut(MVAmax2);
+  bool passBDTboth    = passLdgMVA * passSubldgMVA;
+  
   // bool passBDT1       = false;
   // bool passBDT2       = false;
 
@@ -1599,7 +1606,6 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
     
     if (IsInTopDirection) hInTopDirBDTmult -> Fill(nTopDirPassBDT);
     
-    bool passBDTboth = cfg_MVACut.passedCut(min(MVAmax1,MVAmax2));   
     if (MatchedTop_index.size() == GenTops.size() && passBDTboth )
       {
       hMatchedBDTmult -> Fill(matchedPassBDT);
@@ -1714,7 +1720,8 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   // Fill output data  
   //================================================================================================
 
-  output.bPassedSelection   = (cfg_MVACut.passedCut(MVAmax1) && cfg_MVACut.passedCut(MVAmax2) && tetrajetBjetPt_max > 0 );
+  // output.bPassedSelection   = (cfg_MVACut.passedCut(MVAmax1) && cfg_MVACut.passedCut(MVAmax2) && tetrajetBjetPt_max > 0 ); //alex - fixme!
+  output.bPassedSelection   = (passBDTboth && tetrajetBjetPt_max > 0);
   output.bHasFreeBJet       = (tetrajetBjetPt_max > 0); 
   output.fMVAmax1           = MVAmax1;
   output.fTrijet1Jet1       = leadingTrijetJet1;

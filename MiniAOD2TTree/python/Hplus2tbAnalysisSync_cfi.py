@@ -19,13 +19,14 @@ skim = cms.EDFilter("Hplus2tbAnalysisSync",
     NJets          = cms.int32(0),
 
     # AK8 Jets
-    #AK8JetCollection = cms.InputTag("slimmedJetsAK4"),
+    AK8JetCollection = cms.InputTag("slimmedJetsAK8"),
     #AK8JetUserFloats = cms.vstring(
     #    
     #    ),
-    #AK8JetEtCut      = cms.double(100),
-    #AK8JetEtaCut     = cms.double(2.4),
-    
+    AK8JetEtCut      = cms.double(100),
+    AK8JetEtaCut     = cms.double(2.4),
+    AK8NJets         = cms.int32(0),
+
     PackedCandidatesCollection = cms.InputTag("packedPFCandidates"),
 
     # Taus
@@ -42,7 +43,7 @@ skim = cms.EDFilter("Hplus2tbAnalysisSync",
     ElectronCollection    = cms.InputTag("slimmedElectrons"),
     ElectronID            = cms.string("cutBasedElectronID-Spring15-25ns-V1-standalone-veto"),
     ElectronMVA           = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values"),
-    ElectronRhoSource     = cms.InputTag("fixedGridRhoFastjetAll"),
+    ElectronRhoSource     = cms.InputTag("fixedGridRhoFastjetCentralNeutral"),
     ElectronMiniRelIsoEA  = cms.double(0.40),
     ElectronRelIsoEA      = cms.double(0.15),
     ElectronPtCut         = cms.double(10.0),                                               

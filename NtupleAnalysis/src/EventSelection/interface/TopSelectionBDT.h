@@ -245,12 +245,14 @@ private:
   int getTopFromHiggs(TrijetSelection TopCand, const Jet&  MCtrueTopFromH_LdgJet, const Jet& MCtrueTopFromH_SubldgJet, const Jet& MCtrueTopFromH_Bjet);
 
   // Input parameters
+  const DirectionalCut<double> cfg_LdgMVACut;
+  const DirectionalCut<double> cfg_SubldgMVACut;
   const DirectionalCut<double> cfg_MVACut;
   const DirectionalCut<double> cfg_MassCut;
   const DirectionalCut<double> cfg_CSV_bDiscCut;
   const unsigned int cfg_NjetsMax;
   const unsigned int cfg_NBjetsMax;
-  const std::vector<float> cfg_MVACuts;
+
   // Event counter for passing selection
   Count cPassedTopSelectionBDT;
 

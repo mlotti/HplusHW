@@ -35,8 +35,10 @@ protected:
   const Branch<std::vector<bool>> *fMuIDLoose;
   const Branch<std::vector<bool>> *fMuIDMedium;
   const Branch<std::vector<bool>> *fMuIDTight;
+  const Branch<std::vector<float>> *fEffAreaMiniIso;
   const Branch<std::vector<float>> *fRelIsoDeltaBeta03;
   const Branch<std::vector<float>> *fRelIsoDeltaBeta04;
+  const Branch<std::vector<float>> *fRelMiniIso;
   const Branch<std::vector<short>> *fCharge;
 };
 
@@ -66,8 +68,10 @@ public:
   bool muIDLoose() const { return this->fCollection->fMuIDLoose->value()[this->index()]; }
   bool muIDMedium() const { return this->fCollection->fMuIDMedium->value()[this->index()]; }
   bool muIDTight() const { return this->fCollection->fMuIDTight->value()[this->index()]; }
+  float effAreaMiniIso() const { return this->fCollection->fEffAreaMiniIso->value()[this->index()]; }
   float relIsoDeltaBeta03() const { return this->fCollection->fRelIsoDeltaBeta03->value()[this->index()]; }
   float relIsoDeltaBeta04() const { return this->fCollection->fRelIsoDeltaBeta04->value()[this->index()]; }
+  float relMiniIso() const { return this->fCollection->fRelMiniIso->value()[this->index()]; }
   short charge() const { return this->fCollection->fCharge->value()[this->index()]; }
 
 protected:

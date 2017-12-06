@@ -836,8 +836,9 @@ def GetEOSHomeDir(opts):
         # prefix = "" #do NOT use this "FUSE mount" as it fails for multiple files
     elif "lxplus" in HOST:
         prefix = ""
-    else:
-        raise Exception("Unsupported host %s" % (HOST) )
+    else:        
+        prefix = ""
+        # raise Exception("Unsupported host %s" % (HOST) )
     home = prefix + "/store/user/%s/CRAB3_TransferData/%s" % (getpass.getuser(), opts.dirName)
     return home
 
