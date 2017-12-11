@@ -4,6 +4,7 @@ import os
 import sys
 import ROOT
 import array
+import math
 
 import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
@@ -27,12 +28,226 @@ def usage():
     sys.exit()
 
 def fit(name,plot,graph,min,max):
-    function = ROOT.TF1("fit"+name, "0.5*[0]*(1+TMath::Erf( (sqrt(x)-sqrt([1]))/(sqrt(2)*[2]) ))", min, max);
+    function = ROOT.TF1("fit"+name, "0.5*[0]*(1+TMath::Erf( (sqrt(x)-sqrt([1]))/(sqrt(2)*[2]) ))", min, 300);
     function.SetParameters(1., 50., 1.);
-    function.SetParLimits(0, 0.0, 1.0);
+    function.SetParLimits(0, 0.0, 1.);
     fitResult = graph.Fit(function, "NRSE+EX0");
     aux.copyStyle(graph, function)
     plot.appendPlotObject(function)
+    fitResult.Print("V")
+    return fitResult
+
+def fitType(name,plot,eff,graph,min,max,functionType,fitType):
+ 
+## Sigmoid
+    if (functionType == "Sigmoid"):
+        function = ROOT.TF1("fit"+name, "[0]/( 1+exp(-[1]*(x-[2]) ))", min, max)
+        function.SetParameters(0.9,0.1,60)
+
+## Error function
+    if (functionType == "Error"):
+        function = ROOT.TF1("fit"+name,"0.5*[0]*(1+TMath::Erf( (sqrt(x)-sqrt([1]))/([2]) ))",min,max)
+        function.SetParameters(0.8,50,1)
+        function.SetParLimits(0, 0.0, 1.)
+
+## Gompertz
+    if (functionType == "Gompertz"):
+        function = ROOT.TF1("fit"+name," [2]*(0.5)**(exp(-[0]*(x-[1])))",min,max)
+        function.SetParameters(0.1,51,0.9)
+        function.SetParLimits(2, 0.0, 1.)
+
+## Richards function
+    if (functionType == "Richard"):
+        function = ROOT.TF1("fit"+name,"[2]/( (1 + (2**[3] - 1)*exp(-[0]*(x-[1])))**(1/[3])  ) ",min,max)
+        function.SetParameters(0.1,50,0.8,5)
+        function.SetParLimits(2, 0.0, 1.) 
+
+## Crystal Ball cdf
+    if (functionType == "Crystal"):
+        function = ROOT.TF1("fit"+name,"ROOT::Math::crystalball_cdf(x, [0], [1], [2], [3])",min,max)
+        function.SetParameters(-2.2,2,10,50) 
+	function.SetParLimits(1, 1.01, 10.);
+
+## Chi2 fit to TGraph
+    if (fitType == "Chi"):
+        fitResult = graph.Fit(function, "NRSE+EX0")
+
+## binned maximum likelihood to TEfficiency object
+    if (fitType == "ML"):
+        passed = eff.GetCopyPassedHisto()
+        total = eff.GetCopyTotalHisto()
+	
+        fitter = ROOT.TBinomialEfficiencyFitter(passed,total)
+        fitResult = fitter.Fit(function,"S+")
+
+    aux.copyStyle(graph, function)
+    plot.appendPlotObject(function)
+    fitResult.Print("V")
+#    print "P-value: ", fitResult.Prob() 
+
+    return propagateFitError(fitResult,plot,graph,min,max,functionType)
+
+def propagateFitError(fitResult,plot,graph,min,max,type):
+
+    fCov00 = fitResult.CovMatrix(0,0)
+    fCov10 = fitResult.CovMatrix(1,0)
+    fCov20 = fitResult.CovMatrix(2,0)
+    fCov11 = fitResult.CovMatrix(1,1)
+    fCov21 = fitResult.CovMatrix(2,1)
+    fCov22 = fitResult.CovMatrix(2,2)
+    
+    fPar0 = fitResult.Parameter(0)
+    fPar1 = fitResult.Parameter(1)
+    fPar2 = fitResult.Parameter(2)
+    
+    print "Using ", type, "function to fit the efficiency"   
+    
+    if (type == "Sigmoid"):
+        f = ROOT.TF1("f","[0]/( 1+exp(-[1]*(x-[2]) ))", min, max)
+        f.SetParameters(fPar0,fPar1,fPar2)
+
+        V0 = ROOT.TF1("V0","1/( 1+exp((-x+[2])*[1]) )",min,max )
+        V1 = ROOT.TF1("V1","-[0]*([2]-x)*exp((x+[2])*[1])/( (exp([1]*[2]) + exp(x*[1]))**2)",min,max)        
+        V2 = ROOT.TF1("V2","    -[0]*[1]*exp((x+[2])*[1])/( (exp([1]*[2]) + exp([1]*x))**2)",min,max)
+
+        V0.SetParameters(fPar1,fPar2)
+        V1.SetParameters(fPar0,fPar1,fPar2)
+        V2.SetParameters(fPar0,fPar1,fPar2)        
+       
+        err = []
+        for i in range(1,max):
+            err.append(math.sqrt(V0.Eval(i)*V0.Eval(i)*fCov00 + 2*V1.Eval(i)*V0.Eval(i)*fCov10 + 2*V2.Eval(i)*V0.Eval(i)*fCov20 + V1.Eval(i)*V1.Eval(i)*fCov11 + 2*V2.Eval(i)*V1.Eval(i)*fCov21 + V2.Eval(i)*V2.Eval(i)*fCov22))    
+
+    if (type == "Error"):
+        f = ROOT.TF1("f","0.5*[0]*(1+TMath::Erf( (sqrt(x)-sqrt([1]))/([2]) ))", min, max)
+        f.SetParameters(fPar0,fPar1,fPar2)
+
+        V0 = ROOT.TF1("V0","0.5*(1 + TMath::Erf( (sqrt(x)-sqrt([1]))/[2]  ))",min,max )
+        V1 = ROOT.TF1("V1","-0.282095*[0]*exp( -(sqrt([1]-sqrt(x)))**2/([2]**2)  )/(sqrt([1])*[2])",min,max)
+        V2 = ROOT.TF1("V2","[0]*(0.56419*sqrt([1]) - 0.56419*sqrt(x))*exp( -(sqrt([1]-sqrt(x)))**2/([2]**2)  )/([2]**2)",min,max)
+
+        V0.SetParameters(fPar0,fPar1,fPar2)
+        V1.SetParameters(fPar0,fPar1,fPar2)
+        V2.SetParameters(fPar0,fPar1,fPar2)
+
+        err = []
+        for i in range(1,max):
+            err.append(math.sqrt(V0.Eval(i)*V0.Eval(i)*fCov00 + 2*V1.Eval(i)*V0.Eval(i)*fCov10 + 2*V2.Eval(i)*V0.Eval(i)*fCov20 + V1.Eval(i)*V1.Eval(i)*fCov11 + 2*V2.Eval(i)*V1.Eval(i)*fCov21 + V2.Eval(i)*V2.Eval(i)*fCov22))
+
+    if (type == "Gompertz"):
+        f = ROOT.TF1("f","[2]*(0.5)**(exp(-[0]*(x-[1]))) ",min,max)
+        f.SetParameters(fPar0,fPar1,fPar2)
+
+        V0 = ROOT.TF1("V0","-0.693147*exp([0]*([1] - x))*(0.5**(exp([0]*([1] - x)))*[1]*[2] -0.5**(exp([0]*([1] - x)))*[2]*x)",min,max)
+        V1 = ROOT.TF1("V1","-0.693147*0.5**(exp([0]*([1] - x)))*[0]*[2]*exp([0]*([1] - x))",min,max)
+        V2 = ROOT.TF1("V2","0.5**(exp(-[0]*(-[1] + x)))",min,max)
+
+        V0.SetParameters(fPar0,fPar1,fPar2)
+        V1.SetParameters(fPar0,fPar1,fPar2)
+        V2.SetParameters(fPar0,fPar1,fPar2)
+
+        err = []
+        for i in range(1,max):
+            err.append(math.sqrt(V0.Eval(i)*V0.Eval(i)*fCov00 + 2*V1.Eval(i)*V0.Eval(i)*fCov10 + 2*V2.Eval(i)*V0.Eval(i)*fCov20 + V1.Eval(i)*V1.Eval(i)*fCov11 + 2*V2.Eval(i)*V1.Eval(i)*fCov21 + V2.Eval(i)*V2.Eval(i)*fCov22))
+
+    if (type == "Richard"):
+        fCov30 = fitResult.CovMatrix(3,0)
+        fCov31 = fitResult.CovMatrix(3,1)
+        fCov32 = fitResult.CovMatrix(3,2)
+        fCov33 = fitResult.CovMatrix(3,3)
+        fPar3 = fitResult.Parameter(3)
+
+        f = ROOT.TF1("f","[2]/( (1 + (2**[3] - 1)*exp(-[0]*(x-[1])))**(1/[3])  )  ",min,max)
+        f.SetParameters(fPar0,fPar1,fPar2,fPar3)
+
+#        V0 = ROOT.TF1("V0","-((-1 + 2**[3])*[2]*exp(-[0]*(-[1] + x))*(1 + (-1 + 2**[3])*exp(-[0]*(-[1] + x)))**(-1 - 1/[3])*([1] - x))/[3]",min,max)
+#        V1 = ROOT.TF1("V1","-((-1 + 2**[3])*[0]*[2]*exp(-[0]*(-[1] + x))*(1 + (-1 + 2**[3])*exp(-[0]*(-[1] + x)))**(-1 - 1/[3]))/[3]",min,max)
+#	V2 = ROOT.TF1("V2","(1 + (-1 + 2**[3])*exp(-[0]*(-[1] + x)))**(-1/[3])",min,max)
+#	V3 = ROOT.TF1("V3","-1/[3]**2*[2]*((2**[3]-1)*exp([0]*([1]-x))+1)**(-1/[3]-1)*(2**[3]*[3]*log(2)*exp([0]*([1]-x))-((2**[3]-1)*exp([0]*([1]-x))+1)*log((2**[3]-1)*exp([0]*([1]-x))+1))",min,max)
+        
+#	V0.SetParameters(fPar0,fPar1,fPar2,fPar3)
+#        V1.SetParameters(fPar0,fPar1,fPar2,fPar3)
+#        V2.SetParameters(fPar0,fPar1,fPar2,fPar3)	
+#        V3.SetParameters(fPar0,fPar1,fPar2,fPar3)
+
+#        err = []
+#        for i in range(1,max):
+#            err.append(math.sqrt(V0.Eval(i)*V0.Eval(i)*fCov00 + 2*V1.Eval(i)*V0.Eval(i)*fCov10 + 2*V2.Eval(i)*V0.Eval(i)*fCov20 + 2*V3.Eval(i)*V0.Eval(i)*fCov30 + V1.Eval(i)*V1.Eval(i)*fCov11 + 2*V2.Eval(i)*V1.Eval(i)*fCov21 + 2*V3.Eval(i)*V1.Eval(i)*fCov31 + V2.Eval(i)*V2.Eval(i)*fCov22 + 2*V3.Eval(i)*V2.Eval(i)*fCov32 + V3.Eval(i)*V3.Eval(i)*fCov33))        
+
+        err = []
+	for x in range(1,max):
+            xpoint = []
+    	    xpoint.append(x)
+	    m = array.array("d",xpoint)
+	    err.append( math.sqrt(f.GradientPar(0,m)**2*fCov00 + 2*f.GradientPar(1,m)*f.GradientPar(0,m)*fCov10 + 2*f.GradientPar(2,m)*f.GradientPar(0,m)*fCov20 + 2*f.GradientPar(3,m)*f.GradientPar(0,m)*fCov30 + f.GradientPar(1,m)**2*fCov11 + 2*f.GradientPar(2,m)*f.GradientPar(1,m)*fCov21 + 2*f.GradientPar(3,m)*f.GradientPar(1,m)*fCov31 + f.GradientPar(2,m)**2*fCov22 + 2*f.GradientPar(3,m)*f.GradientPar(2,m)*fCov32 + f.GradientPar(3,m)**2*fCov33) )	    
+    
+    if (type == "Crystal"):
+        fCov30 = fitResult.CovMatrix(3,0)
+        fCov31 = fitResult.CovMatrix(3,1)
+        fCov32 = fitResult.CovMatrix(3,2)
+        fCov33 = fitResult.CovMatrix(3,3)
+        fPar3 = fitResult.Parameter(3)
+        f = ROOT.TF1("f","ROOT::Math::crystalball_cdf(x,[0],[1],[2],[3])",min,max)
+	f.SetParameters(fPar0,fPar1,fPar2,fPar3)
+	
+        err = []
+	for x in range(1,max):
+            xpoint = []
+    	    xpoint.append(x)
+	    m = array.array("d",xpoint)
+	    err.append( math.sqrt(f.GradientPar(0,m)**2*fCov00 + 2*f.GradientPar(1,m)*f.GradientPar(0,m)*fCov10 + 2*f.GradientPar(2,m)*f.GradientPar(0,m)*fCov20 + 2*f.GradientPar(3,m)*f.GradientPar(0,m)*fCov30 + f.GradientPar(1,m)**2*fCov11 + 2*f.GradientPar(2,m)*f.GradientPar(1,m)*fCov21 + 2*f.GradientPar(3,m)*f.GradientPar(1,m)*fCov31 + f.GradientPar(2,m)**2*fCov22 + 2*f.GradientPar(3,m)*f.GradientPar(2,m)*fCov32 + f.GradientPar(3,m)**2*fCov33) )	    
+    
+    return getFittedEfficiency(f,err,plot,min,max)
+   
+def getFittedEfficiency(fitResult,err,plot,min,max):
+
+    x = []
+    y = []
+    xerrl = []
+    xerrh = []
+    yerrl = []
+    yerrh = []
+    ymin = []
+    ymax = []
+
+    for i in range(min,max):
+        x.append(i) 
+        xerrl.append(0)
+        xerrh.append(0)
+        y.append(fitResult.Eval(i))
+	yerrl.append(err[i-1])	
+        if (fitResult.Eval(i) + err[i-1] < 1):
+	    yerrh.append(err[i-1])
+	else:
+	    yerrh.append(1-fitResult.Eval(i))
+        ymin.append(fitResult.Eval(i) - yerrl[i-min])
+        ymax.append(fitResult.Eval(i) + yerrh[i-min])
+
+
+#    errors to plots
+
+    n = max-min
+#    grmin = ROOT.TGraph(n,array.array("d",x),array.array("d",ymin))
+#    grmax = ROOT.TGraph(n,array.array("d",x),array.array("d",ymax))
+    grshade = ROOT.TGraph(2*n)
+
+    for i in range(0,n):
+      grshade.SetPoint(i,x[i],ymax[i])
+      grshade.SetPoint(n+i,x[n-i-1],ymin[n-i-1])
+
+    grshade.SetFillStyle(3002)
+    grshade.SetFillColor(14)
+    
+#    plot.appendPlotObject(grmin)
+#    plot.appendPlotObject(grmax)
+    plot.appendPlotObject(grshade,option="f")
+
+    return ROOT.TGraphAsymmErrors(max-min,array.array("d",x),
+                                    array.array("d",y),
+                                    array.array("d",xerrl),
+                                    array.array("d",xerrh),
+                                    array.array("d",yerrl),
+                                    array.array("d",yerrh))
 
 def getEfficiency(datasets,numerator="Numerator",denominator="Denominator"):
 
@@ -42,7 +257,7 @@ def getEfficiency(datasets,numerator="Numerator",denominator="Denominator"):
 
     first = True
     isData = False
-
+     
     teff = ROOT.TEfficiency()
     for dataset in datasets:
         n = dataset.getDatasetRootHisto(numerator).getHistogram()                                               
@@ -58,12 +273,13 @@ def getEfficiency(datasets,numerator="Numerator",denominator="Denominator"):
         print dataset.getName(),"entries",n.GetEntries(),d.GetEntries()
         print "    bins",n.GetNbinsX(),d.GetNbinsX()
         print "    lowedge",n.GetBinLowEdge(1),d.GetBinLowEdge(1)
+        
         eff = ROOT.TEfficiency(n,d)
         eff.SetStatisticOption(statOption)
 
         weight = 1
         if dataset.isMC():
-            weight = dataset.getCrossSection()
+            weight = dataset.getCrossSection()/d.GetEntries()
             for i in range(1,d.GetNbinsX()+1):
                 print "    bin",i,d.GetBinLowEdge(i),n.GetBinContent(i),d.GetBinContent(i)
         eff.SetWeight(weight)
@@ -82,7 +298,9 @@ def getEfficiency(datasets,numerator="Numerator",denominator="Denominator"):
     if isData:
         teff = ROOT.TEfficiency(tn, td)
         teff.SetStatisticOption(self.statOption)
-    return convert2TGraph(teff)
+
+    return teff
+#    return convert2TGraph(teff)
 
 def checkNegatives(n,d):
     for i in range(1,n.GetNbinsX()+1):
@@ -142,10 +360,15 @@ def Print(graph):
         graph.GetPoint(i,x,y)
         print "x,y",x,y
 
-
 def analyze(analysis=None):
 
     paths = [sys.argv[1]]
+
+    if (len(sys.argv) == 3):
+        howAnalyse = sys.argv[2]
+    else:
+#       howAnalyse = "--fit" 
+        howAnalyse = "--bin"
 
     if not analysis == None:
         datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="Silver|GluGluHToTauTau_M125")
@@ -172,11 +395,15 @@ def analyze(analysis=None):
         dataset2 = datasetsDY.getMCDatasets()
 
 
-    eff1 = getEfficiency(dataset1)
-    eff2 = getEfficiency(dataset2)
-    if isinstance(datasetsH125,dataset.DatasetManager):
-        eff3 = getEfficiency(datasetsH125.getMCDatasets())
+    histeff1 = getEfficiency(dataset1)
+    histeff2 = getEfficiency(dataset2)
 
+    eff1 = convert2TGraph(histeff1)
+    eff2 = convert2TGraph(histeff2)
+
+    if isinstance(datasetsH125,dataset.DatasetManager):
+        histeff3 = getEfficiency(datasetsH125.getMCDatasets())
+        eff3 = convert2TGraph(histeff3)
 
     styles.dataStyle.apply(eff1)
     styles.mcStyle.apply(eff2)
@@ -202,11 +429,17 @@ def analyze(analysis=None):
         p = plots.PlotBase([histograms.HistoGraph(eff1, "eff1", "p", "P")])
 
 
-    fit("Data",p,eff1,20,500)
-    fit("MC",p,eff2,20,500)
+    
+## FIT FUNCTIONS: "Sigmoid", "Error", "Gompertz", "Richard","Crystal" ##
+## FIT TYPES: binned max likelihood: "ML" , Chi2-fit: "Chi" ##
+    
+    if (howAnalyse == "--fit" ):
+        datafit = fitType("Data",p,histeff1,eff1,20,500,"Sigmoid","ML")
+        mcfit = fitType("MC",p,histeff2,eff2,20,500,"Crystal","ML")
+    
     if isinstance(datasetsH125,dataset.DatasetManager):
         fit("H125",p,eff3,20,200)
-
+    
     opts = {"ymin": 0, "ymax": 1.1}
     opts2 = {"ymin": 0.5, "ymax": 1.5}
 #    moveLegend = {"dx": -0.55, "dy": -0.15, "dh": -0.1}
@@ -238,6 +471,8 @@ def analyze(analysis=None):
         p.getFrame2().GetYaxis().SetTitle("Ratio")
         p.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
+    
+    
     histograms.addText(0.5, 0.6, "LooseIsoPFTau50_Trk30_eta2p1", 17)
 #    histograms.addText(0.5, 0.6, "VLooseIsoPFTau120_Trk50_eta2p1", 17)
 #    histograms.addText(0.5, 0.6, "VLooseIsoPFTau140_Trk50_eta2p1", 17)
@@ -249,6 +484,19 @@ def analyze(analysis=None):
     histograms.addText(0.5, 0.46, "Runs "+runRange, 17)
 
     p.draw()
+
+
+## does the ratio of the fits
+    if (howAnalyse=="--fit"):
+        funcRatio = ROOT.TH1F("","",480,20,500)
+        for i in range(0,480):
+            ratio = datafit.Eval(i+20-1)/mcfit.Eval(i+20-1) 
+            funcRatio.SetBinContent(i,ratio)
+        p.getPad().GetCanvas().cd(2)
+        funcRatio.Draw("SAME")
+        p.getPad().GetCanvas().cd(1)
+
+##
     lumi = 0.0
     for d in datasets.getDataDatasets():
         print "luminosity",d.getName(),d.getLuminosity()
@@ -259,10 +507,13 @@ def analyze(analysis=None):
     if not os.path.exists(plotDir):
         os.mkdir(plotDir)
     p.save(formats)
-
-
-    pythonWriter.addParameters(plotDir,label,runRange,lumi,eff1)
-    pythonWriter.addMCParameters(label,eff2)
+   
+    if (howAnalyse == "--fit"):
+        pythonWriter.addParameters(plotDir,label,runRange,lumi,datafit)
+        pythonWriter.addMCParameters(label,mcfit)
+    if (howAnalyse == "--bin"):
+        pythonWriter.addParameters(plotDir,label,runRange,lumi,eff1)
+        pythonWriter.addMCParameters(label,eff2)
 
     pythonWriter.writeJSON(os.path.join(plotDir,"tauLegTriggerEfficiency_"+label+".json"))
 
@@ -271,11 +522,15 @@ def analyze(analysis=None):
 
     #########################################################################                                                                                                                              
 
-    eff1eta = getEfficiency(dataset1,"NumeratorEta","DenominatorEta")
-    eff2eta = getEfficiency(dataset2,"NumeratorEta","DenominatorEta")
-    if isinstance(datasetsH125,dataset.DatasetManager):
-        eff3eta = getEfficiency(datasetsH125.getMCDatasets(),"NumeratorEta","DenominatorEta")
+    histeff1eta = getEfficiency(dataset1,"NumeratorEta","DenominatorEta")
+    histeff2eta = getEfficiency(dataset2,"NumeratorEta","DenominatorEta")
 
+    eff1eta = convert2TGraph(histeff1eta)
+    eff2eta = convert2TGraph(histeff2eta)
+
+    if isinstance(datasetsH125,dataset.DatasetManager):
+        histeff3eta = getEfficiency(datasetsH125.getMCDatasets(),"NumeratorEta","DenominatorEta")
+        eff3eta = convert2TGraph(histeff3eta)
     styles.dataStyle.apply(eff1eta)
     styles.mcStyle.apply(eff2eta)
     eff1eta.SetMarkerSize(1)
@@ -330,10 +585,16 @@ def analyze(analysis=None):
 
     #########################################################################
     
-    eff1phi = getEfficiency(dataset1,"NumeratorPhi","DenominatorPhi")
-    eff2phi = getEfficiency(dataset2,"NumeratorPhi","DenominatorPhi")
+    histeff1phi = getEfficiency(dataset1,"NumeratorPhi","DenominatorPhi")
+    histeff2phi = getEfficiency(dataset2,"NumeratorPhi","DenominatorPhi")
+
+    eff1phi = convert2TGraph(histeff1phi)
+    eff2phi = convert2TGraph(histeff2phi)
+
     if isinstance(datasetsH125,dataset.DatasetManager):
-        eff3phi = getEfficiency(datasetsH125.getMCDatasets(),"NumeratorPhi","DenominatorPhi")
+        histeff3phi = getEfficiency(datasetsH125.getMCDatasets(),"NumeratorPhi","DenominatorPhi")
+        eff3phi = convert2TGraph(histeff3phi)
+    
 
     styles.dataStyle.apply(eff1phi)
     styles.mcStyle.apply(eff2phi)
@@ -390,8 +651,11 @@ def analyze(analysis=None):
 
     namePU = "TauMET_"+analysis+"_DataVsMC_nVtx"
 
-    eff1PU = getEfficiency(dataset1,"NumeratorPU","DenominatorPU")
-    eff2PU = getEfficiency(dataset2,"NumeratorPU","DenominatorPU")
+    histeff1PU = getEfficiency(dataset1,"NumeratorPU","DenominatorPU")
+    histeff2PU = getEfficiency(dataset2,"NumeratorPU","DenominatorPU")
+
+    eff1PU = convert2TGraph(histeff1PU)
+    eff2PU = convert2TGraph(histeff2PU)
 
     styles.dataStyle.apply(eff1PU)
     styles.mcStyle.apply(eff2PU)
