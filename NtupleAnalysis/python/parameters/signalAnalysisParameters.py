@@ -6,6 +6,8 @@ import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
 
 #====== General parameters
 histoLevel = "Debug"  # Options: Systematics, Vital, Informative, Debug
+useTriggerEfficiencyFitting = True # false if you want to use bin-by-bin method,
+				   # true if you want to use fits
 
 #====== Trigger
 trg = PSet(
@@ -54,7 +56,11 @@ scaleFactors.assignTauMisidentificationSF(tauSelection, "eToTau", "full", "nomin
 scaleFactors.assignTauMisidentificationSF(tauSelection, "muToTau", "full", "nominal")
 scaleFactors.assignTauMisidentificationSF(tauSelection, "jetToTau", "full", "nominal")
 # tau trigger SF
-scaleFactors.assignTauTriggerSF(tauSelection, "nominal")
+
+if useTriggerEfficiencyFitting:
+    scaleFactors.assignTauTriggerSF(tauSelection, "nominal", analysisType = "fit")
+else:
+    scaleFactors.assignTauTriggerSF(tauSelection, "nominal", analysisType = "bin")
 
 #====== Electron veto
 eVeto = PSet(
@@ -140,8 +146,10 @@ metSelection = PSet(
    applyPhiCorrections = False  # FIXME: no effect yet
 )
 # MET trigger SF
-scaleFactors.assignMETTriggerSF(metSelection, bjetSelection.bjetDiscrWorkingPoint, "nominal")
-
+if useTriggerEfficiencyFitting:
+    scaleFactors.assignMETTriggerSF(metSelection, bjetSelection.bjetDiscrWorkingPoint, "nominal",analysisType ="fit")
+else:
+    scaleFactors.assignMETTriggerSF(metSelection, bjetSelection.bjetDiscrWorkingPoint, "nominal",analysisType ="bin")
 #====== Angular cuts / back-to-back
 angularCutsBackToBack = PSet(
        nConsideredJets = 3,    # Number of highest-pt jets to consider (excluding jet corresponding to tau)
@@ -259,6 +267,7 @@ def applyAnalysisCommandLineOptions(argv, config):
         config.TauSelection.prongs = 2
     elif "3prong" in argv or "3pr" in argv:
         config.TauSelection.prongs = 3
-
-    scaleFactors.assignTauTriggerSF(config.TauSelection, "nominal")
-
+    if useTriggerEfficiencyFitting:
+        scaleFactors.assignTauTriggerSF(config.TauSelection, "nominal",analysisType ="fit")
+    else:
+        scaleFactors.assignTauTriggerSF(config.TauSelection, "nominal",analysisType ="bin")
