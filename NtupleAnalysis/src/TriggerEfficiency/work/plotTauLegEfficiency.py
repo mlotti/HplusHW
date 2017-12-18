@@ -511,11 +511,11 @@ def analyze(analysis=None):
     if (howAnalyse == "--fit"):
         pythonWriter.addParameters(plotDir,label,runRange,lumi,datafit)
         pythonWriter.addMCParameters(label,mcfit)
+        pythonWriter.writeJSON(os.path.join(plotDir,"tauLegTriggerEfficiency_"+label+"_fit.json"))
     if (howAnalyse == "--bin"):
         pythonWriter.addParameters(plotDir,label,runRange,lumi,eff1)
         pythonWriter.addMCParameters(label,eff2)
-
-    pythonWriter.writeJSON(os.path.join(plotDir,"tauLegTriggerEfficiency_"+label+".json"))
+        pythonWriter.writeJSON(os.path.join(plotDir,"tauLegTriggerEfficiency_"+label+"_bin.json"))
 
 #    if not createRatio:
 #        sys.exit()

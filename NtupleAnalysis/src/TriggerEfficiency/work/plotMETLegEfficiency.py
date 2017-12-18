@@ -177,11 +177,11 @@ def analyze(analysis=None):
         if (howAnalyse == "--fit"):
             pythonWriter.addParameters(plotDir,label,runRange,lumi,datafit)
             pythonWriter.addMCParameters(label,mcfit)
+            pythonWriter.writeJSON(os.path.join(plotDir,"metLegTriggerEfficiency_"+label+"_fit.json"))
         if (howAnalyse == "--bin"):
             pythonWriter.addParameters(plotDir,label,runRange,lumi,eff1_MET80)
             pythonWriter.addMCParameters(label,eff2_MET80)
-
-    pythonWriter.writeJSON(os.path.join(plotDir,"metLegTriggerEfficiency_"+label+".json"))
+            pythonWriter.writeJSON(os.path.join(plotDir,"metLegTriggerEfficiency_"+label+"_bin.json"))
 
     #########################################################################                                             
 
