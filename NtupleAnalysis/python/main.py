@@ -235,7 +235,7 @@ class Dataset:
 # Class Definition
 #================================================================================================
 class Process:
-    def __init__(self, outputPrefix="analysis", outputPostfix="", maxEvents=-1):
+    def __init__(self, outputPrefix="analysis", outputPostfix="", maxEvents={}):
         ROOT.gSystem.Load("libHPlusAnalysis.so")
 
         self._verbose       = _debugMode
@@ -331,11 +331,30 @@ class Process:
                 raise Exception("Unsupported input format!")
             del kwargs["blacklist"]
 
+        whitelist = []
+        if "whitelist" in kwargs.keys():
+            if isinstance(kwargs["whitelist"], str):
+                whitelist.append(kwargs["whitelist"])
+            elif isinstance(kwargs["whitelist"], list):
+                whitelist.extend(kwargs["whitelist"])
+            else:
+                raise Exception("Unsupported input format!")
+            del kwargs["whitelist"]
+
         # dataset._optionDefaults["input"] = "miniaod2tree*.root"
         dataset._optionDefaults["input"] = "histograms-*.root"
         dsetMgrCreator = dataset.readFromMulticrabCfg(directory=directory, *args, **kwargs)
         dsets = dsetMgrCreator.getDatasetPrecursors()
         dsetMgrCreator.close()
+
+        if len(whitelist) > 0:
+            for dset in dsets:
+                isOnWhiteList = False
+                for item in whitelist:
+                    if dset.getName().startswith(item):
+                        isOnWhiteList = True
+                if not isOnWhiteList:
+                    blacklist.append(dset.getName())
 
         for dset in dsets:
             isOnBlackList = False
@@ -343,7 +362,7 @@ class Process:
                 if dset.getName().startswith(item):
                     isOnBlackList = True
             if isOnBlackList:
-                print "Ignoring dataset because of blacklist options: '%s' ..."%dset.getName()
+                print "Ignoring dataset because of black/whitelist options: '%s' ..."%dset.getName()
             else:
                 self.addDataset(dset.getName(), dset.getFileNames(), dataVersion=dset.getDataVersion(), lumiFile=dsetMgrCreator.getLumiFile())
         return
@@ -572,10 +591,43 @@ class Process:
             readCallsStart = ROOT.TFile.GetFileReadCalls()
             timeStart = time.time()
             clockStart = time.clock()
-            
-            if self._maxEvents > 0:
-                tchain.SetCacheEntryRange(0, self._maxEvents)
-                tchain.Process(tselector, "", self._maxEvents)
+
+            # Determine how many events to run on for given dataset
+            if len(self._maxEvents.keys()) > 0:
+                key = ""
+                for k in self._maxEvents.keys():
+                    if k.lower() == "all":
+                        key = k
+                        break
+                    maxEv_re = re.compile(k)
+                    match = maxEv_re.search(dset.getName())
+                    if match:
+                        key = k
+                        break
+                if key == "":
+                    tchain.Process(tselector)
+                else:
+                    tchain.SetCacheEntryRange(0, self._maxEvents[key])
+                    tchain.Process(tselector, "", self._maxEvents[key])
+
+#            elif "All" in self._maxEvents:
+#                if len(self._maxEvents) == 1:
+#                    if self._maxEvents["All"] == -1:
+#                        tchain.Process(tselector)
+#                    else:
+#                        tchain.SetCacheEntryRange(0, self._maxEvents["All"])
+#                        tchain.Process(tselector, "", self._maxEvents["All"])
+#                else:
+#                    msg  = "Ambiguous selection for number of max events to run"
+#                    msg += "If \"all\" is selected no other datasets options are allowed. Got: "
+#                    msg += "\n\t".join(self._maxEvents.keys())
+#                    raise Exception(msg)
+#            elif dset.getName() in self._maxEvents.keys():
+#                tchain.SetCacheEntryRange(0, self._maxEvents[dset.getName()])
+#                tchain.Process(tselector, "", self._maxEvents[dset.getName()])
+            #if self._maxEvents > 0:
+            #    tchain.SetCacheEntryRange(0, self._maxEvents)
+            #    tchain.Process(tselector, "", self._maxEvents)
             else:
                 tchain.Process(tselector)
             if _debugMemoryConsumption:

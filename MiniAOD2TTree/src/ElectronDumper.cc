@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/ElectronDumper.h"
+#include "HiggsAnalysis/MiniAOD2TTree/interface/MiniIsolation.h"
 
 #include <algorithm>
 
@@ -21,14 +22,26 @@ ElectronDumper::ElectronDumper(edm::ConsumesCollector&& iConsumesCollector, std:
     
     nDiscriminators = inputCollections[0].getParameter<std::vector<std::string> >("discriminators").size();
     discriminators = new std::vector<bool>[inputCollections.size()*nDiscriminators];
-    electronToken = new edm::EDGetTokenT<edm::View<pat::Electron>>[inputCollections.size()];
+    electronToken = new edm::EDGetTokenT<pat::ElectronCollection>[inputCollections.size()];
+    //    electronToken = new edm::EDGetTokenT<edm::View<pat::Electron>>[inputCollections.size()];
     gsfElectronToken = new edm::EDGetTokenT<edm::View<reco::GsfElectron>>[inputCollections.size()];
     rhoToken = new edm::EDGetTokenT<double>[inputCollections.size()];
 //    electronIDToken = new edm::EDGetTokenT<edm::ValueMap<bool>>[inputCollections.size()*nDiscriminators];
-    
+
+    // Marina - Start
+    pfcandsToken      = new edm::EDGetTokenT<edm::View<pat::PackedCandidate>>[inputCollections.size()];
+    relMiniIso        = new std::vector<float>[inputCollections.size()];
+    effAreaMiniIso    = new std::vector<float>[inputCollections.size()];
+    electronMVAToken  = new edm::EDGetTokenT<edm::ValueMap<float> >[inputCollections.size()];
+    electronMVA       = new std::vector<float>[inputCollections.size()];
+    rhoMiniIsoToken   = new edm::EDGetTokenT<double>[inputCollections.size()];
+    // Marina - End
+
+
     for(size_t i = 0; i < inputCollections.size(); ++i){
         edm::InputTag inputtag = inputCollections[i].getParameter<edm::InputTag>("src");
-        electronToken[i] = iConsumesCollector.consumes<edm::View<pat::Electron>>(inputtag);
+	electronToken[i] = iConsumesCollector.consumes<pat::ElectronCollection>(inputtag);
+        //electronToken[i] = iConsumesCollector.consumes<edm::View<pat::Electron>>(inputtag);
         gsfElectronToken[i] = iConsumesCollector.consumes<edm::View<reco::GsfElectron>>(inputtag);
         edm::InputTag rhoSource = inputCollections[i].getParameter<edm::InputTag>("rhoSource");
         rhoToken[i] = iConsumesCollector.consumes<double>(rhoSource);
@@ -40,6 +53,17 @@ ElectronDumper::ElectronDumper(edm::ConsumesCollector&& iConsumesCollector, std:
             electronIDToken[i*discriminatorNames.size()+j] = iConsumesCollector.consumes<edm::ValueMap<bool>>(discrTag);
         }
         */
+	
+	// Marina - Start
+	edm::InputTag pfcandinputtag = inputCollections[i].getParameter<edm::InputTag>("pfcands");
+	pfcandsToken[i] = iConsumesCollector.consumes<edm::View<pat::PackedCandidate>>(pfcandinputtag);
+	
+	edm::InputTag rhoSourceMiniIso = inputCollections[i].getParameter<edm::InputTag>("rhoSourceMiniIso");
+	rhoMiniIsoToken[i] = iConsumesCollector.consumes<double>(rhoSourceMiniIso);
+	
+	edm::InputTag electronMVATag = inputCollections[i].getParameter<edm::InputTag>("ElectronMVA");
+	electronMVAToken[i] = iConsumesCollector.consumes<edm::ValueMap<float> >(electronMVATag);
+	// Marina - end
     }
     
     useFilter = false;
@@ -65,7 +89,13 @@ void ElectronDumper::book(TTree* tree){
         tree->Branch((name+"_effAreaIsoDeltaBeta").c_str(),&effAreaIsoDeltaBetaCorrected[i]);
 
         MCelectron[i].book(tree, name, "MCelectron");
-        
+	
+	// Marina - start
+	tree->Branch((name+"_relMiniIso").c_str(), &relMiniIso[i]);
+	tree->Branch((name+"_effAreaMiniIso").c_str(), &effAreaMiniIso[i]);
+	tree->Branch((name+"_MVA").c_str(), &electronMVA[i]);
+	// Marina - end
+	
         std::vector<std::string> discriminatorNames = inputCollections[i].getParameter<std::vector<std::string> >("discriminators");
         for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
             // Convert dashes into underscores
@@ -83,17 +113,34 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
       iEvent.getByToken(genParticleToken, genParticlesHandle);
     
     for(size_t ic = 0; ic < inputCollections.size(); ++ic){
-	edm::Handle<edm::View<pat::Electron>> electronHandle;
-	iEvent.getByToken(electronToken[ic], electronHandle);
+        //edm::Handle<edm::View<pat::Electron>> electronHandle;
+        edm::Handle<pat::ElectronCollection>  electronHandle;
+        iEvent.getByToken(electronToken[ic], electronHandle);
+	
+	// Marina - start
+	edm::Handle<edm::View<pat::PackedCandidate> > pfcandHandle;
+        iEvent.getByToken(pfcandsToken[ic], pfcandHandle);
+	// Electron MVA
+	edm::Handle<edm::ValueMap<float> > electronMVAHandle;
+	iEvent.getByToken(electronMVAToken[ic], electronMVAHandle);
+	// Marina - end
+	
 	if(electronHandle.isValid()){
-            // Setup also handle for GsfElectrons (needed for ID)
+	    // Setup also handle for GsfElectrons (needed for ID)
             edm::Handle<edm::View<reco::GsfElectron>> gsfHandle;
             iEvent.getByToken(gsfElectronToken[ic], gsfHandle);
             // Setup handles for rho
             edm::Handle<double> rhoHandle;
             iEvent.getByToken(rhoToken[ic], rhoHandle);
             double rho = *(rhoHandle.product());
-            // Setup handles for ID
+	    
+	    // Marina - start
+	    edm::Handle<double> rhoMiniIsoHandle;
+	    iEvent.getByToken(rhoMiniIsoToken[ic], rhoMiniIsoHandle);
+	    //double rhoMiniIso = *(rhoMiniIsoHandle.product());
+	    // Marina - end
+	    
+	    // Setup handles for ID
             std::vector<edm::Handle<edm::ValueMap<bool>>> IDhandles;
             std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
 /*
@@ -105,6 +152,9 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 */
 	    for(size_t i=0; i<electronHandle->size(); ++i) {
     		const pat::Electron& obj = electronHandle->at(i);
+		
+		// Get Electron Ref
+		edm::RefToBase<pat::Electron> ref ( edm::Ref<pat::ElectronCollection >(electronHandle, i));
 
 		pt[ic].push_back(obj.p4().pt());
                 eta[ic].push_back(obj.p4().eta());
@@ -137,7 +187,16 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                   - rho * ea, 0.0);
                 double eaIso = eaisolation / obj.pt();
                 effAreaIsoDeltaBetaCorrected[ic].push_back(eaIso);
-
+		
+		// Marina - start
+		relMiniIso[ic].push_back(getMiniIsolation_DeltaBeta(pfcandHandle, dynamic_cast<const reco::Candidate *>(&obj), 0.05, 0.2, 10., false));
+		effAreaMiniIso[ic].push_back(getMiniIsolation_EffectiveArea(pfcandHandle, dynamic_cast<const reco::Candidate *>(&obj), 0.05, 0.2, 10., false, false, *rhoMiniIsoHandle));
+		// Get electron MVA
+		electronMVA[ic].push_back((*electronMVAHandle)[ref]);
+		//float mva = (*electronMVAHandle)[ref];
+		//std::cout<<"mva = "<<mva<<std::endl;
+		// Marina - end
+		
 
 		/*                
 		for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
@@ -194,9 +253,15 @@ void ElectronDumper::reset(){
       effAreaIsoDeltaBetaCorrected[ic].clear();
 
       MCelectron[ic].reset();
-    }                                                                                                                                                             
+      
+      // Marina - start
+      relMiniIso[ic].clear();
+      effAreaMiniIso[ic].clear();
+      electronMVA[ic].clear();
+      // Marina - end
+    }                                                                                                                                             
     for(size_t ic = 0; ic < inputCollections.size()*nDiscriminators; ++ic){                                                                                       
       discriminators[ic].clear();                                                                                                                                 
-    }                                                                                                                                                             
-  }                                                                                                                                                               
+    }                                                                                                                                                            
+  }                                                                                                                                                             
 }

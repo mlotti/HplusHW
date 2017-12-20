@@ -19,6 +19,13 @@
 
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/FourVectorDumper.h"
+#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
+// Marina - start
+#include "DataFormats/Common/interface/ValueMap.h"
+#include "DataFormats/Common/interface/RefToBase.h"
+#include "DataFormats/Common/interface/Association.h"
+#include "DataFormats/Common/interface/PtrVector.h"
+// Marina - end
 
 class ElectronDumper : public BaseDumper {
     public:
@@ -31,16 +38,28 @@ class ElectronDumper : public BaseDumper {
 
     private:
 	void fillMCMatchInfo(size_t ic, edm::Handle<reco::GenParticleCollection>& genParticles, const pat::Electron& ele);
-        
-        edm::EDGetTokenT<edm::View<pat::Electron>> *electronToken;
+	
+        //edm::EDGetTokenT<edm::View<pat::Electron>> *electronToken;
+	edm::EDGetTokenT<pat::ElectronCollection> *electronToken;
         edm::EDGetTokenT<edm::View<reco::GsfElectron>> *gsfElectronToken;
         edm::EDGetTokenT<double> *rhoToken;
         edm::EDGetTokenT<reco::GenParticleCollection> genParticleToken;
         edm::EDGetTokenT<edm::ValueMap<bool>> *electronIDToken;
-        
+	// Marina - start
+	edm::EDGetTokenT<edm::ValueMap<float> > *electronMVAToken;
+	edm::EDGetTokenT<double> *rhoMiniIsoToken;
+	// Marina - end
+
         std::vector<float> *relIsoDeltaBetaCorrected;
         std::vector<float> *effAreaIsoDeltaBetaCorrected;
-        
+	
+	// Marina - start
+	edm::EDGetTokenT<edm::View<pat::PackedCandidate> > *pfcandsToken;
+	std::vector<float> *relMiniIso;
+	std::vector<float> *effAreaMiniIso;
+	std::vector<float> *electronMVA;
+	// Marina - end
+	
         // 4-vector for generator electron
         FourVectorDumper *MCelectron;
 };

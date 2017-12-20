@@ -98,12 +98,12 @@ from CRABClient.UserUtilities import getUsernameFromSiteDB
 # See: https://github.com/dmwm/CRABClient/blob/master/src/python/CRABClient/ClientUtilities.py
 from CRABClient.ClientUtilities import LOGLEVEL_MUTE
 from CRABClient.UserUtilities import getConsoleLogLevel
-
-try:
-    import HiggsAnalysis.MiniAOD2TTree.tools.git as git
-    from HiggsAnalysis.MiniAOD2TTree.tools.datasets import *
-except:
-    from datasets import *
+ 
+#try: #sami please fix me-28Nov2017 (alex)
+import HiggsAnalysis.MiniAOD2TTree.tools.git as git
+from HiggsAnalysis.MiniAOD2TTree.tools.datasets import *
+#except: #sami please fix me-28Nov2017 (alex)
+#    from datasets import *
 
 #================================================================================================ 
 # Global Definitions
@@ -906,7 +906,7 @@ def PrintTaskSummary(reportDict):
     Verbose("PrintTaskSummary()")
     
     reports  = []    
-    msgAlign = "{:<3} {:<45} {:^16} {:^16} {:^16} {:^16} {:^16} {:^16} {:^16} {:^16} {:^16} {:^16}"
+    msgAlign = "{:<3} {:<50} {:^16} {:^16} {:^16} {:^16} {:^16} {:^16} {:^16} {:^16} {:^16} {:^16}"
     header   = msgAlign.format("#", "Task",
                                "%s%s" % (colors.GRAY  , "Idle"    ),
                                "%s%s" % (colors.RED   , "Failed"  ),
@@ -919,7 +919,7 @@ def PrintTaskSummary(reportDict):
                                "%s%s" % (colors.CYAN  , "Out"     ),
                                "%s%s" % (colors.WHITE , "Status"  ),
                                )
-    hLine = colors.WHITE + "="*170
+    hLine = colors.WHITE + "="*175
     reports.append(hLine)
     reports.append(header)
     reports.append(hLine)
