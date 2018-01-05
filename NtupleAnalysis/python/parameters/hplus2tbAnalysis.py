@@ -193,6 +193,7 @@ fakeBMeasurement = PSet(
     invertedBJetsWorkingPoint         = "Loose",  # [default: "Loose"]
     # Does this make any difference?
     invertedBJetsSortType             = "Random", # [default: "Random"] ("AscendingPt", "DescendingPt", "AscendingBDiscriminator", "DescendingBDiscriminator", "Random")
+    # NOTE: Do I need new entries to also invert BDT2?
     )
 
 
