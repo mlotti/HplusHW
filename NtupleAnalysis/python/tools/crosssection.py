@@ -483,6 +483,9 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("ST_s_channel_4f_inclusiveDecays", {
             "13": 11.36, # [19]
             }),
+    CrossSection("ST_s_channel_4f_InclusiveDecays", {
+            "13": 11.36, # [19]
+            }),
 
     ########################################### Added for H+->tb
     CrossSection("QCD_bEnriched_HT100to200", {

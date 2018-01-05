@@ -1698,7 +1698,7 @@ void FakeBMeasurement::process(Long64_t entry) {
       if (!passSelected) return;
 
       // CSVv2-Loose (Inverted)
-      const std::vector<Jet> invertedBJets = GetInvertedBJets(jetData, bjetData);
+      const std::vector<Jet> invertedBJets = GetInvertedBJets(jetData, bjetData); // failed bjets (sorted by some quality) that are within some b-discriminator range
       bool passInverted = cfg_NumberOfInvertedBJets.passedCut(invertedBJets.size());
       if (!passInverted) return;
 

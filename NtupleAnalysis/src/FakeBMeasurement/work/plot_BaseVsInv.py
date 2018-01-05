@@ -182,6 +182,10 @@ def main(opts):
             Verbose("Plotting histogram \"%s\"" % hBaseline, False)
             if "IsGenuineB" in hBaseline:
                 continue
+
+            # temporary
+            #if "LdgTetrajetMass_" not in hBaseline:
+            #    continue
             PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted)
 
     return
