@@ -267,7 +267,7 @@ def main(opts):
             
         # Get the PSets:
         thePSets = datasetsMgr.getDataset("TT").getParameterSet()
-        if 0:
+        if 1:
             Print("Printing the PSet:\n" + thePSets, True)
             sys.exit()
 

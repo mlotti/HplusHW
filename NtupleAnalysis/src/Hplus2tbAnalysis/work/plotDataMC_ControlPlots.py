@@ -8,13 +8,14 @@ Usage:
 ./plotDataMC_ControlPlots.py -m <pseudo_mcrab_directory> [opts]
 
 Examples:
+./plotDataMC_ControlPlots.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/SignalAnalysis/Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_TopCut10_171012_011451 --folder topologySelection_
 ./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_TopCut10_171012_011451 --folder jetSelection_ --url
 ./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_TopMVA0p90_171106_064503 --folder topbdtSelection_ -e "QCD_HT50to100|QCD_HT100to200|QCD_HT200to300|QCD_HT300to500"
 ./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_TopMVA0p90_171106_064503/ --url --signalMass 500
 ./plotDataMC_ControlPlots.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/SignalAnalysis/Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_TopCut10_171012_011451 --folder ForDataDrivenCtrlPlots --signalMass 500 -e "FakeB"
 
 Last Used:
-./plotDataMC_ControlPlots.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/SignalAnalysis/Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_TopCut10_171012_011451 --folder topologySelection_
+./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_MVA0p80_MVA0p80_TopMassCutOff600GeV_180104_043952 --folder counters/weighted --url
 '''
 
 #================================================================================================ 
@@ -126,9 +127,12 @@ def main(opts):
         datasetsMgr.updateNAllEventsToPUWeighted()
         datasetsMgr.loadLuminosities() # from lumi.json
 
+        # Define datasets to remove by default
+        #datasetsToRemove = ["QCD-b", "QCD_HT50to100", "QCD_HT100to200", "QCD_HT200to300"] # QCD_HT removed should NOT make a noticable difference
+        #datasetsToRemove = ["QCD-b", "DYJets", "QCD_HT50to100", "QCD_HT100to200", "QCD_HT200to300"]
+        datasetsToRemove = ["QCD-b", "ZJetsToQQ", "QCD_HT50to100", "QCD_HT100to200", "QCD_HT200to300"]
+
         # Set/Overwrite cross-sections
-        datasetsToRemove = ["QCD-b", "QCD_HT50to100", "QCD_HT100to200", "QCD_HT200to300"] # QCD_HT removed should NOT make a noticable difference
-        #datasetsToRemove = ["QCD-b"]
         for d in datasetsMgr.getAllDatasets():
             if "ChargedHiggs" in d.getName():
                 datasetsMgr.getDataset(d.getName()).setCrossSection(1.0) # ATLAS 13 TeV H->tb exclusion limits
@@ -144,7 +148,7 @@ def main(opts):
             msg = "Removing dataset %s" % d
             Print(ShellStyles.WarningLabel() + msg + ShellStyles.NormalStyle(), i==0)
             datasetsMgr.remove(filter(lambda name: d in name, datasetsMgr.getAllDatasetNames()))
-        if opts.verbose:
+        if 1: #opts.verbose:
             datasetsMgr.PrintInfo()
 
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
@@ -190,7 +194,7 @@ def main(opts):
         for h in histoPaths:
             
             # Re-arrange dataset order if after top selection!
-            if "AfterAllSelections" in h:
+            if "AfterAllSelections" in h and opts.afterTop:
                 s = newOrder.pop( newOrder.index("noTop") )
                 newOrder.insert(len(newOrder), s) 
                 datasetsMgr.selectAndReorder(newOrder)
@@ -438,7 +442,7 @@ def GetHistoKwargs(h, opts):
 
     if h == "TetrajetMass" in h:
         units            = "GeV/c^{2}"
-        kwargs["rebinX"] = 2
+        kwargs["rebinX"] = 5
         kwargs["xlabel"] = "m_{jjbb} (%s)" % units
         kwargs["ylabel"] = _yLabel + units
         kwargs["opts"]   = {"xmin": 0.0, "xmax": +3000.0, "ymin": yMin, "ymaxfactor": yMaxF}
@@ -453,6 +457,7 @@ def GetHistoKwargs(h, opts):
     if h == "counter":
         xMin = 15
         kwargs["opts"]   = {"xmin": xMin, "xmax": +21.0, "ymin": 1e0, "ymaxfactor": 1.2}
+        #kwargs["opts"]   = {"xmin": xMin, "xmax": +21.0, "ymin": yMin, "ymaxfactor": 1.2}
         kwargs["cutBox"] = {"cutValue": xMin+2, "fillColor": 16, "box": False, "line": True, "greaterThan": True} #indicate btag SF
 
     if "IsolPt" in h:
@@ -498,7 +503,7 @@ def GetHistoKwargs(h, opts):
             kwargs["opts"]   = {"xmin": 0.0, "xmax": +3500.0, "ymin": yMin, "ymaxfactor": yMaxF}
 
     if "MHT" in h:
-        kwargs["rebinX"] = 1
+        kwargs["rebinX"] = 2
         units            = "GeV"
         kwargs["xlabel"] = "MHT (%s)" % units
         kwargs["ylabel"] = _yLabel + units
@@ -549,6 +554,7 @@ def GetHistoKwargs(h, opts):
 
     if "met" in h.lower():
         units            = "GeV"
+        kwargs["rebinX"] = 2
         kwargs["xlabel"] = "E_{T}^{miss} (%s)" % (units)
         kwargs["ylabel"] = _yLabel + units
         kwargs["opts"]   = {"xmin": 0.0, "xmax": 800.0, "ymin": yMin, "ymaxfactor": yMaxF}
