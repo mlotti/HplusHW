@@ -130,7 +130,9 @@ def main(opts):
         # Define datasets to remove by default
         #datasetsToRemove = ["QCD-b", "QCD_HT50to100", "QCD_HT100to200", "QCD_HT200to300"] # QCD_HT removed should NOT make a noticable difference
         #datasetsToRemove = ["QCD-b", "DYJets", "QCD_HT50to100", "QCD_HT100to200", "QCD_HT200to300"]
-        datasetsToRemove = ["QCD-b", "ZJetsToQQ", "QCD_HT50to100", "QCD_HT100to200", "QCD_HT200to300"]
+        #datasetsToRemove = ["QCD-b", "ZJetsToQQ", "QCD_HT50to100", "QCD_HT100to200", "QCD_HT200to300"]
+        #datasetsToRemove = ["QCD-b", "ZJetsToQQ"]
+        datasetsToRemove = ["QCD-b", "DYJets"]
 
         # Set/Overwrite cross-sections
         for d in datasetsMgr.getAllDatasets():
@@ -558,6 +560,8 @@ def GetHistoKwargs(h, opts):
         kwargs["xlabel"] = "E_{T}^{miss} (%s)" % (units)
         kwargs["ylabel"] = _yLabel + units
         kwargs["opts"]   = {"xmin": 0.0, "xmax": 800.0, "ymin": yMin, "ymaxfactor": yMaxF}
+        if "METFilter" in h:
+            kwargs["rebinX"] = 1
         if "Selections" in h:
             kwargs["opts"]   = {"xmin": 0.0, "xmax": 400.0, "ymin": yMin, "ymaxfactor": yMaxF}
             
