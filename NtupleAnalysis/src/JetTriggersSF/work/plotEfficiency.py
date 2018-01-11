@@ -180,6 +180,10 @@ def GetHistoKwargs(histoName, opts):
     histoKwargs = {}
     #_moveLegend = {"dx": -0.10, "dy": -0.53, "dh": -0.2}
     _moveLegend = {"dx": -0.10, "dy": -0.68, "dh": -0.2}
+    yMin1 = 0.5
+    yMax1 = 1.05
+    yMin2 = 0.75 #0.7
+    yMax2 = 1.21 #1.3
     _kwargs     = {
         "xlabel"           : "x-axis",
         "ylabel"           : "HLT Efficiency",
@@ -191,57 +195,66 @@ def GetHistoKwargs(histoName, opts):
         "addLuminosityText": True,
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
-        "opts"             : {"ymin": 0.0, "ymax": 1.1},#, "xmin":xMin, "xmax":xMax}
-        "opts2"            : {"ymin": 0.7, "ymax": 1.3},
+        "opts"             : {"ymin": yMin1, "ymax": yMax1},
+        "opts2"            : {"ymin": yMin2, "ymax": yMax2},
         "log"              : False,
         "moveLegend"       : _moveLegend,
+        "cutBoxY"          : {"cutValue": 0.95, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": False, "ratioCanvas": True},
         }
 
     kwargs = copy.deepcopy(_kwargs)
     hName  = histoName.lower()
 
+    ROOT.gStyle.SetNdivisions(510, "X") 
     if "pt6thjet" in hName:
         kwargs["xlabel"] = "p_{T} (GeV/c)"
-        kwargs["opts"]   = {"xmin": 29.5, "xmax": 120, "ymin": 0.0, "ymax": 1.05}
+        kwargs["opts"]   = {"xmin": 29.5, "xmax": 120, "ymin": yMin1, "ymax": yMax1}
         kwargs["cutBox"] = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
 
     if "eta6thjet" in hName:
         kwargs["xlabel"] = "#eta"
-        kwargs["opts"]   = {"xmin": -2.49, "xmax": 2.49, "ymin": 0.0, "ymax": 1.05}
+        kwargs["opts"]   = {"xmin": -2.49, "xmax": 2.49, "ymin": yMin1, "ymax": yMax1}
         #kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
 
     if "phi6thjet" in hName:
         kwargs["xlabel"] = "#phi (rads)"
-        kwargs["opts"]   = {"xmin": -3.0, "xmax": 3.0, "ymin": 0.0, "ymax": 1.05}
+        kwargs["opts"]   = {"xmin": -3.0, "xmax": 3.0, "ymin": yMin1, "ymax": yMax1}
 
     if "ht" in hName:
         kwargs["xlabel"] = "H_{T} (GeV)"
-        kwargs["opts"]   = {"xmin": 300.0, "ymin": 0.0, "ymax": 1.05}
-        kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        ROOT.gStyle.SetNdivisions(8, "X")
+        kwargs["opts"]   = {"xmin": 300.0, "ymin": yMin1, "ymax": yMax1}
+        kwargs["cutBox"]  = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        n1 = 8 # primary divisions
+        n2 = 5 # second order divisions
+        n3 = 2 # third order divisions
+        nDivs = n1 + 100*n2 + 10000*n3
+        if 1:
+            ROOT.gStyle.SetNdivisions(nDivs, "X")
+        #ROOT.gStyle.SetNdivisions(8, "X")
 
     if "nbtagjets" in hName:
         kwargs["xlabel"] = "b-jet multiplicity"
-        kwargs["opts"]   = {"xmin": 0.0, "ymin": 0.0, "ymax": 1.05}
+        #kwargs["opts"]   = {"xmin": 0.0, "ymin": 0.0, "ymax": yMax1}
+        kwargs["opts"]   = {"xmin": 2.0, "ymin": yMin1, "ymax": yMax1}
         kwargs["cutBox"] = {"cutValue": 3.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
 
     if "pu" in hName:
         kwargs["xlabel"]     = "reco vertices"
-        kwargs["opts"]       = {"xmin": 0.0, "ymin": 0.0, "ymax": 1.05}
+        kwargs["opts"]       = {"xmin": 0.0, "ymin": yMin1, "ymax": yMax1}
         #kwargs["moveLegend"] = {"dx": -0.44, "dy": -0.62, "dh": -0.2 }
 
     if "csv" in hName:
         kwargs["xlabel"] = "CSV"
-        kwargs["opts"]   = {"xmin": 0.0, "ymin": 0.0, "ymax": 1.05}
+        kwargs["opts"]   = {"xmin": 0.0, "ymin": yMin1, "ymax": yMax1}
  
     if "jetmulti" in hName:
         kwargs["xlabel"] = "jet multiplicity"
-        kwargs["opts"]   = {"xmin": 6.0, "xmax": 14.0, "ymin": 0.0, "ymax": 1.05}
+        kwargs["opts"]   = {"xmin": 6.0, "xmax": 14.0, "ymin": yMin1, "ymax": yMax1}
         kwargs["cutBox"] = {"cutValue": 7.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
 
     if "bjetmulti" in hName:
         kwargs["xlabel"] = "b-jet multiplicity"
-        kwargs["opts"]   = {"xmin": 0.0, "ymin": 0.0, "ymax": 1.05}
+        kwargs["opts"]   = {"xmin": 0.0, "ymin": yMin1, "ymax": yMax1}
         kwargs["cutBox"] = {"cutValue": 3.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
 
     return kwargs
@@ -569,7 +582,7 @@ def main(opts):
 
     # Define lists of Triggers to be plotted and Variables 
     trgOR  = ["OR_PFJet450"] # ["1BTag", "2BTag", "OR", "OR_PFJet450"]
-    xVars  = ["pt6thJet"]    # ["pt6thJet", "eta6thJet", "phi6thJet", "Ht", "nBTagJets", "pu", "JetMulti", "BJetMulti"]
+    xVars  = ["pt6thJet", "Ht", "nBTagJets"]    # ["pt6thJet", "eta6thJet", "phi6thJet", "Ht", "nBTagJets", "pu", "JetMulti", "BJetMulti"]
 
     # For-loop: All signal triggers
     for s in trgOR:
@@ -608,12 +621,12 @@ def main(opts):
             p.setLuminosity(intLumi)
             plots.drawPlot(p, plotName, **_kwargs)
 
-            # FIXME - xenios - ior
-            if xVar == "pt6thJet" and s == "OR_PFJet450":
-                plist = [0.7, 0.99, 1000, 0.16, 28.0]
-                Fit_Richards(30.0, 120.0, p, eff_Data, plist)
-                plist = [0.72, 0.91, 0.212, 0.15, 50.0]
-                Fit_Richards(30.0, 120.0, p, eff_MC, plist)
+#            # FIXME - xenios - ior
+#            if xVar == "pt6thJet" and s == "OR_PFJet450":
+#                plist = [0.7, 0.99, 1000, 0.16, 28.0]
+#                Fit_Richards(30.0, 120.0, p, eff_Data, plist)
+#                plist = [0.72, 0.91, 0.212, 0.15, 50.0]
+#                Fit_Richards(30.0, 120.0, p, eff_MC, plist)
             #elif xVar == "Ht" and s == "OR":
             #    plist = [0.00005, 0.988, 0.000000109, 0.15, 29.0]
             #    Fit_Richards(350.0, 2000.0, p, eff_Data, plist)
@@ -632,7 +645,7 @@ def main(opts):
             histograms.addText(0.65, 0.10, "2016", 17)
 
             # Save the canvas to a file
-            SavePlot(p, plotName, os.path.join(opts.saveDir, opts.optMode), saveFormats=[".png"] )
+            SavePlot(p, plotName, os.path.join(opts.saveDir, opts.optMode), saveFormats=[".pdf", ".png", ".C"] )
 
             '''
             # IN SLICES OF HT
