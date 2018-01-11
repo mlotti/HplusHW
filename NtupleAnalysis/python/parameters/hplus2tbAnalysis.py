@@ -94,6 +94,49 @@ jetSelection = PSet(
     MHTCutDirection          = ">=",
 )
 
+
+#=================================================================================================
+# Fat jet selection
+#=================================================================================================
+fatjetSelection = PSet(
+    fatjetType                  = "FatJets",   
+    fatjetPtCuts                = [100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0],
+    fatjetEtaCuts               = [2.4],
+    numberOfFatJetsCutValue     = 0,
+    numberOfFatJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
+    fatjetIDDiscr               = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
+    fatjetPUIDDiscr             = "",        # does not work at the moment 
+    tauMatchingDeltaR           = 0.4,
+    HTCutValue                  = 0.0,
+    HTCutDirection              = ">=",
+    JTCutValue                  = 0.0,
+    JTCutDirection              = ">=",
+    MHTCutValue                 = 0.0,
+    MHTCutDirection             = ">=",
+)
+
+#=================================================================================================
+# Fat jet selection
+#=================================================================================================
+fatjetSoftDropSelection = PSet(
+    fatjetType                  = "FatJetsSoftDrop",   
+    fatjetPtCuts                = [100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0],
+    fatjetEtaCuts               = [2.4],
+    numberOfFatJetsCutValue     = 0,
+    numberOfFatJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
+    fatjetIDDiscr               = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
+    fatjetPUIDDiscr             = "",        # does not work at the moment 
+    tauMatchingDeltaR           = 0.4,
+    HTCutValue                  = 0.0,
+    HTCutDirection              = ">=",
+    JTCutValue                  = 0.0,
+    JTCutDirection              = ">=",
+    MHTCutValue                 = 0.0,
+    MHTCutDirection             = ">=",
+)
+
+
+
 #================================================================================================
 # B-jet selection
 #================================================================================================
@@ -242,4 +285,7 @@ allSelections = PSet(
     Trigger               = trigger,
     Verbose               = verbose,
     FakeBMeasurement      = fakeBMeasurement,
+    FatJetSelection       = fatjetSelection,
+    FatJetSoftDropSelection = fatjetSoftDropSelection
 )
+

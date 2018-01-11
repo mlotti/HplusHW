@@ -1,0 +1,399 @@
+// -*- c++ -*-
+#include "Framework/interface/BaseSelector.h"
+#include "Framework/interface/makeTH.h"
+
+#include "EventSelection/interface/CommonPlots.h"
+#include "EventSelection/interface/EventSelections.h"
+
+#include "TDirectory.h"
+
+#include "DataFormat/interface/AK8Jet.h"
+#include "DataFormat/interface/AK8JetsSoftDrop.h"
+
+class TestFatJets: public BaseSelector {
+public:
+  explicit TestFatJets(const ParameterSet& config, const TH1* skimCounters);
+  virtual ~TestFatJets() {}
+
+  /// Books histograms
+  virtual void book(TDirectory *dir) override;
+  /// Sets up branches for reading the TTree
+  virtual void setupBranches(BranchManager& branchManager) override;
+  /// Called for each event
+  virtual void process(Long64_t entry) override;
+
+private:
+  // Input parameters
+  // const DirectionalCut<float> cfg_PrelimTopFitChiSqr;
+  const DirectionalCut<double> cfg_PrelimTopMVACut;
+
+  // Common plots
+  CommonPlots fCommonPlots;
+  // Event selection classes and event counters (in same order like they are applied)
+  Count cAllEvents;
+  Count cTrigger;
+  METFilterSelection fMETFilterSelection;
+  Count cVertexSelection;
+  ElectronSelection fElectronSelection;
+  MuonSelection fMuonSelection;
+  TauSelection fTauSelection;
+  JetSelection fJetSelection;
+  BJetSelection fBJetSelection;
+  Count cBTaggingSFCounter;
+  METSelection fMETSelection;
+  TopologySelection fTopologySelection;
+  TopSelectionBDT fTopSelection;
+  Count cSelected;
+  
+  // Marina
+  FatJetSelection fFatJetSelection;
+  FatJetSoftDropSelection fFatJetSoftDropSelection;
+  
+
+  // Non-common histograms
+  // WrappedTH1 *hAssociatedTop_Pt;
+  // WrappedTH1 *hAssociatedTop_Eta;
+};
+
+#include "Framework/interface/SelectorFactory.h"
+REGISTER_SELECTOR(TestFatJets);
+
+TestFatJets::TestFatJets(const ParameterSet& config, const TH1* skimCounters)
+  : BaseSelector(config, skimCounters),
+    // cfg_PrelimTopFitChiSqr(config, "FakeBMeasurement.prelimTopFitChiSqrCut"),
+    cfg_PrelimTopMVACut(config, "FakeBMeasurement.prelimTopMVACut"),
+    fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kHplus2tbAnalysis, fHistoWrapper),
+    cAllEvents(fEventCounter.addCounter("all events")),
+    cTrigger(fEventCounter.addCounter("passed trigger")),
+    fMETFilterSelection(config.getParameter<ParameterSet>("METFilter"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    cVertexSelection(fEventCounter.addCounter("passed PV")),
+    fElectronSelection(config.getParameter<ParameterSet>("ElectronSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
+    fMuonSelection(config.getParameter<ParameterSet>("MuonSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
+    fTauSelection(config.getParameter<ParameterSet>("TauSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
+    fJetSelection(config.getParameter<ParameterSet>("JetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    cBTaggingSFCounter(fEventCounter.addCounter("b tag SF")),
+    fMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    cSelected(fEventCounter.addCounter("Selected Events")),  // Marina ","
+    // Marina
+    fFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fFatJetSoftDropSelection(config.getParameter<ParameterSet>("FatJetSoftDropSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "")
+{ }
+
+
+void TestFatJets::book(TDirectory *dir) {
+
+  
+  // Book common plots histograms
+  fCommonPlots.book(dir, isData());
+
+  // Book histograms in event selection classes
+  fMETFilterSelection.bookHistograms(dir);
+  fElectronSelection.bookHistograms(dir);
+  fMuonSelection.bookHistograms(dir);
+  fTauSelection.bookHistograms(dir);
+  fJetSelection.bookHistograms(dir);
+  fBJetSelection.bookHistograms(dir);
+  fMETSelection.bookHistograms(dir);
+  fTopologySelection.bookHistograms(dir);
+  fTopSelection.bookHistograms(dir);
+  // Marina
+  fFatJetSelection.bookHistograms(dir);
+  fFatJetSoftDropSelection.bookHistograms(dir);
+  
+
+  // Book non-common histograms
+  // hAssociatedTop_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTop_Pt", "Associated t pT;p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  // hAssociatedTop_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTop_Eta", "Associated t eta;#eta", nBinsEta, minEta, maxEta);
+  return;
+}
+
+
+void TestFatJets::setupBranches(BranchManager& branchManager) {
+  fEvent.setupBranches(branchManager);
+  return;
+}
+
+
+void TestFatJets::process(Long64_t entry) {
+
+  //====== Initialize
+  fCommonPlots.initialize();
+  fCommonPlots.setFactorisationBinForEvent(std::vector<float> {});
+  cAllEvents.increment();
+
+  //================================================================================================   
+  // 1) Apply trigger 
+  //================================================================================================   
+  if (0) std::cout << "=== Trigger" << std::endl;
+  if ( !(fEvent.passTriggerDecision()) ) return;
+  
+  cTrigger.increment();
+  int nVertices = fEvent.vertexInfo().value();
+  fCommonPlots.setNvertices(nVertices);
+  fCommonPlots.fillControlPlotsAfterTrigger(fEvent);
+
+  //================================================================================================   
+  // 2) MET filters (to remove events with spurious sources of fake MET)
+  //================================================================================================   
+  if (0) std::cout << "=== MET Filter" << std::endl;
+  const METFilterSelection::Data metFilterData = fMETFilterSelection.analyze(fEvent);
+  if (!metFilterData.passedSelection()) return;
+  fCommonPlots.fillControlPlotsAfterMETFilter(fEvent);  
+
+  //================================================================================================   
+  // 3) Primarty Vertex (Check that a PV exists)
+  //================================================================================================   
+  if (0) std::cout << "=== Vertices" << std::endl;
+  if (nVertices < 1) return;
+  cVertexSelection.increment();
+  fCommonPlots.fillControlPlotsAtVertexSelection(fEvent);
+  
+  //================================================================================================   
+  // 4) Electron veto (Fully hadronic + orthogonality)
+  //================================================================================================   
+  if (0) std::cout << "=== Electron veto" << std::endl;
+  const ElectronSelection::Data eData = fElectronSelection.analyze(fEvent);
+  if (eData.hasIdentifiedElectrons()) return;
+
+  //================================================================================================
+  // 5) Muon veto (Fully hadronic + orthogonality)
+  //================================================================================================
+  if (0) std::cout << "=== Muon veto" << std::endl;
+  const MuonSelection::Data muData = fMuonSelection.analyze(fEvent);
+  if (muData.hasIdentifiedMuons()) return;
+
+  //================================================================================================   
+  // 6) Tau Veto (HToTauNu Orthogonality)
+  //================================================================================================   
+  if (0) std::cout << "=== Tau Veto" << std::endl;
+  const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
+  if (tauData.hasIdentifiedTaus() ) return;
+  
+  //================================================================================================
+  // 7) Jet selection
+  //================================================================================================
+  if (0) std::cout << "=== Jet selection" << std::endl;
+  const JetSelection::Data jetData = fJetSelection.analyzeWithoutTau(fEvent);
+  if (!jetData.passedSelection()) return;
+  fCommonPlots.fillControlPlotsAfterTopologicalSelections(fEvent, true);
+ 
+  //================================================================================================  
+  // 8) BJet selection
+  //================================================================================================
+  if (0) std::cout << "=== BJet selection" << std::endl;
+  const BJetSelection::Data bjetData = fBJetSelection.analyze(fEvent, jetData);
+  if (!bjetData.passedSelection()) return;
+  //fCommonPlots.fillControlPlotsAfterBjetSelection(fEvent, bjetData);
+  
+  //================================================================================================  
+  // 9) BJet SF  
+  //================================================================================================
+  if (0) std::cout << "=== BJet SF" << std::endl;
+  if (fEvent.isMC()) 
+    {
+      fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
+    }
+  cBTaggingSFCounter.increment();
+
+  //================================================================================================
+  // 10) MET selection
+  //================================================================================================
+  if (0) std::cout << "=== MET selection" << std::endl;
+  const METSelection::Data METData = fMETSelection.analyze(fEvent, nVertices);
+  // if (!METData.passedSelection()) return;
+
+  //================================================================================================
+  // 11) Topology selection
+  //================================================================================================
+  if (0) std::cout << "=== Topology selection" << std::endl;
+  const TopologySelection::Data topologyData = fTopologySelection.analyze(fEvent, jetData);
+  // if (!topologyData.passedSelection()) return; 
+
+  //================================================================================================
+  // 12) Top selection
+  //================================================================================================
+  /*
+    if (0) std::cout << "=== Top (ChiSq) selection" << std::endl;
+    const TopSelection::Data topData = fTopSelection.analyze(fEvent, jetData, bjetData);
+    // Apply preliminary chiSq cut
+    bool passPrelimChiSq = cfg_PrelimTopFitChiSqr.passedCut(topData.ChiSqr());
+    if (!passPrelimChiSq) return;
+  */
+  if (0) std::cout << "=== Top (BDT) selection" << std::endl;
+  const TopSelectionBDT::Data topData = fTopSelection.analyze(fEvent, jetData, bjetData, true);
+  bool passPrelimMVACut = cfg_PrelimTopMVACut.passedCut( std::max(topData.getMVAmax1(), topData.getMVAmax2()) ); //fixme?
+  bool hasFreeBJet      = topData.hasFreeBJet();
+  if (!hasFreeBJet) return;
+  if (!passPrelimMVACut) return;
+
+  //================================================================================================
+  // Standard Selections
+  //================================================================================================
+  if (0) std::cout << "=== Standard Selections" << std::endl;
+  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, bjetData.isGenuineB());
+  
+  //================================================================================================
+  // All Selections
+  //================================================================================================
+  if (!topologyData.passedSelection()) return;
+  if (!topData.passedSelection()) return;
+
+  if (0) std::cout << "=== All Selections" << std::endl;
+  cSelected.increment();
+  
+  
+  
+  //================================================================================================
+  // Other) Fat Jet selection
+  //================================================================================================
+  /*
+  if (0) std::cout << "=== Fat Jet selection" << std::endl;
+  const FatJetSelection::Data fatjetData = fFatJetSelection.analyzeWithoutTau(fEvent);
+  //if (!fatjetData.passedSelection()) return;
+  
+  // AK8 Jets Analysis
+  int jet_index = -1;
+  for(AK8Jet jet: fEvent.ak8jets())
+    {
+      jet_index++;
+      
+      double pt  = jet.pt();
+      double eta = jet.eta();
+      
+      if (pt < 100) continue;
+      if (std::abs(eta) > 2.4) continue;
+      
+      double phi = jet.phi();
+      double e   = jet.e();
+      
+      int pdgId  = jet.pdgId();
+      
+      // ID
+      bool jetID   = jet.jetIDDiscriminator();
+      bool IDloose = jet.IDloose();
+      bool IDtight = jet.IDtight();
+      bool IDtightLeptonVeto = jet.IDtightLeptonVeto();
+
+      // PU ID
+      bool jetPUID    = jet.jetPUIDDiscriminator();
+      bool PUIDloose  = jet.PUIDloose();
+      bool PUIDmedium = jet.PUIDmedium();
+      bool PUIDtight  = jet.PUIDtight();
+      
+      // originates From 
+      bool originatesFromChargedHiggs = jet.originatesFromChargedHiggs();
+      bool originatesFromTop          = jet.originatesFromTop();
+      bool originatesFromUnknown      = jet.originatesFromUnknown();
+      bool originatesFromW            = jet.originatesFromW();
+      bool originatesFromZ            = jet.originatesFromZ();
+
+      // Njettiness
+      double NjettinessAK8CHStau1 = jet.NjettinessAK8CHStau1();
+      double NjettinessAK8CHStau2 = jet.NjettinessAK8CHStau2();
+      double NjettinessAK8CHStau3 = jet.NjettinessAK8CHStau3();
+      double NjettinessAK8CHStau4 = jet.NjettinessAK8CHStau4();
+      
+      // Discriminators
+      float pfCombinedCvsBJetTags = jet.pfCombinedCvsBJetTags();
+      float pfCombinedCvsLJetTags = jet.pfCombinedCvsLJetTags();
+      float pfCombinedInclusiveSecondaryVertexV2BJetTags = jet.pfCombinedInclusiveSecondaryVertexV2BJetTags();
+      float pfCombinedMVAV2BJetTags = jet.pfCombinedMVAV2BJetTags();
+      
+      // Flavours
+      int hadronFlavour = jet.hadronFlavour();
+      int partonFlavour = jet.partonFlavour();
+      
+      
+      std::cout<<"===Fat jet ="<<jet_index<<std::endl;
+      std::cout<<"pt =" << pt    <<std::endl;
+      std::cout<<"eta=" << eta   <<std::endl;
+      std::cout<<"e=" << e     <<std::endl;
+      std::cout<<"pdgId=" << pdgId <<std::endl;
+      std::cout<<"jetID=" << jetID <<std::endl;
+      std::cout<<"IDloose="<<IDloose <<std::endl;
+      std::cout<<"IDtight="<<IDtight <<std::endl;
+      std::cout<<"IDtightLeptonVeto="<<IDtightLeptonVeto<<std::endl;
+      std::cout<<"jetPUID="<<jetPUID<<std::endl;
+      std::cout<<"PUIDloose="<<PUIDloose<<std::endl;
+      
+    }
+  */
+
+  
+  // AK8 Jets Analysis
+  int jetSD_index = -1;
+  for(AK8JetsSoftDrop jet: fEvent.ak8jetsSoftDrop())
+    {
+      jetSD_index++;
+      
+      double pt  = jet.pt();
+      double eta = jet.eta();
+      
+      if (pt < 100) continue;
+      if (std::abs(eta) > 2.4) continue;
+      if (!jet.jetIDDiscriminator()) continue;
+      
+      
+      double phi = jet.phi();
+      double e   = jet.e();
+      
+      int pdgId  = jet.pdgId();
+      
+      // ID
+      // bool jetID   = jet.jetIDDiscriminator();
+      // bool IDloose = jet.IDloose();
+      // bool IDtight = jet.IDtight();
+      // bool IDtightLeptonVeto = jet.IDtightLeptonVeto();
+
+      // PU ID
+      bool jetPUID    = jet.jetPUIDDiscriminator();
+      //bool PUIDloose  = jet.PUIDloose();
+      //bool PUIDmedium = jet.PUIDmedium();
+      //bool PUIDtight  = jet.PUIDtight();
+      
+      // originates From 
+      bool originatesFromChargedHiggs = jet.originatesFromChargedHiggs();
+      bool originatesFromTop          = jet.originatesFromTop();
+      bool originatesFromUnknown      = jet.originatesFromUnknown();
+      bool originatesFromW            = jet.originatesFromW();
+      bool originatesFromZ            = jet.originatesFromZ();
+      
+      // Discriminators
+      float pfCombinedInclusiveSecondaryVertexV2BJetTags = jet.pfCombinedInclusiveSecondaryVertexV2BJetTags();
+      
+      // Flavours
+      int hadronFlavour = jet.hadronFlavour();
+      int partonFlavour = jet.partonFlavour();
+      
+      int nSubJets      = jet.nSubjets();
+      bool hasBTagSubjet= jet.hasBTagSubjets();
+      
+      //std::cout<<"soft drop jet = "<<jet_index<<" has "<<nSubJets<<" subjets & has b-tagged? "<<hasBTagSubjet<<std::endl;
+    }
+  //std::cout<<"Soft Drop Fat Jets: "<<jetSD_index<<std::endl;
+  
+  
+  
+  
+  //================================================================================================
+  // Other) Fat Jet SoftDrop selection
+  //================================================================================================
+
+  //std::cout << "=== Fat Jet SoftDrop selection" << std::endl;
+  //const FatJetSoftDropSelection::Data fatjetSoftDropData = fFatJetSoftDropSelection.analyzeWithoutTau(fEvent);
+  
+  //================================================================================================
+  // Fill final plots
+  //===============================================================================================
+  //fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, 1);
+  
+  //================================================================================================
+  // Finalize
+  //================================================================================================
+  fEventSaver.save();
+
+  return;
+}

@@ -551,7 +551,9 @@ def main(opts, args):
     # HLTTau contains only generic momentum and pdgId information, no generation needed
     generateDiscriminator(types, "METFilter", "METFilter")
     generateGenParticles(types, "genParticle")
-    
+    # Marina
+    generateParticle(types, "AK8Jet", {"BJetTags": "BJetTags", "PUID": "PUID", "ID" : "JetID"})
+
     return 0
 
 
