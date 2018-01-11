@@ -103,7 +103,7 @@ bjetSelection = PSet(
     jetPtCuts                 = [40.0, 40.0, 30.0],
     jetEtaCuts                = [2.4],
     bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
-    bjetDiscrWorkingPoint     = "Medium", # change to list?
+    bjetDiscrWorkingPoint     = "Medium",
     numberOfBJetsCutValue     = 3,
     numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
 )
