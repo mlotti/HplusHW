@@ -575,7 +575,6 @@ backgroundCrossSections = CrossSectionList(
             }),
     CrossSection("ZZTo4Q", {
             "13": 6.883e+00, #6.883e+00 +- 3.718e-02 pb [16] (inputFiles="024C4223-171B-E611-81E5-0025904E4064.root")
-            #check
             }),
     CrossSection("ttbb_4FS_ckm_amcatnlo_madspin_pythia8", {
             "13": 1.393e+01, #1.393e+01 +- 3.629e-02 pb [16] (inputFiles="0641890F-F72C-E611-9EA8-02163E014B5F.root")

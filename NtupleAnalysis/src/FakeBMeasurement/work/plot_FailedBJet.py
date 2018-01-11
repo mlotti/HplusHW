@@ -98,8 +98,8 @@ def GetLumi(datasetsMgr):
 
 def GetListOfEwkDatasets():
     Verbose("Getting list of EWK datasets")
-    #return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
-    return ["TT", "noTop", "SingleTop", "ttX"]
+    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    #return ["TT", "noTop", "SingleTop", "ttX"]
 
 
 def GetDatasetsFromDir(opts):
@@ -210,11 +210,24 @@ def main(opts):
         # Only do these histos
         myHistos = ["FailedBJet1BDisc",
                     "FailedBJet1Pt", 
-                    "FailedBJet1Eta", 
+                    #"FailedBJet1Eta", 
                     #"FailedBJet1PdgId", 
                     #"FailedBJet1PartonFlavour", 
                     #"FailedBJet1HadronFlavour", 
-                    #"FailedBJet1Ancestry"
+                    #
+                    "FailedBJet2BDisc",
+                    "FailedBJet2Pt", 
+                    #"FailedBJet2Eta", 
+                    #"FailedBJet2PdgId", 
+                    #"FailedBJet2PartonFlavour", 
+                    #"FailedBJet2HadronFlavour", 
+                    #
+                    "FailedBJet3BDisc",
+                    "FailedBJet3Pt", 
+                    #"FailedBJet3Eta", 
+                    #"FailedBJet3PdgId", 
+                    #"FailedBJet3PartonFlavour", 
+                    #"FailedBJet3HadronFlavour", 
                     ]
         
         # For-loop: All histos
@@ -248,9 +261,10 @@ def PlotHisto(datasetsMgr, histoName):
     _rebinX = 1
     logY    = True
     yMaxF   = 1.2
+    yMax    = 0.5
     if logY:
         yMaxF = 10        
-    _opts   = {"ymin": 1e-4, "ymaxfactor": yMaxF}
+    _opts   = {"ymin": 1e-4, "ymax": yMax} #"ymaxfactor": yMaxF}
     _format = "%0.0f"
     _xlabel = None
     _ylabel = "Events / "
@@ -268,7 +282,7 @@ def PlotHisto(datasetsMgr, histoName):
         _cutBox = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _opts["xmin"] = -3.0
         _opts["xmax"] = +3.0
-    if "bjetbdisc" in h.lower():
+    if "bdisc" in h.lower():
         _format = "%0.2f" 
         _opts["xmin"] = 0.0
         _opts["xmax"] = 1.2

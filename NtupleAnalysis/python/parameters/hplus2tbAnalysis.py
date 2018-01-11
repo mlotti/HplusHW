@@ -222,21 +222,23 @@ topSelectionBDT = PSet(
 # FakeB Measurement Options
 #================================================================================================
 fakeBMeasurement = PSet(
-    prelimTopMVACutValue              = 0.4,      # [default: 0.4]
+    prelimTopMVACutValue              = 0.6,      # [default: 0.4]
     prelimTopMVACutDirection          =  ">=",    # [default: ">="]
-    # CSVv2-Medium requirements (Baseline b-jets)
-    numberOfBJetsCutValue             = 2,        # [default: 2]
-    numberOfBJetsCutDirection         = "==",     # [default: "=="]
-    # CSVv2-Loose requirements (Inverted b-jets)
-    numberOfInvertedBJetsCutValue     = 1,        # [default: 1]
-    numberOfInvertedBJetsCutDirection = ">=",     # [default: ">="]
+    # CSVv2-M (Baseline b-jets)
+    numberOfBJetsCutValue             = 2,        # [VR, CR2: 2   , CR3, CR4: 1   ]
+    numberOfBJetsCutDirection         = "==",     # [VR, CR2: "==", CR3, CR4: "=="]
+    # CSVv2-L (Inverted b-jets)
+    numberOfInvertedBJetsCutValue     = 1,        # [VR, CR2: 1   , CR3, CR4: 2   ]
+    numberOfInvertedBJetsCutDirection = ">=",     # [VR, CR2: ">=", CR3, CR4: ">="]
     invertedBJetsDiscr                = bjetSelection.bjetDiscr,
-    invertedBJetsDiscrMaxCutValue     = 0.8,      # [default: 0.7]
+    invertedBJetsDiscrMaxCutValue     = 0.85,     # [default: 0.8, CSVv2-L = 0.5426, CSVv2-M = +0.8484, CSVv2-T = 0.9535]
     invertedBJetsDiscrMaxCutDirection = "<=",     # [default: "<="]
     invertedBJetsWorkingPoint         = "Loose",  # [default: "Loose"]
-    # Does this make any difference?
-    invertedBJetsSortType             = "Random", # [default: "Random"] ("AscendingPt", "DescendingPt", "AscendingBDiscriminator", "DescendingBDiscriminator", "Random")
-    # NOTE: Do I need new entries to also invert BDT2?
+    invertedBJetsSortType             = "Random", # [default: "Random"] # FIXME: Does this make any difference?
+    LdgTopMVACutValue                 = topSelectionBDT.LdgMVACutValue,
+    LdgTopMVACutDirection             = topSelectionBDT.LdgMVACutDirection, 
+    SubldgTopMVACutValue              = topSelectionBDT.SubldgMVACutValue, # [VR CR2: 0.8 , CR3, CR4: 0.8 ]
+    SubldgTopMVACutDirection          = "<",                               # [VR CR2: ">=", CR3, CR4: "<" ]
     )
 
 

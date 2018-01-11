@@ -4,13 +4,12 @@ Usage:
 ./plot_Purity.py -m <pseudo_mcrab_directory> [opts]
 
 Examples:
-./plot_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar -e "QCD|Charged" --plotEWK -o OptChiSqrCutValue100  
-./plot_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar  -e "QCD|Charged" -plotEWK -o OptChiSqrCutValue100  
-./plot_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170630_045528_IsGenuineBEventBugFix_TopChiSqrVar -e "QCD|Charged" --plotEWK -o OptChiSqrCutValue100  
-./plot_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170627_124436_BJetsGE2_TopChiSqrVar_AllSamples --plotEWK -e 'QCD|Charged'
+./plot_Purity.py -m FakeBMeasurement_SRCR1VR_CSV2M_EE2_CSV2L_GE1_StdSelections_MVA_GE0p40_AllSelections_LdgTopMVA_GE0p80_SubldgMVA_GE0p80_RandomSort_180108_043300/ --folder ForFakeBMeasurement --doEWK
+./plot_Purity.py -m FakeBMeasurement_SRCR1VR_CSV2M_EE2_CSV2L_GE1_StdSelections_MVA_GE0p40_AllSelections_LdgTopMVA_GE0p80_SubldgMVA_GE0p80_RandomSort_180108_043300/ --folder ForFakeBMeasurement --doEWK --doQCD
+./plot_Purity.py -m FakeBMeasurement_SRCR1VR_CSV2M_EE2_CSV2L_GE0_StdSelections_MVA_GE0p40_AllSelections_LdgTopMVA_GE0p80_SubldgMVA_GE0p80_RandomSort_180107_122559/ --url --doQCD
 
 Last Used:
-./plot_Purity.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDT0p70_AllSelections_BDT0p70to0p90_RandomSort_171124_144802 --url --doQCD
+./plot_Purity.py -m FakeBMeasurement_SRCR1VR_CSV2M_EE2_CSV2L_GE1_StdSelections_MVA_GE0p40_AllSelections_LdgTopMVA_GE0p80_SubldgMVA_GE0p80_RandomSort_180108_043300/ --folder ForFakeBMeasurement
 
 NOTE:
 If unsure about the parameter settings a pseudo-multicrab do:
@@ -28,6 +27,7 @@ import sys
 import math
 import copy
 import os
+import array
 from optparse import OptionParser
 
 import ROOT
@@ -43,6 +43,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
+import HiggsAnalysis.NtupleAnalysis.tools.errorPropagation as errorPropagation
 
 #================================================================================================ 
 # Function Definition
@@ -64,29 +65,13 @@ def Verbose(msg, printHeader=True, verbose=False):
     return
 
 
-def MakeGraph(markerStyle, color, binList, valueDict, upDict, downDict):
-    g = ROOT.TGraphAsymmErrors(len(binList))
-    for i in range(len(binList)):
-        g.SetPoint(i, i+0.5, valueDict[binList[i]])
-        g.SetPointEYhigh(i, upDict[binList[i]])
-        g.SetPointEYlow(i, downDict[binList[i]])
-    g.SetMarkerSize(1.6)
-    g.SetMarkerStyle(markerStyle)
-    g.SetLineColor(color)
-    g.SetLineWidth(3)
-    g.SetMarkerColor(color)
-    return g
-
-
 def GetLumi(datasetsMgr):
-    Verbose("Determininig Integrated Luminosity")
-    
     lumi = 0.0
     for d in datasetsMgr.getAllDatasets():
         if d.isMC():
             continue
-        else:
-            lumi += d.getLuminosity()
+        # Add lumis
+        lumi += d.getLuminosity()
     Verbose("Luminosity = %s (pb)" % (lumi), True)
     return lumi
 
@@ -96,6 +81,7 @@ def GetListOfEwkDatasets(datasetsMgr):
     if "noTop" in datasetsMgr.getAllDatasetNames():
         return ["TT", "noTop", "SingleTop", "ttX"]
     else:
+        # ZJetsToQQ_HT600toInf and DYJetToQQHT are the same?
         return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
 
 
@@ -129,7 +115,12 @@ def GetDatasetsFromDir(opts):
 
 def main(opts):
 
-
+    # Apply TDR style
+    style = tdrstyle.TDRStyle()
+    style.setGridX(True)
+    style.setGridY(True)
+    style.setOptStat(True)
+    
     # Obtain dsetMgrCreator and register it to module selector
     dsetMgrCreator = dataset.readFromMulticrabCfg(directory=opts.mcrab)
 
@@ -150,7 +141,6 @@ def main(opts):
     else:
         optModes = [opts.optMode]
 
-
     # For-loop: All optimisation modes
     for opt in optModes:
         opts.optMode = opt
@@ -160,7 +150,8 @@ def main(opts):
         datasetsMgr.updateNAllEventsToPUWeighted()
         datasetsMgr.loadLuminosities() # from lumi.json
         
-        PrintPSet("TopologySelection", datasetsMgr)
+        # Print PSets used for FakeBMeasurement
+        PrintPSet("FakeBMeasurement", datasetsMgr)
 
         # Set/Overwrite cross-sections
         for d in datasetsMgr.getAllDatasets():
@@ -174,7 +165,12 @@ def main(opts):
 
         # Filter the datasets 
         datasetsMgr.remove(filter(lambda name: "Charged" in name, datasetsMgr.getAllDatasetNames()))
-        #datasetsMgr.remove(filter(lambda name: "Charged" in name and not "M_500" in name, datasetsMgr.getAllDatasetNames()))
+        # datasetsMgr.remove(filter(lambda name: "Charged" in name and not "M_500" in name, datasetsMgr.getAllDatasetNames()))
+
+        # ZJets and DYJets overlap!
+        if "ZJetsToQQ_HT600toInf" in datasetsMgr.getAllDatasetNames() and "DYJetsToQQ_HT180" in datasetsMgr.getAllDatasetNames():
+            Print("Cannot use both ZJetsToQQ and DYJetsToQQ due to duplicate events? Investigate. Removing ZJetsToQQ datasets for now ..", True)
+            datasetsMgr.remove(filter(lambda name: "ZJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
                
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
@@ -192,41 +188,31 @@ def main(opts):
         datasetsMgr.merge("EWK", GetListOfEwkDatasets(datasetsMgr))
         plots._plotStyles["EWK"] = styles.getAltEWKStyle()
             
-        # Print dataset information
+        # Print post EWK-merge dataset summary
         datasetsMgr.PrintInfo()
 
-        # Apply TDR style
-        style = tdrstyle.TDRStyle()
-        style.setOptStat(True)
-
-        # Do the Purity Triplets?
-        if 0:
-            bType  = ["", "EWKFakeB", "EWKGenuineB"]
-            folder = "FakeBPurity" + bType[0]
-            hList  = datasetsMgr.getDataset("EWK").getDirectoryContent(folder)
-            for hName in hList:
-                PlotPurity(datasetsMgr, os.path.join(folder, hName))
-
-        # Do the Std Selections Purity plots
-        folder    = "ForDataDrivenCtrlPlots"
-        allHistos = datasetsMgr.getDataset("EWK").getDirectoryContent(folder)
-        hList = [h for h in allHistos if "StandardSelections" in h and "_Vs" not in h]
+        # Get all histograms from the  in the selected folder inside the ROOT files 
+        allHistos = datasetsMgr.getAllDatasets()[0].getDirectoryContent(opts.folder)
+        hList     = [h for h in allHistos if "CRSelections" in h and "_Vs" not in h]
         hList.extend([h for h in allHistos if "AllSelections" in h and "_Vs" not in h])
+        # hList.extend([h for h in allHistos if "StandardSelections" in h and "_Vs" not in h])
 
-        # Only do these histos
-        #myHistos = ["Njets", "LdgTrijetMass", "TetrajetBjetPt", "LdgTetrajetMass", "LdgTetrajetMass", "HT"]
-        myHistos = ["Njets", "NBjets", "LdgTrijetMass", "TetrajetBjetPt", "LdgTetrajetMass", "LdgTetrajetMass", "HT"]
+        # Create a list with strings included in the histogram names you want to plot
+        myHistos = ["LdgTrijetM", "LdgTetrajetMass", "MVAmax2", "MVAmax1", "Njets", "NBjets", 
+                    "Bjet3BtagDisc", "Bjet2BtagDisc", "Bjet1BtagDisc", "Bjet3Pt", "Bjet2Pt", "Bjet1Pt"]
 
         # For-loop: All histos
-        for h in hList:
-                
-            if h.split("_")[0] not in myHistos:
-                continue
-            if "JetEtaPhi" in h:
-                continue
-            PlotPurity(datasetsMgr, folder, h)
-
+        for h in myHistos:
+            hGraphList = []
+            for b in ["Baseline_", "Inverted_"]:
+                for r in ["_AfterCRSelections", "_AfterAllSelections" ]:
+                    histoName = b + h + r
+                    hgQCD, kwargs = GetPurityHistoGraph(datasetsMgr, opts.folder, histoName)
+                    hGraphList.append(hgQCD)
+                    PlotHistoGraph(hgQCD, kwargs)
+            PlotHistoGraphs(hGraphList, kwargs)
     return
+
 
 def PrintPSet(selection, datasetsMgr):
     selection = "\"%s\":"  % (selection)
@@ -244,6 +230,7 @@ def PrintPSet(selection, datasetsMgr):
     Print(thePSet, True)
     return
 
+
 def getHistos(datasetsMgr, histoName):
     
     h1 = datasetsMgr.getDataset("Data").getDatasetRootHisto(histoName)
@@ -254,90 +241,39 @@ def getHistos(datasetsMgr, histoName):
     return [h1, h2]
 
 
-def IsBaselineOrInverted(analysisType):
-    analysisTypes = ["Baseline", "Inverted"]
-    if analysisType not in analysisTypes:
-        raise Exception("Invalid analysis type \"%s\". Please select one of the following: %s" % (analysisType, "\"" + "\", \"".join(analysisTypes) + "\"") )
-    else:
-        pass
+def PlotHistoGraph(histoGraph, _kwargs):
+    histoName = _kwargs["histoName"]
+
+    # Make the plots
+    p = plots.PlotBase( [histoGraph], saveFormats=[])
+    # p = plots.ComparisonManyPlot(histoGraph, [histoGraph1, histoGraph2], saveFormats=[])
+
+    # Draw the plots
+    plots.drawPlot(p, histoName,  **_kwargs)
+    
+    # Save the plots
+    histoName = histoName.replace("ForFakeBMeasurement/", "")
+    histoName = GetSaveName(histoName) #introduced for ABCD method
+    SavePlot(p, histoName, os.path.join(opts.saveDir, "Purity", opts.optMode), saveFormats = [".png", ".pdf"] )
     return
 
 
-def PlotPurity(datasetsMgr, folder, hName):
-    '''
-    Create plots with "FakeB=Data-EWKGenuineB"
-    '''
-    # Which folder
+def GetPurityHistoGraph(datasetsMgr, folder, hName):
+
+    # Which folder to use
     genuineBFolder = folder + "EWKGenuineB"
     fakeBFolder    = folder + "EWKFakeB"
     histoName      = os.path.join(folder, hName)
     hNameGenuineB  = os.path.join(genuineBFolder, hName)
+    Verbose("Creating purity plot for %s" % (histoName), True)
 
-    # Customize the histograms (BEFORE calculating purity obviously otherwise numbers are nonsense)
-    _cutBox = None
-    _rebinX = 1
-    _opts   = {"ymin": 1e-2, "ymax": 1.0} #"ymaxfactor": 1.2}
-    _format = "%0.0f"
-    #_opts["xmax"] = xMax
-    _xlabel = None
-    _ylabel = "Purity / "
-    _format = "/ %.0f "
-
-    h = histoName.split("/")[-1]
-    if "dijetm" in h.lower():
-        _units  = "GeV/c^{2}" 
-        _format = "%0.0f " + _units
-        _xlabel = "m_{jj} (%s)" % (_units)
-        _cutBox = {"cutValue": 80.399, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-    if "trijetm" in h.lower():
-        _rebinX = 2
-        _units  = "GeV/c^{2}" 
-        _format = "%0.0f " + _units
-        _xlabel = "m_{jjb} (%s)" % _units
-        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 1000.0
-    if "pt" in h.lower():
-        _format = "%0.0f GeV/c" 
-    if "chisqr" in h.lower():
-        _opts["xmax"] = 100.0
-        if "allselections" in h.lower():
-            _opts["xmax"] = 10.0            
-    #if histo.lower().endswith("met_et"):
-    if h.lower().startswith("ht_"):
-        _rebinX = 5
-        _units  = "GeV/c" 
-        _format = "%0.0f " + _units
-        _xlabel = "H_{T} (%s)" % _units
-        _cutBox = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
-        _opts["xmin"] =  500.0
-        _opts["xmax"] = 3500.0
-    if "eta" in h.lower():
-        _rebinX = 1
-        _format = "%0.2f" 
-        _cutBox = {"cutValue": 0., "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmin"] = -3.0
-        _opts["xmax"] = +3.0
-    if "deltaeta" in h.lower():
-        _format = "%0.2f" 
-        _opts["xmin"] =  0.0
-        _opts["xmax"] = 6.0
-    if "bdisc" in h.lower():
-        _format = "%0.2f" 
-    if "tetrajetm" in h.lower():
-        _rebinX = 4
-        _units  = "GeV/c^{2}" 
-        _format = "%0.0f " + _units
-        _xlabel = "m_{jjbb} (%s)" % (_units)
-        _opts["xmax"] = 2500.0
-    if "pt_" in h.lower():
-        _rebinX = 2
-
-    _ylabel += _format
+    # Get histogram customisations
+    _kwargs  = GetHistoKwargs(histoName, opts)
 
     # Get histos (Data, EWK) for Inclusive
     p1 = plots.ComparisonPlot(*getHistos(datasetsMgr, histoName) )
     if opts.doQCD:
-        p2 = plots.ComparisonPlot(*getHistos(datasetsMgr, histoName) ) #hNameGenuineB) )
+        p2 = plots.ComparisonPlot(*getHistos(datasetsMgr, histoName) )
     else:
         p2 = plots.ComparisonPlot(*getHistos(datasetsMgr, hNameGenuineB) )
 
@@ -349,79 +285,246 @@ def PlotPurity(datasetsMgr, folder, hName):
     EWK  = p2.histoMgr.getHisto("EWK").getRootHisto().Clone("EWK") # EWKGenuineB
     QCD  = p1.histoMgr.getHisto("Data").getRootHisto().Clone("QCD")
 
-    # Rebin histograms (Before calculating Purity)
-    Data.Rebin(_rebinX)
-    EWK.Rebin(_rebinX)
-    QCD.Rebin(_rebinX)
+    # Rebin histograms (Before calculating Purity) # alex: FIXME - make it automatic
+    if "binList" in _kwargs:
+        xBins   = _kwargs["binList"]
+        nx      = len(xBins)-1
+        newName = "" 
+        Verbose("Setting customly-selected bins %s" % (xBins), True)
+
+        Data = Data.Rebin(nx, "", xBins)
+        EWK  = EWK.Rebin(nx, "", xBins)
+        QCD  = QCD.Rebin(nx, "", xBins)
 
     # Get QCD = Data-EWK
     QCD.Add(EWK, -1)
 
-    # Comparison plot. The first argument is the reference histo. All other histograms are compared with respect to that. 
-    QCD_Purity, xMin, xMax, binList, valueDict, upDict, downDict = getPurityHisto(QCD, Data, inclusiveBins=False, printValues=True)
-    EWK_Purity, xMin, xMax, binList, valueDict, upDict, downDict = getPurityHisto(EWK, Data, inclusiveBins=False, printValues=False)
+    # Create the Purity histos
+    hPurity = GetPurityHisto(Data, EWK, _kwargs, printValues=False, hideZeros=True)
+    if opts.doEWK:
+        hPurity = GetPurityHisto(Data, QCD, _kwargs, printValues=False, hideZeros=True)
 
-    # Create TGraphs
-    if 0:
-        gQCD_Purity = MakeGraph(ROOT.kFullTriangleUp, ROOT.kOrange, binList, valueDict, upDict, downDict)
-        gEWK_Purity = MakeGraph(ROOT.kFullTriangleDown, ROOT.kBlue, binList, valueDict, upDict, downDict)
-        
-    # Make the plots
-    if opts.plotEWK:
-        p = plots.ComparisonManyPlot(QCD_Purity, [EWK_Purity], saveFormats=[])
-    else:
-        p = plots.PlotBase([QCD_Purity], saveFormats=[])
-
-
-    # Apply histo styles
-    p.histoMgr.forHisto("QCD", styles.getQCDLineStyle() )
-    if opts.plotEWK:
-        p.histoMgr.forHisto("EWK"  , styles.getAltEWKLineStyle() )
-
-    # Set draw style
-    p.histoMgr.setHistoDrawStyle("QCD", "P")
-    if opts.plotEWK:
-        p.histoMgr.setHistoDrawStyle("EWK", "HIST")
-
-    # Set legend style
-    p.histoMgr.setHistoLegendStyle("QCD", "P")
-    if opts.plotEWK:
-        p.histoMgr.setHistoLegendStyle("EWK", "F")
+    # Convert histos to TGraph
+    gPurity = convertHisto2TGraph(hPurity, printValues=False)
 
     # Set legend labels
-    if opts.plotEWK:
-        p.histoMgr.setHistoLegendLabelMany({
-                "QCD" : "QCD",
-                "EWK" : "EWK",
-                })
+    if opts.doQCD:
+        qcdLabel = "QCD (%s)" % GetControlRegionLabel(histoName)
+        ewkLabel = "EWK (%s)" % GetControlRegionLabel(histoName)
     else:
-        p.histoMgr.setHistoLegendLabelMany({
-                "QCD" : "QCD",
-                })
-    
-    # Do the plot
-    plots.drawPlot(p, 
-                   histoName,  
-                   xlabel        = _xlabel,
-                   ylabel        = _ylabel,
-                   log           = False, 
-                   rebinX        = 1, # must be done BEFORE calculating purity
-                   cmsExtraText  = "Preliminary", 
-                   createLegend  = {"x1": 0.76, "y1": 0.80, "x2": 0.92, "y2": 0.92},
-                   opts          = _opts,
-                   opts2         = {"ymin": 0.5, "ymax": 1.5},
-                   ratio         = False,
-                   ratioInvert   = False, 
-                   ratioYlabel   = "Ratio",
-                   cutBox        = _cutBox,
-                   )
-    
-    # Save plot in all formats
-    SavePlot(p, histoName, os.path.join(opts.saveDir, "Purity", opts.optMode))#, saveFormats = [".png"] )
+        qcdLabel = "Fake-b (%s)"    % GetControlRegionLabel(histoName)
+        ewkLabel = "Genuine-b (%s)" % GetControlRegionLabel(histoName)        
+
+    # Apply random histo styles
+    s = styles.getABCDStyle( GetControlRegionLabel(histoName) )
+    s.apply(gPurity)        
+
+    # Create histoGraph object
+    if opts.doEWK:
+        hgPurity = histograms.HistoGraph( gPurity, ewkLabel, "p", "P")
+    else:
+        hgPurity = histograms.HistoGraph( gPurity, qcdLabel, "p", "P")
+
+    # Save for future use
+    _kwargs["histoName"] = histoName
+    return hgPurity, _kwargs
+
+def PlotHistoGraphs(hGraphList, _kwargs):
+
+    histoName = _kwargs["histoName"]
+    histoName = histoName.replace("ForFakeBMeasurement/", "")
+    histoName = histoName.split("_")[1]
+
+    # Overwrite some canvas options
+    _kwargs["opts"]["ymin"] = 0.5
+    _kwargs["opts"]["ymax"] = 1.02
+
+    # Create & draw the plot    
+    p = plots.PlotBase( hGraphList, saveFormats=[])
+    plots.drawPlot(p, histoName, **_kwargs)
+
+    # Save the plot
+    SavePlot(p, histoName, os.path.join(opts.saveDir, "Purity", opts.optMode), saveFormats = [".png", ".pdf"] )
     return
 
+def GetHistoKwargs(histoName, opts):
+    '''
+    Dictionary with
+    key   = histogram name
+    value = kwargs
+    '''
+    h = histoName.split("/")[-1]
+    histoKwargs = {}
+    _moveLegend = {"dx": -0.08, "dy": -0.42, "dh": -0.14}
+    _yMin       = 0.0
+    _yMax       = 1.09
+    _cutBox     = None
+    _cutBoxY    = {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
+    _xlabel     = "x-axis"
+    _bins       = None
+    _kwargs     = {
+        "xlabel"           : _xlabel,
+        "ylabel"           : "Purity",
+        #"rebinX"           : 1,
+        "ratioYlabel"      : "Ratio",
+        "ratio"            : False, #works (but not needed)
+        "ratioInvert"      : False,
+        "stackMCHistograms": False,
+        "addMCUncertainty" : True,
+        "addLuminosityText": False,
+        "addCmsText"       : True,
+        "cmsExtraText"     : "Preliminary",
+        # "opts"             : _opts,
+        "opts2"            : {"ymin": 0.6, "ymax": 1.4},
+        "log"              : False,
+        "moveLegend"       : _moveLegend,
+        "cutBoxY"          : _cutBoxY
+        }
 
-def SavePlot(plot, plotName, saveDir, saveFormats = [".png"]): #[".png", ".C", ".pdf"]):
+    # Common bin settings
+    myBins     = []
+    ptBins     = []
+    jetBins    = []
+    bjetBins   = []
+    btagBins   = []
+    mvaBins    = []
+    triMBins   = [] 
+    tetraMBins = [] 
+    step1      = 20
+    step2      = 50
+    step3      = 100
+    step4      = 200
+    step5      = 2000
+
+    for i in range(0, 21, 1):
+        mvaBins.append(i*0.05)
+
+    for i in range(4, 21, 1):
+        j = i*0.05
+        btagBins.append(j)
+
+    for i in range(6, 15, 1):
+        jetBins.append(i)
+    for i in range(0, 9, 1):
+        bjetBins.append(i)
+
+    for i in range(0, 100, 10):
+        ptBins.append(i)
+    for j in range(100, 200, step1):
+        ptBins.append(j)
+    for j in range(200, 300+step2, step2):
+        ptBins.append(j)
+
+    for j in range(0, 300, step1):
+        triMBins.append(j)
+    for j in range(300, 500+step2, step2):
+        triMBins.append(j)
+
+    for j in range(0, 1000, step3):
+        tetraMBins.append(j)
+    for k in range(1000, 2000, step4):
+        tetraMBins.append(k)
+    for l in range(2000, 4000+step5, step5):
+        tetraMBins.append(l)
+
+    # Set x-axis divisions
+    n1 = 8 # primary divisions
+    n2 = 5 # second order divisions
+    n3 = 2 # third order divisions
+    nDivs = n1 + 100*n2 + 10000*n3
+    if 1:
+        ROOT.gStyle.SetNdivisions(nDivs, "X")
+
+    if "pt" in h.lower():# don't move further down!
+        _xlabel           = "p_{T} (GeV/c)"
+        myBins            = ptBins
+
+    if "mvamax1" in h.lower():
+        _xlabel = "Leading MVA"
+        _cutBox = {"cutValue": 0.8, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        myBins  = mvaBins
+    if "mvamax2" in h.lower():
+        _xlabel = "Subleading MVA"
+        _cutBox = {"cutValue": 0.8, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        myBins  = mvaBins
+    if "trijetm" in h.lower():
+        _units  = "GeV/c^{2}" 
+        _xlabel = "m_{jjb} (%s)" % _units
+        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        myBins = triMBins
+    if "bjet1pt" in h.lower():
+        _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _xlabel = "p_{T} (GeV/c)"
+        myBins  = ptBins
+        myBins.extend([400, 600])
+    if "bjet2pt" in h.lower():
+        _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _xlabel = "p_{T} (GeV/c)"
+        myBins.extend([400, 600])
+    if "bjet3pt" in h.lower():
+        _cutBox = {"cutValue": 30.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _xlabel = "p_{T} (GeV/c)"
+    if "btagdisc" in h.lower():
+        _units  = "" 
+        _xlabel = "b-jet discriminator"
+        # _cutBox = {"cutValue": 0.5426, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _cutBox = {"cutValue": 0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        myBins  = btagBins
+    if "nbjets" in h.lower():
+        _units  = "" 
+        _cutBox = {"cutValue": 3.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _xlabel = "b-jet multiplicity"
+        myBins  = bjetBins
+    if "njets" in h.lower():
+        _units  = "" 
+        _cutBox = {"cutValue": 7.0, "fillColor": 16, "box": True, "line": True, "greaterThan": True}
+        _xlabel = "jet multiplicity"
+        myBins  = jetBins
+    if "tetrajetm" in h.lower():
+        _units  = "GeV/c^{2}" 
+        _xlabel = "m_{jjbb} (%s)" % (_units)
+        myBins  = tetraMBins
+        ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
+
+    _kwargs["opts"]    = {"ymin": _yMin, "ymax": _yMax}
+    _kwargs["xlabel"]  = _xlabel
+    _kwargs["cutBox"]  = _cutBox
+    _kwargs["cutBoxY"] = _cutBoxY
+
+    if len(myBins) > 0:
+        _kwargs["binList"] = array.array('d', myBins)
+    return _kwargs
+
+
+def GetSaveName(histoName):
+    base = histoName.split("_")[0]
+    var  = histoName.split("_")[1]
+    sel  = histoName.split("_")[2]
+    name = var + "_" + GetControlRegionLabel(histoName)
+    return name
+
+
+def GetControlRegionLabel(histoName):
+    histoName = histoName.replace(opts.folder + "/", "")
+    base = histoName.split("_")[0]
+    var  = histoName.split("_")[1]
+    sel  = histoName.split("_")[2]
+
+    if base == "Baseline":
+        if sel == "AfterAllSelections":
+            return "SR"
+        elif sel == "AfterCRSelections":
+            return "CR1"
+    elif base == "Inverted":
+        if sel == "AfterAllSelections":
+            return "VR"
+        elif sel == "AfterCRSelections":
+            return "CR2"
+    else:
+        raise Exception("Cannot determine Control Region label. Got unexpeted histogram name \"%s\". " % histoName)
+    return
+    
+def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".C", ".pdf"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
 
     # Check that path exists
@@ -429,7 +532,6 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png"]): #[".png", ".C", "
         os.makedirs(saveDir)
 
     # Create the name under which plot will be saved
-    #saveName = os.path.join(saveDir, plotName.replace("/", "_"))
     saveName = os.path.join(saveDir, plotName.replace("ForDataDrivenCtrlPlots/", ""))
 
     # For-loop: All save formats
@@ -444,90 +546,159 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png"]): #[".png", ".C", "
     return
 
 
-def getPurityHisto(histo, refHisto, inclusiveBins=False, printValues=False):
-    '''
-    Return the FakeB purity as a histogram with splitted bins on x-axis
-    '''
+def convertHisto2TGraph(histo, printValues=False):
 
-    h = histo.Clone()
-    h.Reset("ICESM")
-    ROOT.SetOwnership(h, True)
-    
-    rows   = []
-    align  = "{:>10} {:>10} {:>10} {:>10} {:>10} {:>3} {:<10}"
+    # Lists for values
+    x     = []
+    y     = []
+    xerrl = []
+    xerrh = []
+    yerrl = []
+    yerrh = []
+
+    # Other definitions
+    xMin   = histo.GetXaxis().GetXmin()
+    xMax   = histo.GetXaxis().GetXmax()
+    nBinsX = histo.GetNbinsX()
+
+    # For-loop: All histogram bins
+    for i in range(1, nBinsX+1):
+        
+        # Get values
+        xVal  = histo.GetBinLowEdge(i) +  0.5*histo.GetBinWidth(i)
+        xLow  = 0.5*histo.GetBinWidth(i)
+        xHigh = 0.5*histo.GetBinWidth(i)
+        yVal  = histo.GetBinContent(i)
+        yLow  = histo.GetBinError(i)
+        yHigh = yLow            
+
+        # Store values
+        x.append(xVal)
+        xerrl.append(xLow)
+        xerrh.append(xHigh)
+
+        y.append(yVal)
+        yerrl.append(yLow)
+        yerrh.append(yHigh)
+
+    # Create the TGraph with asymmetric errors
+    tgraph = ROOT.TGraphAsymmErrors(nBinsX,
+                                    array.array("d",x),
+                                    array.array("d",y),
+                                    array.array("d",xerrl),
+                                    array.array("d",xerrh),
+                                    array.array("d",yerrl),
+                                    array.array("d",yerrh))
+
+    # Construct info table (debugging)
+    table  = []
+    align  = "{:>6} {:^10} {:>10} {:>10} {:>10} {:^3} {:<10}"
+    header = align.format("#", "xLow", "x", "xUp", "Purity", "+/-", "Error") #Purity = 1-EWK/Data
     hLine  = "="*70
-    header = align.format("Bin", "Bin-Center", "Numerator", "Denominator", "Purity", "", "Error")
-    rows.append(hLine)
-    rows.append("{:^55}".format(histo.GetName()) )
-    rows.append(header)
-    rows.append(hLine)
-
-    # For-loop: Bins
-    minPurity = 999.9
-    binList   = []
-    valueDict = {}
-    upDict    = {}
-    downDict  = {}
-    for j in range(1, refHisto.GetNbinsX()+1, 1):
-
-        # Get the numerator and denominator
-        if inclusiveBins:
-            nNumerator   = histo.Integral(j, histo.GetNbinsX()+1)
-            nDenominator = refHisto.Integral(j, refHisto.GetNbinsX()+1)
-        else:
-            nNumerator   = histo.GetBinContent(j)
-            nDenominator = refHisto.GetBinContent(j)
-
-        # Calculate purity and error. Assume binomial error
-        if (nDenominator > 0.0 and nNumerator > 0.0):
-            myPurity = ((nNumerator) / (nDenominator) )
-            myUncert = ROOT.TMath.Sqrt(myPurity * (1.0 - myPurity) / nDenominator)
-        else:
-            myPurity = 0.0
-            myUncert = 0.0
-            
-        # Sanity check!
-        if myPurity > 1.0 or myPurity < 0.0:
-            myPurity = 1.0
-            # raise Exception("Purity=%.1f/%.1f=%0.2f. This should never happen!" % (nNumerator, nDenominator, myPurity) )
-
-        if myPurity < minPurity:
-            minPurity = myPurity
-
-        if 0:
-            myPurity = myPurity*100
-            myUncert = myUncert*100
-
-        h.SetBinContent(j, myPurity)
-        h.SetBinError(j, myUncert)
-
-        # Save the values
-        binList.append(j)
-        valueDict[j] = myPurity
-        upDict[j]    = myUncert
-        downDict[j]  = myUncert
-
-        row = align.format(j, "%.2f" % refHisto.GetXaxis().GetBinCenter(j), "%.1f" % nNumerator, "%.1f" % nDenominator, "%.2f" % (myPurity), "+/-", "%.3f" % (myUncert))
-        rows.append(row)
-
-    # Determine x-min and x-max
-    xMinBin = histo.FindFirstBinAbove(0) # histo.GetBinCenter(1)
-    xMaxBin = histo.FindLastBinAbove(minPurity) # histo.GetBinCenter(histo.GetNbinsX()+1)
-    xMin    = refHisto.GetXaxis().GetBinCenter(xMinBin)
-    xMax    = refHisto.GetXaxis().GetBinCenter(xMaxBin+1)
+    table.append("")
+    table.append(hLine)
+    table.append("{:^70}".format("TGraph"))
+    table.append(header)
+    table.append(hLine)
+    
+    # For-loop: All values x-y and their errors
+    for i, xV in enumerate(x, 0):
+        row = align.format(i+1, "%.2f" % xerrl[i], "%.2f" %  x[i], "%.2f" %  xerrh[i], "%.3f" %  y[i], "+/-", "%.3f" %  yerrh[i])
+        table.append(row)
+    table.append(hLine)
 
     if printValues:
-        for r in rows:
-            print r
+        for i, line in enumerate(table, 1):
+            Print(line, False) #i==1)
+    return tgraph
 
-    return h, xMin, xMax, binList, valueDict, upDict, downDict
-            
+def GetPurityHisto(hData, hEWK, kwargs, printValues=False, hideZeros=True):
+
+    # Prepare a new histo
+    h = hData.Clone()    
+    h.Reset("ICESM")
+    ROOT.SetOwnership(h, True)
+
+    # Construct info table (debugging)
+    table  = []
+    align  = "{:>6} {:^20} {:>10} {:>10} {:>10} {:^3} {:<10}"
+    header = align.format("Bin", "Range", "EWK", "Data", "Purity", "+/-", "Error") #Purity = 1-EWK/Data
+    hLine  = "="*70
+    nBinsX = hData.GetNbinsX()
+    table.append("{:^70}".format("Histogram"))
+    table.append(hLine)
+    table.append(header)
+    table.append(hLine)
+
+    # For-loop: All histogram bins
+    for j in range (1, nBinsX+1):
+        
+        # Legeacy: No idea why the code snippet I copied used "j=j-1" instead of "i=j". 
+        i = j
+
+        # Declare variables
+        myPurity       = 0.0
+        myPurityUncert = 0.0
+        ewkSum         = hEWK.GetBinContent(i)
+        ewkSumUncert   = hEWK.GetBinError(i)
+        dataSum        = hData.GetBinContent(i)
+        dataSumUncert  = hData.GetBinContent(i)
+        
+        # Treat negative bins for EWK (possible if -ve weights are applied)
+        if ewkSum < 0.0:
+            Print("Sum is below 0 (Sum=%.3f +/- %.3f). Forcing value to 0.0." % (ewkSum,  ewkSumUncert), False)
+            ewkSum = 0.0 
+
+        # Ignore zero bins
+        if abs(dataSum) > 0.000001:
+            myPurity       = 1.0 - ewkSum / dataSum
+            myPurityUncert = errorPropagation.errorPropagationForDivision(ewkSum, ewkSumUncert, dataSum, dataSumUncert)
+
+        # Bin-range or overflow bin?
+        binRange = "%.1f -> %.1f" % (hData.GetXaxis().GetBinLowEdge(j), hData.GetXaxis().GetBinUpEdge(j) )
+        if j >= nBinsX:
+            binRange = "> %.1f"   % (hData.GetXaxis().GetBinLowEdge(j) )
+
+        # WARNING! Ugly trick so that zero points are not visible on canvas 
+        if hideZeros:
+            if myPurity == 0.0:
+                myPurity       = -0.1
+                myPurityUncert = +0.0001
+
+        # Sanity check
+        if myPurity > 1.0:
+            if myPurity < 1.1: # allow a generous 5% for -ve MC weights (TTbar)
+                newPurity = 1.0
+                newUncert = myPurityUncert
+                Print("Purity exceeds 1.0 (P=%.3f +/- %.3f). Forcing value to P=%.3f +/- %.3f" % (myPurity,  myPurityUncert, newPurity, newUncert), False)
+                myPurity  = newPurity                
+            else:
+                raise Exception("Purity cannot exceed 100%% (=%s +/- %s)" % (myPurity*100, myPurityUncert*100) )
+
+        # Fill histogram
+        h.SetBinContent(j, myPurity)
+        h.SetBinError(j, myPurityUncert)
+
+        # Save information in table
+        row = align.format(j, binRange, "%.1f" % ewkSum, "%.1f" % dataSum, "%.3f" % myPurity, "+/-", "%.3f" % myPurityUncert)
+        table.append(row)
+        
+    # Finalise table
+    table.append(hLine)
+
+    # Print purity as function of final shape bins
+    if printValues:
+        for i, line in enumerate(table):
+            Print(line, i==0)
+
+    return h
 
 #================================================================================================ 
 # Main
 #================================================================================================ 
 if __name__ == "__main__":
-    '''
+    '''g1
+
     https://docs.python.org/3/library/argparse.html
  
     name or flags...: Either a name or a list of option strings, e.g. foo or -f, --foo.
@@ -554,13 +725,13 @@ if __name__ == "__main__":
     SUBCOUNTERS  = False
     LATEX        = False
     MCONLY       = False
-    PLOTEWK      = False
     URL          = False
     NOERROR      = True
+    DOEWK        = False
     SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"
     VERBOSE      = False
-    HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug' 
     DOQCD        = False
+    FOLDER       = "ForFakeBMeasurement" #"ForDataDrivenCtrlPlots"
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -589,8 +760,8 @@ if __name__ == "__main__":
     parser.add_option("--dataEra", dest="dataEra", type="string", default=DATAERA, 
                       help="Override default dataEra [default: %s]" % DATAERA)
 
-    parser.add_option("--plotEWK", dest="plotEWK", action="store_true", default=PLOTEWK, 
-                      help="Include EWK purity in all the plots (1-QCDPurity) [default: %s]" % (PLOTEWK) )
+    parser.add_option("--doEWK", dest="doEWK", action="store_true", default=DOEWK, 
+                      help="Plot EWK purity instead of Fake-B purity [default: %s]" % (DOEWK) )
 
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR, 
                       help="Directory where all pltos will be saved [default: %s]" % SAVEDIR)
@@ -601,17 +772,17 @@ if __name__ == "__main__":
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE, 
                       help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
 
-    parser.add_option("--histoLevel", dest="histoLevel", action="store", default = HISTOLEVEL,
-                      help="Histogram ambient level (default: %s)" % (HISTOLEVEL))
-
     parser.add_option("--doQCD", dest="doQCD", action="store_true", default = DOQCD,
-                      help="Plot QCD Purity instead of Fake-B purity (default: %s)" % (DOQCD))
+                      help="Plot QCD purity instead of Fake-B purity [default: %s]" % (DOQCD))
 
     parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
                       help="List of datasets in mcrab to include")
 
     parser.add_option("-e", "--excludeTasks", dest="excludeTasks", action="store", 
                       help="List of datasets in mcrab to exclude")
+
+    parser.add_option("--folder", dest="folder", type="string", default = FOLDER,
+                      help="ROOT file folder under which all histograms to be plotted are located [default: %s]" % (FOLDER) )
 
     (opts, parseArgs) = parser.parse_args()
 
@@ -625,6 +796,14 @@ if __name__ == "__main__":
         parser.print_help()
         #print __doc__
         sys.exit(1)        
+        
+    # Sanity check
+    allowedFolders = ["ForDataDrivenCtrlPlots", "ForFakeBMeasurement"]
+    if opts.folder not in allowedFolders:
+        Print("Invalid folder \"%s\"! Please select one of the following:" % (opts.folder), True)
+        for m in allowedFolders:
+            Print(m, False)
+        sys.exit()
 
     # Call the main function
     main(opts)
