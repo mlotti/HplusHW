@@ -198,17 +198,19 @@ def main(opts):
         # hList.extend([h for h in allHistos if "StandardSelections" in h and "_Vs" not in h])
 
         # Create a list with strings included in the histogram names you want to plot
-        myHistos = ["LdgTrijetM", "LdgTetrajetMass", "MVAmax2", "MVAmax1", "Njets", "NBjets", 
+        myHistos = ["LdgTrijetPt", "LdgTrijetM", "LdgTetrajetMass", "MVAmax2", "MVAmax1", "Njets", "NBjets", 
                     "Bjet3BtagDisc", "Bjet2BtagDisc", "Bjet1BtagDisc", "Bjet3Pt", "Bjet2Pt", "Bjet1Pt"]
 
         # For-loop: All histos
         for h in myHistos:
             hGraphList = []
             for b in ["Baseline_", "Inverted_"]:
-                for r in ["_AfterCRSelections", "_AfterAllSelections" ]:
+                for r in ["_AfterAllSelections", "_AfterCRSelections"]:
                     histoName = b + h + r
                     hgQCD, kwargs = GetPurityHistoGraph(datasetsMgr, opts.folder, histoName)
-                    hGraphList.append(hgQCD)
+                    # Do not draw SR in multigraph plot!
+                    if GetControlRegionLabel(histoName) != "SR":
+                        hGraphList.append(hgQCD)
                     PlotHistoGraph(hgQCD, kwargs)
             PlotHistoGraphs(hGraphList, kwargs)
     return
@@ -359,7 +361,7 @@ def GetHistoKwargs(histoName, opts):
     _yMin       = 0.0
     _yMax       = 1.09
     _cutBox     = None
-    _cutBoxY    = {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
+    _cutBoxY    = {"cutValue": 0.85, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
     _xlabel     = "x-axis"
     _bins       = None
     _kwargs     = {
