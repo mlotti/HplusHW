@@ -25,6 +25,7 @@ import sys
 import math
 import copy
 import os
+import array
 import re
 from optparse import OptionParser
 
@@ -59,6 +60,12 @@ def Verbose(msg, printHeader=True, verbose=False):
         return
     Print(msg, printHeader)
     return
+
+def rchop(myString, endString):
+  if myString.endswith(endString):
+    return myString[:-len(endString)]
+  return myString
+
 
 def GetLumi(datasetsMgr):
     Verbose("Determininig Integrated Luminosity")
@@ -128,12 +135,19 @@ def main(opts):
         datasetsMgr.loadLuminosities() # from lumi.json
 
         # Define datasets to remove by default
+        QCD_list = ["QCD_HT700to1000", "QCD_HT50to100", "QCD_HT500to700", "QCD_HT300to500", 
+                    "QCD_HT200to300", "QCD_HT2000toInf", "QCD_HT1500to2000", "QCD_HT100to200", "QCD_HT1000to1500"]
+        QCDExt_list = [x+"_ext1" for x in QCD_list]
+
         #datasetsToRemove = ["QCD-b", "QCD_HT50to100", "QCD_HT100to200", "QCD_HT200to300"] # QCD_HT removed should NOT make a noticable difference
         #datasetsToRemove = ["QCD-b", "DYJets", "QCD_HT50to100", "QCD_HT100to200", "QCD_HT200to300"]
         #datasetsToRemove = ["QCD-b", "ZJetsToQQ", "QCD_HT50to100", "QCD_HT100to200", "QCD_HT200to300"]
         #datasetsToRemove = ["QCD-b", "ZJetsToQQ"]
+        #datasetsToRemove = ["QCD-b", "DYJets"]
         datasetsToRemove = ["QCD-b", "DYJets"]
-
+        #datasetsToRemove.extend(QCD_list)
+        # datasetsToRemove.extend(QCDExt_list)
+        
         # Set/Overwrite cross-sections
         for d in datasetsMgr.getAllDatasets():
             if "ChargedHiggs" in d.getName():
@@ -149,7 +163,9 @@ def main(opts):
         for i, d in enumerate(datasetsToRemove, 0):
             msg = "Removing dataset %s" % d
             Print(ShellStyles.WarningLabel() + msg + ShellStyles.NormalStyle(), i==0)
-            datasetsMgr.remove(filter(lambda name: d in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: d in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr.remove(filter(lambda name: d == name, datasetsMgr.getAllDatasetNames()))
+
         if 1: #opts.verbose:
             datasetsMgr.PrintInfo()
 
@@ -194,7 +210,10 @@ def main(opts):
         histoList  = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(folder)
         histoPaths = [os.path.join(folder, h) for h in histoList]
         for h in histoPaths:
-            
+                    
+            if "NVertices" not in h: #alex-iro
+                continue
+
             # Re-arrange dataset order if after top selection!
             if "AfterAllSelections" in h and opts.afterTop:
                 s = newOrder.pop( newOrder.index("noTop") )
@@ -207,16 +226,27 @@ def main(opts):
     return
 
 def GetHistoKwargs(h, opts):
+
+    # Common bin settings
+    myBins  = []
+    vtxBins = []
+    ptBins  = []
+    bWidth  = 1
+    for i in range(0, 50, bWidth):
+        vtxBins.append(i)
+    bWidth  = 25
+    for i in range(50, 100+bWidth, bWidth):
+        vtxBins.append(i)
+
     _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": 0.1}
     if opts.mergeEWK:
         _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": -0.12}    
     logY    = True
     _yLabel = "Events / %.0f "
     yMin    = 1e-1
+    yMaxF   = 1.2
     if logY:
         yMaxF = 10
-    else:
-        yMaxF = 1.2
 
     _kwargs = {
         "ylabel"           : _yLabel,
@@ -228,7 +258,7 @@ def GetHistoKwargs(h, opts):
         "ratioInvert"      : False, 
         "addMCUncertainty" : False, 
         "addLuminosityText": True,
-        "addCmsText"       : True,
+        "addCmText"       : True,
         "cmsExtraText"     : "Preliminary",
         "opts"             : {"ymin": yMin, "ymaxfactor": yMaxF},
         #"opts2"            : {"ymin": 0.0, "ymax": 2.0},
@@ -400,7 +430,8 @@ def GetHistoKwargs(h, opts):
         kwargs["opts"]   = {"xmin": 0.0, "xmax": +400.0, "ymin": yMin, "ymaxfactor": yMaxF}
         kwargs["cutBox"] = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         if "AfterStandardSelections" in h:
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": +1500.0, "ymin": yMin, "ymaxfactor": yMaxF}
+            #kwargs["opts"]   = {"xmin": 0.0, "xmax": +1500.0, "ymin": yMin, "ymaxfactor": yMaxF}
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": +800.0, "ymin": yMin, "ymaxfactor": yMaxF}
 
     if "ldgTrijetPt" in h:
         ROOT.gStyle.SetNdivisions(8, "X")
@@ -649,19 +680,37 @@ def GetHistoKwargs(h, opts):
             kwargs["moveLegend"] = {"dx": -0.52, "dy": -0.0, "dh": 0.0}
 
     if "NVertices" in h:
+        kwargs["rebinX"] = vtxBins
+        binWmin, binWmax = GetBinWidthMinMax(vtxBins)
+        kwargs["ylabel"] = "Events / %.0f-%.0f" % (binWmin, binWmax)
         kwargs["xlabel"] = "PV multiplicity"
-        kwargs["cutBox"] = {"cutValue": 1.0, "fillColor": 16, "box": True, "line": True, "greaterThan": True}
-        if "AllSelections" in h:
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": 80.0, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["cutBox"] = {"cutValue": 20.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
 
     if "SubldgTrijetBjetPt" in h:
         if "AllSelections" in h:
             kwargs["opts"]   = {"xmin": 0.0, "xmax": 500.0, "ymin": yMin, "ymaxfactor": yMaxF}
 
-    # alex
-
     return kwargs
     
+
+def GetBinWidthMinMax(binList):
+    if not isinstance(binList, list):
+        raise Exception("Argument is not a list instance!")
+
+    minWidth = +1e6
+    maxWidth = -1e6
+    # For-loop: All bin values (centre)
+    for i in range(0, len(binList)-1):
+        j = i + 1
+        iBin = binList[i]
+        jBin = binList[j]
+        wBin = jBin-iBin
+        if wBin < minWidth:
+            minWidth = wBin
+
+        if wBin > maxWidth:
+            maxWidth = wBin
+    return minWidth, maxWidth
 
 def getHistos(datasetsMgr, histoName):
 
@@ -720,7 +769,6 @@ def DataMCHistograms(datasetsMgr, histoName):
     if opts.signalMass != 0:
         p.histoMgr.forHisto(opts.signal, styles.getSignalStyleHToTB_M(opts.signalMass))
 
-    # p.histoMgr.forHisto(opts.signalMass, styles.getSignalStyleHToTB())
     p.histoMgr.setHistoLegendLabelMany({
             "QCD": "QCD (MC)",
             })
@@ -819,7 +867,7 @@ if __name__ == "__main__":
     MERGEEWK     = False
     URL          = False
     NOERROR      = True
-    SAVEDIR      = "/publicweb/a/aattikis/DataMC/"
+    SAVEDIR      = "/publicweb/a/aattikis/"
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug' 
     FOLDER       = "topbdtSelection_" #jetSelection_
@@ -900,6 +948,11 @@ if __name__ == "__main__":
         parser.print_help()
         #print __doc__
         sys.exit(1)
+    else:
+        mcrabDir = rchop(opts.mcrab, "/")
+        if len(mcrabDir.split("/")) > 1:
+            mcrabDir = mcrabDir.split("/")[-1]#:]
+        opts.saveDir += mcrabDir + "/DataMC"
 
     # Sanity check
     allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 2000, 3000]
