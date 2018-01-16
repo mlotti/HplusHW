@@ -287,7 +287,7 @@ def GetPurityHistoGraph(datasetsMgr, folder, hName):
     EWK  = p2.histoMgr.getHisto("EWK").getRootHisto().Clone("EWK") # EWKGenuineB
     QCD  = p1.histoMgr.getHisto("Data").getRootHisto().Clone("QCD")
 
-    # Rebin histograms (Before calculating Purity) # alex: FIXME - make it automatic
+    # Rebin histograms (Before calculating Purity)
     if "binList" in _kwargs:
         xBins   = _kwargs["binList"]
         nx      = len(xBins)-1

@@ -138,8 +138,11 @@ def main(opts):
         datasetsMgr.updateNAllEventsToPUWeighted()
         datasetsMgr.loadLuminosities() # from lumi.json
 
-        PrintPSet("TopSelectionBDT", datasetsMgr)
-        PrintPSet("FakeBMeasurement", datasetsMgr)
+        if 0:
+            PrintPSet("BJetSelection", datasetsMgr)
+            PrintPSet("TopSelectionBDT", datasetsMgr)
+            PrintPSet("FakeBMeasurement", datasetsMgr)
+            sys.exit()
 
         # Print dataset info?
         if opts.verbose:
@@ -180,7 +183,7 @@ def main(opts):
         # For-loop: All histogram paths
         for p in hPaths:
             if "AfterStandardSelections" in p:
-                # print p
+                #print p
                 continue
             
             if "Baseline" in p:
