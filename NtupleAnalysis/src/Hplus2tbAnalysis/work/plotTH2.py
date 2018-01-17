@@ -7,14 +7,14 @@ Usage:
 
 
 Examples:
-./plot_TH2.py -m Hplus2tbAnalysis_3bjets40_MVA0p80_MVA0p80_TopMassCutOff600GeV_180112_023556 --folder ForDataDrivenCtrlPlots --gridX --gridY --dataset ChargedHiggs_HplusTB_HplusToTB_M_1000 --normalizeToLumi --logZ 
-./plot_TH2.py -m Hplus2tbAnalysis_3bjets40_MVA0p80_MVA0p80_TopMassCutOff600GeV_180112_023556 --folder ForDataDrivenCtrlPlots --gridX --gridY --dataset TT --normalizeToOne --logZ 
-./plot_TH2.py -m Hplus2tbAnalysis_3bjets40_MVA0p80_MVA0p80_TopMassCutOff600GeV_180112_023556 --folder ForDataDrivenCtrlPlots --gridX --gridY --dataset QCD --normalizeByCrossSection --logZ 
-./plot_TH2.py -m Hplus2tbAnalysis_3bjets40_MVA0p80_MVA0p80_TopMassCutOff600GeV_180112_023556 --folder ForDataDrivenCtrlPlots --dataset TT --gridX --gridY --logY --logX
-./plot_TH2.py -m Hplus2tbAnalysis_3bjets40_MVA0p80_MVA0p80_TopMassCutOff600GeV_180112_023556 --folder ForDataDrivenCtrlPlots --gridX --gridY --dataset QCD --normalizeToLumi --logZ --intLumi 100000
+./plotTH2.py -m Hplus2tbAnalysis_3bjets40_MVA0p80_MVA0p80_TopMassCutOff600GeV_180112_023556 --folder ForDataDrivenCtrlPlots --gridX --gridY --dataset ChargedHiggs_HplusTB_HplusToTB_M_1000 --normalizeToLumi --logZ 
+./plotTH2.py -m Hplus2tbAnalysis_3bjets40_MVA0p80_MVA0p80_TopMassCutOff600GeV_180112_023556 --folder ForDataDrivenCtrlPlots --gridX --gridY --dataset TT --normalizeToOne --logZ 
+./plotTH2.py -m Hplus2tbAnalysis_3bjets40_MVA0p80_MVA0p80_TopMassCutOff600GeV_180112_023556 --folder ForDataDrivenCtrlPlots --gridX --gridY --dataset QCD --normalizeByCrossSection --logZ 
+./plotTH2.py -m Hplus2tbAnalysis_3bjets40_MVA0p80_MVA0p80_TopMassCutOff600GeV_180112_023556 --folder ForDataDrivenCtrlPlots --dataset TT --gridX --gridY --logY --logX
+./plotTH2.py -m Hplus2tbAnalysis_3bjets40_MVA0p80_MVA0p80_TopMassCutOff600GeV_180112_023556 --folder ForDataDrivenCtrlPlots --gridX --gridY --dataset QCD --normalizeToLumi --logZ --intLumi 100000
 
 Last Used:
-./plot_TH2.py -m Hplus2tbAnalysis_3bjets40_MVA0p80_MVA0p80_TopMassCutOff600GeV_180112_023556 --folder ForDataDrivenCtrlPlots --gridX --gridY --dataset QCD --normalizeToLumi --logZ 
+./plotTH2.py -m Hplus2tbAnalysis_3bjets40_MVA0p80_MVA0p80_TopMassCutOff600GeV_180112_023556 --folder ForDataDrivenCtrlPlots --gridX --gridY --dataset QCD --normalizeToLumi --logZ 
 
 '''
 
@@ -249,8 +249,8 @@ def GetHistoKwargs(h, opts):
 
     if "LdgTrijetPt_Vs_LdgTrijetDijetPt" in h:
         units             = "(GeV/c)"
-        kwargs["xlabel"]  = "p_{T}^{top} " + units
-        kwargs["ylabel"]  = "p_{T}^{W} " + units
+        kwargs["xlabel"]  = "p_{T}^{jjb} " + units
+        kwargs["ylabel"]  = "p_{T}^{jj} " + units
         kwargs["cutBox"]  = cutBox
         kwargs["cutBoxY"] = cutBoxY
         kwargs["rebinX"]  = 1
@@ -263,8 +263,8 @@ def GetHistoKwargs(h, opts):
         
     if "SubldgTrijetPt_Vs_SubldgTrijetDijetPt" in h:
         units             = "(GeV/c)"
-        kwargs["xlabel"]  = "p_{T}^{top} " + units
-        kwargs["ylabel"]  = "p_{T}^{W} " + units
+        kwargs["xlabel"]  = "p_{T}^{jjb} " + units
+        kwargs["ylabel"]  = "p_{T}^{jj} " + units
         kwargs["cutBox"]  = cutBox
         kwargs["cutBoxY"] = cutBoxY
         kwargs["rebinX"]  = 1
@@ -290,11 +290,11 @@ def Plot2dHistograms(datasetsMgr, histoName):
         p = plots.DataMCPlot(datasetsMgr, histoName, saveFormats=[])
     else:
         if opts.normalizeToLumi:
-            p = plots.MCPlot(datasetsMgr, histoName, normalizeToLumi=opts.intLumi)
+            p = plots.MCPlot(datasetsMgr, histoName, normalizeToLumi=opts.intLumi, saveFormats=[])
         elif opts.normalizeByCrossSection:
-            p = plots.MCPlot(datasetsMgr, histoName, normalizeByCrossSection=True, **{})
+            p = plots.MCPlot(datasetsMgr, histoName, normalizeByCrossSection=True, saveFormats=[], **{})
         elif opts.normalizeToOne:
-            p = plots.MCPlot(datasetsMgr, histoName, normalizeToOne=True, **{})
+            p = plots.MCPlot(datasetsMgr, histoName, normalizeToOne=True, saveFormats=[], **{})
         else:
             raise Exception("One of the options --normalizeToOne, --normalizeByCrossSection, --normalizeToLumi must be enabled (set to \"True\").")
             
@@ -318,15 +318,8 @@ def Plot2dHistograms(datasetsMgr, histoName):
     plots.drawPlot(p, saveName, **kwargs) #the "**" unpacks the kwargs_ dictionary
 
     # Save the plots in custom list of saveFormats
-    SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode, opts.folder), [".png"])#, ".pdf"] )
+    SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode, opts.folder, opts.dataset), [".png", ".pdf"] )
     return
-
-
-def HasKeys(keyList, **kwargs):
-    for key in keyList:
-        if key not in kwargs:
-            raise Exception("Could not find the keyword \"%s\" in kwargs" % (key) )
-    return 
 
 
 def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
@@ -384,7 +377,7 @@ if __name__ == "__main__":
     LOGY         = False
     LOGZ         = False
     URL          = False
-    SAVEDIR      = "/publicweb/a/aattikis/TH2/"
+    SAVEDIR      = "/publicweb/a/aattikis/"
     VERBOSE      = False
     FOLDER       = "ForDataDrivenCtrlPlots" #"topbdtSelection_" #jetSelection_
     DATASET      = "Data"
@@ -478,7 +471,7 @@ if __name__ == "__main__":
         mcrabDir = rchop(opts.mcrab, "/")
         if len(mcrabDir.split("/")) > 1:
             mcrabDir = mcrabDir.split("/")[-1]#:]
-        opts.saveDir += mcrabDir + "/DataMC"
+        opts.saveDir += mcrabDir + "/TH2"
 
     if opts.normalizeToOne == False and opts.normalizeByCrossSection == False and opts.normalizeToLumi == False:
         raise Exception("One of the options --normalizeToOne, --normalizeByCrossSection, --normalizeToLumi must be enabled (set to \"True\").")
