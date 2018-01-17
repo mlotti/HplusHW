@@ -168,11 +168,13 @@ def main(opts):
         # Get all the histograms and their paths
         hList  = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(opts.folder)
         hPaths = [os.path.join(opts.folder, h) for h in hList]
-
+        
         # Create two lists of paths: one for "Baseline" (SR)  and one for "Inverted" (CR)
         baselinePaths = []
         invertedPaths = []
         for p in hPaths:
+            if "StandardSelections" not in p:
+                continue
             if "Baseline" in p:
                 baselinePaths.append(p)
             if "Inverted" in p:
@@ -265,11 +267,12 @@ def PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted):
 
     # Create the final plot object
     p = plots.ComparisonManyPlot(baseline_FakeB, [inverted_FakeB], saveFormats=[])
+    # p = plots.ComparisonManyPlot(inverted_FakeB, [baseline_FakeB], saveFormats=[])
     p.setLuminosity(opts.intLumi)
 
     # Apply histogram styles
-    p.histoMgr.forHisto("Baseline-FakeB" , styles.getBaselineStyle() )
-    p.histoMgr.forHisto("Inverted-FakeB" , styles.getInvertedStyle() )
+    p.histoMgr.forHisto("Baseline-FakeB" , styles.getInvertedStyle() )
+    p.histoMgr.forHisto("Inverted-FakeB" , styles.getBaselineStyle() )
         
     # Set draw/legend style
     p.histoMgr.setHistoDrawStyle("Baseline-FakeB", "AP")
@@ -449,7 +452,7 @@ def GetHistoKwargs(histoName, opts):
         "ylabel"           : "Arbitrary Units / %s" % (_format),
         "rebinX"           : _rebinX, 
         "rebinY"           : None,
-        "ratioYlabel"      : "SR/CR", #Ratio",
+        "ratioYlabel"      : "Base/Inv", #Ratio",
         "ratio"            : _ratio,
         "ratioInvert"      : True, 
         "addMCUncertainty" : True,

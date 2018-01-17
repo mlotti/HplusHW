@@ -1637,7 +1637,17 @@ class PlotBase:
     def addCutBoxAndLineY(self, *args, **kwargs):
         objs = _createCutBoxAndLineY(self.getFrame(), *args, **kwargs)
         for o in objs:
-            self.appendPlotObject(o)
+            if "mainCanvas" in kwargs:
+                if kwargs["mainCanvas"]:
+                    self.appendPlotObject(o)
+            else:
+                self.appendPlotObject(o)
+            if "ratioCanvas" in kwargs:
+                if kwargs["ratioCanvas"]:
+                    self.prependPlotObjectToRatio(o)
+            else:
+                self.prependPlotObjectToRatio(o) 
+                
 
     ## Add MC uncertainty histogram
     def addMCUncertainty(self):
@@ -1858,7 +1868,7 @@ class PlotRatioBase:
     def addCutBoxAndLineToRatio(self, *args, **kwargs):
         if len(self.ratioHistoMgr) == 0:
             return
-
+        
         objs = _createCutBoxAndLine(self.getFrame2(), *args, **kwargs)
         for o in objs:
             self.prependPlotObjectToRatio(o)
@@ -3249,7 +3259,7 @@ class PlotDrawer:
             lst = cutBoxY
             if not isinstance(lst, list):
                 lst = [lst]
-    
+
             for box in lst:
                 p.addCutBoxAndLineY(**box)
         return

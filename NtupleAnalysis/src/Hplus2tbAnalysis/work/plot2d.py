@@ -199,7 +199,7 @@ def GetHistoKwargs(histoList):
     zMax        = 1e5
     normToOne   = True
     print "WARNING! Normalisation does not work. Switch to using MCPlot and DataMCPlot instead of plotbase (use if)"
-    raw_input("Press key to continue ..."
+    raw_input("Press key to continue ...")
 
     _kwargs = {
         "xlabel"           : labelX,
@@ -260,7 +260,7 @@ def Plot2d(datasetsMgr, histoName, kwargs, opts):
     p.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinY(kwargs.get("rebinY")))
 
 
-    # Create a frame                                                                                                                                                             
+    # Create a frame
     fOpts = {"ymin": 0.0, "ymaxfactor": 1.0}
     p.createFrame(saveName, opts=fOpts)
         
