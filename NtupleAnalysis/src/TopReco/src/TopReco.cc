@@ -162,7 +162,9 @@ private:
   WrappedTH1        *hTrijetDPt_matched;
   WrappedTH1        *hTrijetDEta_matched;
   WrappedTH1        *hTrijetDPhi_matched;
-  
+
+  WrappedTH1        *hJetsDeltaRmin;
+  WrappedTH1        *hQuarkJetMinDr03_DeltaPtOverPt;
   //Correlations
   WrappedTH2Triplet *hTrijetPtDrVsTrijetMass;
   WrappedTH2Triplet *hTrijetPtDrVsBjetLdgJetMass;
@@ -268,7 +270,7 @@ TopReco::TopReco(const ParameterSet& config, const TH1* skimCounters)
     fTopSelection(config.getParameter<ParameterSet>("TopSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cSelected(fEventCounter.addCounter("Selected Events"))
     */
-    cfg_MassBinSetting(config.getParameter<ParameterSet>("CommonPlots.invMassBins")),// Problem Here!!
+    cfg_MassBinSetting(config.getParameter<ParameterSet>("CommonPlots.invMassBins")),
     cfg_DeltaEtaBinSetting(config.getParameter<ParameterSet>("CommonPlots.deltaEtaBins")),
     cfg_DeltaPhiBinSetting(config.getParameter<ParameterSet>("CommonPlots.deltaPhiBins")),
     cfg_DeltaRBinSetting(config.getParameter<ParameterSet>("CommonPlots.deltaRBins")),
@@ -411,14 +413,14 @@ void TopReco::book(TDirectory *dir) {
   hNmatchedTrijets = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug,myInclusiveDir,"NmatchedTrijetCand",";NTrijet_{matched}",4,-0.5,3.5);
   hGenTop_Pt       = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs,"GenTop_Pt", ";p_{T} (GeV/c)", 2*nBinsPt, minPt , 2*maxPt);
 
-  hTrijetDrMin          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug,myInclusiveDir,"TrijetDrMin",";#Delta R", 50,0.0,0.5);
-  hTrijetDPtOverGenPt   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug,myInclusiveDir,"TrijetDPtOverGenPt","#;Delta P_{T}/P_{T,qqb}", 500,-2.5,2.5);
+  hTrijetDrMin          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital,myInclusiveDir,"TrijetDrMin",";#Delta R", 50,0.0,0.5);
+  hTrijetDPtOverGenPt   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital,myInclusiveDir,"TrijetDPtOverGenPt","#;Delta P_{T}/P_{T,qqb}", 500,-2.5,2.5);
   hTrijetDEtaOverGenEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug,myInclusiveDir,"TrijetDEtaOverGenEta",";#Delta #eta/#eta_{qqb}", 200,-1.0,1.0);
   hTrijetDPhiOverGenPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug,myInclusiveDir,"TrijetDPhiOverGenPhi",";#Delta #phi/#phi_{qqb}", 200,-1.0,1.0);
   hTrijetDPt_matched    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug,myInclusiveDir,"TrijetDPt_matched",";#Delta P_{T}", 2*nBinsPt, -maxPt , maxPt);
-  hTrijetDEta_matched   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug,myInclusiveDir,"TrijetDEta_matched",";#Delta #eta", 80,-0.4,0.4);
-  hTrijetDPhi_matched   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug,myInclusiveDir,"TrijetDPhi_matched",";#Delta #phi", 80,-0.4,0.4);
-  
+  hTrijetDEta_matched   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital,myInclusiveDir,"TrijetDEta_matched",";#Delta #eta", 80,-0.4,0.4);
+  hTrijetDPhi_matched   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital,myInclusiveDir,"TrijetDPhi_matched",";#Delta #phi", 80,-0.4,0.4);
+  hQuarkJetMinDr03_DeltaPtOverPt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital,myInclusiveDir,"QuarkJetMinDr03_DeltaPtOverPt","#;Delta P_{T}(jet-quark)/P_{T,q}", 500,-2.5,2.5);
   //Correlation plots
   hTrijetPtDrVsTrijetMass        = fHistoWrapper.makeTHTriplet<TH2F>(true, HistoLevel::kVital, myDirs_2d,"TrijetPtDrVsTrijetMass", ";p_{T}#Delta R_{T};m_{jjb}",100,0.0,1000,  100,0.0,1000);
   hTrijetPtDrVsBjetLdgJetMass    = fHistoWrapper.makeTHTriplet<TH2F>(true, HistoLevel::kVital, myDirs_2d,"TrijetPtDrVsBjetLdgJetMass",";p_{T}#Delta R_{T};m_{b+ldgJet}",100,0.0,1000, 100,0.0,1000);
@@ -427,6 +429,8 @@ void TopReco::book(TDirectory *dir) {
   hTrijetMassVsBjetLdgJetMass    = fHistoWrapper.makeTHTriplet<TH2F>(true, HistoLevel::kVital, myDirs_2d,"TrijetMassVsBjetLdgJetMass",";m_{jjb};m_{b+ldgJet}" ,100,0.0,1000, 100,0.0,1000);
   hTrijetMassVsBjetSubldgJetMass = fHistoWrapper.makeTHTriplet<TH2F>(true, HistoLevel::kVital, myDirs_2d,"TrijetMassVsBjetSubldgJetMass",";m_{jjb};m_{b+subldgJet}" ,100,0.0,1000, 100,0.0,1000);
   hTrijetMassVsDijetMass         = fHistoWrapper.makeTHTriplet<TH2F>(true, HistoLevel::kVital, myDirs_2d,"TrijetMassVsDijetMass",";m_{jjb};m_{W}", 100,0.0,1000, 100,0.0,1000);
+
+  hJetsDeltaRmin =   fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital,myInclusiveDir,"JetsDeltaRmin",";#Delta R", 50,0.0,0.5);
   // TTree
   treeS = new TTree("treeS", "TTree");
   treeB = new TTree("treeB", "TTree");
@@ -498,31 +502,31 @@ void TopReco::book(TDirectory *dir) {
 }
 
 
-/*                                                                                                                                                                                                                                                                 
-  Get all gen particles by pdgId                                                                                                                                                                                                                                   
+/*                                                                                                                                                                                            
+  Get all gen particles by pdgId                                                                                                                
 */
 vector<genParticle> TopReco::GetGenParticles(const vector<genParticle> genParticles, const int pdgId)
 {
   std::vector<genParticle> particles;
 
-  // For-loop: All genParticles                                                                                                                                                                                                                                    
+  // For-loop: All genParticles                                                                                                                                     
   for (auto& p: genParticles){
 
-    // Find last copy of a given particle                                                                                                                                                                                                                          
+    // Find last copy of a given particle                                                                                                                             
     if (!p.isLastCopy()) continue;
 
-    // Consider only particles                                                                                                                                                                                                                                     
+    // Consider only particles                                                                                                                          
     if (std::abs(p.pdgId()) != pdgId) continue;
 
-    // Save this particle                                                                                                                                                                                                                                          
+    // Save this particle                                                                                                                                         
     particles.push_back(p);
   }
   return particles;
 }
 
 
-/*                                                                                                                                                                                                                                                                 
-  Get the last copy of a particle.                                                                                                                                                                                                                                 
+/*                                                                                                                                                                                                  
+  Get the last copy of a particle.                                                                                                                                                                                    
 */
 const genParticle TopReco::GetLastCopy(const vector<genParticle> genParticles, const genParticle &p){
 
@@ -543,12 +547,12 @@ const genParticle TopReco::GetLastCopy(const vector<genParticle> genParticles, c
 Jet TopReco::getLeadingSubleadingJet(const Jet& jet0, const Jet& jet1, string selectedJet){
   if (selectedJet != "leading" && selectedJet!="subleading") std::cout<<"WARNING! Unknown option "<<selectedJet<<". Function getLeadingSubleadingJet returns leading Jet"<<std::endl;
   Jet leadingJet, subleadingJet;
-  if (jet0.pt() > jet1.pt()){                                                                                                                                                                                                                         
-    leadingJet    = jet0;                                                                                                                                                                                                               
-    subleadingJet = jet1;                                                                                                                                                                                                               
-  }                                                                                                                                                                                                                                                   
-  else{                                                                                                                                                                                                                                               
-    leadingJet    = jet1;                                                                                                                                                                                                               
+  if (jet0.pt() > jet1.pt()){                                                                                                                                                                                         
+    leadingJet    = jet0;                                                                                                                                                                                           
+    subleadingJet = jet1;                                                                                                                                                                              
+  }                                                                                                                                                                                                                
+  else{                                                                                                                                                                           
+    leadingJet    = jet1;                                                                                                                                                                               
     subleadingJet = jet0;
   }
 
@@ -850,7 +854,7 @@ void TopReco::process(Long64_t entry) {
   TrijetLdgJetMult_S           -> SetAddress(&trijetLdgJetMult_S);
   TrijetSubldgJetMult_S        -> SetAddress(&trijetSubldgJetMult_S);
 
-  TrijetLdgJetQGLikelihood_S-> SetAddress(&trijetLdgJetQGLikelihood_S);
+  TrijetLdgJetQGLikelihood_S   -> SetAddress(&trijetLdgJetQGLikelihood_S);
   TrijetSubldgJetQGLikelihood_S-> SetAddress(&trijetSubldgJetQGLikelihood_S);
 
   weight_B                     -> SetAddress(&eventWeight_B);
@@ -879,7 +883,7 @@ void TopReco::process(Long64_t entry) {
   TrijetLdgJetMult_B           -> SetAddress(&trijetLdgJetMult_B);
   TrijetSubldgJetMult_B        -> SetAddress(&trijetSubldgJetMult_B);
 
-  TrijetLdgJetQGLikelihood_B-> SetAddress(&trijetLdgJetQGLikelihood_B);
+  TrijetLdgJetQGLikelihood_B   -> SetAddress(&trijetLdgJetQGLikelihood_B);
   TrijetSubldgJetQGLikelihood_B-> SetAddress(&trijetSubldgJetQGLikelihood_B);
 
   //next address
@@ -890,15 +894,19 @@ void TopReco::process(Long64_t entry) {
   //================================================================================================//
 
   //START
+  const double twoSigma = 0.32;
+  const double dRcut    = 0.3;
   if (fEvent.isMC()){
 
-    
     vector<genParticle> GenTops = GetGenParticles(fEvent.genparticles().getGenParticles(), 6);
     vector<genParticle> GenTops_BQuark;
     vector<genParticle> GenTops_LdgQuark;
     vector<genParticle> GenTops_SubldgQuark;
+    vector<genParticle> GenTops_Quarks;
 
     for (auto& top: GenTops){
+      //Reject boosted top
+      //      if (top.pt() > 500) return;
       vector<genParticle> quarks;
       genParticle bquark;
       bool foundB = false;      
@@ -927,11 +935,14 @@ void TopReco::process(Long64_t entry) {
           }
         }
       }
-      
       // Skip event if any of the tops decays leptonically (the "quarks" vector will be empty causing errors)                                     
       if (!(quarks.size() == 2 && foundB)) return;
       // Fill vectors for b-quarks, leading and subleading quarks coming from tops                                                                                 
       GenTops_BQuark.push_back(bquark);
+
+      GenTops_Quarks.push_back(bquark);
+      GenTops_Quarks.push_back(quarks.at(0));
+      GenTops_Quarks.push_back(quarks.at(1));
       
       if (quarks.at(0).pt() > quarks.at(1).pt()) {
         GenTops_LdgQuark.push_back(quarks.at(0));
@@ -946,16 +957,50 @@ void TopReco::process(Long64_t entry) {
     if (GenTops_BQuark.size() < 2) return;
     
     
-    
-    
+    //Pseudo-matching: Used to calculate the dPt/Pt cut
+    for (size_t i=0; i<GenTops.size(); i++)
+      {
+	genParticle Quark      = GenTops_Quarks.at(i);
+	Jet JetClosest;
+	double dRmin  = 99999.9;
+	for (auto& jet: jetData.getSelectedJets())
+	  {
+	    double dR  = ROOT::Math::VectorUtil::DeltaR( jet.p4(), Quark.p4());
+	    if (dR > 0.3)     continue;
+	    if (dR > dRmin)   continue;
+	    dRmin  = dR;
+	    JetClosest = jet;
+	  }
+	if (dRmin > 0.3) continue;
+	double dPtOverPt = (JetClosest.pt() - Quark.pt())/Quark.pt();
+	hQuarkJetMinDr03_DeltaPtOverPt -> Fill (dPtOverPt);   //2sigma = 2*0.16 = 0.32
+      }
+
     //========================================================================================================
     //                              Matching:  Minimum DeltaR and DeltaPt check
     //========================================================================================================
 
-    //======= B jet matching (Loop over all Jets)
+    //Sanity chack
+    double DeltaR_min = 999.999;
+    for (auto& jet1: jetData.getSelectedJets())
+      {
+	for (auto& jet2: jetData.getSelectedJets())
+	  {
+	    if (areSameJets(jet1, jet2)) continue;
+	    double DeltaR = ROOT::Math::VectorUtil::DeltaR( jet1.p4(), jet2.p4());
+	    if (DeltaR > DeltaR_min) continue;
+	    DeltaR_min = DeltaR;
+	  }
+      }
+    
+    hJetsDeltaRmin -> Fill(DeltaR_min);
+
+      //======= B jet matching (Loop over all Jets)
 
     int imatched =0;
-    vector <Jet> MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet, MC_BJets;
+    vector <Jet> MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet;
+    vector <Jet> MC_LdgJet, MC_SubldgJet, MC_Bjet;
+    vector <Jet> BJetCand, MC_Jets;
     vector <genParticle> MGen_LdgJet, MGen_SubldgJet, MGen_Bjet;
     vector <double> dRminB;
     Jet firstBjet;
@@ -963,19 +1008,20 @@ void TopReco::process(Long64_t entry) {
       genParticle BQuark      = GenTops_BQuark.at(i);
       Jet mcMatched_BJet;
       double dRmin  = 99999.9;
-      double dPtmin = 99999.9;
+      double dPtOverPtmin = 99999.9;
       for (auto& bjet: jetData.getSelectedJets()){
 	double dR  = ROOT::Math::VectorUtil::DeltaR( bjet.p4(), BQuark.p4());
-	double dPt = std::abs(bjet.pt() - BQuark.pt());
-	if (dR > 0.4)     continue;
+	double dPtOverPt = std::abs((bjet.pt() - BQuark.pt())/BQuark.pt());
+	if (dR > dRcut)     continue;
 	if (dR > dRmin)   continue;
-	if (dPt > dPtmin) continue;
+	//if (dPtOverPt > dPtOverPtmin) continue;
+	if (dPtOverPt > twoSigma) continue;
 	dRmin  = dR;
-	dPtmin = dPt;
+	dPtOverPtmin = dPtOverPt;
 	mcMatched_BJet = bjet;
       }
       dRminB.push_back(dRmin);
-      MC_BJets.push_back(mcMatched_BJet);
+      BJetCand.push_back(mcMatched_BJet);
     }
 
     //======= Dijet matching (Loop over all Jets)
@@ -987,65 +1033,86 @@ void TopReco::process(Long64_t entry) {
       Jet mcMatched_LdgJet;
       Jet mcMatched_SubldgJet;
       
-      double dR1min, dR2min, dPt1min, dPt2min;
-      dR1min = dR2min = dPt1min = dPt2min = 99999.9;
+      double dR1min, dR2min, dPtOverPt1min, dPtOverPt2min;
+      dR1min = dR2min = dPtOverPt1min = dPtOverPt2min = 99999.9;
 
       for (auto& jet: jetData.getSelectedJets()){
+	bool same = false;
 	for (size_t k=0; k<GenTops.size(); k++){
-	  if (dRminB.at(k) < 0.4){
-	    if( areSameJets(jet,MC_BJets.at(k))) continue; //Skip the jets that are matched with bquarks
+	  if (dRminB.at(k) <= dRcut){
+	    if( areSameJets(jet,BJetCand.at(k))) same = true; //Skip the jets that are matched with bquarks
 	  }
 	}
-		
+	if (same) continue;
 	double dR1 = ROOT::Math::VectorUtil::DeltaR(jet.p4(), LdgQuark.p4());
 	double dR2 = ROOT::Math::VectorUtil::DeltaR(jet.p4(), SubldgQuark.p4());
 	
-	if (std::min(dR1, dR2) > 0.4) continue;
+	if (std::min(dR1, dR2) > dRcut) continue;
 	
-	double dPt1 = std::abs(jet.pt() - LdgQuark.pt());
-	double dPt2 = std::abs(jet.pt() - SubldgQuark.pt());
+	double dPtOverPt1 = std::abs((jet.pt() - LdgQuark.pt())/LdgQuark.pt());
+	double dPtOverPt2 = std::abs( (jet.pt() - SubldgQuark.pt())/SubldgQuark.pt());
 
 	if (dR1 < dR2)
 	  {
-	    if (dR1 < dR1min && dPt1 < dPt1min)
+	    if (dR1 < dR1min)
 	      {
-		dR1min = dR1;
-		dPt1min= dPt1;
-		mcMatched_LdgJet = jet;
+		//if(dPtOverPt1 < dPtOverPt1min)
+		if(dPtOverPt1 < twoSigma)
+		  {
+		    dR1min = dR1;
+		    dPtOverPt1min= dPtOverPt1;
+		    mcMatched_LdgJet = jet;
+		  }
 	      }
-	    else if (dR2 <= 0.4 && dR2 < dR2min && dPt2 < dPt2min)
+	    else if (dR2 <= dRcut && dR2 < dR2min)
 	      {
-		dR2min  = dR2;
-		dPt2min = dPt2;
-		mcMatched_SubldgJet = jet;
+		//if (dPtOverPt2 < dPtOverPt2min)
+		if (dPtOverPt2 < twoSigma)
+		  {
+		    dR2min  = dR2;
+		    dPtOverPt2min = dPtOverPt2;
+		    mcMatched_SubldgJet = jet;
+		  }
 	      }
 	  }
 	else
 	  {
-	    if (dR2 < dR2min && dPt2 < dPt2min)
+	    if (dR2 < dR2min)
 	      {
-		dR2min  = dR2;
-		dPt2min = dPt2;
-		mcMatched_SubldgJet = jet;
+		//if(dPtOverPt2 < dPtOverPt2min)
+		if(dPtOverPt2 < twoSigma)
+		  {
+		    dR2min  = dR2;
+		    dPtOverPt2min = dPtOverPt2;
+		    mcMatched_SubldgJet = jet;
+		  }
 	      }
-	    else if (dR1 <= 0.4 && dR1 < dR1min && dPt1 < dPt1min)
+	    else if (dR1 <= dRcut && dR1 < dR1min)
 	      {
-		dR1min  = dR1;
-		dPt1min = dPt1;
-		mcMatched_LdgJet = jet;
+		//if (dPtOverPt1 < dPtOverPt1min)
+		if (dPtOverPt1 < twoSigma)
+		  {
+		    dR1min  = dR1;
+		    dPtOverPt1min = dPtOverPt1;
+		    mcMatched_LdgJet = jet;
+		  }
 	      }
-	  }
-      }   
-
+	  }   
+      }
       //Genuine if all the top quarks are matched
       genParticle top = GenTops.at(i);
-      bool genuine = (dR1min<= 0.4 && dR2min <= 0.4 && dRminB.at(i) <= 0.4);
+      bool genuine = (dR1min<= dRcut && dR2min <= dRcut && dRminB.at(i) <= dRcut);
       if (genuine){
 	imatched ++;
 	hGenTop_Pt->Fill(true, top.pt());
 	MCtrue_LdgJet.push_back(mcMatched_LdgJet);
 	MCtrue_SubldgJet.push_back(mcMatched_SubldgJet);
-	MCtrue_Bjet.push_back(MC_BJets.at(i));
+	MCtrue_Bjet.push_back(BJetCand.at(i));
+	
+	MC_Jets.push_back(mcMatched_LdgJet);
+	MC_Jets.push_back(mcMatched_SubldgJet);
+	MC_Jets.push_back(BJetCand.at(i));
+
 	MGen_LdgJet.push_back(GenTops_LdgQuark.at(i));
 	MGen_SubldgJet.push_back(GenTops_SubldgQuark.at(i));
 	MGen_Bjet.push_back(GenTops_BQuark.at(i));
@@ -1057,13 +1124,17 @@ void TopReco::process(Long64_t entry) {
     hNmatchedTop ->Fill(imatched);
     
     
-    //=======	  
-
-
-
-
-
-  
+    size_t nTops = GenTops_BQuark.size();
+    for (size_t i=0; i<nTops; i++)
+      {
+	double dR12 = ROOT::Math::VectorUtil::DeltaR(GenTops_LdgQuark.at(i).p4(), GenTops_SubldgQuark.at(i).p4());
+	double dR1b = ROOT::Math::VectorUtil::DeltaR(GenTops_LdgQuark.at(i).p4(), GenTops_BQuark.at(i).p4());
+	double dR2b = ROOT::Math::VectorUtil::DeltaR(GenTops_SubldgQuark.at(i).p4(), GenTops_BQuark.at(i).p4());
+	//	std::cout<<dR12<<" "<<dR1b<<" "<<dR12<<std::endl;
+	double dRmin = min(min(dR12, dR1b), dR2b);
+	if (dRmin < 0.8) return;
+	//	std::cout<<dR12<<" "<<dR1b<<" "<<dR12<<std::endl;
+      }
     //================================================================================================//                      
     //                                    Top Candidates                                              //
     //================================================================================================//
@@ -1090,42 +1161,18 @@ void TopReco::process(Long64_t entry) {
 	    TopCandidates.BJet.push_back(jet0);
 	    TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet1,jet2,"leading"));
 	    TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet1,jet2,"subleading"));
-	    
-	  //   if (jet1.pt() > jet2.pt()){
-	  //     TopCandidates.Jet1.push_back(jet1);
-	  //     TopCandidates.Jet2.push_back(jet2);
-	  //   }
-	  //   else{
-	  //     TopCandidates.Jet1.push_back(jet2);
-	  //     TopCandidates.Jet2.push_back(jet1);
-	  //   }
 	  }
 	  
 	  else if ( isBJet(jet1, MCtrue_Bjet)    ||  (isWsubjet(jet0,MCtrue_LdgJet, MCtrue_SubldgJet)  &&  isWsubjet(jet2,MCtrue_LdgJet, MCtrue_SubldgJet))){
 	    TopCandidates.BJet.push_back(jet1);
 	    TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet0,jet2,"leading"));
 	    TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet0,jet2,"subleading"));
-	    // if (jet0.pt() > jet2.pt()){
-	    //   TopCandidates.Jet1.push_back(jet0);
-	    //   TopCandidates.Jet2.push_back(jet2);
-	    // }
-	    // else{
-	    //   TopCandidates.Jet1.push_back(jet2);
-	    //   TopCandidates.Jet2.push_back(jet0);
-	    // }
+
 	  }
 	  else if ( isBJet(jet2, MCtrue_Bjet)    ||  (isWsubjet(jet0,MCtrue_LdgJet, MCtrue_SubldgJet)  &&  isWsubjet(jet1,MCtrue_LdgJet, MCtrue_SubldgJet))){
 	    TopCandidates.BJet.push_back(jet2);
 	    TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet0,jet1,"leading"));
 	    TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet0,jet1,"subleading"));
-	    // if (jet0.pt() > jet1.pt()){
-	    //   TopCandidates.Jet1.push_back(jet0);
-	    //   TopCandidates.Jet2.push_back(jet1);
-	    // }
-	    // else{
-	    //   TopCandidates.Jet1.push_back(jet1);
-	    //   TopCandidates.Jet2.push_back(jet0);
-	    // }
 	  }
 	  
 	  //********************************** One of the dijet subjets matched*********************************//
@@ -1137,28 +1184,11 @@ void TopReco::process(Long64_t entry) {
 	      TopCandidates.BJet.push_back(jet1);
 	      TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet0,jet2,"leading"));
 	      TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet0,jet2,"subleading"));
-
-	      // if (jet0.pt() > jet2.pt()){
-	      // 	TopCandidates.Jet1.push_back(jet0);
-              //   TopCandidates.Jet2.push_back(jet2);
-              // }
-              // else{
-              //   TopCandidates.Jet1.push_back(jet2);
-              //   TopCandidates.Jet2.push_back(jet0);
-              // }
 	    }
 	    else{
 	      TopCandidates.BJet.push_back(jet2);
 	      TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet0,jet1,"leading"));
 	      TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet0,jet1,"subleading"));
-	      // if (jet0.pt() > jet1.pt()){
-	      // 	TopCandidates.Jet1.push_back(jet0);
-	      // 	TopCandidates.Jet2.push_back(jet1);
-              // }
-              // else{
-              //   TopCandidates.Jet1.push_back(jet1);
-              //   TopCandidates.Jet2.push_back(jet0);
-	      // }
             }
 	  }
 	  else if (isWsubjet(jet1,MCtrue_LdgJet, MCtrue_SubldgJet)){
@@ -1167,27 +1197,11 @@ void TopReco::process(Long64_t entry) {
 	      TopCandidates.BJet.push_back(jet0);
 	      TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet1,jet2,"leading"));
 	      TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet1,jet2,"subleading"));
-	      // if (jet1.pt() > jet2.pt()){
-	      // 	TopCandidates.Jet1.push_back(jet1);
-	      // 	TopCandidates.Jet2.push_back(jet2);
-              // }
-              // else{
-              //   TopCandidates.Jet1.push_back(jet2);
-              //   TopCandidates.Jet2.push_back(jet1);
-	      // }
             }
             else{
 	      TopCandidates.BJet.push_back(jet2);
 	      TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet0,jet1,"leading"));
 	      TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet0,jet1,"subleading"));
-              // if (jet0.pt() > jet1.pt()){
-	      // 	TopCandidates.Jet1.push_back(jet0);
-              //   TopCandidates.Jet2.push_back(jet1);
-              // }
-              // else{
-              //   TopCandidates.Jet1.push_back(jet1);
-              //   TopCandidates.Jet2.push_back(jet0);
-              // }
             }
           }
 	  else if (isWsubjet(jet2,MCtrue_LdgJet, MCtrue_SubldgJet)){
@@ -1196,27 +1210,11 @@ void TopReco::process(Long64_t entry) {
 	      TopCandidates.BJet.push_back(jet0);
 	      TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet1,jet2,"leading"));
 	      TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet1,jet2,"subleading"));
-	      // if (jet1.pt() > jet2.pt()){
-	      // 	TopCandidates.Jet1.push_back(jet1);
-	      // 	TopCandidates.Jet2.push_back(jet2);
-              // }
-              // else{
-              //   TopCandidates.Jet1.push_back(jet2);
-              //   TopCandidates.Jet2.push_back(jet1);
-	      // }
             }
             else{
 	      TopCandidates.BJet.push_back(jet1);
 	      TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet0,jet2,"leading"));
 	      TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet0,jet2,"subleading"));
-              // if (jet0.pt() > jet2.pt()){
-	      // 	TopCandidates.Jet1.push_back(jet0);
-              //   TopCandidates.Jet2.push_back(jet2);
-              // }
-              // else{
-              //   TopCandidates.Jet1.push_back(jet2);
-              //   TopCandidates.Jet2.push_back(jet0);
-              // }
             }
           }
 
@@ -1229,40 +1227,16 @@ void TopReco::process(Long64_t entry) {
 	    TopCandidates.BJet.push_back(jet0);
 	    TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet1,jet2,"leading"));
 	    TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet1,jet2,"subleading"));	    
-	    // if (jet1.pt() > jet2.pt()){
-	    //   TopCandidates.Jet1.push_back(jet1);
-	    //   TopCandidates.Jet2.push_back(jet2);
-	    // }
-	    // else{
-            //   TopCandidates.Jet1.push_back(jet2);
-            //   TopCandidates.Jet2.push_back(jet1);
-	    // }
 	  }
 	  else if (jet1.bjetDiscriminator() > jet0.bjetDiscriminator() && jet1.bjetDiscriminator() > jet2.bjetDiscriminator()){
 	    TopCandidates.BJet.push_back(jet1);	    
 	    TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet0,jet2,"leading"));
 	    TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet0,jet2,"subleading"));
-	    // if (jet0.pt() > jet2.pt()){
-	    //   TopCandidates.Jet1.push_back(jet0);
-	    //   TopCandidates.Jet2.push_back(jet2);
-	    // }
-	    // else{
-	    //   TopCandidates.Jet1.push_back(jet2);
-	    //   TopCandidates.Jet2.push_back(jet0);
-	    // }	 
 	  }
 	  else if (jet2.bjetDiscriminator() > jet0.bjetDiscriminator() && jet2.bjetDiscriminator() > jet1.bjetDiscriminator()){
 	    TopCandidates.BJet.push_back(jet2);
 	    TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet0,jet1,"leading"));
 	    TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet0,jet1,"subleading"));
-	    // if (jet0.pt() > jet1.pt()){
-	    //   TopCandidates.Jet1.push_back(jet0);
-	    //   TopCandidates.Jet2.push_back(jet1);
-	    // }
-	    // else{
-	    //   TopCandidates.Jet1.push_back(jet1);
-	    //   TopCandidates.Jet2.push_back(jet0);
-	    // }
 	  }
 	}	  	 	  
       }
@@ -1485,19 +1459,20 @@ void TopReco::process(Long64_t entry) {
     vector<Jet> CJets;
 
     for (size_t i=0; i<GenCharm.size(); i++){
-      double dRmin = 10000., dPtmin = 10000.;
+      double dRmin = 10000., dPtOverPtmin = 10000.;
       Jet mcMatched_CJet;
       for (auto& jet: jetData.getSelectedJets()){
 	double dR  = ROOT::Math::VectorUtil::DeltaR( jet.p4(), GenCharm.at(i).p4());
-	double dPt = std::abs(jet.pt() - GenCharm.at(i).pt());
-	if (dR > 0.4) continue;
+	double dPtOverPt = std::abs((jet.pt() - GenCharm.at(i).pt())/ GenCharm.at(i).pt());
+	if (dR > dRcut) continue;
 	if (dR > dRmin) continue;
-	if (dPt > dPtmin) continue;
+	//if (dPtOverPt > dPtOverPtmin) continue;
+	if (dPtOverPt > twoSigma) continue;
 	dRmin = dR;
-	dPtmin = dPt;
+	dPtOverPtmin = dPtOverPt;
 	mcMatched_CJet = jet;
       }
-      if (dRmin < 0.4){
+      if (dRmin < dRcut){
 	hCJetCvsL         -> Fill(true, mcMatched_CJet.pfCombinedCvsLJetTags());
 	hCJetPtD          -> Fill(true, mcMatched_CJet.QGTaggerAK4PFCHSptD());
 	hCJetAxis2        -> Fill(true, mcMatched_CJet.QGTaggerAK4PFCHSaxis2());
