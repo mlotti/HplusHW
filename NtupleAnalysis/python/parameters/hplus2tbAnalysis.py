@@ -79,7 +79,6 @@ muVeto = PSet(
 jetSelection = PSet(
     jetType                  = "Jets",    # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
     jetPtCuts                = [40.0, 40.0, 40.0, 40.0, 40.0, 40.0, 30.0],
-#    jetPtCuts                = [30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0],  #test for topSelection
     jetEtaCuts               = [2.4],
     numberOfJetsCutValue     = 7,
     numberOfJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
@@ -100,7 +99,7 @@ jetSelection = PSet(
 bjetSelection = PSet(
     triggerMatchingApply      = False,
     triggerMatchingCone       = 0.1,  # DeltaR for matching offline bjet with trigger::TriggerBjet
-    jetPtCuts                 = [40.0, 40.0, 30.0],
+    jetPtCuts                 = [40.0], # [default: [40.0, 40.0, 30.0] ]
     jetEtaCuts                = [2.4],
     bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
     bjetDiscrWorkingPoint     = "Medium",
@@ -159,9 +158,9 @@ topologySelection = PSet(
 # Top selection BDT                                               
 #================================================================================================        
 topSelectionBDT = PSet(
-    LdgMVACutValue         = 0.8,     # [default: 0.9]
+    LdgMVACutValue         = 0.85,    # [default: 0.85]
     LdgMVACutDirection     =  ">=",   # [default: ">="]
-    SubldgMVACutValue      = 0.8,     # [default: 0.9]
+    SubldgMVACutValue      = 0.85,    # [default: 0.85]
     SubldgMVACutDirection  =  ">=",   # [default: ">="]
     NjetsMax               = 999,     # [default: 999]
     NBjetsMax              = 999,     # [default: 999]
@@ -171,7 +170,7 @@ topSelectionBDT = PSet(
     MassCutValue           = 600.0,   # [default: 400.0]
     MassCutDirection       = "<=",    # [default: "<"]
     # FIXME: Phase this out (currently only used in plots)
-    MVACutValue            = 0.8,     # [default: 0.9]
+    MVACutValue            = 0.85,    # [default: 0.85]
     MVACutDirection        =  ">=",   # [default: ">="]
 )
 
@@ -179,20 +178,23 @@ topSelectionBDT = PSet(
 # FakeB Measurement Options
 #================================================================================================
 fakeBMeasurement = PSet(
-    prelimTopMVACutValue              = 0.4,      # [default: 0.4]
+    prelimTopMVACutValue              = 0.65,     # [default: 0.65]
     prelimTopMVACutDirection          =  ">=",    # [default: ">="]
-    # CSVv2-Medium requirements (Baseline b-jets)
-    numberOfBJetsCutValue             = 2,        # [default: 2]
-    numberOfBJetsCutDirection         = "==",     # [default: "=="]
-    # CSVv2-Loose requirements (Inverted b-jets)
-    numberOfInvertedBJetsCutValue     = 1,        # [default: 1]
-    numberOfInvertedBJetsCutDirection = ">=",     # [default: ">="]
+    # CSVv2-M (Baseline b-jets)
+    numberOfBJetsCutValue             = 2,        # [VR, CR2: 2   , CR3, CR4: 1   ]
+    numberOfBJetsCutDirection         = "==",     # [VR, CR2: "==", CR3, CR4: "=="]
+    # CSVv2-L (Inverted b-jets)
+    numberOfInvertedBJetsCutValue     = 1,        # [VR, CR2: 1   , CR3, CR4: 2   ]
+    numberOfInvertedBJetsCutDirection = ">=",     # [VR, CR2: ">=", CR3, CR4: ">="]
     invertedBJetsDiscr                = bjetSelection.bjetDiscr,
-    invertedBJetsDiscrMaxCutValue     = 0.8,      # [default: 0.7]
+    invertedBJetsDiscrMaxCutValue     = 0.85,     # [default: 0.8, CSVv2-L = 0.5426, CSVv2-M = +0.8484, CSVv2-T = 0.9535]
     invertedBJetsDiscrMaxCutDirection = "<=",     # [default: "<="]
     invertedBJetsWorkingPoint         = "Loose",  # [default: "Loose"]
-    # Does this make any difference?
-    invertedBJetsSortType             = "Random", # [default: "Random"] ("AscendingPt", "DescendingPt", "AscendingBDiscriminator", "DescendingBDiscriminator", "Random")
+    invertedBJetsSortType             = "Random", # [default: "Random"] # FIXME: Does this make any difference?
+    LdgTopMVACutValue                 = topSelectionBDT.LdgMVACutValue,
+    LdgTopMVACutDirection             = topSelectionBDT.LdgMVACutDirection, 
+    SubldgTopMVACutValue              = topSelectionBDT.SubldgMVACutValue, # [VR CR2: 0.8 , CR3, CR4: 0.8 ]
+    SubldgTopMVACutDirection          = "<",                               # [VR CR2: ">=", CR3, CR4: "<" ]
     )
 
 
@@ -235,7 +237,7 @@ allSelections = PSet(
     TauSelection          = tauSelection,
     METFilter             = metFilter,
     METSelection          = metSelection,
-    TopologySelection     = topologySelection,
+    # TopologySelection     = topologySelection,
     TopSelectionBDT       = topSelectionBDT,
     MuonSelection         = muVeto,
     Trigger               = trigger,

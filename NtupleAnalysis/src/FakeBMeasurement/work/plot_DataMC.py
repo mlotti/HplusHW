@@ -15,6 +15,7 @@ Examples:
 ./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurementEWKGenuineB --onlyMC && ./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurementEWKFakeB --onlyMC && ./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurement --ratio
 
 Last Used:
+./plot_DataMC.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/QCDMeaurement/TopSelectionBDT/FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --mergeEWK --nostack --onlyMC
 ./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDT0p40_AllSelections_BDT0p40to0p90_RandomSort_171127_034851 --folder ForFakeBMeasurement --url
 '''
 
@@ -465,9 +466,10 @@ def GetHistoKwargs(h, opts):
         
     if h == "counter":
         ROOT.gStyle.SetLabelSize(16.0, "X")
-        xMin = 17
+        xMin = 17 # 15 = jets selection, 16 = bjets selection, 17 = baseline: bjets selection, 18 = bjets SF
         xMax = 29
-        kwargs["opts"]   = {"xmin": xMin, "xmax": xMax, "ymin": 1e0, "ymax": 1e7} #"ymaxfactor": yMaxF}
+        #kwargs["opts"]   = {"xmin": xMin, "xmax": xMax, "ymin": 1e0, "ymax": 1e7} #"ymaxfactor": yMaxF}
+        kwargs["opts"]   = {"xmin": xMin, "ymin": 1e0, "ymax": 3e6}#1e7}
         #kwargs["cutBox"] = {"cutValue": xMin+2, "fillColor": 16, "box": False, "line": True, "greaterThan": True} #indicate btag SF
 
     if "IsolPt" in h:
@@ -720,7 +722,10 @@ def DataMCHistograms(datasetsMgr, histoName, intLumi):
 
     # Create the plotting object
     if opts.onlyMC:        
-        p = plots.MCPlot(datasetsMgr, histoName, saveFormats=[], normalizeToLumi=intLumi)
+        if 1:
+            p = plots.MCPlot(datasetsMgr, histoName, saveFormats=[], normalizeToLumi=intLumi)
+        else:
+            p = plots.MCPlot(datasetsMgr, histoName, saveFormats=[], normalizeToOne=True)
         #p.setLuminosity(intLumi)
         #p.histoMgr.normalizeMCToLuminosity(intLumi)
     else:
@@ -772,14 +777,19 @@ def replaceBinLabels(p, histoName):
     myBinList = []
     if "counter" not in histoName:
         return
-    myBinList = ["SR: #geq 3 b-jets", "SR: b-jets SF", "SR: E_{T}^{miss}", "SR: Topology", "SR: TopReco", "SR: Selected",
-                 "CR: #geq 3 b-jets", "CR: b-jets SF", "CR: E_{T}^{miss}", "CR: Topology", "CR: TopReco", "CR: Selected"]
+    #myBinList = ["SR: #geq 3 b-jets", "SR: b-jets SF", "SR: E_{T}^{miss}", "SR: Topology", "SR: TopReco", "SR: Selected",
+    #             "CR: #geq 3 b-jets", "CR: b-jets SF", "CR: E_{T}^{miss}", "CR: Topology", "CR: TopReco", "CR: Selected"]
+
+    myBinList = ["3b", "b-SF", "E_{T}^{miss}", "H2", "Top", "SR", "CR1",
+                 "2b", "b-SF", "E_{T}^{miss}", "H2", "Top", "VR", "CR2"]
+
 
     #for i in range(0, p.getFrame().GetXaxis().GetNbins()):
     #    p.getFrame().GetXaxis().SetBinLabel(i+1, "")   
 
-    for i in range(0, len(myBinList)):
-        p.getFrame().GetXaxis().SetBinLabel(i+1, myBinList[i])
+    if 1:
+        for i in range(0, len(myBinList)):
+            p.getFrame().GetXaxis().SetBinLabel(i+1, myBinList[i])
     return
 
 def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
@@ -843,7 +853,7 @@ if __name__ == "__main__":
     SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/DataMC/"
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug' 
-    FOLDER       = "FailedBJetGenuineB" #jetSelection_
+    FOLDER       = "ForDataDrivenCtrlPlots" #"FailedBJetGenuineB" #jetSelection_
     ONLYMC       = False
     RATIO        = False
     NOSTACK      = False

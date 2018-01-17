@@ -89,6 +89,23 @@ _physicalMcAdd = {
     "WJetsToLNu_ext1": "WJetsToLNu",
     "WJetsToLNu_ext2": "WJetsToLNu",
 
+    #"QCD_HT50to100"        : 
+    #"QCD_HT100to200"       : 
+    "QCD_HT200to300"       : "QCD_HT200to300",
+    "QCD_HT200to300_ext1"  : "QCD_HT200to300",
+    "QCD_HT300to500"       : "QCD_HT300to500",
+    "QCD_HT300to500_ext1"  : "QCD_HT300to500",
+    "QCD_HT500to700"       : "QCD_HT500to700",
+    "QCD_HT500to700_ext1"  : "QCD_HT500to700",
+    "QCD_HT700to1000"      : "QCD_HT700to1000",
+    "QCD_HT700to1000_ext1" : "QCD_HT700to1000",
+    "QCD_HT1000to1500"     : "QCD_HT1000to1500",
+    "QCD_HT1000to1500_ext1": "QCD_HT1000to1500",
+    "QCD_HT1500to2000"     : "QCD_HT1500to2000",
+    "QCD_HT1500to2000_ext1": "QCD_HT1500to2000",
+    "QCD_HT2000toInf"      : "QCD_HT2000toInf",
+    "QCD_HT2000toInf_ext1" : "QCD_HT2000toInf",
+    
     "WJetsToLNu_HT_0To70"          : "WJetsToLNu_HT_0To70",
     "WJetsToLNu_HT_0To70_ext2"     : "WJetsToLNu_HT_0To70",
     "WJetsToLNu_HT_100To200"       : "WJetsToLNu_HT_100To200",
@@ -1642,7 +1659,17 @@ class PlotBase:
     def addCutBoxAndLineY(self, *args, **kwargs):
         objs = _createCutBoxAndLineY(self.getFrame(), *args, **kwargs)
         for o in objs:
-            self.appendPlotObject(o)
+            if "mainCanvas" in kwargs:
+                if kwargs["mainCanvas"]:
+                    self.appendPlotObject(o)
+            else:
+                self.appendPlotObject(o)
+            if "ratioCanvas" in kwargs:
+                if kwargs["ratioCanvas"]:
+                    self.prependPlotObjectToRatio(o)
+            else:
+                self.prependPlotObjectToRatio(o) 
+                
 
     ## Add MC uncertainty histogram
     def addMCUncertainty(self):
@@ -1863,7 +1890,7 @@ class PlotRatioBase:
     def addCutBoxAndLineToRatio(self, *args, **kwargs):
         if len(self.ratioHistoMgr) == 0:
             return
-
+        
         objs = _createCutBoxAndLine(self.getFrame2(), *args, **kwargs)
         for o in objs:
             self.prependPlotObjectToRatio(o)
@@ -3254,7 +3281,7 @@ class PlotDrawer:
             lst = cutBoxY
             if not isinstance(lst, list):
                 lst = [lst]
-    
+
             for box in lst:
                 p.addCutBoxAndLineY(**box)
         return

@@ -612,8 +612,12 @@ class Process:
                 if key == "":
                     tchain.Process(tselector)
                 else:
-                    tchain.SetCacheEntryRange(0, self._maxEvents[key])
-                    tchain.Process(tselector, "", self._maxEvents[key])
+                    maxEvts  = self._maxEvents[key]
+                    if maxEvts == -1:
+                        tchain.Process(tselector)
+                    else:
+                        tchain.SetCacheEntryRange(0, self._maxEvents[key])
+                        tchain.Process(tselector, "", self._maxEvents[key])
 
 #            elif "All" in self._maxEvents:
 #                if len(self._maxEvents) == 1:
