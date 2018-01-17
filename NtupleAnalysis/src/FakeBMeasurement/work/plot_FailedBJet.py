@@ -185,6 +185,11 @@ def main(opts):
         # Custom Filtering of datasets 
         if 0:
             datasetsMgr.remove(filter(lambda name: "Charged" in name and not "M_500" in name, datasetsMgr.getAllDatasetNames()))
+
+        # ZJets and DYJets overlap!
+        if "ZJetsToQQ_HT600toInf" in datasetsMgr.getAllDatasetNames() and "DYJetsToQQ_HT180" in datasetsMgr.getAllDatasetNames():
+            Print("Cannot use both ZJetsToQQ and DYJetsToQQ due to duplicate events? Investigate. Removing ZJetsToQQ datasets for now ..", True)
+            datasetsMgr.remove(filter(lambda name: "ZJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
                
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
@@ -208,27 +213,28 @@ def main(opts):
         style.setOptStat(True)
 
         # Only do these histos
-        myHistos = ["FailedBJet1BDisc",
-                    "FailedBJet1Pt", 
-                    #"FailedBJet1Eta", 
-                    #"FailedBJet1PdgId", 
-                    #"FailedBJet1PartonFlavour", 
-                    #"FailedBJet1HadronFlavour", 
-                    #
-                    "FailedBJet2BDisc",
-                    "FailedBJet2Pt", 
-                    #"FailedBJet2Eta", 
-                    #"FailedBJet2PdgId", 
-                    #"FailedBJet2PartonFlavour", 
-                    #"FailedBJet2HadronFlavour", 
-                    #
-                    "FailedBJet3BDisc",
-                    "FailedBJet3Pt", 
-                    #"FailedBJet3Eta", 
-                    #"FailedBJet3PdgId", 
-                    #"FailedBJet3PartonFlavour", 
-                    #"FailedBJet3HadronFlavour", 
-                    ]
+        myHistos = [
+            "FailedBJet1BDisc",
+            "FailedBJet1Pt",             
+            #"FailedBJet1Eta", 
+            #"FailedBJet1PdgId", 
+            #"FailedBJet1PartonFlavour", 
+            #"FailedBJet1HadronFlavour", 
+            #
+            "FailedBJet2BDisc",
+            "FailedBJet2Pt", 
+            #"FailedBJet2Eta", 
+            #"FailedBJet2PdgId", 
+            #"FailedBJet2PartonFlavour", 
+            #"FailedBJet2HadronFlavour", 
+            #
+            "FailedBJet3BDisc",
+            "FailedBJet3Pt", 
+            #"FailedBJet3Eta", 
+            #"FailedBJet3PdgId", 
+            #"FailedBJet3PartonFlavour", 
+            #"FailedBJet3HadronFlavour", 
+            ]
         
         # For-loop: All histos
         folders = ["", "FakeB", "GenuineB"]
@@ -236,11 +242,19 @@ def main(opts):
 
             folder = "FailedBJet" + f
             hList  = datasetsMgr.getDataset("EWK").getDirectoryContent(folder)
-            
+
             for hName in hList:
+                if "StandardSelections" in hName:
+                    continue
+
                 if hName.split("_")[-2] not in myHistos:
                     continue
                 PlotHisto(datasetsMgr, os.path.join(folder, hName))
+
+        # Add by hand 3 non-triplet TH1s
+        PlotHisto(datasetsMgr, "FailedBJet/Inverted_NFailedBJets_AfterStandardSelections")
+        PlotHisto(datasetsMgr, "FailedBJet/Inverted_NFailedBJets_AfterCRSelections")
+        PlotHisto(datasetsMgr, "FailedBJet/Inverted_NFailedBJets_AfterAllSelections")
     return
 
 def getHistos(datasetsMgr, histoName):
@@ -251,6 +265,31 @@ def getHistos(datasetsMgr, histoName):
     h2 = datasetsMgr.getDataset("EWK").getDatasetRootHisto(histoName)
     h2.setName("EWK")
     return [h1, h2]
+
+
+def GetControlRegionLabel(histoName):
+    histoName = histoName.split("/")[1] # .replace("FailedBJet/", "")
+    base = histoName.split("_")[0]
+    var  = histoName.split("_")[1]
+    sel  = histoName.split("_")[2]
+
+    if base == "Baseline":
+        if sel == "AfterAllSelections":
+            return "SR"
+        elif sel == "AfterCRSelections":
+            return "CR1"
+        else:
+            return "StdSel"
+    elif base == "Inverted":
+        if sel == "AfterAllSelections":
+            return "VR"
+        elif sel == "AfterCRSelections":
+            return "CR2"
+        else:
+            return "StdSel"
+    else:
+        raise Exception("Cannot determine Control Region label. Got unexpeted histogram name \"%s\". " % histoName)
+    return
 
 
 def PlotHisto(datasetsMgr, histoName):
@@ -369,9 +408,20 @@ def PlotHisto(datasetsMgr, histoName):
                    )
     
     # Save plot in all formats
-    SavePlot(p, histoName, os.path.join(opts.saveDir, "FailedBJet", opts.optMode), saveFormats = [".png"] )
+    histoName, histoDir = GetSaveName(histoName)
+    SavePlot(p, histoName, os.path.join(opts.saveDir, histoDir, opts.optMode), saveFormats = [".pdf", ".png"] )
     return
 
+
+def GetSaveName(histoName):
+    base = histoName.split("_")[0]
+    var  = histoName.split("_")[1]
+    sel  = histoName.split("_")[2]
+    name = var + "_" + GetControlRegionLabel(histoName)
+
+    histoName = name
+    histoDir  = base.split("/")[0]
+    return histoName, histoDir
 
 def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".pdf", ".png"]):
     # Check that path exists
@@ -429,7 +479,6 @@ if __name__ == "__main__":
     NOERROR      = True
     SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"
     VERBOSE      = False
-    HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug' 
     NORMALISE    = True
 
     # Define the available script options
@@ -470,9 +519,6 @@ if __name__ == "__main__":
     
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE, 
                       help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
-
-    parser.add_option("--histoLevel", dest="histoLevel", action="store", default = HISTOLEVEL,
-                      help="Histogram ambient level (default: %s)" % (HISTOLEVEL))
 
     parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
                       help="List of datasets in mcrab to include")

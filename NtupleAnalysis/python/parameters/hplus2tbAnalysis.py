@@ -79,7 +79,6 @@ muVeto = PSet(
 jetSelection = PSet(
     jetType                  = "Jets",    # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
     jetPtCuts                = [40.0, 40.0, 40.0, 40.0, 40.0, 40.0, 30.0],
-#    jetPtCuts                = [30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0],  #test for topSelection
     jetEtaCuts               = [2.4],
     numberOfJetsCutValue     = 7,
     numberOfJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
@@ -143,7 +142,7 @@ fatjetSoftDropSelection = PSet(
 bjetSelection = PSet(
     triggerMatchingApply      = False,
     triggerMatchingCone       = 0.1,  # DeltaR for matching offline bjet with trigger::TriggerBjet
-    jetPtCuts                 = [40.0, 40.0, 30.0],
+    jetPtCuts                 = [40.0], # [default: [40.0, 40.0, 30.0] ]
     jetEtaCuts                = [2.4],
     bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
     bjetDiscrWorkingPoint     = "Medium",
@@ -202,9 +201,9 @@ topologySelection = PSet(
 # Top selection BDT                                               
 #================================================================================================        
 topSelectionBDT = PSet(
-    LdgMVACutValue         = 0.8,     # [default: 0.9]
+    LdgMVACutValue         = 0.85,    # [default: 0.85]
     LdgMVACutDirection     =  ">=",   # [default: ">="]
-    SubldgMVACutValue      = 0.8,     # [default: 0.9]
+    SubldgMVACutValue      = 0.85,    # [default: 0.85]
     SubldgMVACutDirection  =  ">=",   # [default: ">="]
     NjetsMax               = 999,     # [default: 999]
     NBjetsMax              = 999,     # [default: 999]
@@ -214,7 +213,7 @@ topSelectionBDT = PSet(
     MassCutValue           = 600.0,   # [default: 400.0]
     MassCutDirection       = "<=",    # [default: "<"]
     # FIXME: Phase this out (currently only used in plots)
-    MVACutValue            = 0.8,     # [default: 0.9]
+    MVACutValue            = 0.85,    # [default: 0.85]
     MVACutDirection        =  ">=",   # [default: ">="]
 )
 
@@ -222,7 +221,7 @@ topSelectionBDT = PSet(
 # FakeB Measurement Options
 #================================================================================================
 fakeBMeasurement = PSet(
-    prelimTopMVACutValue              = 0.6,      # [default: 0.4]
+    prelimTopMVACutValue              = 0.65,     # [default: 0.65]
     prelimTopMVACutDirection          =  ">=",    # [default: ">="]
     # CSVv2-M (Baseline b-jets)
     numberOfBJetsCutValue             = 2,        # [VR, CR2: 2   , CR3, CR4: 1   ]
@@ -281,7 +280,7 @@ allSelections = PSet(
     TauSelection          = tauSelection,
     METFilter             = metFilter,
     METSelection          = metSelection,
-    TopologySelection     = topologySelection,
+    # TopologySelection     = topologySelection,
     TopSelectionBDT       = topSelectionBDT,
     MuonSelection         = muVeto,
     Trigger               = trigger,

@@ -4,9 +4,10 @@ Usage:
 ./plot_Purity.py -m <pseudo_mcrab_directory> [opts]
 
 Examples:
-./plot_Purity.py -m FakeBMeasurement_SRCR1VR_CSV2M_EE2_CSV2L_GE1_StdSelections_MVA_GE0p40_AllSelections_LdgTopMVA_GE0p80_SubldgMVA_GE0p80_RandomSort_180108_043300/ --folder ForFakeBMeasurement --doEWK
-./plot_Purity.py -m FakeBMeasurement_SRCR1VR_CSV2M_EE2_CSV2L_GE1_StdSelections_MVA_GE0p40_AllSelections_LdgTopMVA_GE0p80_SubldgMVA_GE0p80_RandomSort_180108_043300/ --folder ForFakeBMeasurement --doEWK --doQCD
-./plot_Purity.py -m FakeBMeasurement_SRCR1VR_CSV2M_EE2_CSV2L_GE0_StdSelections_MVA_GE0p40_AllSelections_LdgTopMVA_GE0p80_SubldgMVA_GE0p80_RandomSort_180107_122559/ --url --doQCD
+./plot_Purity.py -m FakeBMeasurement_SRCR1VR_CSV2M_EE2_CSV2L_GE1_StdSelections_MVA_GE0p40_AllSelections_LdgTopMVA_GE0p80_SubldgMVA_GE0p80_RandomSort_180108_043300/ --folder ForFakeBMeasurement --plotEWK
+./plot_Purity.py -m FakeBMeasurement_SRCR1VR_CSV2M_EE2_CSV2L_GE1_StdSelections_MVA_GE0p40_AllSelections_LdgTopMVA_GE0p80_SubldgMVA_GE0p80_RandomSort_180108_043300/ --folder ForFakeBMeasurement --plotEWK --doQCD --url
+./plot_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170627_124436_BJetsGE2_TopChiSqrVar_AllSamples --plotEWK -e 'QCD|Charged'
+./plot_Purity.py -m FakeBMeasurement_SRCR1VR_CSV2M_EE2_CSV2L_GE0_StdSelections_MVA_GE0p40_AllSelections_LdgTopMVA_GE0p80_SubldgMVA_GE0p80_RandomSort_180107_122559/ --url --doQCD --plotEWK 
 
 Last Used:
 ./plot_Purity.py -m FakeBMeasurement_SRCR1VR_CSV2M_EE2_CSV2L_GE1_StdSelections_MVA_GE0p40_AllSelections_LdgTopMVA_GE0p80_SubldgMVA_GE0p80_RandomSort_180108_043300/ --folder ForFakeBMeasurement
@@ -81,7 +82,6 @@ def GetListOfEwkDatasets(datasetsMgr):
     if "noTop" in datasetsMgr.getAllDatasetNames():
         return ["TT", "noTop", "SingleTop", "ttX"]
     else:
-        # ZJetsToQQ_HT600toInf and DYJetToQQHT are the same?
         return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
 
 
@@ -115,12 +115,7 @@ def GetDatasetsFromDir(opts):
 
 def main(opts):
 
-    # Apply TDR style
-    style = tdrstyle.TDRStyle()
-    style.setGridX(True)
-    style.setGridY(True)
-    style.setOptStat(True)
-    
+
     # Obtain dsetMgrCreator and register it to module selector
     dsetMgrCreator = dataset.readFromMulticrabCfg(directory=opts.mcrab)
 
@@ -150,8 +145,9 @@ def main(opts):
         datasetsMgr.updateNAllEventsToPUWeighted()
         datasetsMgr.loadLuminosities() # from lumi.json
         
-        # Print PSets used for FakeBMeasurement
-        PrintPSet("FakeBMeasurement", datasetsMgr)
+        if 1:
+            PrintPSet("TopologySelection", datasetsMgr)
+            PrintPSet("FakeBMeasurement", datasetsMgr)
 
         # Set/Overwrite cross-sections
         for d in datasetsMgr.getAllDatasets():
@@ -165,12 +161,7 @@ def main(opts):
 
         # Filter the datasets 
         datasetsMgr.remove(filter(lambda name: "Charged" in name, datasetsMgr.getAllDatasetNames()))
-        # datasetsMgr.remove(filter(lambda name: "Charged" in name and not "M_500" in name, datasetsMgr.getAllDatasetNames()))
-
-        # ZJets and DYJets overlap!
-        if "ZJetsToQQ_HT600toInf" in datasetsMgr.getAllDatasetNames() and "DYJetsToQQ_HT180" in datasetsMgr.getAllDatasetNames():
-            Print("Cannot use both ZJetsToQQ and DYJetsToQQ due to duplicate events? Investigate. Removing ZJetsToQQ datasets for now ..", True)
-            datasetsMgr.remove(filter(lambda name: "ZJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
+        #datasetsMgr.remove(filter(lambda name: "Charged" in name and not "M_500" in name, datasetsMgr.getAllDatasetNames()))
                
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
@@ -182,36 +173,55 @@ def main(opts):
             datasetsMgr.selectAndReorder(newOrder)
 
         # Print post-merged data dataset summary
-        datasetsMgr.PrintInfo()
+        if 0:
+            datasetsMgr.PrintInfo()
 
         # Merge EWK samples
         datasetsMgr.merge("EWK", GetListOfEwkDatasets(datasetsMgr))
         plots._plotStyles["EWK"] = styles.getAltEWKStyle()
             
-        # Print post EWK-merge dataset summary
-        datasetsMgr.PrintInfo()
+        # Print dataset information
+        if 0:
+            datasetsMgr.PrintInfo()
 
-        # Get all histograms from the  in the selected folder inside the ROOT files 
-        allHistos = datasetsMgr.getAllDatasets()[0].getDirectoryContent(opts.folder)
+        # Apply TDR style
+        style = tdrstyle.TDRStyle()
+        style.setGridX(True)
+        style.setGridY(True)
+        style.setOptStat(True)
+
+        # Do the purity plots
+        folder    = opts.folder 
+        allHistos = datasetsMgr.getAllDatasets()[0].getDirectoryContent(folder)
         hList     = [h for h in allHistos if "CRSelections" in h and "_Vs" not in h]
         hList.extend([h for h in allHistos if "AllSelections" in h and "_Vs" not in h])
-        # hList.extend([h for h in allHistos if "StandardSelections" in h and "_Vs" not in h])
+        if 0:
+            hList.extend([h for h in allHistos if "StandardSelections" in h and "_Vs" not in h])
 
-        # Create a list with strings included in the histogram names you want to plot
-        myHistos = ["LdgTrijetPt", "LdgTrijetM", "LdgTetrajetMass", "MVAmax2", "MVAmax1", "Njets", "NBjets", 
-                    "Bjet3BtagDisc", "Bjet2BtagDisc", "Bjet1BtagDisc", "Bjet3Pt", "Bjet2Pt", "Bjet1Pt"]
+        # Only do these histos
+        myHistos   = ["LdgTrijetM", "LdgTetrajetMass", "MVAmax2", "MVAmax1", "Njets", "NBjets", 
+                      "Bjet3BtagDisc", "Bjet2BtagDisc", "Bjet1BtagDisc", "Bjet3Pt", "Bjet2Pt", "Bjet1Pt"]
+
+        # For-loop: All histos
+        for h in hList:
+            continue
+            if h.split("_")[1] not in myHistos:
+                continue
+            Print(h, True)
+            #PlotPurity(datasetsMgr, folder, h)
 
         # For-loop: All histos
         for h in myHistos:
             hGraphList = []
             for b in ["Baseline_", "Inverted_"]:
-                for r in ["_AfterAllSelections", "_AfterCRSelections"]:
+                for r in ["_AfterCRSelections", "_AfterAllSelections" ]:
                     histoName = b + h + r
-                    hgQCD, kwargs = GetPurityHistoGraph(datasetsMgr, opts.folder, histoName)
-                    # Do not draw SR in multigraph plot!
-                    if GetControlRegionLabel(histoName) != "SR":
-                        hGraphList.append(hgQCD)
-                    PlotHistoGraph(hgQCD, kwargs)
+                    # Get the histoGraphs
+                    hgQCD, hgEWK, kwargs = GetPurityHistoGraph(datasetsMgr, folder, histoName)
+                    #kwargs["histoName"] = histoName
+                    # Plot 
+                    PlotHistoGraph(hgQCD, hgEWK, kwargs)
+                    hGraphList.append(hgQCD)
             PlotHistoGraphs(hGraphList, kwargs)
     return
 
@@ -232,7 +242,6 @@ def PrintPSet(selection, datasetsMgr):
     Print(thePSet, True)
     return
 
-
 def getHistos(datasetsMgr, histoName):
     
     h1 = datasetsMgr.getDataset("Data").getDatasetRootHisto(histoName)
@@ -243,26 +252,11 @@ def getHistos(datasetsMgr, histoName):
     return [h1, h2]
 
 
-def PlotHistoGraph(histoGraph, _kwargs):
-    histoName = _kwargs["histoName"]
-
-    # Make the plots
-    p = plots.PlotBase( [histoGraph], saveFormats=[])
-    # p = plots.ComparisonManyPlot(histoGraph, [histoGraph1, histoGraph2], saveFormats=[])
-
-    # Draw the plots
-    plots.drawPlot(p, histoName,  **_kwargs)
-    
-    # Save the plots
-    histoName = histoName.replace("ForFakeBMeasurement/", "")
-    histoName = GetSaveName(histoName) #introduced for ABCD method
-    SavePlot(p, histoName, os.path.join(opts.saveDir, "Purity", opts.optMode), saveFormats = [".png", ".pdf"] )
-    return
-
-
-def GetPurityHistoGraph(datasetsMgr, folder, hName):
-
-    # Which folder to use
+def PlotPurity(datasetsMgr, folder, hName):
+    '''
+    Create plots with "FakeB=Data-EWKGenuineB"
+    '''
+    # Which folder
     genuineBFolder = folder + "EWKGenuineB"
     fakeBFolder    = folder + "EWKFakeB"
     histoName      = os.path.join(folder, hName)
@@ -288,6 +282,12 @@ def GetPurityHistoGraph(datasetsMgr, folder, hName):
     QCD  = p1.histoMgr.getHisto("Data").getRootHisto().Clone("QCD")
 
     # Rebin histograms (Before calculating Purity)
+    if 0:
+        Data.Rebin(_kwargs["rebinX"])
+        EWK.Rebin(_kwargs["rebinX"])
+        QCD.Rebin(_kwargs["rebinX"])
+
+    # Rebin histograms (Before calculating Purity) # alex: FIXME - make it automatic
     if "binList" in _kwargs:
         xBins   = _kwargs["binList"]
         nx      = len(xBins)-1
@@ -302,12 +302,14 @@ def GetPurityHistoGraph(datasetsMgr, folder, hName):
     QCD.Add(EWK, -1)
 
     # Create the Purity histos
-    hPurity = GetPurityHisto(Data, EWK, _kwargs, printValues=False, hideZeros=True)
-    if opts.doEWK:
-        hPurity = GetPurityHisto(Data, QCD, _kwargs, printValues=False, hideZeros=True)
+    hQCD_Purity  = GetPurityHisto(Data, EWK, _kwargs, printValues=False, hideZeros=True)
+    if opts.plotEWK:
+        hEWK_Purity  = GetPurityHisto(Data, QCD, _kwargs, printValues=False, hideZeros=True)
 
-    # Convert histos to TGraph
-    gPurity = convertHisto2TGraph(hPurity, printValues=False)
+    # Convert Purity histos to Purity TGraphs
+    gQCD_Purity = convertHisto2TGraph(hQCD_Purity, printValues=False)
+    if opts.plotEWK:
+        gEWK_Purity = convertHisto2TGraph(hEWK_Purity, printValues=False)
 
     # Set legend labels
     if opts.doQCD:
@@ -315,21 +317,141 @@ def GetPurityHistoGraph(datasetsMgr, folder, hName):
         ewkLabel = "EWK (%s)" % GetControlRegionLabel(histoName)
     else:
         qcdLabel = "Fake-b (%s)"    % GetControlRegionLabel(histoName)
-        ewkLabel = "Genuine-b (%s)" % GetControlRegionLabel(histoName)        
+        ewkLabel = "Genuine-b (%s)" % GetControlRegionLabel(histoName)
+        
+    # Apply histo styles
+    if opts.doQCD:        
+        styles.qcdStyle.apply(gQCD_Purity)
+        if opts.plotEWK:
+            styles.altEwkStyle.apply(gEWK_Purity)
+            # styles.ewkStyle.apply(gEWK_Purity)
+    else:
+        styles.fakeBStyle.apply(gQCD_Purity)
+        if opts.plotEWK:
+            styles.genuineBStyle.apply(gEWK_Purity)
+
+    # Do the plots
+    if opts.plotEWK:
+        refGraph  = histograms.HistoGraph( gQCD_Purity, qcdLabel, "p", "P")
+        comGraph1 = histograms.HistoGraph( gEWK_Purity, ewkLabel, "p", "P")
+        p1 = plots.ComparisonManyPlot(refGraph, [comGraph1], saveFormats=[])
+        # p1 = plots.PlotBase( [refGraph, comGraph1], saveFormats=[]) #also works
+    else:
+        refGraph  = histograms.HistoGraph( gQCD_Purity, qcdLabel, "p", "P")
+        p1 = plots.PlotBase( [refGraph], saveFormats=[])
+
+    # Also plot histograms used to calculate purity? (need custom kwargs for y-axis range)
+    if 0:
+        p2 = plots.ComparisonManyPlot(Data, [QCD, EWK], saveFormats=[])
+ 
+    # Remember to remove the "rebinX" option (crashes otherwise)
+    _kwargs.pop('rebinX', None)
+    plots.drawPlot(p1, histoName,  **_kwargs)
+    if 0:
+        plots.drawPlot(p2, histoName,  **_kwargs)
+    
+    # Save plot in all formats
+    histoName = histoName.replace("ForFakeBMeasurement/", "")
+    histoName = GetSaveName(histoName) #introduced for ABCD method
+    SavePlot(p1, histoName, os.path.join(opts.saveDir, "Purity", opts.optMode), saveFormats = [".png", ".pdf"] )
+    if 0:
+        SavePlot(p2, histoName, os.path.join(opts.saveDir, "Purity_Src", opts.optMode), saveFormats = [".png", ".pdf"] )
+    return
+
+
+def PlotHistoGraph(hgQCD, hgEWK, _kwargs):
+    histoName = _kwargs["histoName"]
+
+    # Make the plots
+    if opts.plotEWK:
+        p = plots.ComparisonManyPlot(hgQCD, [hgEWK], saveFormats=[])
+    else:
+        p = plots.PlotBase( [hgQCD], saveFormats=[])
+
+    # Draw the plots
+    plots.drawPlot(p, histoName,  **_kwargs)
+    
+    # Save plot in all formats
+    histoName = histoName.replace("ForFakeBMeasurement/", "")
+    histoName = GetSaveName(histoName) #introduced for ABCD method
+    SavePlot(p, histoName, os.path.join(opts.saveDir, "Purity", opts.optMode), saveFormats = [".png", ".pdf"] )
+    return
+
+def GetPurityHistoGraph(datasetsMgr, folder, hName):
+    '''
+    Create plots with "FakeB=Data-EWKGenuineB"
+    '''
+    # Which folder
+    genuineBFolder = folder + "EWKGenuineB"
+    fakeBFolder    = folder + "EWKFakeB"
+    histoName      = os.path.join(folder, hName)
+    hNameGenuineB  = os.path.join(genuineBFolder, hName)
+    Verbose("Creating purity plot for %s" % (histoName), True)
+
+    # Get histogram customisations
+    _kwargs  = GetHistoKwargs(histoName, opts)
+
+    # Get histos (Data, EWK) for Inclusive
+    p1 = plots.ComparisonPlot(*getHistos(datasetsMgr, histoName) )
+    if opts.doQCD:
+        p2 = plots.ComparisonPlot(*getHistos(datasetsMgr, histoName) )
+    else:
+        p2 = plots.ComparisonPlot(*getHistos(datasetsMgr, hNameGenuineB) )
+
+    p1.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
+    p2.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
+
+    # Clone histograms 
+    Data = p1.histoMgr.getHisto("Data").getRootHisto().Clone("Data")
+    EWK  = p2.histoMgr.getHisto("EWK").getRootHisto().Clone("EWK") # EWKGenuineB
+    QCD  = p1.histoMgr.getHisto("Data").getRootHisto().Clone("QCD")
+
+    # Rebin histograms (Before calculating Purity) # alex: FIXME - make it automatic
+    if "binList" in _kwargs:
+        xBins   = _kwargs["binList"]
+        nx      = len(xBins)-1
+        newName = "" 
+        Verbose("Setting customly-selected bins %s" % (xBins), True)
+
+        Data = Data.Rebin(nx, "", xBins)
+        EWK  = EWK.Rebin(nx, "", xBins)
+        QCD  = QCD.Rebin(nx, "", xBins)
+
+    # Get QCD = Data-EWK
+    QCD.Add(EWK, -1)
+
+    # Create the Purity histos
+    hQCD_Purity  = GetPurityHisto(Data, EWK, _kwargs, printValues=False, hideZeros=True)
+    hEWK_Purity  = None
+    if opts.plotEWK:
+        hEWK_Purity  = GetPurityHisto(Data, QCD, _kwargs, printValues=False, hideZeros=True)
+
+    # Convert Purity histos to Purity TGraphs
+    gQCD_Purity = convertHisto2TGraph(hQCD_Purity, printValues=False)
+    gEWK_Purity = None
+    if opts.plotEWK:
+        gEWK_Purity = convertHisto2TGraph(hEWK_Purity, printValues=False)
+
+    # Set legend labels
+    if opts.doQCD:
+        qcdLabel = "QCD (%s)" % GetControlRegionLabel(histoName)
+        ewkLabel = "EWK (%s)" % GetControlRegionLabel(histoName)
+    else:
+        qcdLabel = "Fake-b (%s)"    % GetControlRegionLabel(histoName)
+        ewkLabel = "Genuine-b (%s)" % GetControlRegionLabel(histoName)
 
     # Apply random histo styles
     s = styles.getABCDStyle( GetControlRegionLabel(histoName) )
-    s.apply(gPurity)        
-
-    # Create histoGraph object
-    if opts.doEWK:
-        hgPurity = histograms.HistoGraph( gPurity, ewkLabel, "p", "P")
-    else:
-        hgPurity = histograms.HistoGraph( gPurity, qcdLabel, "p", "P")
+    s.apply(gQCD_Purity)        
+        
+    hgQCD_Purity = histograms.HistoGraph( gQCD_Purity, qcdLabel, "p", "P")
+    hgEWK_Purity = None
+    if gEWK_Purity:
+        hgEWK_Purity = histograms.HistoGraph( gEWK_Purity, ewkLabel, "p", "P")
 
     # Save for future use
     _kwargs["histoName"] = histoName
-    return hgPurity, _kwargs
+    return hgQCD_Purity, hgEWK_Purity, _kwargs
 
 def PlotHistoGraphs(hGraphList, _kwargs):
 
@@ -361,7 +483,7 @@ def GetHistoKwargs(histoName, opts):
     _yMin       = 0.0
     _yMax       = 1.09
     _cutBox     = None
-    _cutBoxY    = {"cutValue": 0.85, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
+    _cutBoxY    = {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
     _xlabel     = "x-axis"
     _bins       = None
     _kwargs     = {
@@ -497,14 +619,13 @@ def GetHistoKwargs(histoName, opts):
         _kwargs["binList"] = array.array('d', myBins)
     return _kwargs
 
-
 def GetSaveName(histoName):
-    base = histoName.split("_")[0]
-    var  = histoName.split("_")[1]
-    sel  = histoName.split("_")[2]
+    base = histoName.split("_")[0]#.lower()
+    var  = histoName.split("_")[1]#.lower()
+    sel  = histoName.split("_")[2]#.lower()
+
     name = var + "_" + GetControlRegionLabel(histoName)
     return name
-
 
 def GetControlRegionLabel(histoName):
     histoName = histoName.replace(opts.folder + "/", "")
@@ -534,6 +655,7 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".C", ".pdf"]):
         os.makedirs(saveDir)
 
     # Create the name under which plot will be saved
+    #saveName = os.path.join(saveDir, plotName.replace("/", "_"))
     saveName = os.path.join(saveDir, plotName.replace("ForDataDrivenCtrlPlots/", ""))
 
     # For-loop: All save formats
@@ -727,9 +849,9 @@ if __name__ == "__main__":
     SUBCOUNTERS  = False
     LATEX        = False
     MCONLY       = False
+    PLOTEWK      = False
     URL          = False
     NOERROR      = True
-    DOEWK        = False
     SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"
     VERBOSE      = False
     DOQCD        = False
@@ -762,8 +884,8 @@ if __name__ == "__main__":
     parser.add_option("--dataEra", dest="dataEra", type="string", default=DATAERA, 
                       help="Override default dataEra [default: %s]" % DATAERA)
 
-    parser.add_option("--doEWK", dest="doEWK", action="store_true", default=DOEWK, 
-                      help="Plot EWK purity instead of Fake-B purity [default: %s]" % (DOEWK) )
+    parser.add_option("--plotEWK", dest="plotEWK", action="store_true", default=PLOTEWK, 
+                      help="Include EWK purity in all the plots (1-QCDPurity) [default: %s]" % (PLOTEWK) )
 
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR, 
                       help="Directory where all pltos will be saved [default: %s]" % SAVEDIR)
@@ -775,7 +897,7 @@ if __name__ == "__main__":
                       help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
 
     parser.add_option("--doQCD", dest="doQCD", action="store_true", default = DOQCD,
-                      help="Plot QCD purity instead of Fake-B purity [default: %s]" % (DOQCD))
+                      help="Plot QCD Purity instead of Fake-B purity [default: %s]" % (DOQCD))
 
     parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
                       help="List of datasets in mcrab to include")
