@@ -248,10 +248,16 @@ signalHH155Style = signalHHStyle.clone()
 signalHH160Style = signalHHStyle.clone()
 
 signal145Style = signalStyle.clone()
+signal150Style = signalStyle.clone()
+signal155Style = signalStyle.clone()
+signal160Style = signalStyle.clone()
+signal165Style = signalStyle.clone()
+signal170Style = signalStyle.clone()
 signal175Style = signalStyle.clone()
-
 signal180Style = signalStyle.clone()
 signal190Style = signalStyle.clone()
+signal200Style = signalStyle.clone()
+
 """
 # Problem with StyleCompound: solid signal histo in control plots. 13122016/SL
 signal200Style = StyleCompound([
