@@ -65,6 +65,9 @@ def isData(dataVersion):
         return True
     return False
 
+TauSelection      = signalAnalysis.tauSelection
+TauSelection.applyTriggerMatching = False
+
 def createAnalyzer(dataVersion,era,onlineSelection = "MET80"):
     useCaloMET = False
     if "CaloMET" in era:
@@ -81,12 +84,7 @@ def createAnalyzer(dataVersion,era,onlineSelection = "MET80"):
 #        usePileupWeights = False,
         onlineSelection = onlineSelection,
         offlineSelection = leg,
-        TauSelection      = signalAnalysis.tauSelection,
-#        TauSelection = PSet(
-#            discriminators = ["byLooseCombinedIsolationDeltaBetaCorr3Hits",
-#                             "againstMuonTight3",
-#                             "againstElectronMediumMVA5"],
-#        ),
+        TauSelection      = TauSelection,
         ElectronSelection = signalAnalysis.eVeto,
         MuonSelection     = signalAnalysis.muVeto,
         JetSelection      = signalAnalysis.jetSelection,
