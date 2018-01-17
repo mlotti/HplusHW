@@ -905,6 +905,8 @@ void TopReco::process(Long64_t entry) {
     vector<genParticle> GenTops_Quarks;
 
     for (auto& top: GenTops){
+      //Reject boosted top
+      //      if (top.pt() > 500) return;
       vector<genParticle> quarks;
       genParticle bquark;
       bool foundB = false;      
@@ -1121,51 +1123,18 @@ void TopReco::process(Long64_t entry) {
     }
     hNmatchedTop ->Fill(imatched);
     
-    //=======	  
-    // if (MCtrue_Bjet.size() == 1){
-    //   MCtrue_Bjet.push_back(MCtrue_Bjet.at(0));
-    //   MCtrue_LdgJet.push_back(MCtrue_LdgBet.at(0));
-    //   MCtrue_SubldgJet.push_back(MCtrue_SubldgJet.at(0));
-    // }
     
-    //FIXME
-    if (MCtrue_Bjet.size() == 2){
-      if (areSameJets(MCtrue_Bjet.at(0), MCtrue_Bjet.at(1)))
-	{
-	  std::cout<<"BB"<<std::endl;
-	  //	  return;
-	}
-      if (areSameJets(MCtrue_LdgJet.at(0), MCtrue_LdgJet.at(1)))
-	{
-	  std::cout<<"LL"<<std::endl;
-	  //	  return;
-	}
-      if (areSameJets(MCtrue_LdgJet.at(0), MCtrue_SubldgJet.at(1)))
-	{
-	  std::cout<<"LS"<<std::endl;
-	  //	  return;
-	}
-      if (areSameJets(MCtrue_SubldgJet.at(0), MCtrue_LdgJet.at(1)))
-	{
-	  std::cout<<"SL"<<std::endl;
-	  //	  return;
-	}
-      if (areSameJets(MCtrue_SubldgJet.at(0), MCtrue_SubldgJet.at(1)))
-	{
-	  std::cout<<"SS"<<std::endl;
-	  //	  return;
-	}
-    }
-  
-    
-    // if (MCtrue_Bjet.size() == 2){
-    //   std::cout<<"2 bjets"<<std::endl;
-    //   if (areSameJets(MCtrue_Bjet.at(0), MCtrue_Bjet.at(1))) std::cout<<"same"<<std::endl;
-    // }
-
-
-
-  
+    size_t nTops = GenTops_BQuark.size();
+    for (size_t i=0; i<nTops; i++)
+      {
+	double dR12 = ROOT::Math::VectorUtil::DeltaR(GenTops_LdgQuark.at(i).p4(), GenTops_SubldgQuark.at(i).p4());
+	double dR1b = ROOT::Math::VectorUtil::DeltaR(GenTops_LdgQuark.at(i).p4(), GenTops_BQuark.at(i).p4());
+	double dR2b = ROOT::Math::VectorUtil::DeltaR(GenTops_SubldgQuark.at(i).p4(), GenTops_BQuark.at(i).p4());
+	//	std::cout<<dR12<<" "<<dR1b<<" "<<dR12<<std::endl;
+	double dRmin = min(min(dR12, dR1b), dR2b);
+	if (dRmin < 0.8) return;
+	//	std::cout<<dR12<<" "<<dR1b<<" "<<dR12<<std::endl;
+      }
     //================================================================================================//                      
     //                                    Top Candidates                                              //
     //================================================================================================//

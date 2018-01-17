@@ -226,18 +226,17 @@ void TMVAClassificationTopRec( TString myMethodList = "", TString fout = "TMVA_T
    // Read training and test data
    // (it is also possible to use ASCII format as input -> see TMVA Users Guide)OA
 
-  // TString fnameS_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_171014_173553/TT/res/histograms-TT.root";//"histograms_TTsd.root";                            
-  // TString fnameB_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_171014_173553/TT/res/histograms-TT.root";                                                     
-
-      // TString fnameS_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_MVA141017/TT/res/histograms-TT.root";
-      // TString fnameB_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_MVA141017/TT/res/histograms-TT.root";
-      // TString fnameS_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_171115_New/TT/res/histograms-TT.root";
-      // TString fnameB_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_171115_New/TT/res/histograms-TT.root";
-      TString fnameS_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_171122_forMVA/TT/res/histograms-TT.root";
-      TString fnameB_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_171122_forMVA/TT/res/histograms-TT.root";
+  /*      TString fnameS_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_171215_TT_trainingcheck/TT/res/histograms-TT.root";
+	  TString fnameB_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_171215_TT_trainingcheck/TT/res/histograms-TT.root";
+	  
+	  TString fnameS_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_180107_Tople500/TT/res/histograms-TT.root";
+	  TString fnameB_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_180107_Tople500/TT/res/histograms-TT.root";
+  */
   // TString fnameS_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_MVA101117/TT/res/histograms-TT.root";
   // TString fnameB_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_MVA101117/TT/res/histograms-TT.root";
-
+  
+  TString fnameS_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_180115_DeltaRJets08/TT/res/histograms-TT.root";
+  TString fnameB_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_180115_DeltaRJets08/TT/res/histograms-TT.root";
    //   if (gSystem->AccessPathName( fname ))  // file does not exist in local directory
    //   gSystem->Exec("curl -O http://root.cern.ch/files/tmva_class_example.root");
    
@@ -299,7 +298,8 @@ void TMVAClassificationTopRec( TString myMethodList = "", TString fout = "TMVA_T
    //    factory->PrepareTrainingAndTestTree( mycut,
    //                                         "NSigTrain=3000:NBkgTrain=3000:NSigTest=3000:NBkgTest=3000:SplitMode=Random:!V" );
    factory->PrepareTrainingAndTestTree( mycuts, mycutb,
-					"nTrain_Signal=70000:nTrain_Background=70000:NTest_Signal=70000:nTest_Background=70000:SplitMode=Random:NormMode=NumEvents:!V" );
+					//					"nTrain_Signal=70000:nTrain_Background=70000:NTest_Signal=70000:nTest_Background=70000:SplitMode=Random:NormMode=NumEvents:!V" );
+					"nTrain_Signal=20000:nTrain_Background=20000:NTest_Signal=20000:nTest_Background=20000:SplitMode=Random:NormMode=NumEvents:!V" );
    //"nTrain_Signal=0:nTrain_Background=0:SplitMode=Random:NormMode=NumEvents:!V" );
 
    // ---- Book MVA methods
