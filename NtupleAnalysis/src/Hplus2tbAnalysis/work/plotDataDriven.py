@@ -115,6 +115,8 @@ def main(opts):
 
         # Setup & configure the dataset manager 
         datasetsMgr = GetDatasetsFromDir(opts)
+        
+        PrintPSet("TopologySelection", datasetsMgr)
         datasetsMgr.updateNAllEventsToPUWeighted()
         datasetsMgr.loadLuminosities() # from lumi.json
 
@@ -496,6 +498,22 @@ def DataMCHistograms(datasetsMgr, qcdDatasetName):
         # Draw and save the plot
         plots.drawPlot(p, saveName, **kwargs_) #the "**" unpacks the kwargs_ dictionary
         SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode) )
+    return
+
+def PrintPSet(selection, datasetsMgr):
+    selection = "\"%s\":"  % (selection)
+    thePSets = datasetsMgr.getAllDatasets()[0].getParameterSet()
+
+    # First drop everything before the selection
+    thePSet_1 = thePSets.split(selection)[-1]
+
+    # Then drop everything after the selection
+    thePSet_2 = thePSet_1.split("},")[0]
+
+    # Final touch
+    thePSet = selection + thePSet_2
+
+    Print(thePSet, True)
     return
 
 def getHisto(datasetsMgr, datasetName, histoName):

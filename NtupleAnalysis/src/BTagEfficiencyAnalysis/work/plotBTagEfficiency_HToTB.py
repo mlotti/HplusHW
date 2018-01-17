@@ -13,9 +13,10 @@ Usage:
 Examples:
 ./plotBTagEfficiency_HToTB.py -m BTagEfficiencyAnalysis_HadronFlavour_171115_100257 
 ./plotBTagEfficiency_HToTB.py -m BTagEfficiencyAnalysis_HadronFlavour_171115_100257 --url --error 0.1 --gridX -e "QCD_HT50to100|QCD_HT100to200|QCD_HT200to300"
+./plotBTagEfficiency_HToTB.py -m BTagEfficiencyAnalysis_HadronFlavour_171115_100257 --url --error 0.1 --gridX --gridY -e "QCD_HT50to100|QCD_HT100to200|QCD_HT200to300"
 
 Last Used:
-./plotBTagEfficiency_HToTB.py -m BTagEfficiencyAnalysis_HadronFlavour_171115_100257 --url --error 0.1 --gridX --gridY -e "QCD_HT50to100|QCD_HT100to200|QCD_HT200to300"
+./plotBTagEfficiency_HToTB.py -m BTagEfficiencyAnalysis_HadronFlavour_InclWJets_171116_084530 --url --error 0.1 --gridX --gridY -e "QCD_HT50to100|QCD_HT100to200|QCD_HT200to300|WJets"
 
 '''
 
@@ -393,17 +394,17 @@ def main(opts):
                 "QCD_HT1000to1500": "FakeB",
                 "QCD_HT1500to2000": "FakeB", 
                 "QCD_HT2000toInf" : "FakeB",
-                #"WJetsToQQ_HT_600ToInf": "FakeB"
+                "WJetsToQQ_HT_600ToInf": "FakeB"
                 }
     # Definitions
     messages = []
+    results  = []
 
     # For-loop: All optimisation modes
     for index, opt in enumerate(optModes, 1):
         opts.optMode = opt
         
         # Definitions
-        results  = []
         genuineB = None
         fakeB    = None
 

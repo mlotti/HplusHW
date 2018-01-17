@@ -98,9 +98,9 @@ def main():
     # ================================================================================================
     # Setup the process
     # ================================================================================================
-    #from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import obtainAnalysisSuffix
-    #process = Process("QCDMeasurement"+obtainAnalysisSuffix(sys.argv))
-    process = Process(prefix, postfix, opts.nEvts)
+    maxEvents = {}
+    maxEvents["All"] = opts.nEvts
+    process = Process(prefix, postfix, maxEvents)
 
 
     # ================================================================================================
@@ -115,7 +115,8 @@ def main():
         process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=opts.excludeTasks)
     else:
         #myBlackList = [] #QCD_bEnriched"] #["ChargedHiggs", "QCD-b"]
-        myBlackList = ["M_800", "M_400", "M_350", "M_3000", "M_300", "M_250", "M_220","M_2000","M_200", "M_180","M_1000", "QCD_b"]
+        #myBlackList = ["M_180", "M_200", "M_220", "M_250", "M_300", "M_350", "M_400", "M_500", "M_800", "M_1000", "M_1500", "M_2000", "M_2500", "M_3000", "M_5000", "M_7000", "M_10000", "QCD_b"]
+        myBlackList = ["M_180", "M_200", "M_220", "M_250", "M_300", "M_350", "M_400", "M_800", "M_1000", "M_1500", "M_2000", "M_2500", "M_3000", "M_5000", "M_7000", "M_10000", "QCD_b"]
         Print("Adding all datasets from multiCRAB directory %s except %s" % (opts.mcrab, (",".join(myBlackList))) )
         Print("Vertex reweighting is done according to the chosen data era (%s)" % (",".join(dataEras)) )
         # process.addDatasetsFromMulticrab(opts.mcrab, blacklist=myBlackList)

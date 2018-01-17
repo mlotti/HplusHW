@@ -79,7 +79,6 @@ muVeto = PSet(
 jetSelection = PSet(
     jetType                  = "Jets",    # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
     jetPtCuts                = [40.0, 40.0, 40.0, 40.0, 40.0, 40.0, 30.0],
-#    jetPtCuts                = [30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0],  #test for topSelection
     jetEtaCuts               = [2.4],
     numberOfJetsCutValue     = 7,
     numberOfJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
@@ -100,7 +99,7 @@ jetSelection = PSet(
 bjetSelection = PSet(
     triggerMatchingApply      = False,
     triggerMatchingCone       = 0.1,  # DeltaR for matching offline bjet with trigger::TriggerBjet
-    jetPtCuts                 = [40.0, 40.0, 30.0],
+    jetPtCuts                 = [40.0], # [default: [40.0, 40.0, 30.0] ]
     jetEtaCuts                = [2.4],
     bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
     bjetDiscrWorkingPoint     = "Medium",
@@ -155,64 +154,47 @@ topologySelection = PSet(
     CentralityCutDirection       = "<=",
 )
 
-
-#================================================================================================
-# Top selection
-#================================================================================================
-# topSelection = PSet(
-#     ChiSqrCutValue     = 100.0,
-#     ChiSqrCutDirection =  "<",   # options: ==, !=, <, <=, >, >=
-#     LowLdgTrijetMassCutValue      = 150.0,
-#     LowLdgTrijetMassCutDirection  = ">=",
-#     HighLdgTrijetMassCutValue      = 210.0,
-#     HighLdgTrijetMassCutDirection  = "<=",
-#     MassW              = 80.385,
-#     DiJetSigma         = 10.2,
-#     TriJetSigma        = 27.2,
-#     MaxJetsToUseInFit  = 8,
-#     MaxBJetsToUseInFit = 3,
-#     # Distance cut
-#     dijetWithMaxDR_tetrajetBjet_dR_min          =  0.0, # Disable: 0.0, Default: +3.0
-#     dijetWithMaxDR_tetrajetBjet_dR_yIntercept   = -1.0, # Disable:-1.0, Default: +4.0
-#     dijetWithMaxDR_tetrajetBjet_dR_slopeCoeff   =  0.0, # Disable: 0.0, Default: -1.0
-#     # Angular cut
-#     dijetWithMaxDR_tetrajetBjet_dPhi_min        = +2.5, # Disable: 0.0, Default: +2.5
-#     dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept = +3.0, # Disable:-1.0, Default: +3.0
-#     dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff = -1.0, # Disable: 0.0, Default: -1.0
-#     ReplaceJetsWithGenJets = False, 
-# )
-
 #================================================================================================
 # Top selection BDT                                               
 #================================================================================================        
 topSelectionBDT = PSet(
-    # MVACuts                = [0.8, 0.8], #FIXME: Set individual cut values for each top candidate  
-    MVACutValue            = 0.9,        #FIXME: Set individual cut values for each top candidate  
-    MVACutDirection        =  ">=",  # options: ==, !=, <, <=, >, >=
+    LdgMVACutValue         = 0.85,    # [default: 0.85]
+    LdgMVACutDirection     =  ">=",   # [default: ">="]
+    SubldgMVACutValue      = 0.85,    # [default: 0.85]
+    SubldgMVACutDirection  =  ">=",   # [default: ">="]
     NjetsMax               = 999,     # [default: 999]
     NBjetsMax              = 999,     # [default: 999]
-    ReplaceJetsWithGenJets = False,  # For Testing (perfect jet resolution) 
-    CSV_bDiscCutValue      = 0.8484, #-100., #0.8484, #Temporary
-    CSV_bDiscCutDirection  = ">=",
-    MassCutValue           = 400,
-    MassCutDirection       = "<",
+    # Speed-up calculation by skipping top candidates failing some criteria
+    CSV_bDiscCutValue      = 0.5426,  # [default: 0.8484] #Do not evaluate top candidate if b-jet assigned as b from top fails this cut
+    CSV_bDiscCutDirection  = ">=",    # [default: ">="]
+    MassCutValue           = 600.0,   # [default: 400.0]
+    MassCutDirection       = "<=",    # [default: "<"]
+    # FIXME: Phase this out (currently only used in plots)
+    MVACutValue            = 0.85,    # [default: 0.85]
+    MVACutDirection        =  ">=",   # [default: ">="]
 )
 
 #================================================================================================
 # FakeB Measurement Options
 #================================================================================================
 fakeBMeasurement = PSet(
-    prelimTopMVACutValue              = -0.8,     # [default: -0.8]
+    prelimTopMVACutValue              = 0.65,     # [default: 0.65]
     prelimTopMVACutDirection          =  ">=",    # [default: ">="]
-    numberOfBJetsCutValue             = 2,        # [default: 2]
-    numberOfBJetsCutDirection         = "==",     # [default: "=="]
-    numberOfInvertedBJetsCutValue     = 1,        # [default: 1]
-    numberOfInvertedBJetsCutDirection = ">=",     # [default: ">="]
+    # CSVv2-M (Baseline b-jets)
+    numberOfBJetsCutValue             = 2,        # [VR, CR2: 2   , CR3, CR4: 1   ]
+    numberOfBJetsCutDirection         = "==",     # [VR, CR2: "==", CR3, CR4: "=="]
+    # CSVv2-L (Inverted b-jets)
+    numberOfInvertedBJetsCutValue     = 1,        # [VR, CR2: 1   , CR3, CR4: 2   ]
+    numberOfInvertedBJetsCutDirection = ">=",     # [VR, CR2: ">=", CR3, CR4: ">="]
     invertedBJetsDiscr                = bjetSelection.bjetDiscr,
-    invertedBJetsDiscrMaxCutValue     = 0.8,      # [default: 0.7]
+    invertedBJetsDiscrMaxCutValue     = 0.85,     # [default: 0.8, CSVv2-L = 0.5426, CSVv2-M = +0.8484, CSVv2-T = 0.9535]
     invertedBJetsDiscrMaxCutDirection = "<=",     # [default: "<="]
     invertedBJetsWorkingPoint         = "Loose",  # [default: "Loose"]
-    invertedBJetsSortType             = "Random", # [default: "Random"] ("AscendingPt", "DescendingPt", "AscendingBDiscriminator", "DescendingBDiscriminator", "Random")
+    invertedBJetsSortType             = "Random", # [default: "Random"] # FIXME: Does this make any difference?
+    LdgTopMVACutValue                 = topSelectionBDT.LdgMVACutValue,
+    LdgTopMVACutDirection             = topSelectionBDT.LdgMVACutDirection, 
+    SubldgTopMVACutValue              = topSelectionBDT.SubldgMVACutValue, # [VR CR2: 0.8 , CR3, CR4: 0.8 ]
+    SubldgTopMVACutDirection          = "<",                               # [VR CR2: ">=", CR3, CR4: "<" ]
     )
 
 
@@ -255,8 +237,7 @@ allSelections = PSet(
     TauSelection          = tauSelection,
     METFilter             = metFilter,
     METSelection          = metSelection,
-    TopologySelection     = topologySelection,
-    #TopSelection          = topSelection,
+    # TopologySelection     = topologySelection,
     TopSelectionBDT       = topSelectionBDT,
     MuonSelection         = muVeto,
     Trigger               = trigger,
