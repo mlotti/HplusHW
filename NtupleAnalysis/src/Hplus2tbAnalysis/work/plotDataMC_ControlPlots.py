@@ -81,13 +81,13 @@ def GetLumi(datasetsMgr):
 
 def GetListOfEwkDatasets():
     Verbose("Getting list of EWK datasets")
-    if 0: # TopSelection
+    if 1: # TopSelection
         return  ["TT", "WJetsToQQ_HT_600ToInf", "SingleTop", "DYJetsToQQHT", "TTZToQQ",  "TTWJetsToQQ", "Diboson", "TTTT"]
-    else: # TopSelectionBDT
-        if opts.afterTop:
-            return  ["TT", "SingleTop", "ttX", "noTop"]
-        else:
-            return  ["TT", "noTop", "SingleTop", "ttX"]
+    #else: # TopSelectionBDT
+    #    if opts.afterTop:
+    #        return  ["TT", "SingleTop", "ttX", "noTop"]
+    #    else:
+    #        return  ["TT", "noTop", "SingleTop", "ttX"]
 
 
 def GetDatasetsFromDir(opts):
@@ -138,15 +138,15 @@ def main(opts):
         QCD_list = ["QCD_HT700to1000", "QCD_HT50to100", "QCD_HT500to700", "QCD_HT300to500", 
                     "QCD_HT200to300", "QCD_HT2000toInf", "QCD_HT1500to2000", "QCD_HT100to200", "QCD_HT1000to1500"]
         QCDExt_list = [x+"_ext1" for x in QCD_list]
-
-        #datasetsToRemove = ["QCD-b", "QCD_HT50to100", "QCD_HT100to200", "QCD_HT200to300"] # QCD_HT removed should NOT make a noticable difference
-        #datasetsToRemove = ["QCD-b", "DYJets", "QCD_HT50to100", "QCD_HT100to200", "QCD_HT200to300"]
-        #datasetsToRemove = ["QCD-b", "ZJetsToQQ", "QCD_HT50to100", "QCD_HT100to200", "QCD_HT200to300"]
-        #datasetsToRemove = ["QCD-b", "ZJetsToQQ"]
-        #datasetsToRemove = ["QCD-b", "DYJets"]
-        datasetsToRemove = ["QCD-b", "DYJets"]
-        #datasetsToRemove.extend(QCD_list)
+        datasetsToRemove = ["QCD-b"]
+        # datasetsToRemove.extend(QCD_list)
         # datasetsToRemove.extend(QCDExt_list)
+
+        # ZJets and DYJets overlap
+        if "ZJetsToQQ_HT600toInf" in datasetsMgr.getAllDatasetNames() and "DYJetsToQQ_HT180" in datasetsMgr.getAllDatasetNames():
+            Print("Cannot use both ZJetsToQQ and DYJetsToQQ due to duplicate events? Investigate. Removing ZJetsToQQ datasets for now ..", True)
+            datasetsMgr.remove(filter(lambda name: "ZJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
+            # datasetsMgr.remove(filter(lambda name: "DYJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
         
         # Set/Overwrite cross-sections
         for d in datasetsMgr.getAllDatasets():
@@ -207,11 +207,19 @@ def main(opts):
 
         # Do Data-MC histograms with DataDriven QCD
         folder     = opts.folder
-        histoList  = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(folder)
+        histoList  = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(folder)        
         histoPaths = [os.path.join(folder, h) for h in histoList]
+        ignoreList = ["Aplanarity", "Planarity", "Sphericity", "FoxWolframMoment", "Circularity", "ThirdJetResolution", "Centrality"]
+
         for h in histoPaths:
-                    
-            if "NVertices" not in h: #alex-iro
+            skip = False
+
+            # Skip unwanted histos
+            for i in ignoreList:
+                if i in h:
+                    skip = True
+
+            if skip:
                 continue
 
             # Re-arrange dataset order if after top selection!
@@ -231,11 +239,11 @@ def GetHistoKwargs(h, opts):
     myBins  = []
     vtxBins = []
     ptBins  = []
-    bWidth  = 1
-    for i in range(0, 50, bWidth):
+    bWidth  = 2    
+    for i in range(0, 40, bWidth):
         vtxBins.append(i)
-    bWidth  = 25
-    for i in range(50, 100+bWidth, bWidth):
+    bWidth  = 10 #25
+    for i in range(40, 100+bWidth, bWidth):
         vtxBins.append(i)
 
     _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": 0.1}
@@ -246,7 +254,7 @@ def GetHistoKwargs(h, opts):
     yMin    = 1e-1
     yMaxF   = 1.2
     if logY:
-        yMaxF = 10
+        yMaxF = 20#10
 
     _kwargs = {
         "ylabel"           : _yLabel,
@@ -431,7 +439,9 @@ def GetHistoKwargs(h, opts):
         kwargs["cutBox"] = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         if "AfterStandardSelections" in h:
             #kwargs["opts"]   = {"xmin": 0.0, "xmax": +1500.0, "ymin": yMin, "ymaxfactor": yMaxF}
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": +800.0, "ymin": yMin, "ymaxfactor": yMaxF}
+            kwargs["opts"]   = {"xmin": 50, "xmax": +600, "ymin": yMin, "ymaxfactor": yMaxF}
+        if "AfterAllSelections" in h:
+            kwargs["opts"]   = {"xmin": 175-80, "xmax": +175+100, "ymin": yMin, "ymaxfactor": yMaxF}
 
     if "ldgTrijetPt" in h:
         ROOT.gStyle.SetNdivisions(8, "X")
@@ -669,7 +679,7 @@ def GetHistoKwargs(h, opts):
 
     if "NBjets" in h:
         kwargs["xlabel"] = "b-jet multiplicity"
-        kwargs["opts"]   = {"xmin": 0.0, "xmax": 12.0, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["opts"]   = {"xmin": 2.0, "xmax": 10.0, "ymin": yMin, "ymaxfactor": yMaxF}
         kwargs["cutBox"] = {"cutValue": 3, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
 
     if "Njets" in h:
@@ -677,7 +687,8 @@ def GetHistoKwargs(h, opts):
         kwargs["opts"]   = {"xmin": 0.0, "xmax": 18.0, "ymin": yMin, "ymaxfactor": yMaxF}
         kwargs["cutBox"] = {"cutValue": 7, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         if "Selections" in h:
-            kwargs["moveLegend"] = {"dx": -0.52, "dy": -0.0, "dh": 0.0}
+            kwargs["opts"]   = {"xmin": 6.0, "xmax": 18.0, "ymin": yMin, "ymaxfactor": yMaxF}
+            #kwargs["moveLegend"] = {"dx": -0.52, "dy": -0.0, "dh": 0.0}
 
     if "NVertices" in h:
         kwargs["rebinX"] = vtxBins
@@ -751,7 +762,7 @@ def DataMCHistograms(datasetsMgr, histoName):
     if opts.folder == "topologySelection_":
         skipStrings = ["_Vs_"]
     if "ForDataDrivenCtrlPlots" in opts.folder:
-        skipStrings = ["_Vs_", "JetEtaPhi", "MinDeltaPhiJet", "MaxDeltaPhiJet", "MinDeltaRJet", "SubldgTetrajet"]
+        skipStrings = ["_Vs_", "JetEtaPhi", "MinDeltaPhiJet", "MaxDeltaPhiJet", "MinDeltaRJet"]
 
     # Skip histograms if they contain a given string
     for keyword in skipStrings:
