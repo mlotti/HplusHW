@@ -3,17 +3,16 @@
 Description:
 
 Usage:
-./plot_Closure.py -m <pseudo_mcrab> [opts]
+./plot_BaseVsInv.py -m <pseudo_mcrab> [opts]
 
 Examples:
-./plot_Closure.py -m FakeBMeasurement_170728_040545/ -o "" --url
-./plot_Closure.py -m FakeBMeasurement_170728_040545/ -o "" --url --normaliseToOne
-./plot_Closure.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170703_031128_CtrlTriggers_QCDTemplateFit --mergeEWK -e "QCD|Charged" -o "OptTriggerOR['HLT_PFHT400_SixJet30']ChiSqrCutValue100"
-./plot_Closure.py -m FakeBMeasurement_SignalTriggers_NoTrgMatch_StdSelections_TopCut_AllSelections_TopCut10_170728_040545/ --url --normaliseToOne
-./plot_Closure.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657/ --normaliseToOne && ./plot_Closure.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657/ --normaliseToOne --useMC
+./plot_BaseVsInv.py -m FakeBMeasurement_170728_040545/ -o "" --url
+./plot_BaseVsInv.py -m FakeBMeasurement_170728_040545/ -o "" --url --normaliseToOne
+./plot_BaseVsInv.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170703_031128_CtrlTriggers_QCDTemplateFit --mergeEWK -e "QCD|Charged" -o "OptTriggerOR['HLT_PFHT400_SixJet30']ChiSqrCutValue100"
+./plot_BaseVsInv.py -m FakeBMeasurement_SignalTriggers_NoTrgMatch_StdSelections_TopCut_AllSelections_TopCut10_170728_040545/ --url --normaliseToOne
 
 Last Used:
-./plot_Closure.py -m FakeBMeasurement_SRCR1VR_CSV2M_EE2_CSV2L_GE0_StdSelections_MVA_GE0p40_AllSelections_LdgTopMVA_GE0p80_SubldgMVA_GE0p80_RandomSort_180107_122559 --normaliseToOne --url
+./plot_BaseVsInv.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657/ --normaliseToOne && ./plot_BaseVsInv.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657/ --normaliseToOne --useMC
 '''
 
 #================================================================================================ 
@@ -138,11 +137,7 @@ def main(opts):
         datasetsMgr.updateNAllEventsToPUWeighted()
         datasetsMgr.loadLuminosities() # from lumi.json
 
-        if 0:
-            PrintPSet("BJetSelection", datasetsMgr)
-            PrintPSet("TopSelectionBDT", datasetsMgr)
-            PrintPSet("FakeBMeasurement", datasetsMgr)
-            sys.exit()
+        PrintPSet("TopSelectionBDT", datasetsMgr)
 
         # Print dataset info?
         if opts.verbose:
@@ -170,47 +165,27 @@ def main(opts):
         # Print dataset information
         datasetsMgr.PrintInfo()
 
-        # Get all the histograms and their paths (e.g. ForFakeBMeasurement/Baseline_DeltaRLdgTrijetBJetTetrajetBJet_AfterCRSelections)
+        # Get all the histograms and their paths
         hList  = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(opts.folder)
         hPaths = [os.path.join(opts.folder, h) for h in hList]
-
-        # Create two lists of paths: one for "Baseline" (SR)  and one for "Inverted" (CR)
-        path_SR  = []  # baseline, _AfterAllSelections
-        path_CR1 = []  # baseline, _AfterCRSelections
-        path_VR  = []  # inverted, _AfterAllSelections
-        path_CR2 = []  # inverted, _AfterCRSelections
         
-        # For-loop: All histogram paths
+        # Create two lists of paths: one for "Baseline" (SR)  and one for "Inverted" (CR)
+        baselinePaths = []
+        invertedPaths = []
         for p in hPaths:
-            if "AfterStandardSelections" in p:
-                #print p
+            if "StandardSelections" not in p:
                 continue
-            
             if "Baseline" in p:
-                if "AllSelections" in p:
-                    path_SR.append(p)
-                if "CRSelections" in p:
-                    path_CR1.append(p)
+                baselinePaths.append(p)
             if "Inverted" in p:
-                if "AllSelections" in p:
-                    path_VR.append(p)
-                if "CRSelections" in p:
-                    path_CR2.append(p)
+                invertedPaths.append(p)
 
-        # For-loop: All histogram pairs
-        for hSR, hCR1 in zip(path_SR, path_CR1):
-            Verbose("Plotting histogram \"%s\"" % hSR, False)
-            if "IsGenuineB" in hSR:
+        # For-loop: All histogram pairs (Baseline-Inverted aka SR-CR)
+        for hBaseline, hInverted in zip(baselinePaths, invertedPaths):
+            Verbose("Plotting histogram \"%s\"" % hBaseline, False)
+            if "IsGenuineB" in hBaseline:
                 continue
-            PlotComparison(datasetsMgr, hSR, hCR1, "SRvCR1")
-
-        # For-loop: All histogram pairs
-        for hVR, hCR2 in zip(path_VR, path_CR2):
-            Verbose("Plotting histogram \"%s\"" % hVR, False)
-            if "IsGenuineB" in hVR:
-                continue
-            PlotComparison(datasetsMgr, hVR, hCR2, "VRvCR2")
-
+            PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted)
 
     return
 
@@ -239,7 +214,7 @@ def getHistos(datasetsMgr, dataset, hBaseline, hInverted):
     h2.setName("Inverted-" + dataset)
     return [h1, h2]
 
-def PlotComparison(datasetsMgr, hBaseline, hInverted, ext):
+def PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted):
 
     # Create corresponding paths for GenuineB and FakeB histograms (not only Inclusive) 
     hBaseline_Inclusive = hBaseline #no extra string 
@@ -292,11 +267,12 @@ def PlotComparison(datasetsMgr, hBaseline, hInverted, ext):
 
     # Create the final plot object
     p = plots.ComparisonManyPlot(baseline_FakeB, [inverted_FakeB], saveFormats=[])
+    # p = plots.ComparisonManyPlot(inverted_FakeB, [baseline_FakeB], saveFormats=[])
     p.setLuminosity(opts.intLumi)
 
     # Apply histogram styles
-    p.histoMgr.forHisto("Baseline-FakeB" , styles.getABCDStyle(ext.split("v")[0]))
-    p.histoMgr.forHisto("Inverted-FakeB" , styles.getABCDStyle(ext.split("v")[1]))
+    p.histoMgr.forHisto("Baseline-FakeB" , styles.getInvertedStyle() )
+    p.histoMgr.forHisto("Inverted-FakeB" , styles.getBaselineStyle() )
         
     # Set draw/legend style
     p.histoMgr.setHistoDrawStyle("Baseline-FakeB", "AP")
@@ -315,14 +291,12 @@ def PlotComparison(datasetsMgr, hBaseline, hInverted, ext):
        })
     else:
         p.histoMgr.setHistoLegendLabelMany({
-                #"Baseline-FakeB" : "Baseline",
-                #"Inverted-FakeB" : "Inverted",
-                "Baseline-FakeB" : ext.split("v")[0],
-                "Inverted-FakeB" : ext.split("v")[1],
+                "Baseline-FakeB" : "Baseline",
+                "Inverted-FakeB" : "Inverted",
                 })
 
     # Get histogram keyword arguments
-    kwargs_ = GetHistoKwargs(hBaseline_Inclusive, ext, opts)
+    kwargs_ = GetHistoKwargs(hBaseline_Inclusive, opts)
 
     # Draw the histograms
     plots.drawPlot(p, hBaseline_Inclusive, **kwargs_)
@@ -330,17 +304,15 @@ def PlotComparison(datasetsMgr, hBaseline, hInverted, ext):
     # Save plot in all formats    
     saveName = hBaseline_Inclusive.split("/")[-1]
     saveName = saveName.replace("Baseline_", "")
-    saveName = saveName.replace("Inverted_", "")
-    saveName = saveName.replace("_AfterAllSelections", "_" + ext)
 
     if opts.useMC:
-        savePath = os.path.join(opts.saveDir, "Closure", "MC", opts.optMode)
+        savePath = os.path.join(opts.saveDir, "BaselineVsInverted", "MC", opts.optMode)
     else:
-        savePath = os.path.join(opts.saveDir, "Closure", opts.optMode)
-    SavePlot(p, saveName, savePath, saveFormats = [".pdf", ".png"])
+        savePath = os.path.join(opts.saveDir, "BaselineVsInverted", opts.optMode)
+    SavePlot(p, saveName, savePath, saveFormats = [".png"])
     return
 
-def GetHistoKwargs(histoName, ext, opts):
+def GetHistoKwargs(histoName, opts):
     hName   = histoName.lower()
     _cutBox = None
     _rebinX = 1
@@ -360,15 +332,11 @@ def GetHistoKwargs(histoName, ext, opts):
         _xlabel = "m_{jj} (%s)" % (_units)
         _cutBox = {"cutValue": 80.399, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _opts["xmax"] = 400.0
-    if "met" in hName:
-        _rebinX = 1 #2
-        _opts["xmax"] = 300.0
     if "mvamax" in hName:
         _rebinX = 1
         _units  = ""
         _format = "%0.2f " + _units
         _xlabel = "BDT discriminant"
-        _opts["xmin"] =  0.0
         _cutBox = {"cutValue": 0.8, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         #_cutBox = {"cutValue": 0.9, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
     if "nbjets" in hName:
@@ -484,7 +452,7 @@ def GetHistoKwargs(histoName, ext, opts):
         "ylabel"           : "Arbitrary Units / %s" % (_format),
         "rebinX"           : _rebinX, 
         "rebinY"           : None,
-        "ratioYlabel"      : ext.split("v")[0] + "/" + ext.split("v")[1],
+        "ratioYlabel"      : "Base/Inv", #Ratio",
         "ratio"            : _ratio,
         "ratioInvert"      : True, 
         "addMCUncertainty" : True,
@@ -494,7 +462,7 @@ def GetHistoKwargs(histoName, ext, opts):
         "opts"             : _opts,
         "opts2"            : {"ymin": 0.6, "ymax": 1.4},
         "log"              : True,
-        "createLegend"     : {"x1": 0.84, "y1": 0.78, "x2": 0.98, "y2": 0.92},
+        "createLegend"     : {"x1": 0.64, "y1": 0.78, "x2": 0.92, "y2": 0.92},
         #"moveLegend"       : {"dx": -0.1, "dy": -0.01, "dh": 0.1},
         "cutBox"           : _cutBox,
         }
@@ -664,4 +632,4 @@ if __name__ == "__main__":
     main(opts)
 
     if not opts.batchMode:
-        raw_input("=== plot_Closure.py: Press any key to quit ROOT ...")
+        raw_input("=== plot_BaseVsInv.py: Press any key to quit ROOT ...")

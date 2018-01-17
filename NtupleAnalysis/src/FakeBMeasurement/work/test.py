@@ -1,31 +1,37 @@
 #!/usr/bin/env python
 '''
 Description:
-This script produces QCD normalization factors by running a fitting script.
+This script produces QCD normalization factors by employing an ABCD method
+using regions created by inverting the b-jets selections and the MVA2 top 
+(i.e. subleading in BDT discrimant) as follows:
+         MVA2max
+              ^
+              |
+              |--------------|--------------|--------------|
+        >=0.8 |      CR3     |      VR      |      SR      |
+              |--------------|--------------|--------------|
+0.4 < && <0.8 |      CR4     |      CR2     |      CR1     |
+              |--------------|--------------|--------------|----> CSVv2
+              | ==1M, >= 2L  | ==2M, >= 1L  |      >=3M    |
+
+The assumption is that MVA2max and CSVv2-M and NOT (at least strongly) correlated
+and that the shapes in SR and CR1 (VR and CR2, and CR3 and CR4) are similar.
+In that was one can write the following relation:
+SR/CR1 = VR/CR2 (= CR3/CR4)
+Therefore:
+SR = (VR/CR2)*CR1
+
+We call the ratio f=(VR/CR2) the transfer factor that gets us from CR1 to the SR. This
+is needed to ensure the normalisation of the sample obtained from CR1 is corrected.
+Then, if we want the predicted FakeB shape of the tetrajet mass in the signal region (m_SR) 
+we do the following:
+m_SR = f * m_CR1
+where m_CR1 is is the shape of mjjbb and f=(VR/CR2) is the transfer factor
+needed to correctly normalise the shape obtained from CR1.
+
+
 The steps followed are the following:
-1) The user defines the histograms to be used as templates. Two are needed:
-   a) Baseline EWK (MC)
-   b) Inverted QCD (Data)
-This will be used in the fitting processes to extract the templates for:
-   a) EWK
-   b) QCD
-This step gives us the two fitted templates:
-   a) fit_EWKInclusive_Baseline_Inclusive.png
-   b) fit_QCD_Inverted_Inclusive.png
-
-2) The two extracted templates (from fits) are then used to fit on "Baseline Data" 
-(our Signal Region) as a linear combination with the fraction of QCD (f) as the only 
-free parameter of the fit:
-N = fQCD + (1-f)EWK
-This step gives us the final fit and the fit parameter:
-   a) finalFit_Inclusive.png 
-   b) finalFit_Inclusive_log.png
-   c) f = Fraction of QCD Events
-
-In addition to the above, the normalisation factor is also extrated:
-   a) R = nQCDBaseline / nQCDInverted
-   b) R = nFakeBaseline / nFakeInverted 
-where the later is not used in any way (HToTauNu legacy)
+1) The user defines the histogram that will be used to extract the transfer factor (f)
 These normalisation factor are saved under:
    <pseudo_mcrab_directory> QCDInvertedNormalizationFactors_Run2016_80to1000.py
 in an automatically-generated python class. 
@@ -33,9 +39,8 @@ in an automatically-generated python class.
 This file/class is later used (read) by the makeInvertedPseudoMulticrab.py in order to normalise
 properly the "Control-Region" data.
 
-
 Usage:
-./plotQCD_Fit.py -m <pseudo_mcrab_directory> [opts]
+./test.py -m <pseudo_mcrab_directory> [opts]
 
 Last Used:
 /test.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDT0p70_AllSelections_BDT0p70to0p90_RandomSort_171124_144802/ --url --useMC -e "QCD_HT50to100|QCD_HT100to200|QCD_HT200to300|QCD_HT300to500"
@@ -267,25 +272,32 @@ def main(opts):
             
         # Get the PSets:
         thePSets = datasetsMgr.getDataset("TT").getParameterSet()
-        if 1:
+        if 0:
             Print("Printing the PSet:\n" + thePSets, True)
-            sys.exit()
+
+        # ZJets and DYJets overlap!
+        if "ZJetsToQQ_HT600toInf" in datasetsMgr.getAllDatasetNames() and "DYJetsToQQ_HT180" in datasetsMgr.getAllDatasetNames():
+            Print("Cannot use both ZJetsToQQ and DYJetsToQQ due to duplicate events? Investigate. Removing ZJetsToQQ datasets for now ..", True)
+            datasetsMgr.remove(filter(lambda name: "ZJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
 
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
 
-        # Get Luminosity
+        # Get luminosity if a value is not specified
         if opts.intLumi < 0:
             opts.intLumi = datasetsMgr.getDataset("Data").getLuminosity()
         
         # Remove datasets
-        removeList = ["QCD-b", "Charged"] #"QCD"
+        removeList = ["QCD-b", "Charged"]
+        if not opts.useMC:
+            removeList.append("QCD")
         for i, d in enumerate(removeList, 0):
             msg = "Removing dataset %s" % d
             Verbose(ShellStyles.WarningLabel() + msg + ShellStyles.NormalStyle(), i==0)
             datasetsMgr.remove(filter(lambda name: d in name, datasetsMgr.getAllDatasetNames()))
-        if 0:
-            datasetsMgr.PrintInfo()
+
+        # Print summary of datasets to be used
+        datasetsMgr.PrintInfo()
         
         # Re-order datasets (different for inverted than default=baseline)
         if 0:
@@ -342,11 +354,13 @@ def PlotHistogramsAndCalculateTF(datasetsMgr, histoName, inclusiveFolder, opts):
 
     # Get the desired histograms
     rData_Baseline        = pInclusive_Baseline.histoMgr.getHisto("Data").getRootHisto().Clone("Data-Baseline")
-    rQCD_Baseline         = pInclusive_Baseline.histoMgr.getHisto("QCD").getRootHisto().Clone("QCD-Baseline")
+    if opts.useMC:
+        rQCD_Baseline         = pInclusive_Baseline.histoMgr.getHisto("QCD").getRootHisto().Clone("QCD-Baseline")
     rEWKGenuineB_Baseline = pGenuineB_Baseline.histoMgr.getHisto("EWK").getRootHisto().Clone("EWKGenuineB-Baseline")
     rEWKFakeB_Baseline    = pFakeB_Baseline.histoMgr.getHisto("EWK").getRootHisto().Clone("EWKFakeB-Baseline")
     rData_Inverted        = pInclusive_Inverted.histoMgr.getHisto("Data").getRootHisto().Clone("Data-Inverted")
-    rQCD_Inverted         = pInclusive_Inverted.histoMgr.getHisto("QCD").getRootHisto().Clone("QCD-Inverted")
+    if opts.useMC:
+        rQCD_Inverted         = pInclusive_Inverted.histoMgr.getHisto("QCD").getRootHisto().Clone("QCD-Inverted")
     rEWKGenuineB_Inverted = pGenuineB_Inverted.histoMgr.getHisto("EWK").getRootHisto().Clone("EWKGenuineB-Inverted")
     rEWKFakeB_Inverted    = pFakeB_Inverted.histoMgr.getHisto("EWK").getRootHisto().Clone("EWKFakeB-Inverted")
     
@@ -369,11 +383,13 @@ def PlotHistogramsAndCalculateTF(datasetsMgr, histoName, inclusiveFolder, opts):
     # Create list of root histograms (for easy manipulation)
     rList = []    
     rList.append(rData_Baseline)
-    rList.append(rQCD_Baseline)
+    if opts.useMC:
+        rList.append(rQCD_Baseline)
     rList.append(rEWKGenuineB_Baseline)
     rList.append(rEWKFakeB_Baseline)
     rList.append(rData_Inverted)
-    rList.append(rQCD_Inverted)
+    if opts.useMC:
+        rList.append(rQCD_Inverted)
     rList.append(rEWKGenuineB_Inverted)
     rList.append(rEWKFakeB_Inverted)
     rList.append(rFakeB_Baseline)

@@ -57,7 +57,7 @@ private:
   Count cBaselineBTaggingCounter;
   Count cBaselineBTaggingSFCounter;
   METSelection fBaselineMETSelection;
-  TopologySelection fBaselineTopologySelection;
+  // TopologySelection fBaselineTopologySelection;
   TopSelectionBDT fBaselineTopSelection;
   Count cBaselineSelected;
   Count cBaselineSelectedCR;
@@ -65,7 +65,7 @@ private:
   Count cInvertedBTaggingCounter;
   Count cInvertedBTaggingSFCounter;
   METSelection fInvertedMETSelection;
-  TopologySelection fInvertedTopologySelection;
+  // TopologySelection fInvertedTopologySelection;
   TopSelectionBDT fInvertedTopSelection;
   Count cInvertedSelected;
   Count cInvertedSelectedCR;
@@ -488,7 +488,7 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
     cBaselineBTaggingCounter(fEventCounter.addCounter("Baseline: passed b-jet selection")),
     cBaselineBTaggingSFCounter(fEventCounter.addCounter("Baseline: b tag SF")),
     fBaselineMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
-    fBaselineTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
+    // fBaselineTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
     fBaselineTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
     cBaselineSelected(fEventCounter.addCounter("Baseline: selected events")),
     cBaselineSelectedCR(fEventCounter.addCounter("Baseline: selected CR events")),
@@ -496,7 +496,7 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
     cInvertedBTaggingCounter(fEventCounter.addCounter("Inverted: passed b-jet selection")),
     cInvertedBTaggingSFCounter(fEventCounter.addCounter("Inverted: b tag SF")),
     fInvertedMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
-    fInvertedTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
+    // fInvertedTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
     fInvertedTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
     cInvertedSelected(fEventCounter.addCounter("Inverted: selected events")),
     cInvertedSelectedCR(fEventCounter.addCounter("Inverted: selected CR events"))
@@ -940,11 +940,11 @@ void FakeBMeasurement::book(TDirectory *dir) {
   fBJetSelection.bookHistograms(dir);
   // Baseline selection
   fBaselineMETSelection.bookHistograms(dir);
-  fBaselineTopologySelection.bookHistograms(dir);
+  // fBaselineTopologySelection.bookHistograms(dir);
   fBaselineTopSelection.bookHistograms(dir);
   // Inverted selection
   fInvertedMETSelection.bookHistograms(dir);
-  fInvertedTopologySelection.bookHistograms(dir);
+  // fInvertedTopologySelection.bookHistograms(dir);
   fInvertedTopSelection.bookHistograms(dir);
   
   // ====== Normalization histograms
@@ -2356,7 +2356,14 @@ bool FakeBMeasurement::areSameJets(const Jet& jet1, const Jet& jet2) {
 
 const std::vector<Jet> FakeBMeasurement::GetInvertedBJets(const JetSelection::Data& jetData, const BJetSelection::Data& bjetData)
 {
-  
+  /*
+    This function returns the inverted bjets. First, it gets the failed b-jets from the BJetSelection class.
+    These bjets are jets that pass the pt and eta cuts of the bjet requirements and only fail the b-discriminator cut.
+    Once these are obtained, they are shuffled according to the user settings (passed through cfg file) and then additional
+    cuts are applied (e.g. b-discriminator min and max) also according to the user settings (passed through cfg file).
+    Whatever jet objects survive the above selections are returned by this function as "failed" or "inverted" bjets.
+   */
+
   if (0) std::cout << "=== FakeBMeasurement::GetInvertedBJets()" << std::endl;
   
   // Apply requirement on selected b-jets (CSVv2-Medium)
@@ -2430,8 +2437,8 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   // 11) Topology
   //================================================================================================
-  if (0) std::cout << "=== Baseline: Topology selection" << std::endl;
-  const TopologySelection::Data topologyData = fBaselineTopologySelection.analyze(fEvent, jetData);
+  // if (0) std::cout << "=== Baseline: Topology selection" << std::endl;
+  // const TopologySelection::Data topologyData = fBaselineTopologySelection.analyze(fEvent, jetData);
 
   //================================================================================================
   // 12) Top selection
@@ -2574,7 +2581,7 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   // All Selections
   //================================================================================================
-  if (!topologyData.passedSelection()) return;
+  // if (!topologyData.passedSelection()) return;
   if (!topData.passedSelection()) 
     {
       // If top fails fill Control Region (CR) histograms and return
@@ -2864,8 +2871,8 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   // 11) Topology
   //================================================================================================
-  if (0) std::cout << "=== Inverted: Topology selection" << std::endl;
-  const TopologySelection::Data topologyData = fInvertedTopologySelection.analyze(fEvent, jetData);
+  // if (0) std::cout << "=== Inverted: Topology selection" << std::endl;
+  // const TopologySelection::Data topologyData = fInvertedTopologySelection.analyze(fEvent, jetData);
 
   //================================================================================================
   // 12) Top selection
@@ -2886,7 +2893,8 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   // Standard Selections
   //================================================================================================
   if (0) std::cout << "=== Inverted: Standard Selections" << std::endl;
-  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, isGenuineB);
+  // fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, isGenuineB);
+  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, TopologySelection::Data(), topData, isGenuineB);
 
   // Fill Triplets  (Inverted)
   hInverted_LdgTrijetMass_AfterStandardSelections->Fill(isGenuineB, topData.getLdgTrijet().M());
@@ -3057,7 +3065,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   // All Selections
   //================================================================================================
-  if (!topologyData.passedSelection()) return;
+  // if (!topologyData.passedSelection()) return;
   if (!topData.passedSelection()) 
     {
       // If top fails fill Control Region (CR) histograms and return
