@@ -219,7 +219,7 @@ def GetHistoKwargs(h, opts):
     zLabel      = "z-axis"
     if opts.normalizeToLumi:
         zLabel  = "Events"
-        #zMin    = 1e-1
+        zMin    = 1e0
     elif opts.normalizeByCrossSection:
         zLabel  = "#sigma (pb)"
         #zMin    = 0 #1e-3
@@ -253,8 +253,8 @@ def GetHistoKwargs(h, opts):
         kwargs["ylabel"]  = "p_{T}^{jj} " + units
         kwargs["cutBox"]  = cutBox
         kwargs["cutBoxY"] = cutBoxY
-        kwargs["rebinX"]  = 1
-        kwargs["rebinY"]  = 1
+        kwargs["rebinX"]  = 2
+        kwargs["rebinY"]  = 2
         kwargs["opts"]    = {"xmin": 0.0, "xmax": +800.0, "ymin": yMin, "ymax": yMax} #, "ymaxfactor": yMaxF}
         #if  "AfterStandardSelections" in h:
         #if  "AfterAllSelections" in h:
@@ -267,8 +267,8 @@ def GetHistoKwargs(h, opts):
         kwargs["ylabel"]  = "p_{T}^{jj} " + units
         kwargs["cutBox"]  = cutBox
         kwargs["cutBoxY"] = cutBoxY
-        kwargs["rebinX"]  = 1
-        kwargs["rebinY"]  = 1
+        kwargs["rebinX"]  = 2
+        kwargs["rebinY"]  = 2
         kwargs["opts"]    = {"xmin": 0.0, "xmax": +800.0, "ymin": yMin, "ymax": yMax} #, "ymaxfactor": yMaxF}
         # if  "AfterStandardSelections" in h:
         # if  "AfterAllSelections" in h:

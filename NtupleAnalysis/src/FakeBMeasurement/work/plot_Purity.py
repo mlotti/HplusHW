@@ -58,6 +58,12 @@ def Print(msg, printHeader=False):
     return
 
 
+def rchop(myString, endString):
+  if myString.endswith(endString):
+    return myString[:-len(endString)]
+  return myString
+
+
 def Verbose(msg, printHeader=True, verbose=False):
     if not opts.verbose:
         return
@@ -256,7 +262,7 @@ def PlotHistoGraph(histoGraph, _kwargs):
     # Save the plots
     histoName = histoName.replace("ForFakeBMeasurement/", "")
     histoName = GetSaveName(histoName) #introduced for ABCD method
-    SavePlot(p, histoName, os.path.join(opts.saveDir, "Purity", opts.optMode), saveFormats = [".png", ".pdf"] )
+    SavePlot(p, histoName, os.path.join(opts.saveDir, "Purity", opts.optMode), saveFormats = [".png"])#, ".pdf"] )
     return
 
 
@@ -346,7 +352,7 @@ def PlotHistoGraphs(hGraphList, _kwargs):
     plots.drawPlot(p, histoName, **_kwargs)
 
     # Save the plot
-    SavePlot(p, histoName, os.path.join(opts.saveDir, "Purity", opts.optMode), saveFormats = [".png", ".pdf"] )
+    SavePlot(p, histoName, os.path.join(opts.saveDir, "Purity", opts.optMode), saveFormats = [".png"])#, ".pdf"] )
     return
 
 def GetHistoKwargs(histoName, opts):
@@ -730,7 +736,7 @@ if __name__ == "__main__":
     URL          = False
     NOERROR      = True
     DOEWK        = False
-    SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"
+    SAVEDIR      = "/publicweb/a/aattikis/" #FakeBMeasurement/
     VERBOSE      = False
     DOQCD        = False
     FOLDER       = "ForFakeBMeasurement" #"ForDataDrivenCtrlPlots"
@@ -797,7 +803,12 @@ if __name__ == "__main__":
         Print("Not enough arguments passed to script execution. Printing docstring & EXIT.")
         parser.print_help()
         #print __doc__
-        sys.exit(1)        
+        sys.exit(1)
+    else:
+        mcrabDir = rchop(opts.mcrab, "/")
+        if len(mcrabDir.split("/")) > 1:
+            mcrabDir = mcrabDir.split("/")[-1]
+        opts.saveDir += mcrabDir + "/" + opts.folder
         
     # Sanity check
     allowedFolders = ["ForDataDrivenCtrlPlots", "ForFakeBMeasurement"]
