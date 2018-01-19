@@ -1008,7 +1008,7 @@ void TopReco::process(Long64_t entry) {
       genParticle BQuark      = GenTops_BQuark.at(i);
       Jet mcMatched_BJet;
       double dRmin  = 99999.9;
-      double dPtOverPtmin = 99999.9;
+      // double dPtOverPtmin = 99999.9;
       for (auto& bjet: jetData.getSelectedJets()){
 	double dR  = ROOT::Math::VectorUtil::DeltaR( bjet.p4(), BQuark.p4());
 	double dPtOverPt = std::abs((bjet.pt() - BQuark.pt())/BQuark.pt());
@@ -1017,7 +1017,7 @@ void TopReco::process(Long64_t entry) {
 	//if (dPtOverPt > dPtOverPtmin) continue;
 	if (dPtOverPt > twoSigma) continue;
 	dRmin  = dR;
-	dPtOverPtmin = dPtOverPt;
+	// dPtOverPtmin = dPtOverPt;
 	mcMatched_BJet = bjet;
       }
       dRminB.push_back(dRmin);
@@ -1459,7 +1459,8 @@ void TopReco::process(Long64_t entry) {
     vector<Jet> CJets;
 
     for (size_t i=0; i<GenCharm.size(); i++){
-      double dRmin = 10000., dPtOverPtmin = 10000.;
+      double dRmin = 10000.0;
+      // double dPtOverPtmin = 10000.0;
       Jet mcMatched_CJet;
       for (auto& jet: jetData.getSelectedJets()){
 	double dR  = ROOT::Math::VectorUtil::DeltaR( jet.p4(), GenCharm.at(i).p4());
@@ -1469,7 +1470,7 @@ void TopReco::process(Long64_t entry) {
 	//if (dPtOverPt > dPtOverPtmin) continue;
 	if (dPtOverPt > twoSigma) continue;
 	dRmin = dR;
-	dPtOverPtmin = dPtOverPt;
+	// dPtOverPtmin = dPtOverPt;
 	mcMatched_CJet = jet;
       }
       if (dRmin < dRcut){
