@@ -1401,7 +1401,7 @@ def GetMergeCommand(mergeName, inputFiles, opts):
     #return " ".join(cmd)
 
 
-@timeout(1) # 5 seconds timeout for this function
+#@timeout(1) # 5 seconds timeout for this function
 def MergeFiles(mergeName, inputFiles, opts):
     '''
     Merges ROOT files, either stored locally or on EOS.
@@ -1439,7 +1439,7 @@ def MergeFiles(mergeName, inputFiles, opts):
         else:
             ret = hadd(opts, mergeName, inputFiles)    
             Verbose("Done %s (%s GB)." % (mergeName, GetFileSize(mergeName, opts) ), False )
-
+            os.system("chmod u+r,g+r,o+r %s"%mergeName)
     return ret
 
 def PrintSummary(taskReports):
@@ -2105,17 +2105,17 @@ def main(opts, args):
             time_start = time.time()
             ret = -1
             cmd = GetMergeCommand(mergeName, inputFiles, opts)
-            try:
-                ret = MergeFiles(mergeName, inputFiles, opts)
-            except TimeoutError, e:
-                dt_timeout = time.time() - time_start
-                print
-                msg  = "Timed-out (%.2f seconds) trying to create %s using %s files(s): %s to %s" % (dt_timeout, mergeFile, nInputs, firstFile, lastFile)
-                Print(msg, True)
-                Print("Command invoked was:\n" +  " ".join(cmd), False)
+#            try:
+            ret = MergeFiles(mergeName, inputFiles, opts)
+#            except TimeoutError, e:
+#                dt_timeout = time.time() - time_start
+#                print
+#                msg  = "Timed-out (%.2f seconds) trying to create %s using %s files(s): %s to %s" % (dt_timeout, mergeFile, nInputs, firstFile, lastFile)
+#                Print(msg, True)
+#                Print("Command invoked was:\n" +  " ".join(cmd), False)
                 #for c in cmd:
                 #   print c
-                sys.exit()
+#                sys.exit()
 
             time_end = time.time()
             dtMerge = time_end-time_start
