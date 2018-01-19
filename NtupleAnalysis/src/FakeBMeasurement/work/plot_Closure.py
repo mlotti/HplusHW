@@ -50,6 +50,13 @@ def Print(msg, printHeader=False):
         print "\t", msg
     return
 
+
+def rchop(myString, endString):
+  if myString.endswith(endString):
+    return myString[:-len(endString)]
+  return myString
+
+
 def Verbose(msg, printHeader=True, verbose=False):
     if not opts.verbose:
         return
@@ -550,7 +557,7 @@ if __name__ == "__main__":
     MERGEEWK     = True
     URL          = False
     NOERROR      = True
-    SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"
+    SAVEDIR      = "/publicweb/a/aattikis/" #FakeBMeasurement/"
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
     NORMALISE    = False
@@ -624,6 +631,12 @@ if __name__ == "__main__":
         parser.print_help()
         #print __doc__
         sys.exit(1)
+    else:
+        mcrabDir = rchop(opts.mcrab, "/")
+        if len(mcrabDir.split("/")) > 1:
+            mcrabDir = mcrabDir.split("/")[-1]
+        opts.saveDir += mcrabDir + "/" + opts.folder
+
 
     # Sanity check
     if not opts.mergeEWK:

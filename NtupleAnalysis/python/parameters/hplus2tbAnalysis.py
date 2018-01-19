@@ -208,7 +208,7 @@ topSelectionBDT = PSet(
     NjetsMax               = 999,     # [default: 999]
     NBjetsMax              = 999,     # [default: 999]
     # Speed-up calculation by skipping top candidates failing some criteria
-    CSV_bDiscCutValue      = 0.5426,  # [default: 0.8484] #Do not evaluate top candidate if b-jet assigned as b from top fails this cut
+    CSV_bDiscCutValue      = 0.8484,  # [default: 0.8484] #Do not evaluate top candidate if b-jet assigned as b from top fails this cut
     CSV_bDiscCutDirection  = ">=",    # [default: ">="]
     MassCutValue           = 600.0,   # [default: 400.0]
     MassCutDirection       = "<=",    # [default: "<"]
