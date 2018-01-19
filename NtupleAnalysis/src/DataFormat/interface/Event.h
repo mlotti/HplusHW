@@ -22,7 +22,6 @@
 #include "DataFormat/interface/GenWeight.h"
 #include "DataFormat/interface/GenParticle.h"
 #include "DataFormat/interface/PFCands.h"
-// Marina
 #include "DataFormat/interface/AK8Jet.h"
 #include "DataFormat/interface/AK8JetsSoftDrop.h"
 
@@ -83,7 +82,6 @@ public:
   const MuonCollection& muons() const { return fMuonCollection; }
   const GenParticleCollection& genparticles() const { return fGenParticleCollection; }
   const PFCandsCollection& pfCandidates() const { return fPFCandidates; }
-  // Marina
   const AK8JetCollection& ak8jets() const { return fAK8JetCollection; }
   const AK8JetsSoftDropCollection& ak8jetsSoftDrop() const { return fAK8JetsSoftDropCollection; }
 
@@ -121,7 +119,6 @@ private:
   MuonCollection fMuonCollection;
   GenParticleCollection fGenParticleCollection;
   PFCandsCollection fPFCandidates;
-  // Marina
   AK8JetCollection fAK8JetCollection;
   AK8JetsSoftDropCollection fAK8JetsSoftDropCollection;
 

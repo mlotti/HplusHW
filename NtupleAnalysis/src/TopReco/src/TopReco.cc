@@ -34,8 +34,8 @@ struct TrijetSelections{
   std::vector<Jet> Jet2;
   std::vector<Jet> BJet;
   std::vector <double> MVA;
-  std::vector<math::XYZTLorentzVector> TrijetP4; //temporary                                                                                                                                                                                                       
-  std::vector<math::XYZTLorentzVector> DijetP4;  //temporary                                                                                                                                                                                                       
+  std::vector<math::XYZTLorentzVector> TrijetP4; //temporary
+  std::vector<math::XYZTLorentzVector> DijetP4;  //temporary
 };
 
 
@@ -64,8 +64,6 @@ public:
   /// Called for each event
   virtual void process(Long64_t entry) override;
 
-
-  //Soti-Marina
   const genParticle GetLastCopy(const vector<genParticle> genParticles, const genParticle &p);
   vector<genParticle> GetGenParticles(const vector<genParticle> genParticles, const int pdgId);
 

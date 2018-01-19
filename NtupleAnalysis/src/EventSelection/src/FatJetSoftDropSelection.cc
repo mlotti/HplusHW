@@ -86,13 +86,11 @@ FatJetSoftDropSelection::~FatJetSoftDropSelection() {
   
   delete hFatJetSoftDropPtAll;
   delete hFatJetSoftDropEtaAll;
-  // Marina
   delete hFatJetSoftDropSubjetsAll;
   delete hFatJetSoftDropHasBSubjetAll;
   
   delete hFatJetSoftDropPtPassed;
   delete hFatJetSoftDropEtaPassed;
-  // Marina
   delete hFatJetSoftDropSubjetsPassed;
   delete hFatJetSoftDropHasBSubjetPassed;
   
@@ -206,8 +204,8 @@ FatJetSoftDropSelection::Data FatJetSoftDropSelection::analyze(const Event& even
   ensureAnalyzeAllowed(event.eventID());
   FatJetSoftDropSelection::Data data = privateAnalyze(event, tau.p4(), tau.pt());
   // Send data to CommonPlots
-  if (fCommonPlots != nullptr)
-    //fCommonPlots->fillControlPlotsAtFatJetSelection(event, data);
+  // if (fCommonPlots != nullptr)
+  // fCommonPlots->fillControlPlotsAtFatJetSelection(event, data);
   // Return data
   return data;
 }
@@ -217,8 +215,8 @@ FatJetSoftDropSelection::Data FatJetSoftDropSelection::analyzeWithoutTau(const E
   math::LorentzVectorT<double> tauP(0.,0.,9999.,0.);
   FatJetSoftDropSelection::Data data = privateAnalyze(event, tauP, -1.);
   // Send data to CommonPlots
-  if (fCommonPlots != nullptr)
-    //fCommonPlots->fillControlPlotsAtFatJetSelection(event, data);
+  // if (fCommonPlots != nullptr)
+  // fCommonPlots->fillControlPlotsAtFatJetSelection(event, data);
   // Return data
   return data;
 }

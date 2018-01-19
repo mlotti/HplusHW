@@ -127,7 +127,6 @@ void Event::setupBranches(BranchManager& mgr) {
   fL1MET.setupBranches(mgr);
   fL1extraMET.setupBranches(mgr);
   fPFCandidates.setupBranches(mgr);
-  // Marina
   fAK8JetCollection.setupBranches(mgr);
   fAK8JetsSoftDropCollection.setupBranches(mgr);
 }

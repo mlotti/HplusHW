@@ -262,8 +262,8 @@ FatJetSelection::Data FatJetSelection::analyze(const Event& event, const Tau& ta
   ensureAnalyzeAllowed(event.eventID());
   FatJetSelection::Data data = privateAnalyze(event, tau.p4(), tau.pt());
   // Send data to CommonPlots
-  if (fCommonPlots != nullptr)
-    //fCommonPlots->fillControlPlotsAtFatJetSelection(event, data);
+  // if (fCommonPlots != nullptr)
+  // fCommonPlots->fillControlPlotsAtFatJetSelection(event, data);
   // Return data
   return data;
 }
@@ -273,8 +273,8 @@ FatJetSelection::Data FatJetSelection::analyzeWithoutTau(const Event& event) {
   math::LorentzVectorT<double> tauP(0.,0.,9999.,0.);
   FatJetSelection::Data data = privateAnalyze(event, tauP, -1.);
   // Send data to CommonPlots
-  if (fCommonPlots != nullptr)
-    //fCommonPlots->fillControlPlotsAtFatJetSelection(event, data);
+  // if (fCommonPlots != nullptr)
+  // fCommonPlots->fillControlPlotsAtFatJetSelection(event, data);
   // Return data
   return data;
 }

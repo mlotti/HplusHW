@@ -45,7 +45,6 @@ private:
   TopSelectionBDT fTopSelection;
   Count cSelected;
   
-  // Marina
   FatJetSelection fFatJetSelection;
   FatJetSoftDropSelection fFatJetSoftDropSelection;
   
@@ -137,8 +136,7 @@ TestFatJets::TestFatJets(const ParameterSet& config, const TH1* skimCounters)
     fMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     //fTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    cSelected(fEventCounter.addCounter("Selected Events")),  // Marina ","
-    // Marina
+    cSelected(fEventCounter.addCounter("Selected Events")),
     fFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fFatJetSoftDropSelection(config.getParameter<ParameterSet>("FatJetSoftDropSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "")
 { }
@@ -160,7 +158,6 @@ void TestFatJets::book(TDirectory *dir) {
   fMETSelection.bookHistograms(dir);
   //fTopologySelection.bookHistograms(dir);
   fTopSelection.bookHistograms(dir);
-  // Marina
   fFatJetSelection.bookHistograms(dir);
   fFatJetSoftDropSelection.bookHistograms(dir);
   
@@ -396,23 +393,23 @@ void TestFatJets::process(Long64_t entry) {
       int pdgId  = jet.pdgId();
       
       // ID
-      bool jetID   = jet.jetIDDiscriminator();
+      // bool jetID   = jet.jetIDDiscriminator();
       bool IDloose = jet.IDloose();
-      bool IDtight = jet.IDtight();
-      bool IDtightLeptonVeto = jet.IDtightLeptonVeto();
+      // bool IDtight = jet.IDtight();
+      // bool IDtightLeptonVeto = jet.IDtightLeptonVeto();
 
       // PU ID
-      bool jetPUID    = jet.jetPUIDDiscriminator();
-      bool PUIDloose  = jet.PUIDloose();
-      bool PUIDmedium = jet.PUIDmedium();
-      bool PUIDtight  = jet.PUIDtight();
+      // bool jetPUID    = jet.jetPUIDDiscriminator();
+      // bool PUIDloose  = jet.PUIDloose();
+      // bool PUIDmedium = jet.PUIDmedium();
+      // bool PUIDtight  = jet.PUIDtight();
       
       // originates From 
-      bool originatesFromChargedHiggs = jet.originatesFromChargedHiggs();
-      bool originatesFromTop          = jet.originatesFromTop();
-      bool originatesFromUnknown      = jet.originatesFromUnknown();
-      bool originatesFromW            = jet.originatesFromW();
-      bool originatesFromZ            = jet.originatesFromZ();
+      // bool originatesFromChargedHiggs = jet.originatesFromChargedHiggs();
+      // bool originatesFromTop          = jet.originatesFromTop();
+      // bool originatesFromUnknown      = jet.originatesFromUnknown();
+      // bool originatesFromW            = jet.originatesFromW();
+      // bool originatesFromZ            = jet.originatesFromZ();
 
       // Njettiness
       double NjettinessAK8CHStau1 = jet.NjettinessAK8CHStau1();
@@ -467,7 +464,6 @@ void TestFatJets::process(Long64_t entry) {
       // --------------------------------------------------------------------------------
     }
   
-  // Marina
   h_FatJets_N -> Fill(nFatJets);
     
   int iJet = 0;
@@ -522,29 +518,29 @@ void TestFatJets::process(Long64_t entry) {
       
       double pt  = jet.pt();
       double eta = jet.eta();
-      double phi = jet.phi();
-      double e   = jet.e();
-      int pdgId  = jet.pdgId();
+      // double phi = jet.phi();
+      // double e   = jet.e();
+      // int pdgId  = jet.pdgId();
       
       // PU ID
-      bool jetPUID    = jet.jetPUIDDiscriminator();
+      // bool jetPUID    = jet.jetPUIDDiscriminator();
       //bool PUIDloose  = jet.PUIDloose();
       //bool PUIDmedium = jet.PUIDmedium();
       //bool PUIDtight  = jet.PUIDtight();
       
       // originates From 
-      bool originatesFromChargedHiggs = jet.originatesFromChargedHiggs();
-      bool originatesFromTop          = jet.originatesFromTop();
-      bool originatesFromUnknown      = jet.originatesFromUnknown();
-      bool originatesFromW            = jet.originatesFromW();
-      bool originatesFromZ            = jet.originatesFromZ();
+      // bool originatesFromChargedHiggs = jet.originatesFromChargedHiggs();
+      // bool originatesFromTop          = jet.originatesFromTop();
+      // bool originatesFromUnknown      = jet.originatesFromUnknown();
+      // bool originatesFromW            = jet.originatesFromW();
+      // bool originatesFromZ            = jet.originatesFromZ();
       
       // Discriminators
-      float pfCombinedInclusiveSecondaryVertexV2BJetTags = jet.pfCombinedInclusiveSecondaryVertexV2BJetTags();
+      // float pfCombinedInclusiveSecondaryVertexV2BJetTags = jet.pfCombinedInclusiveSecondaryVertexV2BJetTags();
       
       // Flavours
-      int hadronFlavour = jet.hadronFlavour();
-      int partonFlavour = jet.partonFlavour();
+      // int hadronFlavour = jet.hadronFlavour();
+      // int partonFlavour = jet.partonFlavour();
       
       int nSubJets      = jet.nSubjets();
       bool hasBTagSubjet= jet.hasBTagSubjets();

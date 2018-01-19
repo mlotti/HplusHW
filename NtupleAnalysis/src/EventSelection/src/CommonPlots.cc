@@ -886,9 +886,8 @@ void CommonPlots::initialize() {
   // fTopData = TopSelection::Data();
   fTopData = TopSelectionBDT::Data();
   fBackToBackAngularCutsData = AngularCutsCollinear::Data();
-  // Marina
-  fFatJetData = FatJetSelection::Data();
-  fFatJetSoftDropData = FatJetSoftDropSelection::Data();
+  // fFatJetData = FatJetSelection::Data();
+  // fFatJetSoftDropData = FatJetSoftDropSelection::Data();
   fHistoSplitter.initialize();
   
   for (auto& p: fBaseObjects) p->reset();
