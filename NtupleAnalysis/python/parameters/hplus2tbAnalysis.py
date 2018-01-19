@@ -69,10 +69,11 @@ eVeto = PSet(
 # Muon veto
 #================================================================================================
 muVeto = PSet(
-    muonPtCut         = 10.0,
-    muonEtaCut        = 2.5,
-    muonID            = "muIDLoose", # loosest option for vetoing (options: muIDLoose, muIDMedium, muIDTight)
-    muonIsolation     = "veto",      # loosest possible for vetoing ("veto"), "tight" for selecting
+    muonPtCut         = 10.0, # [default: 10.0]
+    muonEtaCut        = 2.4,  # [default: 2.5]
+    muonID            = "muIDLoose", # [default: "muIDLoose"] loosest option for vetoing (options: muIDLoose, muIDMedium, muIDTight)
+    muonIsolation     = "veto",      # [default: "veto"]      loosest possible for vetoing ("veto"), "tight" for selecting
+    muonIsolType      = "mini",      # [default: "default"]
 )
 
 #================================================================================================
