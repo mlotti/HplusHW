@@ -202,12 +202,13 @@ ElectronSelection::Data ElectronSelection::privateAnalyze(const Event& event) {
       }
 
     // Apply cut on electron isolation
-    bool passedRelIso  = (electron.effAreaIsoDeltaBeta() > fRelIsoCut);
-    bool passedMiniIso = (electron.effAreaMiniIso() > fRelIsoCut);
+    bool passedRelIso  = (electron.effAreaIsoDeltaBeta() < fRelIsoCut);
+    bool passedMiniIso = (electron.effAreaMiniIso() < fMiniIsoCut);
     bool passedIsolCut = false;
     if (fMiniIsol) passedIsolCut =  passedMiniIso;
     else passedIsolCut =  passedRelIso;
-    if (passedIsolCut) continue;
+    if (!passedIsolCut) continue;
+    passedIsol = true;
 
     // Fill histograms after isolation cut
     hIsolPtAfter->Fill(electron.pt());
