@@ -86,10 +86,37 @@ FatJetSelection::~FatJetSelection() {
   
   delete hFatJetPtAll;
   delete hFatJetEtaAll;
+  delete hFatJetPhiAll;
+  delete hFatJetCSVAll;
+  delete hFatJettau1All;
+  delete hFatJettau2All;
+  delete hFatJettau3All;
+  delete hFatJettau4All;
+  delete hFatJettau21All;
+  delete hFatJettau32All;
+  
   delete hFatJetPtPassed;
   delete hFatJetEtaPassed;
+  delete hFatJetPhiPassed;
+  delete hFatJetCSVPassed;
+  delete hFatJettau1Passed;
+  delete hFatJettau2Passed;
+  delete hFatJettau3Passed;
+  delete hFatJettau4Passed;
+  delete hFatJettau21Passed;
+  delete hFatJettau32Passed;
+
   for (auto p: hSelectedFatJetPt) delete p;
   for (auto p: hSelectedFatJetEta) delete p;  
+  for (auto p: hSelectedFatJetPhi) delete p;
+  for (auto p: hSelectedFatJetCSV) delete p;
+  for (auto p: hSelectedFatJettau1) delete p;
+  for (auto p: hSelectedFatJettau2) delete p;
+  for (auto p: hSelectedFatJettau3) delete p;
+  for (auto p: hSelectedFatJettau4) delete p;
+  for (auto p: hSelectedFatJettau21) delete p;
+  for (auto p: hSelectedFatJettau32) delete p;
+  
   delete hFatJetMatchingToTauDeltaR;
   delete hFatJetMatchingToTauPtRatio;
   delete hHTAll;
@@ -103,7 +130,14 @@ FatJetSelection::~FatJetSelection() {
   }
 
 void FatJetSelection::initialize(const ParameterSet& config) {
+  
+  // These should be taken from fCommonPlots
+  //int nCSVBins;
+  //floatfCSVMin, fCSVMax;
 
+  //int ntauBins;
+  //floatftauMin, ftauMax;
+  
   if(fCommonPlots){
     nPtBins    = 2 * fCommonPlots->getPtBinSettings().bins();
     fPtMin     = 2 * fCommonPlots->getPtBinSettings().min();
@@ -139,9 +173,32 @@ void FatJetSelection::bookHistograms(TDirectory* dir) {
   
   hFatJetPtAll     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "fatjetPtAll", "Fat Jet pT, all;p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
   hFatJetEtaAll    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "fatjetEtaAll", "Fat Jet #eta, all;#eta", nEtaBins, fEtaMin, fEtaMax);
+  /* NEW
+  delete hFatJetPhiAll;
+  delete hFatJetCSVAll;
+  delete hFatJettau1All;
+  delete hFatJettau2All;
+  delete hFatJettau3All;
+  delete hFatJettau4All;
+  delete hFatJettau21All;
+  delete hFatJettau32All;
+  */
+  
   hFatJetPtPassed  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "fatjetPtPassed", "Fat Jet pT, passed;p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
   hFatJetEtaPassed = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "fatjetEtaPassed", "Fat Jet Eta, passed", nEtaBins, fEtaMin, fEtaMax);
-
+  /* NEW
+  delete hFatJetPtPassed;
+  delete hFatJetEtaPassed;
+  delete hFatJetPhiPassed;
+  delete hFatJetCSVPassed;
+  delete hFatJettau1Passed;
+  delete hFatJettau2Passed;
+  delete hFatJettau3Passed;
+  delete hFatJettau4Passed;
+  delete hFatJettau21Passed;
+  delete hFatJettau32Passed;
+  */
+  
   hSelectedFatJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedFatJetsFirstJetPt"  , "First fat jet pT;p_{T} (GeV/c)"  , nPtBins, fPtMin, fPtMax) );
   hSelectedFatJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedFatJetsSecondJetPt" , "Second fat jet pT;p_{T} (GeV/c)" , nPtBins, fPtMin, fPtMax) );
   hSelectedFatJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedFatJetsThirdJetPt"  , "Third fat jet pT;p_{T} (GeV/c)"  , nPtBins, fPtMin, fPtMax) );
@@ -156,6 +213,18 @@ void FatJetSelection::bookHistograms(TDirectory* dir) {
   hSelectedFatJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedFatJetsFifthJetEta"  , "Fifth fat jet #eta;#eta"  , nEtaBins, fEtaMin, fEtaMax) );
   hSelectedFatJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedFatJetsSixthJetEta"  , "Sixth fat jet #eta;#eta"  , nEtaBins, fEtaMin, fEtaMax) );
   hSelectedFatJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedFatJetsSeventhJetEta", "Seventh fat jet #eta;#eta", nEtaBins, fEtaMin, fEtaMax) );
+  /* NEW
+  for (auto p: hSelectedFatJetPt) delete p;
+  for (auto p: hSelectedFatJetEta) delete p;  
+  for (auto p: hSelectedFatJetPhi) delete p;
+  for (auto p: hSelectedFatJetCSV) delete p;
+  for (auto p: hSelectedFatJettau1) delete p;
+  for (auto p: hSelectedFatJettau2) delete p;
+  for (auto p: hSelectedFatJettau3) delete p;
+  for (auto p: hSelectedFatJettau4) delete p;
+  for (auto p: hSelectedFatJettau21) delete p;
+  for (auto p: hSelectedFatJettau32) delete p;
+  */
   hFatJetMatchingToTauDeltaR  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FatJetMatchingToTauDeltaR" , "#DeltaR(fat jet, #tau)", 40, 0, 2);
   hFatJetMatchingToTauPtRatio = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FatJetMatchingToTauPtRatio", "fat jet pT / #tau pT", 40, 0, 2);
 

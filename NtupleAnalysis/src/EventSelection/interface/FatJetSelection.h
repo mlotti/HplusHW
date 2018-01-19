@@ -168,13 +168,39 @@ private:
   Count cSubPassedMHT;
 
   // Histograms (1D)
-  
   WrappedTH1 *hFatJetPtAll;
   WrappedTH1 *hFatJetEtaAll;
+  WrappedTH1 *hFatJetPhiAll;
+  WrappedTH1 *hFatJetCSVAll;
+  WrappedTH1 *hFatJettau1All;
+  WrappedTH1 *hFatJettau2All;
+  WrappedTH1 *hFatJettau3All;
+  WrappedTH1 *hFatJettau4All;
+  WrappedTH1 *hFatJettau21All;
+  WrappedTH1 *hFatJettau32All;  
+  
   WrappedTH1 *hFatJetPtPassed;
   WrappedTH1 *hFatJetEtaPassed;
+  WrappedTH1 *hFatJetPhiPassed;
+  WrappedTH1 *hFatJetCSVPassed;
+  WrappedTH1 *hFatJettau1Passed;
+  WrappedTH1 *hFatJettau2Passed;
+  WrappedTH1 *hFatJettau3Passed;
+  WrappedTH1 *hFatJettau4Passed;
+  WrappedTH1 *hFatJettau21Passed;
+  WrappedTH1 *hFatJettau32Passed;  
+  
   std::vector<WrappedTH1*> hSelectedFatJetPt;
   std::vector<WrappedTH1*> hSelectedFatJetEta;
+  std::vector<WrappedTH1*> hSelectedFatJetPhi;
+  std::vector<WrappedTH1*> hSelectedFatJetCSV;
+  std::vector<WrappedTH1*> hSelectedFatJettau1;
+  std::vector<WrappedTH1*> hSelectedFatJettau2;
+  std::vector<WrappedTH1*> hSelectedFatJettau3;
+  std::vector<WrappedTH1*> hSelectedFatJettau4;
+  std::vector<WrappedTH1*> hSelectedFatJettau21;
+  std::vector<WrappedTH1*> hSelectedFatJettau32;
+  
   WrappedTH1 *hFatJetMatchingToTauDeltaR;
   WrappedTH1 *hFatJetMatchingToTauPtRatio;
   WrappedTH1 *hHTAll;
@@ -184,6 +210,8 @@ private:
   WrappedTH1 *hJTPassed;
   WrappedTH1 *hMHTPassed;
   
+  // Histograms (2D)
+  // NEW
   
   // Binnings
   int nPtBins;
@@ -194,6 +222,13 @@ private:
   
   int  nHtBins;
   float fHtMin,fHtMax;
+
+  // NEW 
+  int nCSVBins;
+  float fCSVMin, fCSVMax;
+  
+  int ntauBins;
+  float ftauMin, ftauMax;
 };
 
 #endif
