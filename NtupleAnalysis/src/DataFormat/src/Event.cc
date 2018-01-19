@@ -117,7 +117,7 @@ void Event::setupBranches(BranchManager& mgr) {
   fGenJetCollection.setupBranches(mgr);
   fMuonCollection.setupBranches(mgr);
   fElectronCollection.setupBranches(mgr);
-  fGenParticleCollection.setupBranches(mgr);
+  fGenParticleCollection.setupBranches(mgr);  
   fGenMET.setupBranches(mgr);
   fGenWeight.setupBranches(mgr);
   fTopPtWeight.setupBranches(mgr);
@@ -127,4 +127,7 @@ void Event::setupBranches(BranchManager& mgr) {
   fL1MET.setupBranches(mgr);
   fL1extraMET.setupBranches(mgr);
   fPFCandidates.setupBranches(mgr);
+  // Marina
+  fAK8JetCollection.setupBranches(mgr);
+  fAK8JetsSoftDropCollection.setupBranches(mgr);
 }

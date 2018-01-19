@@ -886,6 +886,9 @@ void CommonPlots::initialize() {
   // fTopData = TopSelection::Data();
   fTopData = TopSelectionBDT::Data();
   fBackToBackAngularCutsData = AngularCutsCollinear::Data();
+  // Marina
+  fFatJetData = FatJetSelection::Data();
+  fFatJetSoftDropData = FatJetSoftDropSelection::Data();
   fHistoSplitter.initialize();
   
   for (auto& p: fBaseObjects) p->reset();
@@ -1035,7 +1038,7 @@ void CommonPlots::fillControlPlotsAfterStandardSelections(const Event& event,
 							  const METSelection::Data& METData,
 							  const TopologySelection::Data& topologyData,
 							  // const TopSelection::Data& topData, 
-							  const TopSelectionBDT::Data& topData, 
+							  const TopSelectionBDT::Data& topData,
 							  bool bIsGenuineB) {
   fJetData      = jetData;
   fBJetData     = bjetData;

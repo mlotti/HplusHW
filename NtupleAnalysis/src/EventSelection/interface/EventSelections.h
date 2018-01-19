@@ -14,3 +14,6 @@
 #include "EventSelection/interface/TopologySelection.h"
 #include "EventSelection/interface/TopSelection.h"
 #include "EventSelection/interface/TopSelectionBDT.h"
+// Marina
+#include "EventSelection/interface/FatJetSelection.h"
+#include "EventSelection/interface/FatJetSoftDropSelection.h"
