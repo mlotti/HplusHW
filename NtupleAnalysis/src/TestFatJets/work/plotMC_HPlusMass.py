@@ -104,7 +104,9 @@ def GetDatasetsFromDir(opts):
         raise Exception("This should never be reached")
     return datasets
     
-
+# ===========================================
+#             Main Function
+# ===========================================
 def main(opts, signalMass):
 
     optModes = ["OptChiSqrCutValue100"]                                                                                                                             
@@ -116,6 +118,7 @@ def main(opts, signalMass):
     for opt in optModes:
         opts.optMode = opt
 
+        
         # Setup & configure the dataset manager 
         datasetsMgr = GetDatasetsFromDir(opts)
         datasetsMgr.updateNAllEventsToPUWeighted()
@@ -129,23 +132,24 @@ def main(opts, signalMass):
             if "ChargedHiggs" in d.getName():
                 datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
                        
+        
         # Determine integrated Lumi before removing data
-#        intLumi = datasetsMgr.getDataset("Data").getLuminosity()
-        intLumi = 35200
+        #        intLumi = datasetsMgr.getDataset("Data").getLuminosity()
+        intLumi = 35800
 
         # Remove datasets
         if 1:
-            datasetsMgr.remove(filter(lambda name: "Data" in name, datasetsMgr.getAllDatasetNames()))
-            #datasetsMgr.remove(filter(lambda name: "QCD_b" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "QCD_HT" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "SingleTop" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "DYJetsToQQHT" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "Data" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr.remove(filter(lambda name: "QCD_b" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "QCD_HT" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "SingleTop" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "DYJetsToQQHT" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "TTZToQQ" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "TTWJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "WJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "Diboson" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "WJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "Diboson" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "TTTT" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "FakeBMeasurementTrijetMass" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "FakeBMeasurementTrijetMass" in name, datasetsMgr.getAllDatasetNames()))
             #datasetsMgr.remove(filter(lambda name: "M_" in name and "M_" + str(opts.signalMass) not in name, datasetsMgr.getAllDatasetNames()))
         
         if opts.noQCD:
@@ -167,8 +171,7 @@ def main(opts, signalMass):
                 if d not in signalMass:
                     continue
             datasetOrder.append(d.getName())
-            #newOrder = ["TT", "QCD"]
-            #newOrder = ["TT", "QCD"]
+            
         for m in signalMass:
             #newOrder.insert(0, m)
             datasetOrder.insert(0, m)
@@ -184,25 +187,14 @@ def main(opts, signalMass):
         style.setGridX(True)
         style.setGridY(False)
 
-        # Do the topSelection histos
-        folder      = opts.folder 
-        histoPaths1 = ["H2"]
-        if folder != "":
-            histoList  = datasetsMgr.getDataset(datasetOrder[0]).getDirectoryContent(folder)
-            # hList0     = [x for x in histoList if "TrijetMass" in x]
-            # hList1     = [x for x in histoList if "TetrajetMass" in x]
-            # hList2     = [x for x in histoList if "TetrajetBJetPt" in x]
-            # histoPaths1 = [os.path.join(folder, h) for h in hList0+hList1+hList2]
-            histoPaths1 = [os.path.join(folder, h) for h in histoList]
-        
+                
         folder     = ""
         histoList  = datasetsMgr.getDataset(datasetOrder[0]).getDirectoryContent(folder)
-        hList0     = [x for x in histoList if "TrijetMass" in x]
-        hList1     = [x for x in histoList if "TetrajetMass" in x]
-        hList2     = [x for x in histoList if "TetrajetBjetPt" in x]
-        histoPaths2 = [os.path.join(folder, h) for h in hList0+hList1+hList2]
+        hList0     = [x for x in histoList if "FatJets" in x]
+        hList1     = [x for x in histoList if "LdgFatJet" in x]
+        hList2     = [x for x in histoList if "SubldgFatJet" in x]
+        histoPaths = [os.path.join(folder, h) for h in (hList0+hList1+hList2)]
 
-        histoPaths = histoPaths1 + histoPaths2
         for h in histoPaths:
             if "Vs" in h: # Skip TH2D
                 continue
@@ -235,7 +227,7 @@ def SavePlot(plot, saveName, saveDir, saveFormats = [".pdf"]):
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
         saveNameURL = savePath + ext
-        saveNameURL = saveNameURL.replace("/publicweb/s/skonstan/", "http://home.fnal.gov/~skonstan/")
+        saveNameURL = saveNameURL.replace("/publicweb/m/mkolosov/", "http://home.fnal.gov/~mkolosov/")
         if opts.url:
             Print(saveNameURL, i==0)
         else:
@@ -255,7 +247,8 @@ def PlotMC(datasetsMgr, histo, intLumi):
         p = plots.MCPlot(datasetsMgr, histo, normalizeToOne=True, saveFormats=[], **kwargs)
     else:
         p = plots.MCPlot(datasetsMgr, histo, normalizeToLumi=intLumi, saveFormats=[], **kwargs)
-#    p = plots.MCPlot(datasetsMgr, histo, normalizeToLumi=intLumi, saveFormats=[], **kwargs)
+
+
     # Draw the histograms
     _cutBox = None
     _rebinX = 1
@@ -263,6 +256,75 @@ def PlotMC(datasetsMgr, histo, intLumi):
     _xlabel = None
 
     _opts   = {"ymin": 1e-3, "ymaxfactor": 1.0}
+    
+    logY = True
+
+    if "_Pt" in histo: 
+        _opts["xmax"] = 1000
+        _rebinX = 1
+        logY = False
+        _xlabel = "p_{T} (GeV)"
+    
+
+    elif "Eta" in histo:
+        _xlabel = "#eta"
+        logY = False
+        _opts["xmin"] = -3.0
+        _opts["xmax"] = +3.0
+        _rebinX = 2
+        _format = "%0.2f"
+        
+    elif "_E" in histo: 
+        _opts["xmax"] = 2000
+        _rebinX = 1
+        logY = False
+        _xlabel = "E (GeV)"
+        
+    elif "Phi" in histo:
+        _rebinX = 2
+        _format = "%0.2f"
+        _xlabel = "#phi"
+        logY = False
+        _opts["xmin"] = -4.0
+        _opts["xmax"] = 4.0
+
+    elif "tau" in histo:
+        _rebinX = 2
+        _format = "%0.2f"
+        logY = False
+        if "21" in histo:
+            _xlabel = "#tau_{2}/#tau_{1}"
+        elif "32" in histo:
+            _xlabel = "#tau_{3}/#tau_{2}"
+        elif "1" in histo:
+            _xlabel = "#tau_{1}"
+        elif "2" in histo:
+            _xlabel = "#tau_{2}"
+        elif "3" in histo:
+            _xlabel = "#tau_{3}"
+        elif "4" in histo:
+            _xlabel = "#tau_{4}"
+        
+    elif "NSubjets" in histo:
+        _xlabel = "Subjets Multiplicity"
+        
+    
+    elif "HasB" in histo:
+        _xlabel = "Has B-Subjet"
+        logY = False
+        _opts["ymax"] = 1.0
+    elif "N" in histo:
+        _xlabel = "Multiplicity"
+        
+
+
+    elif "CSV" in histo:
+        _rebinX =2
+        logY = False
+        _xlabel = "CSV"
+        _units  = ""
+        _format = "%0.02f " + _units
+
 
     if "ChiSqr" in histo:
         _rebinX = 1
@@ -273,110 +335,14 @@ def PlotMC(datasetsMgr, histo, intLumi):
         _cutBox = {"cutValue": 10.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _opts["xmax"] = 100
 
-    elif "trijetmass" in histo.lower():
-        _rebinX = 2
-#        logY    = False
-        _units  = "GeV/c^{2}"
-        _format = "%0.0f " + _units
-        _xlabel = "m_{jjb} (%s)" % _units
-        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 505 #1005
-
-    elif "ht" in histo.lower():
-        _rebinX = 2
-#        logY    = False
-        _units  = "GeV"
-        _format = "%0.0f " + _units
-        _xlabel = "H_{T} (%s)" % _units
-        _cutBox = {"cutValue": 500, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 2000
-
-    elif "tetrajetmass" in histo.lower():
-        _rebinX = 5 #5 #10 #4
-        _units  = "GeV/c^{2}"
-        _format = "%0.0f " + _units
-        _xlabel = "m_{jjbb} (%s)" % (_units)
-        _format = "%0.0f " + _units
-        _opts["xmax"] = 1500 #3500.0
-
-    elif "dijetmass" in histo.lower():
-        _rebinX = 1 #5 #10 #4
-#        logY    = False
-        _units  = "GeV/c^{2}"
-        _format = "%0.0f " + _units
-        _xlabel = "m_{W} (%s)" % (_units)
-        _format = "%0.0f " + _units
-        _opts["xmax"] = 800 #3500.0
-        _cutBox = {"cutValue": 80.4, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 300
-
-    elif "tetrajetbjetpt" in histo.lower():
-        _rebinX = 2
-#        logY    = False
-        _units  = "GeV/c"
-        _format = "%0.0f " + _units
-        _xlabel = "p_{T}  (%s)" % (_units)
-        _format = "%0.0f " + _units
-        _opts["xmax"] = 800
-    elif "ldgtrijetpt" in histo.lower():
-        _rebinX = 2
-#        logY    = False
-        _units  = "GeV/c"
-        _format = "%0.0f " + _units
-        _xlabel = "p_{T}  (%s)" % (_units)
-        _format = "%0.0f " + _units
-        _opts["xmax"] = 800
-
-    elif "trijetbdt_mass" in histo.lower():
-        _rebinX = 2
-        _units  = "GeV/c^{2}"
-        _format = "%0.0f " + _units
-        _xlabel = "m_{jjb} (%s)" % _units
-        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 505 
-#    elif "topcandmass" in histo.lower():
-#        _rebinX = 2
-#        _units  = "GeV/c^{2}"
-#        _format = "%0.0f " + _units
-#        _xlabel = "m_{jjb} (%s)" % _units
-#        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-#        _opts["xmax"] = 505 
-
-    elif "matched_mass" in histo.lower():
-        _rebinX = 2
-        _units  = "GeV/c^{2}"
-        _format = "%0.0f " + _units
-        _xlabel = "m_{jjb} (%s)" % _units
-        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 505 
-
-    elif "bdtvalue" in histo.lower():
-        _format = "%0.1f"
-
-    elif "foxwolframmoment" in histo.lower():
-        _format = "%0.1f"
-        _cutBox = {"cutValue": 0.5, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-
-    elif "absdeltamvamax_mctruth_sameobjfakes" in histo.lower():
-        _format = "%0.1f"
-        _xlabel = "|#Delta BDTG| response"
-
-    elif "deltamvamin_mctruth_sameobjfakespassbdt" in histo.lower():
-        _opts["xmax"] = 1
-        _opts["xmin"] = -1
-    elif "bdtmultiplicity" in histo.lower():
-        _opts["xmax"] = 15
-
 
     else:
         pass
 
 
     if opts.normaliseToOne:
-        logY    = False
         Ylabel  = "Arbitrary Units / %s" % (_format)
     else:
-        logY    = True
         Ylabel  = "Events / %s" % (_format)
 
     if logY:
@@ -401,9 +367,12 @@ def PlotMC(datasetsMgr, histo, intLumi):
         p.histoMgr.setHistoDrawStyle("QCD", "HIST")
         p.histoMgr.setHistoLegendStyle("QCD", "F")
 
-    if "TT" in datasetsMgr.getAllDatasets():
-        p.histoMgr.setHistoDrawStyle("TT", "AP")
-        p.histoMgr.setHistoLegendStyle("TT", "LP")
+    for d in datasetsMgr.getAllDatasets():
+        if "TT" in d.getName():
+            p.histoMgr.forHisto("TT", styles.getTTFillStyle() )
+            #p.histoMgr.setHistoDrawStyle("TT", "AP")
+            p.histoMgr.setHistoLegendStyle("TT", "F")
+            
 
     # Customise style
     signalM = []
@@ -428,20 +397,10 @@ def PlotMC(datasetsMgr, histo, intLumi):
 
     # Save plot in all formats    
     saveName = histo.split("/")[-1]
-    savePath = os.path.join(opts.saveDir, "HplusMasses", histo.split("/")[0], opts.optMode)
+    savePath = os.path.join(opts.saveDir, "", histo.split("/")[0], opts.optMode)
 
-    if opts.normaliseToOne:
-        save_path = savePath + opts.MVAcut
-        if opts.noQCD:
-            save_path = savePath + opts.MVAcut + "/noQCD/"
-    else:
-        save_path = savePath + opts.MVAcut + "/normToLumi/"
-        if opts.noQCD:
-            save_path = savePath + opts.MVAcut + "/noQCD/"
-
-#    SavePlot(p, saveName, savePath) 
-    SavePlot(p, saveName, save_path) 
-
+    SavePlot(p, saveName, savePath) 
+    
     return
 
 
@@ -457,7 +416,7 @@ def SavePlot(plot, saveName, saveDir, saveFormats = [".pdf"]):
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
         saveNameURL = savePath + ext
-        saveNameURL = saveNameURL.replace("/publicweb/s/skonstan/", "http://home.fnal.gov/~skonstan/")
+        saveNameURL = saveNameURL.replace("/publicweb/m/mkolosov/", "http://home.fnal.gov/~mkolosov/")
         if opts.url:
             Print(saveNameURL, i==0)
         else:
@@ -487,7 +446,7 @@ if __name__ == "__main__":
     '''
     
     # Default Settings
-    ANALYSISNAME = "Hplus2tbAnalysis"
+    ANALYSISNAME = "TestFatJets"
     MVACUT       = "MVA"
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
@@ -496,7 +455,7 @@ if __name__ == "__main__":
     PRECISION    = 3
     #SIGNALMASS   = [200, 500, 800, 2000]
     SIGNALMASS   = []
-    SIGNALMASS   = [300, 500,1000]
+    SIGNALMASS   = [ 300, 800, 1000, 3000]
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False
@@ -509,7 +468,7 @@ if __name__ == "__main__":
 #    else:
 #        DIR = MVACUT+ "/normToLumi/"
 
-    SAVEDIR = "/publicweb/s/skonstan/" + ANALYSISNAME
+    SAVEDIR = "/publicweb/m/mkolosov/" + ANALYSISNAME
 #    SAVEDIR      = "/publicweb/s/skonstan/" + ANALYSISNAME + "/TT/"   #save TT plots
 #    SAVEDIR      = "/publicweb/s/skonstan/" + ANALYSISNAME + "/"+ MVACUT+ "/noQCD/"   #save noQCD plots
 #    SAVEDIR      = "/publicweb/s/skonstan/" + ANALYSISNAME + "/"+ MVACUT+ "/normToLumi/"   #save lumi plots
