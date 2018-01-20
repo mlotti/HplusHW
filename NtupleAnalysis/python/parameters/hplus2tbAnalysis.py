@@ -57,8 +57,8 @@ metFilter = PSet(
 # Electron veto
 #================================================================================================
 eVeto = PSet(
-    electronPtCut     = 10.0, # [default: 15]
-    electronEtaCut    = 2.1,  # [default:  2.5]
+    electronPtCut     = 10.0, # [default: 10.0]
+    electronEtaCut    = 2.1,  # [default:  2.1]
     electronID        = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
     #electronID        = "ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values", #fixme
     electronIsolation = "veto", # [default: "veto"]
@@ -69,10 +69,10 @@ eVeto = PSet(
 # Muon veto
 #================================================================================================
 muVeto = PSet(
-    muonPtCut         = 10.0, # [default: 10.0]
-    muonEtaCut        = 2.4,  # [default: 2.5]
-    muonID            = "muIDLoose", # [default: "muIDLoose"] loosest option for vetoing (options: muIDLoose, muIDMedium, muIDTight)
-    muonIsolation     = "veto",      # [default: "veto"]      loosest possible for vetoing ("veto"), "tight" for selecting
+    muonPtCut         = 10.0,        # [default: 10.0]
+    muonEtaCut        = 2.4,         # [default:  2.4]
+    muonID            = "muIDLoose", # [default: "muIDLoose"] (options: "muIDLoose", "muIDMedium", "muIDTight")
+    muonIsolation     = "veto",      # [default: "veto"]      (options: "veto", "tight")
     muonIsolType      = "mini",      # [default: "default"]
 )
 
