@@ -261,6 +261,8 @@ def main(opts):
         PlotHisto(datasetsMgr, "FailedBJet/Inverted_NFailedBJets_AfterStandardSelections")
         PlotHisto(datasetsMgr, "FailedBJet/Inverted_NFailedBJets_AfterCRSelections")
         PlotHisto(datasetsMgr, "FailedBJet/Inverted_NFailedBJets_AfterAllSelections")
+        # PlotHisto(datasetsMgr, "FailedBJet/Baseline_NFailedBJets_AfterCRSelections")
+        # PlotHisto(datasetsMgr, "FailedBJet/Baseline_NFailedBJets_AfterAllSelections")
     return
 
 def getHistos(datasetsMgr, histoName):

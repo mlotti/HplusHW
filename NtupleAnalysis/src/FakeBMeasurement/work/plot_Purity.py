@@ -205,7 +205,7 @@ def main(opts):
 
         # Create a list with strings included in the histogram names you want to plot
         myHistos = ["LdgTrijetPt", "LdgTrijetM", "LdgTetrajetMass", "MVAmax2", "MVAmax1", "Njets", "NBjets", 
-                    "Bjet3BtagDisc", "Bjet2BtagDisc", "Bjet1BtagDisc", "Bjet3Pt", "Bjet2Pt", "Bjet1Pt"]
+                    "Bjet3Bdisc", "Bjet2Bdisc", "Bjet1Bdisc", "Bjet3Pt", "Bjet2Pt", "Bjet1Pt"]
 
         # For-loop: All histos
         for h in myHistos:
@@ -217,7 +217,9 @@ def main(opts):
                     # Do not draw SR in multigraph plot!
                     if GetControlRegionLabel(histoName) != "SR":
                         hGraphList.append(hgQCD)
-                    PlotHistoGraph(hgQCD, kwargs)
+                    # Plot individual purity graphs?
+                    if 0:
+                        PlotHistoGraph(hgQCD, kwargs)
             PlotHistoGraphs(hGraphList, kwargs)
     return
 
@@ -262,7 +264,7 @@ def PlotHistoGraph(histoGraph, _kwargs):
     # Save the plots
     histoName = histoName.replace("ForFakeBMeasurement/", "")
     histoName = GetSaveName(histoName) #introduced for ABCD method
-    SavePlot(p, histoName, os.path.join(opts.saveDir, "Purity", opts.optMode), saveFormats = [".png"])#, ".pdf"] )
+    SavePlot(p, histoName, os.path.join(opts.saveDir, "Purity", opts.optMode), saveFormats = [".png", ".pdf"] )
     return
 
 
@@ -352,7 +354,7 @@ def PlotHistoGraphs(hGraphList, _kwargs):
     plots.drawPlot(p, histoName, **_kwargs)
 
     # Save the plot
-    SavePlot(p, histoName, os.path.join(opts.saveDir, "Purity", opts.optMode), saveFormats = [".png"])#, ".pdf"] )
+    SavePlot(p, histoName, os.path.join(opts.saveDir, "Purity", opts.optMode), saveFormats = [".png", ".pdf"] )
     return
 
 def GetHistoKwargs(histoName, opts):
@@ -472,9 +474,9 @@ def GetHistoKwargs(histoName, opts):
     if "bjet3pt" in h.lower():
         _cutBox = {"cutValue": 30.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _xlabel = "p_{T} (GeV/c)"
-    if "btagdisc" in h.lower():
+    if "bdisc" in h.lower():
         _units  = "" 
-        _xlabel = "b-jet discriminator"
+        _xlabel = "b-tag discriminant"
         # _cutBox = {"cutValue": 0.5426, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _cutBox = {"cutValue": 0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         myBins  = btagBins
