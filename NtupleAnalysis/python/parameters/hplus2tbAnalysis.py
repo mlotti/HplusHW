@@ -57,10 +57,12 @@ metFilter = PSet(
 # Electron veto
 #================================================================================================
 eVeto = PSet(
-    electronPtCut     = 10.0, # [default: 10.0]
-    electronEtaCut    = 2.1,  # [default:  2.1]
+    electronPtCut     = 10.0,   # [default: 10.0]
+    electronEtaCut    = 2.1,    # [default:  2.1]
+    electronIDType    = "MVA",  # [default: "default"]
     electronID        = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
-    #electronID        = "ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values", #fixme
+    electronMVA       = "ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values",
+    electronMVACut    = "Loose",
     electronIsolation = "veto", # [default: "veto"]
     electronIsolType  = "mini", # [default: "default"]
     )

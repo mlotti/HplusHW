@@ -21,6 +21,8 @@ ElectronSelection::ElectronSelection(const ParameterSet& config, EventCounter& e
   fMiniIsoCut(-1.0),
   fVetoMode(false),
   fMiniIsol(false),
+  fElectronMVA(false),
+  fElectronMVACut(config.getParameter<string>("electronMVACut")),
   // Event counter for passing selection
   cPassedElectronSelection(fEventCounter.addCounter("passed e selection ("+postfix+")")),
   // Sub counters
@@ -41,6 +43,8 @@ ElectronSelection::ElectronSelection(const ParameterSet& config, const std::stri
   fMiniIsoCut(-1.0),
   fVetoMode(false),
   fMiniIsol(false),
+  fElectronMVA(false),
+  fElectronMVACut(config.getParameter<string>("electronMVACut")),
   // Event counter for passing selection
   cPassedElectronSelection(fEventCounter.addCounter("passed e selection ("+postfix+")")),
   // Sub counters
@@ -109,6 +113,14 @@ void ElectronSelection::initialize(const ParameterSet& config, const std::string
    {
      throw hplus::Exception("config") << "Invalid electronIsolType option '" << isolTypeString << "'! Options: 'default', 'mini'";
    }
+  
+  std::string idTypeString = config.getParameter<std::string>("electronIDType");
+  if (idTypeString == "default") fElectronMVA = false;
+  else if (idTypeString == "MVA") fElectronMVA = true;
+  else
+    {
+      throw hplus::Exception("config") << "Invalid electronIDType option '" << idTypeString << "'! Options: 'default', 'MVA'";
+    }
   
   return;
 }
@@ -188,7 +200,12 @@ ElectronSelection::Data ElectronSelection::privateAnalyze(const Event& event) {
     passedEta = true;
 
     // Apply cut on electron ID
-    if (!electron.electronIDDiscriminator()) continue; //fixme: MVA
+    bool passedCutBasedID = electron.electronIDDiscriminator();
+    bool passedMVA        = getMVADecision(electron, fElectronMVACut); 
+    bool passedIDCut      = false;
+    if (fElectronMVA) passedIDCut = passedMVA;
+    else passedIDCut = passedCutBasedID;
+    if (!passedIDCut) continue;
     passedID = true;
     
     // Fill histograms before isolation cut
@@ -263,4 +280,27 @@ ElectronSelection::Data ElectronSelection::privateAnalyze(const Event& event) {
 
   // Return data object
   return output;
+}
+
+bool ElectronSelection::getMVADecision(const Electron& ele, const std::string mvaCut){
+
+  if (mvaCut == "loose" || mvaCut == "Loose")
+    {
+      double AbsEta = std::abs(ele.eta());
+      
+      if (AbsEta<=0.8 && ele.MVA()>=-0.041){
+	return true;
+      }
+      if (AbsEta>0.8 && AbsEta<1.479 && ele.MVA()>=0.383){
+	return true;
+      }
+      if (AbsEta>=1.479 && ele.MVA()>=-0.515){
+	return true;
+      }
+    }
+  else
+    {
+      throw hplus::Exception("config") << "Invalid electronMVACut option '" << mvaCut << "'! Options: 'Loose'";
+    }
+  return false;
 }
