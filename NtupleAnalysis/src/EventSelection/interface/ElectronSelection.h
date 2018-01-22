@@ -73,7 +73,9 @@ private:
   void initialize(const ParameterSet& config, const std::string& postfix);
   /// The actual selection
   Data privateAnalyze(const Event& iEvent);
-
+  /// Return MVA decision based on MVA Cut
+  bool getMVADecision(const Electron& ele, const std::string mvaCut);
+  
   // Input parameters
   const double fElectronPtCut;
   const double fElectronEtaCut;
@@ -81,6 +83,8 @@ private:
   float fMiniIsoCut;
   bool fVetoMode;
   bool fMiniIsol;
+  bool fElectronMVA;
+  const std::string fElectronMVACut;
   
   // Event counter for passing selection
   Count cPassedElectronSelection;
