@@ -1046,27 +1046,27 @@ void FakeBMeasurement::book(TDirectory *dir) {
 
   hBaseline_LdgTrijetMass_AfterStandardSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myNormalizationDirs, 
-				      "Baseline_LdgTrijetMass_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Baseline_LdgTrijetMass_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hBaseline_LdgTrijetMass_AfterAllSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myNormalizationDirs, 
-				      "Baseline_LdgTrijetMass_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Baseline_LdgTrijetMass_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hBaseline_LdgTrijetMass_AfterCRSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myNormalizationDirs, 
-				      "Baseline_LdgTrijetMass_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Baseline_LdgTrijetMass_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hInverted_LdgTrijetMass_AfterStandardSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myNormalizationDirs, 
-				      "Inverted_LdgTrijetMass_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Inverted_LdgTrijetMass_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hInverted_LdgTrijetMass_AfterAllSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myNormalizationDirs, 
-				      "Inverted_LdgTrijetMass_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Inverted_LdgTrijetMass_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hInverted_LdgTrijetMass_AfterCRSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myNormalizationDirs, 
-				      "Inverted_LdgTrijetMass_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Inverted_LdgTrijetMass_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   // Purity histograms [(Data-EWK)/Data]
   myInclusiveLabel = "FailedBJet";
@@ -1081,338 +1081,338 @@ void FakeBMeasurement::book(TDirectory *dir) {
 
   // Create histograms
   hInverted_NFailedBJets_AfterStandardSelections = 
-    fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, myFailedDir, "Inverted_NFailedBJets_AfterStandardSelections", ";b-jet multiplicity;Events / %.0f", nNBins, fNMin, fNMax);
+    fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, myFailedDir, "Inverted_NFailedBJets_AfterStandardSelections", ";b-jet multiplicity;Occur / %.0f", nNBins, fNMin, fNMax);
 
   hInverted_FailedBJet1BDisc_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet1BDisc_AfterStandardSelections",
-				      "Inverted_FailedBJet1BDisc_AfterStandardSelections;b-tag discriminator;Events / %.2f",
+				      "Inverted_FailedBJet1BDisc_AfterStandardSelections;b-tag discriminator;Occur / %.2f",
 				      nBDiscBins, fBDiscMin, fBDiscMax);
   
   hInverted_FailedBJet1Pt_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet1Pt_AfterStandardSelections",
-				      "Inverted_FailedBJet1Pt_AfterStandardSelections;p_{T} (GeV/c);Events / %.0f GeV/c",
+				      "Inverted_FailedBJet1Pt_AfterStandardSelections;p_{T} (GeV/c);Occur / %.0f GeV/c",
 				      nPtBins, fPtMin, fPtMax);
 
   hInverted_FailedBJet1Eta_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet1Eta_AfterStandardSelections",
-				      "Inverted_FailedBJet1Eta_AfterStandardSelections;#eta;Events / %.2f",
+				      "Inverted_FailedBJet1Eta_AfterStandardSelections;#eta;Occur / %.2f",
 				      nEtaBins, fEtaMin, fEtaMax);
 
   hInverted_FailedBJet1PdgId_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet1PdgId_AfterStandardSelections",
-				      "Inverted_FailedBJet1PdgId_AfterStandardSelections;pdgId;Events / %.0f",
+				      "Inverted_FailedBJet1PdgId_AfterStandardSelections;pdgId;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   hInverted_FailedBJet1PartonFlavour_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet1PartonFlavour_AfterStandardSelections",
-				      "Inverted_FailedBJet1PartonFlavour_AfterStandardSelections;parton flavour;Events / %.0f",
+				      "Inverted_FailedBJet1PartonFlavour_AfterStandardSelections;parton flavour;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   hInverted_FailedBJet1HadronFlavour_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet1HadronFlavour_AfterStandardSelections",
-				      "Inverted_FailedBJet1HadronFlavour_AfterStandardSelections;hadron flavour;Events / %.0f",
+				      "Inverted_FailedBJet1HadronFlavour_AfterStandardSelections;hadron flavour;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   hInverted_FailedBJet2BDisc_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet2BDisc_AfterStandardSelections",
-				      "Inverted_FailedBJet2BDisc_AfterStandardSelections;b-tag discriminator;Events / %.2f",
+				      "Inverted_FailedBJet2BDisc_AfterStandardSelections;b-tag discriminator;Occur / %.2f",
 				      nBDiscBins, fBDiscMin, fBDiscMax);
   
   hInverted_FailedBJet2Pt_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet2Pt_AfterStandardSelections",
-				      "Inverted_FailedBJet2Pt_AfterStandardSelections;p_{T} (GeV/c);Events / %.0f GeV/c",
+				      "Inverted_FailedBJet2Pt_AfterStandardSelections;p_{T} (GeV/c);Occur / %.0f GeV/c",
 				      nPtBins, fPtMin, fPtMax);
 
   hInverted_FailedBJet2Eta_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet2Eta_AfterStandardSelections",
-				      "Inverted_FailedBJet2Eta_AfterStandardSelections;#eta;Events / %.2f",
+				      "Inverted_FailedBJet2Eta_AfterStandardSelections;#eta;Occur / %.2f",
 				      nEtaBins, fEtaMin, fEtaMax);
 
   hInverted_FailedBJet2PdgId_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet2PdgId_AfterStandardSelections",
-				      "Inverted_FailedBJet2PdgId_AfterStandardSelections;pdgId;Events / %.0f",
+				      "Inverted_FailedBJet2PdgId_AfterStandardSelections;pdgId;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   hInverted_FailedBJet2PartonFlavour_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet2PartonFlavour_AfterStandardSelections",
-				      "Inverted_FailedBJet2PartonFlavour_AfterStandardSelections;parton flavour;Events / %.0f",
+				      "Inverted_FailedBJet2PartonFlavour_AfterStandardSelections;parton flavour;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   hInverted_FailedBJet2HadronFlavour_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet2HadronFlavour_AfterStandardSelections",
-				      "Inverted_FailedBJet2HadronFlavour_AfterStandardSelections;hadron flavour;Events / %.0f",
+				      "Inverted_FailedBJet2HadronFlavour_AfterStandardSelections;hadron flavour;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   hInverted_FailedBJet3BDisc_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet3BDisc_AfterStandardSelections",
-				      "Inverted_FailedBJet3BDisc_AfterStandardSelections;b-tag discriminator;Events / %.2f",
+				      "Inverted_FailedBJet3BDisc_AfterStandardSelections;b-tag discriminator;Occur / %.2f",
 				      nBDiscBins, fBDiscMin, fBDiscMax);
   
   hInverted_FailedBJet3Pt_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet3Pt_AfterStandardSelections",
-				      "Inverted_FailedBJet3Pt_AfterStandardSelections;p_{T} (GeV/c);Events / %.0f GeV/c",
+				      "Inverted_FailedBJet3Pt_AfterStandardSelections;p_{T} (GeV/c);Occur / %.0f GeV/c",
 				      nPtBins, fPtMin, fPtMax);
 
   hInverted_FailedBJet3Eta_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet3Eta_AfterStandardSelections",
-				      "Inverted_FailedBJet3Eta_AfterStandardSelections;#eta;Events / %.2f",
+				      "Inverted_FailedBJet3Eta_AfterStandardSelections;#eta;Occur / %.2f",
 				      nEtaBins, fEtaMin, fEtaMax);
 
   hInverted_FailedBJet3PdgId_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet3PdgId_AfterStandardSelections",
-				      "Inverted_FailedBJet3PdgId_AfterStandardSelections;pdgId;Events / %.0f",
+				      "Inverted_FailedBJet3PdgId_AfterStandardSelections;pdgId;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   hInverted_FailedBJet3PartonFlavour_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet3PartonFlavour_AfterStandardSelections",
-				      "Inverted_FailedBJet3PartonFlavour_AfterStandardSelections;parton flavour;Events / %.0f",
+				      "Inverted_FailedBJet3PartonFlavour_AfterStandardSelections;parton flavour;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   hInverted_FailedBJet3HadronFlavour_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet3HadronFlavour_AfterStandardSelections",
-				      "Inverted_FailedBJet3HadronFlavour_AfterStandardSelections;hadron flavour;Events / %.0f",
+				      "Inverted_FailedBJet3HadronFlavour_AfterStandardSelections;hadron flavour;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   // Create histograms (AllSelections) 
   hInverted_NFailedBJets_AfterAllSelections = 
-    fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, myFailedDir, "Inverted_NFailedBJets_AfterAllSelections", ";b-jet multiplicity;Events / %.0f", nNBins, fNMin, fNMax);
+    fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, myFailedDir, "Inverted_NFailedBJets_AfterAllSelections", ";b-jet multiplicity;Occur / %.0f", nNBins, fNMin, fNMax);
 
   hInverted_FailedBJet1BDisc_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet1BDisc_AfterAllSelections",
-				      "Inverted_FailedBJet1BDisc_AfterAllSelections;b-tag discriminator;Events / %.2f",
+				      "Inverted_FailedBJet1BDisc_AfterAllSelections;b-tag discriminator;Occur / %.2f",
 				      nBDiscBins, fBDiscMin, fBDiscMax);
   
   hInverted_FailedBJet1Pt_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet1Pt_AfterAllSelections",
-				      "Inverted_FailedBJet1Pt_AfterAllSelections;p_{T} (GeV/c);Events / %.0f GeV/c",
+				      "Inverted_FailedBJet1Pt_AfterAllSelections;p_{T} (GeV/c);Occur / %.0f GeV/c",
 				      nPtBins, fPtMin, fPtMax);
 
   hInverted_FailedBJet1Eta_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet1Eta_AfterAllSelections",
-				      "Inverted_FailedBJet1Eta_AfterAllSelections;#eta;Events / %.2f",
+				      "Inverted_FailedBJet1Eta_AfterAllSelections;#eta;Occur / %.2f",
 				      nEtaBins, fEtaMin, fEtaMax);
 
   hInverted_FailedBJet1PdgId_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet1PdgId_AfterAllSelections",
-				      "Inverted_FailedBJet1PdgId_AfterAllSelections;pdgId;Events / %.0f",
+				      "Inverted_FailedBJet1PdgId_AfterAllSelections;pdgId;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   hInverted_FailedBJet1PartonFlavour_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet1PartonFlavour_AfterAllSelections",
-				      "Inverted_FailedBJet1PartonFlavour_AfterAllSelections;parton flavour;Events / %.0f",
+				      "Inverted_FailedBJet1PartonFlavour_AfterAllSelections;parton flavour;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   hInverted_FailedBJet1HadronFlavour_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet1HadronFlavour_AfterAllSelections",
-				      "Inverted_FailedBJet1HadronFlavour_AfterAllSelections;hadron flavour;Events / %.0f",
+				      "Inverted_FailedBJet1HadronFlavour_AfterAllSelections;hadron flavour;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   hInverted_FailedBJet2BDisc_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet2BDisc_AfterAllSelections",
-				      "Inverted_FailedBJet2BDisc_AfterAllSelections;b-tag discriminator;Events / %.2f",
+				      "Inverted_FailedBJet2BDisc_AfterAllSelections;b-tag discriminator;Occur / %.2f",
 				      nBDiscBins, fBDiscMin, fBDiscMax);
   
   hInverted_FailedBJet2Pt_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet2Pt_AfterAllSelections",
-				      "Inverted_FailedBJet2Pt_AfterAllSelections;p_{T} (GeV/c);Events / %.0f GeV/c",
+				      "Inverted_FailedBJet2Pt_AfterAllSelections;p_{T} (GeV/c);Occur / %.0f GeV/c",
 				      nPtBins, fPtMin, fPtMax);
 
   hInverted_FailedBJet2Eta_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet2Eta_AfterAllSelections",
-				      "Inverted_FailedBJet2Eta_AfterAllSelections;#eta;Events / %.2f",
+				      "Inverted_FailedBJet2Eta_AfterAllSelections;#eta;Occur / %.2f",
 				      nEtaBins, fEtaMin, fEtaMax);
 
   hInverted_FailedBJet2PdgId_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet2PdgId_AfterAllSelections",
-				      "Inverted_FailedBJet2PdgId_AfterAllSelections;pdgId;Events / %.0f",
+				      "Inverted_FailedBJet2PdgId_AfterAllSelections;pdgId;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   hInverted_FailedBJet2PartonFlavour_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet2PartonFlavour_AfterAllSelections",
-				      "Inverted_FailedBJet2PartonFlavour_AfterAllSelections;parton flavour;Events / %.0f",
+				      "Inverted_FailedBJet2PartonFlavour_AfterAllSelections;parton flavour;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   hInverted_FailedBJet2HadronFlavour_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet2HadronFlavour_AfterAllSelections",
-				      "Inverted_FailedBJet2HadronFlavour_AfterAllSelections;hadron flavour;Events / %.0f",
+				      "Inverted_FailedBJet2HadronFlavour_AfterAllSelections;hadron flavour;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   hInverted_FailedBJet3BDisc_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet3BDisc_AfterAllSelections",
-				      "Inverted_FailedBJet3BDisc_AfterAllSelections;b-tag discriminator;Events / %.2f",
+				      "Inverted_FailedBJet3BDisc_AfterAllSelections;b-tag discriminator;Occur / %.2f",
 				      nBDiscBins, fBDiscMin, fBDiscMax);
   
   hInverted_FailedBJet3Pt_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet3Pt_AfterAllSelections",
-				      "Inverted_FailedBJet3Pt_AfterAllSelections;p_{T} (GeV/c);Events / %.0f GeV/c",
+				      "Inverted_FailedBJet3Pt_AfterAllSelections;p_{T} (GeV/c);Occur / %.0f GeV/c",
 				      nPtBins, fPtMin, fPtMax);
 
   hInverted_FailedBJet3Eta_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet3Eta_AfterAllSelections",
-				      "Inverted_FailedBJet3Eta_AfterAllSelections;#eta;Events / %.2f",
+				      "Inverted_FailedBJet3Eta_AfterAllSelections;#eta;Occur / %.2f",
 				      nEtaBins, fEtaMin, fEtaMax);
 
   hInverted_FailedBJet3PdgId_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet3PdgId_AfterAllSelections",
-				      "Inverted_FailedBJet3PdgId_AfterAllSelections;pdgId;Events / %.0f",
+				      "Inverted_FailedBJet3PdgId_AfterAllSelections;pdgId;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   hInverted_FailedBJet3PartonFlavour_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet3PartonFlavour_AfterAllSelections",
-				      "Inverted_FailedBJet3PartonFlavour_AfterAllSelections;parton flavour;Events / %.0f",
+				      "Inverted_FailedBJet3PartonFlavour_AfterAllSelections;parton flavour;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   hInverted_FailedBJet3HadronFlavour_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet3HadronFlavour_AfterAllSelections",
-				      "Inverted_FailedBJet3HadronFlavour_AfterAllSelections;hadron flavour;Events / %.0f",
+				      "Inverted_FailedBJet3HadronFlavour_AfterAllSelections;hadron flavour;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   // Create histograms (CRSelections) 
   hInverted_NFailedBJets_AfterCRSelections = 
-    fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, myFailedDir, "Inverted_NFailedBJets_AfterCRSelections", ";b-jet multiplicity;Events / %.0f", nNBins, fNMin, fNMax);
+    fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, myFailedDir, "Inverted_NFailedBJets_AfterCRSelections", ";b-jet multiplicity;Occur / %.0f", nNBins, fNMin, fNMax);
 
   hInverted_FailedBJet1BDisc_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet1BDisc_AfterCRSelections",
-				      "Inverted_FailedBJet1BDisc_AfterCRSelections;b-tag discriminator;Events / %.2f",
+				      "Inverted_FailedBJet1BDisc_AfterCRSelections;b-tag discriminator;Occur / %.2f",
 				      nBDiscBins, fBDiscMin, fBDiscMax);
   
   hInverted_FailedBJet1Pt_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet1Pt_AfterCRSelections",
-				      "Inverted_FailedBJet1Pt_AfterCRSelections;p_{T} (GeV/c);Events / %.0f GeV/c",
+				      "Inverted_FailedBJet1Pt_AfterCRSelections;p_{T} (GeV/c);Occur / %.0f GeV/c",
 				      nPtBins, fPtMin, fPtMax);
 
   hInverted_FailedBJet1Eta_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet1Eta_AfterCRSelections",
-				      "Inverted_FailedBJet1Eta_AfterCRSelections;#eta;Events / %.2f",
+				      "Inverted_FailedBJet1Eta_AfterCRSelections;#eta;Occur / %.2f",
 				      nEtaBins, fEtaMin, fEtaMax);
 
   hInverted_FailedBJet1PdgId_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet1PdgId_AfterCRSelections",
-				      "Inverted_FailedBJet1PdgId_AfterCRSelections;pdgId;Events / %.0f",
+				      "Inverted_FailedBJet1PdgId_AfterCRSelections;pdgId;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   hInverted_FailedBJet1PartonFlavour_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet1PartonFlavour_AfterCRSelections",
-				      "Inverted_FailedBJet1PartonFlavour_AfterCRSelections;parton flavour;Events / %.0f",
+				      "Inverted_FailedBJet1PartonFlavour_AfterCRSelections;parton flavour;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   hInverted_FailedBJet1HadronFlavour_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet1HadronFlavour_AfterCRSelections",
-				      "Inverted_FailedBJet1HadronFlavour_AfterCRSelections;hadron flavour;Events / %.0f",
+				      "Inverted_FailedBJet1HadronFlavour_AfterCRSelections;hadron flavour;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   hInverted_FailedBJet2BDisc_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet2BDisc_AfterCRSelections",
-				      "Inverted_FailedBJet2BDisc_AfterCRSelections;b-tag discriminator;Events / %.2f",
+				      "Inverted_FailedBJet2BDisc_AfterCRSelections;b-tag discriminator;Occur / %.2f",
 				      nBDiscBins, fBDiscMin, fBDiscMax);
   
   hInverted_FailedBJet2Pt_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet2Pt_AfterCRSelections",
-				      "Inverted_FailedBJet2Pt_AfterCRSelections;p_{T} (GeV/c);Events / %.0f GeV/c",
+				      "Inverted_FailedBJet2Pt_AfterCRSelections;p_{T} (GeV/c);Occur / %.0f GeV/c",
 				      nPtBins, fPtMin, fPtMax);
 
   hInverted_FailedBJet2Eta_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet2Eta_AfterCRSelections",
-				      "Inverted_FailedBJet2Eta_AfterCRSelections;#eta;Events / %.2f",
+				      "Inverted_FailedBJet2Eta_AfterCRSelections;#eta;Occur / %.2f",
 				      nEtaBins, fEtaMin, fEtaMax);
 
   hInverted_FailedBJet2PdgId_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet2PdgId_AfterCRSelections",
-				      "Inverted_FailedBJet2PdgId_AfterCRSelections;pdgId;Events / %.0f",
+				      "Inverted_FailedBJet2PdgId_AfterCRSelections;pdgId;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   hInverted_FailedBJet2PartonFlavour_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet2PartonFlavour_AfterCRSelections",
-				      "Inverted_FailedBJet2PartonFlavour_AfterCRSelections;parton flavour;Events / %.0f",
+				      "Inverted_FailedBJet2PartonFlavour_AfterCRSelections;parton flavour;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   hInverted_FailedBJet2HadronFlavour_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet2HadronFlavour_AfterCRSelections",
-				      "Inverted_FailedBJet2HadronFlavour_AfterCRSelections;hadron flavour;Events / %.0f",
+				      "Inverted_FailedBJet2HadronFlavour_AfterCRSelections;hadron flavour;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   hInverted_FailedBJet3BDisc_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet3BDisc_AfterCRSelections",
-				      "Inverted_FailedBJet3BDisc_AfterCRSelections;b-tag discriminator;Events / %.2f",
+				      "Inverted_FailedBJet3BDisc_AfterCRSelections;b-tag discriminator;Occur / %.2f",
 				      nBDiscBins, fBDiscMin, fBDiscMax);
   
   hInverted_FailedBJet3Pt_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet3Pt_AfterCRSelections",
-				      "Inverted_FailedBJet3Pt_AfterCRSelections;p_{T} (GeV/c);Events / %.0f GeV/c",
+				      "Inverted_FailedBJet3Pt_AfterCRSelections;p_{T} (GeV/c);Occur / %.0f GeV/c",
 				      nPtBins, fPtMin, fPtMax);
 
   hInverted_FailedBJet3Eta_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet3Eta_AfterCRSelections",
-				      "Inverted_FailedBJet3Eta_AfterCRSelections;#eta;Events / %.2f",
+				      "Inverted_FailedBJet3Eta_AfterCRSelections;#eta;Occur / %.2f",
 				      nEtaBins, fEtaMin, fEtaMax);
 
   hInverted_FailedBJet3PdgId_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
 				      "Inverted_FailedBJet3PdgId_AfterCRSelections",
-				      "Inverted_FailedBJet3PdgId_AfterCRSelections;pdgId;Events / %.0f",
+				      "Inverted_FailedBJet3PdgId_AfterCRSelections;pdgId;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   hInverted_FailedBJet3PartonFlavour_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet3PartonFlavour_AfterCRSelections",
-				      "Inverted_FailedBJet3PartonFlavour_AfterCRSelections;parton flavour;Events / %.0f",
+				      "Inverted_FailedBJet3PartonFlavour_AfterCRSelections;parton flavour;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   hInverted_FailedBJet3HadronFlavour_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
 				      "Inverted_FailedBJet3HadronFlavour_AfterCRSelections",
-				      "Inverted_FailedBJet3HadronFlavour_AfterCRSelections;hadron flavour;Events / %.0f",
+				      "Inverted_FailedBJet3HadronFlavour_AfterCRSelections;hadron flavour;Occur / %.0f",
 				      23, -0.5, 22.5);
 
   // Other histograms
@@ -1426,107 +1426,107 @@ void FakeBMeasurement::book(TDirectory *dir) {
   std::vector<TDirectory*> myFakeBDirs = {myFakeBDir, myFakeBEWKFakeBDir, myFakeBGenuineBDir};
 
 
-  hBaseline_IsGenuineB = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, myFakeBDir, "Baseline_IsGenuineB", ";is genuine-b event;Events / %0.f", 2, 0.0, 2.0);
-  hInverted_IsGenuineB = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, myFakeBDir, "Inverted_IsGenuineB", ";is genuine-b event;Events / %0.f", 2, 0.0, 2.0);
+  hBaseline_IsGenuineB = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, myFakeBDir, "Baseline_IsGenuineB", ";is genuine-b event;Occur / %0.f", 2, 0.0, 2.0);
+  hInverted_IsGenuineB = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, myFakeBDir, "Inverted_IsGenuineB", ";is genuine-b event;Occur / %0.f", 2, 0.0, 2.0);
 
   // Baseline selection (StandardSelections)
   hBaseline_NBjets_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_NBjets_AfterStandardSelections", ";b-jet multiplicity;Events / %.0f", nNBins, fNMin, fNMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_NBjets_AfterStandardSelections", ";b-jet multiplicity;Occur / %.0f", nNBins, fNMin, fNMax);
 
   hBaseline_Bjet1Pt_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet1Pt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet1Pt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hBaseline_Bjet2Pt_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet2Pt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet2Pt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hBaseline_Bjet3Pt_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3Pt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3Pt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
 
   hBaseline_Bjet1Eta_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet1Eta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet1Eta_AfterStandardSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hBaseline_Bjet2Eta_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet2Eta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet2Eta_AfterStandardSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hBaseline_Bjet3Eta_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3Eta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3Eta_AfterStandardSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
   hBaseline_Bjet1Bdisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet1Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet1Bdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hBaseline_Bjet2Bdisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet2Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet2Bdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hBaseline_Bjet3Bdisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3Bdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hBaseline_Njets_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Njets_AfterStandardSelections", ";jet multiplicity;Events / %.0f", nNBins, fNMin, fNMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Njets_AfterStandardSelections", ";jet multiplicity;Occur / %.0f", nNBins, fNMin, fNMax);
   hBaseline_Jet1Pt_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet1Pt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet1Pt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hBaseline_Jet2Pt_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet2Pt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet2Pt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hBaseline_Jet3Pt_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet3Pt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet3Pt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hBaseline_Jet4Pt_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet4Pt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet4Pt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hBaseline_Jet5Pt_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet5Pt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet5Pt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hBaseline_Jet6Pt_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet6Pt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet6Pt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hBaseline_Jet7Pt_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7Pt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7Pt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
 
   hBaseline_Jet1Eta_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet1Eta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet1Eta_AfterStandardSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hBaseline_Jet2Eta_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet2Eta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet2Eta_AfterStandardSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hBaseline_Jet3Eta_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet3Eta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet3Eta_AfterStandardSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hBaseline_Jet4Eta_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet4Eta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet4Eta_AfterStandardSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hBaseline_Jet5Eta_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet5Eta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet5Eta_AfterStandardSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hBaseline_Jet6Eta_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet6Eta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet6Eta_AfterStandardSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hBaseline_Jet7Eta_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7Eta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7Eta_AfterStandardSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
   hBaseline_Jet1Bdisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet1Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet1Bdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hBaseline_Jet2Bdisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet2Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet2Bdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hBaseline_Jet3Bdisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet3Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet3Bdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hBaseline_Jet4Bdisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet4Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet4Bdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hBaseline_Jet5Bdisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet5Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet5Bdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hBaseline_Jet6Bdisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet6Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet6Bdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hBaseline_Jet7Bdisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7Bdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hBaseline_MET_AfterStandardSelections =  
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MET_AfterStandardSelections", ";E_{T}^{miss};Events / %.1f", nMetBins, fMetMin, fMetMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MET_AfterStandardSelections", ";E_{T}^{miss};Occur / %.1f", nMetBins, fMetMin, fMetMax);
   hBaseline_MVAmax1_AfterStandardSelections =  
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MVAmax1_AfterStandardSelections", ";#BDT discriminant;Events / %.2f", 40, -1.0, +1.0);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MVAmax1_AfterStandardSelections", ";#BDT discriminant;Occur / %.2f", 40, -1.0, +1.0);
   hBaseline_MVAmax2_AfterStandardSelections =  
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MVAmax2_AfterStandardSelections", ";#BDT discriminant;Events / %.2f", 40, -1.0, +1.0);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MVAmax2_AfterStandardSelections", ";#BDT discriminant;Occur / %.2f", 40, -1.0, +1.0);
 
   hBaseline_LdgTetrajetPt_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Baseline_LdgTetrajetPt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Baseline_LdgTetrajetPt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
   
   hBaseline_LdgTetrajetM_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Baseline_LdgTetrajetMass_AfterStandardSelections", ";m_{jjbb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nInvMassBins, fInvMassMin, fInvMassMax);
+				      "Baseline_LdgTetrajetMass_AfterStandardSelections", ";m_{jjbb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nInvMassBins, fInvMassMin, fInvMassMax);
 
   hBaseline_TetrajetBJetPt_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Baseline_TetrajetBJetPt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Baseline_TetrajetBJetPt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hBaseline_TetrajetBJetEta_AfterStandardSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_TetrajetBJetEta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+				      "Baseline_TetrajetBJetEta_AfterStandardSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
   hBaseline_TetrajetBJetBdisc_AfterStandardSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_TetrajetBJetBdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+				      "Baseline_TetrajetBJetBdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   
   hBaseline_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
@@ -1542,142 +1542,142 @@ void FakeBMeasurement::book(TDirectory *dir) {
 
   hBaseline_LdgTrijetPt_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Baseline_LdgTrijetPt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Baseline_LdgTrijetPt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hBaseline_LdgTrijetM_AfterStandardSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_LdgTrijetM_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Baseline_LdgTrijetM_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hBaseline_LdgTrijetBJetBdisc_AfterStandardSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_LdgTrijetBJetBdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+				      "Baseline_LdgTrijetBJetBdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hBaseline_SubLdgTrijetPt_AfterStandardSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_SubLdgTrijetPt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Baseline_SubLdgTrijetPt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hBaseline_SubLdgTrijetM_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_SubLdgTrijetM_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Baseline_SubLdgTrijetM_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hBaseline_SubLdgTrijetBJetBdisc_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_SubLdgTrijetBJetBdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+				      "Baseline_SubLdgTrijetBJetBdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hBaseline_LdgDijetPt_AfterStandardSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Baseline_LdgDijetPt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Baseline_LdgDijetPt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hBaseline_LdgDijetM_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_LdgDijetM_AfterStandardSelections", ";m_{jj} (GeV/c^{2});Events / %0.f GeV/c^{2}", nWMassBins, fWMassMin, fWMassMax);
+				      "Baseline_LdgDijetM_AfterStandardSelections", ";m_{jj} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nWMassBins, fWMassMin, fWMassMax);
 
   hBaseline_SubLdgDijetPt_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_SubLdgDijetPt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Baseline_SubLdgDijetPt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hBaseline_SubLdgDijetM_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_SubLdgDijetM_AfterStandardSelections", ";m_{jj} (GeV/c^{2});Events / %0.f GeV/c^{2}", nWMassBins, fWMassMin, fWMassMax);
+				      "Baseline_SubLdgDijetM_AfterStandardSelections", ";m_{jj} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nWMassBins, fWMassMin, fWMassMax);
 
   // Baseline selection (AllSelections)
   hBaseline_NBjets_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_NBjets_AfterAllSelections", ";b-jet multiplicity;Events / %.0f", nNBins, fNMin, fNMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_NBjets_AfterAllSelections", ";b-jet multiplicity;Occur / %.0f", nNBins, fNMin, fNMax);
 
   hBaseline_Bjet1Pt_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet1Pt_AfterAllSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet1Pt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hBaseline_Bjet2Pt_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet2Pt_AfterAllSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet2Pt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hBaseline_Bjet3Pt_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3Pt_AfterAllSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3Pt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
 
   hBaseline_Bjet1Eta_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet1Eta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet1Eta_AfterAllSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hBaseline_Bjet2Eta_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet2Eta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet2Eta_AfterAllSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hBaseline_Bjet3Eta_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3Eta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3Eta_AfterAllSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
   hBaseline_Bjet1Bdisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet1Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet1Bdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hBaseline_Bjet2Bdisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet2Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet2Bdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hBaseline_Bjet3Bdisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3Bdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hBaseline_Njets_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Njets_AfterAllSelections", ";jet multiplicity;Events / %.0f", nNBins, fNMin, fNMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Njets_AfterAllSelections", ";jet multiplicity;Occur / %.0f", nNBins, fNMin, fNMax);
   hBaseline_Jet1Pt_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet1Pt_AfterAllSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet1Pt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hBaseline_Jet2Pt_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet2Pt_AfterAllSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet2Pt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hBaseline_Jet3Pt_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet3Pt_AfterAllSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet3Pt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hBaseline_Jet4Pt_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet4Pt_AfterAllSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet4Pt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hBaseline_Jet5Pt_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet5Pt_AfterAllSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet5Pt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hBaseline_Jet6Pt_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet6Pt_AfterAllSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet6Pt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hBaseline_Jet7Pt_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7Pt_AfterAllSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7Pt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
 
   hBaseline_Jet1Eta_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet1Eta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet1Eta_AfterAllSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hBaseline_Jet2Eta_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet2Eta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet2Eta_AfterAllSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hBaseline_Jet3Eta_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet3Eta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet3Eta_AfterAllSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hBaseline_Jet4Eta_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet4Eta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet4Eta_AfterAllSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hBaseline_Jet5Eta_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet5Eta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet5Eta_AfterAllSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hBaseline_Jet6Eta_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet6Eta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet6Eta_AfterAllSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hBaseline_Jet7Eta_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7Eta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7Eta_AfterAllSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
   hBaseline_Jet1Bdisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet1Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet1Bdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hBaseline_Jet2Bdisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet2Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet2Bdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hBaseline_Jet3Bdisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet3Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet3Bdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hBaseline_Jet4Bdisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet4Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet4Bdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hBaseline_Jet5Bdisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet5Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet5Bdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hBaseline_Jet6Bdisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet6Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet6Bdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hBaseline_Jet7Bdisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7Bdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hBaseline_MET_AfterAllSelections =  
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MET_AfterAllSelections", ";E_{T}^{miss};Events / %.1f", nMetBins, fMetMin, fMetMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MET_AfterAllSelections", ";E_{T}^{miss};Occur / %.1f", nMetBins, fMetMin, fMetMax);
   hBaseline_MVAmax1_AfterAllSelections =  
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MVAmax1_AfterAllSelections", ";#BDT discriminant;Events / %.2f", 40, -1.0, +1.0);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MVAmax1_AfterAllSelections", ";#BDT discriminant;Occur / %.2f", 40, -1.0, +1.0);
   hBaseline_MVAmax2_AfterAllSelections =  
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MVAmax2_AfterAllSelections", ";#BDT discriminant;Events / %.2f", 40, -1.0, +1.0);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MVAmax2_AfterAllSelections", ";#BDT discriminant;Occur / %.2f", 40, -1.0, +1.0);
 
   hBaseline_LdgTetrajetPt_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Baseline_LdgTetrajetPt_AfterAllSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Baseline_LdgTetrajetPt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
   
   hBaseline_LdgTetrajetM_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Baseline_LdgTetrajetMass_AfterAllSelections", ";m_{jjbb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nInvMassBins, fInvMassMin, fInvMassMax);
+				      "Baseline_LdgTetrajetMass_AfterAllSelections", ";m_{jjbb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nInvMassBins, fInvMassMin, fInvMassMax);
 
   hBaseline_TetrajetBJetPt_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Baseline_TetrajetBJetPt_AfterAllSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Baseline_TetrajetBJetPt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hBaseline_TetrajetBJetEta_AfterAllSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_TetrajetBJetEta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+				      "Baseline_TetrajetBJetEta_AfterAllSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
   hBaseline_TetrajetBJetBdisc_AfterAllSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_TetrajetBJetBdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+				      "Baseline_TetrajetBJetBdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   
   hBaseline_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
@@ -1693,142 +1693,142 @@ void FakeBMeasurement::book(TDirectory *dir) {
 
   hBaseline_LdgTrijetPt_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Baseline_LdgTrijetPt_AfterAllSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Baseline_LdgTrijetPt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hBaseline_LdgTrijetM_AfterAllSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_LdgTrijetM_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Baseline_LdgTrijetM_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hBaseline_LdgTrijetBJetBdisc_AfterAllSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_LdgTrijetBJetBdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+				      "Baseline_LdgTrijetBJetBdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hBaseline_SubLdgTrijetPt_AfterAllSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_SubLdgTrijetPt_AfterAllSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Baseline_SubLdgTrijetPt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hBaseline_SubLdgTrijetM_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_SubLdgTrijetM_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Baseline_SubLdgTrijetM_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hBaseline_SubLdgTrijetBJetBdisc_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_SubLdgTrijetBJetBdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+				      "Baseline_SubLdgTrijetBJetBdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hBaseline_LdgDijetPt_AfterAllSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Baseline_LdgDijetPt_AfterAllSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Baseline_LdgDijetPt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hBaseline_LdgDijetM_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_LdgDijetM_AfterAllSelections", ";m_{jj} (GeV/c^{2});Events / %0.f GeV/c^{2}", nWMassBins, fWMassMin, fWMassMax);
+				      "Baseline_LdgDijetM_AfterAllSelections", ";m_{jj} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nWMassBins, fWMassMin, fWMassMax);
 
   hBaseline_SubLdgDijetPt_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_SubLdgDijetPt_AfterAllSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Baseline_SubLdgDijetPt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hBaseline_SubLdgDijetM_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_SubLdgDijetM_AfterAllSelections", ";m_{jj} (GeV/c^{2});Events / %0.f GeV/c^{2}", nWMassBins, fWMassMin, fWMassMax);
+				      "Baseline_SubLdgDijetM_AfterAllSelections", ";m_{jj} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nWMassBins, fWMassMin, fWMassMax);
 
   // Baseline selection (CRSelections)
   hBaseline_NBjets_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_NBjets_AfterCRSelections", ";b-jet multiplicity;Events / %.0f", nNBins, fNMin, fNMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_NBjets_AfterCRSelections", ";b-jet multiplicity;Occur / %.0f", nNBins, fNMin, fNMax);
 
   hBaseline_Bjet1Pt_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet1Pt_AfterCRSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet1Pt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hBaseline_Bjet2Pt_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet2Pt_AfterCRSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet2Pt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hBaseline_Bjet3Pt_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3Pt_AfterCRSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3Pt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
 
   hBaseline_Bjet1Eta_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet1Eta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet1Eta_AfterCRSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hBaseline_Bjet2Eta_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet2Eta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet2Eta_AfterCRSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hBaseline_Bjet3Eta_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3Eta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3Eta_AfterCRSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
   hBaseline_Bjet1Bdisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet1Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet1Bdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hBaseline_Bjet2Bdisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet2Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet2Bdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hBaseline_Bjet3Bdisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3Bdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hBaseline_Njets_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Njets_AfterCRSelections", ";jet multiplicity;Events / %.0f", nNBins, fNMin, fNMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Njets_AfterCRSelections", ";jet multiplicity;Occur / %.0f", nNBins, fNMin, fNMax);
   hBaseline_Jet1Pt_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet1Pt_AfterCRSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet1Pt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hBaseline_Jet2Pt_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet2Pt_AfterCRSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet2Pt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hBaseline_Jet3Pt_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet3Pt_AfterCRSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet3Pt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hBaseline_Jet4Pt_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet4Pt_AfterCRSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet4Pt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hBaseline_Jet5Pt_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet5Pt_AfterCRSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet5Pt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hBaseline_Jet6Pt_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet6Pt_AfterCRSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet6Pt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hBaseline_Jet7Pt_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7Pt_AfterCRSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7Pt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
 
   hBaseline_Jet1Eta_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet1Eta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet1Eta_AfterCRSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hBaseline_Jet2Eta_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet2Eta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet2Eta_AfterCRSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hBaseline_Jet3Eta_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet3Eta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet3Eta_AfterCRSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hBaseline_Jet4Eta_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet4Eta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet4Eta_AfterCRSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hBaseline_Jet5Eta_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet5Eta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet5Eta_AfterCRSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hBaseline_Jet6Eta_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet6Eta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet6Eta_AfterCRSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hBaseline_Jet7Eta_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7Eta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7Eta_AfterCRSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
   hBaseline_Jet1Bdisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet1Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet1Bdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hBaseline_Jet2Bdisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet2Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet2Bdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hBaseline_Jet3Bdisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet3Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet3Bdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hBaseline_Jet4Bdisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet4Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet4Bdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hBaseline_Jet5Bdisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet5Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet5Bdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hBaseline_Jet6Bdisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet6Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet6Bdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hBaseline_Jet7Bdisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7Bdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hBaseline_MET_AfterCRSelections =  
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MET_AfterCRSelections", ";E_{T}^{miss};Events / %.1f", nMetBins, fMetMin, fMetMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MET_AfterCRSelections", ";E_{T}^{miss};Occur / %.1f", nMetBins, fMetMin, fMetMax);
   hBaseline_MVAmax1_AfterCRSelections =  
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MVAmax1_AfterCRSelections", ";#BDT discriminant;Events / %.2f", 40, -1.0, +1.0);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MVAmax1_AfterCRSelections", ";#BDT discriminant;Occur / %.2f", 40, -1.0, +1.0);
   hBaseline_MVAmax2_AfterCRSelections =  
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MVAmax2_AfterCRSelections", ";#BDT discriminant;Events / %.2f", 40, -1.0, +1.0);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MVAmax2_AfterCRSelections", ";#BDT discriminant;Occur / %.2f", 40, -1.0, +1.0);
 
   hBaseline_LdgTetrajetPt_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Baseline_LdgTetrajetPt_AfterCRSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Baseline_LdgTetrajetPt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
   
   hBaseline_LdgTetrajetM_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Baseline_LdgTetrajetMass_AfterCRSelections", ";m_{jjbb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nInvMassBins, fInvMassMin, fInvMassMax);
+				      "Baseline_LdgTetrajetMass_AfterCRSelections", ";m_{jjbb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nInvMassBins, fInvMassMin, fInvMassMax);
 
   hBaseline_TetrajetBJetPt_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Baseline_TetrajetBJetPt_AfterCRSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Baseline_TetrajetBJetPt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hBaseline_TetrajetBJetEta_AfterCRSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_TetrajetBJetEta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+				      "Baseline_TetrajetBJetEta_AfterCRSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
   hBaseline_TetrajetBJetBdisc_AfterCRSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_TetrajetBJetBdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+				      "Baseline_TetrajetBJetBdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   
   hBaseline_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
@@ -1844,142 +1844,142 @@ void FakeBMeasurement::book(TDirectory *dir) {
 
   hBaseline_LdgTrijetPt_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Baseline_LdgTrijetPt_AfterCRSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Baseline_LdgTrijetPt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hBaseline_LdgTrijetM_AfterCRSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_LdgTrijetM_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Baseline_LdgTrijetM_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hBaseline_LdgTrijetBJetBdisc_AfterCRSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_LdgTrijetBJetBdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+				      "Baseline_LdgTrijetBJetBdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hBaseline_SubLdgTrijetPt_AfterCRSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_SubLdgTrijetPt_AfterCRSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Baseline_SubLdgTrijetPt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hBaseline_SubLdgTrijetM_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_SubLdgTrijetM_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Baseline_SubLdgTrijetM_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hBaseline_SubLdgTrijetBJetBdisc_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_SubLdgTrijetBJetBdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+				      "Baseline_SubLdgTrijetBJetBdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hBaseline_LdgDijetPt_AfterCRSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Baseline_LdgDijetPt_AfterCRSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Baseline_LdgDijetPt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hBaseline_LdgDijetM_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_LdgDijetM_AfterCRSelections", ";m_{jj} (GeV/c^{2});Events / %0.f GeV/c^{2}", nWMassBins, fWMassMin, fWMassMax);
+				      "Baseline_LdgDijetM_AfterCRSelections", ";m_{jj} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nWMassBins, fWMassMin, fWMassMax);
 
   hBaseline_SubLdgDijetPt_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_SubLdgDijetPt_AfterCRSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Baseline_SubLdgDijetPt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hBaseline_SubLdgDijetM_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_SubLdgDijetM_AfterCRSelections", ";m_{jj} (GeV/c^{2});Events / %0.f GeV/c^{2}", nWMassBins, fWMassMin, fWMassMax);
+				      "Baseline_SubLdgDijetM_AfterCRSelections", ";m_{jj} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nWMassBins, fWMassMin, fWMassMax);
 
   // Inverted selection (StandardSelections)
   hInverted_NBjets_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_NBjets_AfterStandardSelections", ";b-jet multiplicity;Events / %.0f", nNBins, fNMin, fNMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_NBjets_AfterStandardSelections", ";b-jet multiplicity;Occur / %.0f", nNBins, fNMin, fNMax);
 
   hInverted_Bjet1Pt_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet1Pt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet1Pt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hInverted_Bjet2Pt_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet2Pt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet2Pt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hInverted_Bjet3Pt_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3Pt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3Pt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
 
   hInverted_Bjet1Eta_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet1Eta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet1Eta_AfterStandardSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hInverted_Bjet2Eta_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet2Eta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet2Eta_AfterStandardSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hInverted_Bjet3Eta_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3Eta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3Eta_AfterStandardSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
   hInverted_Bjet1Bdisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet1Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet1Bdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hInverted_Bjet2Bdisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet2Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet2Bdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hInverted_Bjet3Bdisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3Bdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hInverted_Njets_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Njets_AfterStandardSelections", ";jet multiplicity;Events / %.0f", nNBins, fNMin, fNMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Njets_AfterStandardSelections", ";jet multiplicity;Occur / %.0f", nNBins, fNMin, fNMax);
   hInverted_Jet1Pt_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet1Pt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet1Pt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hInverted_Jet2Pt_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet2Pt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet2Pt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hInverted_Jet3Pt_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet3Pt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet3Pt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hInverted_Jet4Pt_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet4Pt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet4Pt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hInverted_Jet5Pt_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet5Pt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet5Pt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hInverted_Jet6Pt_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet6Pt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet6Pt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hInverted_Jet7Pt_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7Pt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7Pt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
 
   hInverted_Jet1Eta_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet1Eta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet1Eta_AfterStandardSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hInverted_Jet2Eta_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet2Eta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet2Eta_AfterStandardSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hInverted_Jet3Eta_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet3Eta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet3Eta_AfterStandardSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hInverted_Jet4Eta_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet4Eta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet4Eta_AfterStandardSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hInverted_Jet5Eta_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet5Eta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet5Eta_AfterStandardSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hInverted_Jet6Eta_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet6Eta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet6Eta_AfterStandardSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hInverted_Jet7Eta_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7Eta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7Eta_AfterStandardSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
   hInverted_Jet1Bdisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet1Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet1Bdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hInverted_Jet2Bdisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet2Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet2Bdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hInverted_Jet3Bdisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet3Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet3Bdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hInverted_Jet4Bdisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet4Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet4Bdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hInverted_Jet5Bdisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet5Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet5Bdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hInverted_Jet6Bdisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet6Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet6Bdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hInverted_Jet7Bdisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7Bdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hInverted_MET_AfterStandardSelections =  
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MET_AfterStandardSelections", ";E_{T}^{miss};Events / %.1f", nMetBins, fMetMin, fMetMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MET_AfterStandardSelections", ";E_{T}^{miss};Occur / %.1f", nMetBins, fMetMin, fMetMax);
   hInverted_MVAmax1_AfterStandardSelections =  
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MVAmax1_AfterStandardSelections", ";#BDT discriminant;Events / %.2f", 40, -1.0, +1.0);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MVAmax1_AfterStandardSelections", ";#BDT discriminant;Occur / %.2f", 40, -1.0, +1.0);
   hInverted_MVAmax2_AfterStandardSelections =  
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MVAmax2_AfterStandardSelections", ";#BDT discriminant;Events / %.2f", 40, -1.0, +1.0);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MVAmax2_AfterStandardSelections", ";#BDT discriminant;Occur / %.2f", 40, -1.0, +1.0);
 
   hInverted_LdgTetrajetPt_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Inverted_LdgTetrajetPt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Inverted_LdgTetrajetPt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
   
   hInverted_LdgTetrajetM_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Inverted_LdgTetrajetMass_AfterStandardSelections", ";m_{jjjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nInvMassBins, fInvMassMin, fInvMassMax);
+				      "Inverted_LdgTetrajetMass_AfterStandardSelections", ";m_{jjjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nInvMassBins, fInvMassMin, fInvMassMax);
 
   hInverted_TetrajetBJetPt_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Inverted_TetrajetBJetPt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Inverted_TetrajetBJetPt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hInverted_TetrajetBJetEta_AfterStandardSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_TetrajetBJetEta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+				      "Inverted_TetrajetBJetEta_AfterStandardSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
   hInverted_TetrajetBJetBdisc_AfterStandardSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_TetrajetBJetBdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+				      "Inverted_TetrajetBJetBdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   
   hInverted_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
@@ -1995,142 +1995,142 @@ void FakeBMeasurement::book(TDirectory *dir) {
 
   hInverted_LdgTrijetPt_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_LdgTrijetPt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Inverted_LdgTrijetPt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hInverted_LdgTrijetM_AfterStandardSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_LdgTrijetM_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Inverted_LdgTrijetM_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hInverted_LdgTrijetBJetBdisc_AfterStandardSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_LdgTrijetBJetBdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+				      "Inverted_LdgTrijetBJetBdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hInverted_SubLdgTrijetPt_AfterStandardSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_SubLdgTrijetPt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Inverted_SubLdgTrijetPt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hInverted_SubLdgTrijetM_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_SubLdgTrijetM_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Inverted_SubLdgTrijetM_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hInverted_SubLdgTrijetBJetBdisc_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_SubLdgTrijetBJetBdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+				      "Inverted_SubLdgTrijetBJetBdisc_AfterStandardSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hInverted_LdgDijetPt_AfterStandardSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Inverted_LdgDijetPt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Inverted_LdgDijetPt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hInverted_LdgDijetM_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Inverted_LdgDijetM_AfterStandardSelections", ";m_{jj} (GeV/c^{2});Events / %0.f GeV/c^{2}", nWMassBins, fWMassMin, fWMassMax);
+				      "Inverted_LdgDijetM_AfterStandardSelections", ";m_{jj} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nWMassBins, fWMassMin, fWMassMax);
 
   hInverted_SubLdgDijetPt_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_SubLdgDijetPt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Inverted_SubLdgDijetPt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hInverted_SubLdgDijetM_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_SubLdgDijetM_AfterStandardSelections", ";m_{jj} (GeV/c^{2});Events / %0.f GeV/c^{2}", nWMassBins, fWMassMin, fWMassMax);
+				      "Inverted_SubLdgDijetM_AfterStandardSelections", ";m_{jj} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nWMassBins, fWMassMin, fWMassMax);
 
   // Inverted selection (AllSelections)
   hInverted_NBjets_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_NBjets_AfterAllSelections", ";b-jet multiplicity;Events / %.0f", nNBins, fNMin, fNMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_NBjets_AfterAllSelections", ";b-jet multiplicity;Occur / %.0f", nNBins, fNMin, fNMax);
 
   hInverted_Bjet1Pt_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet1Pt_AfterAllSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet1Pt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hInverted_Bjet2Pt_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet2Pt_AfterAllSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet2Pt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hInverted_Bjet3Pt_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3Pt_AfterAllSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3Pt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
 
   hInverted_Bjet1Eta_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet1Eta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet1Eta_AfterAllSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hInverted_Bjet2Eta_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet2Eta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet2Eta_AfterAllSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hInverted_Bjet3Eta_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3Eta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3Eta_AfterAllSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
   hInverted_Bjet1Bdisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet1Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet1Bdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hInverted_Bjet2Bdisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet2Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet2Bdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hInverted_Bjet3Bdisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3Bdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hInverted_Njets_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Njets_AfterAllSelections", ";jet multiplicity;Events / %.0f", nNBins, fNMin, fNMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Njets_AfterAllSelections", ";jet multiplicity;Occur / %.0f", nNBins, fNMin, fNMax);
   hInverted_Jet1Pt_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet1Pt_AfterAllSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet1Pt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hInverted_Jet2Pt_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet2Pt_AfterAllSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet2Pt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hInverted_Jet3Pt_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet3Pt_AfterAllSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet3Pt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hInverted_Jet4Pt_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet4Pt_AfterAllSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet4Pt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hInverted_Jet5Pt_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet5Pt_AfterAllSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet5Pt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hInverted_Jet6Pt_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet6Pt_AfterAllSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet6Pt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hInverted_Jet7Pt_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7Pt_AfterAllSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7Pt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
 
   hInverted_Jet1Eta_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet1Eta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet1Eta_AfterAllSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hInverted_Jet2Eta_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet2Eta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet2Eta_AfterAllSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hInverted_Jet3Eta_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet3Eta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet3Eta_AfterAllSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hInverted_Jet4Eta_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet4Eta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet4Eta_AfterAllSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hInverted_Jet5Eta_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet5Eta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet5Eta_AfterAllSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hInverted_Jet6Eta_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet6Eta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet6Eta_AfterAllSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hInverted_Jet7Eta_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7Eta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7Eta_AfterAllSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
   hInverted_Jet1Bdisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet1Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet1Bdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hInverted_Jet2Bdisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet2Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet2Bdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hInverted_Jet3Bdisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet3Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet3Bdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hInverted_Jet4Bdisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet4Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet4Bdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hInverted_Jet5Bdisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet5Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet5Bdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hInverted_Jet6Bdisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet6Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet6Bdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hInverted_Jet7Bdisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7Bdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hInverted_MET_AfterAllSelections =  
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MET_AfterAllSelections", ";E_{T}^{miss};Events / %.1f", nMetBins, fMetMin, fMetMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MET_AfterAllSelections", ";E_{T}^{miss};Occur / %.1f", nMetBins, fMetMin, fMetMax);
   hInverted_MVAmax1_AfterAllSelections =  
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MVAmax1_AfterAllSelections", ";#BDT discriminant;Events / %.2f", 40, -1.0, +1.0);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MVAmax1_AfterAllSelections", ";#BDT discriminant;Occur / %.2f", 40, -1.0, +1.0);
   hInverted_MVAmax2_AfterAllSelections =  
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MVAmax2_AfterAllSelections", ";#BDT discriminant;Events / %.2f", 40, -1.0, +1.0);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MVAmax2_AfterAllSelections", ";#BDT discriminant;Occur / %.2f", 40, -1.0, +1.0);
 
   hInverted_LdgTetrajetPt_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Inverted_LdgTetrajetPt_AfterAllSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Inverted_LdgTetrajetPt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
   
   hInverted_LdgTetrajetM_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Inverted_LdgTetrajetMass_AfterAllSelections", ";m_{jjjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nInvMassBins, fInvMassMin, fInvMassMax);
+				      "Inverted_LdgTetrajetMass_AfterAllSelections", ";m_{jjjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nInvMassBins, fInvMassMin, fInvMassMax);
 
   hInverted_TetrajetBJetPt_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Inverted_TetrajetBJetPt_AfterAllSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Inverted_TetrajetBJetPt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hInverted_TetrajetBJetEta_AfterAllSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_TetrajetBJetEta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+				      "Inverted_TetrajetBJetEta_AfterAllSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
   hInverted_TetrajetBJetBdisc_AfterAllSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_TetrajetBJetBdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+				      "Inverted_TetrajetBJetBdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   
   hInverted_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
@@ -2146,142 +2146,142 @@ void FakeBMeasurement::book(TDirectory *dir) {
 
   hInverted_LdgTrijetPt_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_LdgTrijetPt_AfterAllSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Inverted_LdgTrijetPt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hInverted_LdgTrijetM_AfterAllSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_LdgTrijetM_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Inverted_LdgTrijetM_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hInverted_LdgTrijetBJetBdisc_AfterAllSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_LdgTrijetBJetBdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+				      "Inverted_LdgTrijetBJetBdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hInverted_SubLdgTrijetPt_AfterAllSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_SubLdgTrijetPt_AfterAllSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Inverted_SubLdgTrijetPt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hInverted_SubLdgTrijetM_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_SubLdgTrijetM_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Inverted_SubLdgTrijetM_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hInverted_SubLdgTrijetBJetBdisc_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_SubLdgTrijetBJetBdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+				      "Inverted_SubLdgTrijetBJetBdisc_AfterAllSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hInverted_LdgDijetPt_AfterAllSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Inverted_LdgDijetPt_AfterAllSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Inverted_LdgDijetPt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hInverted_LdgDijetM_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Inverted_LdgDijetM_AfterAllSelections", ";m_{jj} (GeV/c^{2});Events / %0.f GeV/c^{2}", nWMassBins, fWMassMin, fWMassMax);
+				      "Inverted_LdgDijetM_AfterAllSelections", ";m_{jj} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nWMassBins, fWMassMin, fWMassMax);
 
   hInverted_SubLdgDijetPt_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_SubLdgDijetPt_AfterAllSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Inverted_SubLdgDijetPt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hInverted_SubLdgDijetM_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_SubLdgDijetM_AfterAllSelections", ";m_{jj} (GeV/c^{2});Events / %0.f GeV/c^{2}", nWMassBins, fWMassMin, fWMassMax);
+				      "Inverted_SubLdgDijetM_AfterAllSelections", ";m_{jj} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nWMassBins, fWMassMin, fWMassMax);
 
   // Inverted selection (CRSelections)
   hInverted_NBjets_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_NBjets_AfterCRSelections", ";b-jet multiplicity;Events / %.0f", nNBins, fNMin, fNMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_NBjets_AfterCRSelections", ";b-jet multiplicity;Occur / %.0f", nNBins, fNMin, fNMax);
 
   hInverted_Bjet1Pt_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet1Pt_AfterCRSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet1Pt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hInverted_Bjet2Pt_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet2Pt_AfterCRSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet2Pt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hInverted_Bjet3Pt_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3Pt_AfterCRSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3Pt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
 
   hInverted_Bjet1Eta_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet1Eta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet1Eta_AfterCRSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hInverted_Bjet2Eta_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet2Eta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet2Eta_AfterCRSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hInverted_Bjet3Eta_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3Eta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3Eta_AfterCRSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
   hInverted_Bjet1Bdisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet1Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet1Bdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hInverted_Bjet2Bdisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet2Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet2Bdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hInverted_Bjet3Bdisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3Bdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hInverted_Njets_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Njets_AfterCRSelections", ";jet multiplicity;Events / %.0f", nNBins, fNMin, fNMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Njets_AfterCRSelections", ";jet multiplicity;Occur / %.0f", nNBins, fNMin, fNMax);
   hInverted_Jet1Pt_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet1Pt_AfterCRSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet1Pt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hInverted_Jet2Pt_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet2Pt_AfterCRSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet2Pt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hInverted_Jet3Pt_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet3Pt_AfterCRSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet3Pt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hInverted_Jet4Pt_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet4Pt_AfterCRSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet4Pt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hInverted_Jet5Pt_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet5Pt_AfterCRSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet5Pt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hInverted_Jet6Pt_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet6Pt_AfterCRSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet6Pt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
   hInverted_Jet7Pt_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7Pt_AfterCRSelections", ";p_{T} (GeV/c);Events / %.0f", nPtBins, fPtMin, fPtMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7Pt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %.0f", nPtBins, fPtMin, fPtMax);
 
   hInverted_Jet1Eta_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet1Eta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet1Eta_AfterCRSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hInverted_Jet2Eta_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet2Eta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet2Eta_AfterCRSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hInverted_Jet3Eta_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet3Eta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet3Eta_AfterCRSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hInverted_Jet4Eta_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet4Eta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet4Eta_AfterCRSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hInverted_Jet5Eta_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet5Eta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet5Eta_AfterCRSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hInverted_Jet6Eta_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet6Eta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet6Eta_AfterCRSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   hInverted_Jet7Eta_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7Eta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7Eta_AfterCRSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
   hInverted_Jet1Bdisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet1Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet1Bdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hInverted_Jet2Bdisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet2Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet2Bdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hInverted_Jet3Bdisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet3Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet3Bdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hInverted_Jet4Bdisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet4Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet4Bdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hInverted_Jet5Bdisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet5Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet5Bdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hInverted_Jet6Bdisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet6Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet6Bdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   hInverted_Jet7Bdisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7Bdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hInverted_MET_AfterCRSelections =  
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MET_AfterCRSelections", ";E_{T}^{miss};Events / %.1f", nMetBins, fMetMin, fMetMax);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MET_AfterCRSelections", ";E_{T}^{miss};Occur / %.1f", nMetBins, fMetMin, fMetMax);
   hInverted_MVAmax1_AfterCRSelections =  
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MVAmax1_AfterCRSelections", ";#BDT discriminant;Events / %.2f", 40, -1.0, +1.0);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MVAmax1_AfterCRSelections", ";#BDT discriminant;Occur / %.2f", 40, -1.0, +1.0);
   hInverted_MVAmax2_AfterCRSelections =  
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MVAmax2_AfterCRSelections", ";#BDT discriminant;Events / %.2f", 40, -1.0, +1.0);
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MVAmax2_AfterCRSelections", ";#BDT discriminant;Occur / %.2f", 40, -1.0, +1.0);
 
   hInverted_LdgTetrajetPt_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Inverted_LdgTetrajetPt_AfterCRSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Inverted_LdgTetrajetPt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
   
   hInverted_LdgTetrajetM_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Inverted_LdgTetrajetMass_AfterCRSelections", ";m_{jjjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nInvMassBins, fInvMassMin, fInvMassMax);
+				      "Inverted_LdgTetrajetMass_AfterCRSelections", ";m_{jjjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nInvMassBins, fInvMassMin, fInvMassMax);
 
   hInverted_TetrajetBJetPt_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Inverted_TetrajetBJetPt_AfterCRSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Inverted_TetrajetBJetPt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hInverted_TetrajetBJetEta_AfterCRSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_TetrajetBJetEta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+				      "Inverted_TetrajetBJetEta_AfterCRSelections", ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
   
   hInverted_TetrajetBJetBdisc_AfterCRSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_TetrajetBJetBdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+				      "Inverted_TetrajetBJetBdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
   
   hInverted_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
@@ -2297,43 +2297,43 @@ void FakeBMeasurement::book(TDirectory *dir) {
 
   hInverted_LdgTrijetPt_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_LdgTrijetPt_AfterCRSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Inverted_LdgTrijetPt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hInverted_LdgTrijetM_AfterCRSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_LdgTrijetM_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Inverted_LdgTrijetM_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hInverted_LdgTrijetBJetBdisc_AfterCRSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_LdgTrijetBJetBdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+				      "Inverted_LdgTrijetBJetBdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hInverted_SubLdgTrijetPt_AfterCRSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_SubLdgTrijetPt_AfterCRSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Inverted_SubLdgTrijetPt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hInverted_SubLdgTrijetM_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_SubLdgTrijetM_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Inverted_SubLdgTrijetM_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hInverted_SubLdgTrijetBJetBdisc_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_SubLdgTrijetBJetBdisc_AfterCRSelections", 
+				      "Inverted_SubLdgTrijetBJetBdisc_AfterCRSelections", ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hInverted_LdgDijetPt_AfterCRSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Inverted_LdgDijetPt_AfterCRSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Inverted_LdgDijetPt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hInverted_LdgDijetM_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
-				      "Inverted_LdgDijetM_AfterCRSelections", ";m_{jj} (GeV/c^{2});Events / %0.f GeV/c^{2}", nWMassBins, fWMassMin, fWMassMax);
+				      "Inverted_LdgDijetM_AfterCRSelections", ";m_{jj} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nWMassBins, fWMassMin, fWMassMax);
 
   hInverted_SubLdgDijetPt_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_SubLdgDijetPt_AfterCRSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
+				      "Inverted_SubLdgDijetPt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
   hInverted_SubLdgDijetM_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_SubLdgDijetM_AfterCRSelections", ";m_{jj} (GeV/c^{2});Events / %0.f GeV/c^{2}", nWMassBins, fWMassMin, fWMassMax);
+				      "Inverted_SubLdgDijetM_AfterCRSelections", ";m_{jj} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nWMassBins, fWMassMin, fWMassMax);
 
   return;
 }
