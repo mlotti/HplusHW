@@ -57,25 +57,25 @@ metFilter = PSet(
 # Electron veto
 #================================================================================================
 eVeto = PSet(
-    electronPtCut     = 10.0,   # [default: 10.0]
-    electronEtaCut    = 2.1,    # [default:  2.1]
-    electronIDType    = "MVA",  # [default: "default"]
+    electronPtCut     = 10.0,   # sync: 10.0
+    electronEtaCut    = 2.1,    # sync:  2.1
+    electronIDType    = "MVA",  # options: "default", "MVA"
     electronID        = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
     electronMVA       = "ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values",
     electronMVACut    = "Loose",
-    electronIsolation = "veto", # [default: "veto"]
-    electronIsolType  = "mini", # [default: "default"]
+    electronIsolation = "veto", # options: "veto", "tight"
+    electronIsolType  = "mini", # options: "mini", "default"
     )
 
 #================================================================================================
 # Muon veto
 #================================================================================================
 muVeto = PSet(
-    muonPtCut         = 10.0,        # [default: 10.0]
-    muonEtaCut        = 2.4,         # [default:  2.4]
-    muonID            = "muIDLoose", # [default: "muIDLoose"] (options: "muIDLoose", "muIDMedium", "muIDTight")
-    muonIsolation     = "veto",      # [default: "veto"]      (options: "veto", "tight")
-    muonIsolType      = "mini",      # [default: "default"]
+    muonPtCut         = 10.0,        # sync: 10.0
+    muonEtaCut        = 2.4,         # sync:  2.4
+    muonID            = "muIDLoose", # options: "muIDLoose", "muIDMedium", "muIDTight"
+    muonIsolation     = "veto",      # options: "veto", "tight")
+    muonIsolType      = "mini",      # options: "mini", "default"
 )
 
 #================================================================================================
@@ -226,7 +226,7 @@ topSelectionBDT = PSet(
 # FakeB Measurement Options
 #================================================================================================
 fakeBMeasurement = PSet(
-    prelimTopMVACutValue              = 0.65,     # [default: 0.65]
+    prelimTopMVACutValue              = 0.60,     # [default: 0.60]
     prelimTopMVACutDirection          =  ">=",    # [default: ">="]
     # CSVv2-M (Baseline b-jets)
     numberOfBJetsCutValue             = 2,        # [VR, CR2: 2   , CR3, CR4: 1   ]
