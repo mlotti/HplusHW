@@ -359,6 +359,8 @@ private:
   // TopSelection::Data fTopData;
   TopSelectionBDT::Data fTopData;
   AngularCutsCollinear::Data fBackToBackAngularCutsData;
+  // FatJetSelection::Data fFatJetData;
+  // FatJetSoftDropSelection::Data fFatJetSoftDropData;
 
   /// Helper
   CommonPlotsHelper fHelper;

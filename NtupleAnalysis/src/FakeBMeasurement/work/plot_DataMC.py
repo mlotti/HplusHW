@@ -7,16 +7,19 @@ Good for sanity checks for key points in the cut-flow
 Usage:
 ./plot_DataMC.py -m <pseudo_mcrab_directory> [opts]
 
+
 Examples:
 ./plot_DataMC.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_TopCut10_171012_011451 --folder jetSelection_ --url
 ./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurement --ratio
 ./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurementEWKGenuineB --onlyMC
 ./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurementEWKFakeB --onlyMC --nostack
-./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurementEWKGenuineB --onlyMC && ./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurementEWKFakeB --onlyMC && ./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurement --ratio
 
 Last Used:
-./plot_DataMC.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/QCDMeaurement/TopSelectionBDT/FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --mergeEWK --nostack --onlyMC
-./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDT0p40_AllSelections_BDT0p40to0p90_RandomSort_171127_034851 --folder ForFakeBMeasurement --url
+./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --mergeEWK --nostack --onlyMC
+
+
+Useful Paths:
+/uscms_data/d3/aattikis/workspace/pseudo-multicrab/QCDMeaurement/TopSelectionBDT/
 '''
 
 #================================================================================================ 
@@ -54,6 +57,11 @@ def Print(msg, printHeader=False):
     else:
         print "\t", msg
     return
+
+def rchop(myString, endString):
+  if myString.endswith(endString):
+    return myString[:-len(endString)]
+  return myString
 
 def Verbose(msg, printHeader=True, verbose=False):
     if not opts.verbose:
@@ -145,6 +153,11 @@ def main(opts):
         if opts.verbose:
             datasetsMgr.PrintInfo()
 
+        # ZJets and DYJets overlap
+        if "ZJetsToQQ_HT600toInf" in datasetsMgr.getAllDatasetNames() and "DYJetsToQQ_HT180" in datasetsMgr.getAllDatasetNames():
+            Print("Cannot use both ZJetsToQQ and DYJetsToQQ due to duplicate events? Investigate. Removing ZJetsToQQ datasets for now ..", True)
+            datasetsMgr.remove(filter(lambda name: "ZJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
+
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
         
@@ -222,7 +235,7 @@ def GetHistoKwargs(h, opts):
         "ratio"            : opts.ratio,
         "stackMCHistograms": not opts.nostack,
         "ratioInvert"      : False, 
-        "addMCUncertainty" : False, 
+        "addMCUncertainty" : True, 
         "addLuminosityText": True,
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
@@ -455,9 +468,8 @@ def GetHistoKwargs(h, opts):
         kwargs["cutBox"] = {"cutValue": opts.signalMass, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
 
     if "counters" in opts.folder:
-        ROOT.gStyle.SetLabelSize(16.0, "X")
-        #ROOT.gStyle.SetLabelFont(62, "X")
-        #ROOT.gStyle.SetLabelOffset(1.0)
+        ROOT.gStyle.SetLabelSize(16.0, "X")        
+        # ROOT.gStyle.SetLabelOffset(1.2)
         if opts.ratio:
             kwargs["moveLegend"] = {"dx": -0.52, "dy": -0.55, "dh": 0.0}
         else:
@@ -466,11 +478,10 @@ def GetHistoKwargs(h, opts):
         
     if h == "counter":
         ROOT.gStyle.SetLabelSize(16.0, "X")
-        xMin = 17 # 15 = jets selection, 16 = bjets selection, 17 = baseline: bjets selection, 18 = bjets SF
+        xMin = 17  # 15 = jets selection, 16 = bjets selection, 17 = baseline: bjets selection, 18 = bjets SF
         xMax = 29
-        #kwargs["opts"]   = {"xmin": xMin, "xmax": xMax, "ymin": 1e0, "ymax": 1e7} #"ymaxfactor": yMaxF}
-        kwargs["opts"]   = {"xmin": xMin, "ymin": 1e0, "ymax": 3e6}#1e7}
-        #kwargs["cutBox"] = {"cutValue": xMin+2, "fillColor": 16, "box": False, "line": True, "greaterThan": True} #indicate btag SF
+        kwargs["opts"]   = {"xmin": xMin, "ymin": 8e-2, "ymax": 3e6}#"ymaxfactor": yMaxF}
+        kwargs["moveLegend"] = {"dx": -0.52, "dy": -0.38, "dh": 0.1}
 
     if "IsolPt" in h:
         ROOT.gStyle.SetNdivisions(8, "X")
@@ -679,6 +690,12 @@ def getHistos(datasetsMgr, histoName):
     h2.setName("EWK")
     return [h1, h2]
 
+
+def getHisto(datasetsMgr, histoName, dataset):
+    h = datasetsMgr.getDataset(dataset).getDatasetRootHisto(histoName)
+    return h
+
+
 def DataMCHistograms(datasetsMgr, histoName, intLumi):
     Verbose("Plotting Data-MC Histograms")
 
@@ -717,7 +734,7 @@ def DataMCHistograms(datasetsMgr, histoName, intLumi):
             return
 
     # Get Histogram name and its kwargs
-    saveName = histoName.rsplit("/")[-1] # histoName.replace("/", "_")
+    saveName = histoName.rsplit("/")[-1]
     kwargs_  = GetHistoKwargs(saveName, opts)
 
     # Create the plotting object
@@ -726,8 +743,6 @@ def DataMCHistograms(datasetsMgr, histoName, intLumi):
             p = plots.MCPlot(datasetsMgr, histoName, saveFormats=[], normalizeToLumi=intLumi)
         else:
             p = plots.MCPlot(datasetsMgr, histoName, saveFormats=[], normalizeToOne=True)
-        #p.setLuminosity(intLumi)
-        #p.histoMgr.normalizeMCToLuminosity(intLumi)
     else:
         p = plots.DataMCPlot(datasetsMgr, histoName, saveFormats=[])
 
@@ -751,45 +766,47 @@ def DataMCHistograms(datasetsMgr, histoName, intLumi):
 
     # Replace bin labels
     if "counter" in opts.folder:
-        replaceBinLabels(p, saveName)
+        replaceBinLabels(p, histoName)
 
     # Save the plots in custom list of saveFormats
-    SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode, opts.folder), [".png"])#, ".pdf"] )
+    SavePlot(p, saveName, os.path.join(opts.saveDir, "DataMC", opts.optMode), [".png"])#, ".pdf"] )
     return
 
 def replaceBinLabels(p, histoName):
     '''
     https://root.cern.ch/doc/master/classTAttText.html#T5
     '''
-    # myBinList = []
-    # if histoName == "counter" or histoName == "weighted/counter":
-    #     myBinList = ["#geq 7 jets", "#geq 3 b-jets", "b-jets SF", "E_{T}^{miss}", "Topology", "TopReco"]
-    # elif "bjet" in histoName:
-    #     myBinList = ["All", "#eta", "p_{T}", "CSVv2 (M)", "Trg Match", "#geq 3"]
-    # elif "jet" in histoName:
-    #     myBinList = ["All", "jet ID", "PU ID", "#tau match", "#eta", "p_{T}", "#geq 7", "H_{T}", "J_{T}", "MHT"]
-    # else:
-    #     pass
-    # for i in range(0, len(myBinList)):
-    #     p.getFrame().GetXaxis().SetBinLabel(i+1, myBinList[i])
-    #     #p.getFrame().GetXaxis().GetBinLabel(i+1).SetTextAngle(90) #not correct
-    # return
-    myBinList = []
-    if "counter" not in histoName:
+    #if "counter" not in histoName:
+    if histoName != "counters/weighted/counter":
         return
-    #myBinList = ["SR: #geq 3 b-jets", "SR: b-jets SF", "SR: E_{T}^{miss}", "SR: Topology", "SR: TopReco", "SR: Selected",
-    #             "CR: #geq 3 b-jets", "CR: b-jets SF", "CR: E_{T}^{miss}", "CR: Topology", "CR: TopReco", "CR: Selected"]
 
-    myBinList = ["3b", "b-SF", "E_{T}^{miss}", "H2", "Top", "SR", "CR1",
-                 "2b", "b-SF", "E_{T}^{miss}", "H2", "Top", "VR", "CR2"]
+    myBinDict = {
+        "passed jet selection ()"         : "#geq 7j",
+        "passed b-jet selection ()"       : "#geq 3b",
+        "Baseline: passed b-jet selection": "SR: #geq 3b",
+        "Baseline: b tag SF"              : "SR: b-SF",
+        "passed MET selection (Baseline)" : "SR: MET",
+        "passed top selection (Baseline)" : "SR: Top",
+        "Baseline: selected events"       : "SR: All",
+        "Baseline: selected CR events"    : "CR1: All",
+        "Inverted: passed b-jet selection": "VR: =2b",
+        "Inverted: b tag SF"              : "VR: b-SF",
+        "passed MET selection (Inverted)" : "VR: MET",
+        "passed top selection (Inverted)" : "VR: Top",
+        "Inverted: selected events"       : "VR: All",
+        "Inverted: selected CR events"    : "CR2: All",
+        }
 
-
-    #for i in range(0, p.getFrame().GetXaxis().GetNbins()):
-    #    p.getFrame().GetXaxis().SetBinLabel(i+1, "")   
-
-    if 1:
-        for i in range(0, len(myBinList)):
-            p.getFrame().GetXaxis().SetBinLabel(i+1, myBinList[i])
+    nBinsX = p.getFrame().GetXaxis().GetNbins()
+    p.getFrame().GetXaxis().LabelsOption("v")
+    for i in range(0, nBinsX+1):
+        oldLabel = p.getFrame().GetXaxis().GetBinLabel(i)
+        if oldLabel in myBinDict.keys():
+            newLabel = myBinDict[oldLabel]
+            p.getFrame().GetXaxis().SetBinLabel(i, newLabel)
+            Verbose("%s -> %s" % (oldLabel, newLabel), False)
+        else:
+            Verbose("Could not find new label for bin %i and label \"%s\"" % (i, oldLabel), True)
     return
 
 def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
@@ -850,7 +867,7 @@ if __name__ == "__main__":
     MERGEEWK     = False
     URL          = False
     NOERROR      = True
-    SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/DataMC/"
+    SAVEDIR      = "/publicweb/a/aattikis/" #FakeBMeasurement/DataMC/"
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug' 
     FOLDER       = "ForDataDrivenCtrlPlots" #"FailedBJetGenuineB" #jetSelection_
@@ -936,6 +953,12 @@ if __name__ == "__main__":
         parser.print_help()
         #print __doc__
         sys.exit(1)
+    else:
+        mcrabDir = rchop(opts.mcrab, "/")
+        if len(mcrabDir.split("/")) > 1:
+            mcrabDir = mcrabDir.split("/")[-1]
+        opts.saveDir += mcrabDir + "/" + opts.folder
+
 
     # Sanity check
     allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 2000, 3000]

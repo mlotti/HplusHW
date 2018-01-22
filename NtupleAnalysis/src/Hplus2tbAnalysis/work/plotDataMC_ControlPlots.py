@@ -264,7 +264,7 @@ def GetHistoKwargs(h, opts):
         "ratio"            : True, 
         "stackMCHistograms": True,
         "ratioInvert"      : False, 
-        "addMCUncertainty" : False, 
+        "addMCUncertainty" : True, 
         "addLuminosityText": True,
         "addCmText"       : True,
         "cmsExtraText"     : "Preliminary",

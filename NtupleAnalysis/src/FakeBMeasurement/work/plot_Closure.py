@@ -50,6 +50,13 @@ def Print(msg, printHeader=False):
         print "\t", msg
     return
 
+
+def rchop(myString, endString):
+  if myString.endswith(endString):
+    return myString[:-len(endString)]
+  return myString
+
+
 def Verbose(msg, printHeader=True, verbose=False):
     if not opts.verbose:
         return
@@ -198,19 +205,34 @@ def main(opts):
                     path_CR2.append(p)
 
         # For-loop: All histogram pairs
-        for hSR, hCR1 in zip(path_SR, path_CR1):
-            Verbose("Plotting histogram \"%s\"" % hSR, False)
-            if "IsGenuineB" in hSR:
-                continue
-            PlotComparison(datasetsMgr, hSR, hCR1, "SRvCR1")
-
-        # For-loop: All histogram pairs
-        for hVR, hCR2 in zip(path_VR, path_CR2):
-            Verbose("Plotting histogram \"%s\"" % hVR, False)
+        for hVR, hCR2, hCR1 in zip(path_VR, path_CR2, path_CR1):
+            break # not needed now
             if "IsGenuineB" in hVR:
                 continue
             PlotComparison(datasetsMgr, hVR, hCR2, "VRvCR2")
 
+        # For-loop: All histogram pairs
+        for hCR1, hCR2 in zip(path_CR1, path_CR2):
+            if "IsGenuineB" in hCR1:
+                continue
+            PlotComparison(datasetsMgr, hCR1, hCR2, "CR1vCR2")
+
+        # For-loop: All histogram pairs
+        for hSR, hVR in zip(path_SR, path_VR):
+            break
+            Print("UNBLINDING SR! Are you nuts ? BREAK!" % hSR, False)
+            if "IsGenuineB" in hSR:
+                continue
+            PlotComparison(datasetsMgr, hSR, hVR, "SRvVR")
+
+        # For-loop: All histogram pairs
+        for hSR, hCR1 in zip(path_SR, path_CR1):
+            break
+            Print("UNBLINDING SR! Are you nuts ? BREAK!" % hSR, False)
+            raw_input("Press any key to continue")
+            if "IsGenuineB" in hSR:
+                continue
+            PlotComparison(datasetsMgr, hSR, hCR1, "SRvCR1")
 
     return
 
@@ -332,12 +354,13 @@ def PlotComparison(datasetsMgr, hBaseline, hInverted, ext):
     saveName = saveName.replace("Baseline_", "")
     saveName = saveName.replace("Inverted_", "")
     saveName = saveName.replace("_AfterAllSelections", "_" + ext)
+    saveName = saveName.replace("_AfterCRSelections", "_" + ext)
 
     if opts.useMC:
         savePath = os.path.join(opts.saveDir, "Closure", "MC", opts.optMode)
     else:
         savePath = os.path.join(opts.saveDir, "Closure", opts.optMode)
-    SavePlot(p, saveName, savePath, saveFormats = [".pdf", ".png"])
+    SavePlot(p, saveName, savePath, saveFormats = [".png", ".pdf"])
     return
 
 def GetHistoKwargs(histoName, ext, opts):
@@ -345,13 +368,13 @@ def GetHistoKwargs(histoName, ext, opts):
     _cutBox = None
     _rebinX = 1
     if opts.normaliseToOne:
-        _opts   = {"ymin": 3e-4, "ymaxfactor": 2.0}
+        #_opts   = {"ymin": 3e-4, "ymaxfactor": 2.0}
+        _opts   = {"ymin": 7e-5, "ymaxfactor": 2.0}
     else:
         _opts   = {"ymin": 1e0, "ymaxfactor": 2.0}
     _format = "%0.0f"
     _xlabel = None
     _ratio  = True
-
         
     if "dijetm" in hName:
         _rebinX = 2
@@ -359,18 +382,19 @@ def GetHistoKwargs(histoName, ext, opts):
         _format = "%0.0f " + _units
         _xlabel = "m_{jj} (%s)" % (_units)
         _cutBox = {"cutValue": 80.399, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 400.0
+        _opts["xmax"] = 200.0
     if "met" in hName:
-        _rebinX = 1 #2
+        _units  = "GeV"
+        _rebinX = 2 #2
         _opts["xmax"] = 300.0
     if "mvamax" in hName:
         _rebinX = 1
         _units  = ""
         _format = "%0.2f " + _units
-        _xlabel = "BDT discriminant"
-        _opts["xmin"] =  0.0
-        _cutBox = {"cutValue": 0.8, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        #_cutBox = {"cutValue": 0.9, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        #_xlabel = "BDTG discriminant"
+        _xlabel = "top-tag discriminant"
+        _opts["xmin"] =  0.45
+        _cutBox = {"cutValue": 0.85, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
     if "nbjets" in hName:
         _units  = ""
         _format = "%0.0f " + _units
@@ -408,21 +432,22 @@ def GetHistoKwargs(histoName, ext, opts):
         _format = "%0.0f " + _units
         _xlabel = "m_{jj} (%s)" % _units
         _cutBox = {"cutValue": 80.385, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 300.0
+        _opts["xmax"] = 200.0
     if "trijetm" in hName:
-        _rebinX = 4#5
+        _rebinX = 2
         _units  = "GeV/c^{2}"
         _format = "%0.0f " + _units
         _xlabel = "m_{jjb} (%s)" % _units
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        if "allselections" in hName:
-            _opts["xmax"] = 400.0
-        else:
+        if "standardelections" in hName:
+            _rebinX = 4
             _opts["xmax"] = 800.0
+        else:
+            _opts["xmax"] = 300.0
     if "pt" in hName:
-        _rebinX = 2
+        _rebinX = 2 
         _format = "%0.0f GeV/c"
-        _cutBox = {"cutValue": 40., "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         if "jet1" in hName:
             _opts["xmax"] = 1000.0
         elif "jet2" in hName:
@@ -437,6 +462,12 @@ def GetHistoKwargs(histoName, ext, opts):
             _opts["xmax"] = 250.0
         elif "jet7" in hName:
             _opts["xmax"] = 200.0
+        elif "tetrajet" in hName:
+            _opts["xmax"] = 1000.0
+            _cutBox = {"cutValue": 200.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+            ROOT.gStyle.SetNdivisions(8, "X")
+        elif "dijet" in hName:
+            _cutBox = {"cutValue": 200.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         else:
             _opts["xmax"] = 600.0
         #ROOT.gStyle.SetNdivisions(8, "X")
@@ -469,6 +500,14 @@ def GetHistoKwargs(histoName, ext, opts):
 
     if "bdisc" in hName:
         _format = "%0.2f"
+        _rebinX = 1 #2
+        _opts["xmin"] = 0.0
+        _opts["xmax"] = 1.0
+        #_cutBox = {"cutValue": 0.5426, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _cutBox = {"cutValue": +0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _xlabel = "b-tag discriminant"
+        if "trijet" in hName:
+            _opts["xmin"] = 0.7
     if "tetrajetm" in hName:
         _rebinX = 10 #4
         if opts.useMC:
@@ -494,7 +533,7 @@ def GetHistoKwargs(histoName, ext, opts):
         "opts"             : _opts,
         "opts2"            : {"ymin": 0.6, "ymax": 1.4},
         "log"              : True,
-        "createLegend"     : {"x1": 0.84, "y1": 0.78, "x2": 0.98, "y2": 0.92},
+        "createLegend"     : {"x1": 0.80, "y1": 0.78, "x2": 0.98, "y2": 0.92},
         #"moveLegend"       : {"dx": -0.1, "dy": -0.01, "dh": 0.1},
         "cutBox"           : _cutBox,
         }
@@ -550,7 +589,7 @@ if __name__ == "__main__":
     MERGEEWK     = True
     URL          = False
     NOERROR      = True
-    SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"
+    SAVEDIR      = "/publicweb/a/aattikis/" #FakeBMeasurement/"
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
     NORMALISE    = False
@@ -624,6 +663,12 @@ if __name__ == "__main__":
         parser.print_help()
         #print __doc__
         sys.exit(1)
+    else:
+        mcrabDir = rchop(opts.mcrab, "/")
+        if len(mcrabDir.split("/")) > 1:
+            mcrabDir = mcrabDir.split("/")[-1]
+        opts.saveDir += mcrabDir + "/" + opts.folder
+
 
     # Sanity check
     if not opts.mergeEWK:
