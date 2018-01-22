@@ -71,6 +71,8 @@ _physicalMcAdd = {
     "WZ"     : "WZ",
     "WZ_ext" : "WZ",
     "WZ_ext1": "WZ",
+    "ZZ"     : "ZZ",
+    "ZZ_ext1": "ZZ",
 
     "ST_tW_antitop_5f_inclusiveDecays"     : "ST_tW_antitop_5f_inclusiveDecays",
     "ST_tW_antitop_5f_inclusiveDecays_ext" : "ST_tW_antitop_5f_inclusiveDecays",
