@@ -57,20 +57,25 @@ metFilter = PSet(
 # Electron veto
 #================================================================================================
 eVeto = PSet(
-    electronPtCut     = 15.0,
-    electronEtaCut    = 2.5,
+    electronPtCut     = 10.0,   # sync: 10.0
+    electronEtaCut    = 2.1,    # sync:  2.1
+    electronIDType    = "MVA",  # options: "default", "MVA"
     electronID        = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
-    electronIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
+    electronMVA       = "ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values",
+    electronMVACut    = "Loose",
+    electronIsolation = "veto", # options: "veto", "tight"
+    electronIsolType  = "mini", # options: "mini", "default"
     )
 
 #================================================================================================
 # Muon veto
 #================================================================================================
 muVeto = PSet(
-    muonPtCut         = 10.0,
-    muonEtaCut        = 2.5,
-    muonID            = "muIDLoose", # loosest option for vetoing (options: muIDLoose, muIDMedium, muIDTight)
-    muonIsolation     = "veto",      # loosest possible for vetoing ("veto"), "tight" for selecting
+    muonPtCut         = 10.0,        # sync: 10.0
+    muonEtaCut        = 2.4,         # sync:  2.4
+    muonID            = "muIDLoose", # options: "muIDLoose", "muIDMedium", "muIDTight"
+    muonIsolation     = "veto",      # options: "veto", "tight")
+    muonIsolType      = "mini",      # options: "mini", "default"
 )
 
 #================================================================================================
@@ -92,6 +97,49 @@ jetSelection = PSet(
     MHTCutValue              = 0.0,
     MHTCutDirection          = ">=",
 )
+
+
+#=================================================================================================
+# Fat jet selection
+#=================================================================================================
+fatjetSelection = PSet(
+    fatjetType                  = "FatJets",   
+    fatjetPtCuts                = [100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0],
+    fatjetEtaCuts               = [2.4],
+    numberOfFatJetsCutValue     = 0,
+    numberOfFatJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
+    fatjetIDDiscr               = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
+    fatjetPUIDDiscr             = "",        # does not work at the moment 
+    tauMatchingDeltaR           = 0.4,
+    HTCutValue                  = 0.0,
+    HTCutDirection              = ">=",
+    JTCutValue                  = 0.0,
+    JTCutDirection              = ">=",
+    MHTCutValue                 = 0.0,
+    MHTCutDirection             = ">=",
+)
+
+#=================================================================================================
+# Fat jet selection
+#=================================================================================================
+fatjetSoftDropSelection = PSet(
+    fatjetType                  = "FatJetsSoftDrop",   
+    fatjetPtCuts                = [100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0],
+    fatjetEtaCuts               = [2.4],
+    numberOfFatJetsCutValue     = 0,
+    numberOfFatJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
+    fatjetIDDiscr               = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
+    fatjetPUIDDiscr             = "",        # does not work at the moment 
+    tauMatchingDeltaR           = 0.4,
+    HTCutValue                  = 0.0,
+    HTCutDirection              = ">=",
+    JTCutValue                  = 0.0,
+    JTCutDirection              = ">=",
+    MHTCutValue                 = 0.0,
+    MHTCutDirection             = ">=",
+)
+
+
 
 #================================================================================================
 # B-jet selection
@@ -165,7 +213,7 @@ topSelectionBDT = PSet(
     NjetsMax               = 999,     # [default: 999]
     NBjetsMax              = 999,     # [default: 999]
     # Speed-up calculation by skipping top candidates failing some criteria
-    CSV_bDiscCutValue      = 0.5426,  # [default: 0.8484] #Do not evaluate top candidate if b-jet assigned as b from top fails this cut
+    CSV_bDiscCutValue      = 0.8484,  # [default: 0.8484] #Do not evaluate top candidate if b-jet assigned as b from top fails this cut
     CSV_bDiscCutDirection  = ">=",    # [default: ">="]
     MassCutValue           = 600.0,   # [default: 400.0]
     MassCutDirection       = "<=",    # [default: "<"]
@@ -178,7 +226,7 @@ topSelectionBDT = PSet(
 # FakeB Measurement Options
 #================================================================================================
 fakeBMeasurement = PSet(
-    prelimTopMVACutValue              = 0.65,     # [default: 0.65]
+    prelimTopMVACutValue              = 0.60,     # [default: 0.60]
     prelimTopMVACutDirection          =  ">=",    # [default: ">="]
     # CSVv2-M (Baseline b-jets)
     numberOfBJetsCutValue             = 2,        # [VR, CR2: 2   , CR3, CR4: 1   ]
@@ -243,4 +291,7 @@ allSelections = PSet(
     Trigger               = trigger,
     Verbose               = verbose,
     FakeBMeasurement      = fakeBMeasurement,
+    FatJetSelection       = fatjetSelection,
+    FatJetSoftDropSelection = fatjetSoftDropSelection
 )
+

@@ -156,9 +156,9 @@ private:
   WrappedTH1Triplet *hBaseline_Bjet1Eta_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_Bjet2Eta_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_Bjet3Eta_AfterStandardSelections;
-  WrappedTH1Triplet *hBaseline_Bjet1BtagDisc_AfterStandardSelections;
-  WrappedTH1Triplet *hBaseline_Bjet2BtagDisc_AfterStandardSelections;
-  WrappedTH1Triplet *hBaseline_Bjet3BtagDisc_AfterStandardSelections;
+  WrappedTH1Triplet *hBaseline_Bjet1Bdisc_AfterStandardSelections;
+  WrappedTH1Triplet *hBaseline_Bjet2Bdisc_AfterStandardSelections;
+  WrappedTH1Triplet *hBaseline_Bjet3Bdisc_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_Njets_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_Jet1Pt_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_Jet2Pt_AfterStandardSelections;
@@ -174,13 +174,13 @@ private:
   WrappedTH1Triplet *hBaseline_Jet5Eta_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_Jet6Eta_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_Jet7Eta_AfterStandardSelections;
-  WrappedTH1Triplet *hBaseline_Jet1BtagDisc_AfterStandardSelections;
-  WrappedTH1Triplet *hBaseline_Jet2BtagDisc_AfterStandardSelections;
-  WrappedTH1Triplet *hBaseline_Jet3BtagDisc_AfterStandardSelections;
-  WrappedTH1Triplet *hBaseline_Jet4BtagDisc_AfterStandardSelections;
-  WrappedTH1Triplet *hBaseline_Jet5BtagDisc_AfterStandardSelections;
-  WrappedTH1Triplet *hBaseline_Jet6BtagDisc_AfterStandardSelections;
-  WrappedTH1Triplet *hBaseline_Jet7BtagDisc_AfterStandardSelections;
+  WrappedTH1Triplet *hBaseline_Jet1Bdisc_AfterStandardSelections;
+  WrappedTH1Triplet *hBaseline_Jet2Bdisc_AfterStandardSelections;
+  WrappedTH1Triplet *hBaseline_Jet3Bdisc_AfterStandardSelections;
+  WrappedTH1Triplet *hBaseline_Jet4Bdisc_AfterStandardSelections;
+  WrappedTH1Triplet *hBaseline_Jet5Bdisc_AfterStandardSelections;
+  WrappedTH1Triplet *hBaseline_Jet6Bdisc_AfterStandardSelections;
+  WrappedTH1Triplet *hBaseline_Jet7Bdisc_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_MET_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_MVAmax1_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_MVAmax2_AfterStandardSelections;
@@ -188,13 +188,16 @@ private:
   WrappedTH1Triplet *hBaseline_LdgTetrajetM_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_TetrajetBJetPt_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_TetrajetBJetEta_AfterStandardSelections;
+  WrappedTH1Triplet *hBaseline_TetrajetBJetBdisc_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_DeltaRLdgTrijetBJetTetrajetBJet_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_LdgTrijetPt_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_LdgTrijetM_AfterStandardSelections;
+  WrappedTH1Triplet *hBaseline_LdgTrijetBJetBdisc_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_SubLdgTrijetPt_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_SubLdgTrijetM_AfterStandardSelections;
+  WrappedTH1Triplet *hBaseline_SubLdgTrijetBJetBdisc_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_LdgDijetPt_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_LdgDijetM_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_SubLdgDijetPt_AfterStandardSelections;
@@ -207,9 +210,9 @@ private:
   WrappedTH1Triplet *hBaseline_Bjet1Eta_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_Bjet2Eta_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_Bjet3Eta_AfterAllSelections;
-  WrappedTH1Triplet *hBaseline_Bjet1BtagDisc_AfterAllSelections;
-  WrappedTH1Triplet *hBaseline_Bjet2BtagDisc_AfterAllSelections;
-  WrappedTH1Triplet *hBaseline_Bjet3BtagDisc_AfterAllSelections;
+  WrappedTH1Triplet *hBaseline_Bjet1Bdisc_AfterAllSelections;
+  WrappedTH1Triplet *hBaseline_Bjet2Bdisc_AfterAllSelections;
+  WrappedTH1Triplet *hBaseline_Bjet3Bdisc_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_Njets_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_Jet1Pt_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_Jet2Pt_AfterAllSelections;
@@ -225,13 +228,13 @@ private:
   WrappedTH1Triplet *hBaseline_Jet5Eta_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_Jet6Eta_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_Jet7Eta_AfterAllSelections;
-  WrappedTH1Triplet *hBaseline_Jet1BtagDisc_AfterAllSelections;
-  WrappedTH1Triplet *hBaseline_Jet2BtagDisc_AfterAllSelections;
-  WrappedTH1Triplet *hBaseline_Jet3BtagDisc_AfterAllSelections;
-  WrappedTH1Triplet *hBaseline_Jet4BtagDisc_AfterAllSelections;
-  WrappedTH1Triplet *hBaseline_Jet5BtagDisc_AfterAllSelections;
-  WrappedTH1Triplet *hBaseline_Jet6BtagDisc_AfterAllSelections;
-  WrappedTH1Triplet *hBaseline_Jet7BtagDisc_AfterAllSelections;
+  WrappedTH1Triplet *hBaseline_Jet1Bdisc_AfterAllSelections;
+  WrappedTH1Triplet *hBaseline_Jet2Bdisc_AfterAllSelections;
+  WrappedTH1Triplet *hBaseline_Jet3Bdisc_AfterAllSelections;
+  WrappedTH1Triplet *hBaseline_Jet4Bdisc_AfterAllSelections;
+  WrappedTH1Triplet *hBaseline_Jet5Bdisc_AfterAllSelections;
+  WrappedTH1Triplet *hBaseline_Jet6Bdisc_AfterAllSelections;
+  WrappedTH1Triplet *hBaseline_Jet7Bdisc_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_MET_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_MVAmax1_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_MVAmax2_AfterAllSelections;
@@ -239,13 +242,16 @@ private:
   WrappedTH1Triplet *hBaseline_LdgTetrajetM_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_TetrajetBJetPt_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_TetrajetBJetEta_AfterAllSelections;
+  WrappedTH1Triplet *hBaseline_TetrajetBJetBdisc_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_DeltaRLdgTrijetBJetTetrajetBJet_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_LdgTrijetPt_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_LdgTrijetM_AfterAllSelections;
+  WrappedTH1Triplet *hBaseline_LdgTrijetBJetBdisc_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_SubLdgTrijetPt_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_SubLdgTrijetM_AfterAllSelections;
+  WrappedTH1Triplet *hBaseline_SubLdgTrijetBJetBdisc_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_LdgDijetPt_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_LdgDijetM_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_SubLdgDijetPt_AfterAllSelections;
@@ -258,9 +264,9 @@ private:
   WrappedTH1Triplet *hBaseline_Bjet1Eta_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_Bjet2Eta_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_Bjet3Eta_AfterCRSelections;
-  WrappedTH1Triplet *hBaseline_Bjet1BtagDisc_AfterCRSelections;
-  WrappedTH1Triplet *hBaseline_Bjet2BtagDisc_AfterCRSelections;
-  WrappedTH1Triplet *hBaseline_Bjet3BtagDisc_AfterCRSelections;
+  WrappedTH1Triplet *hBaseline_Bjet1Bdisc_AfterCRSelections;
+  WrappedTH1Triplet *hBaseline_Bjet2Bdisc_AfterCRSelections;
+  WrappedTH1Triplet *hBaseline_Bjet3Bdisc_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_Njets_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_Jet1Pt_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_Jet2Pt_AfterCRSelections;
@@ -276,13 +282,13 @@ private:
   WrappedTH1Triplet *hBaseline_Jet5Eta_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_Jet6Eta_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_Jet7Eta_AfterCRSelections;
-  WrappedTH1Triplet *hBaseline_Jet1BtagDisc_AfterCRSelections;
-  WrappedTH1Triplet *hBaseline_Jet2BtagDisc_AfterCRSelections;
-  WrappedTH1Triplet *hBaseline_Jet3BtagDisc_AfterCRSelections;
-  WrappedTH1Triplet *hBaseline_Jet4BtagDisc_AfterCRSelections;
-  WrappedTH1Triplet *hBaseline_Jet5BtagDisc_AfterCRSelections;
-  WrappedTH1Triplet *hBaseline_Jet6BtagDisc_AfterCRSelections;
-  WrappedTH1Triplet *hBaseline_Jet7BtagDisc_AfterCRSelections;
+  WrappedTH1Triplet *hBaseline_Jet1Bdisc_AfterCRSelections;
+  WrappedTH1Triplet *hBaseline_Jet2Bdisc_AfterCRSelections;
+  WrappedTH1Triplet *hBaseline_Jet3Bdisc_AfterCRSelections;
+  WrappedTH1Triplet *hBaseline_Jet4Bdisc_AfterCRSelections;
+  WrappedTH1Triplet *hBaseline_Jet5Bdisc_AfterCRSelections;
+  WrappedTH1Triplet *hBaseline_Jet6Bdisc_AfterCRSelections;
+  WrappedTH1Triplet *hBaseline_Jet7Bdisc_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_MET_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_MVAmax1_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_MVAmax2_AfterCRSelections;
@@ -290,13 +296,16 @@ private:
   WrappedTH1Triplet *hBaseline_LdgTetrajetM_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_TetrajetBJetPt_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_TetrajetBJetEta_AfterCRSelections;
+  WrappedTH1Triplet *hBaseline_TetrajetBJetBdisc_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_DeltaRLdgTrijetBJetTetrajetBJet_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_LdgTrijetPt_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_LdgTrijetM_AfterCRSelections;
+  WrappedTH1Triplet *hBaseline_LdgTrijetBJetBdisc_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_SubLdgTrijetPt_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_SubLdgTrijetM_AfterCRSelections;
+  WrappedTH1Triplet *hBaseline_SubLdgTrijetBJetBdisc_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_LdgDijetPt_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_LdgDijetM_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_SubLdgDijetPt_AfterCRSelections;
@@ -310,9 +319,9 @@ private:
   WrappedTH1Triplet *hInverted_Bjet1Eta_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_Bjet2Eta_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_Bjet3Eta_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_Bjet1BtagDisc_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_Bjet2BtagDisc_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_Bjet3BtagDisc_AfterStandardSelections;
+  WrappedTH1Triplet *hInverted_Bjet1Bdisc_AfterStandardSelections;
+  WrappedTH1Triplet *hInverted_Bjet2Bdisc_AfterStandardSelections;
+  WrappedTH1Triplet *hInverted_Bjet3Bdisc_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_Njets_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_Jet1Pt_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_Jet2Pt_AfterStandardSelections;
@@ -328,13 +337,13 @@ private:
   WrappedTH1Triplet *hInverted_Jet5Eta_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_Jet6Eta_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_Jet7Eta_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_Jet1BtagDisc_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_Jet2BtagDisc_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_Jet3BtagDisc_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_Jet4BtagDisc_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_Jet5BtagDisc_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_Jet6BtagDisc_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_Jet7BtagDisc_AfterStandardSelections;
+  WrappedTH1Triplet *hInverted_Jet1Bdisc_AfterStandardSelections;
+  WrappedTH1Triplet *hInverted_Jet2Bdisc_AfterStandardSelections;
+  WrappedTH1Triplet *hInverted_Jet3Bdisc_AfterStandardSelections;
+  WrappedTH1Triplet *hInverted_Jet4Bdisc_AfterStandardSelections;
+  WrappedTH1Triplet *hInverted_Jet5Bdisc_AfterStandardSelections;
+  WrappedTH1Triplet *hInverted_Jet6Bdisc_AfterStandardSelections;
+  WrappedTH1Triplet *hInverted_Jet7Bdisc_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_MET_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_MVAmax1_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_MVAmax2_AfterStandardSelections;
@@ -342,13 +351,16 @@ private:
   WrappedTH1Triplet *hInverted_LdgTetrajetM_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_TetrajetBJetPt_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_TetrajetBJetEta_AfterStandardSelections;
+  WrappedTH1Triplet *hInverted_TetrajetBJetBdisc_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_DeltaRLdgTrijetBJetTetrajetBJet_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_LdgTrijetPt_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_LdgTrijetM_AfterStandardSelections;
+  WrappedTH1Triplet *hInverted_LdgTrijetBJetBdisc_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_SubLdgTrijetPt_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_SubLdgTrijetM_AfterStandardSelections;
+  WrappedTH1Triplet *hInverted_SubLdgTrijetBJetBdisc_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_LdgDijetPt_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_LdgDijetM_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_SubLdgDijetPt_AfterStandardSelections;
@@ -361,9 +373,9 @@ private:
   WrappedTH1Triplet *hInverted_Bjet1Eta_AfterAllSelections;
   WrappedTH1Triplet *hInverted_Bjet2Eta_AfterAllSelections;
   WrappedTH1Triplet *hInverted_Bjet3Eta_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_Bjet1BtagDisc_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_Bjet2BtagDisc_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_Bjet3BtagDisc_AfterAllSelections;
+  WrappedTH1Triplet *hInverted_Bjet1Bdisc_AfterAllSelections;
+  WrappedTH1Triplet *hInverted_Bjet2Bdisc_AfterAllSelections;
+  WrappedTH1Triplet *hInverted_Bjet3Bdisc_AfterAllSelections;
   WrappedTH1Triplet *hInverted_Njets_AfterAllSelections;
   WrappedTH1Triplet *hInverted_Jet1Pt_AfterAllSelections;
   WrappedTH1Triplet *hInverted_Jet2Pt_AfterAllSelections;
@@ -379,13 +391,13 @@ private:
   WrappedTH1Triplet *hInverted_Jet5Eta_AfterAllSelections;
   WrappedTH1Triplet *hInverted_Jet6Eta_AfterAllSelections;
   WrappedTH1Triplet *hInverted_Jet7Eta_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_Jet1BtagDisc_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_Jet2BtagDisc_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_Jet3BtagDisc_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_Jet4BtagDisc_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_Jet5BtagDisc_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_Jet6BtagDisc_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_Jet7BtagDisc_AfterAllSelections;
+  WrappedTH1Triplet *hInverted_Jet1Bdisc_AfterAllSelections;
+  WrappedTH1Triplet *hInverted_Jet2Bdisc_AfterAllSelections;
+  WrappedTH1Triplet *hInverted_Jet3Bdisc_AfterAllSelections;
+  WrappedTH1Triplet *hInverted_Jet4Bdisc_AfterAllSelections;
+  WrappedTH1Triplet *hInverted_Jet5Bdisc_AfterAllSelections;
+  WrappedTH1Triplet *hInverted_Jet6Bdisc_AfterAllSelections;
+  WrappedTH1Triplet *hInverted_Jet7Bdisc_AfterAllSelections;
   WrappedTH1Triplet *hInverted_MET_AfterAllSelections;
   WrappedTH1Triplet *hInverted_MVAmax1_AfterAllSelections;
   WrappedTH1Triplet *hInverted_MVAmax2_AfterAllSelections;
@@ -393,13 +405,16 @@ private:
   WrappedTH1Triplet *hInverted_LdgTetrajetM_AfterAllSelections;
   WrappedTH1Triplet *hInverted_TetrajetBJetPt_AfterAllSelections;
   WrappedTH1Triplet *hInverted_TetrajetBJetEta_AfterAllSelections;
+  WrappedTH1Triplet *hInverted_TetrajetBJetBdisc_AfterAllSelections;
   WrappedTH1Triplet *hInverted_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterAllSelections;
   WrappedTH1Triplet *hInverted_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterAllSelections;
   WrappedTH1Triplet *hInverted_DeltaRLdgTrijetBJetTetrajetBJet_AfterAllSelections;
   WrappedTH1Triplet *hInverted_LdgTrijetPt_AfterAllSelections;
   WrappedTH1Triplet *hInverted_LdgTrijetM_AfterAllSelections;
+  WrappedTH1Triplet *hInverted_LdgTrijetBJetBdisc_AfterAllSelections;
   WrappedTH1Triplet *hInverted_SubLdgTrijetPt_AfterAllSelections;
   WrappedTH1Triplet *hInverted_SubLdgTrijetM_AfterAllSelections;
+  WrappedTH1Triplet *hInverted_SubLdgTrijetBJetBdisc_AfterAllSelections;
   WrappedTH1Triplet *hInverted_LdgDijetPt_AfterAllSelections;
   WrappedTH1Triplet *hInverted_LdgDijetM_AfterAllSelections;
   WrappedTH1Triplet *hInverted_SubLdgDijetPt_AfterAllSelections;
@@ -412,9 +427,9 @@ private:
   WrappedTH1Triplet *hInverted_Bjet1Eta_AfterCRSelections;
   WrappedTH1Triplet *hInverted_Bjet2Eta_AfterCRSelections;
   WrappedTH1Triplet *hInverted_Bjet3Eta_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_Bjet1BtagDisc_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_Bjet2BtagDisc_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_Bjet3BtagDisc_AfterCRSelections;
+  WrappedTH1Triplet *hInverted_Bjet1Bdisc_AfterCRSelections;
+  WrappedTH1Triplet *hInverted_Bjet2Bdisc_AfterCRSelections;
+  WrappedTH1Triplet *hInverted_Bjet3Bdisc_AfterCRSelections;
   WrappedTH1Triplet *hInverted_Njets_AfterCRSelections;
   WrappedTH1Triplet *hInverted_Jet1Pt_AfterCRSelections;
   WrappedTH1Triplet *hInverted_Jet2Pt_AfterCRSelections;
@@ -430,13 +445,13 @@ private:
   WrappedTH1Triplet *hInverted_Jet5Eta_AfterCRSelections;
   WrappedTH1Triplet *hInverted_Jet6Eta_AfterCRSelections;
   WrappedTH1Triplet *hInverted_Jet7Eta_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_Jet1BtagDisc_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_Jet2BtagDisc_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_Jet3BtagDisc_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_Jet4BtagDisc_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_Jet5BtagDisc_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_Jet6BtagDisc_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_Jet7BtagDisc_AfterCRSelections;
+  WrappedTH1Triplet *hInverted_Jet1Bdisc_AfterCRSelections;
+  WrappedTH1Triplet *hInverted_Jet2Bdisc_AfterCRSelections;
+  WrappedTH1Triplet *hInverted_Jet3Bdisc_AfterCRSelections;
+  WrappedTH1Triplet *hInverted_Jet4Bdisc_AfterCRSelections;
+  WrappedTH1Triplet *hInverted_Jet5Bdisc_AfterCRSelections;
+  WrappedTH1Triplet *hInverted_Jet6Bdisc_AfterCRSelections;
+  WrappedTH1Triplet *hInverted_Jet7Bdisc_AfterCRSelections;
   WrappedTH1Triplet *hInverted_MET_AfterCRSelections;
   WrappedTH1Triplet *hInverted_MVAmax1_AfterCRSelections;
   WrappedTH1Triplet *hInverted_MVAmax2_AfterCRSelections;
@@ -444,13 +459,16 @@ private:
   WrappedTH1Triplet *hInverted_LdgTetrajetM_AfterCRSelections;
   WrappedTH1Triplet *hInverted_TetrajetBJetPt_AfterCRSelections;
   WrappedTH1Triplet *hInverted_TetrajetBJetEta_AfterCRSelections;
+  WrappedTH1Triplet *hInverted_TetrajetBJetBdisc_AfterCRSelections;
   WrappedTH1Triplet *hInverted_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterCRSelections;
   WrappedTH1Triplet *hInverted_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterCRSelections;
   WrappedTH1Triplet *hInverted_DeltaRLdgTrijetBJetTetrajetBJet_AfterCRSelections;
   WrappedTH1Triplet *hInverted_LdgTrijetPt_AfterCRSelections;
   WrappedTH1Triplet *hInverted_LdgTrijetM_AfterCRSelections;
+  WrappedTH1Triplet *hInverted_LdgTrijetBJetBdisc_AfterCRSelections;
   WrappedTH1Triplet *hInverted_SubLdgTrijetPt_AfterCRSelections;
   WrappedTH1Triplet *hInverted_SubLdgTrijetM_AfterCRSelections;
+  WrappedTH1Triplet *hInverted_SubLdgTrijetBJetBdisc_AfterCRSelections;
   WrappedTH1Triplet *hInverted_LdgDijetPt_AfterCRSelections;
   WrappedTH1Triplet *hInverted_LdgDijetM_AfterCRSelections;
   WrappedTH1Triplet *hInverted_SubLdgDijetPt_AfterCRSelections;
@@ -589,10 +607,10 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hBaseline_Bjet2Eta_AfterStandardSelections;
   delete hBaseline_Bjet3Eta_AfterStandardSelections;
   // hBaseline_BjetsEta_AfterStandardSelections.clear();
-  delete hBaseline_Bjet1BtagDisc_AfterStandardSelections;
-  delete hBaseline_Bjet2BtagDisc_AfterStandardSelections;
-  delete hBaseline_Bjet3BtagDisc_AfterStandardSelections;
-  // hBaseline_BjetsBtagDisc_AfterStandardSelections.clear();
+  delete hBaseline_Bjet1Bdisc_AfterStandardSelections;
+  delete hBaseline_Bjet2Bdisc_AfterStandardSelections;
+  delete hBaseline_Bjet3Bdisc_AfterStandardSelections;
+  // hBaseline_BjetsBdisc_AfterStandardSelections.clear();
   delete hBaseline_Njets_AfterStandardSelections;
   delete hBaseline_Jet1Pt_AfterStandardSelections;
   delete hBaseline_Jet2Pt_AfterStandardSelections;
@@ -610,14 +628,14 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hBaseline_Jet6Eta_AfterStandardSelections;
   delete hBaseline_Jet7Eta_AfterStandardSelections;
   // hBaseline_JetsEta_AfterStandardSelections.clear();
-  delete hBaseline_Jet1BtagDisc_AfterStandardSelections;
-  delete hBaseline_Jet2BtagDisc_AfterStandardSelections;
-  delete hBaseline_Jet3BtagDisc_AfterStandardSelections;
-  delete hBaseline_Jet4BtagDisc_AfterStandardSelections;
-  delete hBaseline_Jet5BtagDisc_AfterStandardSelections;
-  delete hBaseline_Jet6BtagDisc_AfterStandardSelections;
-  delete hBaseline_Jet7BtagDisc_AfterStandardSelections;
-  // hBaseline_JetsBtagDisc_AfterStandardSelections.clear();
+  delete hBaseline_Jet1Bdisc_AfterStandardSelections;
+  delete hBaseline_Jet2Bdisc_AfterStandardSelections;
+  delete hBaseline_Jet3Bdisc_AfterStandardSelections;
+  delete hBaseline_Jet4Bdisc_AfterStandardSelections;
+  delete hBaseline_Jet5Bdisc_AfterStandardSelections;
+  delete hBaseline_Jet6Bdisc_AfterStandardSelections;
+  delete hBaseline_Jet7Bdisc_AfterStandardSelections;
+  // hBaseline_JetsBdisc_AfterStandardSelections.clear();
   delete hBaseline_MET_AfterStandardSelections;
   delete hBaseline_MVAmax1_AfterStandardSelections;
   delete hBaseline_MVAmax2_AfterStandardSelections;
@@ -625,13 +643,16 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hBaseline_LdgTetrajetM_AfterStandardSelections;
   delete hBaseline_TetrajetBJetPt_AfterStandardSelections;
   delete hBaseline_TetrajetBJetEta_AfterStandardSelections;
+  delete hBaseline_TetrajetBJetBdisc_AfterStandardSelections;
   delete hBaseline_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterStandardSelections;
   delete hBaseline_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterStandardSelections;
   delete hBaseline_DeltaRLdgTrijetBJetTetrajetBJet_AfterStandardSelections;
   delete hBaseline_LdgTrijetPt_AfterStandardSelections;
   delete hBaseline_LdgTrijetM_AfterStandardSelections;
+  delete hBaseline_LdgTrijetBJetBdisc_AfterStandardSelections;
   delete hBaseline_SubLdgTrijetPt_AfterStandardSelections;
   delete hBaseline_SubLdgTrijetM_AfterStandardSelections;
+  delete hBaseline_SubLdgTrijetBJetBdisc_AfterStandardSelections;
   delete hBaseline_LdgDijetPt_AfterStandardSelections;
   delete hBaseline_LdgDijetM_AfterStandardSelections;
   delete hBaseline_SubLdgDijetPt_AfterStandardSelections;
@@ -646,10 +667,10 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hBaseline_Bjet2Eta_AfterAllSelections;
   delete hBaseline_Bjet3Eta_AfterAllSelections;
   //  hBaseline_BjetsEta_AfterAllSelections.clear();
-  delete hBaseline_Bjet1BtagDisc_AfterAllSelections;
-  delete hBaseline_Bjet2BtagDisc_AfterAllSelections;
-  delete hBaseline_Bjet3BtagDisc_AfterAllSelections;
-  //  hBaseline_BjetsBtagDisc_AfterAllSelections.clear();
+  delete hBaseline_Bjet1Bdisc_AfterAllSelections;
+  delete hBaseline_Bjet2Bdisc_AfterAllSelections;
+  delete hBaseline_Bjet3Bdisc_AfterAllSelections;
+  //  hBaseline_BjetsBdisc_AfterAllSelections.clear();
   delete hBaseline_Njets_AfterAllSelections;
   delete hBaseline_Jet1Pt_AfterAllSelections;
   delete hBaseline_Jet2Pt_AfterAllSelections;
@@ -667,14 +688,14 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hBaseline_Jet6Eta_AfterAllSelections;
   delete hBaseline_Jet7Eta_AfterAllSelections;
   //  hBaseline_JetsEta_AfterAllSelections.clear();
-  delete hBaseline_Jet1BtagDisc_AfterAllSelections;
-  delete hBaseline_Jet2BtagDisc_AfterAllSelections;
-  delete hBaseline_Jet3BtagDisc_AfterAllSelections;
-  delete hBaseline_Jet4BtagDisc_AfterAllSelections;
-  delete hBaseline_Jet5BtagDisc_AfterAllSelections;
-  delete hBaseline_Jet6BtagDisc_AfterAllSelections;
-  delete hBaseline_Jet7BtagDisc_AfterAllSelections;
-  //  hBaseline_JetsBtagDisc_AfterAllSelections.clear();
+  delete hBaseline_Jet1Bdisc_AfterAllSelections;
+  delete hBaseline_Jet2Bdisc_AfterAllSelections;
+  delete hBaseline_Jet3Bdisc_AfterAllSelections;
+  delete hBaseline_Jet4Bdisc_AfterAllSelections;
+  delete hBaseline_Jet5Bdisc_AfterAllSelections;
+  delete hBaseline_Jet6Bdisc_AfterAllSelections;
+  delete hBaseline_Jet7Bdisc_AfterAllSelections;
+  //  hBaseline_JetsBdisc_AfterAllSelections.clear();
   delete hBaseline_MET_AfterAllSelections;
   delete hBaseline_MVAmax1_AfterAllSelections;
   delete hBaseline_MVAmax2_AfterAllSelections;
@@ -682,13 +703,16 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hBaseline_LdgTetrajetM_AfterAllSelections;
   delete hBaseline_TetrajetBJetPt_AfterAllSelections;
   delete hBaseline_TetrajetBJetEta_AfterAllSelections;
+  delete hBaseline_TetrajetBJetBdisc_AfterAllSelections;
   delete hBaseline_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterAllSelections;
   delete hBaseline_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterAllSelections;
   delete hBaseline_DeltaRLdgTrijetBJetTetrajetBJet_AfterAllSelections;
   delete hBaseline_LdgTrijetPt_AfterAllSelections;
   delete hBaseline_LdgTrijetM_AfterAllSelections;
+  delete hBaseline_LdgTrijetBJetBdisc_AfterAllSelections;
   delete hBaseline_SubLdgTrijetPt_AfterAllSelections;
   delete hBaseline_SubLdgTrijetM_AfterAllSelections;
+  delete hBaseline_SubLdgTrijetBJetBdisc_AfterAllSelections;
   delete hBaseline_LdgDijetPt_AfterAllSelections;
   delete hBaseline_LdgDijetM_AfterAllSelections;
   delete hBaseline_SubLdgDijetPt_AfterAllSelections;
@@ -703,10 +727,10 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hBaseline_Bjet2Eta_AfterCRSelections;
   delete hBaseline_Bjet3Eta_AfterCRSelections;
   //  hBaseline_BjetsEta_AfterCRSelections.clear();
-  delete hBaseline_Bjet1BtagDisc_AfterCRSelections;
-  delete hBaseline_Bjet2BtagDisc_AfterCRSelections;
-  delete hBaseline_Bjet3BtagDisc_AfterCRSelections;
-  //  hBaseline_BjetsBtagDisc_AfterCRSelections.clear();
+  delete hBaseline_Bjet1Bdisc_AfterCRSelections;
+  delete hBaseline_Bjet2Bdisc_AfterCRSelections;
+  delete hBaseline_Bjet3Bdisc_AfterCRSelections;
+  //  hBaseline_BjetsBdisc_AfterCRSelections.clear();
   delete hBaseline_Njets_AfterCRSelections;
   delete hBaseline_Jet1Pt_AfterCRSelections;
   delete hBaseline_Jet2Pt_AfterCRSelections;
@@ -724,14 +748,14 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hBaseline_Jet6Eta_AfterCRSelections;
   delete hBaseline_Jet7Eta_AfterCRSelections;
   //  hBaseline_JetsEta_AfterCRSelections.clear();
-  delete hBaseline_Jet1BtagDisc_AfterCRSelections;
-  delete hBaseline_Jet2BtagDisc_AfterCRSelections;
-  delete hBaseline_Jet3BtagDisc_AfterCRSelections;
-  delete hBaseline_Jet4BtagDisc_AfterCRSelections;
-  delete hBaseline_Jet5BtagDisc_AfterCRSelections;
-  delete hBaseline_Jet6BtagDisc_AfterCRSelections;
-  delete hBaseline_Jet7BtagDisc_AfterCRSelections;
-  //  hBaseline_JetsBtagDisc_AfterCRSelections.clear();
+  delete hBaseline_Jet1Bdisc_AfterCRSelections;
+  delete hBaseline_Jet2Bdisc_AfterCRSelections;
+  delete hBaseline_Jet3Bdisc_AfterCRSelections;
+  delete hBaseline_Jet4Bdisc_AfterCRSelections;
+  delete hBaseline_Jet5Bdisc_AfterCRSelections;
+  delete hBaseline_Jet6Bdisc_AfterCRSelections;
+  delete hBaseline_Jet7Bdisc_AfterCRSelections;
+  //  hBaseline_JetsBdisc_AfterCRSelections.clear();
   delete hBaseline_MET_AfterCRSelections;
   delete hBaseline_MVAmax1_AfterCRSelections;
   delete hBaseline_MVAmax2_AfterCRSelections;
@@ -739,13 +763,16 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hBaseline_LdgTetrajetM_AfterCRSelections;
   delete hBaseline_TetrajetBJetPt_AfterCRSelections;
   delete hBaseline_TetrajetBJetEta_AfterCRSelections;
+  delete hBaseline_TetrajetBJetBdisc_AfterCRSelections;
   delete hBaseline_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterCRSelections;
   delete hBaseline_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterCRSelections;
   delete hBaseline_DeltaRLdgTrijetBJetTetrajetBJet_AfterCRSelections;
   delete hBaseline_LdgTrijetPt_AfterCRSelections;
   delete hBaseline_LdgTrijetM_AfterCRSelections;
+  delete hBaseline_LdgTrijetBJetBdisc_AfterCRSelections;
   delete hBaseline_SubLdgTrijetPt_AfterCRSelections;
   delete hBaseline_SubLdgTrijetM_AfterCRSelections;
+  delete hBaseline_SubLdgTrijetBJetBdisc_AfterCRSelections;
   delete hBaseline_LdgDijetPt_AfterCRSelections;
   delete hBaseline_LdgDijetM_AfterCRSelections;
   delete hBaseline_SubLdgDijetPt_AfterCRSelections;
@@ -761,10 +788,10 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hInverted_Bjet2Eta_AfterStandardSelections;
   delete hInverted_Bjet3Eta_AfterStandardSelections;
   //  hInverted_JetsEta_AfterStandardSelections.clear();
-  delete hInverted_Bjet1BtagDisc_AfterStandardSelections;
-  delete hInverted_Bjet2BtagDisc_AfterStandardSelections;
-  delete hInverted_Bjet3BtagDisc_AfterStandardSelections;
-  //  hInverted_JetsBtagDisc_AfterStandardSelections.clear();
+  delete hInverted_Bjet1Bdisc_AfterStandardSelections;
+  delete hInverted_Bjet2Bdisc_AfterStandardSelections;
+  delete hInverted_Bjet3Bdisc_AfterStandardSelections;
+  //  hInverted_JetsBdisc_AfterStandardSelections.clear();
   delete hInverted_Njets_AfterStandardSelections;
   delete hInverted_Jet1Pt_AfterStandardSelections;
   delete hInverted_Jet2Pt_AfterStandardSelections;
@@ -782,14 +809,14 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hInverted_Jet6Eta_AfterStandardSelections;
   delete hInverted_Jet7Eta_AfterStandardSelections;
   //  hInverted_JetsEta_AfterStandardSelections.clear();
-  delete hInverted_Jet1BtagDisc_AfterStandardSelections;
-  delete hInverted_Jet2BtagDisc_AfterStandardSelections;
-  delete hInverted_Jet3BtagDisc_AfterStandardSelections;
-  delete hInverted_Jet4BtagDisc_AfterStandardSelections;
-  delete hInverted_Jet5BtagDisc_AfterStandardSelections;
-  delete hInverted_Jet6BtagDisc_AfterStandardSelections;
-  delete hInverted_Jet7BtagDisc_AfterStandardSelections;
-  //  hInverted_JetsBtagDisc_AfterStandardSelections.clear();
+  delete hInverted_Jet1Bdisc_AfterStandardSelections;
+  delete hInverted_Jet2Bdisc_AfterStandardSelections;
+  delete hInverted_Jet3Bdisc_AfterStandardSelections;
+  delete hInverted_Jet4Bdisc_AfterStandardSelections;
+  delete hInverted_Jet5Bdisc_AfterStandardSelections;
+  delete hInverted_Jet6Bdisc_AfterStandardSelections;
+  delete hInverted_Jet7Bdisc_AfterStandardSelections;
+  //  hInverted_JetsBdisc_AfterStandardSelections.clear();
   delete hInverted_MET_AfterStandardSelections;
   delete hInverted_MVAmax1_AfterStandardSelections;
   delete hInverted_MVAmax2_AfterStandardSelections;
@@ -797,13 +824,16 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hInverted_LdgTetrajetM_AfterStandardSelections;
   delete hInverted_TetrajetBJetPt_AfterStandardSelections;
   delete hInverted_TetrajetBJetEta_AfterStandardSelections;
+  delete hInverted_TetrajetBJetBdisc_AfterStandardSelections;
   delete hInverted_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterStandardSelections;
   delete hInverted_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterStandardSelections;
   delete hInverted_DeltaRLdgTrijetBJetTetrajetBJet_AfterStandardSelections;
   delete hInverted_LdgTrijetPt_AfterStandardSelections;
   delete hInverted_LdgTrijetM_AfterStandardSelections;
+  delete hInverted_LdgTrijetBJetBdisc_AfterStandardSelections;
   delete hInverted_SubLdgTrijetPt_AfterStandardSelections;
   delete hInverted_SubLdgTrijetM_AfterStandardSelections;
+  delete hInverted_SubLdgTrijetBJetBdisc_AfterStandardSelections;
   delete hInverted_LdgDijetPt_AfterStandardSelections;
   delete hInverted_LdgDijetM_AfterStandardSelections;
   delete hInverted_SubLdgDijetPt_AfterStandardSelections;
@@ -818,10 +848,10 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hInverted_Bjet2Eta_AfterAllSelections;
   delete hInverted_Bjet3Eta_AfterAllSelections;
   //  hInverted_BjetsEta_AfterAllSelections.clear();
-  delete hInverted_Bjet1BtagDisc_AfterAllSelections;
-  delete hInverted_Bjet2BtagDisc_AfterAllSelections;
-  delete hInverted_Bjet3BtagDisc_AfterAllSelections;
-  //  hInverted_BjetsBtagDisc_AfterAllSelections.clear();
+  delete hInverted_Bjet1Bdisc_AfterAllSelections;
+  delete hInverted_Bjet2Bdisc_AfterAllSelections;
+  delete hInverted_Bjet3Bdisc_AfterAllSelections;
+  //  hInverted_BjetsBdisc_AfterAllSelections.clear();
   delete hInverted_Njets_AfterAllSelections;
   delete hInverted_Jet1Pt_AfterAllSelections;
   delete hInverted_Jet2Pt_AfterAllSelections;
@@ -839,14 +869,14 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hInverted_Jet6Eta_AfterAllSelections;
   delete hInverted_Jet7Eta_AfterAllSelections;
   //  hInverted_JetsEta_AfterAllSelections.clear();
-  delete hInverted_Jet1BtagDisc_AfterAllSelections;
-  delete hInverted_Jet2BtagDisc_AfterAllSelections;
-  delete hInverted_Jet3BtagDisc_AfterAllSelections;
-  delete hInverted_Jet4BtagDisc_AfterAllSelections;
-  delete hInverted_Jet5BtagDisc_AfterAllSelections;
-  delete hInverted_Jet6BtagDisc_AfterAllSelections;
-  delete hInverted_Jet7BtagDisc_AfterAllSelections;
-  //  hInverted_JetsBtagDisc_AfterAllSelections.clear();
+  delete hInverted_Jet1Bdisc_AfterAllSelections;
+  delete hInverted_Jet2Bdisc_AfterAllSelections;
+  delete hInverted_Jet3Bdisc_AfterAllSelections;
+  delete hInverted_Jet4Bdisc_AfterAllSelections;
+  delete hInverted_Jet5Bdisc_AfterAllSelections;
+  delete hInverted_Jet6Bdisc_AfterAllSelections;
+  delete hInverted_Jet7Bdisc_AfterAllSelections;
+  //  hInverted_JetsBdisc_AfterAllSelections.clear();
   delete hInverted_MET_AfterAllSelections;
   delete hInverted_MVAmax1_AfterAllSelections;
   delete hInverted_MVAmax2_AfterAllSelections;
@@ -854,13 +884,16 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hInverted_LdgTetrajetM_AfterAllSelections;
   delete hInverted_TetrajetBJetPt_AfterAllSelections;
   delete hInverted_TetrajetBJetEta_AfterAllSelections;
+  delete hInverted_TetrajetBJetBdisc_AfterAllSelections;
   delete hInverted_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterAllSelections;
   delete hInverted_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterAllSelections;
   delete hInverted_DeltaRLdgTrijetBJetTetrajetBJet_AfterAllSelections;
   delete hInverted_LdgTrijetPt_AfterAllSelections;
   delete hInverted_LdgTrijetM_AfterAllSelections;
+  delete hInverted_LdgTrijetBJetBdisc_AfterAllSelections;
   delete hInverted_SubLdgTrijetPt_AfterAllSelections;
   delete hInverted_SubLdgTrijetM_AfterAllSelections;
+  delete hInverted_SubLdgTrijetBJetBdisc_AfterAllSelections;
   delete hInverted_LdgDijetPt_AfterAllSelections;
   delete hInverted_LdgDijetM_AfterAllSelections;
   delete hInverted_SubLdgDijetPt_AfterAllSelections;
@@ -875,10 +908,10 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hInverted_Bjet2Eta_AfterCRSelections;
   delete hInverted_Bjet3Eta_AfterCRSelections;
   //  hInverted_BjetsEta_AfterCRSelections.clear();
-  delete hInverted_Bjet1BtagDisc_AfterCRSelections;
-  delete hInverted_Bjet2BtagDisc_AfterCRSelections;
-  delete hInverted_Bjet3BtagDisc_AfterCRSelections;
-  //  hInverted_BjetsBtagDisc_AfterCRSelections.clear();
+  delete hInverted_Bjet1Bdisc_AfterCRSelections;
+  delete hInverted_Bjet2Bdisc_AfterCRSelections;
+  delete hInverted_Bjet3Bdisc_AfterCRSelections;
+  //  hInverted_BjetsBdisc_AfterCRSelections.clear();
   delete hInverted_Njets_AfterCRSelections;
   delete hInverted_Jet1Pt_AfterCRSelections;
   delete hInverted_Jet2Pt_AfterCRSelections;
@@ -896,14 +929,14 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hInverted_Jet6Eta_AfterCRSelections;
   delete hInverted_Jet7Eta_AfterCRSelections;
   //  hInverted_JetsEta_AfterCRSelections.clear();
-  delete hInverted_Jet1BtagDisc_AfterCRSelections;
-  delete hInverted_Jet2BtagDisc_AfterCRSelections;
-  delete hInverted_Jet3BtagDisc_AfterCRSelections;
-  delete hInverted_Jet4BtagDisc_AfterCRSelections;
-  delete hInverted_Jet5BtagDisc_AfterCRSelections;
-  delete hInverted_Jet6BtagDisc_AfterCRSelections;
-  delete hInverted_Jet7BtagDisc_AfterCRSelections;
-  //  hInverted_JetsBtagDisc_AfterCRSelections.clear();
+  delete hInverted_Jet1Bdisc_AfterCRSelections;
+  delete hInverted_Jet2Bdisc_AfterCRSelections;
+  delete hInverted_Jet3Bdisc_AfterCRSelections;
+  delete hInverted_Jet4Bdisc_AfterCRSelections;
+  delete hInverted_Jet5Bdisc_AfterCRSelections;
+  delete hInverted_Jet6Bdisc_AfterCRSelections;
+  delete hInverted_Jet7Bdisc_AfterCRSelections;
+  //  hInverted_JetsBdisc_AfterCRSelections.clear();
   delete hInverted_MET_AfterCRSelections;
   delete hInverted_MVAmax1_AfterCRSelections;
   delete hInverted_MVAmax2_AfterCRSelections;
@@ -911,13 +944,16 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hInverted_LdgTetrajetM_AfterCRSelections;
   delete hInverted_TetrajetBJetPt_AfterCRSelections;
   delete hInverted_TetrajetBJetEta_AfterCRSelections;
+  delete hInverted_TetrajetBJetBdisc_AfterCRSelections;
   delete hInverted_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterCRSelections;
   delete hInverted_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterCRSelections;
   delete hInverted_DeltaRLdgTrijetBJetTetrajetBJet_AfterCRSelections;
   delete hInverted_LdgTrijetPt_AfterCRSelections;
   delete hInverted_LdgTrijetM_AfterCRSelections;
+  delete hInverted_LdgTrijetBJetBdisc_AfterCRSelections;
   delete hInverted_SubLdgTrijetPt_AfterCRSelections;
   delete hInverted_SubLdgTrijetM_AfterCRSelections;
+  delete hInverted_SubLdgTrijetBJetBdisc_AfterCRSelections;
   delete hInverted_LdgDijetPt_AfterCRSelections;
   delete hInverted_LdgDijetM_AfterCRSelections;
   delete hInverted_SubLdgDijetPt_AfterCRSelections;
@@ -1411,12 +1447,12 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hBaseline_Bjet3Eta_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3Eta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
-  hBaseline_Bjet1BtagDisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet1BtagDisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hBaseline_Bjet2BtagDisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet2BtagDisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hBaseline_Bjet3BtagDisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3BtagDisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Bjet1Bdisc_AfterStandardSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet1Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Bjet2Bdisc_AfterStandardSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet2Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Bjet3Bdisc_AfterStandardSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hBaseline_Njets_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Njets_AfterStandardSelections", ";jet multiplicity;Events / %.0f", nNBins, fNMin, fNMax);
@@ -1450,20 +1486,20 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hBaseline_Jet7Eta_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7Eta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
-  hBaseline_Jet1BtagDisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet1BtagDisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hBaseline_Jet2BtagDisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet2BtagDisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hBaseline_Jet3BtagDisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet3BtagDisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hBaseline_Jet4BtagDisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet4BtagDisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hBaseline_Jet5BtagDisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet5BtagDisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hBaseline_Jet6BtagDisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet6BtagDisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hBaseline_Jet7BtagDisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7BtagDisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Jet1Bdisc_AfterStandardSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet1Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Jet2Bdisc_AfterStandardSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet2Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Jet3Bdisc_AfterStandardSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet3Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Jet4Bdisc_AfterStandardSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet4Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Jet5Bdisc_AfterStandardSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet5Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Jet6Bdisc_AfterStandardSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet6Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Jet7Bdisc_AfterStandardSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hBaseline_MET_AfterStandardSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MET_AfterStandardSelections", ";E_{T}^{miss};Events / %.1f", nMetBins, fMetMin, fMetMax);
@@ -1487,6 +1523,10 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hBaseline_TetrajetBJetEta_AfterStandardSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Baseline_TetrajetBJetEta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+
+  hBaseline_TetrajetBJetBdisc_AfterStandardSelections =
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
+				      "Baseline_TetrajetBJetBdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
   
   hBaseline_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
@@ -1508,6 +1548,10 @@ void FakeBMeasurement::book(TDirectory *dir) {
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Baseline_LdgTrijetM_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
+  hBaseline_LdgTrijetBJetBdisc_AfterStandardSelections =
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
+				      "Baseline_LdgTrijetBJetBdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+
   hBaseline_SubLdgTrijetPt_AfterStandardSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Baseline_SubLdgTrijetPt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
@@ -1515,6 +1559,10 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hBaseline_SubLdgTrijetM_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Baseline_SubLdgTrijetM_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+
+  hBaseline_SubLdgTrijetBJetBdisc_AfterStandardSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
+				      "Baseline_SubLdgTrijetBJetBdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hBaseline_LdgDijetPt_AfterStandardSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
@@ -1550,12 +1598,12 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hBaseline_Bjet3Eta_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3Eta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
-  hBaseline_Bjet1BtagDisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet1BtagDisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hBaseline_Bjet2BtagDisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet2BtagDisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hBaseline_Bjet3BtagDisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3BtagDisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Bjet1Bdisc_AfterAllSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet1Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Bjet2Bdisc_AfterAllSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet2Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Bjet3Bdisc_AfterAllSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hBaseline_Njets_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Njets_AfterAllSelections", ";jet multiplicity;Events / %.0f", nNBins, fNMin, fNMax);
@@ -1589,20 +1637,20 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hBaseline_Jet7Eta_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7Eta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
-  hBaseline_Jet1BtagDisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet1BtagDisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hBaseline_Jet2BtagDisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet2BtagDisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hBaseline_Jet3BtagDisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet3BtagDisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hBaseline_Jet4BtagDisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet4BtagDisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hBaseline_Jet5BtagDisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet5BtagDisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hBaseline_Jet6BtagDisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet6BtagDisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hBaseline_Jet7BtagDisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7BtagDisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Jet1Bdisc_AfterAllSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet1Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Jet2Bdisc_AfterAllSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet2Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Jet3Bdisc_AfterAllSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet3Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Jet4Bdisc_AfterAllSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet4Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Jet5Bdisc_AfterAllSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet5Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Jet6Bdisc_AfterAllSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet6Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Jet7Bdisc_AfterAllSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hBaseline_MET_AfterAllSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MET_AfterAllSelections", ";E_{T}^{miss};Events / %.1f", nMetBins, fMetMin, fMetMax);
@@ -1626,6 +1674,10 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hBaseline_TetrajetBJetEta_AfterAllSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Baseline_TetrajetBJetEta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+
+  hBaseline_TetrajetBJetBdisc_AfterAllSelections =
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
+				      "Baseline_TetrajetBJetBdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
   
   hBaseline_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
@@ -1647,6 +1699,10 @@ void FakeBMeasurement::book(TDirectory *dir) {
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Baseline_LdgTrijetM_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
+  hBaseline_LdgTrijetBJetBdisc_AfterAllSelections =
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
+				      "Baseline_LdgTrijetBJetBdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+
   hBaseline_SubLdgTrijetPt_AfterAllSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Baseline_SubLdgTrijetPt_AfterAllSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
@@ -1654,6 +1710,10 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hBaseline_SubLdgTrijetM_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Baseline_SubLdgTrijetM_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+
+  hBaseline_SubLdgTrijetBJetBdisc_AfterAllSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
+				      "Baseline_SubLdgTrijetBJetBdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hBaseline_LdgDijetPt_AfterAllSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
@@ -1689,12 +1749,12 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hBaseline_Bjet3Eta_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3Eta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
-  hBaseline_Bjet1BtagDisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet1BtagDisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hBaseline_Bjet2BtagDisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet2BtagDisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hBaseline_Bjet3BtagDisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3BtagDisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Bjet1Bdisc_AfterCRSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet1Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Bjet2Bdisc_AfterCRSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet2Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Bjet3Bdisc_AfterCRSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Bjet3Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hBaseline_Njets_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Njets_AfterCRSelections", ";jet multiplicity;Events / %.0f", nNBins, fNMin, fNMax);
@@ -1728,20 +1788,20 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hBaseline_Jet7Eta_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7Eta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
-  hBaseline_Jet1BtagDisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet1BtagDisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hBaseline_Jet2BtagDisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet2BtagDisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hBaseline_Jet3BtagDisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet3BtagDisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hBaseline_Jet4BtagDisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet4BtagDisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hBaseline_Jet5BtagDisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet5BtagDisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hBaseline_Jet6BtagDisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet6BtagDisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hBaseline_Jet7BtagDisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7BtagDisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Jet1Bdisc_AfterCRSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet1Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Jet2Bdisc_AfterCRSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet2Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Jet3Bdisc_AfterCRSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet3Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Jet4Bdisc_AfterCRSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet4Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Jet5Bdisc_AfterCRSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet5Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Jet6Bdisc_AfterCRSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet6Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hBaseline_Jet7Bdisc_AfterCRSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_Jet7Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hBaseline_MET_AfterCRSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MET_AfterCRSelections", ";E_{T}^{miss};Events / %.1f", nMetBins, fMetMin, fMetMax);
@@ -1765,6 +1825,10 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hBaseline_TetrajetBJetEta_AfterCRSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Baseline_TetrajetBJetEta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+
+  hBaseline_TetrajetBJetBdisc_AfterCRSelections =
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
+				      "Baseline_TetrajetBJetBdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
   
   hBaseline_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
@@ -1786,6 +1850,10 @@ void FakeBMeasurement::book(TDirectory *dir) {
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Baseline_LdgTrijetM_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
+  hBaseline_LdgTrijetBJetBdisc_AfterCRSelections =
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
+				      "Baseline_LdgTrijetBJetBdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+
   hBaseline_SubLdgTrijetPt_AfterCRSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Baseline_SubLdgTrijetPt_AfterCRSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
@@ -1793,6 +1861,10 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hBaseline_SubLdgTrijetM_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Baseline_SubLdgTrijetM_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+
+  hBaseline_SubLdgTrijetBJetBdisc_AfterCRSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
+				      "Baseline_SubLdgTrijetBJetBdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hBaseline_LdgDijetPt_AfterCRSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
@@ -1828,12 +1900,12 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hInverted_Bjet3Eta_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3Eta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
-  hInverted_Bjet1BtagDisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet1BtagDisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hInverted_Bjet2BtagDisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet2BtagDisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hInverted_Bjet3BtagDisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3BtagDisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Bjet1Bdisc_AfterStandardSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet1Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Bjet2Bdisc_AfterStandardSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet2Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Bjet3Bdisc_AfterStandardSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hInverted_Njets_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Njets_AfterStandardSelections", ";jet multiplicity;Events / %.0f", nNBins, fNMin, fNMax);
@@ -1867,20 +1939,20 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hInverted_Jet7Eta_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7Eta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
-  hInverted_Jet1BtagDisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet1BtagDisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hInverted_Jet2BtagDisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet2BtagDisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hInverted_Jet3BtagDisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet3BtagDisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hInverted_Jet4BtagDisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet4BtagDisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hInverted_Jet5BtagDisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet5BtagDisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hInverted_Jet6BtagDisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet6BtagDisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hInverted_Jet7BtagDisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7BtagDisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Jet1Bdisc_AfterStandardSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet1Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Jet2Bdisc_AfterStandardSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet2Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Jet3Bdisc_AfterStandardSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet3Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Jet4Bdisc_AfterStandardSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet4Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Jet5Bdisc_AfterStandardSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet5Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Jet6Bdisc_AfterStandardSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet6Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Jet7Bdisc_AfterStandardSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7Bdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hInverted_MET_AfterStandardSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MET_AfterStandardSelections", ";E_{T}^{miss};Events / %.1f", nMetBins, fMetMin, fMetMax);
@@ -1904,6 +1976,10 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hInverted_TetrajetBJetEta_AfterStandardSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Inverted_TetrajetBJetEta_AfterStandardSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+
+  hInverted_TetrajetBJetBdisc_AfterStandardSelections =
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
+				      "Inverted_TetrajetBJetBdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
   
   hInverted_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
@@ -1925,6 +2001,10 @@ void FakeBMeasurement::book(TDirectory *dir) {
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Inverted_LdgTrijetM_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
+  hInverted_LdgTrijetBJetBdisc_AfterStandardSelections =
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
+				      "Inverted_LdgTrijetBJetBdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+
   hInverted_SubLdgTrijetPt_AfterStandardSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Inverted_SubLdgTrijetPt_AfterStandardSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
@@ -1932,6 +2012,10 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hInverted_SubLdgTrijetM_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Inverted_SubLdgTrijetM_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+
+  hInverted_SubLdgTrijetBJetBdisc_AfterStandardSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
+				      "Inverted_SubLdgTrijetBJetBdisc_AfterStandardSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hInverted_LdgDijetPt_AfterStandardSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
@@ -1967,12 +2051,12 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hInverted_Bjet3Eta_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3Eta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
-  hInverted_Bjet1BtagDisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet1BtagDisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hInverted_Bjet2BtagDisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet2BtagDisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hInverted_Bjet3BtagDisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3BtagDisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Bjet1Bdisc_AfterAllSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet1Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Bjet2Bdisc_AfterAllSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet2Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Bjet3Bdisc_AfterAllSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hInverted_Njets_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Njets_AfterAllSelections", ";jet multiplicity;Events / %.0f", nNBins, fNMin, fNMax);
@@ -2006,20 +2090,20 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hInverted_Jet7Eta_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7Eta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
-  hInverted_Jet1BtagDisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet1BtagDisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hInverted_Jet2BtagDisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet2BtagDisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hInverted_Jet3BtagDisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet3BtagDisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hInverted_Jet4BtagDisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet4BtagDisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hInverted_Jet5BtagDisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet5BtagDisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hInverted_Jet6BtagDisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet6BtagDisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hInverted_Jet7BtagDisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7BtagDisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Jet1Bdisc_AfterAllSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet1Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Jet2Bdisc_AfterAllSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet2Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Jet3Bdisc_AfterAllSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet3Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Jet4Bdisc_AfterAllSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet4Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Jet5Bdisc_AfterAllSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet5Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Jet6Bdisc_AfterAllSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet6Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Jet7Bdisc_AfterAllSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7Bdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hInverted_MET_AfterAllSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MET_AfterAllSelections", ";E_{T}^{miss};Events / %.1f", nMetBins, fMetMin, fMetMax);
@@ -2043,6 +2127,10 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hInverted_TetrajetBJetEta_AfterAllSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Inverted_TetrajetBJetEta_AfterAllSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
+
+  hInverted_TetrajetBJetBdisc_AfterAllSelections =
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
+				      "Inverted_TetrajetBJetBdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
   
   hInverted_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
@@ -2064,6 +2152,10 @@ void FakeBMeasurement::book(TDirectory *dir) {
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Inverted_LdgTrijetM_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
+  hInverted_LdgTrijetBJetBdisc_AfterAllSelections =
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
+				      "Inverted_LdgTrijetBJetBdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+
   hInverted_SubLdgTrijetPt_AfterAllSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Inverted_SubLdgTrijetPt_AfterAllSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
@@ -2071,6 +2163,10 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hInverted_SubLdgTrijetM_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Inverted_SubLdgTrijetM_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+
+  hInverted_SubLdgTrijetBJetBdisc_AfterAllSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
+				      "Inverted_SubLdgTrijetBJetBdisc_AfterAllSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hInverted_LdgDijetPt_AfterAllSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
@@ -2106,12 +2202,12 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hInverted_Bjet3Eta_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3Eta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
-  hInverted_Bjet1BtagDisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet1BtagDisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hInverted_Bjet2BtagDisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet2BtagDisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hInverted_Bjet3BtagDisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3BtagDisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Bjet1Bdisc_AfterCRSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet1Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Bjet2Bdisc_AfterCRSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet2Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Bjet3Bdisc_AfterCRSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Bjet3Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hInverted_Njets_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Njets_AfterCRSelections", ";jet multiplicity;Events / %.0f", nNBins, fNMin, fNMax);
@@ -2145,20 +2241,20 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hInverted_Jet7Eta_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7Eta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
 
-  hInverted_Jet1BtagDisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet1BtagDisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hInverted_Jet2BtagDisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet2BtagDisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hInverted_Jet3BtagDisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet3BtagDisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hInverted_Jet4BtagDisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet4BtagDisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hInverted_Jet5BtagDisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet5BtagDisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hInverted_Jet6BtagDisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet6BtagDisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
-  hInverted_Jet7BtagDisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7BtagDisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Jet1Bdisc_AfterCRSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet1Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Jet2Bdisc_AfterCRSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet2Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Jet3Bdisc_AfterCRSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet3Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Jet4Bdisc_AfterCRSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet4Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Jet5Bdisc_AfterCRSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet5Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Jet6Bdisc_AfterCRSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet6Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  hInverted_Jet7Bdisc_AfterCRSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_Jet7Bdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
 
   hInverted_MET_AfterCRSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MET_AfterCRSelections", ";E_{T}^{miss};Events / %.1f", nMetBins, fMetMin, fMetMax);
@@ -2183,6 +2279,10 @@ void FakeBMeasurement::book(TDirectory *dir) {
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Inverted_TetrajetBJetEta_AfterCRSelections", ";#eta;Events / %.2f", nEtaBins, fEtaMin, fEtaMax);
   
+  hInverted_TetrajetBJetBdisc_AfterCRSelections =
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
+				      "Inverted_TetrajetBJetBdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  
   hInverted_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
 				      "Inverted_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterCRSelections", ";#Delta#eta; #Delta#eta", nDEtaBins, fDEtaMin, fDEtaMax);
@@ -2203,6 +2303,10 @@ void FakeBMeasurement::book(TDirectory *dir) {
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Inverted_LdgTrijetM_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
+  hInverted_LdgTrijetBJetBdisc_AfterCRSelections =
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
+				      "Inverted_LdgTrijetBJetBdisc_AfterCRSelections", ";b tag discriminator;Events / %.2f", nBtagBins, fBtagMin, fBtagMax);
+
   hInverted_SubLdgTrijetPt_AfterCRSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Inverted_SubLdgTrijetPt_AfterCRSelections", ";p_{T} (GeV/c);Events / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
@@ -2210,6 +2314,10 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hInverted_SubLdgTrijetM_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Inverted_SubLdgTrijetM_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+
+  hInverted_SubLdgTrijetBJetBdisc_AfterCRSelections = 
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
+				      "Inverted_SubLdgTrijetBJetBdisc_AfterCRSelections", 
 
   hInverted_LdgDijetPt_AfterCRSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
@@ -2479,21 +2587,21 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
 	{
 	  hBaseline_Bjet1Pt_AfterStandardSelections->Fill(isGenuineB, bjet.pt() );
 	  hBaseline_Bjet1Eta_AfterStandardSelections->Fill(isGenuineB, bjet.eta() );
-	  hBaseline_Bjet1BtagDisc_AfterStandardSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
+	  hBaseline_Bjet1Bdisc_AfterStandardSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
 	}
 
       if (index == 1)
 	{
 	  hBaseline_Bjet2Pt_AfterStandardSelections->Fill(isGenuineB, bjet.pt() );
 	  hBaseline_Bjet2Eta_AfterStandardSelections->Fill(isGenuineB, bjet.eta() );
-	  hBaseline_Bjet2BtagDisc_AfterStandardSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
+	  hBaseline_Bjet2Bdisc_AfterStandardSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
 	} 
 
       if (index == 2)
 	{
 	  hBaseline_Bjet3Pt_AfterStandardSelections->Fill(isGenuineB, bjet.pt() );
 	  hBaseline_Bjet3Eta_AfterStandardSelections->Fill(isGenuineB, bjet.eta() );
-	  hBaseline_Bjet3BtagDisc_AfterStandardSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
+	  hBaseline_Bjet3Bdisc_AfterStandardSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
 	}
     }
 
@@ -2509,49 +2617,49 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
 	{
 	  hBaseline_Jet1Pt_AfterStandardSelections->Fill(isGenuineB, jet.pt() );
 	  hBaseline_Jet1Eta_AfterStandardSelections->Fill(isGenuineB, jet.eta() );
-	  hBaseline_Jet1BtagDisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hBaseline_Jet1Bdisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	}
 
       if (index == 1)
 	{
 	  hBaseline_Jet2Pt_AfterStandardSelections->Fill(isGenuineB, jet.pt() );
 	  hBaseline_Jet2Eta_AfterStandardSelections->Fill(isGenuineB, jet.eta() );
-	  hBaseline_Jet2BtagDisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hBaseline_Jet2Bdisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	} 
 
       if (index == 2)
 	{
 	  hBaseline_Jet3Pt_AfterStandardSelections->Fill(isGenuineB, jet.pt() );
 	  hBaseline_Jet3Eta_AfterStandardSelections->Fill(isGenuineB, jet.eta() );
-	  hBaseline_Jet3BtagDisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hBaseline_Jet3Bdisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	}
 
       if (index == 3)
 	{
 	  hBaseline_Jet4Pt_AfterStandardSelections->Fill(isGenuineB, jet.pt() );
 	  hBaseline_Jet4Eta_AfterStandardSelections->Fill(isGenuineB, jet.eta() );
-	  hBaseline_Jet4BtagDisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hBaseline_Jet4Bdisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	}
 
       if (index == 4)
 	{
 	  hBaseline_Jet5Pt_AfterStandardSelections->Fill(isGenuineB, jet.pt() );
 	  hBaseline_Jet5Eta_AfterStandardSelections->Fill(isGenuineB, jet.eta() );
-	  hBaseline_Jet5BtagDisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hBaseline_Jet5Bdisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	}
 
       if (index == 5)
 	{
 	  hBaseline_Jet6Pt_AfterStandardSelections->Fill(isGenuineB, jet.pt() );
 	  hBaseline_Jet6Eta_AfterStandardSelections->Fill(isGenuineB, jet.eta() );
-	  hBaseline_Jet6BtagDisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hBaseline_Jet6Bdisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	}
 
       if (index == 6)
 	{
 	  hBaseline_Jet7Pt_AfterStandardSelections->Fill(isGenuineB, jet.pt() );
 	  hBaseline_Jet7Eta_AfterStandardSelections->Fill(isGenuineB, jet.eta() );
-	  hBaseline_Jet7BtagDisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hBaseline_Jet7Bdisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	}
     }
 
@@ -2562,6 +2670,7 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   hBaseline_LdgTetrajetM_AfterStandardSelections->Fill(isGenuineB, topData.getLdgTetrajet().M() );
   hBaseline_TetrajetBJetPt_AfterStandardSelections->Fill(isGenuineB, topData.getTetrajetBJet().pt() );
   hBaseline_TetrajetBJetEta_AfterStandardSelections->Fill(isGenuineB, topData.getTetrajetBJet().eta() );
+  hBaseline_TetrajetBJetBdisc_AfterStandardSelections->Fill(isGenuineB, topData.getTetrajetBJet().bjetDiscriminator());
   double dEta = std::abs( topData.getTetrajetBJet().p4().eta() - topData.getLdgTrijetBJet().p4().eta() );
   double dPhi = std::abs( ROOT::Math::VectorUtil::DeltaPhi( topData.getTetrajetBJet().p4(), topData.getLdgTrijetBJet().p4() ) );
   double dR = ROOT::Math::VectorUtil::DeltaR( topData.getTetrajetBJet().p4(), topData.getLdgTrijetBJet().p4()) ;
@@ -2570,8 +2679,10 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   hBaseline_DeltaRLdgTrijetBJetTetrajetBJet_AfterStandardSelections->Fill(isGenuineB, dR);
   hBaseline_LdgTrijetPt_AfterStandardSelections->Fill(isGenuineB, topData.getLdgTrijet().pt() );
   hBaseline_LdgTrijetM_AfterStandardSelections ->Fill(isGenuineB, topData.getLdgTrijet().M() );
+  hBaseline_LdgTrijetBJetBdisc_AfterStandardSelections ->Fill(isGenuineB, topData.getLdgTrijetBJet().bjetDiscriminator() );
   hBaseline_SubLdgTrijetPt_AfterStandardSelections->Fill(isGenuineB, topData.getSubldgTrijet().pt() );
   hBaseline_SubLdgTrijetM_AfterStandardSelections ->Fill(isGenuineB, topData.getSubldgTrijet().M() );
+  hBaseline_SubLdgTrijetBJetBdisc_AfterStandardSelections ->Fill(isGenuineB, topData.getSubldgTrijetBJet().bjetDiscriminator() );
   hBaseline_LdgDijetPt_AfterStandardSelections->Fill(isGenuineB, topData.getLdgDijet().pt() );
   hBaseline_LdgDijetM_AfterStandardSelections ->Fill(isGenuineB, topData.getLdgDijet().M() );
   hBaseline_SubLdgDijetPt_AfterStandardSelections->Fill(isGenuineB, topData.getSubldgDijet().pt() );
@@ -2609,21 +2720,21 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
 	    {
 	      hBaseline_Bjet1Pt_AfterCRSelections->Fill(isGenuineB, bjet.pt() );
 	      hBaseline_Bjet1Eta_AfterCRSelections->Fill(isGenuineB, bjet.eta() );
-	      hBaseline_Bjet1BtagDisc_AfterCRSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
+	      hBaseline_Bjet1Bdisc_AfterCRSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
 	    }
 	  
 	  if (index == 1)
 	    {
 	      hBaseline_Bjet2Pt_AfterCRSelections->Fill(isGenuineB, bjet.pt() );
 	      hBaseline_Bjet2Eta_AfterCRSelections->Fill(isGenuineB, bjet.eta() );
-	      hBaseline_Bjet2BtagDisc_AfterCRSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
+	      hBaseline_Bjet2Bdisc_AfterCRSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
 	    }
 	  
 	  if (index == 2)
 	    {
 	      hBaseline_Bjet3Pt_AfterCRSelections->Fill(isGenuineB, bjet.pt() );
 	      hBaseline_Bjet3Eta_AfterCRSelections->Fill(isGenuineB, bjet.eta() );
-	      hBaseline_Bjet3BtagDisc_AfterCRSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
+	      hBaseline_Bjet3Bdisc_AfterCRSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
 	    }
 	  
 	}
@@ -2639,49 +2750,49 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
 	    {
 	      hBaseline_Jet1Pt_AfterCRSelections->Fill(isGenuineB, jet.pt() );
 	      hBaseline_Jet1Eta_AfterCRSelections->Fill(isGenuineB, jet.eta() );
-	      hBaseline_Jet1BtagDisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	      hBaseline_Jet1Bdisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	    }
 	  
 	  if (index == 1)
 	    {
 	      hBaseline_Jet2Pt_AfterCRSelections->Fill(isGenuineB, jet.pt() );
 	      hBaseline_Jet2Eta_AfterCRSelections->Fill(isGenuineB, jet.eta() );
-	      hBaseline_Jet2BtagDisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	      hBaseline_Jet2Bdisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	    } 
 	  
 	  if (index == 2)
 	    {
 	      hBaseline_Jet3Pt_AfterCRSelections->Fill(isGenuineB, jet.pt() );
 	      hBaseline_Jet3Eta_AfterCRSelections->Fill(isGenuineB, jet.eta() );
-	      hBaseline_Jet3BtagDisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	      hBaseline_Jet3Bdisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	    }
 	  
 	  if (index == 3)
 	    {
 	      hBaseline_Jet4Pt_AfterCRSelections->Fill(isGenuineB, jet.pt() );
 	      hBaseline_Jet4Eta_AfterCRSelections->Fill(isGenuineB, jet.eta() );
-	      hBaseline_Jet4BtagDisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	      hBaseline_Jet4Bdisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	    }
 	  
 	  if (index == 4)
 	    {
 	      hBaseline_Jet5Pt_AfterCRSelections->Fill(isGenuineB, jet.pt() );
 	      hBaseline_Jet5Eta_AfterCRSelections->Fill(isGenuineB, jet.eta() );
-	      hBaseline_Jet5BtagDisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	      hBaseline_Jet5Bdisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	    }
 	  
 	  if (index == 5)
 	    {
 	      hBaseline_Jet6Pt_AfterCRSelections->Fill(isGenuineB, jet.pt() );
 	      hBaseline_Jet6Eta_AfterCRSelections->Fill(isGenuineB, jet.eta() );
-	      hBaseline_Jet6BtagDisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	      hBaseline_Jet6Bdisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	    }
 	  
 	  if (index == 6)
 	    {
 	      hBaseline_Jet7Pt_AfterCRSelections->Fill(isGenuineB, jet.pt() );
 	      hBaseline_Jet7Eta_AfterCRSelections->Fill(isGenuineB, jet.eta() );
-	      hBaseline_Jet7BtagDisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	      hBaseline_Jet7Bdisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	    }
 	}
       
@@ -2692,13 +2803,16 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
       hBaseline_LdgTetrajetM_AfterCRSelections->Fill(isGenuineB, topData.getLdgTetrajet().M() );
       hBaseline_TetrajetBJetPt_AfterCRSelections->Fill(isGenuineB, topData.getTetrajetBJet().pt() );
       hBaseline_TetrajetBJetEta_AfterCRSelections->Fill(isGenuineB, topData.getTetrajetBJet().eta() );
+      hBaseline_TetrajetBJetBdisc_AfterCRSelections->Fill(isGenuineB, topData.getTetrajetBJet().bjetDiscriminator() );
       hBaseline_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterCRSelections->Fill(isGenuineB, dEta);
       hBaseline_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterCRSelections->Fill(isGenuineB, dPhi);
       hBaseline_DeltaRLdgTrijetBJetTetrajetBJet_AfterCRSelections->Fill(isGenuineB, dR);
       hBaseline_LdgTrijetPt_AfterCRSelections->Fill(isGenuineB, topData.getLdgTrijet().pt() );
       hBaseline_LdgTrijetM_AfterCRSelections ->Fill(isGenuineB, topData.getLdgTrijet().M() );
+      hBaseline_LdgTrijetBJetBdisc_AfterCRSelections ->Fill(isGenuineB, topData.getLdgTrijetBJet().bjetDiscriminator() );
       hBaseline_SubLdgTrijetPt_AfterCRSelections->Fill(isGenuineB, topData.getSubldgTrijet().pt() );
       hBaseline_SubLdgTrijetM_AfterCRSelections ->Fill(isGenuineB, topData.getSubldgTrijet().M() );
+      hBaseline_SubLdgTrijetBJetBdisc_AfterCRSelections ->Fill(isGenuineB, topData.getSubldgTrijetBJet().bjetDiscriminator() );
       hBaseline_LdgDijetPt_AfterCRSelections->Fill(isGenuineB, topData.getLdgDijet().pt() );
       hBaseline_LdgDijetM_AfterCRSelections ->Fill(isGenuineB, topData.getLdgDijet().M() );
       hBaseline_SubLdgDijetPt_AfterCRSelections->Fill(isGenuineB, topData.getSubldgDijet().pt() );
@@ -2728,21 +2842,21 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
 	{
 	  hBaseline_Bjet1Pt_AfterAllSelections->Fill(isGenuineB, bjet.pt() );
 	  hBaseline_Bjet1Eta_AfterAllSelections->Fill(isGenuineB, bjet.eta() );
-	  hBaseline_Bjet1BtagDisc_AfterAllSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
+	  hBaseline_Bjet1Bdisc_AfterAllSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
 	}
 
       if (index == 1)
 	{
 	  hBaseline_Bjet2Pt_AfterAllSelections->Fill(isGenuineB, bjet.pt() );
 	  hBaseline_Bjet2Eta_AfterAllSelections->Fill(isGenuineB, bjet.eta() );
-	  hBaseline_Bjet2BtagDisc_AfterAllSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
+	  hBaseline_Bjet2Bdisc_AfterAllSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
 	}
 
       if (index == 2)
 	{
 	  hBaseline_Bjet3Pt_AfterAllSelections->Fill(isGenuineB, bjet.pt() );
 	  hBaseline_Bjet3Eta_AfterAllSelections->Fill(isGenuineB, bjet.eta() );
-	  hBaseline_Bjet3BtagDisc_AfterAllSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
+	  hBaseline_Bjet3Bdisc_AfterAllSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
 	}
 
     }
@@ -2758,49 +2872,49 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
 	{
 	  hBaseline_Jet1Pt_AfterAllSelections->Fill(isGenuineB, jet.pt() );
 	  hBaseline_Jet1Eta_AfterAllSelections->Fill(isGenuineB, jet.eta() );
-	  hBaseline_Jet1BtagDisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hBaseline_Jet1Bdisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	}
 
       if (index == 1)
 	{
 	  hBaseline_Jet2Pt_AfterAllSelections->Fill(isGenuineB, jet.pt() );
 	  hBaseline_Jet2Eta_AfterAllSelections->Fill(isGenuineB, jet.eta() );
-	  hBaseline_Jet2BtagDisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hBaseline_Jet2Bdisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	} 
 
       if (index == 2)
 	{
 	  hBaseline_Jet3Pt_AfterAllSelections->Fill(isGenuineB, jet.pt() );
 	  hBaseline_Jet3Eta_AfterAllSelections->Fill(isGenuineB, jet.eta() );
-	  hBaseline_Jet3BtagDisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hBaseline_Jet3Bdisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	}
 
       if (index == 3)
 	{
 	  hBaseline_Jet4Pt_AfterAllSelections->Fill(isGenuineB, jet.pt() );
 	  hBaseline_Jet4Eta_AfterAllSelections->Fill(isGenuineB, jet.eta() );
-	  hBaseline_Jet4BtagDisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hBaseline_Jet4Bdisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	}
 
       if (index == 4)
 	{
 	  hBaseline_Jet5Pt_AfterAllSelections->Fill(isGenuineB, jet.pt() );
 	  hBaseline_Jet5Eta_AfterAllSelections->Fill(isGenuineB, jet.eta() );
-	  hBaseline_Jet5BtagDisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hBaseline_Jet5Bdisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	}
 
       if (index == 5)
 	{
 	  hBaseline_Jet6Pt_AfterAllSelections->Fill(isGenuineB, jet.pt() );
 	  hBaseline_Jet6Eta_AfterAllSelections->Fill(isGenuineB, jet.eta() );
-	  hBaseline_Jet6BtagDisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hBaseline_Jet6Bdisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	}
 
       if (index == 6)
 	{
 	  hBaseline_Jet7Pt_AfterAllSelections->Fill(isGenuineB, jet.pt() );
 	  hBaseline_Jet7Eta_AfterAllSelections->Fill(isGenuineB, jet.eta() );
-	  hBaseline_Jet7BtagDisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hBaseline_Jet7Bdisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	}
     }
 
@@ -2811,13 +2925,16 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   hBaseline_LdgTetrajetM_AfterAllSelections->Fill(isGenuineB, topData.getLdgTetrajet().M() );
   hBaseline_TetrajetBJetPt_AfterAllSelections->Fill(isGenuineB, topData.getTetrajetBJet().pt() );
   hBaseline_TetrajetBJetEta_AfterAllSelections->Fill(isGenuineB, topData.getTetrajetBJet().eta() );
+  hBaseline_TetrajetBJetBdisc_AfterAllSelections->Fill(isGenuineB, topData.getTetrajetBJet().bjetDiscriminator() );
   hBaseline_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterAllSelections->Fill(isGenuineB, dEta);
   hBaseline_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterAllSelections->Fill(isGenuineB, dPhi);
   hBaseline_DeltaRLdgTrijetBJetTetrajetBJet_AfterAllSelections->Fill(isGenuineB, dR);
   hBaseline_LdgTrijetPt_AfterAllSelections->Fill(isGenuineB, topData.getLdgTrijet().pt() );
   hBaseline_LdgTrijetM_AfterAllSelections ->Fill(isGenuineB, topData.getLdgTrijet().M() );
+  hBaseline_LdgTrijetBJetBdisc_AfterAllSelections ->Fill(isGenuineB, topData.getLdgTrijetBJet().bjetDiscriminator() );
   hBaseline_SubLdgTrijetPt_AfterAllSelections->Fill(isGenuineB, topData.getSubldgTrijet().pt() );
   hBaseline_SubLdgTrijetM_AfterAllSelections ->Fill(isGenuineB, topData.getSubldgTrijet().M() );
+  hBaseline_SubLdgTrijetBJetBdisc_AfterAllSelections ->Fill(isGenuineB, topData.getSubldgTrijetBJet().bjetDiscriminator() );
   hBaseline_LdgDijetPt_AfterAllSelections->Fill(isGenuineB, topData.getLdgDijet().pt() );
   hBaseline_LdgDijetM_AfterAllSelections ->Fill(isGenuineB, topData.getLdgDijet().M() );
   hBaseline_SubLdgDijetPt_AfterAllSelections->Fill(isGenuineB, topData.getSubldgDijet().pt() );
@@ -2962,21 +3079,21 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
 	{
 	  hInverted_Bjet1Pt_AfterStandardSelections->Fill(isGenuineB, bjet.pt() );
 	  hInverted_Bjet1Eta_AfterStandardSelections->Fill(isGenuineB, bjet.eta() );
-	  hInverted_Bjet1BtagDisc_AfterStandardSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
+	  hInverted_Bjet1Bdisc_AfterStandardSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
 	}
 
       if (index == 1)
 	{
 	  hInverted_Bjet2Pt_AfterStandardSelections->Fill(isGenuineB, bjet.pt() );
 	  hInverted_Bjet2Eta_AfterStandardSelections->Fill(isGenuineB, bjet.eta() );
-	  hInverted_Bjet2BtagDisc_AfterStandardSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
+	  hInverted_Bjet2Bdisc_AfterStandardSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
 	} 
 
       if (index == 2)
 	{
 	  hInverted_Bjet3Pt_AfterStandardSelections->Fill(isGenuineB, bjet.pt() );
 	  hInverted_Bjet3Eta_AfterStandardSelections->Fill(isGenuineB, bjet.eta() );
-	  hInverted_Bjet3BtagDisc_AfterStandardSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
+	  hInverted_Bjet3Bdisc_AfterStandardSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
 	}
     }
   // std::cout << "\n" << std::endl;
@@ -2994,49 +3111,49 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
 	{
 	  hInverted_Jet1Pt_AfterStandardSelections->Fill(isGenuineB, jet.pt() );
 	  hInverted_Jet1Eta_AfterStandardSelections->Fill(isGenuineB, jet.eta() );
-	  hInverted_Jet1BtagDisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hInverted_Jet1Bdisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	}
 
       if (index == 1)
 	{
 	  hInverted_Jet2Pt_AfterStandardSelections->Fill(isGenuineB, jet.pt() );
 	  hInverted_Jet2Eta_AfterStandardSelections->Fill(isGenuineB, jet.eta() );
-	  hInverted_Jet2BtagDisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hInverted_Jet2Bdisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	} 
 
       if (index == 2)
 	{
 	  hInverted_Jet3Pt_AfterStandardSelections->Fill(isGenuineB, jet.pt() );
 	  hInverted_Jet3Eta_AfterStandardSelections->Fill(isGenuineB, jet.eta() );
-	  hInverted_Jet3BtagDisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hInverted_Jet3Bdisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	}
 
       if (index == 3)
 	{
 	  hInverted_Jet4Pt_AfterStandardSelections->Fill(isGenuineB, jet.pt() );
 	  hInverted_Jet4Eta_AfterStandardSelections->Fill(isGenuineB, jet.eta() );
-	  hInverted_Jet4BtagDisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hInverted_Jet4Bdisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	}
 
       if (index == 4)
 	{
 	  hInverted_Jet5Pt_AfterStandardSelections->Fill(isGenuineB, jet.pt() );
 	  hInverted_Jet5Eta_AfterStandardSelections->Fill(isGenuineB, jet.eta() );
-	  hInverted_Jet5BtagDisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hInverted_Jet5Bdisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	}
 
       if (index == 5)
 	{
 	  hInverted_Jet6Pt_AfterStandardSelections->Fill(isGenuineB, jet.pt() );
 	  hInverted_Jet6Eta_AfterStandardSelections->Fill(isGenuineB, jet.eta() );
-	  hInverted_Jet6BtagDisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hInverted_Jet6Bdisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	}
 
       if (index == 6)
 	{
 	  hInverted_Jet7Pt_AfterStandardSelections->Fill(isGenuineB, jet.pt() );
 	  hInverted_Jet7Eta_AfterStandardSelections->Fill(isGenuineB, jet.eta() );
-	  hInverted_Jet7BtagDisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hInverted_Jet7Bdisc_AfterStandardSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	}
     }
 
@@ -3047,6 +3164,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   hInverted_LdgTetrajetM_AfterStandardSelections->Fill(isGenuineB, topData.getLdgTetrajet().M() );
   hInverted_TetrajetBJetPt_AfterStandardSelections->Fill(isGenuineB, topData.getTetrajetBJet().pt() );
   hInverted_TetrajetBJetEta_AfterStandardSelections->Fill(isGenuineB, topData.getTetrajetBJet().eta() );
+  hInverted_TetrajetBJetBdisc_AfterStandardSelections->Fill(isGenuineB, topData.getTetrajetBJet().bjetDiscriminator() );
   double dEta = std::abs( topData.getTetrajetBJet().eta() - topData.getLdgTrijetBJet().eta());
   double dPhi = std::abs( ROOT::Math::VectorUtil::DeltaPhi( topData.getTetrajetBJet().p4(), topData.getLdgTrijetBJet().p4()) );
   double dR = ROOT::Math::VectorUtil::DeltaR( topData.getTetrajetBJet().p4(), topData.getLdgTrijetBJet().p4()) ;
@@ -3055,8 +3173,10 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   hInverted_DeltaRLdgTrijetBJetTetrajetBJet_AfterStandardSelections->Fill(isGenuineB, dR);
   hInverted_LdgTrijetPt_AfterStandardSelections->Fill(isGenuineB, topData.getLdgTrijet().pt() );
   hInverted_LdgTrijetM_AfterStandardSelections ->Fill(isGenuineB, topData.getLdgTrijet().M() );
+  hInverted_LdgTrijetBJetBdisc_AfterStandardSelections ->Fill(isGenuineB, topData.getLdgTrijetBJet().bjetDiscriminator() );
   hInverted_SubLdgTrijetPt_AfterStandardSelections->Fill(isGenuineB, topData.getSubldgTrijet().pt() );
   hInverted_SubLdgTrijetM_AfterStandardSelections ->Fill(isGenuineB, topData.getSubldgTrijet().M() );
+  hInverted_SubLdgTrijetBJetBdisc_AfterStandardSelections ->Fill(isGenuineB, topData.getSubldgTrijetBJet().bjetDiscriminator() );
   hInverted_LdgDijetPt_AfterStandardSelections->Fill(isGenuineB, topData.getLdgDijet().pt() );
   hInverted_LdgDijetM_AfterStandardSelections ->Fill(isGenuineB, topData.getLdgDijet().M() );
   hInverted_SubLdgDijetPt_AfterStandardSelections->Fill(isGenuineB, topData.getSubldgDijet().pt() );
@@ -3143,21 +3263,21 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
 	    {
 	      hInverted_Bjet1Pt_AfterCRSelections->Fill(isGenuineB, bjet.pt() );
 	      hInverted_Bjet1Eta_AfterCRSelections->Fill(isGenuineB, bjet.eta() );
-	      hInverted_Bjet1BtagDisc_AfterCRSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
+	      hInverted_Bjet1Bdisc_AfterCRSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
 	    }
 	  
 	  if (index == 1)
 	    {
 	      hInverted_Bjet2Pt_AfterCRSelections->Fill(isGenuineB, bjet.pt() );
 	      hInverted_Bjet2Eta_AfterCRSelections->Fill(isGenuineB, bjet.eta() );
-	      hInverted_Bjet2BtagDisc_AfterCRSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
+	      hInverted_Bjet2Bdisc_AfterCRSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
 	    } 
 	  
 	  if (index == 2)
 	    {
 	      hInverted_Bjet3Pt_AfterCRSelections->Fill(isGenuineB, bjet.pt() );
 	      hInverted_Bjet3Eta_AfterCRSelections->Fill(isGenuineB, bjet.eta() );
-	      hInverted_Bjet3BtagDisc_AfterCRSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
+	      hInverted_Bjet3Bdisc_AfterCRSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
 	    }
 	}
       
@@ -3172,49 +3292,49 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
 	    {
 	      hInverted_Jet1Pt_AfterCRSelections->Fill(isGenuineB, jet.pt() );
 	      hInverted_Jet1Eta_AfterCRSelections->Fill(isGenuineB, jet.eta() );
-	      hInverted_Jet1BtagDisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	      hInverted_Jet1Bdisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	    }
 	  
 	  if (index == 1)
 	    {
 	      hInverted_Jet2Pt_AfterCRSelections->Fill(isGenuineB, jet.pt() );
 	      hInverted_Jet2Eta_AfterCRSelections->Fill(isGenuineB, jet.eta() );
-	      hInverted_Jet2BtagDisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	      hInverted_Jet2Bdisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	    } 
 	  
 	  if (index == 2)
 	    {
 	      hInverted_Jet3Pt_AfterCRSelections->Fill(isGenuineB, jet.pt() );
 	      hInverted_Jet3Eta_AfterCRSelections->Fill(isGenuineB, jet.eta() );
-	      hInverted_Jet3BtagDisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	      hInverted_Jet3Bdisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	    }
 	  
 	  if (index == 3)
 	    {
 	      hInverted_Jet4Pt_AfterCRSelections->Fill(isGenuineB, jet.pt() );
 	      hInverted_Jet4Eta_AfterCRSelections->Fill(isGenuineB, jet.eta() );
-	      hInverted_Jet4BtagDisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	      hInverted_Jet4Bdisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	    }
 	  
 	  if (index == 4)
 	    {
 	      hInverted_Jet5Pt_AfterCRSelections->Fill(isGenuineB, jet.pt() );
 	      hInverted_Jet5Eta_AfterCRSelections->Fill(isGenuineB, jet.eta() );
-	      hInverted_Jet5BtagDisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	      hInverted_Jet5Bdisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	    }
 	  
 	  if (index == 5)
 	    {
 	      hInverted_Jet6Pt_AfterCRSelections->Fill(isGenuineB, jet.pt() );
 	      hInverted_Jet6Eta_AfterCRSelections->Fill(isGenuineB, jet.eta() );
-	      hInverted_Jet6BtagDisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	      hInverted_Jet6Bdisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	    }
 	  
 	  if (index == 6)
 	    {
 	      hInverted_Jet7Pt_AfterCRSelections->Fill(isGenuineB, jet.pt() );
 	      hInverted_Jet7Eta_AfterCRSelections->Fill(isGenuineB, jet.eta() );
-	      hInverted_Jet7BtagDisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	      hInverted_Jet7Bdisc_AfterCRSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	    }
 	}
       
@@ -3225,13 +3345,16 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
       hInverted_LdgTetrajetM_AfterCRSelections->Fill(isGenuineB, topData.getLdgTetrajet().M() );
       hInverted_TetrajetBJetPt_AfterCRSelections->Fill(isGenuineB, topData.getTetrajetBJet().pt() );
       hInverted_TetrajetBJetEta_AfterCRSelections->Fill(isGenuineB, topData.getTetrajetBJet().eta() );
+      hInverted_TetrajetBJetBdisc_AfterCRSelections->Fill(isGenuineB, topData.getTetrajetBJet().bjetDiscriminator() );
       hInverted_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterCRSelections->Fill(isGenuineB, dEta);
       hInverted_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterCRSelections->Fill(isGenuineB, dPhi);
       hInverted_DeltaRLdgTrijetBJetTetrajetBJet_AfterCRSelections->Fill(isGenuineB, dR);
       hInverted_LdgTrijetPt_AfterCRSelections->Fill(isGenuineB, topData.getLdgTrijet().pt() );
       hInverted_LdgTrijetM_AfterCRSelections ->Fill(isGenuineB, topData.getLdgTrijet().M() );
+      hInverted_LdgTrijetBJetBdisc_AfterCRSelections ->Fill(isGenuineB, topData.getLdgTrijetBJet().bjetDiscriminator() );
       hInverted_SubLdgTrijetPt_AfterCRSelections->Fill(isGenuineB, topData.getSubldgTrijet().pt() );
       hInverted_SubLdgTrijetM_AfterCRSelections ->Fill(isGenuineB, topData.getSubldgTrijet().M() );
+      hInverted_SubLdgTrijetBJetBdisc_AfterCRSelections ->Fill(isGenuineB, topData.getSubldgTrijetBJet().bjetDiscriminator() );
       hInverted_LdgDijetPt_AfterCRSelections->Fill(isGenuineB, topData.getLdgDijet().pt() );
       hInverted_LdgDijetM_AfterCRSelections ->Fill(isGenuineB, topData.getLdgDijet().M() );
       hInverted_SubLdgDijetPt_AfterCRSelections->Fill(isGenuineB, topData.getSubldgDijet().pt() );
@@ -3313,21 +3436,21 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
 	{
 	  hInverted_Bjet1Pt_AfterAllSelections->Fill(isGenuineB, bjet.pt() );
 	  hInverted_Bjet1Eta_AfterAllSelections->Fill(isGenuineB, bjet.eta() );
-	  hInverted_Bjet1BtagDisc_AfterAllSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
+	  hInverted_Bjet1Bdisc_AfterAllSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
 	}
 
       if (index == 1)
 	{
 	  hInverted_Bjet2Pt_AfterAllSelections->Fill(isGenuineB, bjet.pt() );
 	  hInverted_Bjet2Eta_AfterAllSelections->Fill(isGenuineB, bjet.eta() );
-	  hInverted_Bjet2BtagDisc_AfterAllSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
+	  hInverted_Bjet2Bdisc_AfterAllSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
 	} 
 
       if (index == 2)
 	{
 	  hInverted_Bjet3Pt_AfterAllSelections->Fill(isGenuineB, bjet.pt() );
 	  hInverted_Bjet3Eta_AfterAllSelections->Fill(isGenuineB, bjet.eta() );
-	  hInverted_Bjet3BtagDisc_AfterAllSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
+	  hInverted_Bjet3Bdisc_AfterAllSelections->Fill(isGenuineB, bjet.bjetDiscriminator() );
 	}
     }
 
@@ -3342,49 +3465,49 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
 	{
 	  hInverted_Jet1Pt_AfterAllSelections->Fill(isGenuineB, jet.pt() );
 	  hInverted_Jet1Eta_AfterAllSelections->Fill(isGenuineB, jet.eta() );
-	  hInverted_Jet1BtagDisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hInverted_Jet1Bdisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	}
 
       if (index == 1)
 	{
 	  hInverted_Jet2Pt_AfterAllSelections->Fill(isGenuineB, jet.pt() );
 	  hInverted_Jet2Eta_AfterAllSelections->Fill(isGenuineB, jet.eta() );
-	  hInverted_Jet2BtagDisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hInverted_Jet2Bdisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	} 
 
       if (index == 2)
 	{
 	  hInverted_Jet3Pt_AfterAllSelections->Fill(isGenuineB, jet.pt() );
 	  hInverted_Jet3Eta_AfterAllSelections->Fill(isGenuineB, jet.eta() );
-	  hInverted_Jet3BtagDisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hInverted_Jet3Bdisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	}
 
       if (index == 3)
 	{
 	  hInverted_Jet4Pt_AfterAllSelections->Fill(isGenuineB, jet.pt() );
 	  hInverted_Jet4Eta_AfterAllSelections->Fill(isGenuineB, jet.eta() );
-	  hInverted_Jet4BtagDisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hInverted_Jet4Bdisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	}
 
       if (index == 4)
 	{
 	  hInverted_Jet5Pt_AfterAllSelections->Fill(isGenuineB, jet.pt() );
 	  hInverted_Jet5Eta_AfterAllSelections->Fill(isGenuineB, jet.eta() );
-	  hInverted_Jet5BtagDisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hInverted_Jet5Bdisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	}
 
       if (index == 5)
 	{
 	  hInverted_Jet6Pt_AfterAllSelections->Fill(isGenuineB, jet.pt() );
 	  hInverted_Jet6Eta_AfterAllSelections->Fill(isGenuineB, jet.eta() );
-	  hInverted_Jet6BtagDisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hInverted_Jet6Bdisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	}
 
       if (index == 6)
 	{
 	  hInverted_Jet7Pt_AfterAllSelections->Fill(isGenuineB, jet.pt() );
 	  hInverted_Jet7Eta_AfterAllSelections->Fill(isGenuineB, jet.eta() );
-	  hInverted_Jet7BtagDisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
+	  hInverted_Jet7Bdisc_AfterAllSelections->Fill(isGenuineB, jet.bjetDiscriminator() );
 	}
     }
 
@@ -3395,13 +3518,16 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   hInverted_LdgTetrajetM_AfterAllSelections->Fill(isGenuineB, topData.getLdgTetrajet().M() );
   hInverted_TetrajetBJetPt_AfterAllSelections->Fill(isGenuineB, topData.getTetrajetBJet().pt() );
   hInverted_TetrajetBJetEta_AfterAllSelections->Fill(isGenuineB, topData.getTetrajetBJet().eta() );
+  hInverted_TetrajetBJetBdisc_AfterAllSelections->Fill(isGenuineB, topData.getTetrajetBJet().bjetDiscriminator() );
   hInverted_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterAllSelections->Fill(isGenuineB, dEta);
   hInverted_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterAllSelections->Fill(isGenuineB, dPhi);
   hInverted_DeltaRLdgTrijetBJetTetrajetBJet_AfterAllSelections->Fill(isGenuineB, dR);
   hInverted_LdgTrijetPt_AfterAllSelections->Fill(isGenuineB, topData.getLdgTrijet().pt() );
   hInverted_LdgTrijetM_AfterAllSelections ->Fill(isGenuineB, topData.getLdgTrijet().M() );
+  hInverted_LdgTrijetBJetBdisc_AfterAllSelections ->Fill(isGenuineB, topData.getLdgTrijetBJet().bjetDiscriminator() );
   hInverted_SubLdgTrijetPt_AfterAllSelections->Fill(isGenuineB, topData.getSubldgTrijet().pt() );
   hInverted_SubLdgTrijetM_AfterAllSelections ->Fill(isGenuineB, topData.getSubldgTrijet().M() );
+  hInverted_SubLdgTrijetBJetBdisc_AfterAllSelections ->Fill(isGenuineB, topData.getSubldgTrijetBJet().bjetDiscriminator() );
   hInverted_LdgDijetPt_AfterAllSelections->Fill(isGenuineB, topData.getLdgDijet().pt() );
   hInverted_LdgDijetM_AfterAllSelections ->Fill(isGenuineB, topData.getLdgDijet().M() );
   hInverted_SubLdgDijetPt_AfterAllSelections->Fill(isGenuineB, topData.getSubldgDijet().pt() );
