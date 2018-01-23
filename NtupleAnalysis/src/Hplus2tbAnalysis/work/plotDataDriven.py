@@ -1,20 +1,22 @@
 #!/usr/bin/env python
 '''
-Description:
+DESCRIPTION:
 
-Usage:
+
+USAGE:
 ./plotDataDriven.py -m <pseudo_mcrab_directory> [opts]
 
-Examples:
+
+EXAMPLES:
 ./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_HLTBJetTrgMatch_TopCut10_H2Cut0p5_170720_104648 --url -o ""
 ./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170817_025841/ --url --signalMass 500
-./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170810_022933/ --url --signalMass 800
 ./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_HLTBJetTrgMatch_TopCut10_H2Cut0p5_170720_104648 --url --signalMass 800
 
-Last Used:
-./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170827_075947/ --url
-./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --url --signalMass 800
-./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170817_025841/ --url --signalMass 500
+
+LAST USED:
+./plotDataDriven.py -m Hplus2tbAnalysis_3bjets40_MVA0p88_MVA0p88_TopMassCutOff600GeV_180113_050540/ --mergeEWK --signal 500 --gridX --gridY --url
+./plotDataDriven.py -m Hplus2tbAnalysis_3bjets40_MVA0p88_MVA0p88_TopMassCutOff600GeV_180113_050540/ --mergeEWK --signal 1000 --gridX --gridY --useMC
+
 '''
 
 #================================================================================================ 
@@ -103,6 +105,14 @@ def GetDatasetsFromDir(opts):
     
 def main(opts):
 
+    # Apply TDR style
+    style = tdrstyle.TDRStyle()
+    style.setOptStat(False)
+    style.setGridX(opts.gridX)
+    style.setGridY(opts.gridY)
+    style.setLogX(opts.logX)
+    style.setLogY(opts.logY)
+
     #optModes = ["", "OptChiSqrCutValue50", "OptChiSqrCutValue100"]
     optModes = [""]
 
@@ -116,15 +126,27 @@ def main(opts):
         # Setup & configure the dataset manager 
         datasetsMgr = GetDatasetsFromDir(opts)
         
-        PrintPSet("TopologySelection", datasetsMgr)
+        # PrintPSet("TopologySelection", datasetsMgr)
         datasetsMgr.updateNAllEventsToPUWeighted()
         datasetsMgr.loadLuminosities() # from lumi.json
+
+        # ZJets and DYJets overlap
+        if "ZJetsToQQ_HT600toInf" in datasetsMgr.getAllDatasetNames() and "DYJetsToQQ_HT180" in datasetsMgr.getAllDatasetNames():
+            Print("Cannot use both ZJetsToQQ and DYJetsToQQ due to duplicate events? Investigate. Removing ZJetsToQQ datasets for now ..", True)
+            datasetsMgr.remove(filter(lambda name: "ZJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
+            # datasetsMgr.remove(filter(lambda name: "DYJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))     
+
+        # Define datasets to remove
+        datasetsToRemove = ["QCD-b"]
 
         # Set/Overwrite cross-sections
         for d in datasetsMgr.getAllDatasets():
             if "ChargedHiggs" in d.getName():
                 datasetsMgr.getDataset(d.getName()).setCrossSection(1.0) # ATLAS 13 TeV H->tb exclusion limits
-                
+                if d.getName() != opts.signal:
+                    datasetsToRemove.append(d.getName())
+
+        # Print useful information?
         if opts.verbose:
             datasetsMgr.PrintCrossSections()
             datasetsMgr.PrintLuminosities()
@@ -133,44 +155,50 @@ def main(opts):
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
    
         # Custom Filtering of datasets 
-        datasetsMgr.remove(filter(lambda name: "QCD-b" in name, datasetsMgr.getAllDatasetNames()))
-        # datasetsMgr.remove(filter(lambda name: "Charged" in name, datasetsMgr.getAllDatasetNames()))
+        for d in datasetsToRemove:
+            datasetsMgr.remove(filter(lambda name: d == name, datasetsMgr.getAllDatasetNames()))
 
-        # Replace QCD MC with QCD-DataDriven
-        qcdDatasetName    = "FakeBMeasurementTrijetMass"
-        qcdDatasetNameNew = "QCD-Data"
-        if opts.mcQCD:
-            pass
-        else:
-            replaceQCDFromData(datasetsMgr, qcdDatasetName, qcdDatasetNameNew)
-
-        # Re-order datasets (different for inverted than default=baseline)
-        newOrder = ["Data"]
-        if opts.signalMass != 0:
-            signal = "ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass
-            newOrder.extend([signal])
-        if opts.mcQCD:
-            newOrder.extend(["QCD"])
-        else:
-            newOrder.extend(["QCD-Data"])
-        newOrder.extend(GetListOfEwkDatasets())
-        datasetsMgr.selectAndReorder(newOrder)
-        
         # Merge EWK samples
         if opts.mergeEWK:
             datasetsMgr.merge("EWK", GetListOfEwkDatasets())
             plots._plotStyles["EWK"] = styles.getAltEWKStyle()
 
+        # Print dataset summary
+        if 0:
+            datasetsMgr.PrintInfo()
+
+        # Replace MC datasets with data-driven
+        if not opts.useMC:
+            #replaceQCDFromData(datasetsMgr, "FakeBMeasurement", "FakeB")
+            replaceQCDFromData(datasetsMgr, "FakeB", "FakeB")
+            replaceEWKWithGenuineB(datasetsMgr, "GenuineB", "GenuineB") # duplicate of FakeB!
+
+        # Re-order datasets
+        #datasetsMgr.selectAndReorder( GetDatasetOrder(opts) )
+        datasetsMgr.selectAndReorder( ["Data", "FakeB", "GenuineB"] )
+        
         # Print dataset information
         datasetsMgr.PrintInfo()
 
-        # Apply TDR style
-        style = tdrstyle.TDRStyle()
-        style.setOptStat(True)
-
         # Do Data-MC histograms with DataDriven QCD
-        DataMCHistograms(datasetsMgr, qcdDatasetNameNew)
+        DataMCHistograms(datasetsMgr, opts)
     return
+
+
+def GetDatasetOrder(opts):
+    order_mc  = ["QCD", "EWK"]
+    order_dd  = ["FakeB", "GenuineB"]
+    order_new = ["Data"]
+
+    if opts.signal != None:
+        order_new.append(opts.signal)
+
+    if opts.useMC:
+        order_new.extend(order_mc)
+    else:
+        order_new.extend(order_dd)
+    return order_new
+    
 
 def GetHistoKwargs(histoList, opts):
     '''
@@ -183,7 +211,11 @@ def GetHistoKwargs(histoList, opts):
     _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": 0.1}
     if opts.mergeEWK:
         _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": -0.12}    
-    logY = True
+    logY  = False
+    if logY:
+        ymaxF = 2
+    else:
+        ymaxF = 1.2
 
     _kwargs = {
         "ylabel"           : "Events / %.0f",
@@ -192,23 +224,25 @@ def GetHistoKwargs(histoList, opts):
         "ratioYlabel"      : "Data/Bkg",
         "ratio"            : True, 
         "stackMCHistograms": True,
-        "ratioInvert"      : False, 
+        "ratioInvert"      : False,
         "addMCUncertainty" : False, 
         "addLuminosityText": True,
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
-        "opts"             : {"ymin": 2e-1, "ymaxfactor": 10}, #1.2
-        "opts2"            : {"ymin": 0.0, "ymax": 2.0},
+        "opts"             : {"ymin": 2e-1, "ymaxfactor": ymaxF},
+        "opts2"            : {"ymin": 0.6, "ymax": 2.0-0.6},
         "log"              : logY,
         "moveLegend"       : _moveLegend,
+        "cutBoxY"          : {"cutValue": 1.2, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": False, "ratioCanvas": True}
         }
 
     for h in histoList:
         kwargs = copy.deepcopy(_kwargs)
         if "met" in h.lower():
             units            = "GeV/c"
-            kwargs["ylabel"] = "Events / %.0f " + units
+            kwargs["ylabel"] = "Events / %.0f " + units            
             kwargs["xlabel"] = "E_{T}^{miss} (%s)" % units
+            kwargs["rebinX"] = 2
         if "NVertices" in h:
             kwargs["ylabel"] = "Events / %.0f"
             kwargs["xlabel"] = "Vertices"
@@ -216,7 +250,7 @@ def GetHistoKwargs(histoList, opts):
             kwargs["ylabel"] = "Events / %.0f"
             kwargs["xlabel"] = "Jets Multiplicity"
             kwargs["cutBox"] = {"cutValue": 7.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": 7.0, "xmax": +16.0, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["opts"]   = {"xmin": 7.0, "xmax": +16.0, "ymin": 1e+0, "ymaxfactor": ymaxF}
             ROOT.gStyle.SetNdivisions(10, "X")
         if "JetPt" in h:                
             units            = "GeV/c"
@@ -227,12 +261,12 @@ def GetHistoKwargs(histoList, opts):
             kwargs["ylabel"] = "Events / %.2f"
             kwargs["xlabel"] = "#eta"
             kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": 1e+0, "ymaxfactor": ymaxF}
         if "NBjets" in h:                
             kwargs["ylabel"] = "Events / %.0f"
             kwargs["xlabel"] = "b-Jets Multiplicity"
             kwargs["cutBox"] = {"cutValue": 3.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": 10.0, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": 10.0, "ymin": 1e+0, "ymaxfactor": ymaxF}
         if "BjetPt" in h:                
             units = "GeV/c"
             kwargs["ylabel"] = "Events / %.0f " + units
@@ -242,27 +276,27 @@ def GetHistoKwargs(histoList, opts):
             kwargs["ylabel"] = "Events / %.2f"
             kwargs["xlabel"] = "#eta"
             kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": 1e+0, "ymaxfactor": ymaxF}
         if "BtagDiscriminator" in h:                
             kwargs["ylabel"]     = "Events / %.2f"
             kwargs["xlabel"]     = "b-Tag Discriminator"
             kwargs["cutBox"]     = {"cutValue": 0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["moveLegend"] = {"dx": -0.5, "dy": -0.01, "dh": 0.0}
-            kwargs["opts"]       = {"xmin": 0.0, "xmax": 1.05, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["opts"]       = {"xmin": 0.0, "xmax": 1.05, "ymin": 1e+0, "ymaxfactor": ymaxF}
         if "HT" in h:
             units            = "GeV"
             kwargs["ylabel"] = "Events / %.0f " + units
             kwargs["xlabel"] = "H_{T} (%s)"  % units
             kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["rebinX"] = 5
-            kwargs["opts"]   = {"xmin": 500.0, "xmax": 3000, "ymin": 1e+0, "ymaxfactor": 10}
-            # kwargs["opts"]   = {"xmin": 500.0, "xmax": 4100, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["opts"]   = {"xmin": 500.0, "xmax": 3000, "ymin": 1e+0, "ymaxfactor": ymaxF}
+            # kwargs["opts"]   = {"xmin": 500.0, "xmax": 4100, "ymin": 1e+0, "ymaxfactor": ymaxF}
         if "MHT" in h:
             units            = "GeV"
             kwargs["ylabel"] = "Events / %.0f " + units
             kwargs["xlabel"] = "MHT (%s)"  % units
             kwargs["rebinX"] = 2
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": 400, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": 400, "ymin": 1e+0, "ymaxfactor": ymaxF}
         if "Sphericity" in h:
             kwargs["ylabel"] = "Events / %.2f"
             kwargs["xlabel"] = "Sphericity"
@@ -283,7 +317,7 @@ def GetHistoKwargs(histoList, opts):
             kwargs["xlabel"] = "H_{2}"
             kwargs["opts"]   = {"xmin": 0.0, "xmax": 1.01}
             kwargs["cutBox"] = {"cutValue": 0.5, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": +1.0, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": +1.0, "ymin": 1e+0, "ymaxfactor": ymaxF}
             kwargs["moveLegend"] = {"dx": +0.0}
             #kwargs["moveLegend"] = {"dx": -0.53, "dy": -0.5, "dh": 0.0}
         if "Centrality" in h:
@@ -295,7 +329,7 @@ def GetHistoKwargs(histoList, opts):
             kwargs["xlabel"] = "#chi^{2}"
             kwargs["cutBox"] = {"cutValue": 100.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["rebinX"] = 2
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": 180.0, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": 180.0, "ymin": 1e+0, "ymaxfactor": ymaxF}
         if "LdgTrijetPt" in h:
             units = "GeV/c"
             kwargs["ylabel"] = "Events / %.0f " + units
@@ -304,7 +338,7 @@ def GetHistoKwargs(histoList, opts):
             units = "GeV/c"
             kwargs["ylabel"] = "Events / %.0f " + units
             kwargs["xlabel"] = "p_{T} (%s)"  % units
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": 700.0, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": 700.0, "ymin": 1e+0, "ymaxfactor": ymaxF}
         if "LdgTrijetMass" in h:
             startBlind       = 115 #135 v. sensitive to bin-width!
             endBlind         = 225 #205 v. sensitive to bin-width!
@@ -313,7 +347,7 @@ def GetHistoKwargs(histoList, opts):
             kwargs["ylabel"] = "Events / %.0f " + units
             kwargs["xlabel"] = "m_{jjb} (%s)"  % units
             kwargs["cutBox"] = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": 1200.0, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": 1200.0, "ymin": 1e+0, "ymaxfactor": ymaxF}
             if "AllSelections" in h:
                 kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind)
                 kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.12}
@@ -325,7 +359,7 @@ def GetHistoKwargs(histoList, opts):
             kwargs["ylabel"] = "Events / %.2f"
             kwargs["xlabel"] = "#eta"
             kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": 1e+0, "ymaxfactor": ymaxF}
         if "SubldgTrijetPt" in h:
             units = "GeV/c"
             kwargs["ylabel"] = "Events / %.0f " + units
@@ -338,7 +372,7 @@ def GetHistoKwargs(histoList, opts):
             kwargs["ylabel"] = "Events / %.0f " + units
             kwargs["xlabel"] = "m_{jjb} (%s)"  % units
             kwargs["cutBox"] = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": 1200.0, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": 1200.0, "ymin": 1e+0, "ymaxfactor": ymaxF}
             if "AllSelections" in h:
                 kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind)
                 kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.12}
@@ -350,7 +384,7 @@ def GetHistoKwargs(histoList, opts):
             kwargs["ylabel"] = "Events / %.2f"
             kwargs["xlabel"] = "#eta"
             kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": 1e+0, "ymaxfactor": ymaxF}
         if "LdgTetrajetPt" in h:
             units            = "GeV/c"
             kwargs["ylabel"] = "Events / %.0f " + units
@@ -364,10 +398,10 @@ def GetHistoKwargs(histoList, opts):
             kwargs["ylabel"] = "Events / %.0f " + units
             kwargs["xlabel"] = "m_{jjbb} (%s)"  % units
             kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": endBlind, "ymin": 1e+0, "ymaxfactor": 10}
-            #kwargs["opts"]   = {"xmin": 0.0, "xmax": 2000, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": endBlind, "ymin": 1e+0, "ymaxfactor": ymaxF}
+            #kwargs["opts"]   = {"xmin": 0.0, "xmax": 2000, "ymin": 1e+0, "ymaxfactor": ymaxF}
             if "AllSelections" in h:
-                kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind)
+                # kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind) #ale
                 kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.12}
         if "SubldgTetrajetPt" in h:
             units            = "GeV/c"
@@ -381,7 +415,7 @@ def GetHistoKwargs(histoList, opts):
             kwargs["ylabel"] = "Events / %.0f " + units
             kwargs["xlabel"] = "m_{jjbb} (%s)"  % units
             kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": endBlind, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": endBlind, "ymin": 1e+0, "ymaxfactor": ymaxF}
             kwargs["cutBox"] = {"cutValue": 7.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
             if "AllSelections" in h:
                 kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind)
@@ -394,7 +428,7 @@ def GetHistoKwargs(histoList, opts):
             kwargs["ylabel"] = "Events / %.2f"
             kwargs["xlabel"] = "#eta"
             kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": 1e+0, "ymaxfactor": ymaxF}
         if "TopMassWMassRatio" in h:
             kwargs["ylabel"] = "Events / %.1f"
             kwargs["xlabel"] = "R_{3/2}"
@@ -402,27 +436,27 @@ def GetHistoKwargs(histoList, opts):
             # kwargs["cutBox"] = {"cutValue": (172.5/80.385), "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             #kwargs["cutBox"] = {"cutValue": 2.1, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             #kwargs["opts"]   = {"xmin": 0, "xmax": +10.0, "ymin": 1e+0, "ymaxfactor": 1.2}
-            kwargs["opts"]   = {"xmin": 0, "xmax": +10.0, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["opts"]   = {"xmin": 0, "xmax": +10.0, "ymin": 1e+0, "ymaxfactor": ymaxF}
             kwargs["log"]    = True#False
 
         histoKwargs[h] = kwargs
     return histoKwargs
     
-def DataMCHistograms(datasetsMgr, qcdDatasetName):
-    Verbose("Plotting Data-MC Histograms")
+def DataMCHistograms(datasetsMgr, opts):
 
     # Definitions
     histoNames  = []
     saveFormats = [".png"] #[".C", ".png", ".pdf"]
 
     # Get list of histograms
-    dataPath    = "ForDataDrivenCtrlPlots"
-    allHistos   = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(dataPath)
-    histoList   = [h for h in allHistos if "StandardSelections" in h]
-    histoList.extend([h for h in allHistos if "AllSelections" in h])
-    histoList   = [h for h in histoList if "_MCEWK" not in h]
-    histoList   = [h for h in histoList if "_Purity" not in h]
-    histoPaths  = [dataPath + "/" + h for h in histoList]
+    folder      = "ForDataDrivenCtrlPlots"
+    allHistos   = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(folder)
+    # histoList   = [h for h in allHistos if "StandardSelections" in h]
+    # histoList.extend([h for h in allHistos if "AllSelections" in h])
+    histoList   = [h for h in allHistos if "AllSelections" in h]
+    #histoList   = [h for h in histoList if "_MCEWK" not in h]
+    #histoList   = [h for h in histoList if "_Purity" not in h]
+    histoPaths  = [folder + "/" + h for h in histoList]
 
     # Get histogram<->kwargs dictionary 
     histoKwargs = GetHistoKwargs(histoPaths, opts)
@@ -430,7 +464,38 @@ def DataMCHistograms(datasetsMgr, qcdDatasetName):
     # For-loop: All histograms in list
     for histoName in histoPaths:
 
-        if "Fox" not in histoName:
+#        if "LdgTetrajetMass" not in histoName:
+#            continue
+
+        if "MET" not in histoName:
+            continue
+
+#        if "HT" not in histoName:
+#            continue
+
+        #if "TetrajetMass" not in histoName:
+        #if "AllSelections" not in histoName:
+        #    continue
+
+        if "Fox" in histoName:
+            continue
+
+        if "Sphericity" in histoName:
+            continue
+
+        if "Aplanarity" in histoName:
+            continue
+
+        if "Planarity" in histoName:
+            continue
+
+        if "Circularity" in histoName:
+            continue
+
+        if "Centrality" in histoName:
+            continue
+
+        if "ThirdJet" in histoName:
             continue
 
         if "JetEtaPhi" in histoName:
@@ -473,22 +538,26 @@ def DataMCHistograms(datasetsMgr, qcdDatasetName):
             p.histoMgr.forHisto(signal, styles.getSignalStyleHToTB_M(mHPlus))
 
         #p.histoMgr.forHisto(opts.signalMass, styles.getSignalStyleHToTB())
-        if opts.mcQCD:
+        if opts.useMC:
             pass
         else:
-            p.histoMgr.forHisto(qcdDatasetName, styles.getAltQCDStyle())
-            p.histoMgr.setHistoDrawStyle(qcdDatasetName, "HIST")
-            p.histoMgr.setHistoLegendStyle(qcdDatasetName, "F")
+            p.histoMgr.forHisto("FakeB", styles.getFakeBStyle())
+            p.histoMgr.setHistoDrawStyle("FakeB", "HIST")
+            p.histoMgr.setHistoLegendStyle("FakeB", "F")
+            p.histoMgr.forHisto("GenuineB", styles.getGenuineBStyle())
+            p.histoMgr.setHistoDrawStyle("GenuineB", "HIST")
+            p.histoMgr.setHistoLegendStyle("GenuineB", "F")
 
-        if not opts.mcQCD:
+        if not opts.useMC:
             p.histoMgr.setHistoLegendLabelMany({
-                    qcdDatasetName: "QCD (Data)",
+                    "FakeB"   : "Fake b",
+                    "GenuineB": "EWK Genuine b",
                     })
         else:
             p.histoMgr.setHistoLegendLabelMany({
                     "QCD": "QCD (MC)",
                     })            
-
+                              
         # Apply blinding of signal region
         if "blindingRangeString" in kwargs_:
             startBlind = float(kwargs_["blindingRangeString"].split("-")[1])
@@ -523,7 +592,7 @@ def getHisto(datasetsMgr, datasetName, histoName):
     h1.setName(datasetName)
     return h1
 
-def replaceQCDFromData(dMgr, dataDrivenDatasetName, newName="QCD-Data"):
+def replaceQCDFromData(dMgr, dataDrivenDatasetName, newName="FakeB"):
     
     # Define variables
     mcQCDName      = "QCD"
@@ -545,6 +614,35 @@ def replaceQCDFromData(dMgr, dataDrivenDatasetName, newName="QCD-Data"):
     # Remove from the dataset manager the mcQCDName
     dMgr.remove(mcQCDName)
     names.pop(names.index(dataDrivenQCD.getName()))
+    
+    # Select and reorder Datasets. 
+    # This method can be used to either select a set of dataset.Dataset objects. reorder them, or both.
+    dMgr.selectAndReorder(names)
+    return
+
+def replaceEWKWithGenuineB(dMgr, dataDrivenDatasetName, newName="GenuineB"):
+    
+    # Define variables
+    EwkName  = "EWK"
+    dMgr.PrintInfo()
+    GenuineB = dMgr.getDataset(dataDrivenDatasetName)
+    GenuineB.setName(newName)
+
+    # Get list of dataset names
+    names = dMgr.getAllDatasetNames()
+
+    # Return the index in the list of the first dataset whose name is EwkName.
+    index = names.index(EwkName)
+
+    # Remove the dataset at the given position in the list, and return it. 
+    names.pop(index)
+    
+    # Insert the dataset to the given position  (index) of the list
+    names.insert(index, GenuineB.getName())
+
+    # Remove from the dataset manager the EwkName
+    dMgr.remove(EwkName)
+    names.pop(names.index(GenuineB.getName()))
     
     # Select and reorder Datasets. 
     # This method can be used to either select a set of dataset.Dataset objects. reorder them, or both.
@@ -595,7 +693,7 @@ if __name__ == "__main__":
     
     # Default Settings
     ANALYSISNAME = "Hplus2tbAnalysis"
-    MCQCD        = False
+    USEMC        = False
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
     OPTMODE      = None
@@ -604,14 +702,18 @@ if __name__ == "__main__":
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False
-    MCONLY       = False
     SIGNALMASS   = 0
+    SIGNAL       = None
     MERGEEWK     = False
     URL          = False
     NOERROR      = True
     SAVEDIR      = "/publicweb/a/aattikis/DataDriven/"
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug' 
+    GRIDX        = False
+    GRIDY        = False
+    LOGX         = False
+    LOGY         = False
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -628,11 +730,8 @@ if __name__ == "__main__":
     parser.add_option("--analysisName", dest="analysisName", type="string", default=ANALYSISNAME,
                       help="Override default analysisName [default: %s]" % ANALYSISNAME)
 
-    parser.add_option("--mcQCD", dest="mcQCD", action="store_true", default=MCQCD,
-                      help="Do not replace QCD MC with Data-Driven QCD Background Estiomation [default: %s]" % MCQCD)
-
-    parser.add_option("--mcOnly", dest="mcOnly", action="store_true", default=MCONLY,
-                      help="Plot only MC info [default: %s]" % MCONLY)
+    parser.add_option("--useMC", dest="useMC", action="store_true", default=USEMC,
+                      help="Use all backgrounds from MC. Do not use data-driven background estimation [default: %s]" % USEMC)
 
     parser.add_option("--intLumi", dest="intLumi", type=float, default=INTLUMI,
                       help="Override the integrated lumi [default: %s]" % INTLUMI)
@@ -667,6 +766,19 @@ if __name__ == "__main__":
     parser.add_option("-e", "--excludeTasks", dest="excludeTasks", action="store", 
                       help="List of datasets in mcrab to exclude")
 
+    parser.add_option("--gridX", dest="gridX", action="store_true", default=GRIDX,
+                      help="Enable the x-axis grid lines [default: %s]" % GRIDX)
+
+    parser.add_option("--gridY", dest="gridY", action="store_true", default=GRIDY,
+                      help="Enable the y-axis grid lines [default: %s]" % GRIDY)
+
+    parser.add_option("--logX", dest="logX", action="store_true", default=LOGX,
+                      help="Set x-axis to logarithm scale [default: %s]" % LOGX)
+
+    parser.add_option("--logY", dest="logY", action="store_true", default=LOGY,
+                      help="Set y-axis to logarithm scale [default: %s]" % LOGY)
+
+
     (opts, parseArgs) = parser.parse_args()
 
     # Require at least two arguments (script-name, path to multicrab)
@@ -687,6 +799,8 @@ if __name__ == "__main__":
         for m in allowedMass:
             Print(m, False)
         sys.exit()
+    else:
+        opts.signal = "ChargedHiggs_HplusTB_HplusToTB_M_%i" % opts.signalMass
 
     # Call the main function
     main(opts)
