@@ -74,7 +74,7 @@ muVeto = PSet(
     muonPtCut         = 10.0,        # sync: 10.0
     muonEtaCut        = 2.4,         # sync:  2.4
     muonID            = "muIDLoose", # options: "muIDLoose", "muIDMedium", "muIDTight"
-    muonIsolation     = "veto",      # options: "veto", "tight")
+    muonIsolation     = "veto",      # options: "veto", "tight"
     muonIsolType      = "mini",      # options: "mini", "default"
 )
 
