@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Prerequisites:
+PREREQUISITES:
 ./run.py -m <multicrab> [opts]
 ./plotQCD_Fit.py -m <pseudo_multicrab> [opts]
 
@@ -35,20 +35,16 @@ Description: (* = prerequisites)
 4) Make data-driven control plots: (<1m )
 The <pseudo_dataset> dir created in step 3) can be copied in a signal-analysis <pseudo-multicrab> directory and can then be used 
 to REPLACE the "QCD MC" dataset in the plots. See NtupleAnalysis/src/Hplus2tbAnalysis/work/plotDataDriven.py for an example script.
-Remember to copy the new <pseudo_dataset> directory from the FakeBMEasurement <pseudo_multicrab> directory to a Hplus2tbAnalysis 
+Remember to copy the new <pseudo_dataset> directory from the FakeBMeasurement <pseudo_multicrab> directory to a Hplus2tbAnalysis 
 <pseudo_multicrab> directory. For example:
 cp -rf ../../FakeBMeasurement/work/FakeBMeasurement_170720_104631/FakeBMeasurement/FakeBMeasurementTrijetMass Hplus2tbAnalysis_170720_104648/ .
 
-5) Limit calculation:
 
-
-Usage:
+USAGE:
 ./makeInvertedPseudoMultirab.py -m <same_pseudo_multicrab> [opts]
 
-Last Used:
-./makeInvertedPseudoMulticrab.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_SignalTriggers_NoTrgMatch_StdSelections_TopCut_AllSelections_TopCut10_170725_030408/
 
-Examples:
+EXAMPLES:
 1) Produces QCD normalization factors by running the fitting script:
 ./plotQCD_Fit.py -m FakeBMeasurement_StdSelections_TopCut100_AllSelections_HLTBJetTrgMatch_TopCut10_H2Cut0p5_170720_104631/ --url -o ""
 
@@ -62,6 +58,12 @@ Run on a single optimization mode:
 cp -rf ../../FakeBMeasurement/work/FakeBMeasurement_StdSelections_TopCut100_AllSelections_HLTBJetTrgMatch_TopCut10_H2Cut0p5_170720_104631/FakeBMeasurement/FakeBMeasurementTrijetMass Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_HLTBJetTrgMatch_TopCut10_H2Cut0p5_170720_104648/ .
 
 4) Edit multicrab.cfg and add the new dataset. Its name can be found in FakeBMeasurementTrijetMass/multicrab.cfg
+
+
+LAST USED:
+./makeInvertedPseudoMulticrab.py -m FakeBMeasurement_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180120_092605/ --analysisName GenuineB --ewkSrc ForDataDrivenCtrlPlotsEWKGenuineB
+./makeInvertedPseudoMulticrab.py -m FakeBMeasurement_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180120_092605/ --analysisName FakeB --ewkSrc ForDataDrivenCtrlPlotsEWKGenuineB -v
+./makeInvertedPseudoMulticrab.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_SignalTriggers_NoTrgMatch_StdSelections_TopCut_AllSelections_TopCut10_170725_030408/
 
 '''
 #================================================================================================ 
@@ -163,7 +165,8 @@ class ModuleBuilder:
                                                                 self._searchMode,
                                                                 self._optimizationMode,
                                                                 self._systematicVariation, 
-                                                                opts.analysisNameSaveAs)
+                                                                opts.analysisNameSaveAs,
+                                                                opts.verbose)
 
         Print("Obtaining results", True)
         self._nominalResult = qcdInvertedResult.QCDInvertedResultManager(dataPath,
@@ -177,6 +180,8 @@ class ModuleBuilder:
                                                                          opts.normEwkSrc,
                                                                          self._opts.useInclusiveNorm,
                                                                          opts.verbose)
+        sys.exit()
+
         Verbose("Storing results", True)
         myModule.addPlots(self._nominalResult.getShapePlots(), self._nominalResult.getShapePlotLabels()) 
         self._outputCreator.addModule(myModule)
@@ -239,7 +244,7 @@ class ModuleBuilder:
 def Print(msg, printHeader=False):
     fName = __file__.split("/")[-1]
     if printHeader==True:
-        print "=== ", fName
+        print "===", fName
         print "\t", msg
     else:
         print "\t", msg
@@ -308,11 +313,11 @@ def getNormFactorFileList(dirName, fileBaseName):
                 scriptList.append(item)
 
     if len(scriptList) < 1:
-        msg = "ERROR! Found no normalization info files under dir %s" % dirName
-        raise Exception(msg)
+        msg = "ERROR! Found no normalization info files under dir %s. Did you generate them?" % dirName
+        raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle() )
     else:
         msg = "Found %s norm-factor file(s):\n\t%s" % (  len(scriptList), "\n\t".join(os.path.join([os.path.join(dirName, s) for s in scriptList])))
-        Print(ShellStyles.NoteLabel() + msg, True)
+        Verbose(ShellStyles.NoteLabel() + msg, True)
     return scriptList
 
 
@@ -365,20 +370,32 @@ def importNormFactors(era, searchMode, optimizationMode, multicrabDirName):
 
     # Obtain normalization factors
     myNormFactorsImport = getattr(normFactorsImport, "QCDNormalization")
-    msg = "Disabled NormFactors Syst Var Fake Weighting Up/Down"
+    msg = "Disabled NormFactors SystVar Fake Weighting Up/Down"
     Print(ShellStyles.WarningLabel() + msg, True)    
     # myNormFactorsImportSystVarFakeWeightingDown = getattr(normFactorsImport, "QCDPlusEWKFakeTausNormalizationSystFakeWeightingVarDown") #FIXME
     # myNormFactorsImportSystVarFakeWeightingUp   = getattr(normFactorsImport, "QCDPlusEWKFakeTausNormalizationSystFakeWeightingVarUp")   #FIXME
 
+    # Import the normalisation factors and inform user
     myNormFactors = {}
-    myNormFactors["nominal"] = myNormFactorsImport
-    msg = "Obtained \"nominal\" QCD normalisation factors dictionary. The values are:\n"
-    for k in  myNormFactors["nominal"]:
-        msg += "\t" + k + " = " + str(myNormFactors["nominal"][k])
-    Print(ShellStyles.NoteLabel() + msg, True)
-
+    if "FakeB" in opts.analysisName:
+        myNormFactors[opts.normFactorKey] = myNormFactorsImport
+    elif "GenuineB" in opts.analysisName:
+        myNormFactors[opts.normFactorKey] = {'Inclusive': 1.0} #fime: does the EWKGenuineB require normalisation?
+    else:
+        raise Exception("This should not be reached!")
+    # Inform user of normalisation factos
+    msg = "Obtained %s normalisation factor dictionary. The values are:" % (ShellStyles.NoteStyle() + opts.normFactorKey + ShellStyles.NormalStyle() )
+    Print(msg, True)
+    for i, k in  enumerate(myNormFactors[opts.normFactorKey], 1):
+        keyName  = k
+        keyValue = myNormFactors[opts.normFactorKey][k]
+        #msg += "%s = %s" % (keyName, keyValue)
+        msg = "%s = %s" % (keyName, keyValue)
+        Print(msg, i==0)
+        
+    # Inform user of weighting up/down
     msg = "Disabled NormFactors Weighting Up/Down"
-    Print(ShellStyles.WarningLabel() + msg, True) 
+    Verbose(ShellStyles.WarningLabel() + msg, True)  #fixme
     # myNormFactors["FakeWeightingDown"] = myNormFactorsImportSystVarFakeWeightingDown # FIXME 
     # myNormFactors["FakeWeightingUp"]   = myNormFactorsImportSystVarFakeWeightingUp   # FIXME
     return myNormFactors
@@ -387,67 +404,60 @@ def importNormFactors(era, searchMode, optimizationMode, multicrabDirName):
 #================================================================================================ 
 # Main
 #================================================================================================ 
-def main():
+def main(opts):
     
     # Object for selecting data eras, search modes, and optimization modes
     myModuleSelector = analysisModuleSelector.AnalysisModuleSelector()
 
-    # Obtain multicrab directory
-    myMulticrabDir = "."
-    if opts.mcrab != None:
-        myMulticrabDir = opts.mcrab
-    if not os.path.exists("%s/multicrab.cfg" % myMulticrabDir):
-        msg = "No multicrab directory found at path '%s'! Please check path or specify it with --mcrab!" % (myMulticrabDir)
-        raise Exception(ShellStyles.ErrorLabel() + msg + ShellStyles.NormalStyle())
-    if len(opts.shape) == 0:
-        raise Exception(ShellStyles.ErrorLabel()+"Provide a shape identifierwith --shape (for example MT)!"+ShellStyles.NormalStyle())
-
     # Obtain dsetMgrCreator and register it to module selector
-    dsetMgrCreator = dataset.readFromMulticrabCfg(directory=myMulticrabDir)
+    dsetMgrCreator = dataset.readFromMulticrabCfg(directory=opts.mcrab)
 
     # Obtain systematics names
     mySystematicsNamesRaw = dsetMgrCreator.getSystematicVariationSources()
     mySystematicsNames    = []
-    for item in mySystematicsNamesRaw:
+    for i, item in enumerate(mySystematicsNamesRaw, 0):
+        Print("Using systematic %s" % (ShellStyles.NoteStyle() + item + ShellStyles.NormalStyle()), i==0)
         mySystematicsNames.append("%sPlus" % item)
         mySystematicsNames.append("%sMinus"% item)
     if opts.test:
-        mySystematicsNames = [] #[mySystematicsNames[0]] #FIXME
-
+        mySystematicsNames = []
+        
     # Set the primary source 
-    myModuleSelector.setPrimarySource(label=opts.analysisName, dsetMgrCreator=dsetMgrCreator)
+    Verbose("Setting the primary source (label=%s)" % (ShellStyles.NoteStyle() + opts.analysisName + ShellStyles.NormalStyle()), True)
+    myModuleSelector.setPrimarySource(label=opts.analysisName, dsetMgrCreator=dsetMgrCreator) #fixme: what is label for?
 
     # Select modules
-    myModuleSelector.doSelect(opts=None) #FIXME: (opts=opts)
+    myModuleSelector.doSelect(opts=None) #fixme: (opts=opts)
 
     # Loop over era/searchMode/optimizationMode combos
-    myDisplayStatus = True
     myTotalModules  = myModuleSelector.getSelectedCombinationCount() * (len(mySystematicsNames)+1) * len(opts.shape)
     Verbose("Found %s modules in total" % (myTotalModules), True)
 
     count, nEras, nSearchModes, nOptModes, nSysVars = myModuleSelector.getSelectedCombinationCountIndividually()
     if nSysVars > 0:
-        msg = "Will run over %d modules (%d eras x %d searchModes x %d optimizationModes x %d systematic variations)" % (count, nEras, nSearchModes, nOptModes, nSysVars)
+        msg = "Running  over %d modules (%d eras x %d searchModes x %d optimizationModes x %d systematic variations)" % (count, nEras, nSearchModes, nOptModes, nSysVars)
     else:
-        msg = "Will run over %d modules (%d eras x %d searchModes x %d optimizationModes)" % (count, nEras, nSearchModes, nOptModes)
-    Print(msg, True)
+        msg = "Running over %d modules (%d eras x %d searchModes x %d optimizationModes)" % (count, nEras, nSearchModes, nOptModes)
+    Verbose(msg, True)
 
     # Create pseudo-multicrab creator
-    myOutputCreator = pseudoMultiCrabCreator.PseudoMultiCrabCreator(opts.analysisName, myMulticrabDir)
+    msg = "Will create pseudo-dataset %s inside the pseudo-multicrab directory" % (ShellStyles.NoteStyle() + opts.analysisName + ShellStyles.NormalStyle())
+    Verbose(msg, True)
+    myOutputCreator = pseudoMultiCrabCreator.PseudoMultiCrabCreator(opts.analysisName, opts.mcrab, verbose=opts.verbose)
 
     # Make time stamp for start time
     myGlobalStartTime = time.time()
 
     iModule = 0
     # For-loop: All Shapes
-    for shapeType in opts.shape:
+    for iShape, shapeType in enumerate(opts.shape, 1):
+        
+        msg = "Shape %d/%d:%s %s" % (iShape, len(opts.shape), ShellStyles.NormalStyle(), shapeType)
+        Print(ShellStyles.CaptionStyle() + msg, True)
 
         # Initialize
-        myOutputCreator.initialize(shapeType, prefix="")
-        
-        msg = "Creating dataset for shape \"%s\"%s" % (shapeType, ShellStyles.NormalStyle())
-        Verbose(ShellStyles.HighlightStyle() + msg, True)
-        
+        myOutputCreator.initialize(subTitle=shapeType, prefix="") #fixeme: remove shapeType from sub-directory name?
+
         # Get lists of settings
         erasList   = myModuleSelector.getSelectedEras()
         modesList  = myModuleSelector.getSelectedSearchModes()
@@ -482,7 +492,7 @@ def main():
 
                     Verbose("Create dataset manager with given settings", True)
                     nominalModule = ModuleBuilder(opts, myOutputCreator)
-                    nominalModule.createDsetMgr(myMulticrabDir, era, searchMode, optimizationMode)
+                    nominalModule.createDsetMgr(opts.mcrab, era, searchMode, optimizationMode)
                     
                     if (iModule == 1):
                         if opts.verbose:
@@ -491,8 +501,12 @@ def main():
                     doQCDNormalizationSyst=False #FIXME
                     if not doQCDNormalizationSyst:
                         msg = "Disabling systematics"
-                        Print(ShellStyles.WarningLabel() + msg, True)
-                    nominalModule.buildModule(opts.dataSrc, opts.ewkSrc, myNormFactors["nominal"], doQCDNormalizationSyst, opts.normDataSrc, opts.normEwkSrc)
+                        Verbose(ShellStyles.WarningLabel() + msg, True) #fixme
+                        
+                    # Build the module
+                    nominalModule.buildModule(opts.dataSrc, opts.ewkSrc, myNormFactors[opts.normFactorKey], doQCDNormalizationSyst, opts.normDataSrc, opts.normEwkSrc)
+                    break #iro alex
+
 
                     if len(mySystematicsNames) > 0:
                         Print("Adding QCD normalization systematics (iff also other systematics  present) ", True)
@@ -523,24 +537,21 @@ def main():
                         myStartTime = time.time()
                         systModule  = ModuleBuilder(opts, myOutputCreator)
                         # Create dataset manager with given settings
-                        systModule.createDsetMgr(myMulticrabDir, era, searchMode, optimizationMode, systematicVariation=syst)
+                        systModule.createDsetMgr(opts.mcrab, era, searchMode, optimizationMode, systematicVariation=syst)
 
                         # Build asystematics module
-                        systModule.buildModule(opts.dataSrc, opts.ewkSrc, myNormFactors["nominal"], False, opts.normDataSrc, opts.normEwkSrc)
+                        systModule.buildModule(opts.dataSrc, opts.ewkSrc, myNormFactors[opts.normFactorKey], False, opts.normDataSrc, opts.normEwkSrc)
                         printTimeEstimate(myGlobalStartTime, myStartTime, iModule, myTotalModules)
                         systModule.delete()
 
         Verbose("Pseudo-multicrab ready for %s" % shapeType, True)
 
     # Create rest of pseudo multicrab directory
-    myOutputCreator.silentFinalize() 
+    myOutputCreator.finalize(silent=not opts.verbose)
     
     # Print some timing statistics
     Print("Average processing time per module was %.1f s" % getAvgProcessTimeForOneModule(myGlobalStartTime, myTotalModules), True)
     Print("Total elapsed time was %.1f s" % getTotalElapsedTime(myGlobalStartTime), False)
-
-    msg = "Created pseudo-multicrab %s for shape type \"%s\"" % (myOutputCreator.getDirName(), shapeType)
-    Print(ShellStyles.SuccessLabel() + msg, True)
     return
 
 if __name__ == "__main__":
@@ -562,7 +573,7 @@ if __name__ == "__main__":
 
     # Default Settings
     global opts
-    ANALYSISNAME     = "FakeBMeasurement"
+    ANALYSISNAME     = "FakeBMeasurement" #FakeB #GenuineB
     ANALYSISNAMESAVE = "Hplus2tbAnalysis"
     EWKDATASETS      = ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
     SEARCHMODES      = ["80to1000"]
@@ -582,17 +593,22 @@ if __name__ == "__main__":
     TEST             = True
     FACTOR_SRC       = "QCDInvertedNormalizationFactors_%s.py"
     DATA_SRC         = "ForDataDrivenCtrlPlots"
-    EWK_SRC          = "ForDataDrivenCtrlPlots"
-    NORM_DATA_SRC    = "ForDataDrivenCtrlPlots"
-    NORM_EWK_SRC     = "ForDataDrivenCtrlPlots"
+    EWK_SRC          = "ForDataDrivenCtrlPlotsEWKGenuineB" #"ForDataDrivenCtrlPlots"
+    NORM_DATA_SRC    = "ForDataDrivenCtrlPlotsEWKGenuineB" #"ForDataDrivenCtrlPlots"
+    NORM_EWK_SRC     = "ForDataDrivenCtrlPlotsEWKGenuineB" #"ForDataDrivenCtrlPlots"
     INCLUSIVE_ONLY   = True
     MULTICRAB        = None
-
+    SHAPE            = ["TrijetMass"]
+    NORMFACTOR_KEY   = "nominal"
+ 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]", add_help_option=True, conflict_handler="resolve")
 
     parser.add_option("-m", "--mcrab", dest="mcrab", action="store",# required=True,
                       help="Path to the multicrab directory for input [default: %s]" % (MULTICRAB) )
+
+    parser.add_option("--normFactorKey", dest="normFactorKey", default=NORMFACTOR_KEY, 
+                      help="The normalisation factor key (e.g. nominal) [default: %s]" % (NORMFACTOR_KEY) )
 
     parser.add_option("--inclusiveOnly", dest="useInclusiveNorm", action="store_true", default=INCLUSIVE_ONLY, 
                       help="Use only inclusive weight instead of binning [default: %s]" % (INCLUSIVE_ONLY) )
@@ -603,8 +619,8 @@ if __name__ == "__main__":
     parser.add_option("-l", "--list", dest="listVariations", action="store_true", default=VARIATIONS, 
                       help="Print a list of available variations [default: %s]" % VARIATIONS)
 
-    parser.add_option("--shape", dest="shape", action="store", default=["TrijetMass"], 
-                      help="shape identifiers") # unknown use
+    parser.add_option("--shape", dest="shape", action="store", default=SHAPE, 
+                      help="Shape identifiers") # unknown use
 
     parser.add_option("--test", dest="test", action="store_true", default=TEST, 
                       help="Make short test by limiting number of syst. variations [default: %s]" % TEST)
@@ -675,13 +691,36 @@ if __name__ == "__main__":
         parser.print_help()
         #print __doc__
         sys.exit(1)
+    else:
+        if not os.path.exists("%s/multicrab.cfg" % opts.mcrab):
+            msg = "No pseudo-multicrab directory found at path '%s'! Please check path or specify it with --mcrab!" % (opts.mcrab)
+            raise Exception(ShellStyles.ErrorLabel() + msg + ShellStyles.NormalStyle())
+        else:
+            msg = "Using pseudo-multicrab directory %s" % (ShellStyles.NoteStyle() + opts.mcrab + ShellStyles.NormalStyle())
+            Print(msg , True)
+
+    # Sanity check - iro - fixme
+    if len(opts.shape) == 0:
+        msg = "Provide a shape identifier with --shape (e.g.: TrijetMass)!"
+        raise Exception(ShellStyles.ErrorLabel() + msg + ShellStyles.NormalStyle())
 
     if opts.useInclusiveNorm:
-        msg = "Will use only inclusive weight instead of binning (no splitted histograms)"
-        Print(ShellStyles.NoteLabel() + msg, True)
+        msg = "Will only use " + ShellStyles.NoteStyle() + " inclusive " + ShellStyles.NormalStyle() + " weight instead of binning (no splitted histograms)"
+        Print(msg, True)
             
+    # Sanity check:
+    if opts.analysisName == "GenuineB":
+        if opts.ewkSrc != "ForDataDrivenCtrlPlotsEWKGenuineB":
+            msg = "Cannot create pseudo-dataset %s with EWK source set to %s" % (opts.analysisName, opts.ewkSrc)
+            raise Exception(ShellStyles.ErrorLabel() + msg + ShellStyles.NormalStyle())
+
+    if opts.analysisName == "FakeB":
+        if opts.ewkSrc != "ForDataDrivenCtrlPlotsEWKGenuineB":
+            msg = "Cannot create pseudo-dataset %s with EWK source set to %s" % (opts.analysisName, opts.ewkSrc)
+            raise Exception(ShellStyles.ErrorLabel() + msg + ShellStyles.NormalStyle())
+                    
     # Call the main function
-    main()
+    main(opts)
 
     if not opts.batchMode:
         raw_input("=== makeInvertedPseudoMulticrab.py: Press any key to quit ROOT ...")

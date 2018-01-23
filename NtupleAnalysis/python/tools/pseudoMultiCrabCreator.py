@@ -1,11 +1,20 @@
-## \package PseudoMultiCrabCreator
-# Description: used for creating a root file and proper directory structure to fool the dataset.py to think
-# it is a genuine multicrab directory
-#
-# Use cases: Converterting QCD measuerement results to readable format for the datacard generator
-#
-# Authors: Lauri A. Wendland
+'''
+\package PseudoMultiCrabCreator
 
+DESCRIPTION::
+Used for creating a root file and proper directory structure to fool the dataset.py to think
+ it is a genuine multicrab directory
+
+USE CASES: 
+Converterting QCD/FakeB/EwkGenuineB measurement results to readable format for the datacard generator
+ 
+AUTHOR: 
+Lauri A. Wendland
+'''
+
+#================================================================================================
+# Imports
+#================================================================================================
 import ROOT
 ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
@@ -17,14 +26,18 @@ from math import sqrt
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 
+#================================================================================================
+# Clas definition
+#================================================================================================
 class PseudoMultiCrabCreator:
     ## Constructor
     # title is a string that goes to the multicrab directory name
-    def __init__(self, title, inputMulticrabDir):
+    def __init__(self, title, inputMulticrabDir, verbose=False):
         suffix = ""
         s = inputMulticrabDir.split("_")
         if s[len(s)-1].endswith("pr") or s[len(s)-1].endswith("prong"):
             suffix = "_"+s[len(s)-1]
+        self._verbose = verbose
         self._title = title+suffix
         self._mySubTitles = []
         self._modulesList = [] # List of PseudoMultiCrabModule objects
@@ -33,6 +46,22 @@ class PseudoMultiCrabCreator:
         self._energy = None
         self._dataVersion = None
         #self._codeVersion = None
+        return
+
+    def Print(self, msg, printHeader=False):
+        fName = __file__.split("/")[-1].replace("pyc", "py")
+        if printHeader==True:
+            print "===", fName
+            print "\t", msg
+        else:
+            print "\t", msg
+        return
+
+    def Verbose(self, msg, printHeader=True):
+        if not self._verbose:
+            return
+        self.Print(msg, printHeader)
+        return
 
     def addModule(self, module):
         if self._energy == None:
@@ -44,17 +73,19 @@ class PseudoMultiCrabCreator:
             #self._codeVersion = None
 
         # Open root file
-        myFilename = "%s/%s/res/histograms-%s.root"%(self._myBaseDir,self._title+self._mySubTitles[-1],self._title+self._mySubTitles[-1])
+        myFilename = "%s/%s/res/histograms-%s.root" % (self._myBaseDir,self._title+self._mySubTitles[-1],self._title+self._mySubTitles[-1])
         myRootFile = None
         if os.path.exists(myFilename):
             myRootFile = ROOT.TFile(myFilename,"UPDATE")
         else:
             myRootFile = ROOT.TFile(myFilename,"CREATE")
+
         # Write module
         module.writeModuleToRootFile(myRootFile)
         myRootFile.Write()
         myRootFile.Close()
         module.delete()
+        return
 
     def _createBaseDirectory(self, prefix):
         if self._myBaseDir != None:
@@ -63,7 +94,10 @@ class PseudoMultiCrabCreator:
         self._myBaseDir = os.path.join(self._inputMulticrabDir, "%s%s" % (prefix, self._title) )
         if os.path.exists(self._myBaseDir):
             shutil.rmtree(self._myBaseDir)
+
+        self.Verbose("Creating dir %s" % (self._myBaseDir), True)
         os.mkdir(self._myBaseDir)
+        return
 
     def initialize(self, subTitle, prefix="pseudoMulticrab_"):
         self._energy = None
@@ -72,33 +106,43 @@ class PseudoMultiCrabCreator:
         self._createBaseDirectory(prefix)
         self._mySubTitles.append(subTitle)
         self._currentSubTitle = subTitle
-        os.mkdir("%s/%s"%(self._myBaseDir,self._title+subTitle))
-        os.mkdir("%s/%s/res"%(self._myBaseDir,self._title+subTitle))
 
-    def finalize(self):
-        # Copy lumi.json file from input multicrab directory
-        #os.system("cp %s/lumi.json %s"%(self._inputMulticrabDir, self._myBaseDir))
+        datasetDir = os.path.join(self._myBaseDir, self._title + subTitle)
+        resDir = os.path.join(datasetDir, "res")
+
+        self.Verbose("Creating dir %s" % (datasetDir), True)
+        os.mkdir(datasetDir)
+
+        self.Verbose("Creating sub-dir %s" % (resDir), False)
+        os.mkdir(resDir)
+        return
+
+    def finalize(self, silent=False):
+        '''
+        Copy lumi.json file from input multicrab directory
+
+        os.system("cp %s/lumi.json %s"%(self._inputMulticrabDir, self._myBaseDir))
+        '''
         # Create multicrab.cfg
-        f = open(os.path.join(self._myBaseDir, "multicrab.cfg"), "w")
-        f.write("# Ultimate pseudo-multicrab for fooling dataset.py, created by PseudoMultiCrabCreator\n")
+        filePath = os.path.join(self._myBaseDir, "multicrab.cfg")
+        f = open(filePath, "w")
+        f.write("# Ultimate pseudo-multicrab for fooling dataset.py, created by pseudoMultiCrabCreator.py\n")
+    
         for item in self._mySubTitles:
-            f.write("[%s]\n"%(self._title+item))
+            f.write("[%s]\n" % (self._title+item) )
         f.close()
-        # Done
-        print ShellStyles.HighlightStyle()+"Created pseudo-multicrab directory %s%s"%(self._myBaseDir,ShellStyles.NormalStyle())
+
+        # Inform user ?
+        msg = "Created pseudo-multicrab directory %s" % (ShellStyles.SuccessStyle()  + self._myBaseDir + ShellStyles.NormalStyle() )
+        if silent == False:
+            self.Print(msg, True)
+        return
 
     def silentFinalize(self):
-        # Copy lumi.json file from input multicrab directory
-        if 0:
-            os.system("cp %s/lumi.json %s"%(self._inputMulticrabDir, self._myBaseDir))
-
-        # Create multicrab.cfg
-        f = open(os.path.join(self._myBaseDir, "multicrab.cfg"), "w")
-        f.write("# Ultimate pseudo-multicrab for fooling dataset.py, created by PseudoMultiCrabCreator\n")
-        
-        for item in self._mySubTitles:
-            f.write("[%s]\n"%(self._title + item))
-        f.close()
+        '''
+        Copy lumi.json file from input multicrab directory
+        '''
+        self.finalize(silent=True)
         return
 
     def getDirName(self):
@@ -111,6 +155,7 @@ class PseudoMultiCrabCreator:
         #for m in self._modulesList:
         #    m.writeModuleToRootFile(myRootFile)
         # Create config info histogram
+
         myRootFile.cd("/")
         myConfigInfoDir = myRootFile.mkdir("configInfo")
         hConfigInfo = ROOT.TH1F("configinfo","configinfo",2,0,2)
@@ -127,61 +172,118 @@ class PseudoMultiCrabCreator:
         # Write and close the root file
         myRootFile.Write()
         myRootFile.Close()
+        return
 
+#================================================================================================
+# Clas definition
+#================================================================================================
 class PseudoMultiCrabModule:
     ## Constructor
-    def __init__(self, dsetMgr, era, searchMode, optimizationMode, systematicsVariation=None, analysisName="signalAnalysis"):
-        # Note that 'signalAnalysis' only matters for dataset.py to find the proper module
+    def __init__(self, dsetMgr, era, searchMode, optimizationMode, systematicsVariation=None, analysisName="signalAnalysis", verbose=False):
+        self._verbose = verbose
         self._moduleName = "%s_%s_%s" % (analysisName, searchMode, era)
-        #self._moduleName = "signalAnalysis_%s_%s" % (searchMode, era)
         if optimizationMode != "" and optimizationMode != None:
-            self._moduleName += "_%s"%optimizationMode
+            self._moduleName += "_%s" % optimizationMode
         if systematicsVariation != None:
-            self._moduleName += "_%s"%systematicsVariation
-        # Initialize containers
+            self._moduleName += "_%s" % systematicsVariation
         self._shapes = [] # Shape histograms
         self._dataDrivenControlPlots = [] # Data driven control plot histograms
         self._counters = {} # Dictionary for counter values to be stored
         self._counterUncertainties = {} # Dictionary for counter values to be stored
         self._hCounters = None
-        # Obtain luminosity information
-        myLuminosity = 0.0
-        myDataDatasets = dsetMgr.getDataDatasets()
-        for d in myDataDatasets:
-            myLuminosity += d.getLuminosity()
-        self._luminosity = myLuminosity
-        # Obtain energy information
-        if isinstance(dsetMgr.getDataset("Data"), dataset.Dataset):
-            self._energy = float(dsetMgr.getDataset("Data").getEnergy())
-        else:
-            self._energy = float(dsetMgr.getDataset("Data").datasets[0].getEnergy())
-        #myLuminosity = dsetMgr.getDataset("Data").getLuminosity()
-        self._counters["luminosity"] = myLuminosity
+        self._luminosity = self.GetLuminosity(dsetMgr)
+        self._energy = self.GetEnergy(dsetMgr)
+        self._counters["luminosity"] = self._luminosity
         self._counterUncertainties["luminosity"] = 0
+
         # Copy splittedBinInfo (for self-documenting)
         self._hSplittedBinInfo = dsetMgr.getDataset("Data").getDatasetRootHisto("SplittedBinInfo").getHistogram().Clone()
         myControlValue = self._hSplittedBinInfo.GetBinContent(1)
         for i in range(1,self._hSplittedBinInfo.GetNbinsX()+1):
             self._hSplittedBinInfo.SetBinContent(i, self._hSplittedBinInfo.GetBinContent(i)/myControlValue)
         self._hSplittedBinInfo.SetName("SplittedBinInfo")
+       
         # Copy parameter set information
         #(objs, realNames) = dsetMgr.getDataset("Data").datasets[0].getRootObjects("parameterSet")
         #self._psetInfo = objs[0].Clone()
+
         # Copy data version and set it to pseudo
-        objs = None
-        realNames = None
-        if isinstance(dsetMgr.getDataset("Data"), dataset.Dataset):
-            (objs, realNames) = dsetMgr.getDataset("Data").getRootObjects("../configInfo/dataVersion")
-        else:
-            (objs, realNames) = dsetMgr.getDataset("Data").datasets[0].getRootObjects("../configInfo/dataVersion")
-        self._dataVersion = objs[0].Clone()
+        #objs = None
+        #realNames = None
+        #if isinstance(dsetMgr.getDataset("Data"), dataset.Dataset):
+        #    (objs, realNames) = dsetMgr.getDataset("Data").getRootObjects("../configInfo/dataVersion")
+        #else:
+        #    (objs, realNames) = dsetMgr.getDataset("Data").datasets[0].getRootObjects("../configInfo/dataVersion")
+        #self._dataVersion = objs[0].Clone()
+        self._dataVersion = self.GetDataVersion(dsetMgr)
         self._dataVersion.SetTitle("pseudo")
+
         # Copy code version
         #if isinstance(dsetMgr.getDataset("Data"), dataset.Dataset):
             #(objs, realNames) = dsetMgr.getDataset("Data").getRootObjects("../configInfo/codeVersion")
         #else:
             #(objs, realNames) = dsetMgr.getDataset("Data").datasets[0].getRootObjects("../configInfo/codeVersion")
         #self._codeVersion = objs[0].Clone()
+        return
+
+    def Print(self, msg, printHeader=False):
+        fName = __file__.split("/")[-1].replace("pyc", "py")
+        if printHeader==True:
+            print "===", fName
+            print "\t", msg
+        else:
+            print "\t", msg
+        return
+
+    def Verbose(self, msg, printHeader=True):
+        if not self._verbose:
+            return
+        self.Print(msg, printHeader)
+        return
+
+    def GetEnergy(self, dsetMgr):
+        '''
+        Obtain luminosity information 
+        from the dataset manager
+        '''
+        if isinstance(dsetMgr.getDataset("Data"), dataset.Dataset):
+            myEnergy = dsetMgr.getDataset("Data").getEnergy()
+        else:
+            myEnergy = dsetMgr.getDataset("Data").datasets[0].getEnergy()
+        msg = "Centre-of-Mass energy is %s TeV" % (ShellStyles.NoteStyle() + myEnergy + ShellStyles.NormalStyle())
+        self.Verbose(msg, True)
+        return float(myEnergy)
+
+    def GetLuminosity(self, dsetMgr):
+        '''
+        Obtain luminosity information from the
+        dataset manager by looping over all data 
+        datasets
+        '''
+        myLuminosity = 0.0
+        myDataDatasets = dsetMgr.getDataDatasets()
+        for d in myDataDatasets:
+            myLuminosity += d.getLuminosity()
+            
+        msg = "Integrated luminosity is %s%.3f%s" % (ShellStyles.NoteStyle(), myLuminosity, ShellStyles.NormalStyle())
+        self.Verbose(msg, True)
+        return myLuminosity
+
+    def GetDataVersion(self, dsetMgr):
+        '''
+        Copy data version and set it to pseudo
+        '''
+        objs = None
+        realNames = None
+        if isinstance(dsetMgr.getDataset("Data"), dataset.Dataset):
+            (objs, realNames) = dsetMgr.getDataset("Data").getRootObjects("../configInfo/dataVersion")
+        else:
+            (objs, realNames) = dsetMgr.getDataset("Data").datasets[0].getRootObjects("../configInfo/dataVersion")
+        dataVersion = objs[0].Clone()
+
+        msg = "The data-version is %s" % (ShellStyles.NoteStyle() + dataVersion.GetTitle() + ShellStyles.NormalStyle())
+        self.Verbose(msg, True)
+        return dataVersion
 
     def delete(self):
         if False:
@@ -196,6 +298,7 @@ class PseudoMultiCrabModule:
             self._dataVersion.Delete()
             #self._codeVersion.Delete()
         ROOT.gDirectory.GetList().Delete()
+        return
 
     def addShape(self, shapeHisto, plotName):
         self._shapes.append(shapeHisto.Clone(plotName))
@@ -206,9 +309,11 @@ class PseudoMultiCrabModule:
             myUncert += shapeHisto.GetBinError(i)**2
         self._counters[plotName] = myValue
         self._counterUncertainties[plotName] = sqrt(myUncert)
+        return
 
     def addDataDrivenControlPlot(self, histo, name):
         self._dataDrivenControlPlots.append(histo.Clone(name))
+        return
 
     def addDataDrivenControlPlots(self, histoList, labelList):
         for i in range(0,len(histoList)):
@@ -216,9 +321,12 @@ class PseudoMultiCrabModule:
             h.SetTitle(labelList[i])
             h.SetName(labelList[i])
             self._dataDrivenControlPlots.append(h)
+        return
 
-    ## Adds all plots in one go from the QCDPlotContainer object
     def addPlots(self, plots, labels):
+        '''
+        Adds all plots in one go from the QCDPlotContainer object
+        '''
         for i in range(len(labels)):
             h = plots[i]
             plotName = labels[i]
@@ -232,6 +340,7 @@ class PseudoMultiCrabModule:
                 self._counterUncertainties[plotName] = sqrt(myUncert)
             h.SetName(plotName)
             self._dataDrivenControlPlots.append(h)
+        return
 
     def writeModuleToRootFile(self, rootfile):
         # Create module directory
@@ -275,4 +384,4 @@ class PseudoMultiCrabModule:
         #myConfigInfoDir.Add(self._codeVersion)
         #.SetDirectory(rootfile)
         #self._codeVersion.SetDirectory(rootfile)
-
+        return

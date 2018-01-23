@@ -113,6 +113,10 @@ class FakeBNormalizationManager:
         else:
             raise Exception("Error: _TF dictionary has no key \"%s\"! "% (binLabel) )
 
+    def GetTransferFactor(self, binLabel):
+        return self.GetQCDNormalization(binLabel)
+
+
     def GetQCDNormalizationError(self, binLabel):
         if binLabel in self._TF_Error.keys():
             return self._TF_Error[binLabel]
