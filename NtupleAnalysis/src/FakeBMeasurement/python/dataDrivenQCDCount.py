@@ -111,6 +111,8 @@ class DataDrivenQCDShape:
     def getDataDrivenQCDHistoForSplittedBin(self, binIndex):
         '''
         Return the sum of data-ewk in a given phase space split bin
+        
+        at bin-index 0 you have the inclusive histogram!
         '''
         if binIndex >= len(self._dataList):
             msg = "Requested bin index %d out of range (0-%d)!" % (binIndex, len(self._dataList) )
@@ -201,11 +203,13 @@ class DataDrivenQCDShape:
         '''
         Return the QCD purity as a histogram with splitted bins on x-axis
         '''
+        # Sanity check - Are there splitted histos or is it just the inclusive one?
+        if len(self._dataList) <= 1:
+            return None
+            
         # Create histogram
-        myNameList = self._ewkList[0].GetName().split("_")
-        # histoName  = "%s_purity_%d"%(self._ewkList[0].GetName(), self._uniqueN)  #original code
-        # histoTitle = "PurityBySplittedBin_%s"%myNameList[0][:len(myNameList[0])-1] #original code
-        histoName  = "_".join(self._ewkList[0].GetName().split("_", 2)[:2]) + "_Purity"
+        # histoName  = "_".join(self._ewkList[0].GetName().split("_", 2)[:2]) + "_Purity"
+        histoName  = "_".join(self._dataList[0].GetName().split("_", 2)[:2]) + "_Purity"
         histoTitle = histoName
 
         # Create the Purity histogram with one bin for each measurement bin (e.g. tau pT bins in HToTauNu)
@@ -214,15 +218,18 @@ class DataDrivenQCDShape:
         h.SetYTitle("Purity, %")
         ROOT.SetOwnership(h, True)
         self._uniqueN += 1
-        # For-loop: All data
-        for i in range(0, len(self._dataList)):
+
+        # For-loop: All data histos [N.B. Starts from bin 1 (not 0=inclusive) ]
+        for i in range(1, len(self._dataList)): # for i in range(0, len(self._dataList)):
             h.GetXaxis().SetBinLabel(i+1, self._dataList[i].GetTitle())
             nData = 0.0
             nEwk  = 0.0
+
             # For-loop: All bins
             for j in range(0, self._dataList[i].GetNbinsX()+2):
                 nData += self._dataList[i].GetBinContent(j)
-                nEwk += self._ewkList[i].GetBinContent(j)
+                nEwk  += self._ewkList[i].GetBinContent(j)
+
             myPurity = 0.0
             myUncert = 0.0
             if (nData > 0.0):
@@ -232,6 +239,7 @@ class DataDrivenQCDShape:
             # Set value and error
             h.SetBinContent(i+1, myPurity * 100.0)
             h.SetBinError(  i+1, myUncert * 100.0)
+        print h.GetName()
         return h
     
     def getIntegratedPurity(self):
@@ -287,33 +295,43 @@ class DataDrivenQCDShape:
         '''
         Return the QCD purity in bins of the final shape
         '''
-        hData     = self.getIntegratedDataHisto()
-        hEwk      = self.getIntegratedEwkHisto()
-        #cloneName =  "%s_purity_%d" % (hData, self._uniqueN) # original code
-        cloneName =  ("_".join(hData.GetName().split("_", 2)[:2]) + "_IntegratedPurity_" + str(self._uniqueN) )
-        h         = aux.Clone(hData, cloneName)
-        nameList =  self._dataList[0].GetName().split("_")
-        h.SetTitle("PurityByFinalShapeBin_%s"%nameList[0][:len(nameList[0])-1])
+        hData    = self.getIntegratedDataHisto()
+        hEwk     = self.getIntegratedEwkHisto()
+        # newName  =  ("_".join(hData.GetName().split("_", 2)[:2]) + "_IntegratedPurity_" + str(self._uniqueN) )
+        newName  = hData.GetName() + "_Purity"
+        h        = aux.Clone(hData, newName)
+        nameList = self._dataList[0].GetName().split("_")
+        newTitle = "PurityByFinalShapeBin_%s" % nameList[0][:len(nameList[0])-1]
+        h.SetTitle(newTitle)
         self._uniqueN += 1
 
         # For-loop: All bins
         for i in range(1, h.GetNbinsX()+1):
             myPurity = 0.0
             myUncert = 0.0
-            if (hData.GetBinContent(i) > 0.0):
-                myPurity = (hData.GetBinContent(i) - hEwk.GetBinContent(i)) / hData.GetBinContent(i)
+            nData    = hData.GetBinContent(i)
+            nEWK     = hEwk.GetBinContent(i)
+
+            # Calculate the purity
+            if (nData > 0.0):
+                
+                myPurity = (nData - nEWK) / nData
+
+                # Sanity check
                 if myPurity < 0.0:
                     myPurity = 0.0
                     myUncert = 0.0
                 else:
                     # Assume binomial error
-                    myUncertSq = myPurity * (1.0-myPurity) / hData.GetBinContent(i)
+                    myUncertSq = myPurity * (1.0-myPurity) / nData
                     if myUncertSq >= 0.0:
-                        myUncert   = sqrt(myUncertSq)
+                        myUncert = sqrt(myUncertSq)
                     else:
                         msg = "Purity is greater than 1 (%.4f) in bin %i of histogram %s" % (myPurity, i, h.GetName())
                         self.Verbose(ShellStyles.WarningLabel() + msg, True)
-                        myUncert   = 0.0
+                        myUncert = 0.0
+
+            # Set the purity value for the given bin
             h.SetBinContent(i, myPurity)
             h.SetBinError(i, myUncert)
         return h

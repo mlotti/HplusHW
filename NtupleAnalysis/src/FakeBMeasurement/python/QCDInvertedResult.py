@@ -34,12 +34,14 @@ def Print(msg, printHeader=False):
         print "\t", msg
     return
 
-def IsTH1(h):
+def IsTH1(h, raiseExcept=False):
     if not isinstance(h, ROOT.TH1):
-        msg = "ERROR! Expected object of type ROOT.TH1, got \"%s\" instead" % (type(h))
-        raise Exception(ShellStyles.ErrorLabel() + msg + ShellStyles.NormalStyle())
+        msg = "Expected object of type ROOT.TH1, got \"%s\" instead" % (type(h))
+        if raiseExcept:
+            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
+        return False
     else:
-        return
+        return True
 
 def GetDecimalFormat(value):
     if value == 0.0:
@@ -57,14 +59,14 @@ def GetDecimalFormat(value):
     return decFormat
 
 def GetTH1BinWidthString(myTH1, iBin):
-    IsTH1(myTH1)
-    
+    IsTH1(myTH1, raiseExcept=True)
+     
     width = myTH1.GetBinWidth(iBin)
     return GetDecimalFormat(width)# + str(width)
 
 def GetTH1BinRangeString(myTH1, iBin):
-    IsTH1(myTH1)
-    
+    IsTH1(myTH1, raiseExcept=True)
+
     lowEdge   = myTH1.GetXaxis().GetBinLowEdge(iBin)
     upEdge    = myTH1.GetXaxis().GetBinUpEdge(iBin)
     rangeStr  = GetDecimalFormat(lowEdge)
@@ -77,14 +79,17 @@ def PrintTH1Info(myTH1):
     Generic histogram prints detailed tabled
     with the properties of a ROOT.TH1 instance object
     '''
-    IsTH1(myTH1)
+    if not IsTH1(myTH1):
+        return
 
     # Constuct the table
     table   = []
     align  = "{:>5} {:>10} {:^20} {:>15} {:^3} {:<10} {:>15} {:^3} {:<10}"
     header = align.format("Bin", "Bin Width", "Bin Range", "Bin Content", "+/-", "Error", "Cum. Integral", "+/-", "Error")
     hLine  = "="*100
-    #table.append("{:^100}".format(myTH1.GetName()))
+
+    # Create table
+    table.append("{:^100}".format(myTH1.GetName()))    
     table.append(hLine)
     table.append(header)
     table.append(hLine)
@@ -101,7 +106,8 @@ def PrintTH1Info(myTH1):
         integral      = h.IntegralAndError(0, j, integralError, "")
         table.append(align.format(j, binWidth, binRange, binContent, "+/-", binError,"%.1f" % integral, "+/-", "%.1f" % integralError))
     table.append(hLine)
-    Print("{:^100}".format(myTH1.GetName()), False)
+    table.append("")
+
     for l in table:
         Print(l, False)
     return
@@ -732,9 +738,8 @@ class QCDInvertedResultManager:
             PrintTH1Info(myShape.getIntegratedDataHisto())
             PrintTH1Info(myShape.getIntegratedDataDrivenQCDHisto()) #Data-EWK. NormFactor not applied
             PrintTH1Info(myShape.getIntegratedEwkHisto())
-            PrintTH1Info(myShape.getPurityHisto())
-            PrintTH1Info(myShape.getIntegratedPurityForShapeHisto())
-        
+            PrintTH1Info(myShape.getPurityHisto())  #Splitted-bin (disabled for Inclusive mode)
+            PrintTH1Info(myShape.getIntegratedPurityForShapeHisto())        
         print
         print
         sys.exit()
