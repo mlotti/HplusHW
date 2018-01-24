@@ -61,8 +61,8 @@ cp -rf ../../FakeBMeasurement/work/FakeBMeasurement_StdSelections_TopCut100_AllS
 
 
 LAST USED:
-./makeInvertedPseudoMulticrab.py -m FakeBMeasurement_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180120_092605/ --analysisName GenuineB --ewkSrc ForDataDrivenCtrlPlotsEWKGenuineB
-./makeInvertedPseudoMulticrab.py -m FakeBMeasurement_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180120_092605/ --analysisName FakeB --ewkSrc ForDataDrivenCtrlPlotsEWKGenuineB -v
+./makeInvertedPseudoMulticrab.py -m FakeBMeasurement_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180120_092605/ --analysisName GenuineB
+./makeInvertedPseudoMulticrab.py -m FakeBMeasurement_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180120_092605/ --analysisName FakeB -v
 ./makeInvertedPseudoMulticrab.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_SignalTriggers_NoTrgMatch_StdSelections_TopCut_AllSelections_TopCut10_170725_030408/
 
 '''
@@ -132,13 +132,29 @@ class ModuleBuilder:
 
         # Obtain dataset manager
         self._dsetMgrCreator = dataset.readFromMulticrabCfg(directory=multicrabDir)
-        self._dsetMgr = self._dsetMgrCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode,systematicVariation=systematicVariation)
+        self._dsetMgr = self._dsetMgrCreator.createDatasetManager(dataEra=era, 
+                                                                  searchMode=searchMode,
+                                                                  optimizationMode=optimizationMode,
+                                                                  systematicVariation=systematicVariation)
 
         # Do the usual normalisation
         self._dsetMgr.updateNAllEventsToPUWeighted()
         self._dsetMgr.loadLuminosities()
         plots.mergeRenameReorderForDataMC(self._dsetMgr)
+        
+        # Print initial dataset info
+        if opts.verbose:
+            self._dsetMgr.PrintInfo()   
         self._dsetMgr.merge("EWK", opts.ewkDatasets)
+
+        # Remove all other datasets
+        datasetList = ["ZJetsToQQ_HT600toInf", "Charged", "QCD"]
+        for d in datasetList:
+            self._dsetMgr.remove(filter(lambda name: d in name, self._dsetMgr.getAllDatasetNames()))
+        
+        # Print final dataset info
+        self._dsetMgr.PrintInfo()
+
 
         # Obtain luminosity
         self._luminosity = self._dsetMgr.getDataset("Data").getLuminosity()
@@ -168,7 +184,7 @@ class ModuleBuilder:
                                                                 opts.analysisNameSaveAs,
                                                                 opts.verbose)
 
-        Print("Obtaining results", True)
+        Verbose("Obtain results from the results manager", True)
         self._nominalResult = qcdInvertedResult.QCDInvertedResultManager(dataPath,
                                                                          ewkPath,
                                                                          self._dsetMgr,
@@ -179,13 +195,15 @@ class ModuleBuilder:
                                                                          opts.normDataSrc,
                                                                          opts.normEwkSrc,
                                                                          self._opts.useInclusiveNorm,
-                                                                         opts.verbose)
-        sys.exit()
+                                                                         keyList = ["Baseline", "CRSelections"], #alex
+                                                                         verbose=opts.verbose)
 
-        Verbose("Storing results", True)
+        Print("Add all plots to be written in peudo-dataset to be created", True)
+        sys.exit() #alex
         myModule.addPlots(self._nominalResult.getShapePlots(), self._nominalResult.getShapePlotLabels()) 
         self._outputCreator.addModule(myModule)
-    
+        return
+
     def buildQCDNormalizationSystModule(self, dataPath, ewkPath):
         '''
         Up variation of QCD normalization (i.e. ctrl->signal region transition)
@@ -275,8 +293,8 @@ def printTimeEstimate(globalStart, localStart, nCurrent, nAll):
     s += "%02d"%(myEstimate)
     
     # Print info
-    Print("Module finished in: %.1f seconds" % (myLocalDelta), True)
-    Print("Estimated time to complete: %s" %  (s), False)
+    Print("Module finished in %.1f seconds" % (myLocalDelta), True)
+    Print("Estimated time to complete %s" %  (s), False)
     return
 
 
@@ -505,8 +523,6 @@ def main(opts):
                         
                     # Build the module
                     nominalModule.buildModule(opts.dataSrc, opts.ewkSrc, myNormFactors[opts.normFactorKey], doQCDNormalizationSyst, opts.normDataSrc, opts.normEwkSrc)
-                    break #iro alex
-
 
                     if len(mySystematicsNames) > 0:
                         Print("Adding QCD normalization systematics (iff also other systematics  present) ", True)
@@ -545,13 +561,14 @@ def main(opts):
                         systModule.delete()
 
         Verbose("Pseudo-multicrab ready for %s" % shapeType, True)
-
-    # Create rest of pseudo multicrab directory
-    myOutputCreator.finalize(silent=not opts.verbose)
     
     # Print some timing statistics
-    Print("Average processing time per module was %.1f s" % getAvgProcessTimeForOneModule(myGlobalStartTime, myTotalModules), True)
-    Print("Total elapsed time was %.1f s" % getTotalElapsedTime(myGlobalStartTime), False)
+    Print("Average processing time per module was %.1f seconds" % getAvgProcessTimeForOneModule(myGlobalStartTime, myTotalModules), True)
+    Print("Total elapsed time was %.1f seconds" % getTotalElapsedTime(myGlobalStartTime), False)
+
+    # Create rest of pseudo multicrab directory
+    myOutputCreator.finalize(silent=False)
+
     return
 
 if __name__ == "__main__":
@@ -575,7 +592,7 @@ if __name__ == "__main__":
     global opts
     ANALYSISNAME     = "FakeBMeasurement" #FakeB #GenuineB
     ANALYSISNAMESAVE = "Hplus2tbAnalysis"
-    EWKDATASETS      = ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    EWKDATASETS      = ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"] #ZJetsToQQ_HT600toInf or DYJetsToQQHT ?
     SEARCHMODES      = ["80to1000"]
     DATAERAS         = ["Run2016"]
     OPTMODE          = None
@@ -592,10 +609,10 @@ if __name__ == "__main__":
     VARIATIONS       = False
     TEST             = True
     FACTOR_SRC       = "QCDInvertedNormalizationFactors_%s.py"
-    DATA_SRC         = "ForDataDrivenCtrlPlots"
-    EWK_SRC          = "ForDataDrivenCtrlPlotsEWKGenuineB" #"ForDataDrivenCtrlPlots"
-    NORM_DATA_SRC    = "ForDataDrivenCtrlPlotsEWKGenuineB" #"ForDataDrivenCtrlPlots"
-    NORM_EWK_SRC     = "ForDataDrivenCtrlPlotsEWKGenuineB" #"ForDataDrivenCtrlPlots"
+    DATA_SRC         = "ForFakeBMeasurement" #"ForDataDrivenCtrlPlots"
+    EWK_SRC          = DATA_SRC + "EWKGenuineB" # FakeB = Data - EWK GenuineB
+    NORM_DATA_SRC    = DATA_SRC + "EWKGenuineB" 
+    NORM_EWK_SRC     = DATA_SRC + "EWKGenuineB"
     INCLUSIVE_ONLY   = True
     MULTICRAB        = None
     SHAPE            = ["TrijetMass"]
@@ -632,7 +649,7 @@ if __name__ == "__main__":
                       help="Enables batch mode (canvas creation does NOT generate a window) [default: %s]" % BATCHMODE)
 
     parser.add_option("--ewkDatasets", dest="ewkDatasets", default=EWKDATASETS,
-                      help="EWK Datsets to merge [default: %s]" % ", ".join(EWKDATASETS) )
+                      help="Definition of EWK datset, i.e. datasets to be included in the merge [default: %s]" % ", ".join(EWKDATASETS) )
     
     parser.add_option("--analysisName", dest="analysisName", type="string", default=ANALYSISNAME,
                       help="Override default analysisName [default: %s]" % ANALYSISNAME)
@@ -699,7 +716,7 @@ if __name__ == "__main__":
             msg = "Using pseudo-multicrab directory %s" % (ShellStyles.NoteStyle() + opts.mcrab + ShellStyles.NormalStyle())
             Print(msg , True)
 
-    # Sanity check - iro - fixme
+    # Sanity check - iro - fixme -alex
     if len(opts.shape) == 0:
         msg = "Provide a shape identifier with --shape (e.g.: TrijetMass)!"
         raise Exception(ShellStyles.ErrorLabel() + msg + ShellStyles.NormalStyle())
@@ -708,17 +725,23 @@ if __name__ == "__main__":
         msg = "Will only use " + ShellStyles.NoteStyle() + " inclusive " + ShellStyles.NormalStyle() + " weight instead of binning (no splitted histograms)"
         Print(msg, True)
             
-    # Sanity check:
+    # Sanity check - alex iro 
     if opts.analysisName == "GenuineB":
-        if opts.ewkSrc != "ForDataDrivenCtrlPlotsEWKGenuineB":
+        if "EWKGenuineB" not in opts.ewkSrc:
             msg = "Cannot create pseudo-dataset %s with EWK source set to %s" % (opts.analysisName, opts.ewkSrc)
             raise Exception(ShellStyles.ErrorLabel() + msg + ShellStyles.NormalStyle())
 
     if opts.analysisName == "FakeB":
-        if opts.ewkSrc != "ForDataDrivenCtrlPlotsEWKGenuineB":
+        if "EWKGenuineB" not in opts.ewkSrc:
             msg = "Cannot create pseudo-dataset %s with EWK source set to %s" % (opts.analysisName, opts.ewkSrc)
             raise Exception(ShellStyles.ErrorLabel() + msg + ShellStyles.NormalStyle())
                     
+    # Inform user of which datasets you consider as EWK
+    msg = "The following datasets will comprise the %sEWK merged-dataset%s:"  % (ShellStyles.NoteStyle(), ShellStyles.NormalStyle())
+    Print(msg, True)     
+    for d in opts.ewkDatasets:
+        Print(d, False)
+
     # Call the main function
     main(opts)
 
