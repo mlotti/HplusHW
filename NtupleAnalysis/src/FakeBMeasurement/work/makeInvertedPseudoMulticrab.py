@@ -65,6 +65,9 @@ LAST USED:
 ./makeInvertedPseudoMulticrab.py -m FakeBMeasurement_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180120_092605/ --analysisName FakeB -v
 ./makeInvertedPseudoMulticrab.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_SignalTriggers_NoTrgMatch_StdSelections_TopCut_AllSelections_TopCut10_170725_030408/
 
+USE WITH:
+hplusPrintCounters.py --mainCounterOnly --weighted --dataEra "Run2016" --mergeForDataMC --mergeData --mergeMC FakeBMeasurement_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180120_092605
+
 '''
 #================================================================================================ 
 # Imports
@@ -91,7 +94,8 @@ import HiggsAnalysis.NtupleAnalysis.tools.pseudoMultiCrabCreator as pseudoMultiC
 # Class definition
 #================================================================================================ 
 class ModuleBuilder:
-    def __init__(self, opts, outputCreator):
+    def __init__(self, opts, outputCreator, verbose=False):
+        self._verbose                  = verbose
         self._opts                     = opts
         self._outputCreator            = outputCreator
         self._moduleInfoString         = None
@@ -121,6 +125,23 @@ class ModuleBuilder:
         ROOT.gROOT.CloseFiles()
         ROOT.gROOT.GetListOfCanvases().Delete()
         
+        
+    def Print(self, msg, printHeader=False):
+        fName = __file__.split("/")[-1].replace("pyc", "py")
+        if printHeader==True:
+            print "===", fName
+            print "\t", msg
+        else:
+            print "\t", msg
+        return
+
+
+    def Verbose(self, msg, printHeader=True):
+        if not self._verbose:
+            return
+        self.Print(msg, printHeader)
+        return
+
     def createDsetMgr(self, multicrabDir, era, searchMode, optimizationMode=None, systematicVariation=None):
         self._era = era
         self._searchMode = searchMode
@@ -175,7 +196,7 @@ class ModuleBuilder:
     def buildModule(self, dataPath, ewkPath, normFactors, calculateQCDNormalizationSyst, normDataSrc=None, normEWKSrc=None):
         
         # Create containers for results
-        Verbose("Create containers for results", True)
+        self.Verbose("Create containers for results", True)
         myModule = pseudoMultiCrabCreator.PseudoMultiCrabModule(self._dsetMgr,
                                                                 self._era,
                                                                 self._searchMode,
@@ -184,7 +205,7 @@ class ModuleBuilder:
                                                                 opts.analysisNameSaveAs,
                                                                 opts.verbose)
 
-        Verbose("Obtain results from the results manager", True)
+        self.Verbose("Obtain results from the results manager", True)
         self._nominalResult = qcdInvertedResult.QCDInvertedResultManager(dataPath,
                                                                          ewkPath,
                                                                          self._dsetMgr,
@@ -195,11 +216,10 @@ class ModuleBuilder:
                                                                          opts.normDataSrc,
                                                                          opts.normEwkSrc,
                                                                          self._opts.useInclusiveNorm,
-                                                                         keyList = ["Baseline", "CRSelections"], #alex
+                                                                         keyList = ["Baseline", "CRSelections"], #fixme-iro-alex
                                                                          verbose=opts.verbose)
 
-        Print("Add all plots to be written in peudo-dataset to be created", True)
-        sys.exit() #alex
+        self.Verbose("Add all plots to be written in the peudo-dataset beind created", True)
         myModule.addPlots(self._nominalResult.getShapePlots(), self._nominalResult.getShapePlotLabels()) 
         self._outputCreator.addModule(myModule)
         return
@@ -260,14 +280,13 @@ class ModuleBuilder:
 # Function Definition
 #================================================================================================
 def Print(msg, printHeader=False):
-    fName = __file__.split("/")[-1]
+    fName = __file__.split("/")[-1].replace("pyc", "py")
     if printHeader==True:
         print "===", fName
         print "\t", msg
     else:
         print "\t", msg
     return
-
 
 def Verbose(msg, printHeader=True, verbose=False):
     if not opts.verbose:
@@ -378,7 +397,9 @@ def importNormFactors(era, searchMode, optimizationMode, multicrabDirName):
         sys.path.insert(0, os.path.join(cwd, srcDir))
 
     # Import the (normFactor) src file
-    normFactorsImport = __import__(os.path.basename("/".join(pathList)))
+    Print("Importing the transfer factors from src file %s" % (ShellStyles.NoteStyle() + src + ShellStyles.NormalStyle()), True)
+    srcBase = os.path.basename("/".join(pathList))
+    normFactorsImport = __import__(srcBase)
     
     # Get the function definition
     myNormFactorsSafetyCheck = getattr(normFactorsImport, "QCDInvertedNormalizationSafetyCheck")
@@ -509,7 +530,7 @@ def main(opts):
                     myStartTime = time.time()
 
                     Verbose("Create dataset manager with given settings", True)
-                    nominalModule = ModuleBuilder(opts, myOutputCreator)
+                    nominalModule = ModuleBuilder(opts, myOutputCreator, opts.verbose)
                     nominalModule.createDsetMgr(opts.mcrab, era, searchMode, optimizationMode)
                     
                     if (iModule == 1):
@@ -609,7 +630,7 @@ if __name__ == "__main__":
     VARIATIONS       = False
     TEST             = True
     FACTOR_SRC       = "QCDInvertedNormalizationFactors_%s.py"
-    DATA_SRC         = "ForFakeBMeasurement" #"ForDataDrivenCtrlPlots"
+    DATA_SRC         = "ForFakeBMeasurement"    # "ForDataDrivenCtrlPlots"
     EWK_SRC          = DATA_SRC + "EWKGenuineB" # FakeB = Data - EWK GenuineB
     NORM_DATA_SRC    = DATA_SRC + "EWKGenuineB" 
     NORM_EWK_SRC     = DATA_SRC + "EWKGenuineB"

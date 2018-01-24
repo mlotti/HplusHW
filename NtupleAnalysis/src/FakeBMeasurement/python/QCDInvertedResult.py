@@ -100,8 +100,8 @@ def PrintTH1Info(myTH1):
         binWidth      = GetTH1BinWidthString(myTH1, j)
         #binRange      = "%.1f -> %.1f" % (h.GetXaxis().GetBinLowEdge(j), h.GetXaxis().GetBinUpEdge(j) )
         binRange      = GetTH1BinRangeString(myTH1, j)
-        binContent    = "%.1f" % h.GetBinContent(j)
-        binError      = "%.1f" % h.GetBinError(j)
+        binContent    = "%.2f" % h.GetBinContent(j)
+        binError      = "%.2f" % h.GetBinError(j)
         integralError = ROOT.Double(0.0)
         integral      = h.IntegralAndError(0, j, integralError, "")
         table.append(align.format(j, binWidth, binRange, binContent, "+/-", binError,"%.1f" % integral, "+/-", "%.1f" % integralError))
@@ -141,16 +141,16 @@ class QCDInvertedShape:
         Mostly for debugging purposes
         '''
         info   = []
-        align  = "{:<30} {:<50} {:<70}"
+        align  = "{:<30} {:<70} {:<50}"
         header = align.format("Variable", "Value", "Comment")
         hLine  = "="*150
         info.append("{:^150}".format(self._shape.getHistoName()))
         info.append(hLine)
         info.append(header)
         info.append(hLine)
-        info.append(align.format("resultShape"                , self._resultShape.GetName()      , "Name of TH1F which contains the final shape histogram for NQCD"))
-        info.append(align.format("resultShapeEWK"             , self._resultShapeEWK.GetName()   , "Name of TH1F which contains the final shape histogram for EWK MC"))
-        info.append(align.format("resultShapePurity"          , self._resultShapePurity.GetName(), "Name of TH1F which contains the final shape histogram for QCD purity"))
+        info.append(align.format("resultShape"                , self._resultShape.GetName()      , "Name of final shape TH1F for NQCD"))
+        info.append(align.format("resultShapeEWK"             , self._resultShapeEWK.GetName()   , "Name of final shape TH1F for EWK MC"))
+        info.append(align.format("resultShapePurity"          , self._resultShapePurity.GetName(), "Name of final shape TH1F for QCD purity"))
         info.append(align.format("histogramsList"             , len(self._histogramsList)        , "Length of list of TH1F histograms"))
         info.append(align.format("moduleInfoString"           , self._moduleInfoString           , "Era, Mode, Optimization Mode, and Plot Name"))
         info.append(align.format("verbose"                    , self._verbose                    , "Flag for increased verbosity (Debugging)"))
@@ -158,8 +158,11 @@ class QCDInvertedShape:
         info.append(align.format("optionPrintPurityByBins"    , self._optionPrintPurityByBins    , "Flag for printing QCD purity for given histo (bin-by-bin)"))
         info.append(align.format("optionDoNQCDByBinHistograms", self._optionDoNQCDByBinHistograms, "Flag for doing QCD events bin-by-bin"))
         info.append(hLine)
-        for i, line in enumerate(info):
-            self.Verbose(line, i==0)
+        info.append("")
+
+        if verbose:
+            for i, line in enumerate(info):
+                self.Print(line, i==0)
 
         if printHistos:
             PrintTH1Info(self._resultShape)
@@ -227,9 +230,8 @@ class QCDInvertedShape:
         nSplitBins = shape.getNumberOfPhaseSpaceSplitBins()
 
         self.Verbose("Create Shape", True)
-        self._resultShape = aux.Clone(shape.getDataDrivenQCDHistoForSplittedBin(0)) #alex
+        self._resultShape = aux.Clone(shape.getDataDrivenQCDHistoForSplittedBin(0))
         self._resultShape.Reset()
-        print "\t +++", moduleInfoString
 
         self._resultShape.SetTitle("NQCDFinal_Total_%s"%moduleInfoString)
         self._resultShape.SetName("NQCDFinal_Total_%s"%moduleInfoString)
@@ -573,8 +575,9 @@ class QCDInvertedResultManager:
         # For-Loop: All plots to consider
         for i, plotName in enumerate(self._histoPathsData, 1):
 
-            if "Njets" not in plotName: #alex
-                continue  
+            # For testing ..
+            #if "Njets" not in plotName:
+            #    continue  
 
             # Inform user of progress
             msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % i, "/", "%s:" % (len(self._histoPathsData)), os.path.join(dataPath, plotName) )
@@ -711,20 +714,20 @@ class QCDInvertedResultManager:
     def PrintShapePuritySummary(self, myShape):
         # Inform user of Purity (debugging purposes)
         lines = []
-        align = "{:>8} {:^3} {:^10} {:^3} {:^10}"
-        hLine = "="*40
+        align = "{:>10} {:>8} {:^3} {:<10} {:^3} {:<15}"
+        hLine = "="*55
         lines.append(hLine)
-        lines.append(align.format("Purity", "+/-", "Uncertainty", "+/-", "Syst. Uncertainty"))
+        lines.append(align.format("", "Purity", "+/-", "Uncertainty", "+/-", "Syst. Uncertainty"))
         lines.append(hLine)
-        lines.append(align.format("%.2f" % myShape.getIntegratedPurity().value(), "+/-", "%.3f" % myShape.getIntegratedPurity().uncertainty(), "+/-", "%.3f" % myShape.getIntegratedPurity().systUncertainty() ) )
-        lines.append(align.format("%.2f" % myShape.getMinimumPurity().value()   , "+/-", "%.3f" % myShape.getMinimumPurity().uncertainty()   , "+/-", "%.3f" % myShape.getIntegratedPurity().systUncertainty() ) )
+        lines.append(align.format("central", "%.2f" % myShape.getIntegratedPurity().value(), "+/-", "%.3f" % myShape.getIntegratedPurity().uncertainty(), "+/-", "%.3f" % myShape.getIntegratedPurity().systUncertainty() ) )
+        lines.append(align.format("minimum", "%.2f" % myShape.getMinimumPurity().value()   , "+/-", "%.3f" % myShape.getMinimumPurity().uncertainty()   , "+/-", "%.3f" % myShape.getMinimumPurity().systUncertainty() ) )
         lines.append(hLine)
         for l in lines:
             self.Print(l, False)
         return
 
     def _obtainShapeHistograms(self, i, dataPath, ewkPath, dsetMgr, plotName, luminosity, normFactors):
-        self.Verbose("_obtainShapeHistograms()", True) #alex
+        self.Verbose("_obtainShapeHistograms()", True)
 
         if self._verbose:
             self.PrintShapeInputSummary(dataPath, ewkPath, dsetMgr, plotName, luminosity, normFactors)
@@ -732,51 +735,50 @@ class QCDInvertedResultManager:
         self.Verbose("Obtain the (pre-normFactor) shape %s as \"DataDrivenQCDShape\" type object" % (plotName), True) 
         myShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", plotName, dataPath, ewkPath, luminosity, self._useInclusiveNorm, self._verbose)
         
-        if 1: #self._verbose: #alex
+        if self._verbose:
             msg = "Printing TH1s (before NormFactors) of \"Data\", \"Data-Driven QCD\", \"EWK\",  and \"Bin-by\Bin Purity\" and \"Integrated Purity\""
             self.Print(msg, True)
             PrintTH1Info(myShape.getIntegratedDataHisto())
             PrintTH1Info(myShape.getIntegratedDataDrivenQCDHisto()) #Data-EWK. NormFactor not applied
             PrintTH1Info(myShape.getIntegratedEwkHisto())
-            PrintTH1Info(myShape.getPurityHisto())  #Splitted-bin (disabled for Inclusive mode)
+            PrintTH1Info(myShape.getPurityHisto())  # Splitted-bin (disabled for Inclusive mode)
             PrintTH1Info(myShape.getIntegratedPurityForShapeHisto())        
-        print
-        print
-        sys.exit()
-        if 1: #self._verbose: #alex
             self.PrintShapePuritySummary(myShape)
         
-        sys.exit() # Alex
         self.Verbose("Obtain the (post-normFactor) shape %s as \"QCDInvertedShape\" type object (Takes \"DataDrivenQCDShape\" type object as argument)" % (plotName), True)
         moduleInfo = self._moduleInfoString + "_" + plotName
-        myPlot     = QCDInvertedShape(myShape, moduleInfo, normFactors, optionUseInclusiveNorm=self._useInclusiveNorm)
-        if 0:
-            myPlot.PrintSettings(printHistos=True, verbose=True) #alex
-        else:
-            myPlot.PrintSettings(printHistos=self._verbose, verbose=self._verbose)
+        myPlot= QCDInvertedShape(myShape, moduleInfo, normFactors, optionUseInclusiveNorm=self._useInclusiveNorm)        
+        myPlot.PrintSettings(printHistos=self._verbose, verbose=self._verbose)
 
+        # Define histogram name as will be written in the ROOT file
+        self.Verbose("%sDefining the name of histogram objects, as they will appear in the ROOT file%s" % (ShellStyles.WarningStyle(), ShellStyles.NormalStyle()), True)
+        hName  = plotName + "%d" %i
+        hTitle = plotName.replace("CRSelections", "AllSelections").replace("Baseline_", "")
 
+        # DataDriven
         myShape.delete()
         myPlotHisto = aux.Clone(myPlot.getResultShape(), "ctrlPlotShapeInManager")
         myPlot.delete()
-        myPlotHisto.SetName(plotName+ "%d" %i)
-        myPlotHisto.SetTitle(plotName)
+        myPlotHisto.SetName(hName)
+        myPlotHisto.SetTitle(hTitle)
         self._shapePlots.append(myPlotHisto)
-        self._shapePlotLabels.append(plotName)
+        self._shapePlotLabels.append(myPlotHisto.GetTitle())# this is the name the object will have in the ROOT file
 
-        # MC EWK #alex
+        # MC EWK
+        hName  = plotName + "%d_MCEWK" %i
         myPlotMCEWKHisto = aux.Clone(myPlot.getResultMCEWK(), "ctrlPlotMCEWKInManager")
-        myPlotMCEWKHisto.SetName(plotName + "%d_MCEWK" %i)
-        myPlotMCEWKHisto.SetTitle(plotName + "_MCEWK")
+        myPlotMCEWKHisto.SetName(hName) 
+        myPlotMCEWKHisto.SetTitle(hTitle + "_MCEWK")
         self._shapePlots.append(myPlotMCEWKHisto)
-        self._shapePlotLabels.append(myPlotMCEWKHisto.GetTitle())
+        self._shapePlotLabels.append(myPlotMCEWKHisto.GetTitle())# this is the name the object will have in the ROOT file
 
-        # Purity #alex
+        # Purity
+        hName  = plotName + "%d_Purity" %i
         myPlotPurityHisto = aux.Clone(myPlot.getResultPurity(), "ctrlPlotPurityInManager")
-        myPlotPurityHisto.SetName(plotName+"%d_Purity"%i)
-        myPlotPurityHisto.SetTitle(plotName+"_Purity")
+        myPlotPurityHisto.SetName(hName)
+        myPlotPurityHisto.SetTitle(hTitle + "_Purity")
         self._shapePlots.append(myPlotPurityHisto)
-        self._shapePlotLabels.append(myPlotPurityHisto.GetTitle())
+        self._shapePlotLabels.append(myPlotPurityHisto.GetTitle())# this is the name the object will have in the ROOT file
         return myPlotHisto
 
     def _obtainQCDNormalizationSystHistograms(self, shapeHisto, dsetMgr, plotName, luminosity, normDataSrc, normEWKSrc):
