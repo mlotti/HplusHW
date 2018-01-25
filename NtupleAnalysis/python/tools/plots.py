@@ -387,6 +387,7 @@ for process in ["TTToHplusBWB_M%d", "TTToHplusBHminusB_M%d", "TTToHplus_M%d", "H
 for mass in _heavyHplusMasses:
     _datasetOrder.append("HplusTB_M%d"%mass)
 _datasetOrder.extend([
+    "FakeB", #Htb
     "QCD",
     "QCDdata",
     "QCD-b",
@@ -435,6 +436,7 @@ _legendLabels = {
     "noTop"    : "No t",
     "SingleTop": "Single t",
     "QCD"      : "QCD",#"Mis-ID. #tau_{h} (data)",
+    "FakeB"    : "Fake b (data)",
     "QCD-b"    : "QCD (b enr.)",
     "QCDdata"  : "Mis-ID. #tau_{h} (data)", #"QCD (data driven)"
 
@@ -576,6 +578,7 @@ _plotStyles = {
     "Diboson"       : styles.dibStyle,
     "EWK"           : styles.wStyle,
     "QCD"           : styles.qcdStyle,
+    "FakeB"         : styles.qcdStyle,
     "QCD-b"         : styles.qcdBEnrichedStyle,
     "ttX"           : styles.ttXStyle,
     "noTop"         : styles.noTopStyle,

@@ -14,8 +14,6 @@ EXAMPLES:
 
 
 LAST USED:
-./plotDataDriven.py -m Hplus2tbAnalysis_3bjets40_MVA0p88_MVA0p88_TopMassCutOff600GeV_180113_050540/ --mergeEWK --signal 500 --gridX --gridY --url
-./plotDataDriven.py -m Hplus2tbAnalysis_3bjets40_MVA0p88_MVA0p88_TopMassCutOff600GeV_180113_050540/ --mergeEWK --signal 1000 --gridX --gridY --useMC
 
 '''
 
@@ -40,6 +38,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 
 #================================================================================================ 
 # Function Definition
@@ -59,6 +58,11 @@ def Verbose(msg, printHeader=True, verbose=False):
     Print(msg, printHeader)
     return
 
+def rchop(myString, endString):
+  if myString.endswith(endString):
+    return myString[:-len(endString)]
+  return myString
+
 def GetLumi(datasetsMgr):
     Verbose("Determininig Integrated Luminosity")
     
@@ -76,31 +80,18 @@ def GetListOfEwkDatasets():
     #return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
     return  ["TT", "WJetsToQQ_HT_600ToInf", "SingleTop", "DYJetsToQQHT", "TTZToQQ",  "TTWJetsToQQ", "Diboson", "TTTT"]
 
-def GetDatasetsFromDir(opts):
-    Verbose("Getting datasets")
+def GetDatasetsFromDir(opts, otherDir=False):
     
-    if (not opts.includeOnlyTasks and not opts.excludeTasks):
-        datasets = dataset.getDatasetsFromMulticrabDirs([opts.mcrab],
-                                                        dataEra=opts.dataEra,
-                                                        searchMode=opts.searchMode, 
-                                                        analysisName=opts.analysisName,
-                                                        optimizationMode=opts.optMode)
-    elif (opts.includeOnlyTasks):
-        datasets = dataset.getDatasetsFromMulticrabDirs([opts.mcrab],
-                                                        dataEra=opts.dataEra,
-                                                        searchMode=opts.searchMode,
-                                                        analysisName=opts.analysisName,
-                                                        includeOnlyTasks=opts.includeOnlyTasks,
-                                                        optimizationMode=opts.optMode)
-    elif (opts.excludeTasks):
-        datasets = dataset.getDatasetsFromMulticrabDirs([opts.mcrab],
-                                                        dataEra=opts.dataEra,
-                                                        searchMode=opts.searchMode,
-                                                        analysisName=opts.analysisName,
-                                                        excludeTasks=opts.excludeTasks,
-                                                        optimizationMode=opts.optMode)
-    else:
-        raise Exception("This should never be reached")
+    myDir    = opts.mcrab1
+    analysis = opts.analysisName
+    if otherDir:
+        myDir    = opts.mcrab2        
+        #analysis = "FakeBMeasurement"
+    datasets = dataset.getDatasetsFromMulticrabDirs([myDir],
+                                                    dataEra=opts.dataEra,
+                                                    searchMode=opts.searchMode, 
+                                                    analysisName=analysis,
+                                                    optimizationMode=opts.optMode)
     return datasets
     
 def main(opts):
@@ -124,81 +115,72 @@ def main(opts):
         opts.optMode = opt
 
         # Setup & configure the dataset manager 
-        datasetsMgr = GetDatasetsFromDir(opts)
-        
-        # PrintPSet("TopologySelection", datasetsMgr)
-        datasetsMgr.updateNAllEventsToPUWeighted()
-        datasetsMgr.loadLuminosities() # from lumi.json
+        dsetMgr1 = GetDatasetsFromDir(opts, False) 
+        dsetMgr2 = GetDatasetsFromDir(opts, True)
 
-        # ZJets and DYJets overlap
-        if "ZJetsToQQ_HT600toInf" in datasetsMgr.getAllDatasetNames() and "DYJetsToQQ_HT180" in datasetsMgr.getAllDatasetNames():
-            Print("Cannot use both ZJetsToQQ and DYJetsToQQ due to duplicate events? Investigate. Removing ZJetsToQQ datasets for now ..", True)
-            datasetsMgr.remove(filter(lambda name: "ZJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
-            # datasetsMgr.remove(filter(lambda name: "DYJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))     
+        # Setup the dataset managers
+        dsetMgr1.updateNAllEventsToPUWeighted()
+        dsetMgr2.updateNAllEventsToPUWeighted()
 
-        # Define datasets to remove
-        datasetsToRemove = ["QCD-b"]
+        # Load luminosities
+        dsetMgr1.loadLuminosities() # from lumi.json
+        # dsetMgr2.loadLuminosities()
 
-        # Set/Overwrite cross-sections
-        for d in datasetsMgr.getAllDatasets():
+        # Print PSets?
+        if 0:
+            dsetMgr1.printSelections()
+            dsetMgr2.printSelections()
+            PrintPSet("FakeBMeasurement", dsetMgr1)
+            PrintPSet("TopSelectionBDT" , dsetMgr2)
+
+        # Remove datasets with overlap?
+        removeList = ["QCD-b"]
+        dsetDY     = "DYJetsToQQ_HT180"
+        dsetZJ     = "ZJetsToQQ_HT600toInf"
+        dsetRM     = dsetZJ # datasets with overlap
+        removeList.append(dsetRM)
+        #if opts.useMC: #fixme
+        #    removeList.append("FakeB")
+
+        # Set/Overwrite cross-sections. Remove all but 1 signal mass 
+        for d in dsetMgr1.getAllDatasets():
             if "ChargedHiggs" in d.getName():
-                datasetsMgr.getDataset(d.getName()).setCrossSection(1.0) # ATLAS 13 TeV H->tb exclusion limits
+                dsetMgr1.getDataset(d.getName()).setCrossSection(1.0) # ATLAS 13 TeV H->tb exclusion limits
                 if d.getName() != opts.signal:
-                    datasetsToRemove.append(d.getName())
+                    removeList.append(d.getName())
 
         # Print useful information?
         if opts.verbose:
-            datasetsMgr.PrintCrossSections()
-            datasetsMgr.PrintLuminosities()
+            dsetMgr1.PrintCrossSections()
+            dsetMgr1.PrintLuminosities()
+            dsetMgr2.PrintCrossSections()
+            dsetMgr2.PrintLuminosities()
 
-        # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
-        plots.mergeRenameReorderForDataMC(datasetsMgr) 
+        # Merge histograms
+        plots.mergeRenameReorderForDataMC(dsetMgr1) 
+        # plots.mergeRenameReorderForDataMC(dsetMgr2) 
    
+        # Get the luminosity
+        if opts.intLumi < 0:
+            opts.intLumi = dsetMgr1.getDataset("Data").getLuminosity()
+
         # Custom Filtering of datasets 
-        for d in datasetsToRemove:
-            datasetsMgr.remove(filter(lambda name: d == name, datasetsMgr.getAllDatasetNames()))
-
-        # Merge EWK samples
-        if opts.mergeEWK:
-            datasetsMgr.merge("EWK", GetListOfEwkDatasets())
-            plots._plotStyles["EWK"] = styles.getAltEWKStyle()
-
-        # Print dataset summary
-        if 0:
-            datasetsMgr.PrintInfo()
+        for i, d in enumerate(removeList, 1):
+            msg = "Removing datasets %s from dataset manager" % (ShellStyles.NoteStyle() + d + ShellStyles.NormalStyle())
+            Print(msg, i==1)
+            dsetMgr1.remove(filter(lambda name: d == name, dsetMgr1.getAllDatasetNames()))
 
         # Replace MC datasets with data-driven
-        if not opts.useMC:
-            #replaceQCDFromData(datasetsMgr, "FakeBMeasurement", "FakeB")
-            replaceQCDFromData(datasetsMgr, "FakeB", "FakeB")
-            replaceEWKWithGenuineB(datasetsMgr, "GenuineB", "GenuineB") # duplicate of FakeB!
+        if not opts.useMC: #fixme
+            replaceQCD(dsetMgr1, dsetMgr2, "FakeBTrijetMass", "FakeB") #dsetMgr1 now contains "FakeB" pseudo-dataset
 
-        # Re-order datasets
-        #datasetsMgr.selectAndReorder( GetDatasetOrder(opts) )
-        datasetsMgr.selectAndReorder( ["Data", "FakeB", "GenuineB"] )
-        
         # Print dataset information
-        datasetsMgr.PrintInfo()
+        dsetMgr1.PrintInfo()
+        dsetMgr2.PrintInfo()
 
         # Do Data-MC histograms with DataDriven QCD
-        DataMCHistograms(datasetsMgr, opts)
+        PlotHistograms(dsetMgr1, dsetMgr2, opts)
     return
-
-
-def GetDatasetOrder(opts):
-    order_mc  = ["QCD", "EWK"]
-    order_dd  = ["FakeB", "GenuineB"]
-    order_new = ["Data"]
-
-    if opts.signal != None:
-        order_new.append(opts.signal)
-
-    if opts.useMC:
-        order_new.extend(order_mc)
-    else:
-        order_new.extend(order_dd)
-    return order_new
-    
 
 def GetHistoKwargs(histoList, opts):
     '''
@@ -209,8 +191,6 @@ def GetHistoKwargs(histoList, opts):
     
     histoKwargs = {}
     _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": 0.1}
-    if opts.mergeEWK:
-        _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": -0.12}    
     logY  = False
     if logY:
         ymaxF = 2
@@ -440,23 +420,23 @@ def GetHistoKwargs(histoList, opts):
             kwargs["log"]    = True#False
 
         histoKwargs[h] = kwargs
+        kwargs["rebinX"] = 1 #alex-tmp (must have EXACT same binning)
     return histoKwargs
     
-def DataMCHistograms(datasetsMgr, opts):
+def PlotHistograms(datasetMgr, datasetMgr2, opts):
 
     # Definitions
-    histoNames  = []
-    saveFormats = [".png"] #[".C", ".png", ".pdf"]
-
-    # Get list of histograms
-    folder      = "ForDataDrivenCtrlPlots"
-    allHistos   = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(folder)
-    # histoList   = [h for h in allHistos if "StandardSelections" in h]
-    # histoList.extend([h for h in allHistos if "AllSelections" in h])
-    histoList   = [h for h in allHistos if "AllSelections" in h]
-    #histoList   = [h for h in histoList if "_MCEWK" not in h]
-    #histoList   = [h for h in histoList if "_Purity" not in h]
-    histoPaths  = [folder + "/" + h for h in histoList]
+    histoNames  = []    
+    allHistos   = datasetMgr2.getAllDatasets()[0].getDirectoryContent(opts.folder)
+    histoList1  = [h for h in allHistos if "MCEWK" not in h]
+    histoList2  = [h for h in histoList1 if "Purity" not in h]
+    histoList3  = [h for h in histoList2 if "Bjet" not in h]
+    histoList4  = [h for h in histoList3 if "Jet" not in h]
+    histoList5  = [h for h in histoList4 if "Njet" not in h]
+    histoList6  = [h for h in histoList5 if "Njet" not in h]
+    histoList7  = [h for h in histoList6 if "MVA" not in h]
+    histoList8  = [h for h in histoList7 if "Sub" not in h]
+    histoPaths  = [opts.folder + "/" + h for h in histoList8]
 
     # Get histogram<->kwargs dictionary 
     histoKwargs = GetHistoKwargs(histoPaths, opts)
@@ -464,114 +444,95 @@ def DataMCHistograms(datasetsMgr, opts):
     # For-loop: All histograms in list
     for histoName in histoPaths:
 
-#        if "LdgTetrajetMass" not in histoName:
-#            continue
-
-        if "MET" not in histoName:
-            continue
-
-#        if "HT" not in histoName:
-#            continue
-
-        #if "TetrajetMass" not in histoName:
-        #if "AllSelections" not in histoName:
-        #    continue
-
-        if "Fox" in histoName:
-            continue
-
-        if "Sphericity" in histoName:
-            continue
-
-        if "Aplanarity" in histoName:
-            continue
-
-        if "Planarity" in histoName:
-            continue
-
-        if "Circularity" in histoName:
-            continue
-
-        if "Centrality" in histoName:
-            continue
-
-        if "ThirdJet" in histoName:
-            continue
-
-        if "JetEtaPhi" in histoName:
-            continue
-
-        if opts.signalMass == 0:
-            if "LdgTrijetMass" in histoName:
-                continue
-            
-            if "LdgTetrajetMass" in histoName:
-                continue
-
-        if "Vs" in histoName:
-            continue
-
-        # Not used in this analysis (yet)
-        if "MHT" in histoName:
-            continue
-
-        # By definition of the Inverted sample the following histos cannot agree!
-        if "NBjets_" in histoName:
-            continue
-        if "BJetPt_" in histoName:
-            continue
-        if "_BJetEta_" in histoName:
-            continue
-        if "_BtagDiscriminator_" in histoName:
+        if "MET_" not in histoName:
             continue
 
         kwargs_  = histoKwargs[histoName]
-        saveName = histoName.replace("/", "_")
+        saveName = histoName.replace(opts.folder + "/", "")
 
-        # Create the plotting object
-        p = plots.DataMCPlot(datasetsMgr, histoName, saveFormats=[])
+        # Create the plotting object (Data, "FakeB")
+        p1 = plots.DataMCPlot(datasetMgr, histoName, saveFormats=[])
 
-        # Apply QCD data-driven style
-        if opts.signalMass != 0:
-            signal = "ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass
-            mHPlus = "%s" % int(opts.signalMass)
-            p.histoMgr.forHisto(signal, styles.getSignalStyleHToTB_M(mHPlus))
+        # EWKGenuineB histograms
+        histoNameGenuineB = histoName.replace(opts.folder, opts.folder + "EWKGenuineB") #fixme: all empty! will work after current pseudo-multicrab is finished running!
+        #histoNameGenuineB = histoName.replace(opts.folder, opts.folder + "EWKFakeB") # 
+        
+        # Keep only EWK (GenuineB) datasets
+        datasetMgr.selectAndReorder(GetListOfEwkDatasets())
+        
+        # Create the MCPlot
+        p2 = plots.MCPlot(datasetMgr, histoNameGenuineB, normalizeToLumi=opts.intLumi, saveFormats=[])
 
-        #p.histoMgr.forHisto(opts.signalMass, styles.getSignalStyleHToTB())
-        if opts.useMC:
-            pass
-        else:
-            p.histoMgr.forHisto("FakeB", styles.getFakeBStyle())
-            p.histoMgr.setHistoDrawStyle("FakeB", "HIST")
-            p.histoMgr.setHistoLegendStyle("FakeB", "F")
-            p.histoMgr.forHisto("GenuineB", styles.getGenuineBStyle())
-            p.histoMgr.setHistoDrawStyle("GenuineB", "HIST")
-            p.histoMgr.setHistoLegendStyle("GenuineB", "F")
+        # Add the datasets to be included in the plot
+        myStackList = []
 
+        # Data-driven FakeB background
         if not opts.useMC:
-            p.histoMgr.setHistoLegendLabelMany({
-                    "FakeB"   : "Fake b",
-                    "GenuineB": "EWK Genuine b",
-                    })
+            hFakeB  = p1.histoMgr.getHisto("FakeB").getRootHisto()
+            hhFakeB = histograms.Histo(hFakeB, "FakeB", legendLabel="Fake-b")
+            hhFakeB.setIsDataMC(isData=False, isMC=True)
+            myStackList.append(hhFakeB)
         else:
-            p.histoMgr.setHistoLegendLabelMany({
-                    "QCD": "QCD (MC)",
-                    })            
-                              
-        # Apply blinding of signal region
-        if "blindingRangeString" in kwargs_:
-            startBlind = float(kwargs_["blindingRangeString"].split("-")[1])
-            endBlind   = float(kwargs_["blindingRangeString"].split("-")[0])
-            plots.partiallyBlind(p, maxShownValue=startBlind, minShownValue=endBlind, invert=True, moveBlindedText=kwargs_["moveBlindedText"])
+            pass
 
+        # EWK GenuineB background (Replace all EWK histos with GenuineB histos)
+        ewkNameList  = GetListOfEwkDatasets()
+        ewkHistoList = []
+        # For-loop: All EWK datasets 
+        for dataset in ewkNameList:
+            h = p2.histoMgr.getHisto(dataset).getRootHisto()
+            hh = histograms.Histo(h, dataset,  plots._legendLabels[dataset])
+            hh.setIsDataMC(isData=False, isMC=True)
+            myStackList.append(hh)
+
+        # Collision data
+        hData  = p1.histoMgr.getHisto("Data").getRootHisto()
+        hhData = histograms.Histo(hData, "Data")
+        hhData.setIsDataMC(isData=True, isMC=False)
+        myStackList.insert(0, hhData)
+
+        p3 = plots.DataMCPlot2(myStackList, saveFormats=[])
+        p3.setLuminosity(opts.intLumi)
+        # p3.setEnergy("%d"%self._config.OptionSqrtS)
+        p3.setDefaultStyles()
+
+#        # Apply QCD data-driven style
+#        if opts.signalMass != 0:
+#            signal = "ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass
+#            mHPlus = "%s" % int(opts.signalMass)
+#            p.histoMgr.forHisto(signal, styles.getSignalStyleHToTB_M(mHPlus))
+#
+#        #p.histoMgr.forHisto(opts.signalMass, styles.getSignalStyleHToTB())
+#        if opts.useMC:
+#            pass
+#        else:
+#            p.histoMgr.forHisto("FakeB", styles.getFakeBStyle())
+#            p.histoMgr.setHistoDrawStyle("FakeB", "HIST")
+#            p.histoMgr.setHistoLegendStyle("FakeB", "F")
+#
+#        if not opts.useMC:
+#            p.histoMgr.setHistoLegendLabelMany({
+#                    "FakeB"   : "Fake b",
+#                    })
+#        else:
+#            p.histoMgr.setHistoLegendLabelMany({
+#                    "QCD": "QCD (MC)",
+#                    })            
+#                              
+#        # Apply blinding of signal region
+#        if "blindingRangeString" in kwargs_:
+#            startBlind = float(kwargs_["blindingRangeString"].split("-")[1])
+#            endBlind   = float(kwargs_["blindingRangeString"].split("-")[0])
+#            plots.partiallyBlind(p, maxShownValue=startBlind, minShownValue=endBlind, invert=True, moveBlindedText=kwargs_["moveBlindedText"])
+#
         # Draw and save the plot
-        plots.drawPlot(p, saveName, **kwargs_) #the "**" unpacks the kwargs_ dictionary
-        SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode) )
+        plots.drawPlot(p3, saveName, **kwargs_) #the "**" unpacks the kwargs_ dictionary
+        SavePlot(p3, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png"])
     return
 
-def PrintPSet(selection, datasetsMgr):
+def PrintPSet(selection, dsetMgr):
     selection = "\"%s\":"  % (selection)
-    thePSets = datasetsMgr.getAllDatasets()[0].getParameterSet()
+    thePSets = dsetMgr.getAllDatasets()[0].getParameterSet()
 
     # First drop everything before the selection
     thePSet_1 = thePSets.split(selection)[-1]
@@ -585,68 +546,44 @@ def PrintPSet(selection, datasetsMgr):
     Print(thePSet, True)
     return
 
-def getHisto(datasetsMgr, datasetName, histoName):
+def getHisto(dsetMgr, datasetName, histoName):
     Verbose("getHisto()", True)
 
-    h1 = datasetsMgr.getDataset(datasetName).getDatasetRootHisto(histoName)
+    h1 = dsetMgr.getDataset(datasetName).getDatasetRootHisto(histoName)
     h1.setName(datasetName)
     return h1
 
-def replaceQCDFromData(dMgr, dataDrivenDatasetName, newName="FakeB"):
+def replaceQCD(dMgr1, dMgr2, newName, newLabel="FakeB"):
+    '''
+    Replaces the QCD dataset with 
+    a data-driven pseudo-dataset
+    '''
     
     # Define variables
-    mcQCDName      = "QCD"
-    dataDrivenQCD  = dMgr.getDataset(dataDrivenDatasetName)
-    dataDrivenQCD.setName(newName)
+    oldName    = "QCD"
+    newDataset = dMgr2.getDataset(newName)
+    dMgr1.append(newDataset)
+    newDataset.setName(newLabel)
 
     # Get list of dataset names
-    names = dMgr.getAllDatasetNames()
+    names = dMgr1.getAllDatasetNames()
 
-    # Return the index in the list of the first dataset whose name is mcQCDName.
-    index = names.index(mcQCDName)
+    # Return the index in the list of the first dataset whose name is oldName.
+    index = names.index(oldName)
 
     # Remove the dataset at the given position in the list, and return it. 
     names.pop(index)
     
     # Insert the dataset to the given position  (index) of the list
-    names.insert(index, dataDrivenQCD.getName())
+    names.insert(index, newDataset.getName())
 
-    # Remove from the dataset manager the mcQCDName
-    dMgr.remove(mcQCDName)
-    names.pop(names.index(dataDrivenQCD.getName()))
+    # Remove from the dataset manager the oldName
+    dMgr1.remove(oldName)
+    names.pop(names.index(newDataset.getName()))
     
     # Select and reorder Datasets. 
     # This method can be used to either select a set of dataset.Dataset objects. reorder them, or both.
-    dMgr.selectAndReorder(names)
-    return
-
-def replaceEWKWithGenuineB(dMgr, dataDrivenDatasetName, newName="GenuineB"):
-    
-    # Define variables
-    EwkName  = "EWK"
-    dMgr.PrintInfo()
-    GenuineB = dMgr.getDataset(dataDrivenDatasetName)
-    GenuineB.setName(newName)
-
-    # Get list of dataset names
-    names = dMgr.getAllDatasetNames()
-
-    # Return the index in the list of the first dataset whose name is EwkName.
-    index = names.index(EwkName)
-
-    # Remove the dataset at the given position in the list, and return it. 
-    names.pop(index)
-    
-    # Insert the dataset to the given position  (index) of the list
-    names.insert(index, GenuineB.getName())
-
-    # Remove from the dataset manager the EwkName
-    dMgr.remove(EwkName)
-    names.pop(names.index(GenuineB.getName()))
-    
-    # Select and reorder Datasets. 
-    # This method can be used to either select a set of dataset.Dataset objects. reorder them, or both.
-    dMgr.selectAndReorder(names)
+    dMgr1.selectAndReorder(names)
     return
 
 def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
@@ -698,28 +635,26 @@ if __name__ == "__main__":
     DATAERA      = "Run2016"
     OPTMODE      = None
     BATCHMODE    = True
-    PRECISION    = 3
     INTLUMI      = -1.0
-    SUBCOUNTERS  = False
-    LATEX        = False
     SIGNALMASS   = 0
     SIGNAL       = None
-    MERGEEWK     = False
     URL          = False
-    NOERROR      = True
     SAVEDIR      = "/publicweb/a/aattikis/DataDriven/"
     VERBOSE      = False
-    HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug' 
     GRIDX        = False
     GRIDY        = False
     LOGX         = False
     LOGY         = False
+    FOLDER       = "ForDataDrivenCtrlPlots"
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
 
-    parser.add_option("-m", "--mcrab", dest="mcrab", action="store", 
-                      help="Path to the multicrab directory for input")
+    parser.add_option("-m", "--mcrab1", dest="mcrab1", action="store", 
+                      help="Path to the multicrab directory with the Hplus2tbAnalysis")
+
+    parser.add_option("-n", "--mcrab2", dest="mcrab2", action="store", 
+                      help="Path to the multicrab directory with the data-driven pseudo-datasets (e.g. FakeB)")
 
     parser.add_option("-o", "--optMode", dest="optMode", type="string", default=OPTMODE, 
                       help="The optimization mode when analysis variation is enabled  [default: %s]" % OPTMODE)
@@ -742,9 +677,6 @@ if __name__ == "__main__":
     parser.add_option("--dataEra", dest="dataEra", type="string", default=DATAERA, 
                       help="Override default dataEra [default: %s]" % DATAERA)
 
-    parser.add_option("--mergeEWK", dest="mergeEWK", action="store_true", default=MERGEEWK, 
-                      help="Merge all EWK samples into a single sample called \"EWK\" [default: %s]" % MERGEEWK)
-
     parser.add_option("--signalMass", dest="signalMass", type=float, default=SIGNALMASS, 
                      help="Mass value of signal to use [default: %s]" % SIGNALMASS)
 
@@ -756,15 +688,6 @@ if __name__ == "__main__":
     
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE, 
                       help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
-
-    parser.add_option("--histoLevel", dest="histoLevel", action="store", default = HISTOLEVEL,
-                      help="Histogram ambient level (default: %s)" % (HISTOLEVEL))
-
-    parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
-                      help="List of datasets in mcrab to include")
-
-    parser.add_option("-e", "--excludeTasks", dest="excludeTasks", action="store", 
-                      help="List of datasets in mcrab to exclude")
 
     parser.add_option("--gridX", dest="gridX", action="store_true", default=GRIDX,
                       help="Enable the x-axis grid lines [default: %s]" % GRIDX)
@@ -778,6 +701,9 @@ if __name__ == "__main__":
     parser.add_option("--logY", dest="logY", action="store_true", default=LOGY,
                       help="Set y-axis to logarithm scale [default: %s]" % LOGY)
 
+    parser.add_option("--folder", dest="folder", action="store_true", default=FOLDER,
+                      help="Folder inside the ROOT files where all histograms for plotting are located [default: %s]" % FOLDER)
+
 
     (opts, parseArgs) = parser.parse_args()
 
@@ -786,11 +712,22 @@ if __name__ == "__main__":
         parser.print_help()
         sys.exit(1)
 
-    if opts.mcrab == None:
+    if opts.mcrab1 == None:
         Print("Not enough arguments passed to script execution. Printing docstring & EXIT.")
         parser.print_help()
         #print __doc__
         sys.exit(1)
+    elif opts.mcrab2 == None:
+        Print("Not enough arguments passed to script execution. Printing docstring & EXIT.")
+        parser.print_help()
+        #print __doc__
+        sys.exit(1)
+    else:
+        mcrabDir = rchop(opts.mcrab1, "/")
+        if len(mcrabDir.split("/")) > 1:
+            mcrabDir = mcrabDir.split("/")[-1]
+        opts.saveDir += mcrabDir + "/" + "DataDriven/" #opts.folder
+
 
     # Sanity check
     allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 2000, 3000]

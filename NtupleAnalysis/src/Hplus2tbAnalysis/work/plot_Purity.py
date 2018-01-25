@@ -99,6 +99,9 @@ def main(opts):
             datasetsMgr.PrintCrossSections()
             datasetsMgr.PrintLuminosities()
             
+        if 0:
+            datasetsMgr.printSelections()
+
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
 
