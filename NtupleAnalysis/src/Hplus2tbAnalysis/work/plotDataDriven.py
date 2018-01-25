@@ -77,7 +77,6 @@ def GetLumi(datasetsMgr):
 
 def GetListOfEwkDatasets():
     Verbose("Getting list of EWK datasets")
-    #return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
     return  ["TT", "WJetsToQQ_HT_600ToInf", "SingleTop", "DYJetsToQQHT", "TTZToQQ",  "TTWJetsToQQ", "Diboson", "TTTT"]
 
 def GetDatasetsFromDir(opts, otherDir=False):
@@ -94,6 +93,25 @@ def GetDatasetsFromDir(opts, otherDir=False):
                                                     optimizationMode=opts.optMode)
     return datasets
     
+def GetBinWidthMinMax(binList):
+    if not isinstance(binList, list):
+        raise Exception("Argument is not a list instance!")
+
+    minWidth = +1e6
+    maxWidth = -1e6
+    # For-loop: All bin values (centre)
+    for i in range(0, len(binList)-1):
+        j = i + 1
+        iBin = binList[i]
+        jBin = binList[j]
+        wBin = jBin-iBin
+        if wBin < minWidth:
+            minWidth = wBin
+
+        if wBin > maxWidth:
+            maxWidth = wBin
+    return minWidth, maxWidth
+
 def main(opts):
 
     # Apply TDR style
@@ -191,11 +209,15 @@ def GetHistoKwargs(histoList, opts):
     
     histoKwargs = {}
     _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": 0.1}
-    logY  = False
-    if logY:
-        ymaxF = 2
+    if opts.logY:
+        ymaxF = 4
     else:
         ymaxF = 1.2
+    step1 = 20
+    step2 = 50
+    step3 = 100
+    step4 = 200
+    step5 = 2000
 
     _kwargs = {
         "ylabel"           : "Events / %.0f",
@@ -211,7 +233,7 @@ def GetHistoKwargs(histoList, opts):
         "cmsExtraText"     : "Preliminary",
         "opts"             : {"ymin": 2e-1, "ymaxfactor": ymaxF},
         "opts2"            : {"ymin": 0.6, "ymax": 2.0-0.6},
-        "log"              : logY,
+        "log"              : opts.logY,
         "moveLegend"       : _moveLegend,
         "cutBoxY"          : {"cutValue": 1.2, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": False, "ratioCanvas": True}
         }
@@ -370,12 +392,22 @@ def GetHistoKwargs(histoList, opts):
             kwargs["ylabel"] = "Events / %.0f " + units
             kwargs["xlabel"] = "p_{T} (%s)"  % units
         if "LdgTetrajetMass" in h:
+            myBins = []
+            for j in range(0, 1000, step2):
+                myBins.append(j)
+            for k in range(1000, 2000, step3):
+                myBins.append(k)
+            for l in range(2000, 4000+step5, step4):
+                myBins.append(l)
+
             ROOT.gStyle.SetNdivisions(5, "X")
             startBlind       = 150  # 135 v. sensitive to bin-width!
             endBlind         = 2500 #v. sensitive to bin-width!
-            kwargs["rebinX"] = 4
+            kwargs["rebinX"] = myBins
             units            = "GeV/c^{2}"
-            kwargs["ylabel"] = "Events / %.0f " + units
+            #kwargs["ylabel"] = "Events / %.0f " + units
+            binWmin, binWmax = GetBinWidthMinMax(myBins)
+            kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
             kwargs["xlabel"] = "m_{jjbb} (%s)"  % units
             kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["opts"]   = {"xmin": 0.0, "xmax": endBlind, "ymin": 1e+0, "ymaxfactor": ymaxF}
@@ -420,7 +452,6 @@ def GetHistoKwargs(histoList, opts):
             kwargs["log"]    = True#False
 
         histoKwargs[h] = kwargs
-        kwargs["rebinX"] = 1 #alex-tmp (must have EXACT same binning)
     return histoKwargs
     
 def PlotHistograms(datasetMgr, datasetMgr2, opts):
@@ -444,30 +475,26 @@ def PlotHistograms(datasetMgr, datasetMgr2, opts):
     # For-loop: All histograms in list
     for histoName in histoPaths:
 
-        if "MET_" not in histoName:
-            continue
-        #if "TetrajetMass_" not in histoName:
+        #if "MET_" not in histoName:
         #    continue
+        if "TetrajetMass_" not in histoName:
+            continue
 
         kwargs_  = histoKwargs[histoName]
         saveName = histoName.replace(opts.folder + "/", "")
 
         # Create the plotting object (Data, "FakeB")
         p1 = plots.DataMCPlot(datasetMgr, histoName, saveFormats=[])
-
-        # EWKGenuineB histograms
-        histoNameGenuineB = histoName.replace(opts.folder, opts.folder + "EWKGenuineB") #fixme: all empty! will work after current pseudo-multicrab is finished running!
-        #histoNameGenuineB = histoName.replace(opts.folder, opts.folder + "EWKFakeB") # 
         
         # Keep only EWK (GenuineB) datasets
         datasetMgr.selectAndReorder(GetListOfEwkDatasets())
         
-        # Create the MCPlot
+        # Create the MCPlot for the EWKGenuineB histograms
+        histoNameGenuineB = histoName.replace(opts.folder, opts.folder + "EWKGenuineB")
         p2 = plots.MCPlot(datasetMgr, histoNameGenuineB, normalizeToLumi=opts.intLumi, saveFormats=[])
 
         # Add the datasets to be included in the plot
         myStackList = []
-
         # Data-driven FakeB background
         if not opts.useMC:
             hFakeB  = p1.histoMgr.getHisto("FakeB").getRootHisto()
@@ -475,6 +502,10 @@ def PlotHistograms(datasetMgr, datasetMgr2, opts):
             hhFakeB.setIsDataMC(isData=False, isMC=True)
             myStackList.append(hhFakeB)
         else:
+            hQCD  = p1.histoMgr.getHisto("QCD").getRootHisto()
+            hhQCD = histograms.Histo(hQCD, "QCD", legendLabel="QCD")
+            hhQCD.setIsDataMC(isData=False, isMC=True)
+            myStackList.append(hhQCD)
             pass
 
         # EWK GenuineB background (Replace all EWK histos with GenuineB histos)
@@ -738,7 +769,7 @@ if __name__ == "__main__":
 
 
     # Sanity check
-    allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 2000, 3000]
+    allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 1500, 2000, 2500, 3000, 5000, 7000]
     if opts.signalMass!=0 and opts.signalMass not in allowedMass:
         Print("Invalid signal mass point (=%.0f) selected! Please select one of the following:" % (opts.signalMass), True)
         for m in allowedMass:

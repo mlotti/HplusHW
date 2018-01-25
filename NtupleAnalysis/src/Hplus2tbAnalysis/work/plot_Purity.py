@@ -125,7 +125,8 @@ def main(opts):
         datasetsMgr.PrintInfo()
 
         # Get histograms under given folder in ROOT file
-        hList      = datasetsMgr.getDataset("FakeB").getDirectoryContent(opts.folder)
+        #hList      = datasetsMgr.getDataset("FakeB").getDirectoryContent(opts.folder)
+        hList      = datasetsMgr.getDataset("FakeBTrijet").getDirectoryContent(opts.folder)
         hPaths1    = [os.path.join(opts.folder, h) for h in hList]
         hPaths2    = [h for h in hPaths1 if "Purity" in h]
         keepHistos = ["Njets", "MET", "MVAmax1", "MVAmax2", "LdgTetrajetPt", "LdgTetrajetMass", 
