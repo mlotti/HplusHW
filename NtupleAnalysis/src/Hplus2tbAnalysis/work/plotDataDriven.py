@@ -14,7 +14,7 @@ EXAMPLES:
 
 
 LAST USED:
-
+./plotDataDriven.py -m Hplus2tbAnalysis_3bjets40_MVA0p88_MVA0p88_TopMassCutOff600GeV_180113_050540 -n FakeBMeasurement_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180120_092605/FakeB/ --gridX --gridY --logY --signal 500
 '''
 
 #================================================================================================ 
@@ -126,7 +126,7 @@ def main(opts):
         dsetMgr1.loadLuminosities() # from lumi.json
         # dsetMgr2.loadLuminosities()
 
-        # Print PSets?
+        # Print PSets. Perhaps i can use this to ensure parameters are matching!
         if 0:
             dsetMgr1.printSelections()
             dsetMgr2.printSelections()
@@ -167,7 +167,7 @@ def main(opts):
         # Custom Filtering of datasets 
         for i, d in enumerate(removeList, 1):
             msg = "Removing datasets %s from dataset manager" % (ShellStyles.NoteStyle() + d + ShellStyles.NormalStyle())
-            Print(msg, i==1)
+            Verbose(msg, i==1)
             dsetMgr1.remove(filter(lambda name: d == name, dsetMgr1.getAllDatasetNames()))
 
         # Replace MC datasets with data-driven
@@ -446,6 +446,8 @@ def PlotHistograms(datasetMgr, datasetMgr2, opts):
 
         if "MET_" not in histoName:
             continue
+        #if "TetrajetMass_" not in histoName:
+        #    continue
 
         kwargs_  = histoKwargs[histoName]
         saveName = histoName.replace(opts.folder + "/", "")
@@ -490,6 +492,12 @@ def PlotHistograms(datasetMgr, datasetMgr2, opts):
         hhData = histograms.Histo(hData, "Data")
         hhData.setIsDataMC(isData=True, isMC=False)
         myStackList.insert(0, hhData)
+
+        # Signal
+        hSignal  = p1.histoMgr.getHisto(opts.signal).getRootHisto()
+        hhSignal = histograms.Histo(hSignal, opts.signal, plots._legendLabels[opts.signal])
+        hhSignal.setIsDataMC(isData=False, isMC=True)
+        myStackList.insert(1, hhSignal)
 
         p3 = plots.DataMCPlot2(myStackList, saveFormats=[])
         p3.setLuminosity(opts.intLumi)
