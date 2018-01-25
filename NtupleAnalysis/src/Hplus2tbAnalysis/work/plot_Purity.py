@@ -13,9 +13,11 @@ USAGE:
 
 EXAMPLES:
 ./plot_Purity.py -m Hplus2tbAnalysis_3bjets40_MVA0p88_MVA0p88_TopMassCutOff600GeV_180113_050540/ --gridX --gridY --url
+./plot_Purity.py -m Hplus2tbAnalysis_3bjets40_MVA0p88_MVA0p88_TopMassCutOff600GeV_180113_050540/ --gridX --gridY
+
 
 LAST USED:
-./plot_Purity.py -m Hplus2tbAnalysis_3bjets40_MVA0p88_MVA0p88_TopMassCutOff600GeV_180113_050540/ --`gridX --gridY
+./plot_Purity.py -m Hplus2tbAnalysis_3bjets40_MVA0p88_MVA0p88_TopMassCutOff600GeV_180113_050540/ --gridX --gridY --doHistos
 
 '''
 
@@ -120,31 +122,32 @@ def main(opts):
         datasetsMgr.PrintInfo()
 
         # Get histograms under given folder in ROOT file
-        hList   = datasetsMgr.getDataset("FakeB").getDirectoryContent(opts.folder)
-        hPaths1 = [os.path.join(opts.folder, h) for h in hList]
-        hPaths2 = [h for h in hPaths1 if "Purity" in h]
-        keep    = ["MET", "HT", "Njets", "TetrajetBjetEta", "TetrajetBjetPt", "LdgTetrajetMass", 
-                   "LdgTetrajetPt", "LdgTetrajetMass", "LdgTrijetBjetEta", "LdgTrijetBjetPt", "LdgTrijetMass", "LdgTrijetPt"]
+        hList      = datasetsMgr.getDataset("FakeB").getDirectoryContent(opts.folder)
+        hPaths1    = [os.path.join(opts.folder, h) for h in hList]
+        hPaths2    = [h for h in hPaths1 if "Purity" in h]
+        keepHistos = ["Njets", "MET", "MVAmax1", "MVAmax2", "LdgTetrajetPt", "LdgTetrajetMass", 
+                      "TetrajetBJetPt", "TetrajetBJetEta", "TetrajetBJetBdisc", "DeltaEtaLdgTrijetBJetTetrajetBJet", "DeltaPhiLdgTrijetBJetTetrajetBJet", 
+                      "DeltaRLdgTrijetBJetTetrajetBJet", "LdgTrijetPt", "LdgTrijetM", "LdgTrijetBJetBdisc"]
+        allHistos  = ["NBjets", "Bjet1Pt", "Bjet2Pt", "Bjet3Pt", "Bjet1Eta", "Bjet2Eta", "Bjet3Eta", "Bjet1Bdisc", "Bjet2Bdisc", "Bjet3Bdisc", "Njets", 
+                      "Jet1Pt", "Jet2Pt", "Jet3Pt", "Jet4Pt", "Jet5Pt", "Jet6Pt", "Jet7Pt", "Jet1Eta", "Jet2Eta", "Jet3Eta", "Jet4Eta", "Jet5Eta", "Jet6Eta", "Jet7Eta", 
+                      "Jet1Bdisc", "Jet2Bdisc", "Jet3Bdisc", "Jet4Bdisc", "Jet5Bdisc", "Jet6Bdisc", "Jet7Bdisc", "MET", "MVAmax1", "MVAmax2", "LdgTetrajetPt", "LdgTetrajetMass", 
+                     "TetrajetBJetPt", "TetrajetBJetEta", "TetrajetBJetBdisc", "DeltaEtaLdgTrijetBJetTetrajetBJet", "DeltaPhiLdgTrijetBJetTetrajetBJet", 
+                      "DeltaRLdgTrijetBJetTetrajetBJet", "LdgTrijetPt", "LdgTrijetM", "LdgTrijetBJetBdisc", "SubLdgTrijetPt", "SubLdgTrijetM", "SubLdgTrijetBJetBdisc", "LdgDijetPt", 
+                      "LdgDijetM", "SubLdgDijetPt", "SubLdgDijetM"]
 
-        allHistos = ["NBjets", "Bjet1Pt", "Bjet2Pt", "Bjet3Pt", "Bjet1Eta", "Bjet2Eta", "Bjet3Eta", "Bjet1Bdisc", "Bjet2Bdisc", 
-                     "Bjet3Bdisc", "Jet1Pt", "Jet2Pt", "Jet3Pt", "Jet4Pt", "Jet5Pt", "Jet6Pt", "Jet7Pt", "Jet1Eta", "Jet2Eta", 
-                     "Jet3Eta", "Jet4Eta", "Jet5Eta", "Jet6Eta", "Jet7Eta", "Jet1Bdisc", "Jet2Bdisc", "Jet3Bdisc", "Jet4Bdisc", 
-                     "Jet5Bdisc", "Jet6Bdisc", "Jet7Bdisc", "MVAmax1", "MVAmax2", "TetrajetBJetPt", "TetrajetBJetEta", "TetrajetBJetBdisc", 
-                     "DeltaEtaLdgTrijetBJetTetrajetBJet", "DeltaPhiLdgTrijetBJetTetrajetBJet", "DeltaRLdgTrijetBJetTetrajetBJet", "LdgTrijetM", 
-                     "LdgTrijetBJetBdisc", "SubLdgTrijetPt", "SubLdgTrijetM", "SubLdgTrijetBJetBdisc", "LdgDijetPt", "LdgDijetM", 
-                     "SubLdgDijetPt", "SubLdgDijetM"]
-        
-
-# For-loop: All histograms
+        # For-loop: All histograms
         for i, h in enumerate(hPaths2, 1):
-
-            hName = h.split("/")[1]
-            if hName.split("_")[0] not in keep:
+            hName = h.split("/")[1].replace("_AfterAllSelections_Purity", "")
+            if hName not in keepHistos:
                 Verbose("Skipping %s" % (ShellStyles.ErrorStyle() + h + ShellStyles.NormalStyle()), i==1)
                 continue
             else:
                 Verbose("Plotting %s" % (ShellStyles.NoteStyle() + h + ShellStyles.NormalStyle()), True)
-            PlotHistograms(datasetsMgr, h)
+            if opts.doHistos:
+                PlotHistograms(datasetsMgr, h)
+            else:
+                PlotHistoGraphs(datasetsMgr, h, hideZeros=True)
+
     return
 
 def GetHistoKwargs(h, opts):
@@ -153,76 +156,107 @@ def GetHistoKwargs(h, opts):
     myBins  = []
     vtxBins = []
     ptBins  = []
+    yMax    = 1.04
     bWidth  = 2    
     for i in range(0, 40, bWidth):
         vtxBins.append(i)
     bWidth  = 10 #25
     for i in range(40, 100+bWidth, bWidth):
         vtxBins.append(i)
-
+        
     _kwargs = {
         "ylabel"           : "Purity / %.0f ",
-        "rebinX"           : 1, # cannot rebin unless i divide new purity value by rebinX value!
-        "rebinY"           : None,
-        "addMCUncertainty" : True, 
+        #"rebinX"           : 1, # cannot rebin unless i divide new purity value by rebinX value!
+        #"rebinY"           : None,
+        "addMCUncertainty" : False, 
         "addLuminosityText": True,
         "addCmText"        : True,
         "cmsExtraText"     : "Preliminary",
-        "opts"             : {"ymin": 0.0, "ymax": 1.05},
+        "opts"             : {"ymin": 0.0, "ymax": yMax},
         "log"              : False,
-        "moveLegend"       : {"dx": -0.05, "dy": 0.05, "dh": -0.1}
+        "moveLegend"       : {"dx": -0.05, "dy": -0.15, "dh": -0.1},
+        "cutBoxY"          : {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
         }
 
     kwargs = copy.deepcopy(_kwargs)
     
-    if "pt" in h.lower():
+    if "deltaphi" in h.lower():
+        units            = "rads"
+        kwargs["xlabel"] = "#Delta#phi (%s)" % units
+        kwargs["ylabel"] = "Purity / %.2f " + units
+    elif "deltaeta" in h.lower():
+        units            = ""
+        kwargs["xlabel"] = "#Delta#eta"
+        kwargs["ylabel"] = "Purity / %.2f " + units
+        kwargs["opts"]   = {"xmin": 0.0 ,"xmax": 5.0, "ymin": 0.0, "ymax": yMax}
+    elif "deltar" in h.lower():
+        units            = ""
+        kwargs["xlabel"] = "#DeltaR"
+        kwargs["ylabel"] = "Purity / %.2f " + units
+        kwargs["opts"]   = {"xmin": 0.0 ,"xmax": 6.0, "ymin": 0.0, "ymax": yMax}
+    elif "mvamax" in h.lower():
+        units            = ""
+        kwargs["xlabel"] = "top-tag discriminant"
+        kwargs["ylabel"] = "Purity / %.2f " + units
+        kwargs["cutBox"] = {"cutValue": 0.85, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": 0.55 ,"xmax": 1.0, "ymin": 0.0, "ymax": yMax}
+        if "max1" in h.lower():
+            pass
+        else:
+            pass
+    elif "bdisc" in h.lower():
+        units            = ""
+        kwargs["xlabel"] = "b-tag discriminant"
+        kwargs["ylabel"] = "Purity / %.2f " + units
+        kwargs["cutBox"] = {"cutValue": 0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": 0.0 ,"xmax": 1.0, "ymin": 0.0, "ymax": yMax}
+    elif "pt" in h.lower():
         ROOT.gStyle.SetNdivisions(8, "X")
         units            = "GeV/c"
         kwargs["xlabel"] = "p_{T} (%s)" % units
         kwargs["ylabel"]+= units
         # kwargs["cutBox"] = {"cutValue": 40.0, "fillColor": 16, "box": True, "line": True, "greaterThan": True}
-        kwargs["opts"]   = {"xmin": 0.0 ,"xmax": 500.0, "ymin": 0.0, "ymax": 1.05}
-
+        kwargs["opts"]   = {"xmin": 0.0 ,"xmax": 500.0, "ymin": 0.0, "ymax": yMax}
         if "tetrajet" in h.lower():
-            kwargs["opts"]   = {"xmin": 0.0 ,"xmax": 800.0, "ymin": 0.0, "ymax": 1.05}
-            
-    if "mass" in h.lower():
+            kwargs["opts"]   = {"xmin": 0.0 ,"xmax": 800.0, "ymin": 0.0, "ymax": yMax}
+    elif "mass" in h.lower() or "jetM" in h:
         units             = "GeV/c^{2}"
         kwargs["xlabel"]  = "m_{jjb}^{ldg} (%s)" % units
         kwargs["ylabel"] += units
         if "trijet" in h.lower():
-            kwargs["opts"]   = {"xmin": 50.0 ,"xmax": 300.0, "ymin": 0.0, "ymax": 1.05}
+            kwargs["opts"]   = {"xmin": 50.0 ,"xmax": 300.0, "ymin": 0.0, "ymax": yMax}
             kwargs["cutBox"] = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         if "tetrajet" in h.lower():
-            kwargs["opts"]   = {"xmin": 0.0 ,"xmax": 3000.0, "ymin": 0.0, "ymax": 1.05}
+            kwargs["opts"]   = {"xmin": 0.0 ,"xmax": 3000.0, "ymin": 0.0, "ymax": yMax}
             kwargs["cutBox"] = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
-
-    if "MET" in h:
+    elif "MET" in h:
         units             = "GeV"
         kwargs["xlabel"]  = "E_{T}^{miss} (%s)" % units
         kwargs["ylabel"] += units
-        
-    if "Njets" in h:
+    elif "Njets" in h:
         units             = ""
         kwargs["xlabel"]  = "jet multiplicity"
         #kwargs["ylabel"] += units
-        
-    if "HT" in h:
+        kwargs["opts"]   = {"xmin": 6.0 ,"xmax": 18.0, "ymin": 0.0, "ymax": yMax}
+        kwargs["cutBox"] = {"cutValue": 7.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+    elif "HT" in h:
         units             = "GeV"
         kwargs["xlabel"]  = "H_{T} (%s)" % units
         kwargs["ylabel"]  = "Purity / %.0f " + units
         kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": True, "line": True, "greaterThan": True}
         kwargs["opts"]["xmax"] = 3000.0
-
-    if "eta" in h.lower():
-        units             = ""
+    elif "eta" in h.lower():
+        units            = ""
+        kwargs["xlabel"] = "#eta"
         kwargs["ylabel"]  = "Purity / %.2f " + units
         kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        kwargs["opts"]   = {"xmin": -2.5 ,"xmax": 2.5, "ymin": 0.0, "ymax": 1.05}
+        kwargs["opts"]   = {"xmin": -2.5 ,"xmax": 2.5, "ymin": 0.0, "ymax": yMax}
         if "trijet" in h.lower():
             pass
         if "bjet" in h.lower():
             pass        
+    else:
+        Print("Could not customise kwargs for %s" % (ShellStyles.ErrorStyle() + h + ShellStyles.NormalStyle()), True)
     return kwargs
     
 
@@ -245,11 +279,132 @@ def GetBinWidthMinMax(binList):
             maxWidth = wBin
     return minWidth, maxWidth
 
-def getHisto(datasetsMgr, histoName):
+def getHisto(datasetsMgr, dataset, histoName):
 
-    h1 = datasetsMgr.getDataset("FakeB").getDatasetRootHisto(histoName)
-    h1.setName("FakeB")
+    h1 = datasetsMgr.getDataset(dataset).getDatasetRootHisto(histoName)
+    h1.setName("histo_" + dataset)
     return h1
+
+def convertHisto2TGraph(histo, printValues=False, hideZeros=False):
+
+    # Lists for values
+    x     = []
+    y     = []
+    xerrl = []
+    xerrh = []
+    yerrl = []
+    yerrh = []
+
+    # Other definitions
+    xMin   = histo.GetXaxis().GetXmin()
+    xMax   = histo.GetXaxis().GetXmax()
+    nBinsX = histo.GetNbinsX()
+
+    # For-loop: All histogram bins
+    for i in range(1, nBinsX+1):
+        
+        # Get values
+        xVal  = histo.GetBinLowEdge(i) +  0.5*histo.GetBinWidth(i)
+        xLow  = 0.5*histo.GetBinWidth(i)
+        xHigh = 0.5*histo.GetBinWidth(i)
+        yVal  = histo.GetBinContent(i)
+        yLow  = histo.GetBinError(i)
+        yHigh = yLow            
+
+        # Store values
+        x.append(xVal)
+        xerrl.append(xLow)
+        xerrh.append(xHigh)
+
+        # Force error bars to not be above (belo) 1.0 (0.0)
+        if 1:
+            if abs(yVal + yHigh) > 1.0:
+                yHigh = 1.0-yVal
+            if yVal - yLow < 0.0:
+                yLow = yVal
+
+        # WARNING! Ugly trick so that zero points are not visible on canvas
+        if hideZeros:
+            if yVal == 0.0:
+                yVal  = -0.1
+                yLow  = +0.0001
+                yHigh = +0.0001
+
+        # Save final values
+        y.append(yVal)
+        yerrl.append(yLow)
+        yerrh.append(yHigh)
+            
+    # Create the TGraph with asymmetric errors
+    tgraph = ROOT.TGraphAsymmErrors(nBinsX,
+                                    array.array("d",x),
+                                    array.array("d",y),
+                                    array.array("d",xerrl),
+                                    array.array("d",xerrh),
+                                    array.array("d",yerrl),
+                                    array.array("d",yerrh))
+
+    # Construct info table (debugging)
+    table  = []
+    align  = "{:>6} {:^10} {:>10} {:>10} {:>10} {:^3} {:<10}"
+    header = align.format("#", "xLow", "x", "xUp", "Purity", "+/-", "Error") #Purity = 1-EWK/Data
+    hLine  = "="*70
+    table.append("")
+    table.append(hLine)
+    table.append("{:^70}".format("TGraph"))
+    table.append(header)
+    table.append(hLine)
+    
+    # For-loop: All values x-y and their errors
+    for i, xV in enumerate(x, 0):
+        row = align.format(i+1, "%.2f" % xerrl[i], "%.2f" %  x[i], "%.2f" %  xerrh[i], "%.3f" %  y[i], "+/-", "%.3f" %  yerrh[i])
+        table.append(row)
+    table.append(hLine)
+
+    if printValues:
+        for i, line in enumerate(table, 1):
+            Print(line, False) #i==1)
+    return tgraph
+
+
+def PlotHistoGraphs(datasetsMgr, histoName, hideZeros=False):
+
+    # Get Histogram name and its kwargs
+    saveName = histoName.rsplit("/")[-1]
+    kwargs_  = GetHistoKwargs(saveName, opts)
+    kwargs_["ylabel"] = "Purity"
+
+    # Create the plotting object
+    dataset = "FakeB"
+    p1 = plots.PlotBase( [getHisto(datasetsMgr, dataset, histoName)], saveFormats=[])
+    p1.setLuminosity(opts.intLumi)
+
+    # Convert to TGraph
+    hPurity  = p1.histoMgr.getHisto("histo_" + dataset).getRootHisto()#.Clone(dataset + "_clone")
+    hgPurity = convertHisto2TGraph(hPurity, printValues=False, hideZeros=hideZeros)
+    hgPurity.SetName(dataset)
+
+    # Create & draw the plot
+    p = plots.PlotBase( [hgPurity], saveFormats=[])
+    p.setLuminosity(opts.intLumi)
+
+    #  Apply histogram style
+    p.histoMgr.forHisto(dataset, styles.getFakeBStyle())
+
+    # Set drawing/legend style
+    p.histoMgr.setHistoDrawStyle(dataset, "P") #Do NOT use "AP"!!!
+    p.histoMgr.setHistoLegendStyle(dataset, "LP")
+
+    #  Customise legend labels
+    p.histoMgr.setHistoLegendLabelMany({
+            dataset: "Fake b (VR)",
+            })
+
+    # Draw and save the plot
+    plots.drawPlot(p, histoName.replace(opts.folder, ""), **kwargs_)
+    SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode), [".png"])#, ".pdf"] )
+    return
+
 
 def PlotHistograms(datasetsMgr, histoName):
     # Get Histogram name and its kwargs
@@ -257,26 +412,24 @@ def PlotHistograms(datasetsMgr, histoName):
     kwargs_  = GetHistoKwargs(saveName, opts)
 
     # Create the plotting object
-    # p = plots.ComparisonPlot(*getHistos(datasetsMgr, histoName) )
-    p = plots.PlotBase( [getHisto(datasetsMgr, histoName)], saveFormats=[])
+    dataset = "FakeB"
+    p = plots.PlotBase( [getHisto(datasetsMgr, dataset, histoName)], saveFormats=[])
     p.setLuminosity(opts.intLumi)
 
     #  Apply histogram style
-    p.histoMgr.forHisto("FakeB", styles.getFakeBStyle())
+    p.histoMgr.forHisto("histo_" + dataset, styles.getFakeBStyle())
 
     # Set drawing/legend style
-    p.histoMgr.setHistoDrawStyle("FakeB", "AP")
-    p.histoMgr.setHistoLegendStyle("FakeB", "LP")
+    p.histoMgr.setHistoDrawStyle("histo_" + dataset, "AP")
+    p.histoMgr.setHistoLegendStyle("histo_" + dataset, "LP")
 
     #  Customise legend labels
     p.histoMgr.setHistoLegendLabelMany({
-            "FakeB": "Fake b (VR)",
+            "histo_" + dataset: "Fake b (VR)",
             })
     
     # Draw and save the plot
     plots.drawPlot(p, saveName, **kwargs_) #the "**" unpacks the kwargs_ dictionary
-
-    # Save the plots in custom list of saveFormats
     SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode), [".png"])#, ".pdf"] )
     return
 
@@ -325,6 +478,7 @@ if __name__ == "__main__":
     ANALYSISNAME = "Hplus2tbAnalysis"
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
+    DOHISTOS     = False
     GRIDX        = False
     GRIDY        = False
     OPTMODE      = None
@@ -358,6 +512,9 @@ if __name__ == "__main__":
 
     parser.add_option("--dataEra", dest="dataEra", type="string", default=DATAERA, 
                       help="Override default dataEra [default: %s]" % DATAERA)
+
+    parser.add_option("--doHistos", dest="doHistos", action="store_true", default=DOHISTOS, 
+                      help="Plot histograms instead of histographs [default: %s]" % DOHISTOS)
 
     parser.add_option("--gridX", dest="gridX", action="store_true", default=GRIDX, 
                       help="Enable the x-axis grid lines [default: %s]" % GRIDX)
