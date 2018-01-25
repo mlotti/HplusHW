@@ -1044,9 +1044,10 @@ void CommonPlots::fillControlPlotsAfterStandardSelections(const Event& event,
   fTopologyData = topologyData;
   fTopData      = topData;
   fMETData      = METData;
+  bIsGenuineB   = bjetData.isGenuineB();
   // if (bIsInverted) bIsGenuineB = topData.isGenuineB();
   // else bIsGenuineB = bjetData.isGenuineB();
-
+  
   // Fill Histogram Triplets
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNVerticesAfterStdSelections, bIsGenuineB, iVertices);
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNJetsAfterStdSelections    , bIsGenuineB, fJetData.getSelectedJets().size());
