@@ -437,6 +437,7 @@ _legendLabels = {
     "SingleTop": "Single t",
     "QCD"      : "QCD",#"Mis-ID. #tau_{h} (data)",
     "FakeB"    : "Fake b (data)",
+    "GenuineB" : "Genuine b (MC)",
     "QCD-b"    : "QCD (b enr.)",
     "QCDdata"  : "Mis-ID. #tau_{h} (data)", #"QCD (data driven)"
 
