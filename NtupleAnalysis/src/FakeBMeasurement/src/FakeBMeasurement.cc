@@ -981,9 +981,9 @@ void FakeBMeasurement::book(TDirectory *dir) {
   const float fBtagMin    = fCommonPlots.getBJetDiscBinSettings().min();
   const float fBtagMax    = fCommonPlots.getBJetDiscBinSettings().max();
 
-  const int  nPtBins      = 2*fCommonPlots.getPtBinSettings().bins();
+  const int  nPtBins      = fCommonPlots.getPtBinSettings().bins();
   const float fPtMin      = fCommonPlots.getPtBinSettings().min();
-  const float fPtMax      = 2*fCommonPlots.getPtBinSettings().max();
+  const float fPtMax      = fCommonPlots.getPtBinSettings().max();
 
   const int  nEtaBins     = fCommonPlots.getEtaBinSettings().bins();
   const float fEtaMin     = fCommonPlots.getEtaBinSettings().min();

@@ -9,10 +9,11 @@ USAGE:
 
 EXAMPLES:
 ./plotDataDriven.py -m Hplus2tbAnalysis_3bjets40_MVA0p88_MVA0p88_TopMassCutOff600GeV_180113_050540 -n FakeBMeasurement_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180120_092605/FakeB/ --gridX --gridY --logY --signal 500
+/plotDataDriven.py -m <mcrab1> -n <mcrab2>/FakeBMeasurement/ --gridX --gridY --logY --useMC --unblind
 
 
 LAST USED:
-./plotDataDriven.py -m Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180125_123633 -n FakeBMeasurement_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180125_123834/FakeB/ --gridX --gridY --logY --signal 500
+./plotDataDriven.py -m Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180125_123633 -n FakeBMeasurement_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180125_123834/FakeBMeasurement/ --gridX --gridY --logY --unblind
 
 '''
 
@@ -214,15 +215,12 @@ def main(opts):
         # For-loop: All histograms in list
         for i, hName in enumerate(histoPaths, 1):
             
-            #if "MET_" not in hName:
-            #    continue
-            #if "LdgTetrajet" in hName:
-            #    continue
-
             msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % i, "/", "%s:" % (len(histoPaths)), hName)
-            Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), True)#i==1)
+            Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), i==1)
 
             PlotHistogram(dsetMgr1, hName, opts)
+
+    Print("All plots saved under directory %s" % (opts.saveDir), True)
     return
 
 def GetHistoKwargs(hName, opts):
@@ -356,6 +354,11 @@ def GetHistoKwargs(hName, opts):
         kwargs["xlabel"] = "#eta"
         kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": 1e+0, "ymaxfactor": ymaxF}
+
+    if opts.unblind:
+        key = "blindingRangeString"
+        if key in kwargs.keys():
+            del kwargs[key]
     return kwargs
     
 def ApplyBlinding(myObject, blindedRange = []):
@@ -538,8 +541,6 @@ def replaceQCD(dMgr1, dMgr2, newName, newLabel="FakeB"):
     return
 
 def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
-    Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
-
     # Check that path exists
     if not os.path.exists(saveDir):
         os.makedirs(saveDir)
@@ -549,12 +550,14 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
 
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats, 0):
-        saveNameURL = saveName + ext
-        saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
+        saveNameURL  = saveName + ext
+        saveNameURL  = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
         if opts.url:
-            Print(saveNameURL, False) #i==0)
+            Verbose(saveNameURL, False) #i==0)
+            opts.saveDir = os.path.dirname(saveNameURL) + "/"
         else:
-            Print(saveName + ext, False) #i==0)
+            Verbose(saveName + ext, False) #i==0)
+            opts.saveDir = os.path.dirname(saveName) + "/"
         plot.saveAs(saveName, formats=saveFormats)
     return
 
@@ -593,6 +596,7 @@ if __name__ == "__main__":
     SAVEDIR      = "/publicweb/a/aattikis/DataDriven/"
     VERBOSE      = False
     GRIDX        = False
+    UNBLIND      = False
     GRIDY        = False
     LOGX         = False
     LOGY         = False
@@ -618,6 +622,9 @@ if __name__ == "__main__":
 
     parser.add_option("--useMC", dest="useMC", action="store_true", default=USEMC,
                       help="Use all backgrounds from MC. Do not use data-driven background estimation [default: %s]" % USEMC)
+
+    parser.add_option("--unblind", dest="unblind", action="store_true", default=UNBLIND,
+                      help="Switch off blinging of data in the signal region [default: %s]" % UNBLIND)
 
     parser.add_option("--intLumi", dest="intLumi", type=float, default=INTLUMI,
                       help="Override the integrated lumi [default: %s]" % INTLUMI)
