@@ -146,6 +146,7 @@ def main(opts):
         datasetsMgr.loadLuminosities() # from lumi.json
 
         if 0:
+            datasetsMgr.printSelections()
             PrintPSet("BJetSelection", datasetsMgr)
             PrintPSet("TopSelectionBDT", datasetsMgr)
             PrintPSet("FakeBMeasurement", datasetsMgr)

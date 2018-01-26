@@ -156,6 +156,9 @@ def main(opts):
         datasetsMgr.updateNAllEventsToPUWeighted()
         datasetsMgr.loadLuminosities() # from lumi.json
         
+        if 0:
+            datasetsMgr.printSelections()
+        
         # Print PSets used for FakeBMeasurement
         PrintPSet("FakeBMeasurement", datasetsMgr)
 

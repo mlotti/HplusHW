@@ -65,7 +65,8 @@ Hplus2tbAnalysis::Hplus2tbAnalysis(const ParameterSet& config, const TH1* skimCo
     fJetSelection(config.getParameter<ParameterSet>("JetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cBTaggingSFCounter(fEventCounter.addCounter("b tag SF")),
-    fMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    // fMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fMETSelection(config.getParameter<ParameterSet>("METSelection")), // no subcounter in main counter
     // fTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cSelected(fEventCounter.addCounter("Selected Events"))
@@ -232,7 +233,8 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   //================================================================================================
   // Fill final plots
   //===============================================================================================
-  fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, 1);
+  int isGenuineB = bjetData.isGenuineB();
+  fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, isGenuineB);
  
   //================================================================================================
   // Finalize
