@@ -1102,9 +1102,12 @@ void CommonPlots::fillControlPlotsAfterStandardSelections(const Event& event,
   return;
 }
 
-void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event, int isInverted) {
+void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event, int isGenuineB) {
   // NB: Call only afer fillControlPlotsAfterStandardSelections() has been called
   // Variables fJetData, fBJetData, fTopologyData, fTopData, fMETData, bIsGenuineB already set!
+  
+  // Store boolean  
+  bIsGenuineB = isGenuineB;
 
   // NB: isInverted is a dumbie variable. Introduced to be able to overload the function
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNVerticesAfterAllSelections, bIsGenuineTau, iVertices);
