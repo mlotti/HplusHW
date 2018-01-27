@@ -133,7 +133,7 @@ def main():
 
     allSelections.verbose = opts.verbose
     allSelections.histogramAmbientLevel = opts.histoLevel
-    allSelections.BJetSelection.jetPtCuts = [40.0, 30.0]
+    #allSelections.BJetSelection.jetPtCuts = [40.0, 30.0]
     # allSelections.BJetSelection.triggerMatchingApply = True # at least 1 trg b-jet matched to offline b-jets
     # allSelections.Trigger.triggerOR = ["HLT_PFHT400_SixJet30", #Prescale 110 at inst. lumi 1.35E+34
     #                                    "HLT_PFHT450_SixJet40", #Prescale  26 at inst. lumi 1.35E+34]
