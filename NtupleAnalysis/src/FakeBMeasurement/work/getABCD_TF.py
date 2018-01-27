@@ -94,6 +94,11 @@ def Print(msg, printHeader=False):
         print "\t", msg
     return
 
+def rchop(myString, endString):
+  if myString.endswith(endString):
+    return myString[:-len(endString)]
+  return myString
+
 def Verbose(msg, printHeader=True, verbose=False):
     if not opts.verbose:
         return
@@ -129,7 +134,7 @@ def GetHistoKwargs(histoName):
     _opts   = {"ymin": 1e0, "ymaxfactor": 1.2}
     _ylabel = "Events / %.0f"
     if _logY:
-        _opts     = {"ymin": 1e0, "ymaxfactor": 5.0}
+        _opts = {"ymin": 1e0, "ymaxfactor": 5.0}
 
     if "mass" in histoName.lower():
         _units        = "GeV/c^{2}"
@@ -325,7 +330,7 @@ def main(opts):
 
 def GetTetrajetMassBins():
     myBins   = []
-    binWidth1=   25
+    binWidth1=   50#25
     binWidth2=   50
     binWidth3=  100
     binWidth4=  500
@@ -355,9 +360,10 @@ def PlotHistogramsAndCalculateTF(datasetsMgr, histoList, inclusiveFolder, opts):
 
     # Histogram names
     if 0:
-        hName = "LdgTetrajetMass" #histoList[0].split("_")[1]
+        hName = "LdgTetrajetMass"
     else:
         hName = "MET"
+        # hName = "LdgTrijetMass"
         _kwargs = GetHistoKwargs(hName)
 
     # Get histogams for the Signal Region (SR) and the 3 Control Regions (CR)
@@ -380,7 +386,6 @@ def PlotHistogramsAndCalculateTF(datasetsMgr, histoList, inclusiveFolder, opts):
     hInclusive_CR2 = "%s/%s" % (inclusiveFolder, histoName)
     hGenuineB_CR2  = "%s/%s" % (genuineBFolder , histoName)
     hFakeB_CR2     = "%s/%s" % (fakeBFolder    , histoName)
-    Print()
 
     # Create plots
     pInclusive_SR  = plots.DataMCPlot(datasetsMgr, hInclusive_SR)
@@ -521,7 +526,7 @@ def PlotHistogramsAndCalculateTF(datasetsMgr, histoList, inclusiveFolder, opts):
         myStackList = []
         
         # Add the FakeB data-driven background to the histogram list    
-        hFakeB = histograms.Histo(rFakeB_SR, "FakeB", "Fake-b")
+        hFakeB = histograms.Histo(rBkgSum_SR, "FakeB", "Fake-b") #alex
         hFakeB.setIsDataMC(isData=False, isMC=True)
         myStackList.append(hFakeB)
         
@@ -541,7 +546,7 @@ def PlotHistogramsAndCalculateTF(datasetsMgr, histoList, inclusiveFolder, opts):
 
     # Draw the plot and save it
     plots.drawPlot(p, hName, **_kwargs)
-    SavePlot(p, hName, os.path.join(opts.saveDir, "TransferFactor", opts.optMode) ) 
+    SavePlot(p, hName, os.path.join(opts.saveDir, opts.optMode) ) 
 
     #=========================================================================================
     # Calculate the Transfer Factor (TF) and save to file
@@ -578,7 +583,7 @@ if __name__ == "__main__":
     INTLUMI      = -1.0
     MCONLY       = False
     URL          = False
-    SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"
+    SAVEDIR      = "/publicweb/a/aattikis/"#FakeBMeasurement/"
     VERBOSE      = False
     USEMC        = False
     RATIO        = False
@@ -647,6 +652,11 @@ if __name__ == "__main__":
         parser.print_help()
         #print __doc__
         sys.exit(1)
+    else:
+        mcrabDir = rchop(opts.mcrab, "/")
+        if len(mcrabDir.split("/")) > 1:
+            mcrabDir = mcrabDir.split("/")[-1]
+        opts.saveDir += mcrabDir + "/TransferFactor/"
 
     # Call the main function
     main(opts)

@@ -229,11 +229,7 @@ def GetHistoKwargs(hName, opts):
     key   = histogramName
     value = kwargs
     '''
-    # Change y-max factor to be bigger for log-scales
-    ymaxF = 1.2
-    if opts.logY:
-        ymaxF = 4
-
+    ymaxF  = 1.2
     kwargs = {
         "ratioCreateLegend": True,
         "ratioType"        : "errorScale",
@@ -263,13 +259,17 @@ def GetHistoKwargs(hName, opts):
             myBins.append(j)
         for k in range(100, 200, 20):
             myBins.append(k)
-        for l in range(200, 300, 50):
-            myBins.append(l)
+        for k in range(200, 300, 50):
+            myBins.append(k)
+        for k in range(300, 400+100, 100):
+            myBins.append(k)
         units            = "GeV/c"
         binWmin, binWmax = GetBinWidthMinMax(myBins)
         kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
         kwargs["xlabel"] = "E_{T}^{miss} (%s)" % units
-        kwargs["rebinX"] = myBins # 2
+        kwargs["rebinX"] = myBins
+        #kwargs["opts"]   = {"xmin": 0.0, "xmax": +300.0, "ymin": 1e+0, "ymax":3.05e3} #tmp
+        kwargs["log"]    = True
     if "NVertices" in hName:
         kwargs["ylabel"] = "Events / %.0f"
         kwargs["xlabel"] = "Vertices"
@@ -306,9 +306,10 @@ def GetHistoKwargs(hName, opts):
         kwargs["xlabel"] = "m_{jjb} (%s)"  % units
         kwargs["cutBox"] = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         kwargs["opts"]   = {"xmin": 50.0, "xmax": 350.0, "ymin": 1e+0, "ymaxfactor": ymaxF}
-        if "AllSelections" in hName:
-            kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind)
-            kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.1}
+        kwargs["log"]    = True
+        # Blind data
+        kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind)
+        kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.1}
     if "LdgTrijetBjetPt" in hName:
         units            = "GeV/c"
         kwargs["ylabel"] = "Events / %.0f " + units
@@ -322,7 +323,7 @@ def GetHistoKwargs(hName, opts):
         units            = "GeV/c"
         kwargs["ylabel"] = "Events / %.0f " + units
         kwargs["xlabel"] = "p_{T} (%s)"  % units
-        kwargs["opts"]   = {"xmax": +1000.0, "ymin": 1e+0, "ymaxfactor": ymaxF}
+        kwargs["opts"]   = {"xmax": +800.0, "ymin": 1e+0, "ymaxfactor": ymaxF}
     if "LdgTetrajetMass" in hName:
         myBins = []
         for j in range(0, 1000, 50):
@@ -339,6 +340,7 @@ def GetHistoKwargs(hName, opts):
         units            = "GeV/c^{2}"
         binWmin, binWmax = GetBinWidthMinMax(myBins)
         kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
+        kwargs["log"]    = True
         kwargs["xlabel"] = "m_{jjbb} (%s)"  % units
         kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         kwargs["opts"]   = {"xmin": 0.0, "xmax": endBlind, "ymin": 1e+0, "ymaxfactor": ymaxF}
@@ -359,6 +361,10 @@ def GetHistoKwargs(hName, opts):
         key = "blindingRangeString"
         if key in kwargs.keys():
             del kwargs[key]
+
+    if kwargs["log"]==True or opts.logY == True:
+        kwargs["opts"]["ymaxfactor"] = 5.0
+
     return kwargs
     
 def ApplyBlinding(myObject, blindedRange = []):
@@ -427,6 +433,8 @@ def PlotHistogram(dsetMgr, histoName, opts):
         
     # Create the MCPlot for the EWKGenuineB histograms
     histoNameGenuineB = histoName.replace(opts.folder, opts.folder + "EWKGenuineB")
+    datasetMgr.PrintInfo()
+    sys.exit()
     p2 = plots.MCPlot(datasetMgr, histoNameGenuineB, normalizeToLumi=opts.intLumi, saveFormats=[])
     # plots.drawPlot(p2, saveName + "_tmp", **{"rebiX": kwargs["rebinX"]})
     # p2.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinX(kwargs["rebinX"]))
@@ -593,7 +601,7 @@ if __name__ == "__main__":
     SIGNALMASS   = 800
     SIGNAL       = None
     URL          = False
-    SAVEDIR      = "/publicweb/a/aattikis/DataDriven/"
+    SAVEDIR      = "/publicweb/a/aattikis/"
     VERBOSE      = False
     GRIDX        = False
     UNBLIND      = False
@@ -684,7 +692,7 @@ if __name__ == "__main__":
         mcrabDir = rchop(opts.mcrab1, "/")
         if len(mcrabDir.split("/")) > 1:
             mcrabDir = mcrabDir.split("/")[-1]
-        opts.saveDir += mcrabDir + "/" + "DataDriven/" #opts.folder
+        opts.saveDir += mcrabDir + "/DataDriven/"
 
 
     # Sanity check
