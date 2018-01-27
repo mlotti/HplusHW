@@ -160,7 +160,17 @@ def GetHistoKwargs(histoName):
         _opts["xmin"] =   0
         _opts["xmax"] = 300
         _cutBox       = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
-        _rebinX       = 1
+        _opts         = {"ymin": 1e0, "ymax": 2e3} #"ymaxfactor": 5.0} #temp
+        myBins = []
+        for j in range(0, 100, 10):
+            myBins.append(j)
+        for k in range(100, 200, 20):
+            myBins.append(k)
+        for k in range(200, 300, 50):
+            myBins.append(k)
+        for k in range(300, 400+100, 100):
+            myBins.append(k)
+        _rebinX  = myBins #1
                 
     # Define plotting options
     kwargs = {

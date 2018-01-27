@@ -200,17 +200,30 @@ def main(opts):
 
         # Definitions
         histoNames  = []    
-        allHistos   = dsetMgr2.getAllDatasets()[0].getDirectoryContent(opts.folder)
-        histoList1  = [h for h in allHistos if "MCEWK" not in h]
-        histoList2  = [h for h in histoList1 if "Purity" not in h]
-        histoList3  = [h for h in histoList2 if "Bjet" not in h]
-        histoList4  = [h for h in histoList3 if "Jet" not in h]
-        histoList5  = [h for h in histoList4 if "Njet" not in h]
-        histoList6  = [h for h in histoList5 if "Njet" not in h]
-        histoList7  = [h for h in histoList6 if "MVA" not in h]
-        histoList8  = [h for h in histoList7 if "Sub" not in h]
-        histoList9  = [h for h in histoList8 if "Dijet" not in h]
-        histoPaths  = [opts.folder + "/" + h for h in histoList9]
+        #allHistos   = dsetMgr2.getAllDatasets()[0].getDirectoryContent(opts.folder)
+        #histoList1  = [h for h in allHistos if "MCEWK" not in h]
+        #histoList2  = [h for h in histoList1 if "Purity" not in h]
+        #histoList3  = [h for h in histoList2 if "Bjet" not in h]
+        #histoList4  = [h for h in histoList3 if "Jet" not in h]
+        #histoList5  = [h for h in histoList4 if "Njet" not in h]
+        #histoList6  = [h for h in histoList5 if "Njet" not in h]
+        #histoList7  = [h for h in histoList6 if "MVA" not in h]
+        #histoList8  = [h for h in histoList7 if "Sub" not in h]
+        #histoList9  = [h for h in histoList8 if "Dijet" not in h]
+        #histoPaths  = [opts.folder + "/" + h for h in histoList9]
+        
+        allHistos   = dsetMgr1.getAllDatasets()[0].getDirectoryContent(opts.folder)
+        histoPaths  = []
+        for h in allHistos:
+            if "StandardSelections" in h or "Subldg" in h or "BJetEta" in h or "BtagDiscriminator" in h or "JetPt" in h or "JetEta" in h:
+                continue
+            if "Njets" in h or "NBjets" in h or "Dijet" in h or "WMassRatio" in h or h == "MET" or "METPhi" in h or "BJetPt" in h:
+                continue
+            # Please add me
+            if "LdgTrijetBjetPt" in h or "LdgTrijetBjetEta" in h or "TetrajetBjetPt" in h or "TetrajetBjetEta" in h or "NVertices" in h or "HT" in h:
+                continue
+            histoPaths.append(os.path.join(opts.folder, h))
+
 
         # For-loop: All histograms in list
         for i, hName in enumerate(histoPaths, 1):
@@ -230,6 +243,7 @@ def GetHistoKwargs(hName, opts):
     value = kwargs
     '''
     ymaxF  = 1.2
+    ymin   = 1e-1
     kwargs = {
         "ratioCreateLegend": True,
         "ratioType"        : "errorScale",
@@ -246,7 +260,7 @@ def GetHistoKwargs(hName, opts):
         "addLuminosityText": True,
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
-        "opts"             : {"ymin": 2e-1, "ymaxfactor": ymaxF},
+        "opts"             : {"ymin": ymin, "ymaxfactor": ymaxF},
         "opts2"            : {"ymin": 0.2, "ymax": 2.0-0.2},
         "log"              : opts.logY,
         "moveLegend"       : {"dx": -0.1, "dy": -0.01, "dh": 0.1},
@@ -268,7 +282,7 @@ def GetHistoKwargs(hName, opts):
         kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
         kwargs["xlabel"] = "E_{T}^{miss} (%s)" % units
         kwargs["rebinX"] = myBins
-        #kwargs["opts"]   = {"xmin": 0.0, "xmax": +300.0, "ymin": 1e+0, "ymax":3.05e3} #tmp
+        kwargs["opts"]   = {"ymin": ymin, "ymaxfactor": ymaxF}
         kwargs["log"]    = True
     if "NVertices" in hName:
         kwargs["ylabel"] = "Events / %.0f"
@@ -277,26 +291,28 @@ def GetHistoKwargs(hName, opts):
         kwargs["ylabel"] = "Events / %.0f"
         kwargs["xlabel"] = "Jets Multiplicity"
         kwargs["cutBox"] = {"cutValue": 7.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        kwargs["opts"]   = {"xmin": 7.0, "xmax": +16.0, "ymin": 1e+0, "ymaxfactor": ymaxF}
+        kwargs["opts"]   = {"xmin": 7.0, "xmax": +16.0, "ymin": ymin, "ymaxfactor": ymaxF}
         ROOT.gStyle.SetNdivisions(10, "X")
     if "BtagDiscriminator" in hName:                
         kwargs["ylabel"]     = "Events / %.2f"
         kwargs["xlabel"]     = "b-tag discriminator"
         kwargs["cutBox"]     = {"cutValue": 0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         kwargs["moveLegend"] = {"dx": -0.5, "dy": -0.01, "dh": 0.0}
-        kwargs["opts"]       = {"xmin": 0.0, "xmax": 1.05, "ymin": 1e+0, "ymaxfactor": ymaxF}
+        kwargs["opts"]       = {"xmin": 0.0, "xmax": 1.05, "ymin": ymin, "ymaxfactor": ymaxF}
     if "HT" in hName:
         units            = "GeV"
         kwargs["ylabel"] = "Events / %.0f " + units
         kwargs["xlabel"] = "H_{T} (%s)"  % units
         kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         kwargs["rebinX"] = 5
-        kwargs["opts"]   = {"xmin": 500.0, "xmax": 3000, "ymin": 1e+0, "ymaxfactor": ymaxF}
+        kwargs["opts"]   = {"xmin": 500.0, "xmax": 3000, "ymin": ymin, "ymaxfactor": ymaxF}
     if "LdgTrijetPt" in hName:
         units = "GeV/c"
         kwargs["ylabel"] = "Events / %.0f " + units
         kwargs["xlabel"] = "p_{T} (%s)"  % units
-        kwargs["opts"]   = {"xmax": +800.0, "ymin": 1e+0, "ymaxfactor": ymaxF}
+        kwargs["opts"]   = {"xmax": +800.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["rebinX"] = 2
+        kwargs["log"]    = True
     if "LdgTrijetMass" in hName:
         startBlind       = 140
         endBlind         = 200
@@ -305,7 +321,7 @@ def GetHistoKwargs(hName, opts):
         kwargs["ylabel"] = "Events / %.0f " + units
         kwargs["xlabel"] = "m_{jjb} (%s)"  % units
         kwargs["cutBox"] = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        kwargs["opts"]   = {"xmin": 50.0, "xmax": 350.0, "ymin": 1e+0, "ymaxfactor": ymaxF}
+        kwargs["opts"]   = {"xmin": 50.0, "xmax": 350.0, "ymin": ymin, "ymaxfactor": ymaxF}
         kwargs["log"]    = True
         # Blind data
         kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind)
@@ -314,16 +330,26 @@ def GetHistoKwargs(hName, opts):
         units            = "GeV/c"
         kwargs["ylabel"] = "Events / %.0f " + units
         kwargs["xlabel"] = "p_{T} (%s)"  % units
+        kwargs["log"]    = True
     if "LdgTrijetBjetEta" in hName:
         kwargs["ylabel"] = "Events / %.2f"
         kwargs["xlabel"] = "#eta"
         kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": 1e+0, "ymaxfactor": ymaxF}
+        kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": ymin, "ymaxfactor": ymaxF}
     if "LdgTetrajetPt" in hName:
         units            = "GeV/c"
-        kwargs["ylabel"] = "Events / %.0f " + units
         kwargs["xlabel"] = "p_{T} (%s)"  % units
-        kwargs["opts"]   = {"xmax": +800.0, "ymin": 1e+0, "ymaxfactor": ymaxF}
+        kwargs["opts"]   = {"xmax": +900.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True
+        myBins = []
+        for j in range(0, 500, 20):
+            myBins.append(j)
+        for k in range(500, 950, 50):
+            myBins.append(k)
+        kwargs["rebinX"] = myBins #2
+        binWmin, binWmax = GetBinWidthMinMax(myBins)
+        kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
+        # kwargs["ylabel"] = "Events / %.0f " + units
     if "LdgTetrajetMass" in hName:
         myBins = []
         for j in range(0, 1000, 50):
@@ -343,7 +369,7 @@ def GetHistoKwargs(hName, opts):
         kwargs["log"]    = True
         kwargs["xlabel"] = "m_{jjbb} (%s)"  % units
         kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
-        kwargs["opts"]   = {"xmin": 0.0, "xmax": endBlind, "ymin": 1e+0, "ymaxfactor": ymaxF}
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": endBlind, "ymin": ymin, "ymaxfactor": ymaxF}
         if "AllSelections" in hName:
             kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind) #ale
             kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.12}
@@ -351,11 +377,12 @@ def GetHistoKwargs(hName, opts):
         units            = "GeV/c"
         kwargs["ylabel"] = "Events / %.0f " + units
         kwargs["xlabel"] = "p_{T} (%s)"  % units
+
     if "TetrajetBjetEta" in hName:
         kwargs["ylabel"] = "Events / %.2f"
         kwargs["xlabel"] = "#eta"
         kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": 1e+0, "ymaxfactor": ymaxF}
+        kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": ymin, "ymaxfactor": ymaxF}
 
     if opts.unblind:
         key = "blindingRangeString"
@@ -363,7 +390,7 @@ def GetHistoKwargs(hName, opts):
             del kwargs[key]
 
     if kwargs["log"]==True or opts.logY == True:
-        kwargs["opts"]["ymaxfactor"] = 5.0
+        kwargs["opts"]["ymaxfactor"] = 8.0
 
     return kwargs
     
@@ -433,8 +460,6 @@ def PlotHistogram(dsetMgr, histoName, opts):
         
     # Create the MCPlot for the EWKGenuineB histograms
     histoNameGenuineB = histoName.replace(opts.folder, opts.folder + "EWKGenuineB")
-    datasetMgr.PrintInfo()
-    sys.exit()
     p2 = plots.MCPlot(datasetMgr, histoNameGenuineB, normalizeToLumi=opts.intLumi, saveFormats=[])
     # plots.drawPlot(p2, saveName + "_tmp", **{"rebiX": kwargs["rebinX"]})
     # p2.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinX(kwargs["rebinX"]))
