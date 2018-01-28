@@ -55,7 +55,7 @@ import aux
 #================================================================================================
 _lightHplusMasses        = [ 80,  90, 100, 120, 140, 150, 155, 160]
 _heavyHplusMasses        = [180, 200, 220, 250, 300, 350, 400, 500, 600, 700, 750,  800, 1000, 2000, 3000]
-_heavyHplusToTBbarMasses = [180, 200, 220, 250, 300, 350, 400, 500, 600, 800, 1000, 2000, 3000]
+_heavyHplusToTBbarMasses = [180, 200, 220, 250, 300, 350, 400, 500, 600, 800, 1000, 1500, 2000, 2500, 3000, 5000, 7000]
 
 ## These MC datasets must be added together before any
 ## merging/renaming. They are split to two datasets just for more
@@ -387,6 +387,7 @@ for process in ["TTToHplusBWB_M%d", "TTToHplusBHminusB_M%d", "TTToHplus_M%d", "H
 for mass in _heavyHplusMasses:
     _datasetOrder.append("HplusTB_M%d"%mass)
 _datasetOrder.extend([
+    "FakeB", #Htb
     "QCD",
     "QCDdata",
     "QCD-b",
@@ -435,6 +436,8 @@ _legendLabels = {
     "noTop"    : "No t",
     "SingleTop": "Single t",
     "QCD"      : "QCD",#"Mis-ID. #tau_{h} (data)",
+    "FakeB"    : "Fake b (data)",
+    "GenuineB" : "Genuine b (MC)",
     "QCD-b"    : "QCD (b enr.)",
     "QCDdata"  : "Mis-ID. #tau_{h} (data)", #"QCD (data driven)"
 
@@ -560,14 +563,29 @@ for mass in _heavyHplusMasses:
     _legendLabels["ChargedHiggs_HplusTB_HplusToTB_M_%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
 
 for mass in _heavyHplusToTBbarMasses:
+    _legendLabels["ChargedHiggs_HplusTB_HplusToTB_M_%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
     _legendLabels["HplusToTBbar_M%d"%mass] = "H^{+}#rightarrowtb m_{H^{+}}=%d GeV" % mass
     
 
 ## Map the logical dataset names to plot styles
 _plotStyles = {
-    "ChargedHiggs_HplusTB_HplusToTB_M_200": styles.signal200Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_300": styles.signal300Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_500": styles.signal500Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_180" : styles.signal180Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_200" : styles.signal200Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_220" : styles.signal220Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_250" : styles.signal250Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_300" : styles.signal300Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_350" : styles.signal350Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_400" : styles.signal400Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_500" : styles.signal500Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_800" : styles.signal800Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_1000": styles.signal1000Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_1500": styles.signal1500Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_2000": styles.signal2000Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_2500": styles.signal2500Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_3000": styles.signal3000Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_5000": styles.signal5000Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_7000": styles.signal7000Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_10000": styles.signal1000Style,
 
     "DYJetsToLL"    : styles.dyStyle,
     "DYJetsToLLHT"  : styles.dyStyle,
@@ -576,6 +594,7 @@ _plotStyles = {
     "Diboson"       : styles.dibStyle,
     "EWK"           : styles.wStyle,
     "QCD"           : styles.qcdStyle,
+    "FakeB"         : styles.fakeBStyle,
     "QCD-b"         : styles.qcdBEnrichedStyle,
     "ttX"           : styles.ttXStyle,
     "noTop"         : styles.noTopStyle,
