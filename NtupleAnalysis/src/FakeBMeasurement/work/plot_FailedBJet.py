@@ -62,6 +62,12 @@ def Print(msg, printHeader=False):
     return
 
 
+def rchop(myString, endString):
+  if myString.endswith(endString):
+    return myString[:-len(endString)]
+  return myString
+
+
 def Verbose(msg, printHeader=True, verbose=False):
     if not opts.verbose:
         return
@@ -255,6 +261,8 @@ def main(opts):
         PlotHisto(datasetsMgr, "FailedBJet/Inverted_NFailedBJets_AfterStandardSelections")
         PlotHisto(datasetsMgr, "FailedBJet/Inverted_NFailedBJets_AfterCRSelections")
         PlotHisto(datasetsMgr, "FailedBJet/Inverted_NFailedBJets_AfterAllSelections")
+        # PlotHisto(datasetsMgr, "FailedBJet/Baseline_NFailedBJets_AfterCRSelections")
+        # PlotHisto(datasetsMgr, "FailedBJet/Baseline_NFailedBJets_AfterAllSelections")
     return
 
 def getHistos(datasetsMgr, histoName):
@@ -477,7 +485,7 @@ if __name__ == "__main__":
     PLOTEWK      = False
     URL          = False
     NOERROR      = True
-    SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"
+    SAVEDIR      = "/publicweb/a/aattikis/" #FakeBMeasurement/"
     VERBOSE      = False
     NORMALISE    = True
 
@@ -541,6 +549,12 @@ if __name__ == "__main__":
         parser.print_help()
         #print __doc__
         sys.exit(1)
+    else:
+        mcrabDir = rchop(opts.mcrab, "/")
+        if len(mcrabDir.split("/")) > 1:
+            mcrabDir = mcrabDir.split("/")[-1]
+        opts.saveDir += mcrabDir
+
         
     # Call the main function
     main(opts)

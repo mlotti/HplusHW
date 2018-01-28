@@ -17,17 +17,17 @@ using regions created by inverting the b-jets selections and the MVA2 top
 The assumption is that MVA2max and CSVv2-M and NOT (at least strongly) correlated
 and that the shapes in SR and CR1 (VR and CR2, and CR3 and CR4) are similar.
 In that was one can write the following relation:
-SR/CR1 = VR/CR2 (= CR3/CR4)
+SR/VR = CR1/CR2
 Therefore:
-SR = (VR/CR2)*CR1
+SR = (CR1/CR2)*VR
 
-We call the ratio f=(VR/CR2) the transfer factor that gets us from CR1 to the SR. This
-is needed to ensure the normalisation of the sample obtained from CR1 is corrected.
+We call the ratio f=(CR1/CR2) the transfer factor that gets us from VR to the SR. This
+is needed to ensure the normalisation of the sample obtained from VR is corrected.
 Then, if we want the predicted FakeB shape of the tetrajet mass in the signal region (m_SR) 
 we do the following:
-m_SR = f * m_CR1
-where m_CR1 is is the shape of mjjbb and f=(VR/CR2) is the transfer factor
-needed to correctly normalise the shape obtained from CR1.
+m_SR = f * m_VR
+where m_CR1 is is the shape of mjjbb and f=(CR1/CR2) is the transfer factor
+needed to correctly normalise the shape obtained from VR.
 
 
 The steps followed are the following:
@@ -39,11 +39,17 @@ in an automatically-generated python class.
 This file/class is later used (read) by the makeInvertedPseudoMulticrab.py in order to normalise
 properly the "Control-Region" data.
 
-Usage:
+
+USAGE:
 ./test.py -m <pseudo_mcrab_directory> [opts]
 
-Last Used:
-/test.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDT0p70_AllSelections_BDT0p70to0p90_RandomSort_171124_144802/ --url --useMC -e "QCD_HT50to100|QCD_HT100to200|QCD_HT200to300|QCD_HT300to500"
+
+EXAMPLES: 
+./test.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDT0p70_AllSelections_BDT0p70to0p90_RandomSort_171124_144802/ --url --useMC -e "QCD_HT50to100|QCD_HT100to200|QCD_HT200to300|QCD_HT300to500"
+
+
+LAST USED:
+./test.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDT0p70_AllSelections_BDT0p70to0p90_RandomSort_171124_144802/ --url --useMC -e "QCD_HT50to100|QCD_HT100to200|QCD_HT200to300|QCD_HT300to500"
 
 '''
 
@@ -297,38 +303,45 @@ def main(opts):
             datasetsMgr.remove(filter(lambda name: d in name, datasetsMgr.getAllDatasetNames()))
 
         # Print summary of datasets to be used
-        datasetsMgr.PrintInfo()
-        
-        # Re-order datasets (different for inverted than default=baseline)
         if 0:
-            newOrder = ["Data"]
-            newOrder.extend(GetListOfEwkDatasets(datasetsMgr))
-            datasetsMgr.selectAndReorder(newOrder)
-
+            datasetsMgr.PrintInfo()
+        
         # Merge EWK samples
         datasetsMgr.merge("EWK", GetListOfEwkDatasets(datasetsMgr))
             
         # Print dataset information
-        if 0:
+        if 1:
             datasetsMgr.PrintInfo()
         
         # Do the fit on the histo after ALL selections (incl. topology cuts)
-        folderName = "ForFakeBNormalization"        
-        selections = "_AfterAllSelections" # "AfterStandardSelections
-        histoName  = "LdgTrijetMass" + selections
-        if 1:
-            folderName = "ForFakeBMeasurement"
-            #histoName  = "MET" + selections
-            histoName  = "LdgTetrajetMass" + selections
-            #histoName  = "DeltaPhiLdgTrijetBJetTetrajetBJet" + selections
-            #histoName  = "DeltaRLdgTrijetBJetTetrajetBJet" + selections
-
-        PlotHistogramsAndCalculateTF(datasetsMgr, histoName, folderName, opts)
+        folder    = "ForFakeBNormalization"                
+        histoList = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(folder)
+        PlotHistogramsAndCalculateTF(datasetsMgr, histoList, folderName, opts)
     return
 
+
+def GetControlRegionLabel(histoName):
+    histoName = histoName.replace(opts.folder + "/", "")
+    base = histoName.split("_")[0]
+    var  = histoName.split("_")[1]
+    sel  = histoName.split("_")[2]
+
+    if base == "Baseline":
+        if sel == "AfterAllSelections":
+            return "SR"
+        elif sel == "AfterCRSelections":
+            return "CR1"
+    elif base == "Inverted":
+        if sel == "AfterAllSelections":
+            return "VR"
+        elif sel == "AfterCRSelections":
+            return "CR2"
+    else:
+        raise Exception("Cannot determine Control Region label. Got unexpeted histogram name \"%s\". " % histoName)
+    return
+
+
 def PlotHistogramsAndCalculateTF(datasetsMgr, histoName, inclusiveFolder, opts):
-    '''
-    '''
     # Get the histogram customisations (keyword arguments)
     _kwargs = GetHistoKwargs(histoName)
 
@@ -337,6 +350,23 @@ def PlotHistogramsAndCalculateTF(datasetsMgr, histoName, inclusiveFolder, opts):
     fakeBFolder     = inclusiveFolder + "EWKFakeB"
 
     # Histogram names
+    hInclusive_SR = 
+    hGenuineB_SR  = 
+    hFakeB_SR     = 
+
+    hInclusive_VR = 
+    hGenuineB_VR  = 
+    hFakeB_VR     = 
+
+    hInclusive_CR1 = 
+    hGenuineB_CR1  = 
+    hFakeB_CR1     = 
+
+    hInclusive_CR2 = 
+    hGenuineB_CR2  = 
+    hFakeB_CR2     = 
+
+
     hInclusive_Baseline = "%s/%s" % (inclusiveFolder, "Baseline_" + histoName)
     hGenuineB_Baseline  = "%s/%s" % (genuineBFolder , "Baseline_" + histoName)
     hFakeB_Baseline     = "%s/%s" % (fakeBFolder    , "Baseline_" + histoName)

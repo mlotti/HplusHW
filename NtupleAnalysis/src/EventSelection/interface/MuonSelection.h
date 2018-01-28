@@ -82,7 +82,9 @@ private:
   const double fMuonPtCut;
   const double fMuonEtaCut;
   float fRelIsoCut;
+  float fMiniIsoCut;
   bool fVetoMode;
+  bool fMiniIsol;
   
   // Event counter for passing selection
   Count cPassedMuonSelection;
@@ -97,20 +99,28 @@ private:
   WrappedTH1 *hMuonPtAll;
   WrappedTH1 *hMuonEtaAll;
   WrappedTH1 *hMuonRelIsoAll;
+  WrappedTH1 *hMuonMiniIsoAll;
+  
   WrappedTH1 *hMuonPtPassed;
   WrappedTH1 *hMuonEtaPassed;
   WrappedTH1 *hMuonRelIsoPassed;
+  WrappedTH1 *hMuonMiniIsoPassed;
+  
   WrappedTH1 *hPtResolution;
   WrappedTH1 *hEtaResolution;
   WrappedTH1 *hPhiResolution;
+  
   WrappedTH1 *hIsolPtBefore;
   WrappedTH1 *hIsolEtaBefore;
   WrappedTH1 *hIsolVtxBefore;
   WrappedTH1 *hIsolRelIsoBefore;
+  WrappedTH1 *hIsolMiniIsoBefore;
+  
   WrappedTH1 *hIsolPtAfter;
   WrappedTH1 *hIsolEtaAfter;
   WrappedTH1 *hIsolVtxAfter;
   WrappedTH1 *hIsolRelIsoAfter;
+  WrappedTH1 *hIsolMiniIsoAfter;
 };
 
 #endif
