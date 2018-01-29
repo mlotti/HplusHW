@@ -383,7 +383,7 @@ def GetHistoKwargs(hName, opts):
         #          760,780,800,820,840,860,880,900,920,940,960,980,1000,1020,1040,1060,1080,1100,1150,1200,1250,1300,1350,1400,1450,1500,1750,2000,2250,2500,
         #          2750,3000,3250,3500,3750,4000]
 
-        ROOT.gStyle.SetNdivisions(5, "X")
+        ROOT.gStyle.SetNdivisions(8, "X")
         startBlind       = 150  # 135 v. sensitive to bin-width!
         endBlind         = 3000 #4000 #3000 # v. sensitive to bin-width!
         kwargs["rebinX"] = myBins
@@ -393,7 +393,7 @@ def GetHistoKwargs(hName, opts):
         kwargs["log"]    = True
         kwargs["xlabel"] = "m_{jjbb} (%s)"  % units
         kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
-        kwargs["opts"]   = {"xmin": 0.0, "xmax": endBlind, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["opts"]   = {"xmin": 200.0, "xmax": endBlind, "ymin": ymin, "ymaxfactor": ymaxF}
         kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind) #ale
         kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.12}
 
@@ -483,8 +483,11 @@ def PlotHistogram(dsetMgr, histoName, opts):
     datasetMgr.selectAndReorder(GetListOfEwkDatasets())
         
     # Create the MCPlot for the EWKGenuineB histograms
-    histoNameGenuineB = histoName.replace(opts.folder, opts.folder + "EWKGenuineB")
-    p2 = plots.MCPlot(datasetMgr, histoNameGenuineB, normalizeToLumi=opts.intLumi, saveFormats=[])
+    if opts.useMC:
+        p2 = plots.MCPlot(datasetMgr, histoName, normalizeToLumi=opts.intLumi, saveFormats=[])
+    else:
+        histoNameGenuineB = histoName.replace(opts.folder, opts.folder + "EWKGenuineB")
+        p2 = plots.MCPlot(datasetMgr, histoNameGenuineB, normalizeToLumi=opts.intLumi, saveFormats=[])
 
     # Add the datasets to be included in the plot
     myStackList = []
