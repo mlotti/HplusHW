@@ -13,7 +13,7 @@ Description: (* = prerequisites)
    c) Depending on whether variations are added or not this can take ~12 h without systematics (!)
    d) OUTPUT: A pseudo-multicrab dir under the work directory <pseudo_multicrab>
 
-*2) Generate the QCDInvertedNormalizationFactors.py file by running a dedicated script: (< 1m without systematics)
+*2) Generate the FakeBTranserFactors.py file by running a dedicated script: (< 1m without systematics)
    a) Go to the appropriate directory:
       cd /NtupleAnalysis/src/FakeBMeasurement/work   
    b) Run the script that generates the file containing the Transfer Factor(s):
@@ -209,7 +209,8 @@ class ModuleBuilder:
                                                                          opts.normDataSrc,
                                                                          opts.normEwkSrc,
                                                                          self._opts.useInclusiveNorm,
-                                                                         keyList = ["Baseline", "CRSelections"], #fixme-iro-alex
+                                                                         #keyList = ["Baseline", "CRSelections"], #fixme-iro-alex
+                                                                         keyList = ["Inverted", "AllSelections"],
                                                                          verbose=opts.verbose)
 
         self.Verbose("Add all plots to be written in the peudo-dataset beind created", True)
@@ -353,7 +354,7 @@ def getNormFactorFileList(dirName, fileBaseName):
 
 def importNormFactors(era, searchMode, optimizationMode, multicrabDirName):
     '''
-    Imports the auto-generates  QCDInvertedNormalizationFactors.py file, which is 
+    Imports the auto-generates  FakeBTranserFactors.py file, which is 
     created by the plotting/fitting templates script  (plotQCD_Fit.py)
     
     This containsthe results  of fitting to the Baseline Data the templates m_{jjb} 
@@ -622,7 +623,7 @@ if __name__ == "__main__":
     VERBOSE          = False
     VARIATIONS       = False
     TEST             = True
-    FACTOR_SRC       = "QCDInvertedNormalizationFactors_%s.py"
+    FACTOR_SRC       = "FakeBTransferFactors_%s.py" # "QCDInvertedNormalizationFactors_%s.py"
     DATA_SRC         = "ForFakeBMeasurement"    # "ForDataDrivenCtrlPlots"
     EWK_SRC          = DATA_SRC + "EWKGenuineB" # FakeB = Data - EWK GenuineB
     NORM_DATA_SRC    = DATA_SRC + "EWKGenuineB" 

@@ -417,7 +417,7 @@ def PlotHisto(datasetsMgr, histoName):
     
     # Save plot in all formats
     histoName, histoDir = GetSaveName(histoName)
-    SavePlot(p, histoName, os.path.join(opts.saveDir, histoDir, opts.optMode), saveFormats = [".pdf", ".png"] )
+    SavePlot(p, histoName, os.path.join(opts.saveDir, histoDir, opts.optMode), saveFormats = [".png"] )
     return
 
 

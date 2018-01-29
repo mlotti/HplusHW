@@ -74,7 +74,9 @@ def GetLumi(datasetsMgr):
     return lumi
 
 def GetListOfEwkDatasets():
-    return  ["TT", "WJetsToQQ_HT_600ToInf", "SingleTop", "DYJetsToQQHT", "TTZToQQ",  "TTWJetsToQQ", "Diboson", "TTTT"]
+    ewkList = ["TT", "SingleTop", "TTZToQQ", "TTTT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "Diboson"]
+    # ewkList = ["TT", "SingleTop", "TTZToQQ", "TTTT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf"] #no "Diboson"
+    return  ewkList
 
 def GetDatasetsFromDir(opts, otherDir=False):
     
@@ -82,6 +84,7 @@ def GetDatasetsFromDir(opts, otherDir=False):
     analysis = opts.analysisName
     if otherDir:
         myDir    = opts.mcrab2        
+        #analysis = "FakeBMeasurement"
     datasets = dataset.getDatasetsFromMulticrabDirs([myDir],
                                                     dataEra=opts.dataEra,
                                                     searchMode=opts.searchMode, 
@@ -132,6 +135,12 @@ def main(opts):
     if opts.optMode != None:
         optModes = [opts.optMode]
         
+    # Inform user of EWK datasets used
+    ewkList = GetListOfEwkDatasets()
+    Print("The EWK datasets used are the following:", True)
+    for i,d in enumerate(ewkList, 1):
+        Print(ShellStyles.NoteStyle() + d + ShellStyles.NormalStyle(), i==0)
+
     # For-loop: All opt Mode
     for opt in optModes:
         opts.optMode = opt
@@ -159,7 +168,8 @@ def main(opts):
         removeList = ["QCD-b"]
         dsetDY     = "DYJetsToQQ_HT180"
         dsetZJ     = "ZJetsToQQ_HT600toInf"
-        dsetRM     = dsetZJ # datasets with overlap
+        #dsetRM     = dsetZJ # datasets with overlap
+        dsetRM     = dsetDY # datasets with overlap
         removeList.append(dsetRM)
 
         # Set/Overwrite cross-sections. Remove all but 1 signal mass 
@@ -243,12 +253,13 @@ def GetHistoKwargs(hName, opts):
     value = kwargs
     '''
     ymaxF  = 1.2
-    ymin   = 1e-1
+    ymin   = 1e-1 #if any smaller legend problems
     kwargs = {
         "ratioCreateLegend": True,
-        "ratioType"        : "errorScale",
-        "ratioErrorOptions": {"numeratorStatSyst": False},
+        "ratioType"        : "errorScale", #"errorScale", #binomial #errorPropagation
+        "ratioErrorOptions": {"numeratorStatSyst": False},# "denominatorStatSyst": True, "numeratorOriginatesFromTH1": True},
         "ratioMoveLegend"  : {"dx": -0.51, "dy": 0.03, "dh": -0.05},
+        "errorBarsX"       : True,
         "ylabel"           : "Events / %.0f",
         "rebinX"           : 1,
         "rebinY"           : None,
@@ -310,13 +321,20 @@ def GetHistoKwargs(hName, opts):
         units = "GeV/c"
         kwargs["ylabel"] = "Events / %.0f " + units
         kwargs["xlabel"] = "p_{T} (%s)"  % units
-        kwargs["opts"]   = {"xmax": +800.0, "ymin": ymin, "ymaxfactor": ymaxF}
-        kwargs["rebinX"] = 2
+        kwargs["opts"]   = {"xmax": +900.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        myBins = []
+        for j in range(0, 500, 20):
+            myBins.append(j)
+        for k in range(500, 700, 50):
+            myBins.append(k)
+        for k in range(700, 900+100, 100):
+            myBins.append(k)
+        kwargs["rebinX"] = myBins
         kwargs["log"]    = True
     if "LdgTrijetMass" in hName:
         startBlind       = 140
         endBlind         = 200
-        kwargs["rebinX"] = 1
+        kwargs["rebinX"] = 2
         units            = "GeV/c^{2}"
         kwargs["ylabel"] = "Events / %.0f " + units
         kwargs["xlabel"] = "m_{jjb} (%s)"  % units
@@ -344,9 +362,11 @@ def GetHistoKwargs(hName, opts):
         myBins = []
         for j in range(0, 500, 20):
             myBins.append(j)
-        for k in range(500, 950, 50):
+        for k in range(500, 700, 50):
             myBins.append(k)
-        kwargs["rebinX"] = myBins #2
+        for k in range(700, 900+100, 100):
+            myBins.append(k)
+        kwargs["rebinX"] = myBins
         binWmin, binWmax = GetBinWidthMinMax(myBins)
         kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
         # kwargs["ylabel"] = "Events / %.0f " + units
@@ -356,12 +376,16 @@ def GetHistoKwargs(hName, opts):
             myBins.append(j)
         for k in range(1000, 2000, 100):
             myBins.append(k)
-        for l in range(2000, 4000+2000, 200):
+        for l in range(2000, 3500, 500):
             myBins.append(l)
+        # Currenty in Combine:
+        #myBins = [0,50,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,520,540,560,580,600,620,640,660,680,700,720,740,
+        #          760,780,800,820,840,860,880,900,920,940,960,980,1000,1020,1040,1060,1080,1100,1150,1200,1250,1300,1350,1400,1450,1500,1750,2000,2250,2500,
+        #          2750,3000,3250,3500,3750,4000]
 
         ROOT.gStyle.SetNdivisions(5, "X")
         startBlind       = 150  # 135 v. sensitive to bin-width!
-        endBlind         = 2500 #v. sensitive to bin-width!
+        endBlind         = 3000 #4000 #3000 # v. sensitive to bin-width!
         kwargs["rebinX"] = myBins
         units            = "GeV/c^{2}"
         binWmin, binWmax = GetBinWidthMinMax(myBins)
@@ -370,9 +394,9 @@ def GetHistoKwargs(hName, opts):
         kwargs["xlabel"] = "m_{jjbb} (%s)"  % units
         kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         kwargs["opts"]   = {"xmin": 0.0, "xmax": endBlind, "ymin": ymin, "ymaxfactor": ymaxF}
-        if "AllSelections" in hName:
-            kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind) #ale
-            kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.12}
+        kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind) #ale
+        kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.12}
+
     if "TetrajetBjetPt" in hName:
         units            = "GeV/c"
         kwargs["ylabel"] = "Events / %.0f " + units
@@ -390,7 +414,7 @@ def GetHistoKwargs(hName, opts):
             del kwargs[key]
 
     if kwargs["log"]==True or opts.logY == True:
-        kwargs["opts"]["ymaxfactor"] = 8.0
+        kwargs["opts"]["ymaxfactor"] = 7.0
 
     return kwargs
     
@@ -461,8 +485,6 @@ def PlotHistogram(dsetMgr, histoName, opts):
     # Create the MCPlot for the EWKGenuineB histograms
     histoNameGenuineB = histoName.replace(opts.folder, opts.folder + "EWKGenuineB")
     p2 = plots.MCPlot(datasetMgr, histoNameGenuineB, normalizeToLumi=opts.intLumi, saveFormats=[])
-    # plots.drawPlot(p2, saveName + "_tmp", **{"rebiX": kwargs["rebinX"]})
-    # p2.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinX(kwargs["rebinX"]))
 
     # Add the datasets to be included in the plot
     myStackList = []

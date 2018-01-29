@@ -358,10 +358,10 @@ def PlotComparison(datasetsMgr, hBaseline, hInverted, ext):
     saveName = saveName.replace("_AfterCRSelections", "_" + ext)
 
     if opts.useMC:
-        savePath = os.path.join(opts.saveDir, "Closure", "MC", opts.optMode)
+        savePath = os.path.join(opts.saveDir, "MC", opts.optMode)
     else:
-        savePath = os.path.join(opts.saveDir, "Closure", opts.optMode)
-    SavePlot(p, saveName, savePath, saveFormats = [".png", ".pdf"])
+        savePath = os.path.join(opts.saveDir, opts.optMode)
+    SavePlot(p, saveName, savePath, saveFormats = [".png"])#, ".pdf"])
     return
 
 def GetHistoKwargs(histoName, ext, opts):
@@ -668,7 +668,7 @@ if __name__ == "__main__":
         mcrabDir = rchop(opts.mcrab, "/")
         if len(mcrabDir.split("/")) > 1:
             mcrabDir = mcrabDir.split("/")[-1]
-        opts.saveDir += mcrabDir + "/" + opts.folder
+        opts.saveDir += mcrabDir + "/Closure" #+ opts.folder
 
 
     # Sanity check

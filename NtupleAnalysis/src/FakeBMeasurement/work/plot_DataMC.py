@@ -233,6 +233,10 @@ def GetHistoKwargs(h, opts):
         "rebinY"           : None,
         "ratioYlabel"      : "Data/MC",
         "ratio"            : opts.ratio,
+        "ratioCreateLegend": True,
+        "ratioType"        : "errorScale",
+        "ratioErrorOptions": {"numeratorStatSyst": False},
+        "ratioMoveLegend"  : {"dx": -0.51, "dy": 0.03, "dh": -0.05},
         "stackMCHistograms": not opts.nostack,
         "ratioInvert"      : False, 
         "addMCUncertainty" : True, 
@@ -480,7 +484,7 @@ def GetHistoKwargs(h, opts):
         ROOT.gStyle.SetLabelSize(16.0, "X")
         xMin = 17  # 15 = jets selection, 16 = bjets selection, 17 = baseline: bjets selection, 18 = bjets SF
         xMax = 29
-        kwargs["opts"]   = {"xmin": xMin, "ymin": 8e-2, "ymax": 3e6}#"ymaxfactor": yMaxF}
+        kwargs["opts"]       = {"xmin": xMin, "ymin": 1e0, "ymax": 5e6}#"ymaxfactor": yMaxF}
         kwargs["moveLegend"] = {"dx": -0.52, "dy": -0.38, "dh": 0.1}
 
     if "IsolPt" in h:
@@ -769,7 +773,7 @@ def DataMCHistograms(datasetsMgr, histoName, intLumi):
         replaceBinLabels(p, histoName)
 
     # Save the plots in custom list of saveFormats
-    SavePlot(p, saveName, os.path.join(opts.saveDir, "DataMC", opts.optMode), [".png"])#, ".pdf"] )
+    SavePlot(p, saveName, os.path.join(opts.saveDir, opts.folder, opts.optMode), [".png"])#, ".pdf"] )
     return
 
 def replaceBinLabels(p, histoName):
@@ -957,7 +961,7 @@ if __name__ == "__main__":
         mcrabDir = rchop(opts.mcrab, "/")
         if len(mcrabDir.split("/")) > 1:
             mcrabDir = mcrabDir.split("/")[-1]
-        opts.saveDir += mcrabDir + "/" + opts.folder
+        opts.saveDir += mcrabDir + "/DataMC"
 
 
     # Sanity check
