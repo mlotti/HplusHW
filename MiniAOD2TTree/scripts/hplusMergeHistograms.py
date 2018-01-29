@@ -1815,6 +1815,21 @@ def GetTaskRootFiles(taskName, opts):
         filesWithoutPath.append(os.path.basename(f))
     return filesWithoutPath
 
+def CopyMCFiles(taskdir,files):
+    data_re = re.compile("Run20")
+    match = data_re.search(taskdir)
+    if match: # if data do nothing
+        return files
+
+    # copy mc
+    root_re = re.compile("miniaod2tree_(?P<N>\d+)\.root")
+    for f in files:
+        match = root_re.search(f)
+        if match:
+            fOUT = "histograms-"+taskdir+"-%s.root"%(match.group("N"))
+        cmd = "mv %s %s"%(os.path.join(taskdir,"results",f),os.path.join(taskdir,"results",fOUT))
+        os.system(cmd)
+    return None
 
 def GetTaskMergedRootFiles(taskName, fullPath, opts):
     '''
@@ -1982,6 +1997,9 @@ def main(opts, args):
         files, missingFiles, exitedJobs = GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts)
         if opts.skipVerify:
             files = GetTaskRootFiles(taskName, opts)
+
+        if CopyMCFiles(d,files) == None:
+            continue
 
         # Clean up pre-merged ROOT files before continuing? 
         if opts.deleteMergedFilesFirst:
