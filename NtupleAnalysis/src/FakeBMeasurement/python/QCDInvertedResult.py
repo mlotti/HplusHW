@@ -753,7 +753,7 @@ class QCDInvertedResultManager:
         # Define histogram name as will be written in the ROOT file
         self.Verbose("%sDefining the name of histogram objects, as they will appear in the ROOT file%s" % (ShellStyles.WarningStyle(), ShellStyles.NormalStyle()), True)
         hName  = plotName + "%d" %i
-        hTitle = plotName.replace("CRSelections", "AllSelections").replace("Baseline_", "")
+        hTitle = plotName.replace("CRSelections", "AllSelections").replace("Baseline_", "").replace("Inverted_", "")
 
         # DataDriven
         myShape.delete()
