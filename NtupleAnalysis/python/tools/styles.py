@@ -354,12 +354,12 @@ genuineBStyle     = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.
 genuineBLineStyle = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kGreen+2, markerSizes=None, markerStyle=ROOT.kFullCircle),
                                    StyleLine(lineColor=ROOT.kGreen+2, lineStyle=ROOT.kSolid, lineWidth=3), 
                                    StyleFill(fillColor=ROOT.kGreen+2, fillStyle=0)])
-fakeBStyle        = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange-2, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
-                                   StyleLine(lineColor=ROOT.kOrange-2, lineStyle=ROOT.kSolid, lineWidth=3), 
-                                   StyleFill(fillColor=ROOT.kOrange-2, fillStyle=1001)]) #fillStyle=3005)])
-fakeBLineStyle    = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange-2, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
-                                   StyleLine(lineColor=ROOT.kOrange-2, lineStyle=ROOT.kSolid, lineWidth=3), 
-                                   StyleFill(fillColor=ROOT.kOrange-2, fillStyle=0)])
+fakeBStyle        = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange-3, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
+                                   StyleLine(lineColor=ROOT.kOrange-3, lineStyle=ROOT.kSolid, lineWidth=3), 
+                                   StyleFill(fillColor=ROOT.kOrange-3, fillStyle=1001)]) #fillStyle=3005)])
+fakeBLineStyle    = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange-3, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
+                                   StyleLine(lineColor=ROOT.kOrange-3, lineStyle=ROOT.kSolid, lineWidth=3), 
+                                   StyleFill(fillColor=ROOT.kOrange-3, fillStyle=0)])
 signalStyleHToTB  = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kRed-7, markerSizes=None, markerStyle=4),
                                    StyleLine(lineColor=ROOT.kRed-7, lineStyle=ROOT.kDashed, lineWidth=4), 
                                    StyleFill(fillColor=ROOT.kRed-7, fillStyle=0)])
