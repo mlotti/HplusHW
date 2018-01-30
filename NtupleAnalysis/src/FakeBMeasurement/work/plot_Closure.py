@@ -247,8 +247,11 @@ def main(opts):
             if "IsGenuineB" in hSR:
                 continue
             PlotComparison(datasetsMgr, hSR, hCR1, "SRvCR1")
-    
-    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + opts.saveDir + ShellStyles.NormalStyle()), True)
+
+    savePath = opts.saveDir
+    if opts.url:
+        savePath = opts.saveDir.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
+    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + savePath + ShellStyles.NormalStyle()), True)
     return
 
 def PrintPSet(selection, datasetsMgr):
@@ -377,7 +380,7 @@ def PlotComparison(datasetsMgr, hBaseline, hInverted, ext):
         savePath = os.path.join(opts.saveDir, "MC", opts.optMode)
     else:
         savePath = os.path.join(opts.saveDir, opts.optMode)
-    SavePlot(p, saveName, savePath, saveFormats = [".png"])#, ".pdf"])
+    SavePlot(p, saveName, savePath, saveFormats = [".png", ".pdf"])
     return
 
 def GetHistoKwargs(histoName, ext, opts):
@@ -526,7 +529,7 @@ def GetHistoKwargs(histoName, ext, opts):
         if "trijet" in hName:
             _opts["xmin"] = 0.7
     if "tetrajetm" in hName:
-        _rebinX = 10 #4
+        _rebinX = 4
         if opts.useMC:
             _rebinX = 10
         _units  = "GeV/c^{2}"
@@ -557,12 +560,11 @@ def GetHistoKwargs(histoName, ext, opts):
     return _kwargs
         
 def SavePlot(plot, saveName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
-    Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
-    
     # Check that path exists
     if not os.path.exists(saveDir):
         os.makedirs(saveDir)
-        
+
+    # Create the name under which plot will be saved
     savePath = os.path.join(saveDir, saveName)
 
     # For-loop: All save formats
@@ -684,7 +686,7 @@ if __name__ == "__main__":
         mcrabDir = rchop(opts.mcrab, "/")
         if len(mcrabDir.split("/")) > 1:
             mcrabDir = mcrabDir.split("/")[-1]
-        opts.saveDir += mcrabDir + "/Closure" #+ opts.folder
+        opts.saveDir += mcrabDir + "/Closure/"
 
 
     # Sanity check

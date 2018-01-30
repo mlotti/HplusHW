@@ -209,7 +209,7 @@ def main(opts):
         # Definitions
         allHistos   = dsetMgr2.getAllDatasets()[0].getDirectoryContent(opts.folder)
         histoPaths  = []
-        ignoreKeys  = ["MCEWK", "Purity", "BJetPt", "BJetEta", "BtagDiscriminator", "METPhi", "MHT", "NBjets"]
+        ignoreKeys  = ["MCEWK", "Purity", "BJetPt", "BJetEta", "BtagDiscriminator", "METPhi", "MHT", "NBjets", "Njets"]
         # For-loop: All histograms in directory
         for h in allHistos:
             bKeep = True
@@ -257,9 +257,9 @@ def GetHistoKwargs(hName, opts):
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
         "opts"             : {"ymin": ymin, "ymaxfactor": ymaxF},
-        "opts2"            : {"ymin": 0.2, "ymax": 2.0-0.2},
+        "opts2"            : {"ymin": 0.0, "ymax": 2.0}, #{"ymin": 0.2, "ymax": 2.0-0.2},
         "log"              : opts.logY,
-        "moveLegend"       : {"dx": -0.1, "dy": -0.01, "dh": 0.15},
+        "moveLegend"       : {"dx": -0.06, "dy": -0.01, "dh": 0.15},
         "cutBoxY"          : {"cutValue": 1.2, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": False, "ratioCanvas": False}
         }
 
@@ -287,13 +287,25 @@ def GetHistoKwargs(hName, opts):
         kwargs["opts"]   = {"ymin": ymin, "ymaxfactor": ymaxF}
         kwargs["log"]    = True
         kwargs["cutBox"] = {"cutValue": 173.21/80.385, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        kwargs["opts"]   = {"xmin": 0.0, "xmax": 5.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["opts"]   = {"xmin": 1.0, "xmax": 4.0, "ymin": ymin, "ymaxfactor": ymaxF}
     if "NVertices" in hName:
-        kwargs["ylabel"] = "Events / %.0f"
-        kwargs["xlabel"] = "Vertices"
+        myBins = []
+        for j in range(0, 40, 2):
+            myBins.append(j)
+        for j in range(40, 60, 5):
+            myBins.append(j)
+        for j in range(60, 100+10, 10):
+            myBins.append(j)
+        units            = "GeV/c"
+        binWmin, binWmax = GetBinWidthMinMax(myBins)
+        kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
+        kwargs["xlabel"] = "vertex multiplicity"
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": 70.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True
+        kwargs["rebinX"] = myBins
     if "Njets" in hName:                
         kwargs["ylabel"] = "Events / %.0f"
-        kwargs["xlabel"] = "Jets Multiplicity"
+        kwargs["xlabel"] = "jets multiplicity"
         kwargs["cutBox"] = {"cutValue": 7.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         kwargs["opts"]   = {"xmin": 6.0, "xmax": 19.0, "ymin": ymin, "ymaxfactor": ymaxF}
         kwargs["log"]    = True
@@ -306,6 +318,31 @@ def GetHistoKwargs(hName, opts):
         kwargs["log"]    = True        
         ROOT.gStyle.SetNdivisions(10, "X")
     if "JetEta" in hName:                
+        kwargs["ylabel"] = "Events / %.2f"
+        kwargs["xlabel"] = "#eta"
+        kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True        
+        # kwargs["moveLegend"] = {"dx": -0.1, "dy": -0.4, "dh": 0.15}
+        kwargs["moveLegend"] = {"dx": -5.0, "dy": -5.0, "dh": -500.0}
+    if "TetrajetBjetPt" in hName:                
+        units            = "GeV/c"
+        kwargs["xlabel"] = "p_{T} (%s)" % (units)
+        kwargs["cutBox"] = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["log"]    = True
+        myBins = []
+        for j in range(0, 400, 20):
+            myBins.append(j)
+        for k in range(400, 600, 50):
+            myBins.append(k)
+        for k in range(600, 900+100, 100):
+            myBins.append(k)
+        kwargs["rebinX"] = myBins
+        binWmin, binWmax = GetBinWidthMinMax(myBins)
+        kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +900.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        ROOT.gStyle.SetNdivisions(10, "X")
+    if "TetrajetBjetEta" in hName:                
         kwargs["ylabel"] = "Events / %.2f"
         kwargs["xlabel"] = "#eta"
         kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
@@ -336,7 +373,7 @@ def GetHistoKwargs(hName, opts):
         kwargs["rebinX"] = myBins #5
         kwargs["opts"]   = {"xmin": 500.0, "xmax": 3000, "ymin": ymin, "ymaxfactor": ymaxF}
         kwargs["log"]    = True
-    if "LdgTrijetPt" in hName:
+    if "TrijetPt" in hName:
         units = "GeV/c"
         kwargs["xlabel"] = "p_{T} (%s)"  % units
         kwargs["opts"]   = {"xmax": +900.0, "ymin": ymin, "ymaxfactor": ymaxF}
@@ -352,7 +389,7 @@ def GetHistoKwargs(hName, opts):
         kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
         # kwargs["ylabel"] = "Events / %.0f " + units
         kwargs["log"]    = True
-    if "LdgTrijetMass" in hName:
+    if "TrijetMass" in hName:
         startBlind       = 135
         endBlind         = 205
         kwargs["rebinX"] = 2
@@ -451,16 +488,6 @@ def GetHistoKwargs(hName, opts):
         kwargs["opts"]   = {"xmin": 0.0, "xmax": endBlind, "ymin": ymin, "ymaxfactor": ymaxF}
         kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind) #ale
         kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.12}
-    if "TetrajetBjetPt" in hName:
-        units            = "GeV/c"
-        kwargs["ylabel"] = "Events / %.0f " + units
-        kwargs["xlabel"] = "p_{T} (%s)"  % units
-
-    if "TetrajetBjetEta" in hName:
-        kwargs["ylabel"] = "Events / %.2f"
-        kwargs["xlabel"] = "#eta"
-        kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": ymin, "ymaxfactor": ymaxF}
 
     if opts.unblind:
         key = "blindingRangeString"

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Description:
+DESCRIPTION:
 Plots properties of all failed b-jets (aka inverted b-jets) in triplets:
 a) Inclusive
 b) GenuineB
@@ -8,22 +8,18 @@ c) FakeB
 Thesee b-jets are taken from topData.getFailedBJetsUsedAsBJetsInFit() and 
 include the b-jets with a "Loose" (instead of "Medium") discriminator WP.
 
-Usage:
+
+USAGE:
 ./plot_FailedBJet.py -m <pseudo_mcrab_directory> [opts]
 
-Examples:
+
+EXAMPLES:
 ./plot_FailedBJet.py -m FakeBMeasurement_GE2MediumPt40Pt30_GE1LooseMaxDiscr0p7_StdSelections_TopCut100_AllSelections_TopCut10_RandomFailedBJetSort_171012_012105/ --plotEWK --url
 
-Last Used::
+
+LAST USED:
 ./plot_FailedBJet.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171115_101036 -e "Charged" --url --plotEWK
 
-NOTE:
-If unsure about the parameter settings a pseudo-multicrab do:
-root -l /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar/TT/res/histograms-TT.root
-gDirectory->ls()
-FakeBMeasurement_80to1000_Run2016->cd()
-gDirectory->ls()
-config->ls()
 '''
 
 #================================================================================================ 
@@ -47,6 +43,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
 
 #================================================================================================ 
@@ -178,6 +175,9 @@ def main(opts):
         datasetsMgr = GetDatasetsFromDir(opts)
         datasetsMgr.updateNAllEventsToPUWeighted()
         datasetsMgr.loadLuminosities() # from lumi.json
+
+        if 0:
+            datasetsMgr.printSelections()
         
         # Set/Overwrite cross-sections
         for d in datasetsMgr.getAllDatasets():
@@ -218,54 +218,50 @@ def main(opts):
         style = tdrstyle.TDRStyle()
         style.setOptStat(True)
 
-        # Only do these histos
-        myHistos = [
-            "FailedBJet1BDisc",
-            "FailedBJet1Pt",             
-            #"FailedBJet1Eta", 
-            #"FailedBJet1PdgId", 
-            #"FailedBJet1PartonFlavour", 
-            #"FailedBJet1HadronFlavour", 
-            #
-            "FailedBJet2BDisc",
-            "FailedBJet2Pt", 
-            #"FailedBJet2Eta", 
-            #"FailedBJet2PdgId", 
-            #"FailedBJet2PartonFlavour", 
-            #"FailedBJet2HadronFlavour", 
-            #
-            "FailedBJet3BDisc",
-            "FailedBJet3Pt", 
-            #"FailedBJet3Eta", 
-            #"FailedBJet3PdgId", 
-            #"FailedBJet3PartonFlavour", 
-            #"FailedBJet3HadronFlavour", 
-            ]
-        
+        # Get the histogram list based on a key list
+        keyList    = ["FailedBJet1BDisc", "FailedBJet1Pt", "FailedBJet2BDisc", "FailedBJet2Pt", "FailedBJet3BDisc", "FailedBJet3Pt"]
+        folderList = ["FailedBJet", "FailedBJetFakeB", "FailedBJetGenuineB"]
+        histoList  = GetHistoList(datasetsMgr, keyList, folderList)
+
         # For-loop: All histos
-        folders = ["", "FakeB", "GenuineB"]
-        for f in folders:
-
-            folder = "FailedBJet" + f
-            hList  = datasetsMgr.getDataset("EWK").getDirectoryContent(folder)
-
-            for hName in hList:
-                if "StandardSelections" in hName:
-                    continue
-
-                if hName.split("_")[-2] not in myHistos:
-                    continue
-                PlotHisto(datasetsMgr, os.path.join(folder, hName))
+        for i, h in enumerate(histoList, 1):
+            msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % i,"/", "%s:" % (len(histoList)), h)
+            Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), i==1)
+            PlotHisto(datasetsMgr, h)
 
         # Add by hand 3 non-triplet TH1s
         if 0:
             PlotHisto(datasetsMgr, "FailedBJet/Inverted_NFailedBJets_AfterStandardSelections")
             PlotHisto(datasetsMgr, "FailedBJet/Baseline_NFailedBJets_AfterAllSelections")   #SR
-            PlotHisto(datasetsMgr, "FailedBJet/Inverted_NFailedBJets_AfterCRSelections")    #CR2
             PlotHisto(datasetsMgr, "FailedBJet/Baseline_NFailedBJets_AfterCRSelections")    #CR1
         PlotHisto(datasetsMgr, "FailedBJet/Inverted_NFailedBJets_AfterAllSelections")   #VR
+        PlotHisto(datasetsMgr, "FailedBJet/Inverted_NFailedBJets_AfterCRSelections")    #CR2
 
+    savePath = opts.saveDir
+    if opts.url:
+        savePath = savePath.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
+    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + savePath + ShellStyles.NormalStyle()), True)
     return
+
+
+def GetHistoList(dsetMgr, keyList, folderList):
+
+    keepList = []
+    # For-loop: All folders
+    for folder in folderList:
+        hList  = dsetMgr.getDataset("EWK").getDirectoryContent(folder)
+
+        # For-loop: All histograms in list
+        for i, hName in enumerate(hList):
+            if "StandardSelections" in hName:
+                continue
+            
+            if hName.split("_")[-2] not in keyList:
+                continue
+            else:
+                keepList.append(os.path.join(folder, hName))
+    return keepList
+
 
 def getHistos(datasetsMgr, histoName):
     
@@ -446,9 +442,9 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".pdf", ".png"]):
         saveNameURL = saveName + ext
         saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
         if opts.url:
-            Print(saveNameURL, i==0)
+            Verbose(saveNameURL, i==0)
         else:
-            Print(saveName + ext, i==0)
+            Verbose(saveName + ext, i==0)
         plot.saveAs(saveName, formats=saveFormats)
     return
 
@@ -484,7 +480,7 @@ if __name__ == "__main__":
     SUBCOUNTERS  = False
     LATEX        = False
     MCONLY       = False
-    PLOTEWK      = False
+    PLOTEWK      = True
     URL          = False
     NOERROR      = True
     SAVEDIR      = "/publicweb/a/aattikis/" #FakeBMeasurement/"
