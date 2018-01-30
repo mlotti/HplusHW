@@ -258,11 +258,13 @@ def main(opts):
                 PlotHisto(datasetsMgr, os.path.join(folder, hName))
 
         # Add by hand 3 non-triplet TH1s
-        PlotHisto(datasetsMgr, "FailedBJet/Inverted_NFailedBJets_AfterStandardSelections")
-        PlotHisto(datasetsMgr, "FailedBJet/Inverted_NFailedBJets_AfterCRSelections")
-        PlotHisto(datasetsMgr, "FailedBJet/Inverted_NFailedBJets_AfterAllSelections")
-        # PlotHisto(datasetsMgr, "FailedBJet/Baseline_NFailedBJets_AfterCRSelections")
-        # PlotHisto(datasetsMgr, "FailedBJet/Baseline_NFailedBJets_AfterAllSelections")
+        if 0:
+            PlotHisto(datasetsMgr, "FailedBJet/Inverted_NFailedBJets_AfterStandardSelections")
+            PlotHisto(datasetsMgr, "FailedBJet/Baseline_NFailedBJets_AfterAllSelections")   #SR
+            PlotHisto(datasetsMgr, "FailedBJet/Inverted_NFailedBJets_AfterCRSelections")    #CR2
+            PlotHisto(datasetsMgr, "FailedBJet/Baseline_NFailedBJets_AfterCRSelections")    #CR1
+        PlotHisto(datasetsMgr, "FailedBJet/Inverted_NFailedBJets_AfterAllSelections")   #VR
+
     return
 
 def getHistos(datasetsMgr, histoName):

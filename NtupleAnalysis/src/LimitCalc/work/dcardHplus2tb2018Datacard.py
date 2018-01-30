@@ -168,7 +168,7 @@ for mass in MassPoints:
 
 # FakeB dataset
 # ===============
-if 0:
+if 1:
     myQCD = DataGroup(label             = labelPrefix + "FakeBmeasurement",  #fixme: QCDMeasurement
                       landsProcess      = 2, #fixme: what is it for?
                       validMassPoints   = MassPoints,

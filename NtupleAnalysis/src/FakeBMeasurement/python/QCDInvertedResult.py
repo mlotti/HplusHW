@@ -228,25 +228,25 @@ class QCDInvertedShape:
         '''
         self.Verbose("Calculate final shape in signal region (shape * w_QCD) & initialize result containers", True)
         nSplitBins = shape.getNumberOfPhaseSpaceSplitBins()
+        self.Verbose("The phase-space of shape %s is split into %i bin(s)" % (shape.getDataDrivenQCDHistoForSplittedBin(0).GetName(), nSplitBins), True)
 
-        self.Verbose("Create Shape", True)
+        self.Verbose("Create Data-Driven Shape", True)
         self._resultShape = aux.Clone(shape.getDataDrivenQCDHistoForSplittedBin(0))
         self._resultShape.Reset()
-
-        self._resultShape.SetTitle("NQCDFinal_Total_%s"%moduleInfoString)
-        self._resultShape.SetName("NQCDFinal_Total_%s"%moduleInfoString)
+        self._resultShape.SetTitle("FakeB_Total_%s"%moduleInfoString)
+        self._resultShape.SetName("FakeB_Total_%s"%moduleInfoString)
 
         self.Verbose("Create EWK shape", True)
         self._resultShapeEWK = aux.Clone(shape.getDataDrivenQCDHistoForSplittedBin(0))
         self._resultShapeEWK.Reset()
-        self._resultShapeEWK.SetTitle("NQCDFinal_EWK_%s"%moduleInfoString)
-        self._resultShapeEWK.SetName("NQCDFinal_EWK_%s"%moduleInfoString)
+        self._resultShapeEWK.SetTitle("FakeB_EWK_%s"%moduleInfoString)
+        self._resultShapeEWK.SetName("FakeB_EWK_%s"%moduleInfoString)
 
         self.Verbose("Create Purity shape", True)
         self._resultShapePurity = aux.Clone(shape.getDataDrivenQCDHistoForSplittedBin(0))
         self._resultShapePurity.Reset()
-        self._resultShapePurity.SetTitle("NQCDFinal_Purity_%s"%moduleInfoString)
-        self._resultShapePurity.SetName("NQCDFinal_Purity_%s"%moduleInfoString)
+        self._resultShapePurity.SetTitle("FakeB_Purity_%s"%moduleInfoString)
+        self._resultShapePurity.SetName("FakeB_Purity_%s"%moduleInfoString)
 
         self._histogramsList = []
         myUncertaintyLabels  = ["statData", "statEWK"]
@@ -255,8 +255,8 @@ class QCDInvertedShape:
         if optionDoNQCDByBinHistograms:
             for i in range(0, nSplitBins):
                 hBin = aux.Clone(self._resultShape)
-                hBin.SetTitle("NQCDFinal_%s_%s"%(shape.getPhaseSpaceBinFileFriendlyTitle(i).replace(" ",""), moduleInfoString))
-                hBin.SetName("NQCDFinal_%s_%s"%(shape.getPhaseSpaceBinFileFriendlyTitle(i).replace(" ",""), moduleInfoString))
+                hBin.SetTitle("FakeB_%s_%s"%(shape.getPhaseSpaceBinFileFriendlyTitle(i).replace(" ",""), moduleInfoString))
+                hBin.SetName("FakeB_%s_%s"%(shape.getPhaseSpaceBinFileFriendlyTitle(i).replace(" ",""), moduleInfoString))
                 self._histogramsList.append(hBin)
 
         if isinstance(self._resultShape, ROOT.TH2):
@@ -281,7 +281,7 @@ class QCDInvertedShape:
         for i in range(0, nSplitBins):
             # N.B: The \"Inclusive\" value is in the zeroth bin
 
-            self.Verbose("Get data-driven QCD, data, and MC EWK shape histogram for the phase-space bin", True)
+            self.Verbose("Get data-driven QCD, data, and MC EWK shape histogram for the phase-space bin #%i" % (i), True)
             h     = shape.getDataDrivenQCDHistoForSplittedBin(i)
             hData = shape.getDataHistoForSplittedBin(i)
             hEwk  = shape.getEwkHistoForSplittedBin(i)
@@ -302,10 +302,10 @@ class QCDInvertedShape:
 
             # Construct info table (debugging)
             table  = []
-            align  = "{:>6} {:^10} {:^15} {:>10} {:>10} {:>10} {:^3} {:^8} {:^3} {:^8}"
-            header = align.format("Bin", "Width", "Range", "Content", "NormFactor", "QCD", "+/-", "Data", "+/-", "EWK")
-            hLine  = "="*90
-            table.append("{:^90}".format(shape.getHistoName()))
+            align  = "{:>6} {:^10} {:^15} {:>10} {:>10} {:>10} {:^3} {:^12} {:^3} {:^12}"
+            header = align.format("Bin", "Width", "Range", "Content", "NormFactor", "FakeB", "+/-", "Stat. Data", "+/-", "Stat. EWK")
+            hLine  = "="*100
+            table.append("{:^100}".format(shape.getHistoName()))
             table.append(hLine)
             table.append(header)
             table.append(hLine)
@@ -326,14 +326,15 @@ class QCDInvertedShape:
 
                 # Ignore zero bins
                 if abs(h.GetBinContent(j)) > 0.00001:
-                    self.Verbose("Calculating the result")
+                    # self.Verbose("Bin %i: Calculating the result" % (j) , j==0)
                     binContent = h.GetBinContent(j)
                     binRange   = "%.1f -> %.1f" % (h.GetXaxis().GetBinLowEdge(j), h.GetXaxis().GetBinUpEdge(j) )
                     binWidth   = GetTH1BinWidthString(h, j)
                     binSum    += binContent
                     myResult   = binContent * wQCD #apply  normalisation factor (transfer from CR to SR))
+                    self.Verbose("Bin %i: BinContent = %.3f x %.3f = %.3f" % (j, binContent, wQCD, myResult), False)
 
-                    self.Verbose("Calculate abs. stat. uncert. for data and for MC EWK (Do not calculate here MC EWK syst.)", True)
+                    # self.Verbose("Calculate abs. stat. uncert. for data and for MC EWK (Do not calculate here MC EWK syst.)", True)
                     myStatDataUncert = hData.GetBinError(j) * wQCD
                     myStatEwkUncert  = hEwk.GetBinError(j)  * wQCD
                     table.append(align.format(j, binWidth, binRange, "%0.1f" % binContent, wQCD, "%.1f" % myResult, "+/-", "%.1f" % myStatDataUncert, "+/-", "%.1f" % myStatEwkUncert))
@@ -379,9 +380,10 @@ class QCDInvertedShape:
         ewkStat    = "%.1f" % qcdResults["statEWK"]
         table.append(align.format(bins, binWidth, binRange, binSum, wQCD, nQCD, "+/-", dataStat, "+/-", ewkStat))
         table.append(hLine)
+        # For-loop: All lines in table
         for i, line in enumerate(table):
             if i == len(table)-2:
-                self.Verbose(ShellStyles.TestPassedStyle()+line+ShellStyles.NormalStyle(), i==0)
+                self.Verbose(ShellStyles.TestPassedStyle()+line+ShellStyles.NormalStyle(), i==1)
             else:
                 self.Verbose(line, i==0)
 
@@ -753,7 +755,8 @@ class QCDInvertedResultManager:
         # Define histogram name as will be written in the ROOT file
         self.Verbose("%sDefining the name of histogram objects, as they will appear in the ROOT file%s" % (ShellStyles.WarningStyle(), ShellStyles.NormalStyle()), True)
         hName  = plotName + "%d" %i
-        hTitle = plotName.replace("CRSelections", "AllSelections").replace("Baseline_", "").replace("Inverted_", "")
+        hTitle = plotName.replace("CRSelections", "AllSelections").replace("Baseline_", "").replace("Inverted_", "")#FIXME - alex-iro
+        #hTitle = plotName
 
         # DataDriven
         myShape.delete()
