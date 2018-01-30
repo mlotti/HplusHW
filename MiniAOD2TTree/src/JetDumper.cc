@@ -83,8 +83,8 @@ JetDumper::JetDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<ed
       systJERdown = new FourVectorDumper[inputCollections.size()];
     }
     // Marina - start
-    nSubjets     = new std::vector<int>[inputCollections.size()];
-    hasBTagSubjet= new std::vector<bool>[inputCollections.size()];
+    //nSubjets     = new std::vector<int>[inputCollections.size()];
+    //hasBTagSubjet= new std::vector<bool>[inputCollections.size()];
     // Marina - end
 }
 
@@ -147,11 +147,11 @@ void JetDumper::book(TTree* tree){
     }
     
     // Marina - start
-    bool checkSubjets = inputCollections[i].getParameter<bool>("checkSubjets");
-    if (checkSubjets){
-      tree->Branch((name+"_nSubjets").c_str(),&nSubjets[i]);
-      tree->Branch((name+"_hasBTagSubjet").c_str(), &hasBTagSubjet[i]);
-    }
+    //bool checkSubjets = inputCollections[i].getParameter<bool>("checkSubjets");
+    //if (checkSubjets){
+    //  tree->Branch((name+"_nSubjets").c_str(),&nSubjets[i]);
+    //  tree->Branch((name+"_hasBTagSubjet").c_str(), &hasBTagSubjet[i]);
+    // }
     // Marina - end
   }
 }
@@ -193,7 +193,7 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	std::vector<std::string> userintNames = inputCollections[ic].getParameter<std::vector<std::string> >("userInts");
 	
 	// Marina - start
-	bool checkSubjets = inputCollections[ic].getParameter<bool>("checkSubjets");
+	//bool checkSubjets = inputCollections[ic].getParameter<bool>("checkSubjets");
 	// Marina - end
 
         edm::Handle<edm::View<pat::Jet>> jetHandle;
@@ -377,20 +377,20 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 */                
                 }
 		// Marina - start		
-		if (checkSubjets){
-		  auto &subjets = obj.subjets("SoftDrop");
+		//if (checkSubjets){
+		//  auto &subjets = obj.subjets("SoftDrop");
 		  
-		  int nSub = 0;
-		  bool hasBSubjet = false;
-		  for (auto const & sj: subjets)
-		    {
-		      float csv = sj->bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags");
-		      if (csv >= 0.8484) hasBSubjet = true;   // Medium working point (Recommended for 2016 Analysis)
-		      nSub++;
-		    }
-		  nSubjets[ic].push_back(nSub);
-		  hasBTagSubjet[ic].push_back(hasBSubjet);
-		}
+		//  int nSub = 0;
+		//  bool hasBSubjet = false;
+		//  for (auto const & sj: subjets)
+		//    {
+		//      float csv = sj->bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags");
+		//      if (csv >= 0.8484) hasBSubjet = true;   // Medium working point (Recommended for 2016 Analysis)
+		//     nSub++;
+		//    }
+		//  nSubjets[ic].push_back(nSub);
+		//  hasBTagSubjet[ic].push_back(hasBSubjet);
+		//	}
 		// Marina - end
             }
         }
@@ -433,8 +433,8 @@ void JetDumper::reset(){
           systJERdown[ic].reset();
 	}
 	// Marina - start
-	nSubjets[ic].clear();
-	hasBTagSubjet[ic].clear();
+	//nSubjets[ic].clear();
+	//hasBTagSubjet[ic].clear();
 	// Marina - end
     }
     for(size_t ic = 0; ic < inputCollections.size()*nDiscriminators; ++ic){

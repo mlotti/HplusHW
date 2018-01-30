@@ -80,8 +80,8 @@ class JetDumper : public BaseDumper {
         FourVectorDumper *systJERdown;
 
 	// Marina - start
-	std::vector<int> *nSubjets;
-	std::vector<bool> *hasBTagSubjet;
+	//std::vector<int> *nSubjets;
+	//std::vector<bool> *hasBTagSubjet;
 	// Marina - end
 	
 };
