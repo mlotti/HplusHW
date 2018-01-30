@@ -147,7 +147,7 @@ void JetDumper::book(TTree* tree){
     }
     
     // Marina - start
-    bool checkSubjets = inputCollections[i].getParameter<bool>("checkSubjets");
+    bool checkSubjets = inputCollections[i].getUntrackedParameter<bool>("checkSubjets",false);
     if (checkSubjets){
       tree->Branch((name+"_nSubjets").c_str(),&nSubjets[i]);
       tree->Branch((name+"_hasBTagSubjet").c_str(), &hasBTagSubjet[i]);
@@ -193,7 +193,7 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	std::vector<std::string> userintNames = inputCollections[ic].getParameter<std::vector<std::string> >("userInts");
 	
 	// Marina - start
-	bool checkSubjets = inputCollections[ic].getParameter<bool>("checkSubjets");
+	bool checkSubjets = inputCollections[ic].getUntrackedParameter<bool>("checkSubjets",false);
 	// Marina - end
 
         edm::Handle<edm::View<pat::Jet>> jetHandle;
