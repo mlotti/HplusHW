@@ -12,7 +12,7 @@ from HiggsAnalysis.MiniAOD2TTree.tools.HChOptions import getOptionsDataVersion
 #================================================================================================  
 # Options
 #================================================================================================  
-maxEvents    = 100
+maxEvents    = 1000
 maxWarnings  = 100
 reportEvery  = 100
 testWithData = True
@@ -134,6 +134,7 @@ process.load("HiggsAnalysis/MiniAOD2TTree/Tau_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Electron_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Muon_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Jet_cfi")
+process.load("HiggsAnalysis/MiniAOD2TTree/FatJet_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/SecondaryVertex_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Top_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/MET_cfi")
@@ -227,6 +228,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             saveHplusInfo       = cms.untracked.bool(False),
         )
     ),
+    FatJets = process.FatJets,
 )
 
 #================================================================================================ 

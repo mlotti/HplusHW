@@ -89,6 +89,15 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
       std::cout << "Config: JetDumper ignored, because 'Jets' is missing from config" << std::endl;
     }
 
+    fatJetDumper = 0;
+    if (iConfig.exists("FatJets")) {
+      fatJetCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("FatJets");
+      fatJetDumper = new FatJetDumper(consumesCollector(), fatJetCollections);
+      fatJetDumper->book(Events);
+    } else {
+      std::cout << "Config: FatJetDumper ignored, because 'FatJets' is missing from config" << std::endl;
+    }
+    
     softBTagDumper = 0;
     if (iConfig.exists("SoftBTag")) {
       std::cout << "SoftBTag exists!" << std::endl;
