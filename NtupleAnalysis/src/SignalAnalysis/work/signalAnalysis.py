@@ -39,6 +39,7 @@ allSelections.AngularCutsBackToBack.cutValueJet2 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet3 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet4 = 40.0
 allSelections.TauSelection.rtau = 0.7
+#allSelections.TauSelection.rtauSmallerThan = 0.7
 allSelections.BJetSelection.bjetDiscrWorkingPoint = "Medium"
 
 #allSelections.AngularCutsCollinear.cutValueJet1 = 80.0
