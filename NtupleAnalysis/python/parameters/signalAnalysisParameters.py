@@ -58,19 +58,24 @@ scaleFactors.assignTauTriggerSF(tauSelection, "nominal")
 
 #====== Electron veto
 eVeto = PSet(
-         electronPtCut = 15.0,
-        electronEtaCut = 2.5,
+    electronPtCut = 15.0,
+    electronEtaCut = 2.5,
 #            electronID = "mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90", # highest (wp90) for vetoing (2012: wp95)
-            electronID = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
-     electronIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
+    electronID = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
+    electronIDType    = "MVA",  # options: "default", "MVA"
+    electronMVA       = "ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values",
+    electronMVACut    = "Loose",
+    electronIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
+    electronIsolType  = "mini", # options: "mini", "default"
 )
 
 #====== Muon veto
 muVeto = PSet(
-             muonPtCut = 10.0,
-            muonEtaCut = 2.5,
-                muonID = "muIDLoose", # loosest option for vetoing (options: muIDLoose, muIDMedium, muIDTight)
-         muonIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
+    muonPtCut = 10.0,
+    muonEtaCut = 2.5,
+    muonID = "muIDLoose", # loosest option for vetoing (options: muIDLoose, muIDMedium, muIDTight)
+    muonIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
+    muonIsolType      = "mini",      # options: "mini", "default" 
 )
 
 #====== Muon selection (for embedding)
