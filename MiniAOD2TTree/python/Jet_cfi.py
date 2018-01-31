@@ -77,7 +77,7 @@ AK8Jets = cms.PSet(
 
     userInts = cms.vstring(
         ),
-    checkSubjets = cms.bool(True),
+    checkSubjets = cms.untracked.bool(True),
     )
    
 
@@ -112,7 +112,7 @@ AK8JetsSoftDrop = cms.PSet(
         ),
     userInts = cms.vstring(
         ),
-    checkSubjets = cms.bool(True),
+    checkSubjets = cms.untracked.bool(True),
     ),
 
 

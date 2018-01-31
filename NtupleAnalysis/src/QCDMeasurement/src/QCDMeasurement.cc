@@ -404,6 +404,7 @@ void QCDMeasurement::process(Long64_t entry) {
       // Sanity check passed: at least one anti-isolated tau exists
       // Set factorisation bin
       myFactorisationInfo.push_back(tauData.getAntiIsolatedTau().pt());
+      myFactorisationInfo.push_back(tauData.getAntiIsolatedTau().eta());
       fCommonPlots.setFactorisationBinForEvent(myFactorisationInfo);
       fNormalizationSystematicsControlRegion.setFactorisationBinForEvent(myFactorisationInfo);
       fNormalizationSystematicsControlRegion.fillControlPlotsAfterTauSelection(fEvent, tauData);
@@ -437,6 +438,7 @@ void QCDMeasurement::process(Long64_t entry) {
       // Sanity check passed: at least one isolated tau exists
       // Set factorisation bin
       myFactorisationInfo.push_back(tauData.getSelectedTau().pt());
+      myFactorisationInfo.push_back(tauData.getSelectedTau().eta());
       fCommonPlots.setFactorisationBinForEvent(myFactorisationInfo);
       fNormalizationSystematicsSignalRegion.setFactorisationBinForEvent(myFactorisationInfo);
       fNormalizationSystematicsSignalRegion.fillControlPlotsAfterTauSelection(fEvent, tauData);
