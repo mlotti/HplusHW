@@ -93,21 +93,23 @@ def main(opts):
         # Setup & configure the dataset manager 
         datasetsMgr = GetDatasetsFromDir(opts)
         datasetsMgr.updateNAllEventsToPUWeighted()
-        datasetsMgr.loadLuminosities() # from lumi.json
+        #datasetsMgr.loadLuminosities() # from lumi.json
 
         if opts.verbose:
             datasetsMgr.PrintCrossSections()
             datasetsMgr.PrintLuminosities()
             
-        if 0:
+        if 1:
             datasetsMgr.printSelections()
+            sys.exit()
 
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
 
         # Get the luminosity
         if opts.intLumi < 0:
-            opts.intLumi = datasetsMgr.getDataset("Data").getLuminosity()
+            opts.intLumi = 35.8 #fixme
+            # opts.intLumi = datasetsMgr.getDataset("Data").getLuminosity()
 
         # Set/Overwrite cross-sections
         for i, d in enumerate(datasetsMgr.getAllDatasets(), 0):
@@ -125,8 +127,7 @@ def main(opts):
         datasetsMgr.PrintInfo()
 
         # Get histograms under given folder in ROOT file
-        #hList      = datasetsMgr.getDataset("FakeB").getDirectoryContent(opts.folder)
-        hList      = datasetsMgr.getDataset("FakeBTrijet").getDirectoryContent(opts.folder)
+        hList      = datasetsMgr.getDataset(opts.dataset).getDirectoryContent(opts.folder)
         hPaths1    = [os.path.join(opts.folder, h) for h in hList]
         hPaths2    = [h for h in hPaths1 if "Purity" in h]
         keepHistos = ["Njets", "MET", "MVAmax1", "MVAmax2", "LdgTetrajetPt", "LdgTetrajetMass", 
@@ -379,7 +380,7 @@ def PlotHistoGraphs(datasetsMgr, histoName, hideZeros=False):
     kwargs_["ylabel"] = "Purity"
 
     # Create the plotting object
-    dataset = "FakeB"
+    dataset = opts.dataset
     p1 = plots.PlotBase( [getHisto(datasetsMgr, dataset, histoName)], saveFormats=[])
     p1.setLuminosity(opts.intLumi)
 
@@ -492,6 +493,7 @@ if __name__ == "__main__":
     SAVEDIR      = "/publicweb/a/aattikis/"
     VERBOSE      = False
     FOLDER       = "ForDataDrivenCtrlPlots"
+    DATASET      = "FakeBMeasurementTrijetMass"
     
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -507,6 +509,9 @@ if __name__ == "__main__":
 
     parser.add_option("--analysisName", dest="analysisName", type="string", default=ANALYSISNAME,
                       help="Override default analysisName [default: %s]" % ANALYSISNAME)
+
+    parser.add_option("--dataset", dest="dataset", type="string", default=DATASET,
+                      help="Name of the pseudo-dataset inside the pseudo-multicrab [default: %s]" % DATASET)
 
     parser.add_option("--intLumi", dest="intLumi", type=float, default=INTLUMI,
                       help="Override the integrated lumi [default: %s]" % INTLUMI)

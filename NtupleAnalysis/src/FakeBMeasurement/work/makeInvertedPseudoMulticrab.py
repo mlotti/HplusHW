@@ -13,7 +13,7 @@ Description: (* = prerequisites)
    c) Depending on whether variations are added or not this can take ~12 h without systematics (!)
    d) OUTPUT: A pseudo-multicrab dir under the work directory <pseudo_multicrab>
 
-*2) Generate the QCDInvertedNormalizationFactors.py file by running a dedicated script: (< 1m without systematics)
+*2) Generate the FakeBTranserFactors.py file by running a dedicated script: (< 1m without systematics)
    a) Go to the appropriate directory:
       cd /NtupleAnalysis/src/FakeBMeasurement/work   
    b) Run the script that generates the file containing the Transfer Factor(s):
@@ -209,7 +209,8 @@ class ModuleBuilder:
                                                                          opts.normDataSrc,
                                                                          opts.normEwkSrc,
                                                                          self._opts.useInclusiveNorm,
-                                                                         keyList = ["Baseline", "CRSelections"], #fixme-iro-alex
+                                                                         # keyList = ["Inverted", "AllSelections"], #FIXME:  works with "ForFakeBMeasurement" folder
+                                                                         keyList = ["AllSelections"],
                                                                          verbose=opts.verbose)
 
         self.Verbose("Add all plots to be written in the peudo-dataset beind created", True)
@@ -353,7 +354,7 @@ def getNormFactorFileList(dirName, fileBaseName):
 
 def importNormFactors(era, searchMode, optimizationMode, multicrabDirName):
     '''
-    Imports the auto-generates  QCDInvertedNormalizationFactors.py file, which is 
+    Imports the auto-generates  FakeBTranserFactors.py file, which is 
     created by the plotting/fitting templates script  (plotQCD_Fit.py)
     
     This containsthe results  of fitting to the Baseline Data the templates m_{jjb} 
@@ -395,7 +396,7 @@ def importNormFactors(era, searchMode, optimizationMode, multicrabDirName):
     normFactorsImport = __import__(srcBase)
     
     # Get the function definition
-    myNormFactorsSafetyCheck = getattr(normFactorsImport, "QCDInvertedNormalizationSafetyCheck")
+    myNormFactorsSafetyCheck = getattr(normFactorsImport, "QCDInvertedNormalizationSafetyCheck") #FIXME - What does this do?
     
     Verbose("Check that the era=%s, searchMode=%s, optimizationMode=%s info matches!" % (era, searchMode, optimizationMode) )
     myNormFactorsSafetyCheck(era, searchMode, optimizationMode)
@@ -604,7 +605,7 @@ if __name__ == "__main__":
 
     # Default Settings
     global opts
-    ANALYSISNAME     = "FakeBMeasurement" #FakeB #GenuineB
+    ANALYSISNAME     = "FakeBMeasurement"
     ANALYSISNAMESAVE = "Hplus2tbAnalysis"
     EWKDATASETS      = ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"] #ZJetsToQQ_HT600toInf or DYJetsToQQHT ?
     SEARCHMODES      = ["80to1000"]
@@ -622,8 +623,8 @@ if __name__ == "__main__":
     VERBOSE          = False
     VARIATIONS       = False
     TEST             = True
-    FACTOR_SRC       = "QCDInvertedNormalizationFactors_%s.py"
-    DATA_SRC         = "ForFakeBMeasurement"    # "ForDataDrivenCtrlPlots"
+    FACTOR_SRC       = "FakeBTransferFactors_%s.py"
+    DATA_SRC         = "ForDataDrivenCtrlPlots" #"ForFakeBMeasurement"
     EWK_SRC          = DATA_SRC + "EWKGenuineB" # FakeB = Data - EWK GenuineB
     NORM_DATA_SRC    = DATA_SRC + "EWKGenuineB" 
     NORM_EWK_SRC     = DATA_SRC + "EWKGenuineB"
@@ -739,7 +740,7 @@ if __name__ == "__main__":
         msg = "Will only use " + ShellStyles.NoteStyle() + " inclusive " + ShellStyles.NormalStyle() + " weight instead of binning (no splitted histograms)"
         Print(msg, True)
             
-    # Sanity check - alex iro 
+    # Sanity check
     if opts.analysisName == "GenuineB":
         if "EWKGenuineB" not in opts.ewkSrc:
             msg = "Cannot create pseudo-dataset %s with EWK source set to %s" % (opts.analysisName, opts.ewkSrc)

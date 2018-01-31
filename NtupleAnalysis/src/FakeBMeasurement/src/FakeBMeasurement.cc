@@ -982,7 +982,7 @@ void FakeBMeasurement::book(TDirectory *dir) {
   const float fBtagMax    = fCommonPlots.getBJetDiscBinSettings().max();
 
   const int  nPtBins      = 2*fCommonPlots.getPtBinSettings().bins();
-  const float fPtMin      = fCommonPlots.getPtBinSettings().min();
+  const float fPtMin      = 2*fCommonPlots.getPtBinSettings().min();
   const float fPtMax      = 2*fCommonPlots.getPtBinSettings().max();
 
   const int  nEtaBins     = fCommonPlots.getEtaBinSettings().bins();
@@ -2503,15 +2503,9 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   if (0) std::cout << "=== Baseline: MET selection" << std::endl;
   const METSelection::Data METData = fBaselineMETSelection.analyze(fEvent, nVertices);
   // if (!METData.passedSelection()) return;
-
+ 
   //================================================================================================
-  // 11) Topology
-  //================================================================================================
-  // if (0) std::cout << "=== Baseline: Topology selection" << std::endl;
-  // const TopologySelection::Data topologyData = fBaselineTopologySelection.analyze(fEvent, jetData);
-
-  //================================================================================================
-  // 12) Top selection
+  // 11) Top selection
   //================================================================================================
   if (0) std::cout << "=== Baseline: Top selection" << std::endl;
   const TopSelectionBDT::Data topData = fBaselineTopSelection.analyze(fEvent, jetData, bjetData);
@@ -2523,10 +2517,9 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   // If 1 or more untagged genuine bjets are found the event is considered fakeB. Otherwise genuineB  
   bool isGenuineB = IsGenuineBEvent(bjetData.getSelectedBJets());
   hBaseline_IsGenuineB->Fill(isGenuineB);
-  if (0) std::cout << "=== FakeBMeasurement::DoBaselineAnalysis()\n\tisGenuineB = " << isGenuineB << std::endl;
   
   //================================================================================================
-  // Standard Selections
+  // Preselections (aka Standard Selections)
   //================================================================================================
   if (0) std::cout << "=== Baseline: Standard Selections" << std::endl;
   // NB: CtrlPlotsAfterStandardSelections should only be called for Inverted!
@@ -2652,17 +2645,16 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
 
   //================================================================================================
   // All Selections
-  //================================================================================================
-  // if (!topologyData.passedSelection()) return;
+  //================================================================================================  
   if (!topData.passedSelection()) 
     {
-      // If top fails fill Control Region (CR) histograms and return
+      // If top fails fill determine if it qualifies for Control Region 1 (CR1)
       bool passLdgTopMVA    = cfg_LdgTopMVACut.passedCut( topData.getMVAmax1() );
       bool passSubldgTopMVA = cfg_SubldgTopMVACut.passedCut( topData.getMVAmax2() );
       bool passInvertedTop  = passLdgTopMVA * passSubldgTopMVA;
       if (!passInvertedTop) return;
 
-      if (0) std::cout << "=== Baseline: All Selections (Inverted Top)" << std::endl;
+      if (0) std::cout << "=== Baseline: Control Region 1 (CR1)" << std::endl;
       cBaselineSelectedCR.increment();
 
       // Fill histos
@@ -2781,7 +2773,7 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
       return;
     }
 
-  if (0) std::cout << "=== Baseline: All Selections" << std::endl;
+  if (0) std::cout << "=== Baseline: Signal Region (SR)" << std::endl;
   cBaselineSelected.increment();
 
   //================================================================================================
@@ -2945,13 +2937,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   // if (!METData.passedSelection()) return;
 
   //================================================================================================
-  // 11) Topology
-  //================================================================================================
-  // if (0) std::cout << "=== Inverted: Topology selection" << std::endl;
-  // const TopologySelection::Data topologyData = fInvertedTopologySelection.analyze(fEvent, jetData);
-
-  //================================================================================================
-  // 12) Top selection
+  // 11) Top selection
   //================================================================================================
   if (0) std::cout << "=== Inverted: Top selection" << std::endl;
   const TopSelectionBDT::Data topData = fInvertedTopSelection.analyzeWithoutBJets(fEvent, jetData.getSelectedJets(), myBJets, true);
@@ -2963,13 +2949,11 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   // If 1 or more untagged genuine bjets are found the event is considered fakeB. Otherwise genuineB
   bool isGenuineB = IsGenuineBEvent(myBJets);
   hInverted_IsGenuineB->Fill(isGenuineB);
-  if (0) std::cout << "=== FakeBMeasurement::DoInvertedAnalysis()\n\tisGenuineB = " << isGenuineB << std::endl;
 
   //================================================================================================
-  // Standard Selections
+  // Preselections (aka Standard Selections)
   //================================================================================================
-  if (0) std::cout << "=== Inverted: Standard Selections" << std::endl;
-  // fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, isGenuineB);
+  if (0) std::cout << "=== Inverted: Preselections" << std::endl;
   fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, TopologySelection::Data(), topData, isGenuineB);
 
   // Fill Triplets  (Inverted)
@@ -3143,19 +3127,18 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   // All Selections
   //================================================================================================
-  // if (!topologyData.passedSelection()) return;
   if (!topData.passedSelection()) 
     {
-      // If top fails fill Control Region (CR) histograms and return
+      // If top fails determine if event fall into  Control Region 2 (CR2)
       bool passLdgTopMVA    = cfg_LdgTopMVACut.passedCut( topData.getMVAmax1() );
       bool passSubldgTopMVA = cfg_SubldgTopMVACut.passedCut( topData.getMVAmax2() );
       bool passInvertedTop  = passLdgTopMVA * passSubldgTopMVA;
       if (!passInvertedTop) return;
 
-      if (0) std::cout << "=== Inverted: All Selections (Inverted Top)" << std::endl;
+      if (0) std::cout << "=== Inverted: Control Region 2 (CR2)" << std::endl;
       cInvertedSelectedCR.increment();
-      
-      // Fill histos
+
+      // Fill final plots (CR2)
       index = -1;
       hInverted_NFailedBJets_AfterCRSelections -> Fill(invertedBJets.size());
       // For-loop: Only failed BJets used as bjets in top fit
@@ -3320,16 +3303,16 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
       return;
     }
 
-  if (0) std::cout << "=== Inverted: All Selections" << std::endl;
+  if (0) std::cout << "=== Inverted: Verification Region (VR)" << std::endl;
   cInvertedSelected.increment();
 
   //================================================================================================
-  // Fill final plots
+  // Fill final plots (VR)
   //================================================================================================
-  fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, 1);
-
+  fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, (int) isGenuineB); // need to call this in the VR!
+  
   index = -1;
-  hInverted_NFailedBJets_AfterAllSelections -> Fill(invertedBJets.size());//ew
+  hInverted_NFailedBJets_AfterAllSelections -> Fill(invertedBJets.size());
   // For-loop: Only failed BJets used as bjets in top fit
   for (auto bjet: invertedBJets)
     {

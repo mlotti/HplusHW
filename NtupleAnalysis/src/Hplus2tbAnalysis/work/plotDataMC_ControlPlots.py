@@ -273,6 +273,8 @@ def GetHistoKwargs(h, opts):
         "ylabel"           : _yLabel,
         "rebinX"           : 1,
         "rebinY"           : None,
+        "ratioType"        : "errorScale", #new
+        "ratioErrorOptions": {"numeratorStatSyst": False}, #new
         "ratioYlabel"      : "Data/MC",
         "ratio"            : True, 
         "stackMCHistograms": True,

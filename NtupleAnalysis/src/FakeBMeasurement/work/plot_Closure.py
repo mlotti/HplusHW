@@ -1,19 +1,25 @@
 #!/usr/bin/env python
 '''
-Description:
+DESCRIPTION:
+Plots various histograms found under the opts.folder
+comparing the Control Region (CR) used in the ABCD 
+FakeB background measurement. In particular, 
+it creates normalised to unity histograms of CR1 and CR2.
 
-Usage:
+
+USAGE:
 ./plot_Closure.py -m <pseudo_mcrab> [opts]
 
-Examples:
+
+EXAMPLES:
 ./plot_Closure.py -m FakeBMeasurement_170728_040545/ -o "" --url
 ./plot_Closure.py -m FakeBMeasurement_170728_040545/ -o "" --url --normaliseToOne
-./plot_Closure.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170703_031128_CtrlTriggers_QCDTemplateFit --mergeEWK -e "QCD|Charged" -o "OptTriggerOR['HLT_PFHT400_SixJet30']ChiSqrCutValue100"
-./plot_Closure.py -m FakeBMeasurement_SignalTriggers_NoTrgMatch_StdSelections_TopCut_AllSelections_TopCut10_170728_040545/ --url --normaliseToOne
-./plot_Closure.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657/ --normaliseToOne && ./plot_Closure.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657/ --normaliseToOne --useMC
-
-Last Used:
 ./plot_Closure.py -m FakeBMeasurement_SRCR1VR_CSV2M_EE2_CSV2L_GE0_StdSelections_MVA_GE0p40_AllSelections_LdgTopMVA_GE0p80_SubldgMVA_GE0p80_RandomSort_180107_122559 --normaliseToOne --url
+
+
+LAST USED:
+./plot_Closure.py -m FakeBMeasurement_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p50to085_180129_133455
+
 '''
 
 #================================================================================================ 
@@ -37,6 +43,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 
 #================================================================================================ 
 # Function Definition
@@ -213,10 +220,16 @@ def main(opts):
             PlotComparison(datasetsMgr, hVR, hCR2, "VRvCR2")
 
         # For-loop: All histogram pairs
+        counter = 1
         for hCR1, hCR2 in zip(path_CR1, path_CR2):
             if "IsGenuineB" in hCR1:
                 continue
+            
+            hName = hCR1.replace("_AfterCRSelections", "_CR1vCR2").replace("ForFakeBMeasurement/Baseline_", "")
+            msg   = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % counter, "/", "%s:" % (len(path_CR1)), hName)
+            Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), counter==1)
             PlotComparison(datasetsMgr, hCR1, hCR2, "CR1vCR2")
+            counter+=1
 
         # For-loop: All histogram pairs
         for hSR, hVR in zip(path_SR, path_VR):
@@ -235,6 +248,10 @@ def main(opts):
                 continue
             PlotComparison(datasetsMgr, hSR, hCR1, "SRvCR1")
 
+    savePath = opts.saveDir
+    if opts.url:
+        savePath = opts.saveDir.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
+    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + savePath + ShellStyles.NormalStyle()), True)
     return
 
 def PrintPSet(selection, datasetsMgr):
@@ -282,11 +299,13 @@ def PlotComparison(datasetsMgr, hBaseline, hInverted, ext):
 
     # Extract the correct SR and CR histograms
     baseline_Data        = pBaseline_Inclusive.histoMgr.getHisto("Data").getRootHisto().Clone("Baseline-Data")
-    baseline_QCD         = pBaseline_Inclusive.histoMgr.getHisto("QCD").getRootHisto().Clone("Baseline-QCD")
+    if opts.useMC: 
+        baseline_QCD     = pBaseline_Inclusive.histoMgr.getHisto("QCD").getRootHisto().Clone("Baseline-QCD")
     baseline_EWKGenuineB = pBaseline_GenuineB.histoMgr.getHisto("EWK").getRootHisto().Clone("Baseline-EWKGenuineB")
     baseline_EWKFakeB    = pBaseline_FakeB.histoMgr.getHisto("EWK").getRootHisto().Clone("Baseline-EWKFakeB")
     inverted_Data        = pInverted_Inclusive.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted-Data")
-    inverted_QCD         = pInverted_Inclusive.histoMgr.getHisto("QCD").getRootHisto().Clone("Inverted-QCD")
+    if opts.useMC:    
+        inverted_QCD     = pInverted_Inclusive.histoMgr.getHisto("QCD").getRootHisto().Clone("Inverted-QCD")
     inverted_EWKGenuineB = pInverted_GenuineB.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted-EWKGenuineB") 
     inverted_EWKFakeB    = pInverted_FakeB.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted-EWKFakeB")
 
@@ -358,9 +377,9 @@ def PlotComparison(datasetsMgr, hBaseline, hInverted, ext):
     saveName = saveName.replace("_AfterCRSelections", "_" + ext)
 
     if opts.useMC:
-        savePath = os.path.join(opts.saveDir, "Closure", "MC", opts.optMode)
+        savePath = os.path.join(opts.saveDir, "MC", opts.optMode)
     else:
-        savePath = os.path.join(opts.saveDir, "Closure", opts.optMode)
+        savePath = os.path.join(opts.saveDir, opts.optMode)
     SavePlot(p, saveName, savePath, saveFormats = [".png", ".pdf"])
     return
 
@@ -510,7 +529,7 @@ def GetHistoKwargs(histoName, ext, opts):
         if "trijet" in hName:
             _opts["xmin"] = 0.7
     if "tetrajetm" in hName:
-        _rebinX = 10 #4
+        _rebinX = 4
         if opts.useMC:
             _rebinX = 10
         _units  = "GeV/c^{2}"
@@ -541,12 +560,11 @@ def GetHistoKwargs(histoName, ext, opts):
     return _kwargs
         
 def SavePlot(plot, saveName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
-    Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
-    
     # Check that path exists
     if not os.path.exists(saveDir):
         os.makedirs(saveDir)
-        
+
+    # Create the name under which plot will be saved
     savePath = os.path.join(saveDir, saveName)
 
     # For-loop: All save formats
@@ -554,9 +572,9 @@ def SavePlot(plot, saveName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
         saveNameURL = savePath + ext
         saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
         if opts.url:
-            Print(saveNameURL, i==0)
+            Verbose(saveNameURL, i==0)
         else:
-            Print(savePath + ext, i==0)
+            Verbose(savePath + ext, i==0)
         plot.saveAs(savePath, formats=saveFormats)
     return
 
@@ -593,7 +611,7 @@ if __name__ == "__main__":
     SAVEDIR      = "/publicweb/a/aattikis/" #FakeBMeasurement/"
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
-    NORMALISE    = False
+    NORMALISE    = True
     USEMC        = False
     SIGNALMASS   = 500
     FOLDER       = "ForFakeBMeasurement"
@@ -668,7 +686,7 @@ if __name__ == "__main__":
         mcrabDir = rchop(opts.mcrab, "/")
         if len(mcrabDir.split("/")) > 1:
             mcrabDir = mcrabDir.split("/")[-1]
-        opts.saveDir += mcrabDir + "/" + opts.folder
+        opts.saveDir += mcrabDir + "/Closure/"
 
 
     # Sanity check
@@ -677,17 +695,7 @@ if __name__ == "__main__":
         sys.exit()
 
     # Sanity check
-    allowedFolders = ["counters", "counters/weighted", "Weighting", "ForDataDrivenCtrlPlots", 
-                      "ForDataDrivenCtrlPlotsEWKFakeB", "ForDataDrivenCtrlPlotsEWKGenuineB", "PUDependency", 
-                      "Selection_Veto", "muSelection_Veto", "tauSelection_Veto", 
-                      "jetSelection_", "bjetSelection_", "metSelection_Baseline",
-                      "topologySelection_Baseline", "topbdtSelection_Baseline", 
-                      "topbdtSelectionTH2_Baseline", "metSelection_Inverted", 
-                      "topologySelection_Inverted", "topbdtSelection_Inverted",
-                      "topbdtSelectionTH2_Inverted", "ForFakeBNormalization", 
-                      "ForFakeBNormalizationEWKFakeB", "ForFakeBNormalizationEWKGenuineB",
-                      "FailedBJet", "FailedBJetFakeB", "FailedBJetGenuineB", "ForFakeBMeasurement", 
-                      "ForFakeBMeasurementEWKFakeB", "ForFakeBMeasurementEWKGenuineB"]
+    allowedFolders = ["ForFakeBMeasurement", "ForFakeBMeasurementEWKFakeB", "ForFakeBMeasurementEWKGenuineB"]
 
 
     if opts.folder not in allowedFolders:
