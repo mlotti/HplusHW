@@ -306,7 +306,7 @@ def PlotHisto(datasetsMgr, histoName):
     _rebinX = 1
     logY    = True
     yMaxF   = 1.2
-    yMax    = 0.5
+    yMax    = 1.0
     if logY:
         yMaxF = 10        
     _opts   = {"ymin": 1e-4, "ymax": yMax} #"ymaxfactor": yMaxF}

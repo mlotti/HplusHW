@@ -331,7 +331,7 @@ def GetHistoKwargs(hName, opts):
         kwargs["cutBox"] = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         kwargs["log"]    = True
         myBins = []
-        for j in range(0, 400, 20):
+        for j in range(0, 400, 10):
             myBins.append(j)
         for k in range(400, 600, 50):
             myBins.append(k)
@@ -406,7 +406,7 @@ def GetHistoKwargs(hName, opts):
         units            = "GeV/c"
         kwargs["xlabel"] = "p_{T} (%s)"  % units
         myBins = []
-        for j in range(0, 300, 20):
+        for j in range(0, 300, 10): #10 steps!
             myBins.append(j)
         for k in range(300, 700+40, 40):
             myBins.append(k)
