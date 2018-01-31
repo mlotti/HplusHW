@@ -2035,6 +2035,14 @@ class Counter:
     def appendRows(self, histoPath):
         self.forEachDataset(lambda x: x.appendRows(histoPath))
 
+    def removeRows(self, counterName):
+        cn_re = re.compile(counterName)
+        for cn in self.counters:
+            for n in cn.countNames:
+                match = cn_re.search(n)
+                if match:
+                    cn.countNames.remove(n)
+
     ## Set normalization scheme to unit area
     def normalizeToOne(self):
         self.forEachDataset(lambda x: x.normalizeToOne())
@@ -2159,6 +2167,9 @@ class EventCounter:
     # \param datasetNames   Names of datasets to remove
     def removeColumns(self, datasetNames):
         self._forEachCounter(lambda c: c.removeColumns(datasetNames))
+
+    def removeRows(self, counterName):
+        self.mainCounter.removeRows(counterName)
 
     ## Loop through all counters calling the given function
     def _forEachCounter(self, func):

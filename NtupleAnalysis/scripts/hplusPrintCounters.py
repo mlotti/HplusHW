@@ -159,6 +159,9 @@ def main(opts):
     # Create the event counter
     eventCounter = counter.EventCounter(datasetsMgr)
 
+    if len(opts.excludeCounter) > 0:
+        eventCounter.removeRows(opts.excludeCounter)
+
     # Proceed differently depending on operation mode (opts.mode= 'events', 'xsect', 'eff')
     quantity = "events"
     if opts.mode == "events":        
@@ -330,6 +333,8 @@ if __name__ == "__main__":
     parser.add_option("--excludeTasks", dest="excludeTasks", default="", type="string", 
                       help="Exclude this dataset(s) from action [default: \"\"]")
 
+    parser.add_option("--excludeCounter", dest="excludeCounter", default="", type="string",
+                                            help="Exclude this counter [default: \"\"]")
 
     (opts, args) = parser.parse_args()
     opts.dirs.extend(args)
