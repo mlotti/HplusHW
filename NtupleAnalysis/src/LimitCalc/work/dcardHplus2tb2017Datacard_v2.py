@@ -75,12 +75,12 @@ OptionSqrtS= 13    # sqrt(s)
 SignalRateCounter         = "Selected events"            # fixme: what is this for?
 FakeRateCounter           = "EWKfaketaus:SelectedEvents" # fixme: what is this for?
 shapeHistoName            = None                         # Path where the shape histogram is located
+if OptionMassShape == "LdgTetrajetMass":
+    shapeHistoName = "LdgTetrajetMass_AfterAllSelections"
 histoPathInclusive        = "ForDataDrivenCtrlPlots"
 ShapeHistogramsDimensions = systematics.getBinningForPlot(shapeHistoName) # Get the new binning for the shape histogram
 DataCardName             += "_" + OptionMassShape
 
-if OptionMassShape == "LdgTetrajetMass":
-    shapeHistoName = "LdgTetrajetMass_AfterAllSelections"
 
 #================================================================================================  
 # Observation definition (how to retrieve number of observed events)
@@ -93,6 +93,7 @@ Observation = ObservationInput(datasetDefinition="Data", shapeHistoName=shapeHis
 #================================================================================================  
 # Luminosity uncertainty
 myLumiSystematics = ["lumi_13TeV"]
+#myLumiSystematics = None
 
 # Currently (21 Sep 2017) no Trigger SF is used
 myTrgSystematics = [] 
@@ -161,8 +162,11 @@ for mass in MassPoints:
     hx.setLabel("Hp" + str(mass) + "_a") #fixme: what is the "_a" for?
     hx.setLandSProcess(1)                #fixme: what is it for?
     hx.setValidMassPoints(myMassList)
-    hx.setNuisances(signalNuisances)
-    hx.setDatasetDefinition("ChargedHiggs_HplusTB_HplusToTB_M_"+str(mass))
+    if len(signalNuisances) > 0:
+        hx.setNuisances(signalNuisances)
+    else:
+        hx.setNuisances([])
+    hx.setDatasetDefinition("ChargedHiggs_HplusTB_HplusToTB_M_" + str(mass) )
     DataGroups.append(hx)
 
 

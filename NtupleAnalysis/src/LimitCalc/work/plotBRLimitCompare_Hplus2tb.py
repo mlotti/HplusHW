@@ -30,6 +30,7 @@ import sys
 import glob
 import json
 import array
+import copy
 from optparse import OptionParser
 
 import ROOT
@@ -92,29 +93,78 @@ def main(opts, args):
 
 def compareH2tb(opts):
     
+    noLumi = True
+    if noLumi:
+        BDT1    = "limits2017/datacards_combine_171108_092208_Hplus2tb_13TeV_LdgTetrajetMass_Run2016_80to1000_nominal_BDT1_noLumi"
+        BDT2    = "limits2017/datacards_combine_171108_092235_Hplus2tb_13TeV_LdgTetrajetMass_Run2016_80to1000_nominal_BDT2_noLumi"
+        BDT3    = "limits2017/datacards_combine_171108_092253_Hplus2tb_13TeV_LdgTetrajetMass_Run2016_80to1000_nominal_BDT3_noLumi"
+        BDT4    = "limits2017/datacards_combine_171108_093622_Hplus2tb_13TeV_LdgTetrajetMass_Run2016_80to1000_nominal_BDT4_noLumi"
+        NOMINAL = "limits2017/datacards_combine_171108_095038_Hplus2tb_13TeV_LdgTetrajetMass_Run2016_80to1000_nominal_BDT5_noLumi"
+        MVA0p9  = "limits2017/datacards_combine_171108_092208_Hplus2tb_13TeV_LdgTetrajetMass_Run2016_80to1000_nominal_TopRecoMVA0p9_BtagSFFix_noLumi"
+    else:
+        BDT1    = "limits2017/datacards_combine_171108_092208_Hplus2tb_13TeV_LdgTetrajetMass_Run2016_80to1000_nominal_BDT1__MC_FakeAndGenuineTauNotSeparated"
+        BDT2    = "limits2017/datacards_combine_171108_092235_Hplus2tb_13TeV_LdgTetrajetMass_Run2016_80to1000_nominal_BDT2__MC_FakeAndGenuineTauNotSeparated"
+        BDT3    = "limits2017/datacards_combine_171108_092253_Hplus2tb_13TeV_LdgTetrajetMass_Run2016_80to1000_nominal_BDT3__MC_FakeAndGenuineTauNotSeparated"
+        BDT4    = "limits2017/datacards_combine_171108_093622_Hplus2tb_13TeV_LdgTetrajetMass_Run2016_80to1000_nominal_BDT4__MC_FakeAndGenuineTauNotSeparated"
+        NOMINAL = "limits2017/datacards_combine_171108_095038_Hplus2tb_13TeV_LdgTetrajetMass_Run2016_80to1000_nominal_BDT5__MC_FakeAndGenuineTauNotSeparated"
+        MVA0p9  = "limits2017/datacards_combine_171108_092208_Hplus2tb_13TeV_LdgTetrajetMass_Run2016_80to1000_nominal_TopRecoMVA0p9_BtagSFFix"
+
     # Define list iwth label-path mappings
     myList1 = [
-        ("Nominal"                    , "*datacards_default_170827_075947_noLumi/CombineResults_taujets_*"),
-        ("Nominal (Lumi)"             , "*datacards_default_170827_075947/CombineResults_taujets_*"),
-        ("150 < m_{t} < 210 GeV/c^{2}", "*datacards_TopMass150to210_170914_163638_noLumi/CombineResults_taujets_*"),
-        ("Perfect JER (TopReco)"     , "*_LdgTetrajetMass_Run2016_80to1000_GenJets_noLumi/CombineResults_taujets_*"),
-        # ("Boosted Top (Approx.)"   , "*datacards_combine_MIT_approximate/CombineResults_taujets_*"),
-        # ("Single Lepton (Approx.)" , "*datacards_combine_SingleLepton_approximate/CombineResults_taujets_*"),
+        ("p_{T}^{b3} #geq 30, BDT #geq 0.80", "limits2018/datacards_2bjets40_MVA0p80_MVA0p80_TopMassCutOff600GeV_180112_073116/CombineResults*"),
+        #("p_{T}^{b3} #geq 40, BDT #geq 0.80", "limits2018/datacards_3bjets40_MVA0p80_MVA0p80_TopMassCutOff600GeV_180112_023556/CombineResults*"),
+        ("p_{T}^{b3} #geq 40, BDT #geq 0.85", "limits2018/datacards_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180112_023915/CombineResults*"),
+        ("p_{T}^{b3} #geq 40, BDT #geq 0.85 (mini-iso)", "limits2018/datacards_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900/CombineResults*"),
+        #("p_{T}^{b3} #geq 40, BDT #geq 0.88", "limits2018/datacards_3bjets40_MVA0p88_MVA0p88_TopMassCutOff600GeV_180115_090554/CombineResults*"),
+        #("p_{T}^{b3} #geq 40, BDT #geq 0.90", "limits2018/datacards_3bjets40_MVA0p90_MVA0p90_TopMassCutOff600GeV_180112_044147/CombineResults*"),
+        #
+        #("Resolved (MC)"  , 2bjets40_MVA0p80),
+        # ("Nominal"       , "*datacards_default_170827_075947_noLumi/CombineResults_taujets_*"),
+        # ("Nominal (Lumi)" , "*datacards_default_170827_075947/CombineResults_taujets_*"), #Data-driven QCD
+        # ("Nominal"        , "*%s/CombineResults_taujets_*" % (NOMINAL)),
+        # ("BDT (0.80)"     , "*%s/CombineResults_taujets_*" % (BDT1)),
+        # ("BDT (0.85)"     , "*%s/CombineResults_taujets_*" % (BDT2)),
+        # ("BDT #geq 0.9"    , "*%s/CombineResults_taujets_*" % (BDT3)),
+        # ("BDT #geq 0.9, BugFix", "*%s/CombineResults_taujets_*" % (MVA0p9)),
+        # ("BDT (0.95)"     , "*%s/CombineResults_taujets_*" % (BDT4)),
+        # ("BDT (30 GeV/c)" , "*%s/CombineResults_taujets_*" % ("datacards_combine_171113_074001_Hplus2tb_13TeV_LdgTetrajetMass_Run2016_80to1000_nominal_tmp__MC_FakeAndGenuineTauNotSeparated")), #alex
+        # ("150 < m_{t} < 210 GeV/c^{2}", "*datacards_TopMass150to210_170914_163638_noLumi/CombineResults_taujets_*"),
+        # ("Perfect JER (TopReco)"     , "*_LdgTetrajetMass_Run2016_80to1000_GenJets_noLumi/CombineResults_taujets_*"),
+        # ("~Boosted"       , "limits2017/datacards_combine_MIT_approximate/CombineResults_taujets_*"),
+        #("~Single Lepton" , "limits2017/datacards_combine_SingleLepton_approximate/CombineResults_taujets_*"),
         ]
 
+    # Do the first list of plots
+    if 1:
+        _opts = copy.deepcopy(opts)
+        _opts.yMin = -1
+        _opts.yMax = -1
+        doCompare(opts.name, myList1, _opts)
+
+    # NOTE! Be careful in comparing processes with a different BR for H+. It is NOT a fair comparison.
+    # Roughly speaking you have to multiply by the BR for that process. So for H->tb ~ 75-90%, H->tau nu ~ 15% depending on
+    # scenario and mH+ etc..
     myList2 = [
-        ("Nominal"                    , "*datacards_default_170827_075947_noLumi/CombineResults_taujets_*"),
-        ("Boosted Top (Approx.)"   , "*datacards_combine_MIT_approximate/CombineResults_taujets_*"),
-        ("Single Lepton (Approx.)" , "*datacards_combine_SingleLepton_approximate/CombineResults_taujets_*"),
+        # ("H^{+}#rightarrow tb (#chi^{2})"        , "*limits2017/datacards_default_170827_075947_noLumi/CombineResults_taujets_*"),
+        # ("H^{+}#rightarrow tb (#chi^{2}, MC)"    , "*%s/CombineResults_taujets_*" % (NOMINAL)),
+        # ("H^{+}#rightarrow tb (BDT #geq 0.90, MC)", "*%s/CombineResults_taujets_*" % (BDT3)),
+        # ("H^{+}#rightarrow tb (BDT #geq 0.90, MC, BugFix)", "*%s/CombineResults_taujets_*" % (MVA0p9)),
+        # ("H^{+}#rightarrow tb (BDT #geq 0.85, MC, (mini-iso)", "limits2018/datacards_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900/CombineResults*"),
+        # ("H^{+}#rightarrow tb (BDT #geq 0.85, MC)", "limits2018/datacards_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180112_023915/CombineResults*"),
+        ("H^{+}#rightarrow tb (Fake-b, oneBin)"   , "limits2018/datacards_Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180126_030205_oneBin/CombineResults*"),
+        ("H^{+}#rightarrow tb (Fake-b, visBin)"   , "limits2018/datacards_Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180126_030205_visBin/CombineResults*"),
+        ("H^{+}#rightarrow tb (Fake-b, default)"  , "limits2018/datacards_Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180126_030205/CombineResults*"),
+        # ("H^{+}#rightarrow tb (MC, mini-iso)"     , "limits2018/datacards_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900/CombineResults*"),
+        # ("H^{+}#rightarrow tb (MC)"               , "limits2018/datacards_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180112_023915/CombineResults*"),
+        # ("H^{+}#rightarrow tb (~boosted)"         , "limits2017/*datacards_combine_MIT_approximate/CombineResults_taujets_*"),
+        # ("Single Lepton"                          , "limits2017/*datacards_combine_SingleLepton_approximate/CombineResults_taujets_*"),
         ]
 
-
-    # Now do the plots
-    doCompare(opts.name, myList1, opts)
-
+    # Do the second list of plots
     opts.saveDir += "/AllFinalStates"
-    opts.name = opts.name + "2"
-    doCompare(opts.name, myList2, opts)
+    # opts.name = opts.name + "2"
+    if 1:
+        doCompare(opts.name, myList2, opts)
     return
 
 def _ifNotNone(value, default):
@@ -308,6 +358,8 @@ def addPhysicsText(histograms, limit, x=0.45, y=0.84, size=20):
     return
 
 def getLegend(nPlots, limit, opts, xLeg1):
+    if nPlots < 3:
+        nPlots = 3
     dy = (nPlots-3)*0.15
     # Create customised legend
     xLeg2 = 0.93
