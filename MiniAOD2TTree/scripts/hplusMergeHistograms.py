@@ -14,7 +14,7 @@ The maximum allowable size for a single ROOT file is limited to 2 GB (but can be
 Usage: (from inside a multicrab_AnalysisType_vXYZ_TimeStamp directory)
 hplusMergeHistograms.py
 hplusMergeHistograms.py --includeTasks WZ --filesInEOS -v
-
+hplusMergeHistograms.py --filesInEOS --deleteMergedFilesFirst -s
 
 Useful Links:
 https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsChFullyHadronic
@@ -39,7 +39,7 @@ ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
-
+from HiggsAnalysis.NtupleAnalysis.tools.ShellStyles import *
 
 #================================================================================================
 # Global Definitions
@@ -52,6 +52,34 @@ PBARLENGTH = 10
 #================================================================================================ 
 # Class Definition
 #================================================================================================ 
+from functools import wraps
+import errno
+import os
+import signal
+
+class TimeoutError(Exception):
+    '''
+    https://stackoverflow.com/questions/11901328/how-to-timeout-function-in-python-timeout-less-than-a-second
+    '''
+    pass
+
+def timeout(seconds=10, error_message=os.strerror(errno.ETIME)):
+    def decorator(func):
+        def _handle_timeout(signum, frame):
+            raise TimeoutError(error_message)
+
+        def wrapper(*args, **kwargs):
+            signal.signal(signal.SIGALRM, _handle_timeout)
+            signal.setitimer(signal.ITIMER_REAL,seconds) #used timer instead of alarm
+            try:
+                result = func(*args, **kwargs)
+            finally:
+                signal.alarm(0)
+            return result
+        return wraps(func)(wrapper)
+    return decorator
+
+
 class ExitCodeException(Exception):
     '''
     Exception for non-succesful crab job exit codes
@@ -106,6 +134,48 @@ class Report:
 #================================================================================================
 # Function Definitions
 #================================================================================================
+def DeleteTaskMergedRootFles(dirPath, taskName, opts):
+    '''
+    This command will clean a task directory in from pre-existing merged ROOT files.
+    This is useful when the mergign process was interrupted for some reason or you would
+    like to re-merge ROOT files with a different set of options (maxFileSize, filePerMerge, ..)
+    or just want to avoid overwriting pre-existing merged ROOT files.
+    '''
+    Verbose("DeleteTaskMergedRootFiles()", True)
+
+    files = GetTaskMergedRootFiles(taskName, True, opts)
+    
+    Verbose("Found %d merged ROOT files in dir %s:" % (len(files), dirPath), True)
+    cmd_ls = "ls"
+    if opts.filesInEOS:
+        cmd_ls = ConvertCommandToEOS("ls", opts)
+    cmd_ls += " %s" % (dirPath)
+
+    # Print contents of task dir (before)?
+    Verbose(cmd_ls, True)
+    ret = Execute(cmd_ls)
+    for i, r in enumerate(ret, 1):
+        Verbose(r)
+
+    # For-loop: All merged ROOT files of task 
+    for index, f in enumerate(files,1):
+        fName = os.path.basename(f)
+        cmd   = "rm" 
+        if opts.filesInEOS:
+            cmd = ConvertCommandToEOS(cmd, opts)
+        cmd += " %s" % (f)
+        Verbose(cmd)
+        ret = Execute(cmd)
+        PrintProgressBar(taskName + ", Delete ", index-1, len(files), "[" + fName + "]")
+    FinishProgressBar()
+
+    # Print contents of task dir (after)?
+    Verbose(cmd_ls, True)
+    ret = Execute(cmd_ls)
+    for i, r in enumerate(ret, 1):
+        Verbose(r)
+    return
+
 def AskUser(msg, printHeader=False):
     '''
     Prompts user for keyboard feedback to a certain question. 
@@ -190,7 +260,8 @@ def PrintProgressBar(taskName, iteration, total, suffix = ""):
     percents        = formatStr.format(100 * (iteration / float(total)))
     filledLength    = int(round(barLength * iteration / float(total)))
     bar             = '=' * filledLength + '-' * (barLength - filledLength)
-    sys.stdout.write('\r%s: |%s| %s%s %s' % (prefix, bar, percents, '%', suffix)),
+    #sys.stdout.write('\r%s: |%s| %s%s %s' % (prefix, bar, percents, '%', suffix)),
+    sys.stdout.write('%s: |%s| %s%s %s\r' % (prefix, bar, percents, '%', suffix)),
     sys.stdout.flush()
     return
 
@@ -604,11 +675,11 @@ def ConvertCommandToEOS(cmd, opts):
 
     return cmdMap[cmd]
 
-
 def Execute(cmd):
     '''
     Executes a given command and return the output.
     '''
+    # Uncomment the line below to force function to Timeout after 20 seconds
     Verbose("Execute()" , True)
     Verbose("%s" % (cmd), False)
     p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
@@ -632,7 +703,7 @@ def GetEOSHomeDir(opts):
     HOST = socket.gethostname()
     if "fnal" in HOST:
         prefix = "/eos/uscms"
-        # prefix = "" #do NOT use this "mount fuse" as it fails for multiple files
+        # prefix = "" #do NOT use this "FUSE mount" as it fails for multiple files
     elif "lxplus" in HOST:
         prefix = ""
     else:
@@ -685,7 +756,7 @@ def splitFiles(taskName, files, filesPerEntry, opts):
         for ifile, f in enumerate(files):
 
             # Update Progress bar
-            PrintProgressBar(taskName + ", Split ", ifile, len(files), "[" + os.path.basename(f) + "]")
+            PrintProgressBar(taskName + ", Split  ", ifile, len(files), "[" + os.path.basename(f) + "]")
 
             # Calculate cumulative size (in Bytes)
             fileSize = GetFileSize(f, opts, False) 
@@ -804,10 +875,8 @@ def GetFileSize(filePath, opts, convertToGB=True):
         return size
 
 
-def hadd(opts, mergeName, inputFiles, path_prefix=""):
-    '''
-    '''
-    Verbose("hadd()", True)
+def GetHaddCommand(opts, mergeName, inputFiles, path_prefix=""):
+    Verbose("GetHaddCommand()", True)
     if len(inputFiles) < 1:
         raise Exception("Attempting to merge 0 files! Somethings was gone wrong!")
     
@@ -832,6 +901,43 @@ def hadd(opts, mergeName, inputFiles, path_prefix=""):
         cmd.append("-f") 
     cmd.append(mergeNameNew)
     cmd.extend(inputFilesNew)
+    
+    # If under test-mode do nothing
+    if opts.test:
+        return ""
+    else:
+        return cmd
+
+
+def hadd(opts, mergeName, inputFiles, path_prefix=""):
+    '''
+    '''
+    Verbose("hadd()", True)
+#    if len(inputFiles) < 1:
+#        raise Exception("Attempting to merge 0 files! Somethings was gone wrong!")
+#    
+#    if path_prefix.endswith("/"):
+#        mergeNameNew  = path_prefix[:-1] + mergeName
+#    else:
+#        mergeNameNew = mergeName
+#
+#    inputFilesNew = []
+#    # For-loop: All input files
+#    for f in inputFiles:
+#        inputFilesNew.append(path_prefix + f)                               
+#
+#    if type(inputFilesNew) != list:
+#        inputFilesNew = [inputFilesNew]
+#    Verbose("Creating file %s from the following files:\n\t%s" % (mergeNameNew, "\n\t".join(inputFilesNew)) )
+#
+#    # Construct the ROOT-file merge command (hadd)
+#    cmd = ["hadd"]
+#    # Pass "-f" argument to force re-creation of output file.
+#    if opts.overwrite:
+#        cmd.append("-f") 
+#    cmd.append(mergeNameNew)
+#    cmd.extend(inputFilesNew)
+    cmd = GetHaddCommand(opts, mergeName, inputFiles, path_prefix) #alexis
     
     # If under test-mode do nothing
     if opts.test:
@@ -1088,15 +1194,13 @@ def CheckThatFilesExist(taskName, fileList, opts):
             Verbose("Task %s, file %s not found!" % (taskName, os.path.basename(f)) )
 
         # Update Progress bar
-        PrintProgressBar(taskName + ", Check ", index, len(fileList), "[" + os.path.basename(f) + "]")
-            
-
+        PrintProgressBar(taskName + ", Check  ", index, len(fileList), "[" + os.path.basename(f) + "]")
     # Flush stdout
-    FinishProgressBar()
+    # FinishProgressBar()
 
     if nExist != nFiles:
         msg  = "%s, found %s ROOT files but expected %s. Have you already run this script? " % (taskName, nExist, nFiles)
-        msg += "Would you like to proceed with the merging anyway? ALEX"
+        msg += "Would you like to proceed with the merging anyway?"
         if opts.linksToEOS:
             return False
         else:
@@ -1259,21 +1363,67 @@ def GetFileOpenPrefix(opts):
     return path_prefix
 
 
-def MergeFiles(mergeName, inputFiles, opts):
+def GetMergeCommand(mergeName, inputFiles, opts):
     '''
-    Merges ROOT files, either stored locally or on EOS.
+    Command for merging ROOT files, either stored locally or on EOS.
     '''
-    Verbose("MergeFiles()")
-
     Verbose("Attempting to merge:\n\t%s\n\tto\n\t%s." % ("\n\t".join(inputFiles), mergeName) )
+
+    # Initialise variables
+    cmd = ""
+
     if len(inputFiles) < 1:
         raise Exception("Attempting to merge 0 files! Somethings was gone wrong!")
     elif len(inputFiles) == 1:
         if opts.filesInEOS:
             prefix   = GetXrdcpPrefix(opts)
             srcFile  = prefix + inputFiles[0]
+            if "fnal" in socket.gethostname():
+                srcFile  = srcFile.replace("/eos/uscms/", "") # do not use the FUSE mount
             destFile = prefix + mergeName
-            cmd      = "xrdcp %s %s" % (srcFile, destFile)
+            
+            # Construct the command to be executed
+            cmd  = "xrdcp "
+    
+            # Need to replace any existing output file?
+            if opts.overwrite:
+                cmd += "--force "
+            cmd += " %s %s" % (srcFile, destFile)
+        else:
+            if not opts.test:
+                cmd = "cp %s %s" % (inputFiles[0], mergeName)
+    else:
+        if opts.filesInEOS:
+            cmd = GetHaddCommand(opts, mergeName, inputFiles, GetXrdcpPrefix(opts) )
+        else:
+            cmd = GetHaddCommand(opts, mergeName, inputFiles)
+    return cmd
+    #return " ".join(cmd)
+
+
+#@timeout(1) # 5 seconds timeout for this function
+def MergeFiles(mergeName, inputFiles, opts):
+    '''
+    Merges ROOT files, either stored locally or on EOS.
+    '''
+    Verbose("Attempting to merge:\n\t%s\n\tto\n\t%s." % ("\n\t".join(inputFiles), mergeName) )
+
+    if len(inputFiles) < 1:
+        raise Exception("Attempting to merge 0 files! Somethings was gone wrong!")
+    elif len(inputFiles) == 1:
+        if opts.filesInEOS:
+            prefix   = GetXrdcpPrefix(opts)
+            srcFile  = prefix + inputFiles[0]
+            if "fnal" in socket.gethostname():
+                srcFile  = srcFile.replace("/eos/uscms/", "") # do not use the FUSE mount
+            destFile = prefix + mergeName
+            
+            # Construct the command to be executed
+            cmd  = "xrdcp "
+            # Need to replace any existing output file?
+            if opts.overwrite:
+                cmd += "--force "
+            cmd += " %s %s" % (srcFile, destFile)
             Verbose(cmd)
             ret = Execute(cmd)
             ret = 0
@@ -1289,7 +1439,7 @@ def MergeFiles(mergeName, inputFiles, opts):
         else:
             ret = hadd(opts, mergeName, inputFiles)    
             Verbose("Done %s (%s GB)." % (mergeName, GetFileSize(mergeName, opts) ), False )
-
+            os.system("chmod u+r,g+r,o+r %s"%mergeName)
     return ret
 
 def PrintSummary(taskReports):
@@ -1302,22 +1452,20 @@ def PrintSummary(taskReports):
     msgAlign = "{:<3} {:<50} {:^15} {:^15} {:^15} {:^18} {:^18} {:^18}"
     header   = msgAlign.format("#", "Task Name", "Input Files", "Merged Files", "Pre-Merged Files", "Size (GB)", "Merge Time (min)", "Clean Time (min)")
     hLine    = "="*len(header)
+    table.append("")
     table.append(hLine)
     table.append(header)
     table.append(hLine)
 
     #For-loop: All reports
-    index = 1
-    for key in taskReports.keys():
+    for index, key in enumerate(taskReports.keys(), 1):
         r = taskReports[key]
         table.append( msgAlign.format(index, r.dataset, r.nInputFiles, r.nMergedFiles, r.nPreMergedFiles, "%0.3f" % r.mergedFilesSize, "%0.3f" % r.mergeTimeTotal, "%0.3f" % r.cleanTimeTotal) )
-        index+=1
+    table.append("")
 
     # Print the table
-    print
     for l in table:
         print l
-    print
     return
 
 
@@ -1399,7 +1547,7 @@ def GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts):
                 exitedJobs.append(int(exit_match.group("jobId")))
         
         # Update progress bar
-        PrintProgressBar(taskName + ", Files ", index, len(stdoutFiles), "[" + os.path.basename(f) + "]")
+        PrintProgressBar(taskName + ", Files  ", index, len(stdoutFiles), "[" + os.path.basename(f) + "]")
 
     # Flush stdout
     if len(stdoutFiles)>0:
@@ -1574,11 +1722,16 @@ def DeleteFolders(filePath, foldersToDelete, opts):
     Delete folders (TNamed) from merged files (due to merged multiple copies are present)
     '''
     Verbose("DeleteFolders()")
-    
+
+    # if we dont merge, wo dont have any problem with duplicates
+    if opts.filesPerMerge == 1:
+        Verbose("No need to delete duplicate folders since filesPerMerge = %s" % (opts.filesPerMerge))
+        return
+        
     Verbose("Will delete the following folders:\n\t%s\n\tfrom file %s" % ("\n\t".join(foldersToDelete), filePath) )
     # For-loop: All folders to be deleted
-    for folder in foldersToDelete:
-        Verbose("Deleting folder \"%s\"" % (folder) )
+    for i, folder in enumerate(foldersToDelete, 1):
+        Verbose("Deleting folder \"%s\"" % (folder), i==1) 
         delete(filePath, folder, opts)
     return
 
@@ -1661,7 +1814,55 @@ def GetTaskRootFiles(taskName, opts):
     for f in rootFiles:
         filesWithoutPath.append(os.path.basename(f))
     return filesWithoutPath
-####    return rootFiles
+
+def CopyMCFiles(taskdir,files):
+    data_re = re.compile("Run20")
+    match = data_re.search(taskdir)
+    if match: # if data do nothing
+        return files
+
+    # copy mc
+    root_re = re.compile("miniaod2tree_(?P<N>\d+)\.root")
+    for f in files:
+        match = root_re.search(f)
+        if match:
+            fOUT = "histograms-"+taskdir+"-%s.root"%(match.group("N"))
+        cmd = "mv %s %s"%(os.path.join(taskdir,"results",f),os.path.join(taskdir,"results",fOUT))
+        os.system(cmd)
+    return None
+
+def GetTaskMergedRootFiles(taskName, fullPath, opts):
+    '''
+    Get all the histograms-*.root files for the given CRAB task
+    '''
+    Verbose("GetTaskMergedRootFiles()", True)
+    if opts.filesInEOS:
+        path = ConvertPathToEOS(taskName, taskName, "", opts, isDir=True)
+    else:
+        path = os.path.join(taskName, "results", "histograms-*.root")
+
+    Verbose("Obtaining stdout files for task %s from %s" % (taskName, path), True)
+    fileName = "histograms-*.root"
+    rootFiles = glob.glob(path + fileName)
+
+    nFiles = len(rootFiles)
+    if nFiles < 1:
+        msg = "Task %s, found %s ROOT files of type %s with glob under path %s" % (taskName, fileName, nFiles, path)
+        Verbose(msg)
+    else:
+        Verbose("Task %s, Found %s ROOT files of type %s with glob under path %s" % (taskName, fileName, nFiles, path) )
+
+    # Sort the list naturally (alphanumeric strings).
+    rootFiles = natural_sort(rootFiles)
+
+    # remove the path
+    files = []
+    for f in rootFiles:
+        if fullPath:
+            files.append(f)
+        else:
+            files.append(os.path.basename(f))
+    return files
 
 
 def GetPreexistingMergedFiles(taskPath, opts):
@@ -1725,6 +1926,15 @@ def LinkFiles(taskName, fileList):
         PrintProgressBar(taskName + ", Links ", index, len(fileList), "[" + os.path.basename(destFile) + "]")
     return
 
+def DoNotUseFuseMount(files):
+    if "fnal" not in socket.gethostname():
+        return files
+
+    newPaths = []
+    for f in files:
+        newPath = f.replace("/eos/uscms/", "")
+        newPaths.append(newPath)
+    return newPaths
 
 def main(opts, args):
 
@@ -1788,6 +1998,15 @@ def main(opts, args):
         if opts.skipVerify:
             files = GetTaskRootFiles(taskName, opts)
 
+        if CopyMCFiles(d,files) == None:
+            continue
+
+        # Clean up pre-merged ROOT files before continuing? 
+        if opts.deleteMergedFilesFirst:
+            taskDir = os.path.dirname(stdoutFiles[0].replace("/log", ""))
+            DeleteTaskMergedRootFles(taskDir, taskName, opts)
+            continue
+
         # For Testing purposes
         if opts.test:
             ExamineExitCodes(taskName, exitedJobs, missingFiles)            
@@ -1826,7 +2045,8 @@ def main(opts, args):
                         mFile = ConvertPathToEOS(taskName, os.path.join(d, "results", f), "", opts)
                         mList.append(mFile)
                     LinkFiles(taskName, mList)
-                FinishProgressBar()
+                if index < len(crabDirs)-1:
+                    FinishProgressBar()
                 continue
             else:
                 pass
@@ -1835,7 +2055,12 @@ def main(opts, args):
         # If this is a test skip the remaining part
         if opts.test:
             continue
-        
+
+        # If files are in EOS do not use the FUSE mount (FNAL only)
+        # Added while testing to overcome unknown merging errors (I/O related)  on 05 Oct 2017
+        #if opts.filesInEOS:
+        #    files = DoNotUseFuseMount(files)
+
         # Split files according to user-defined options
         filesSplit = splitFiles(taskName, files, opts.filesPerMerge, opts)
 
@@ -1887,10 +2112,29 @@ def main(opts, args):
                 Verbose("%s, merge file  %s does not already exist. Will create it" % (taskName, mergeName) )
 
             # Merge the ROOT files
-            mergePath = "/".join(mergeName.split("/")[-1:]) #fits terminal, [-6:] is too big to fit
-            PrintProgressBar(taskName + ", Merge ", index-1, len(filesSplit), "[" + mergePath + "]")
+            #mergePath = "/".join(mergeName.split("/")[-1:]) #fits terminal, [-6:] is too big to fit
+            mergeFile = os.path.basename(mergeName)
+            nInputs   = len(inputFiles)
+            firstFile = os.path.basename(inputFiles[0])
+            lastFile  = os.path.basename(inputFiles[-1])
+            PrintProgressBar(taskName + ", Merge  ", index-1, len(filesSplit), "[" + mergeFile + " using %s file(s): %s to %s]" % (nInputs, firstFile, lastFile) )
+
+            # Time the merging process
             time_start = time.time()
+            ret = -1
+            cmd = GetMergeCommand(mergeName, inputFiles, opts)
+#            try:
             ret = MergeFiles(mergeName, inputFiles, opts)
+#            except TimeoutError, e:
+#                dt_timeout = time.time() - time_start
+#                print
+#                msg  = "Timed-out (%.2f seconds) trying to create %s using %s files(s): %s to %s" % (dt_timeout, mergeFile, nInputs, firstFile, lastFile)
+#                Print(msg, True)
+#                Print("Command invoked was:\n" +  " ".join(cmd), False)
+                #for c in cmd:
+                #   print c
+#                sys.exit()
+
             time_end = time.time()
             dtMerge = time_end-time_start
             if ret != 0:
@@ -1918,15 +2162,13 @@ def main(opts, args):
                 DeleteFiles(taskName, mergeName, inputFiles, opts)
 
             # Update Progress bar
-            PrintProgressBar(taskName + ", Merge ", index, len(filesSplit), "[" + mergePath + "]")
+            PrintProgressBar(taskName + ", Merge  ", index, len(filesSplit), "[" + mergeFile + " using %s files: %s to %s]" % (len(inputFiles), firstFile, lastFile) )            
+            #PrintProgressBar(taskName + ", Merge  ", index, len(filesSplit), "[" + mergePath + "]")
 
         # Flush stdout
         FinishProgressBar()
         if taskName not in taskReports.keys():
             taskReports[taskName] = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
-
-    # Empty line before proceeding to cleaning
-    print
 
     if opts.test:
         return
@@ -1937,8 +2179,7 @@ def main(opts, args):
     
     foldersToDelete = ["Generated", "Commit", "dataVersion"]
     # For-loop: All merged files
-    index = 0
-    for key in mergeFileMap.keys():
+    for index, key in enumerate(mergeFileMap.keys(), 0):
         f = key
         sourceFiles = mergeFileMap[key]
         taskName = key.split("/")[0]
@@ -1947,6 +2188,10 @@ def main(opts, args):
             taskName    = taskNameEOS.replace("-", "_")
         Verbose("Merge file:\n\t%s" % (f), True)
         Verbose("Source files:\n\t%s" % ("\n\t".join(sourceFiles)), False) 
+
+        if opts.filesPerMerge == 1:
+            PrintProgressBar(taskNameMapR[taskNameEOS] + ", Clean  ", 99, 100, "[Skipped because filesPerMerge=%s]" % (opts.filesPerMerge))
+            break
 
         # Delete folders & Calculate the clean-time (in seconds)
         Verbose("%s [from %d file(s)]" % (f, len(sourceFiles)), True)
@@ -1972,9 +2217,7 @@ def main(opts, args):
         if opts.filesInEOS:
             PrintProgressBar(taskNameMapR[taskNameEOS] + ", Clean ", index, len(mergeFileMap.keys()), "[" + os.path.basename(f) + "]")
         else:
-            PrintProgressBar(taskName + ", Clean ", index, len(mergeFileMap.keys()), "[" + os.path.basename(f) + "]")
-            
-        index += 1
+            PrintProgressBar(taskName + ", Clean ", index, len(mergeFileMap.keys()), "[" + os.path.basename(f) + "]")            
 
     # Flush stdout
     FinishProgressBar()
@@ -2018,14 +2261,18 @@ if __name__ == "__main__":
     FILESINEOS    = False
     SKIPVERIFY    = False
     MAXFILESIZE   = 2.0
+    DELETEFIRST   = False
 
     parser = OptionParser(usage="Usage: %prog [options]")
     # multicrab.addOptions(parser)
     parser.add_option("--input", dest="input", type="string", default="histograms_.*?\.root",
-                      help="Regex for input root files (note: remember to escape * and ? !) [default: 'histograms_.*?\.root']")
+                      help="Regex for input root files (note: remember to escape * and ? !) [default: 'histograms_.*?\.root']")#fixme
 
     parser.add_option("--output", dest="output", type="string", default="histograms-%s.root",
-                      help="Pattern for merged output root files (use '%s' for crab directory name) [default: 'histograms-%s.root']")
+                      help="Pattern for merged output root files (use '%s' for crab directory name) [default: 'histograms-%s.root']")#fixme
+
+    parser.add_option("--deleteMergedFilesFirst", dest="deleteMergedFilesFirst", action="store_true", default=DELETEFIRST,
+                      help="Option to delete all pre-existing merged files before proceeding to merging [default: %s]" % (DELETEFIRST) )
 
     parser.add_option("--test", dest="test", default=False, action="store_true",
                       help="Just test, do not do any merging or deleting. Useful for checking what would happen. [default: 'False']")
@@ -2076,5 +2323,11 @@ if __name__ == "__main__":
 
     if opts.filesPerMerge == 0:
         parser.error("--filesPerMerge must be non-zero")
+
+    if opts.deleteMergedFilesFirst:
+        msg  = "Are you sure you want to %spermanently delete%s all merged ROOT files of all CRAB tasks? " % (ErrorStyle(), NormalStyle())
+        replyIsYes = AskUser(WarningLabel() + msg + NormalStyle(), True)
+        if not replyIsYes:
+            sys.exit()
 
     sys.exit(main(opts, args))

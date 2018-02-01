@@ -14,6 +14,9 @@ void ElectronGeneratedCollection::setupBranches(BranchManager& mgr) {
   mgr.book(prefix()+"_cutBasedElectronID_Spring15_25ns_V1_standalone_medium", &fCutBasedElectronID_Spring15_25ns_V1_standalone_medium);
   mgr.book(prefix()+"_cutBasedElectronID_Spring15_25ns_V1_standalone_tight", &fCutBasedElectronID_Spring15_25ns_V1_standalone_tight);
   mgr.book(prefix()+"_cutBasedElectronID_Spring15_25ns_V1_standalone_veto", &fCutBasedElectronID_Spring15_25ns_V1_standalone_veto);
+  mgr.book(prefix()+"_MVA", &fMVA);
   mgr.book(prefix()+"_effAreaIsoDeltaBeta", &fEffAreaIsoDeltaBeta);
+  mgr.book(prefix()+"_effAreaMiniIso", &fEffAreaMiniIso);
   mgr.book(prefix()+"_relIsoDeltaBeta", &fRelIsoDeltaBeta);
+  mgr.book(prefix()+"_relMiniIso", &fRelMiniIso);
 }

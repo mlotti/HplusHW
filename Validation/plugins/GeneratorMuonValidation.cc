@@ -208,12 +208,15 @@ bool MuonValidation::genMuonMatchingRecoMuon(const reco::GenParticle& particle, 
 
     edm::Handle<edm::View<pat::Muon> > myMuonHandle;
     iEvent.getByLabel(recoMuonSrc, myMuonHandle);
-    edm::PtrVector<pat::Muon> muons = myMuonHandle->ptrVector();
+    /*
+      edm::PtrVector<pat::Muon> muons = myMuonHandle->ptrVector();
 
     for(edm::PtrVector<pat::Muon>::const_iterator iMuon = muons.begin(); iMuon != muons.end(); ++iMuon) {
 	double DR = ROOT::Math::VectorUtil::DeltaR(particle.p4(),(*iMuon)->p4());
 	if(DR < DRmin) match = true;
     }
+    Alexandros - 02 Oct 2017: Disabled due to compilation errors
+    */
 
     return match;
 }

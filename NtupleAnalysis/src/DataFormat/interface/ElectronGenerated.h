@@ -35,8 +35,11 @@ protected:
   const Branch<std::vector<bool>> *fCutBasedElectronID_Spring15_25ns_V1_standalone_medium;
   const Branch<std::vector<bool>> *fCutBasedElectronID_Spring15_25ns_V1_standalone_tight;
   const Branch<std::vector<bool>> *fCutBasedElectronID_Spring15_25ns_V1_standalone_veto;
+  const Branch<std::vector<float>> *fMVA;
   const Branch<std::vector<float>> *fEffAreaIsoDeltaBeta;
+  const Branch<std::vector<float>> *fEffAreaMiniIso;
   const Branch<std::vector<float>> *fRelIsoDeltaBeta;
+  const Branch<std::vector<float>> *fRelMiniIso;
 };
 
 
@@ -66,8 +69,11 @@ public:
   bool cutBasedElectronID_Spring15_25ns_V1_standalone_medium() const { return this->fCollection->fCutBasedElectronID_Spring15_25ns_V1_standalone_medium->value()[this->index()]; }
   bool cutBasedElectronID_Spring15_25ns_V1_standalone_tight() const { return this->fCollection->fCutBasedElectronID_Spring15_25ns_V1_standalone_tight->value()[this->index()]; }
   bool cutBasedElectronID_Spring15_25ns_V1_standalone_veto() const { return this->fCollection->fCutBasedElectronID_Spring15_25ns_V1_standalone_veto->value()[this->index()]; }
+  float MVA() const { return this->fCollection->fMVA->value()[this->index()]; }
   float effAreaIsoDeltaBeta() const { return this->fCollection->fEffAreaIsoDeltaBeta->value()[this->index()]; }
+  float effAreaMiniIso() const { return this->fCollection->fEffAreaMiniIso->value()[this->index()]; }
   float relIsoDeltaBeta() const { return this->fCollection->fRelIsoDeltaBeta->value()[this->index()]; }
+  float relMiniIso() const { return this->fCollection->fRelMiniIso->value()[this->index()]; }
 
 protected:
   Particle<ParticleCollection<double>> fMCelectron;

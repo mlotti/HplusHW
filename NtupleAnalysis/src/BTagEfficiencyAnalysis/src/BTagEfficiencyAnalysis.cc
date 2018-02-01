@@ -81,7 +81,7 @@ BTagEfficiencyAnalysis::BTagEfficiencyAnalysis(const ParameterSet& config, const
                 fEventCounter, fHistoWrapper, &fCommonPlots, ""),
   cVertexSelection(fEventCounter.addCounter("Primary vertex selection")),
   fTauSelection(config.getParameter<ParameterSet>("TauSelection"),
-                fEventCounter, fHistoWrapper, &fCommonPlots, ""), // fixme: alex "Veto"
+                fEventCounter, fHistoWrapper, &fCommonPlots, ""),
   cFakeTauSFCounter(fEventCounter.addCounter("Fake tau SF")),
   cTauTriggerSFCounter(fEventCounter.addCounter("Tau trigger SF")),
   cMetTriggerSFCounter(fEventCounter.addCounter("Met trigger SF")),
@@ -234,17 +234,19 @@ void BTagEfficiencyAnalysis::process(Long64_t entry) {
     if (p.pt() > fJetPtCutMax) continue;
     if (p.eta() < fJetEtaCutMin) continue;
     if (p.eta() > fJetEtaCutMax) continue;
-    // Look for parton flavour
-    int id = std::abs(p.pdgId()); // FIXME switch to partonFlavour
+
+    // Look for hadron flavour (See: https://hypernews.cern.ch/HyperNews/CMS/get/btag/1482.html)
+    int id = std::abs(p.hadronFlavour());
     if (id == 5) {
       hAllBjets->Fill(p.pt());
     } else if (id == 4) {
       hAllCjets->Fill(p.pt());
-    } else if (id == 21) {
-      hAllGjets->Fill(p.pt());
-    } else if (id == 1 || id == 2 || id == 3) {
-      hAllLightjets->Fill(p.pt());
-    }
+    }// else if (id == 21) {
+    //  hAllGjets->Fill(p.pt());
+    // } else if (id == 1 || id == 2 || id == 3) {
+    //  hAllLightjets->Fill(p.pt());
+    // }
+    else hAllLightjets->Fill(p.pt()); 
   }
   // Loop over selected b jets
   const BJetSelection::Data bjetData = fBJetSelection.silentAnalyze(fEvent, jetData);
@@ -254,17 +256,19 @@ void BTagEfficiencyAnalysis::process(Long64_t entry) {
     if (p.pt() > fJetPtCutMax) continue;
     if (p.eta() < fJetEtaCutMin) continue;
     if (p.eta() > fJetEtaCutMax) continue;
-    // Look for parton flavour
-    int id = std::abs(p.pdgId()); // FIXME switch to partonFlavour
+
+    // Look for hadron flavour (See: https://hypernews.cern.ch/HyperNews/CMS/get/btag/1482.html)
+    int id = std::abs(p.hadronFlavour());
     if (id == 5) {
       hPassedBjets->Fill(p.pt());
     } else if (id == 4) {
       hPassedCjets->Fill(p.pt());
-    } else if (id == 21) {
-      hPassedGjets->Fill(p.pt());
-    } else if (id == 1 || id == 2 || id == 3) {
-      hPassedLightjets->Fill(p.pt());
-    }
+    }// else if (id == 21) {
+     // hPassedGjets->Fill(p.pt());
+    // } else if (id == 1 || id == 2 || id == 3) {
+    //  hPassedLightjets->Fill(p.pt());
+    //  }
+    else hPassedLightjets->Fill(p.pt());
   }
   
 //====== All cuts passed

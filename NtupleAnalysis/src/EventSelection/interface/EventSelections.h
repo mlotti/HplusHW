@@ -13,3 +13,6 @@
 #include "EventSelection/interface/JetCorrelations.h"
 #include "EventSelection/interface/TopologySelection.h"
 #include "EventSelection/interface/TopSelection.h"
+#include "EventSelection/interface/TopSelectionBDT.h"
+#include "EventSelection/interface/FatJetSelection.h"
+#include "EventSelection/interface/FatJetSoftDropSelection.h"

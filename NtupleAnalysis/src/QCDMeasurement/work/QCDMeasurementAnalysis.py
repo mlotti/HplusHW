@@ -21,6 +21,7 @@ allSelections.CommonPlots.enableGenuineTauHistograms = True
 # Set splitting of phase space (first bin is below first edge value and last bin is above last edge value)
 allSelections.CommonPlots.histogramSplitting = [
     PSet(label="tauPt", binLowEdges=[60.0, 80.0, 100.0], useAbsoluteValues=False),
+    PSet(label="tauEta", binLowEdges=[1.7], useAbsoluteValues=True),
   ]
 #===== Selection customisations
 allSelections.TauSelection.prongs = 1

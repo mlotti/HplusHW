@@ -14,7 +14,7 @@ JetDumper::JetDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<ed
     booked           = false;
 
     systVariations = inputCollections[0].getParameter<bool>("systVariations");
-
+        
     pt  = new std::vector<double>[inputCollections.size()];
     eta = new std::vector<double>[inputCollections.size()];    
     phi = new std::vector<double>[inputCollections.size()];    
@@ -28,7 +28,9 @@ JetDumper::JetDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<ed
     nDiscriminators = inputCollections[0].getParameter<std::vector<std::string> >("discriminators").size();
     discriminators = new std::vector<float>[inputCollections.size()*nDiscriminators];
     nUserfloats = inputCollections[0].getParameter<std::vector<std::string> >("userFloats").size();
-    userfloats = new std::vector<double>[inputCollections.size()*nUserfloats];
+    userfloats  = new std::vector<double>[inputCollections.size()*nUserfloats];
+    nUserints   = inputCollections[0].getParameter<std::vector<std::string> >("userInts").size();
+    userints    = new std::vector<int>[inputCollections.size()*nUserints];
     jetToken   = new edm::EDGetTokenT<edm::View<pat::Jet> >[inputCollections.size()];
     jetJESup   = new edm::EDGetTokenT<edm::View<pat::Jet> >[inputCollections.size()];
     jetJESdown = new edm::EDGetTokenT<edm::View<pat::Jet> >[inputCollections.size()];
@@ -80,6 +82,10 @@ JetDumper::JetDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<ed
       systJERup = new FourVectorDumper[inputCollections.size()];
       systJERdown = new FourVectorDumper[inputCollections.size()];
     }
+    // Marina - start
+    nSubjets     = new std::vector<int>[inputCollections.size()];
+    hasBTagSubjet= new std::vector<bool>[inputCollections.size()];
+    // Marina - end
 }
 
 JetDumper::~JetDumper(){}
@@ -97,7 +103,7 @@ void JetDumper::book(TTree* tree){
     tree->Branch((name+"_pdgId").c_str(),&pdgId[i]);
     tree->Branch((name+"_hadronFlavour").c_str(),&hadronFlavour[i]);
     tree->Branch((name+"_partonFlavour").c_str(),&partonFlavour[i]);
-
+    
     std::vector<std::string> discriminatorNames = inputCollections[i].getParameter<std::vector<std::string> >("discriminators");
     for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
       tree->Branch((name+"_"+discriminatorNames[iDiscr]).c_str(),&discriminators[inputCollections.size()*iDiscr+i]);
@@ -109,6 +115,14 @@ void JetDumper::book(TTree* tree){
       branch_name = branch_name.erase(pos_semicolon,1);
       tree->Branch((name+"_"+branch_name).c_str(),&userfloats[inputCollections.size()*iDiscr+i]);
     }
+    std::vector<std::string> userintNames = inputCollections[i].getParameter<std::vector<std::string> >("userInts");
+    for(size_t iDiscr = 0; iDiscr < userintNames.size(); ++iDiscr) {
+      std::string branch_name = userintNames[iDiscr];
+      size_t pos_semicolon = branch_name.find(":");
+      branch_name = branch_name.erase(pos_semicolon,1);
+      tree->Branch((name+"_"+branch_name).c_str(),&userints[inputCollections.size()*iDiscr+i]);
+    }
+
     tree->Branch((name+"_IDloose").c_str(),&jetIDloose[i]);
     tree->Branch((name+"_IDtight").c_str(),&jetIDtight[i]);
     tree->Branch((name+"_IDtightLeptonVeto").c_str(),&jetIDtightLeptonVeto[i]);
@@ -131,6 +145,14 @@ void JetDumper::book(TTree* tree){
       systJERup[i].book(tree, name, "JERup");
       systJERdown[i].book(tree, name, "JERdown");
     }
+    
+    // Marina - start
+    bool checkSubjets = inputCollections[i].getUntrackedParameter<bool>("checkSubjets",false);
+    if (checkSubjets){
+      tree->Branch((name+"_nSubjets").c_str(),&nSubjets[i]);
+      tree->Branch((name+"_hasBTagSubjet").c_str(), &hasBTagSubjet[i]);
+    }
+    // Marina - end
   }
 }
 
@@ -168,6 +190,11 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     for(size_t ic = 0; ic < inputCollections.size(); ++ic){
         std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
 	std::vector<std::string> userfloatNames = inputCollections[ic].getParameter<std::vector<std::string> >("userFloats");
+	std::vector<std::string> userintNames = inputCollections[ic].getParameter<std::vector<std::string> >("userInts");
+	
+	// Marina - start
+	bool checkSubjets = inputCollections[ic].getUntrackedParameter<bool>("checkSubjets",false);
+	// Marina - end
 
         edm::Handle<edm::View<pat::Jet>> jetHandle;
         iEvent.getByToken(jetToken[ic], jetHandle);
@@ -192,6 +219,11 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                     //std::cout << inputCollections[ic].getUntrackedParameter<std::string>("branchname","") << " / " << userfloatNames[iDiscr] << std::endl;
                     userfloats[inputCollections.size()*iDiscr+ic].push_back(obj.userFloat(userfloatNames[iDiscr]));
                 }
+		for(size_t iDiscr = 0; iDiscr < userintNames.size(); ++iDiscr) {
+		  // std::cout << inputCollections[ic].getUntrackedParameter<std::string>("branchname","") << " / " << userintNames[iDiscr] << std::endl;
+		  userints[inputCollections.size()*iDiscr+ic].push_back(obj.userInt(userintNames[iDiscr]));
+		}
+
 		int genParton = 0;
 		if(obj.genParton()){
 		  genParton = obj.genParton()->pdgId();
@@ -344,6 +376,22 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                   // JER
 */                
                 }
+		// Marina - start		
+		if (checkSubjets){
+		  auto &subjets = obj.subjets("SoftDrop");
+		  
+		  int nSub = 0;
+		  bool hasBSubjet = false;
+		  for (auto const & sj: subjets)
+		    {
+		      float csv = sj->bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags");
+		      if (csv >= 0.8484) hasBSubjet = true;   // Medium working point (Recommended for 2016 Analysis)
+		      nSub++;
+		    }
+		  nSubjets[ic].push_back(nSub);
+		  hasBTagSubjet[ic].push_back(hasBSubjet);
+		}
+		// Marina - end
             }
         }
     }
@@ -351,6 +399,7 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 }
 
 void JetDumper::reset(){
+
     for(size_t ic = 0; ic < inputCollections.size(); ++ic){
 	pt[ic].clear();
 	eta[ic].clear();
@@ -383,12 +432,19 @@ void JetDumper::reset(){
           systJERup[ic].reset();
           systJERdown[ic].reset();
 	}
+	// Marina - start
+	nSubjets[ic].clear();
+	hasBTagSubjet[ic].clear();
+	// Marina - end
     }
     for(size_t ic = 0; ic < inputCollections.size()*nDiscriminators; ++ic){
         discriminators[ic].clear();
     }
     for(size_t ic = 0; ic < inputCollections.size()*nUserfloats; ++ic){
         userfloats[ic].clear();
+    }
+    for(size_t ic = 0; ic < inputCollections.size()*nUserints; ++ic){
+      userints[ic].clear();
     }
 }
 

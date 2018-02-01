@@ -45,11 +45,12 @@ private:
 /// Mediator class between individual BTagSFInputItem and BTagSFCalculator
 class BTagSFInputStash {
 public:
-  enum BTagJetFlavorType {
+  enum BTagJetFlavorType { 
+    // README: https://hypernews.cern.ch/HyperNews/CMS/get/btag/1482/1/1/1/1/1.html
     kBJet,
     kCJet,
-    kGJet,
-    kUDSJet,
+    // kGJet,   // obsolete (see README)
+    // kUDSJet, // obsolete (see README)
     kUDSGJet,
   };
   BTagSFInputStash();
@@ -73,8 +74,8 @@ private:
   
   std::vector<BTagSFInputItem*> fBToB;
   std::vector<BTagSFInputItem*> fCToB;
-  std::vector<BTagSFInputItem*> fGToB;
-  std::vector<BTagSFInputItem*> fUdsToB;
+  // std::vector<BTagSFInputItem*> fGToB;
+  std::vector<BTagSFInputItem*> fUdsgToB;
 };
 
 class BTagSFCalculator {

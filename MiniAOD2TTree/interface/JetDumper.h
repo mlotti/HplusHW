@@ -47,6 +47,8 @@ class JetDumper : public BaseDumper {
         std::vector<float> *discriminators;
         std::vector<double> *userfloats;
 	int nUserfloats;
+	std::vector<int> *userints;
+	int nUserints;
         //std::vector<JetCorrectionUncertainty*> fJECUncertainty;
 
         std::vector<int> *hadronFlavour;
@@ -77,5 +79,10 @@ class JetDumper : public BaseDumper {
         FourVectorDumper *systJERup;
         FourVectorDumper *systJERdown;
 
+	// Marina - start
+	std::vector<int> *nSubjets;
+	std::vector<bool> *hasBTagSubjet;
+	// Marina - end
+	
 };
 #endif
