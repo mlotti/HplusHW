@@ -341,8 +341,8 @@ void TopSelectionBDT::initialize(const ParameterSet& config) {
 
   // Read the xml file
   reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/EventSelection/interface/weights/TMVAClassification_BDTG_default.weights.xml");
+  //reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TMVA_BDT/test/weights_DeltaRminQuarks08/TMVAClassification_BDTG.weights.xml");
   //reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TMVA_BDT/test/weights_NewTrainingFP/TMVAClassification_BDTG.weights.xml");
-  //reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TMVA_BDT/test/weights_DeltaRJets08/TMVAClassification_BDTG.weights.xml");
   //reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TMVA_BDT/test/weights_topPtle500/TMVAClassification_BDTG.weights.xml");
 }
 
