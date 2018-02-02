@@ -464,20 +464,10 @@ def GetHistoKwargs(hName, opts):
         kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
         # kwargs["ylabel"] = "Events / %.0f " + units
     if "TetrajetMass" in hName:
-        myBins = []
-        for j in range(0, 1000, 50):
-            myBins.append(j)
-        for k in range(1000, 2000, 100):
-            myBins.append(k)
-        for l in range(2000, 3500, 500):
-            myBins.append(l)
-        # Currenty in Combine:
-        #myBins = [0,50,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,520,540,560,580,600,620,640,660,680,700,720,740,
-        #          760,780,800,820,840,860,880,900,920,940,960,980,1000,1020,1040,1060,1080,1100,1150,1200,1250,1300,1350,1400,1450,1500,1750,2000,2250,2500,
-        #          2750,3000,3250,3500,3750,4000]
         ROOT.gStyle.SetNdivisions(8, "X")
         startBlind       = 150  # 135 v. sensitive to bin-width!
-        endBlind         = 3000 #4000 #3000 # v. sensitive to bin-width!
+        endBlind         = 4000 #3000 # v. sensitive to bin-width!
+        myBins           = getBinningForTetrajetMass(binLevel=0)
         kwargs["rebinX"] = myBins
         units            = "GeV/c^{2}"
         binWmin, binWmax = GetBinWidthMinMax(myBins)
@@ -499,6 +489,49 @@ def GetHistoKwargs(hName, opts):
 
     return kwargs
     
+def getBinningForTetrajetMass(binLevel=0):
+    '''
+    Currenty in Combine:
+    myBins = [0,50,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,520,540,560,580,600,620,640,660,680,700,720,740,
+              760,780,800,820,840,860,880,900,920,940,960,980,1000,1020,1040,1060,1080,1100,1150,1200,1250,1300,1350,1400,1450,1500,1750,2000,2250,2500,
+              2750,3000,3250,3500,3750,4000]
+    '''
+    myBins = []
+    if binLevel == -1:
+        myBins = [0.0, 4000.0]
+    elif binLevel == 0: #default binning
+        for i in range(0, 1000, 50):
+            myBins.append(i)
+        for i in range(1000, 2000, 100):
+            myBins.append(i)
+        for i in range(2000, 4000+500, 500):
+            myBins.append(i)
+    elif binLevel == 1: #finer binning
+        for i in range(0, 1000, 25):
+            myBins.append(i)
+        for i in range(1000, 2000, 50):
+            myBins.append(i)
+        for i in range(2000, 4000+250, 250):
+            myBins.append(i)
+    elif binLevel == 2:
+        for i in range(0, 1000, 20):
+            myBins.append(i)
+        for i in range(1000, 2000, 40):
+            myBins.append(i)
+        for i in range(2000, 4000+200, 200):
+            myBins.append(i)
+    elif binLevel == 3:
+        for i in range(0, 1000, 10):
+            myBins.append(i)
+        for i in range(1000, 2000, 20):
+            myBins.append(i)
+        for i in range(2000, 4000+50, 50):
+            myBins.append(i)
+    else:
+        raise Exception(ShellStyles.ErrorStyle() + "Please choose bin-level from -1 to 3" + ShellStyles.NormalStyle())
+
+    return myBins
+
 def ApplyBlinding(myObject, blindedRange = []):
     '''
     myObject must be an instance of:
