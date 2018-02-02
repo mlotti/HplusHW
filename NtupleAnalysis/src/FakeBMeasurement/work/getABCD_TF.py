@@ -33,7 +33,7 @@ needed to correctly normalise the shape obtained from VR.
 The steps followed are the following:
 1) The user defines the histogram that will be used to extract the transfer factor (f)
 These normalisation factor are saved under:
-   <pseudo_mcrab_directory> QCDInvertedNormalizationFactors_Run2016_80to1000.py
+   <pseudo_mcrab_directory> FakeBTranserFactors_Run2016_80to1000.py
 in an automatically-generated python class. 
 
 This file/class is later used (read) by the makeInvertedPseudoMulticrab.py in order to normalise
@@ -94,6 +94,11 @@ def Print(msg, printHeader=False):
         print "\t", msg
     return
 
+def rchop(myString, endString):
+  if myString.endswith(endString):
+    return myString[:-len(endString)]
+  return myString
+
 def Verbose(msg, printHeader=True, verbose=False):
     if not opts.verbose:
         return
@@ -129,7 +134,7 @@ def GetHistoKwargs(histoName):
     _opts   = {"ymin": 1e0, "ymaxfactor": 1.2}
     _ylabel = "Events / %.0f"
     if _logY:
-        _opts     = {"ymin": 1e0, "ymaxfactor": 5.0}
+        _opts = {"ymin": 1e0, "ymaxfactor": 5.0}
 
     if "mass" in histoName.lower():
         _units        = "GeV/c^{2}"
@@ -151,11 +156,21 @@ def GetHistoKwargs(histoName):
     if "met" in histoName.lower():
         _units        = "GeV"
         _xlabel       = "E_{T}^{miss} (%s)" % (_units)
-        _ylabel      += " " + _units
-        _opts["xmin"] =   0
-        _opts["xmax"] = 300
         _cutBox       = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
-        _rebinX       = 1
+        _opts         = {"xmin": 0.0, "xmax": 400.0, "ymin": 1e0, "ymax": 1e3}
+        myBins = []
+        for j in range(0, 100, 10):
+            myBins.append(j)
+        for k in range(100, 200, 20):
+            myBins.append(k)
+        for k in range(200, 300, 50):
+            myBins.append(k)
+        for k in range(300, 400+100, 100):
+            myBins.append(k)
+        _rebinX  = myBins #1
+        # _ylabel      += " " + _units
+        binWmin, binWmax = GetBinWidthMinMax(myBins)
+        _ylabel = "Events / %.0f-%.0f %s" % (binWmin, binWmax, _units)
                 
     # Define plotting options
     kwargs = {
@@ -176,6 +191,25 @@ def GetHistoKwargs(histoName):
         "createLegend"     : {"x1": 0.66, "y1": 0.78, "x2": 0.92, "y2": 0.92},
         }
     return kwargs
+
+def GetBinWidthMinMax(binList):
+    if not isinstance(binList, list):
+        raise Exception("Argument is not a list instance!")
+
+    minWidth = +1e6
+    maxWidth = -1e6
+    # For-loop: All bin values (centre)
+    for i in range(0, len(binList)-1):
+        j = i + 1
+        iBin = binList[i]
+        jBin = binList[j]
+        wBin = jBin-iBin
+        if wBin < minWidth:
+            minWidth = wBin
+
+        if wBin > maxWidth:
+            maxWidth = wBin
+    return minWidth, maxWidth
 
 def GetDatasetsFromDir(opts):
     Verbose("Getting datasets")
@@ -325,7 +359,7 @@ def main(opts):
 
 def GetTetrajetMassBins():
     myBins   = []
-    binWidth1=   25
+    binWidth1=   50#25
     binWidth2=   50
     binWidth3=  100
     binWidth4=  500
@@ -355,32 +389,32 @@ def PlotHistogramsAndCalculateTF(datasetsMgr, histoList, inclusiveFolder, opts):
 
     # Histogram names
     if 0:
-        hName = "LdgTetrajetMass" #histoList[0].split("_")[1]
+        hName = "LdgTetrajetMass"
     else:
         hName = "MET"
+        # hName = "LdgTrijetMass"
         _kwargs = GetHistoKwargs(hName)
 
     # Get histogams for the Signal Region (SR) and the 3 Control Regions (CR)
-    histoName      = "Baseline_" + hName + "_AfterAllSelections"
-    hInclusive_SR  = "%s/%s" % (inclusiveFolder, histoName)
-    hGenuineB_SR   = "%s/%s" % (genuineBFolder , histoName)
-    hFakeB_SR      = "%s/%s" % (fakeBFolder    , histoName)
+    histoName_SR   = "Baseline_" + hName + "_AfterAllSelections"
+    hInclusive_SR  = "%s/%s" % (inclusiveFolder, histoName_SR)
+    hGenuineB_SR   = "%s/%s" % (genuineBFolder , histoName_SR)
+    hFakeB_SR      = "%s/%s" % (fakeBFolder    , histoName_SR)
 
-    histoName      = "Inverted_" + hName + "_AfterAllSelections"
-    hInclusive_VR  = "%s/%s" % (inclusiveFolder, histoName)
-    hGenuineB_VR   = "%s/%s" % (genuineBFolder , histoName)
-    hFakeB_VR      = "%s/%s" % (fakeBFolder    , histoName)
+    histoName_VR   = "Inverted_" + hName + "_AfterAllSelections"
+    hInclusive_VR  = "%s/%s" % (inclusiveFolder, histoName_VR)
+    hGenuineB_VR   = "%s/%s" % (genuineBFolder , histoName_VR)
+    hFakeB_VR      = "%s/%s" % (fakeBFolder    , histoName_VR)
 
-    histoName      = "Baseline_" + hName + "_AfterCRSelections"
-    hInclusive_CR1 = "%s/%s" % (inclusiveFolder, histoName)
-    hGenuineB_CR1  = "%s/%s" % (genuineBFolder , histoName) 
-    hFakeB_CR1     = "%s/%s" % (fakeBFolder    , histoName) 
+    histoName_CR1  = "Baseline_" + hName + "_AfterCRSelections"
+    hInclusive_CR1 = "%s/%s" % (inclusiveFolder, histoName_CR1)
+    hGenuineB_CR1  = "%s/%s" % (genuineBFolder , histoName_CR1) 
+    hFakeB_CR1     = "%s/%s" % (fakeBFolder    , histoName_CR1) 
 
-    histoName      = "Inverted_" + hName + "_AfterCRSelections"
-    hInclusive_CR2 = "%s/%s" % (inclusiveFolder, histoName)
-    hGenuineB_CR2  = "%s/%s" % (genuineBFolder , histoName)
-    hFakeB_CR2     = "%s/%s" % (fakeBFolder    , histoName)
-    Print()
+    histoName_CR2  = "Inverted_" + hName + "_AfterCRSelections"
+    hInclusive_CR2 = "%s/%s" % (inclusiveFolder, histoName_CR2)
+    hGenuineB_CR2  = "%s/%s" % (genuineBFolder , histoName_CR2)
+    hFakeB_CR2     = "%s/%s" % (fakeBFolder    , histoName_CR2)
 
     # Create plots
     pInclusive_SR  = plots.DataMCPlot(datasetsMgr, hInclusive_SR)
@@ -456,6 +490,9 @@ def PlotHistogramsAndCalculateTF(datasetsMgr, histoList, inclusiveFolder, opts):
     binLabels = ["Inclusive"]
     moduleInfoString = opts.optMode
     manager = FakeBNormalization.FakeBNormalizationManager(binLabels, opts.mcrab, moduleInfoString)
+    h1 = ShellStyles.NoteStyle() + histoName_CR1 + ShellStyles.NormalStyle()
+    h2 = ShellStyles.NoteStyle() + histoName_CR2 + ShellStyles.NormalStyle()
+    Print("Calculating the VR->SR transfer factor using histograms %s and %s" % (h1, h2), True)
     manager.CalculateTransferFactor(binLabels[0], rFakeB_CR1, rFakeB_CR2)
 
     # Get unique a style for each region
@@ -486,9 +523,11 @@ def PlotHistogramsAndCalculateTF(datasetsMgr, histoList, inclusiveFolder, opts):
     # =========================================================================================
     # Clone the VR histogram ( BkgSum = VR )
     rBkgSum_SR = rFakeB_VR.Clone("BkgSum-SR") 
+    Print("Got Verification Region (VR) shape %s%s%s" % (ShellStyles.NoteStyle(), rFakeB_VR.GetName(), ShellStyles.NormalStyle()), True)
 
     # Normalise the VR histogram with the Transfer Factor ( BkgSum = VR * (CR1/CR2) )
     VRtoSR_TF = manager.GetTransferFactor("Inclusive")
+    Print("Applying TF = %s%0.6f%s to VR shape" % (ShellStyles.NoteStyle(), VRtoSR_TF, ShellStyles.NormalStyle()), True)
     rBkgSum_SR.Scale(VRtoSR_TF) 
     
     # Plot histograms    
@@ -518,17 +557,18 @@ def PlotHistogramsAndCalculateTF(datasetsMgr, histoList, inclusiveFolder, opts):
                 "BkgSum-SR"     : "Fake-b + Gen-b",
                 })
     else:
+        # Create empty histogram stack list
         myStackList = []
         
         # Add the FakeB data-driven background to the histogram list    
-        hFakeB = histograms.Histo(rFakeB_SR, "FakeB", "Fake-b")
+        hFakeB = histograms.Histo(rBkgSum_SR, "FakeB", "Fake-b")
         hFakeB.setIsDataMC(isData=False, isMC=True)
         myStackList.append(hFakeB)
         
         # Add the EWKGenuineB MC background to the histogram list
         hGenuineB = histograms.Histo(rEWKGenuineB_SR, "GenuineB", "EWK Genuine-b")
         hGenuineB.setIsDataMC(isData=False, isMC=True)
-        myStackList.append(hGenuineB)            
+        myStackList.append(hGenuineB)
 
         # Add the collision datato the histogram list        
         hData = histograms.Histo(rData_SR, "Data", "Data")
@@ -541,13 +581,13 @@ def PlotHistogramsAndCalculateTF(datasetsMgr, histoList, inclusiveFolder, opts):
 
     # Draw the plot and save it
     plots.drawPlot(p, hName, **_kwargs)
-    SavePlot(p, hName, os.path.join(opts.saveDir, "TransferFactor", opts.optMode) ) 
+    SavePlot(p, hName, os.path.join(opts.saveDir, opts.optMode) ) 
 
     #=========================================================================================
     # Calculate the Transfer Factor (TF) and save to file
     #=========================================================================================
     Verbose("Write the normalisation factors to a python file", True)
-    fileName = os.path.join(opts.mcrab, "QCDInvertedNormalizationFactors%s.py"% ( getModuleInfoString(opts) ) )
+    fileName = os.path.join(opts.mcrab, "FakeBTransferFactors%s.py"% ( getModuleInfoString(opts) ) )
     manager.writeNormFactorFile(fileName, opts)
     return
 
@@ -578,7 +618,7 @@ if __name__ == "__main__":
     INTLUMI      = -1.0
     MCONLY       = False
     URL          = False
-    SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"
+    SAVEDIR      = "/publicweb/a/aattikis/"#FakeBMeasurement/"
     VERBOSE      = False
     USEMC        = False
     RATIO        = False
@@ -647,6 +687,11 @@ if __name__ == "__main__":
         parser.print_help()
         #print __doc__
         sys.exit(1)
+    else:
+        mcrabDir = rchop(opts.mcrab, "/")
+        if len(mcrabDir.split("/")) > 1:
+            mcrabDir = mcrabDir.split("/")[-1]
+        opts.saveDir += mcrabDir + "/TransferFactor/"
 
     # Call the main function
     main(opts)

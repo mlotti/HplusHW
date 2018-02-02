@@ -8,12 +8,12 @@ USAGE:
 
 
 EXAMPLES:
-./plotDataDriven.py -m Hplus2tbAnalysis_3bjets40_MVA0p88_MVA0p88_TopMassCutOff600GeV_180113_050540 -n FakeBMeasurement_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180120_092605/FakeB/ --gridX --gridY --logY --signal 500
-/plotDataDriven.py -m <mcrab1> -n <mcrab2>/FakeBMeasurement/ --gridX --gridY --logY --useMC --unblind
-
+./plotDataDriven.py -m <mcrab1> -n <mcrab2>/FakeB/ --gridX --gridY --logY --signal 500
+./plotDataDriven.py -m <mcrab1> -n <mcrab2>/FakeBMeasurement/ --gridX --gridY --logY --useMC --unblind
+./plotDataDriven.py -m <Hplus2tbAnalysis> -n <FakeBMeasurement>/FakeBMeasurement/ --gridX --gridY --logY --unblind
 
 LAST USED:
-./plotDataDriven.py -m Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180125_123633 -n FakeBMeasurement_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180125_123834/FakeBMeasurement/ --gridX --gridY --logY --unblind
+./plotDataDriven.py -m Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180126_030205 -n FakeBMeasurement_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180129_110659/FakeBMeasurement/ --gridX --gridY
 
 '''
 
@@ -74,7 +74,9 @@ def GetLumi(datasetsMgr):
     return lumi
 
 def GetListOfEwkDatasets():
-    return  ["TT", "WJetsToQQ_HT_600ToInf", "SingleTop", "DYJetsToQQHT", "TTZToQQ",  "TTWJetsToQQ", "Diboson", "TTTT"]
+    ewkList = ["TT", "SingleTop", "TTZToQQ", "TTTT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "Diboson"]
+    # ewkList = ["TT", "SingleTop", "TTZToQQ", "TTTT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf"] #no "Diboson"
+    return  ewkList
 
 def GetDatasetsFromDir(opts, otherDir=False):
     
@@ -82,6 +84,7 @@ def GetDatasetsFromDir(opts, otherDir=False):
     analysis = opts.analysisName
     if otherDir:
         myDir    = opts.mcrab2        
+        #analysis = "FakeBMeasurement"
     datasets = dataset.getDatasetsFromMulticrabDirs([myDir],
                                                     dataEra=opts.dataEra,
                                                     searchMode=opts.searchMode, 
@@ -132,6 +135,12 @@ def main(opts):
     if opts.optMode != None:
         optModes = [opts.optMode]
         
+    # Inform user of EWK datasets used
+    ewkList = GetListOfEwkDatasets()
+    Print("The EWK datasets used are the following:", True)
+    for i,d in enumerate(ewkList, 1):
+        Print(ShellStyles.NoteStyle() + d + ShellStyles.NormalStyle(), i==0)
+
     # For-loop: All opt Mode
     for opt in optModes:
         opts.optMode = opt
@@ -178,7 +187,6 @@ def main(opts):
 
         # Merge histograms
         plots.mergeRenameReorderForDataMC(dsetMgr1) 
-        # plots.mergeRenameReorderForDataMC(dsetMgr2) 
    
         # Get the luminosity
         if opts.intLumi < 0:
@@ -190,27 +198,27 @@ def main(opts):
             Verbose(msg, i==1)
             dsetMgr1.remove(filter(lambda name: d == name, dsetMgr1.getAllDatasetNames()))
 
-        # Replace MC datasets with data-driven
-        if not opts.useMC: #fixme
-            replaceQCD(dsetMgr1, dsetMgr2, "FakeBMeasurementTrijetMass", "FakeB") #dsetMgr1 now contains "FakeB" pseudo-dataset
-
         # Print dataset information
         dsetMgr1.PrintInfo()
         dsetMgr2.PrintInfo()
 
+        # Replace MC datasets with data-driven
+        if not opts.useMC:
+            replaceQCD(dsetMgr1, dsetMgr2, "FakeBMeasurementTrijetMass", "FakeB") #dsetMgr1 now contains "FakeB" pseudo-dataset
+
         # Definitions
-        histoNames  = []    
         allHistos   = dsetMgr2.getAllDatasets()[0].getDirectoryContent(opts.folder)
-        histoList1  = [h for h in allHistos if "MCEWK" not in h]
-        histoList2  = [h for h in histoList1 if "Purity" not in h]
-        histoList3  = [h for h in histoList2 if "Bjet" not in h]
-        histoList4  = [h for h in histoList3 if "Jet" not in h]
-        histoList5  = [h for h in histoList4 if "Njet" not in h]
-        histoList6  = [h for h in histoList5 if "Njet" not in h]
-        histoList7  = [h for h in histoList6 if "MVA" not in h]
-        histoList8  = [h for h in histoList7 if "Sub" not in h]
-        histoList9  = [h for h in histoList8 if "Dijet" not in h]
-        histoPaths  = [opts.folder + "/" + h for h in histoList9]
+        histoPaths  = []
+        ignoreKeys  = ["MCEWK", "Purity", "BJetPt", "BJetEta", "BtagDiscriminator", "METPhi", "MHT", "NBjets", "Njets"]
+        # For-loop: All histograms in directory
+        for h in allHistos:
+            bKeep = True
+            for k in ignoreKeys:
+                if k in h:
+                    bKeep = False
+                    continue
+            if bKeep:
+                histoPaths.append(os.path.join(opts.folder, h))
 
         # For-loop: All histograms in list
         for i, hName in enumerate(histoPaths, 1):
@@ -220,7 +228,7 @@ def main(opts):
 
             PlotHistogram(dsetMgr1, hName, opts)
 
-    Print("All plots saved under directory %s" % (opts.saveDir), True)
+    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + opts.saveDir + ShellStyles.NormalStyle()), True)
     return
 
 def GetHistoKwargs(hName, opts):
@@ -229,16 +237,14 @@ def GetHistoKwargs(hName, opts):
     key   = histogramName
     value = kwargs
     '''
-    # Change y-max factor to be bigger for log-scales
-    ymaxF = 1.2
-    if opts.logY:
-        ymaxF = 4
-
+    ymaxF  = 1.2
+    ymin   = 1e-1 #if any smaller than 1e-1 legend problems
     kwargs = {
         "ratioCreateLegend": True,
-        "ratioType"        : "errorScale",
-        "ratioErrorOptions": {"numeratorStatSyst": False},
+        "ratioType"        : "errorScale", #"errorScale", #binomial #errorPropagation
+        "ratioErrorOptions": {"numeratorStatSyst": False},# "denominatorStatSyst": True, "numeratorOriginatesFromTH1": True},
         "ratioMoveLegend"  : {"dx": -0.51, "dy": 0.03, "dh": -0.05},
+        "errorBarsX"       : True,
         "ylabel"           : "Events / %.0f",
         "rebinX"           : 1,
         "rebinY"           : None,
@@ -250,10 +256,10 @@ def GetHistoKwargs(hName, opts):
         "addLuminosityText": True,
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
-        "opts"             : {"ymin": 2e-1, "ymaxfactor": ymaxF},
-        "opts2"            : {"ymin": 0.2, "ymax": 2.0-0.2},
+        "opts"             : {"ymin": ymin, "ymaxfactor": ymaxF},
+        "opts2"            : {"ymin": 0.0, "ymax": 2.0}, #{"ymin": 0.2, "ymax": 2.0-0.2},
         "log"              : opts.logY,
-        "moveLegend"       : {"dx": -0.1, "dy": -0.01, "dh": 0.1},
+        "moveLegend"       : {"dx": -0.06, "dy": -0.01, "dh": 0.15},
         "cutBoxY"          : {"cutValue": 1.2, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": False, "ratioCanvas": False}
         }
 
@@ -263,104 +269,269 @@ def GetHistoKwargs(hName, opts):
             myBins.append(j)
         for k in range(100, 200, 20):
             myBins.append(k)
-        for l in range(200, 300, 50):
-            myBins.append(l)
+        for k in range(200, 300, 50):
+            myBins.append(k)
+        for k in range(300, 400+100, 100):
+            myBins.append(k)
         units            = "GeV/c"
         binWmin, binWmax = GetBinWidthMinMax(myBins)
         kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
         kwargs["xlabel"] = "E_{T}^{miss} (%s)" % units
-        kwargs["rebinX"] = myBins # 2
+        kwargs["rebinX"] = myBins
+        kwargs["opts"]   = {"ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True
+    if "WMassRatio" in hName:
+        units            = ""
+        kwargs["ylabel"] = "Events / %.2f"
+        kwargs["rebinX"] = 2
+        kwargs["opts"]   = {"ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True
+        kwargs["cutBox"] = {"cutValue": 173.21/80.385, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": 1.0, "xmax": 4.0, "ymin": ymin, "ymaxfactor": ymaxF}
     if "NVertices" in hName:
-        kwargs["ylabel"] = "Events / %.0f"
-        kwargs["xlabel"] = "Vertices"
+        myBins = []
+        for j in range(0, 40, 2):
+            myBins.append(j)
+        for j in range(40, 60, 5):
+            myBins.append(j)
+        for j in range(60, 100+10, 10):
+            myBins.append(j)
+        units            = "GeV/c"
+        binWmin, binWmax = GetBinWidthMinMax(myBins)
+        kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
+        kwargs["xlabel"] = "vertex multiplicity"
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": 70.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True
+        kwargs["rebinX"] = myBins
     if "Njets" in hName:                
         kwargs["ylabel"] = "Events / %.0f"
-        kwargs["xlabel"] = "Jets Multiplicity"
+        kwargs["xlabel"] = "jets multiplicity"
         kwargs["cutBox"] = {"cutValue": 7.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        kwargs["opts"]   = {"xmin": 7.0, "xmax": +16.0, "ymin": 1e+0, "ymaxfactor": ymaxF}
+        kwargs["opts"]   = {"xmin": 6.0, "xmax": 19.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True
         ROOT.gStyle.SetNdivisions(10, "X")
+    if "JetPt" in hName:                
+        units            = "GeV/c"
+        kwargs["xlabel"] = "p_{T} (%s)" % (units)
+        kwargs["cutBox"] = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +500.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True        
+        ROOT.gStyle.SetNdivisions(10, "X")
+    if "JetEta" in hName:                
+        kwargs["ylabel"] = "Events / %.2f"
+        kwargs["xlabel"] = "#eta"
+        kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True        
+        # kwargs["moveLegend"] = {"dx": -0.1, "dy": -0.4, "dh": 0.15}
+        kwargs["moveLegend"] = {"dx": -5.0, "dy": -5.0, "dh": -500.0}
+    if "TetrajetBjetPt" in hName:                
+        units            = "GeV/c"
+        kwargs["xlabel"] = "p_{T} (%s)" % (units)
+        kwargs["cutBox"] = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["log"]    = True
+        myBins = []
+        for j in range(0, 400, 10):
+            myBins.append(j)
+        for k in range(400, 600, 50):
+            myBins.append(k)
+        for k in range(600, 900+100, 100):
+            myBins.append(k)
+        kwargs["rebinX"] = myBins
+        binWmin, binWmax = GetBinWidthMinMax(myBins)
+        kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +900.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        ROOT.gStyle.SetNdivisions(10, "X")
+    if "TetrajetBjetEta" in hName:                
+        kwargs["ylabel"] = "Events / %.2f"
+        kwargs["xlabel"] = "#eta"
+        kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True        
+        # kwargs["moveLegend"] = {"dx": -0.1, "dy": -0.4, "dh": 0.15}
+        kwargs["moveLegend"] = {"dx": -5.0, "dy": -5.0, "dh": -500.0}
     if "BtagDiscriminator" in hName:                
         kwargs["ylabel"]     = "Events / %.2f"
         kwargs["xlabel"]     = "b-tag discriminator"
         kwargs["cutBox"]     = {"cutValue": 0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         kwargs["moveLegend"] = {"dx": -0.5, "dy": -0.01, "dh": 0.0}
-        kwargs["opts"]       = {"xmin": 0.0, "xmax": 1.05, "ymin": 1e+0, "ymaxfactor": ymaxF}
+        kwargs["opts"]       = {"xmin": 0.0, "xmax": 1.05, "ymin": ymin, "ymaxfactor": ymaxF}
     if "HT" in hName:
+        myBins = []
+        for i in range(500, 1500, 50):
+            myBins.append(i)
+        for i in range(1500, 2000, 100):
+            myBins.append(i)
+        for i in range(2000, 3000+500, 500):
+            myBins.append(i)
         units            = "GeV"
-        kwargs["ylabel"] = "Events / %.0f " + units
+        binWmin, binWmax = GetBinWidthMinMax(myBins)
+        kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
+        # kwargs["ylabel"] = "Events / %.0f " + units
         kwargs["xlabel"] = "H_{T} (%s)"  % units
-        kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        kwargs["rebinX"] = 5
-        kwargs["opts"]   = {"xmin": 500.0, "xmax": 3000, "ymin": 1e+0, "ymaxfactor": ymaxF}
-    if "LdgTrijetPt" in hName:
+        kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        kwargs["rebinX"] = myBins #5
+        kwargs["opts"]   = {"xmin": 500.0, "xmax": 3000, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True
+    if "TrijetPt" in hName:
         units = "GeV/c"
-        kwargs["ylabel"] = "Events / %.0f " + units
         kwargs["xlabel"] = "p_{T} (%s)"  % units
-        kwargs["opts"]   = {"xmax": +800.0, "ymin": 1e+0, "ymaxfactor": ymaxF}
-    if "LdgTrijetMass" in hName:
-        startBlind       = 140
-        endBlind         = 200
-        kwargs["rebinX"] = 1
+        kwargs["opts"]   = {"xmax": +900.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        myBins = []
+        for j in range(0, 500, 20):
+            myBins.append(j)
+        for k in range(500, 700, 50):
+            myBins.append(k)
+        for k in range(700, 900+100, 100):
+            myBins.append(k)
+        kwargs["rebinX"] = myBins
+        binWmin, binWmax = GetBinWidthMinMax(myBins)
+        kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
+        # kwargs["ylabel"] = "Events / %.0f " + units
+        kwargs["log"]    = True
+    if "TrijetMass" in hName:
+        startBlind       = 135
+        endBlind         = 205
+        kwargs["rebinX"] = 2
         units            = "GeV/c^{2}"
         kwargs["ylabel"] = "Events / %.0f " + units
         kwargs["xlabel"] = "m_{jjb} (%s)"  % units
         kwargs["cutBox"] = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        kwargs["opts"]   = {"xmin": 50.0, "xmax": 350.0, "ymin": 1e+0, "ymaxfactor": ymaxF}
-        if "AllSelections" in hName:
-            kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind)
-            kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.1}
-    if "LdgTrijetBjetPt" in hName:
+        kwargs["opts"]   = {"xmin": 50.0, "xmax": 350.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True
+        # Blind data
+        kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind)
+        kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.1}
+    if "TrijetBjetPt" in hName: # FIXME: Why do i have values below 40 GeV/c?
         units            = "GeV/c"
-        kwargs["ylabel"] = "Events / %.0f " + units
         kwargs["xlabel"] = "p_{T} (%s)"  % units
-    if "LdgTrijetBjetEta" in hName:
-        kwargs["ylabel"] = "Events / %.2f"
-        kwargs["xlabel"] = "#eta"
-        kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": 1e+0, "ymaxfactor": ymaxF}
-    if "LdgTetrajetPt" in hName:
-        units            = "GeV/c"
-        kwargs["ylabel"] = "Events / %.0f " + units
-        kwargs["xlabel"] = "p_{T} (%s)"  % units
-        kwargs["opts"]   = {"xmax": +1000.0, "ymin": 1e+0, "ymaxfactor": ymaxF}
-    if "LdgTetrajetMass" in hName:
         myBins = []
-        for j in range(0, 1000, 50):
+        for j in range(0, 300, 10): #10 steps!
             myBins.append(j)
-        for k in range(1000, 2000, 100):
+        for k in range(300, 700+40, 40):
             myBins.append(k)
-        for l in range(2000, 4000+2000, 200):
-            myBins.append(l)
-
-        ROOT.gStyle.SetNdivisions(5, "X")
+        kwargs["rebinX"] = myBins
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": 600.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["cutBox"] = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["log"]    = True
+        binWmin, binWmax = GetBinWidthMinMax(myBins)
+        kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
+    if "TrijetBjetEta" in hName:
+        kwargs["ylabel"]     = "Events / %.2f"
+        kwargs["xlabel"]     = "#eta"
+        kwargs["cutBox"]     = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]       = {"xmin": -2.5, "xmax": +2.5, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]        = True
+        # kwargs["moveLegend"] = {"dx": -0.1, "dy": -0.4, "dh": 0.15}
+        kwargs["moveLegend"] = {"dx": -5.0, "dy": -5.0, "dh": -500.0}
+    if "TrijetDijetPt" in hName:
+        units            = "GeV/c"
+        kwargs["xlabel"] = "p_{T} (%s)"  % units
+        myBins = []
+        for j in range(0, 300, 20):
+            myBins.append(j)
+        for k in range(300, 500, 40):
+            myBins.append(k)
+        for k in range(500, 700+100, 100):
+            myBins.append(k)
+        kwargs["rebinX"] = myBins
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": 700.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True
+        binWmin, binWmax = GetBinWidthMinMax(myBins)
+        kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
+    if "TrijetDijetMass" in hName:
+        kwargs["rebinX"] = 1
+        units            = "GeV/c^{2}"
+        kwargs["ylabel"] = "Events / %.0f " + units
+        kwargs["xlabel"] = "m_{jj} (%s)"  % units
+        kwargs["cutBox"] = {"cutValue": 80.385, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": 30.0, "xmax": 160.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True
+    if "TetrajetPt" in hName:
+        units            = "GeV/c"
+        kwargs["xlabel"] = "p_{T} (%s)"  % units
+        kwargs["opts"]   = {"xmax": +900.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True
+        myBins = []
+        for j in range(0, 500, 20):
+            myBins.append(j)
+        for k in range(500, 700, 50):
+            myBins.append(k)
+        for k in range(700, 900+100, 100):
+            myBins.append(k)
+        kwargs["rebinX"] = myBins
+        binWmin, binWmax = GetBinWidthMinMax(myBins)
+        kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
+        # kwargs["ylabel"] = "Events / %.0f " + units
+    if "TetrajetMass" in hName:
+        ROOT.gStyle.SetNdivisions(8, "X")
         startBlind       = 150  # 135 v. sensitive to bin-width!
-        endBlind         = 2500 #v. sensitive to bin-width!
+        endBlind         = 4000 #3000 # v. sensitive to bin-width!
+        myBins           = getBinningForTetrajetMass(binLevel=0)
         kwargs["rebinX"] = myBins
         units            = "GeV/c^{2}"
         binWmin, binWmax = GetBinWidthMinMax(myBins)
         kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
+        kwargs["log"]    = True
         kwargs["xlabel"] = "m_{jjbb} (%s)"  % units
         kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
-        kwargs["opts"]   = {"xmin": 0.0, "xmax": endBlind, "ymin": 1e+0, "ymaxfactor": ymaxF}
-        if "AllSelections" in hName:
-            kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind) #ale
-            kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.12}
-    if "TetrajetBjetPt" in hName:
-        units            = "GeV/c"
-        kwargs["ylabel"] = "Events / %.0f " + units
-        kwargs["xlabel"] = "p_{T} (%s)"  % units
-    if "TetrajetBjetEta" in hName:
-        kwargs["ylabel"] = "Events / %.2f"
-        kwargs["xlabel"] = "#eta"
-        kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": 1e+0, "ymaxfactor": ymaxF}
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": endBlind, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind) #ale
+        kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.12}
 
     if opts.unblind:
         key = "blindingRangeString"
         if key in kwargs.keys():
             del kwargs[key]
+
+    if kwargs["log"]==True or opts.logY == True:
+        kwargs["opts"]["ymaxfactor"] = 7.0
+
     return kwargs
     
+def getBinningForTetrajetMass(binLevel=0):
+    '''
+    Currenty in Combine:
+    myBins = [0,50,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,520,540,560,580,600,620,640,660,680,700,720,740,
+              760,780,800,820,840,860,880,900,920,940,960,980,1000,1020,1040,1060,1080,1100,1150,1200,1250,1300,1350,1400,1450,1500,1750,2000,2250,2500,
+              2750,3000,3250,3500,3750,4000]
+    '''
+    myBins = []
+    if binLevel == -1:
+        myBins = [0.0, 4000.0]
+    elif binLevel == 0: #default binning
+        for i in range(0, 1000, 50):
+            myBins.append(i)
+        for i in range(1000, 2000, 100):
+            myBins.append(i)
+        for i in range(2000, 4000+500, 500):
+            myBins.append(i)
+    elif binLevel == 1: #finer binning
+        for i in range(0, 1000, 25):
+            myBins.append(i)
+        for i in range(1000, 2000, 50):
+            myBins.append(i)
+        for i in range(2000, 4000+250, 250):
+            myBins.append(i)
+    elif binLevel == 2:
+        for i in range(0, 1000, 20):
+            myBins.append(i)
+        for i in range(1000, 2000, 40):
+            myBins.append(i)
+        for i in range(2000, 4000+200, 200):
+            myBins.append(i)
+    elif binLevel == 3:
+        for i in range(0, 1000, 10):
+            myBins.append(i)
+        for i in range(1000, 2000, 20):
+            myBins.append(i)
+        for i in range(2000, 4000+50, 50):
+            myBins.append(i)
+    else:
+        raise Exception(ShellStyles.ErrorStyle() + "Please choose bin-level from -1 to 3" + ShellStyles.NormalStyle())
+
+    return myBins
+
 def ApplyBlinding(myObject, blindedRange = []):
     '''
     myObject must be an instance of:
@@ -415,7 +586,7 @@ def ApplyBlinding(myObject, blindedRange = []):
 def PlotHistogram(dsetMgr, histoName, opts):
 
     # Get kistogram argumetns
-    kwargs = GetHistoKwargs(histoName, opts)
+    kwargs   = GetHistoKwargs(histoName, opts)
     saveName = histoName.replace(opts.folder + "/", "")
 
     # Create the plotting object (Data, "FakeB")
@@ -426,10 +597,11 @@ def PlotHistogram(dsetMgr, histoName, opts):
     datasetMgr.selectAndReorder(GetListOfEwkDatasets())
         
     # Create the MCPlot for the EWKGenuineB histograms
-    histoNameGenuineB = histoName.replace(opts.folder, opts.folder + "EWKGenuineB")
-    p2 = plots.MCPlot(datasetMgr, histoNameGenuineB, normalizeToLumi=opts.intLumi, saveFormats=[])
-    # plots.drawPlot(p2, saveName + "_tmp", **{"rebiX": kwargs["rebinX"]})
-    # p2.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinX(kwargs["rebinX"]))
+    if opts.useMC:
+        p2 = plots.MCPlot(datasetMgr, histoName, normalizeToLumi=opts.intLumi, saveFormats=[])
+    else:
+        histoNameGenuineB = histoName.replace(opts.folder, opts.folder + "EWKGenuineB")
+        p2 = plots.MCPlot(datasetMgr, histoNameGenuineB, normalizeToLumi=opts.intLumi, saveFormats=[])
 
     # Add the datasets to be included in the plot
     myStackList = []
@@ -593,7 +765,7 @@ if __name__ == "__main__":
     SIGNALMASS   = 800
     SIGNAL       = None
     URL          = False
-    SAVEDIR      = "/publicweb/a/aattikis/DataDriven/"
+    SAVEDIR      = "/publicweb/a/aattikis/"
     VERBOSE      = False
     GRIDX        = False
     UNBLIND      = False
@@ -684,7 +856,7 @@ if __name__ == "__main__":
         mcrabDir = rchop(opts.mcrab1, "/")
         if len(mcrabDir.split("/")) > 1:
             mcrabDir = mcrabDir.split("/")[-1]
-        opts.saveDir += mcrabDir + "/" + "DataDriven/" #opts.folder
+        opts.saveDir += mcrabDir + "/DataDriven/"
 
 
     # Sanity check

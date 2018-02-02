@@ -56,7 +56,6 @@ import ROOT
 #================================================================================================ 
 VERBOSE = False
 
-
 #================================================================================================ 
 # Function Definition
 #================================================================================================ 
@@ -120,8 +119,8 @@ defaultNumberOfJobs = 20
 Verbose("Edit #1", True)
 
 #lhcAsymptoticOptionsObserved = '-M AsymptoticLimits -v 3 --cminDefaultMinimizerStrategy 2 --rAbsAcc 0.0001 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --cminDefaultMinimizerTolerance=0.1 --cminFallbackAlgo "Minuit,0:0.001"' #default
-lhcAsymptoticOptionsObserved = '-M AsymptoticLimits -v 3 --cminDefaultMinimizerStrategy 0 --rAbsAcc 0.1 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --cminDefaultMinimizerTolerance=1.0' # xenios - WORKS!
-#lhcAsymptoticOptionsObserved = '-M AsymptoticLimits -v 3 --cminDefaultMinimizerStrategy 2 --rAbsAcc 0.0001 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_BOUND --cminDefaultMinimizerTolerance=1.0' # xenios - TESTING
+#lhcAsymptoticOptionsObserved = '-M AsymptoticLimits -v 3 --cminDefaultMinimizerStrategy 0 --rAbsAcc 0.1 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --cminDefaultMinimizerTolerance=1.0' #alex - default_v1
+lhcAsymptoticOptionsObserved = '-M AsymptoticLimits -v 3 --cminDefaultMinimizerStrategy 0 --rAbsAcc 0.001 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --cminDefaultMinimizerTolerance=1.0' #alex - default_v2
 
 
 # If you use Barlow-Beeston-lite approach for statistical uncertainties, uncomment the next line:
@@ -816,6 +815,7 @@ hadd higgsCombineinj_m{MASS}.Asymptotic.mH{MASS}.root higgsCombineinj_m{MASS}.As
         
         \return Result object containing the limits for the mass point
         '''
+        Verbose("Running combine ...", False)
         result = commonLimitTools.Result(mass)
         if self.opts.limit:
             if self.opts.unblinded:
@@ -854,20 +854,21 @@ hadd higgsCombineinj_m{MASS}.Asymptotic.mH{MASS}.root higgsCombineinj_m{MASS}.As
         msg = "Changing directory to \"%s\". Current working directory is:\n\t\"%s\"" % (self.dirname, os.getcwd())
         Verbose(msg, True)
 
-        cmdList = ["./" + script]
-        Verbose("Executing command \"%s\"" % (" ".join(cmdList)), True)
-
+        cmdList  = ["./" + script]
         outFile  = os.path.join(os.getcwd(), outputFile)   
         errFile  = os.path.join(os.getcwd(), errorFile)
         fileMode = "wb"
 
         # Run the script and redirect stdout and stderr to dedicated files
+        Verbose("Opening file \"%s\" in mode \"%s\"" % (outFile, fileMode), True)
         with open(outFile, fileMode) as out, open(errFile, fileMode) as err:
+            Verbose("Executing command \"%s\"" % (" ".join(cmdList)), True)
             p = subprocess.Popen(cmdList, stdout=out, stderr=err)
             output = p.communicate()[0]
+            Verbose("Subprocess returned \"%s\"" % (output), True)
 
         if p.returncode != 0:
-            print output
+            # print output
             raise Exception("Combine failed with exit code %d\nCommand: %s" % (p.returncode, script))
 
         os.chdir(pwd)
@@ -1175,8 +1176,14 @@ def parseResultFromCombineOutput(dirname, result, mass):
 
 
     # Store results
-    if len(myResultList) < 5:
-        print "Combine failed to produce results, perhaps rmin-rmax range is not wide enough"
+    nResults = len(myResultList) 
+    if nResults < 5:
+        msg = "Combine failed to produce all the results (only got %i / 5)L" % (nResults)
+        Print(msg, True)
+
+        for i, r in enumerate(myResultList, 1):
+            msg = "#%i = %s" % (i, r)
+            Print(msg, False)
         result.failed = True
         return -1
     result.expectedMinus2Sigma = myResultList[0]
