@@ -12,7 +12,7 @@ from HiggsAnalysis.MiniAOD2TTree.tools.HChOptions import getOptionsDataVersion
 #================================================================================================  
 # Options
 #================================================================================================  
-maxEvents    = 1000
+maxEvents    = 100
 maxWarnings  = 100
 reportEvery  = 100
 testWithData = True
@@ -189,6 +189,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     Electrons = process.Electrons,
     Muons     = process.Muons,
     Jets      = process.Jets,
+    FatJets   = process.FatJets,
     SoftBTag  = process.SoftBTag,
     Top       = process.Top,
     METs      = process.METs,
@@ -228,7 +229,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             saveHplusInfo       = cms.untracked.bool(False),
         )
     ),
-    FatJets = process.FatJets,
+
 )
 
 #================================================================================================ 
@@ -245,6 +246,9 @@ process.skim.TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.ge
 from HiggsAnalysis.MiniAOD2TTree.CommonFragments import produceCustomisations
 produceCustomisations(process, dataVersion.isData()) # This produces process.CustomisationsSequence which needs to be included to path
 
+from HiggsAnalysis.MiniAOD2TTree.CommonFragments import produceAK8Customisations
+produceAK8Customisations(process, dataVersion.isData())   # This produces process.AK8CustomisationsSequence which needs to be included to path
+
 
 #================================================================================================ 
 # Module execution
@@ -255,11 +259,17 @@ process.runEDFilter = cms.Path(process.PUInfo*
                                process.skim*
                                process.skimCounterPassed*
                                process.CustomisationsSequence*
+                               process.AK8CustomisationsSequence*
                                process.dump)
 
 
 #process.output = cms.OutputModule("PoolOutputModule",
 #   outputCommands = cms.untracked.vstring(
+#       "keep *_*AK8*_*_*",
+#       "keep *_*AK4*_*_*",
+#       "keep *_selected*_*_*",
+#       "keep *_updated*_*_*",
+#       
 #       "keep *",
 #   ),
 #   fileName = cms.untracked.string("CMSSW.root")

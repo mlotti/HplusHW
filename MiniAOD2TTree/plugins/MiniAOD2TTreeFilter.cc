@@ -207,6 +207,7 @@ bool MiniAOD2TTreeFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSet
 	if (trgDumper) trgDumper->triggerMatch(trigger::TriggerMuon,muonDumper->selected());
     }
     if (jetDumper) accept = accept && jetDumper->fill(iEvent,iSetup);
+    if (fatJetDumper) accept = accept && fatJetDumper->fill(iEvent, iSetup);
     if (softBTagDumper) accept = accept && softBTagDumper->fill(iEvent,iSetup);
     if (topDumper) accept = accept && topDumper->fill(iEvent,iSetup);
     if (metDumper) accept = accept && metDumper->fill(iEvent,iSetup);

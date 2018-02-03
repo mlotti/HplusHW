@@ -10,11 +10,39 @@
 
 FatJetDumper::FatJetDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& psets)
 : genParticleToken(iConsumesCollector.consumes<reco::GenParticleCollection>(edm::InputTag("prunedGenParticles"))) {
+
     inputCollections = psets;
     booked           = false;
-
+    
     systVariations = inputCollections[0].getParameter<bool>("systVariations");
+
+    fillPuppi      = inputCollections[0].getParameter<bool>("fillPuppi");
+    
+    mcjecPath      = inputCollections[0].getUntrackedParameter<std::string>("mcjecPath");
+    datajecPath    = inputCollections[0].getUntrackedParameter<std::string>("datajecPath");
         
+    std::vector<JetCorrectorParameters> mcJECparams;
+    mcJECparams.push_back(JetCorrectorParameters(mcjecPath+"_MC_L2Relative_AK8PFchs.txt"));
+    mcJECparams.push_back(JetCorrectorParameters(mcjecPath+"_MC_L3Absolute_AK8PFchs.txt"));
+    mcJEC = new FactorizedJetCorrector(mcJECparams);
+
+    std::vector<JetCorrectorParameters> dataJECparams;
+    dataJECparams.push_back(JetCorrectorParameters(datajecPath+"_DATA_L2Relative_AK8PFchs.txt"));
+    dataJECparams.push_back(JetCorrectorParameters(datajecPath+"_DATA_L3Absolute_AK8PFchs.txt"));
+    dataJECparams.push_back(JetCorrectorParameters(datajecPath+"_DATA_L2L3Residual_AK8PFchs.txt"));
+    dataJEC = new FactorizedJetCorrector(dataJECparams);
+    
+    std::vector<JetCorrectorParameters> mcJECparams_PUPPI;
+    mcJECparams_PUPPI.push_back(JetCorrectorParameters(mcjecPath+"_MC_L2Relative_AK8PFPuppi.txt"));
+    mcJECparams_PUPPI.push_back(JetCorrectorParameters(mcjecPath+"_MC_L3Absolute_AK8PFPuppi.txt"));
+    mcJEC_PUPPI = new FactorizedJetCorrector(mcJECparams_PUPPI);
+    
+    std::vector<JetCorrectorParameters> dataJECparams_PUPPI;
+    dataJECparams_PUPPI.push_back(JetCorrectorParameters(datajecPath+"_DATA_L2Relative_AK8PFPuppi.txt"));
+    dataJECparams_PUPPI.push_back(JetCorrectorParameters(datajecPath+"_DATA_L3Absolute_AK8PFPuppi.txt"));
+    dataJECparams_PUPPI.push_back(JetCorrectorParameters(datajecPath+"_DATA_L2L3Residual_AK8PFPuppi.txt"));
+    dataJEC_PUPPI = new FactorizedJetCorrector(dataJECparams_PUPPI);
+    
     pt  = new std::vector<double>[inputCollections.size()];
     eta = new std::vector<double>[inputCollections.size()];    
     phi = new std::vector<double>[inputCollections.size()];    
@@ -25,12 +53,17 @@ FatJetDumper::FatJetDumper(edm::ConsumesCollector&& iConsumesCollector, std::vec
     hadronFlavour = new std::vector<int>[inputCollections.size()];
     partonFlavour = new std::vector<int>[inputCollections.size()];
 
-    nDiscriminators = inputCollections[0].getParameter<std::vector<std::string> >("discriminators").size();
-    discriminators = new std::vector<float>[inputCollections.size()*nDiscriminators];
-    nUserfloats = inputCollections[0].getParameter<std::vector<std::string> >("userFloats").size();
-    userfloats  = new std::vector<double>[inputCollections.size()*nUserfloats];
-    nUserints   = inputCollections[0].getParameter<std::vector<std::string> >("userInts").size();
-    userints    = new std::vector<int>[inputCollections.size()*nUserints];
+    nDiscriminators   = inputCollections[0].getParameter<std::vector<std::string> >("discriminators").size();
+    discriminators    = new std::vector<float>[inputCollections.size()*nDiscriminators];
+    nUserfloats       = inputCollections[0].getParameter<std::vector<std::string> >("userFloats").size();
+    userfloats        = new std::vector<double>[inputCollections.size()*nUserfloats];
+    nUserints         = inputCollections[0].getParameter<std::vector<std::string> >("userInts").size();
+    userints          = new std::vector<int>[inputCollections.size()*nUserints];
+    nGroomedMasses    = inputCollections[0].getParameter<std::vector<std::string> >("groomedmasses").size();
+    groomedmasses     = new std::vector<double>[inputCollections.size()*nGroomedMasses];
+    nUserfloats_Puppi = inputCollections[0].getParameter<std::vector<std::string> >("userFloatsPuppi").size();
+    userfloats_Puppi  = new std::vector<double>[inputCollections.size()*nUserfloats_Puppi];
+    
     jetToken   = new edm::EDGetTokenT<edm::View<pat::Jet> >[inputCollections.size()];
     jetJESup   = new edm::EDGetTokenT<edm::View<pat::Jet> >[inputCollections.size()];
     jetJESdown = new edm::EDGetTokenT<edm::View<pat::Jet> >[inputCollections.size()];
@@ -40,6 +73,7 @@ FatJetDumper::FatJetDumper(edm::ConsumesCollector&& iConsumesCollector, std::vec
         edm::InputTag inputtag = inputCollections[i].getParameter<edm::InputTag>("src");
         jetToken[i] = iConsumesCollector.consumes<edm::View<pat::Jet>>(inputtag);
 
+	
 	if(systVariations){
 	  edm::InputTag inputtagJESup = inputCollections[i].getParameter<edm::InputTag>("srcJESup");
           jetJESup[i]   = iConsumesCollector.consumes<edm::View<pat::Jet>>(inputtagJESup);
@@ -60,7 +94,11 @@ FatJetDumper::FatJetDumper(edm::ConsumesCollector&& iConsumesCollector, std::vec
 	bool param = inputCollections[i].getUntrackedParameter<bool>("filter",false);
         if(param) useFilter = true;
     }
-
+    
+    
+    rho_token = iConsumesCollector.consumes<double>(inputCollections[0].getParameter<edm::InputTag>("rho"));
+    vertex_token = iConsumesCollector.consumes<reco::VertexCollection>(inputCollections[0].getParameter<edm::InputTag>("vertices"));
+    
     jetIDloose = new std::vector<bool>[inputCollections.size()];
     jetIDtight = new std::vector<bool>[inputCollections.size()];
     jetIDtightLeptonVeto = new std::vector<bool>[inputCollections.size()];
@@ -69,29 +107,63 @@ FatJetDumper::FatJetDumper(edm::ConsumesCollector&& iConsumesCollector, std::vec
     jetPUIDmedium = new std::vector<bool>[inputCollections.size()];
     jetPUIDtight = new std::vector<bool>[inputCollections.size()];
     
-    originatesFromW = new std::vector<bool>[inputCollections.size()];
-    originatesFromZ = new std::vector<bool>[inputCollections.size()];
-    originatesFromTop = new std::vector<bool>[inputCollections.size()];
-    originatesFromChargedHiggs = new std::vector<bool>[inputCollections.size()];
-    originatesFromUnknown = new std::vector<bool>[inputCollections.size()]; 
-    
     MCjet = new FourVectorDumper[inputCollections.size()];
+    
     if(systVariations){
       systJESup = new FourVectorDumper[inputCollections.size()];
       systJESdown = new FourVectorDumper[inputCollections.size()];
       systJERup = new FourVectorDumper[inputCollections.size()];
       systJERdown = new FourVectorDumper[inputCollections.size()];
     }
-    // Marina - start
-    nSubjets     = new std::vector<int>[inputCollections.size()];
-    hasBTagSubjet= new std::vector<bool>[inputCollections.size()];
-    // Marina - end
+    
+    corrPrunedMass    = new std::vector<double>[inputCollections.size()];
+    numberOfDaughters = new std::vector<int>[inputCollections.size()];
+    nSubjets          = new std::vector<int>[inputCollections.size()];
+    
+    sdsubjet1_pt   = new std::vector<double>[inputCollections.size()];
+    sdsubjet1_eta  = new std::vector<double>[inputCollections.size()];
+    sdsubjet1_phi  = new std::vector<double>[inputCollections.size()];
+    sdsubjet1_mass = new std::vector<double>[inputCollections.size()];
+    sdsubjet1_csv  = new std::vector<double>[inputCollections.size()];
+    
+    sdsubjet2_pt   = new std::vector<double>[inputCollections.size()];
+    sdsubjet2_eta  = new std::vector<double>[inputCollections.size()];
+    sdsubjet2_phi  = new std::vector<double>[inputCollections.size()];
+    sdsubjet2_mass = new std::vector<double>[inputCollections.size()];
+    sdsubjet2_csv  = new std::vector<double>[inputCollections.size()];
+
+    // 
+    if (fillPuppi){
+      softdropMass_PUPPI   = new std::vector<double>[inputCollections.size()];
+      corrPrunedMass_PUPPI = new std::vector<double>[inputCollections.size()];
+      
+      nSubjets_PUPPI = new std::vector<int>[inputCollections.size()];
+      
+      sdsubjet1_PUPPI_pt  = new std::vector<double>[inputCollections.size()];
+      sdsubjet1_PUPPI_eta = new std::vector<double>[inputCollections.size()];
+      sdsubjet1_PUPPI_phi = new std::vector<double>[inputCollections.size()];
+      sdsubjet1_PUPPI_mass= new std::vector<double>[inputCollections.size()];
+      sdsubjet1_PUPPI_csv = new std::vector<double>[inputCollections.size()];
+      
+      sdsubjet2_PUPPI_pt  = new std::vector<double>[inputCollections.size()];
+      sdsubjet2_PUPPI_eta = new std::vector<double>[inputCollections.size()];
+      sdsubjet2_PUPPI_phi = new std::vector<double>[inputCollections.size()];
+      sdsubjet2_PUPPI_mass= new std::vector<double>[inputCollections.size()];
+      sdsubjet2_PUPPI_csv = new std::vector<double>[inputCollections.size()];
+    }
+    
 }
 
-FatJetDumper::~FatJetDumper(){}
+FatJetDumper::~FatJetDumper(){
+  delete mcJEC;
+  delete mcJEC_PUPPI;
+  delete dataJEC;
+  delete dataJEC_PUPPI;
+}
 
 void FatJetDumper::book(TTree* tree){
   booked = true;
+  
   for(size_t i = 0; i < inputCollections.size(); ++i){
     std::string name = inputCollections[i].getUntrackedParameter<std::string>("branchname","");
     if(name.length() == 0) name = inputCollections[i].getParameter<edm::InputTag>("src").label();
@@ -122,7 +194,21 @@ void FatJetDumper::book(TTree* tree){
       branch_name = branch_name.erase(pos_semicolon,1);
       tree->Branch((name+"_"+branch_name).c_str(),&userints[inputCollections.size()*iDiscr+i]);
     }
-
+    std::vector<std::string> groomedmassesNames = inputCollections[i].getParameter<std::vector<std::string> >("groomedmasses");
+    for(size_t iDiscr = 0; iDiscr < groomedmassesNames.size(); ++iDiscr) {
+      tree->Branch((name+"_"+groomedmassesNames[iDiscr]).c_str(),&groomedmasses[inputCollections.size()*iDiscr+i]);
+    }
+    
+    if (fillPuppi){
+      std::vector<std::string> userfloatNames_Puppi = inputCollections[i].getParameter<std::vector<std::string> >("userFloatsPuppi");
+      for(size_t iDiscr = 0; iDiscr < userfloatNames_Puppi.size(); ++iDiscr) {
+	std::string branch_name = userfloatNames_Puppi[iDiscr];
+	size_t pos_semicolon = branch_name.find(":");
+	branch_name = branch_name.erase(pos_semicolon,1);
+	tree->Branch((name+"_"+branch_name).c_str(),&userfloats_Puppi[inputCollections.size()*iDiscr+i]);
+      }
+    }
+    
     tree->Branch((name+"_IDloose").c_str(),&jetIDloose[i]);
     tree->Branch((name+"_IDtight").c_str(),&jetIDtight[i]);
     tree->Branch((name+"_IDtightLeptonVeto").c_str(),&jetIDtightLeptonVeto[i]);
@@ -130,12 +216,6 @@ void FatJetDumper::book(TTree* tree){
     tree->Branch((name+"_PUIDloose").c_str(),&jetPUIDloose[i]);
     tree->Branch((name+"_PUIDmedium").c_str(),&jetPUIDmedium[i]);
     tree->Branch((name+"_PUIDtight").c_str(),&jetPUIDtight[i]);
-    
-    tree->Branch((name+"_originatesFromW").c_str(),&originatesFromW[i]);
-    tree->Branch((name+"_originatesFromZ").c_str(),&originatesFromZ[i]);
-    tree->Branch((name+"_originatesFromTop").c_str(),&originatesFromTop[i]);
-    tree->Branch((name+"_originatesFromChargedHiggs").c_str(),&originatesFromChargedHiggs[i]);
-    tree->Branch((name+"_originatesFromUnknown").c_str(),&originatesFromUnknown[i]);
     
     MCjet[i].book(tree, name, "MCjet");
     
@@ -146,59 +226,67 @@ void FatJetDumper::book(TTree* tree){
       systJERdown[i].book(tree, name, "JERdown");
     }
     
-    // Marina - start
-    bool checkSubjets = inputCollections[i].getParameter<bool>("checkSubjets");
-    if (checkSubjets){
-      tree->Branch((name+"_nSubjets").c_str(),&nSubjets[i]);
-      tree->Branch((name+"_hasBTagSubjet").c_str(), &hasBTagSubjet[i]);
+    tree->Branch((name+"_corrPrunedMass").c_str(), &corrPrunedMass[i]);
+    tree->Branch((name+"_numberOfDaughters").c_str(), &numberOfDaughters[i]);
+    
+    tree->Branch((name+"_nsoftdropSubjets").c_str(),  &nSubjets[i]);
+    tree->Branch((name+"_sdsubjet1_pt").c_str(),   &sdsubjet1_pt[i]);
+    tree->Branch((name+"_sdsubjet1_eta").c_str(),  &sdsubjet1_eta[i]);
+    tree->Branch((name+"_sdsubjet1_phi").c_str(),  &sdsubjet1_phi[i]);
+    tree->Branch((name+"_sdsubjet1_mass").c_str(), &sdsubjet1_mass[i]);
+    tree->Branch((name+"_sdsubjet1_csv").c_str(),  &sdsubjet1_csv[i]);
+    
+    tree->Branch((name+"_sdsubjet2_pt").c_str(),   &sdsubjet2_pt[i]);
+    tree->Branch((name+"_sdsubjet2_eta").c_str(),  &sdsubjet2_eta[i]);
+    tree->Branch((name+"_sdsubjet2_phi").c_str(),  &sdsubjet2_phi[i]);
+    tree->Branch((name+"_sdsubjet2_mass").c_str(), &sdsubjet2_mass[i]);
+    tree->Branch((name+"_sdsubjet2_csv").c_str(),  &sdsubjet2_csv[i]);
+    if (fillPuppi){
+      tree->Branch((name+"_softdropMass_PUPPI").c_str(),      &softdropMass_PUPPI[i]);
+      tree->Branch((name+"_corrPrunedMass_PUPPI").c_str(),    &corrPrunedMass_PUPPI[i]);
+      tree->Branch((name+"_nsoftdropSubjets_PUPPI").c_str(),  &nSubjets_PUPPI[i]);
+      tree->Branch((name+"_sdsubjet1_PUPPI_pt").c_str(),   &sdsubjet1_PUPPI_pt[i]);
+      tree->Branch((name+"_sdsubjet1_PUPPI_eta").c_str(),  &sdsubjet1_PUPPI_eta[i]);
+      tree->Branch((name+"_sdsubjet1_PUPPI_phi").c_str(),  &sdsubjet1_PUPPI_phi[i]);
+      tree->Branch((name+"_sdsubjet1_PUPPI_mass").c_str(), &sdsubjet1_PUPPI_mass[i]);
+      tree->Branch((name+"_sdsubjet1_PUPPI_csv").c_str(),  &sdsubjet1_PUPPI_csv[i]);
+      
+      tree->Branch((name+"_sdsubjet2_PUPPI_pt").c_str(),   &sdsubjet2_PUPPI_pt[i]);
+      tree->Branch((name+"_sdsubjet2_PUPPI_eta").c_str(),  &sdsubjet2_PUPPI_eta[i]);
+      tree->Branch((name+"_sdsubjet2_PUPPI_phi").c_str(),  &sdsubjet2_PUPPI_phi[i]);
+      tree->Branch((name+"_sdsubjet2_PUPPI_mass").c_str(), &sdsubjet2_PUPPI_mass[i]);
+      tree->Branch((name+"_sdsubjet2_PUPPI_csv").c_str(),  &sdsubjet2_PUPPI_csv[i]);
     }
-    // Marina - end
   }
 }
 
 bool FatJetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
-    if (!booked) return true;
-/*
-    if (!fJECUncertainty.size()) {
-      for(size_t i = 0; i < inputCollections.size(); ++i) {
-        edm::ESHandle<JetCorrectorParametersCollection> JetCorParColl;
-        iSetup.get<JetCorrectionsRecord>().get(inputCollections[i].getParameter<std::string>("jecPayload"),JetCorParColl);
-//        bool found = true;
-        try {
-          JetCorrectorParameters const & JetCorPar = (*JetCorParColl)["Uncertainty"];
-          fJECUncertainty.push_back(new JetCorrectionUncertainty(JetCorPar));
-        } catch(cms::Exception e) {
-          std::cout << "Warning: cannot find cell 'Uncertainty' in JEC uncertainty table; JEC uncertainty forced to 0" << std::endl;
-//          found = false;
-          fJECUncertainty.push_back(nullptr);
-        }
-
-//        if (found) {
-//          JetCorrectorParameters const & JetCorPar = (*JetCorParColl)["Uncertainty"];
-//          fJECUncertainty.push_back(new JetCorrectionUncertainty(JetCorPar));
-//        } else {
-//          fJECUncertainty.push_back(nullptr);
-//        }
-//
-      }
-    }
-*/
+    
+  if (!booked) return true;
+  
     edm::Handle <reco::GenParticleCollection> genParticlesHandle;
     if (!iEvent.isRealData())
       iEvent.getByToken(genParticleToken, genParticlesHandle);
-
+    
+    // Vertex
+    edm::Handle<reco::VertexCollection> vertex_handle;
+    iEvent.getByToken(vertex_token,vertex_handle);
+    
+    // Rho
+    edm::Handle<double> rho_handle;
+    iEvent.getByToken(rho_token,rho_handle);
+    
     for(size_t ic = 0; ic < inputCollections.size(); ++ic){
-        std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
-	std::vector<std::string> userfloatNames = inputCollections[ic].getParameter<std::vector<std::string> >("userFloats");
-	std::vector<std::string> userintNames = inputCollections[ic].getParameter<std::vector<std::string> >("userInts");
+      
+        std::vector<std::string> discriminatorNames   = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
+	std::vector<std::string> userfloatNames       = inputCollections[ic].getParameter<std::vector<std::string> >("userFloats");
+	std::vector<std::string> userintNames         = inputCollections[ic].getParameter<std::vector<std::string> >("userInts");
+	std::vector<std::string> groomedmassesNames   = inputCollections[ic].getParameter<std::vector<std::string> >("groomedmasses");
+	std::vector<std::string> userfloatNames_Puppi = inputCollections[ic].getParameter<std::vector<std::string> >("userFloatsPuppi");
 	
-	// Marina - start
-	bool checkSubjets = inputCollections[ic].getParameter<bool>("checkSubjets");
-	// Marina - end
-
         edm::Handle<edm::View<pat::Jet>> jetHandle;
         iEvent.getByToken(jetToken[ic], jetHandle);
-
+	
 	if(jetHandle.isValid()){
 
 	    for(size_t i=0; i<jetHandle->size(); ++i) {
@@ -208,22 +296,43 @@ bool FatJetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 eta[ic].push_back(obj.p4().eta());
                 phi[ic].push_back(obj.p4().phi());
                 e[ic].push_back(obj.p4().energy());
-
-		//p4[ic].push_back(obj.p4());
-
+		
+		// L2L3 Corrected Jet only for the pruned mass correction
+		double corr = 0.0;
+		FactorizedJetCorrector *jecAK8_ = ( iEvent.isRealData() ) ? dataJEC : mcJEC;
+		jecAK8_ -> setJetEta ( obj.eta()     * obj.jecFactor("Uncorrected") );
+		jecAK8_ -> setJetPt  ( obj.pt()      * obj.jecFactor("Uncorrected") );
+		jecAK8_ -> setJetE   ( obj.energy()  * obj.jecFactor("Uncorrected") );
+		jecAK8_ -> setJetA   ( obj.jetArea() );
+		jecAK8_->setRho   ( *rho_handle );
+		jecAK8_->setNPV   ( vertex_handle->size() );
+		corr = jecAK8_->getCorrection(); 
+		
+		corrPrunedMass[ic].push_back(obj.userFloat("ak8PFJetsCHSPrunedMass")*corr);
+		
+		
 		for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
-                    //std::cout << inputCollections[ic].getUntrackedParameter<std::string>("branchname","") << " / " << discriminatorNames[iDiscr] << std::endl;
-		    discriminators[inputCollections.size()*iDiscr+ic].push_back(obj.bDiscriminator(discriminatorNames[iDiscr]));
+		  //std::cout << inputCollections[ic].getUntrackedParameter<std::string>("branchname","") << " / " << discriminatorNames[iDiscr] << std::endl;
+		  discriminators[inputCollections.size()*iDiscr+ic].push_back(obj.bDiscriminator(discriminatorNames[iDiscr]));
 		}
                 for(size_t iDiscr = 0; iDiscr < userfloatNames.size(); ++iDiscr) {
-                    //std::cout << inputCollections[ic].getUntrackedParameter<std::string>("branchname","") << " / " << userfloatNames[iDiscr] << std::endl;
-                    userfloats[inputCollections.size()*iDiscr+ic].push_back(obj.userFloat(userfloatNames[iDiscr]));
+		  //std::cout << inputCollections[ic].getUntrackedParameter<std::string>("branchname","") << " / " << userfloatNames[iDiscr] << std::endl;
+		  userfloats[inputCollections.size()*iDiscr+ic].push_back(obj.userFloat(userfloatNames[iDiscr]));
                 }
 		for(size_t iDiscr = 0; iDiscr < userintNames.size(); ++iDiscr) {
-		  // std::cout << inputCollections[ic].getUntrackedParameter<std::string>("branchname","") << " / " << userintNames[iDiscr] << std::endl;
+		  //std::cout << inputCollections[ic].getUntrackedParameter<std::string>("branchname","") << " / " << userintNames[iDiscr] << std::endl;
 		  userints[inputCollections.size()*iDiscr+ic].push_back(obj.userInt(userintNames[iDiscr]));
 		}
-
+		for(size_t iDiscr = 0; iDiscr < groomedmassesNames.size(); ++iDiscr) {
+		  //std::cout << inputCollections[ic].getUntrackedParameter<std::string>("branchname","") << " / " << groomedmassesNames[iDiscr] << std::endl;
+		  groomedmasses[inputCollections.size()*iDiscr+ic].push_back(obj.userFloat(groomedmassesNames[iDiscr]));
+		}
+		if (fillPuppi){
+		  for(size_t iDiscr = 0; iDiscr < userfloatNames_Puppi.size(); ++iDiscr) {
+		    userfloats_Puppi[inputCollections.size()*iDiscr+ic].push_back(obj.userFloat(userfloatNames_Puppi[iDiscr]));
+		  }
+		}
+		
 		int genParton = 0;
 		if(obj.genParton()){
 		  genParton = obj.genParton()->pdgId();
@@ -249,56 +358,7 @@ bool FatJetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 		jetPUIDmedium[ic].push_back(PileupJetIdentifier::passJetId(puIDflag, PileupJetIdentifier::kMedium));
 		jetPUIDtight[ic].push_back(PileupJetIdentifier::passJetId(puIDflag, PileupJetIdentifier::kTight));
                 
-                // MC origin
-                bool fromW = false;
-                bool fromZ = false;
-                bool fromTop = false;
-                bool fromHplus = false;
-                bool fromUnknown = false;
-                if (!iEvent.isRealData()) {
-                  // Find MC parton matching to jet
-                  size_t iCandidate = 0;
-                  double myBestDeltaR = 9999;
-                  reco::Candidate::LorentzVector jetMomentum = obj.p4();
-                  for (size_t iMC=0; iMC < genParticlesHandle->size(); ++iMC) {
-                    const reco::Candidate & p = (*genParticlesHandle)[iMC];
-                    int absPid = std::abs(p.pdgId());
-                    if (absPid >= 1 && absPid <= 5) {
-                      double myDeltaR = deltaR(jetMomentum, p.p4());
-                      if (myDeltaR < 0.8 && myDeltaR < myBestDeltaR) {
-                        myBestDeltaR = myDeltaR;
-                        iCandidate = iMC;
-                      }
-                    }
-                  }
-                  if (iCandidate > 0) {
-                    // Analyze ancestry
-                    const reco::Candidate & p = (*genParticlesHandle)[iCandidate];
-                    std::vector<const reco::Candidate*> ancestry = GenParticleTools::findAncestry(genParticlesHandle, &p);
-                    for (auto& pa: ancestry) {
-                      int absPid = std::abs(pa->pdgId());
-                      if (absPid == kFromW)
-                        fromW = true;
-                      else if (absPid == kFromZ)
-                        fromZ = true;
-                      else if (absPid == kFromHplus)
-                        fromHplus = true;
-                      else if (absPid == 6)
-                        fromTop = true;
-                    }
-                  } else {
-                    fromUnknown = true;
-                  }
-                } else {
-                  fromUnknown = true;
-                }
-                originatesFromW[ic].push_back(fromW);
-                originatesFromZ[ic].push_back(fromZ);
-                originatesFromTop[ic].push_back(fromTop);
-                originatesFromChargedHiggs[ic].push_back(fromHplus);
-                originatesFromUnknown[ic].push_back(fromUnknown);
-                
-                // GenJet
+		// GenJet
                 if (obj.genJet() != nullptr) {
                   MCjet[ic].add(obj.genJet()->pt(), obj.genJet()->eta(), obj.genJet()->phi(), obj.genJet()->energy());
                 } else {
@@ -306,10 +366,10 @@ bool FatJetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 }
                 
                 // Systematics
-                if (systVariations && !iEvent.isRealData()) {
+		if (systVariations && !iEvent.isRealData()) {
 	          edm::Handle<edm::View<pat::Jet>> jetJESupHandle;
         	  iEvent.getByToken(jetJESup[ic], jetJESupHandle);
-
+		  
                   if(jetJESupHandle.isValid()){
                     const pat::Jet& sysobj = jetJESupHandle->at(i);
                     systJESup[ic].add(sysobj.p4().pt(),
@@ -328,7 +388,7 @@ bool FatJetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                                         sysobj.p4().phi(),
                                         sysobj.p4().energy());
                   }
-
+		  
                   edm::Handle<edm::View<pat::Jet>> jetJERupHandle;
                   iEvent.getByToken(jetJERup[ic], jetJERupHandle);
                       
@@ -350,49 +410,152 @@ bool FatJetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                                         sysobj.p4().phi(),
                                         sysobj.p4().energy());
                   }
-/*
-                  // JES
-                  double uncUp = 0.0;
-                  double uncDown = 0.0;
-                  if (fJECUncertainty[ic] != nullptr) {
-                    fJECUncertainty[ic]->setJetEta(obj.eta());
-                    fJECUncertainty[ic]->setJetPt(obj.pt()); // here you must use the CORRECTED jet pt
-                    uncUp = fJECUncertainty[ic]->getUncertainty(true);
-                  }
-                  systJESup[ic].add(obj.p4().pt()*(1.0+uncUp),
-                                    obj.p4().eta(),
-                                    obj.p4().phi(),
-                                    obj.p4().energy()*(1.0+uncUp));
-                  if (fJECUncertainty[ic] != nullptr) {
-                    // Yes, one needs to set pt and eta again
-                    fJECUncertainty[ic]->setJetEta(obj.eta());
-                    fJECUncertainty[ic]->setJetPt(obj.pt()); // here you must use the CORRECTED jet pt
-                    uncDown = fJECUncertainty[ic]->getUncertainty(false);
-                  }
-                  systJESdown[ic].add(obj.p4().pt()*(1.0-uncDown),
-                                      obj.p4().eta(),
-                                      obj.p4().phi(),
-                                      obj.p4().energy()*(1.0-uncDown));
-                  // JER
-*/                
-                }
-		// Marina - start		
-		if (checkSubjets){
-		  auto &subjets = obj.subjets("SoftDrop");
-		  
-		  int nSub = 0;
-		  bool hasBSubjet = false;
-		  for (auto const & sj: subjets)
-		    {
-		      float csv = sj->bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags");
-		      if (csv >= 0.8484) hasBSubjet = true;   // Medium working point (Recommended for 2016 Analysis)
-		      nSub++;
-		    }
-		  nSubjets[ic].push_back(nSub);
-		  hasBTagSubjet[ic].push_back(hasBSubjet);
 		}
-		// Marina - end
-            }
+		
+		numberOfDaughters[ic].push_back(obj.numberOfDaughters());
+		
+		//reco::CATopJetTagInfo const * caTopTagInfo = dynamic_cast<reco::CATopJetTagInfo const * > (obj.tagInfo("caTop"));
+		//if (caTopTagInfo != 0) {
+		//  float minMass = caTopTagInfo->properties().minMass;
+		//  float nSubs   = caTopTagInfo->properties().nSubJets;
+		//std::cout<<"caTopTagInfo -> minMass ="<<minMass<<std::endl;
+		//  std::cout<<"caTopTagInfo -> nSubjets="<<nSubs<<std::endl;
+		//}
+		
+		
+		std::vector<pat::Jet> sdsubjets; sdsubjets.clear();
+		auto &subjets = obj.subjets("SoftDrop");
+		for (auto const & sj: subjets)
+		  {
+		    sdsubjets.push_back(sj);
+		  }
+
+		nSubjets[ic].push_back(sdsubjets.size());
+		if (sdsubjets.size() == 0)
+		  {
+		    sdsubjet1_pt[ic].push_back(-99.9); 
+		    sdsubjet1_eta[ic].push_back(-99.9);
+		    sdsubjet1_phi[ic].push_back(-99.9);
+		    sdsubjet1_mass[ic].push_back(-99.9);
+		    sdsubjet1_csv[ic].push_back(-99.9);
+		    
+		    sdsubjet2_pt[ic].push_back(-99.9);
+		    sdsubjet2_eta[ic].push_back(-99.9);
+		    sdsubjet2_phi[ic].push_back(-99.9);
+		    sdsubjet2_mass[ic].push_back(-99.9);
+		    sdsubjet2_csv[ic].push_back(-99.9);
+		  }
+		else if (sdsubjets.size() == 1)
+		  {
+		    sdsubjet1_pt[ic].push_back(  sdsubjets[0].pt());
+		    sdsubjet1_eta[ic].push_back( sdsubjets[0].eta());
+		    sdsubjet1_phi[ic].push_back( sdsubjets[0].phi());
+		    sdsubjet1_mass[ic].push_back(sdsubjets[0].mass());
+		    sdsubjet1_csv[ic].push_back( sdsubjets[0].bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+		    
+		    sdsubjet2_pt[ic].push_back(-99.9);
+		    sdsubjet2_eta[ic].push_back(-99.9);
+		    sdsubjet2_phi[ic].push_back(-99.9);
+		    sdsubjet2_mass[ic].push_back(-99.9);
+		    sdsubjet2_csv[ic].push_back(-99.9);
+		  }
+		else if (sdsubjets.size() == 2)
+		  {
+		    sdsubjet1_pt[ic].push_back(  sdsubjets[0].pt());
+		    sdsubjet1_eta[ic].push_back( sdsubjets[0].eta());
+		    sdsubjet1_phi[ic].push_back( sdsubjets[0].phi());
+		    sdsubjet1_mass[ic].push_back(sdsubjets[0].mass());
+		    sdsubjet1_csv[ic].push_back( sdsubjets[0].bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+		    
+		    sdsubjet2_pt[ic].push_back(  sdsubjets[1].pt());
+		    sdsubjet2_eta[ic].push_back( sdsubjets[1].eta());
+		    sdsubjet2_phi[ic].push_back( sdsubjets[1].phi());
+		    sdsubjet2_mass[ic].push_back(sdsubjets[1].mass());
+		    sdsubjet2_csv[ic].push_back( sdsubjets[1].bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+		  }
+		else {
+		  throw cms::Exception("CorruptData") << "Softdrop subjets not valid! Fat jets can have only 0, 1 or 2 Soft Drop Subjets!";
+		}
+
+		if (fillPuppi){
+		  
+		  
+		  TLorentzVector puppi_softdrop_p4, puppi_softdrop_subjet_p4;
+		  
+		  std::vector<pat::Jet> sdsubjets_PUPPI; sdsubjets_PUPPI.clear();
+		  auto &subjets_PUPPI = obj.subjets("SoftDropPuppi");
+		  for (auto const & it: subjets_PUPPI)
+		    {
+		      puppi_softdrop_subjet_p4.SetPtEtaPhiM(it->correctedP4(0).pt(), it->correctedP4(0).eta(), it->correctedP4(0).phi(), it->correctedP4(0).mass());
+		      puppi_softdrop_p4+=puppi_softdrop_subjet_p4;
+
+		      sdsubjets_PUPPI.push_back(it);
+		    }
+		  
+		  softdropMass_PUPPI[ic].push_back(puppi_softdrop_p4.M());
+		  
+		  // L2L3 Corrected Jet only for the pruned mass correction
+		  double puppi_corr = 0.0;
+		  FactorizedJetCorrector *jecAK8PUPPI_ = ( iEvent.isRealData() ) ? dataJEC_PUPPI : mcJEC_PUPPI;
+		  jecAK8PUPPI_ -> setJetEta ( puppi_softdrop_p4.Eta());
+		  jecAK8PUPPI_ -> setJetPt  ( puppi_softdrop_p4.Pt());
+		  jecAK8PUPPI_ -> setJetE   ( puppi_softdrop_p4.Energy());
+		  jecAK8PUPPI_ -> setJetA   ( obj.jetArea() );
+		  jecAK8PUPPI_ -> setRho    ( *rho_handle );
+		  jecAK8PUPPI_ -> setNPV    ( vertex_handle->size() );
+		  puppi_corr = jecAK8PUPPI_->getCorrection();
+		  
+		  corrPrunedMass_PUPPI[ic].push_back(puppi_corr * puppi_softdrop_p4.M());
+		  
+		  nSubjets_PUPPI[ic].push_back(sdsubjets_PUPPI.size());
+		  
+		  if (sdsubjets_PUPPI.size() == 0)
+		    {
+		      sdsubjet1_PUPPI_pt[ic].push_back(-99.9);
+		      sdsubjet1_PUPPI_eta[ic].push_back(-99.9);
+		      sdsubjet1_PUPPI_phi[ic].push_back(-99.9);
+		      sdsubjet1_PUPPI_mass[ic].push_back(-99.9);
+		      sdsubjet1_PUPPI_csv[ic].push_back(-99.9);
+		      
+		      sdsubjet2_PUPPI_pt[ic].push_back(-99.9);
+		      sdsubjet2_PUPPI_eta[ic].push_back(-99.9);
+		      sdsubjet2_PUPPI_phi[ic].push_back(-99.9);
+		      sdsubjet2_PUPPI_mass[ic].push_back(-99.9);
+		      sdsubjet2_PUPPI_csv[ic].push_back(-99.9);
+		    }
+		  else if (sdsubjets_PUPPI.size() == 1)
+		    {
+		      sdsubjet1_PUPPI_pt[ic].push_back(  sdsubjets_PUPPI[0].pt());
+		      sdsubjet1_PUPPI_eta[ic].push_back( sdsubjets_PUPPI[0].eta());
+		      sdsubjet1_PUPPI_phi[ic].push_back( sdsubjets_PUPPI[0].phi());
+		      sdsubjet1_PUPPI_mass[ic].push_back(sdsubjets_PUPPI[0].mass());
+		      sdsubjet1_PUPPI_csv[ic].push_back( sdsubjets_PUPPI[0].bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+		      
+		      sdsubjet2_PUPPI_pt[ic].push_back(-99.9);
+		      sdsubjet2_PUPPI_eta[ic].push_back(-99.9);
+		      sdsubjet2_PUPPI_phi[ic].push_back(-99.9);
+		      sdsubjet2_PUPPI_mass[ic].push_back(-99.9);
+		      sdsubjet2_PUPPI_csv[ic].push_back(-99.9);
+		    }
+		  else if (sdsubjets_PUPPI.size() == 2)
+		    {
+		      sdsubjet1_PUPPI_pt[ic].push_back(  sdsubjets_PUPPI[0].pt());
+		      sdsubjet1_PUPPI_eta[ic].push_back( sdsubjets_PUPPI[0].eta());
+		      sdsubjet1_PUPPI_phi[ic].push_back( sdsubjets_PUPPI[0].phi());
+		      sdsubjet1_PUPPI_mass[ic].push_back(sdsubjets_PUPPI[0].mass());
+		      sdsubjet1_PUPPI_csv[ic].push_back( sdsubjets_PUPPI[0].bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+		      
+		      sdsubjet2_PUPPI_pt[ic].push_back(  sdsubjets_PUPPI[1].pt());
+		      sdsubjet2_PUPPI_eta[ic].push_back( sdsubjets_PUPPI[1].eta());
+		      sdsubjet2_PUPPI_phi[ic].push_back( sdsubjets_PUPPI[1].phi());
+		      sdsubjet2_PUPPI_mass[ic].push_back(sdsubjets_PUPPI[1].mass());
+		      sdsubjet2_PUPPI_csv[ic].push_back( sdsubjets_PUPPI[1].bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+		    }
+		  else {
+		    throw cms::Exception("CorruptData") << "PUPPI Softdrop subjets not valid! Fat jets can have only 0, 1 or 2 Soft Drop Subjets!";
+		  }
+		} // Fill Puppi
+	    }
         }
     }
     return filter();
@@ -418,24 +581,49 @@ void FatJetDumper::reset(){
 	jetPUIDmedium[ic].clear();
 	jetPUIDtight[ic].clear();
         
-        originatesFromW[ic].clear();
-        originatesFromZ[ic].clear();
-        originatesFromTop[ic].clear();
-        originatesFromChargedHiggs[ic].clear();
-        originatesFromUnknown[ic].clear();
-        
         MCjet[ic].reset();
+
         // Systematics
 	if(systVariations){
-          systJESup[ic].reset();
+	  systJESup[ic].reset();
           systJESdown[ic].reset();
           systJERup[ic].reset();
           systJERdown[ic].reset();
 	}
-	// Marina - start
+
+	corrPrunedMass[ic].clear();
+	numberOfDaughters[ic].clear();
 	nSubjets[ic].clear();
-	hasBTagSubjet[ic].clear();
-	// Marina - end
+	sdsubjet1_pt[ic].clear();
+	sdsubjet1_eta[ic].clear();
+	sdsubjet1_phi[ic].clear();
+	sdsubjet1_mass[ic].clear();
+	sdsubjet1_csv[ic].clear();
+	
+	sdsubjet2_pt[ic].clear();
+	sdsubjet2_eta[ic].clear();
+	sdsubjet2_phi[ic].clear();
+	sdsubjet2_mass[ic].clear();
+	sdsubjet2_csv[ic].clear();
+	//
+	if (fillPuppi){
+	  softdropMass_PUPPI[ic].clear();
+	  corrPrunedMass_PUPPI[ic].clear();
+	  
+	  nSubjets_PUPPI[ic].clear();
+	  
+	  sdsubjet1_PUPPI_pt[ic].clear();
+	  sdsubjet1_PUPPI_eta[ic].clear();
+	  sdsubjet1_PUPPI_phi[ic].clear();
+	  sdsubjet1_PUPPI_mass[ic].clear();
+	  sdsubjet1_PUPPI_csv[ic].clear();
+	  
+	  sdsubjet2_PUPPI_pt[ic].clear();
+	  sdsubjet2_PUPPI_eta[ic].clear();
+	  sdsubjet2_PUPPI_phi[ic].clear();
+	  sdsubjet2_PUPPI_mass[ic].clear();
+	  sdsubjet2_PUPPI_csv[ic].clear();
+	}
     }
     for(size_t ic = 0; ic < inputCollections.size()*nDiscriminators; ++ic){
         discriminators[ic].clear();
@@ -445,6 +633,12 @@ void FatJetDumper::reset(){
     }
     for(size_t ic = 0; ic < inputCollections.size()*nUserints; ++ic){
       userints[ic].clear();
+    }
+    for(size_t ic = 0; ic < inputCollections.size()*nGroomedMasses; ++ic){
+      groomedmasses[ic].clear();
+    }
+    for(size_t ic = 0; ic < inputCollections.size()*nUserfloats_Puppi; ++ic){
+      userfloats_Puppi[ic].clear();
     }
 }
 
