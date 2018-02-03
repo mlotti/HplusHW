@@ -1017,7 +1017,7 @@ void CommonPlots::fillControlPlotsAfterTauSelection(const Event& event, const Ta
 void CommonPlots::fillControlPlotsAfterBjetSelection(const Event& event, const BJetSelection::Data& data) {
   fBJetData = data;
   for (auto& p: fBaseObjects) p->fillControlPlotsAfterBjetSelection(event, fBJetData);
-  bIsGenuineTau = fBJetData.isGenuineB();
+  bIsGenuineB = fBJetData.isGenuineB();
   return;
 }
 
@@ -1045,8 +1045,6 @@ void CommonPlots::fillControlPlotsAfterStandardSelections(const Event& event,
   fTopData      = topData;
   fMETData      = METData;
   bIsGenuineB   = bjetData.isGenuineB();
-  // if (bIsInverted) bIsGenuineB = topData.isGenuineB();
-  // else bIsGenuineB = bjetData.isGenuineB();
   
   // Fill Histogram Triplets
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNVerticesAfterStdSelections, bIsGenuineB, iVertices);
@@ -1059,7 +1057,7 @@ void CommonPlots::fillControlPlotsAfterStandardSelections(const Event& event,
       fHistoSplitter.fillShapeHistogramTriplet(hCtrlJetPtAfterStdSelections         , bIsGenuineB, p.pt() );
       fHistoSplitter.fillShapeHistogramTriplet(hCtrlJetEtaAfterStdSelections        , bIsGenuineB, p.eta() );
       fHistoSplitter.fillShapeHistogramTriplet(hCtrlJetEtaPhiAfterStdSelections     , bIsGenuineB, p.eta(), p.phi() );
-      // fHistoSplitter.fillShapeHistogramTriplet(hCtrlBDiscriminatorAfterStdSelections, bIsGenuineB, p.bjetDiscriminator() );
+      fHistoSplitter.fillShapeHistogramTriplet(hCtrlBDiscriminatorAfterStdSelections, bIsGenuineB, p.bjetDiscriminator() );
     }
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlHTAfterStdSelections , bIsGenuineB, fJetData.HT());
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlMHTAfterStdSelections, bIsGenuineB, std::sqrt(fJetData.MHT().perp2()));
@@ -1109,10 +1107,8 @@ void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event, int isG
   // Store boolean  
   bIsGenuineB = isGenuineB;
 
-  // NB: isInverted is a dumbie variable. Introduced to be able to overload the function
-  fHistoSplitter.fillShapeHistogramTriplet(hCtrlNVerticesAfterAllSelections, bIsGenuineTau, iVertices);
-
   // Fill Histogram Triplets
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlNVerticesAfterAllSelections, bIsGenuineB, iVertices);
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNVerticesAfterAllSelections, bIsGenuineB, iVertices);
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNJetsAfterAllSelections    , bIsGenuineB, fJetData.getSelectedJets().size());
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNBJetsAfterAllSelections   , bIsGenuineB, fBJetData.getSelectedBJets().size());
@@ -1123,7 +1119,7 @@ void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event, int isG
       fHistoSplitter.fillShapeHistogramTriplet(hCtrlJetPtAfterAllSelections         , bIsGenuineB, p.pt() );
       fHistoSplitter.fillShapeHistogramTriplet(hCtrlJetEtaAfterAllSelections        , bIsGenuineB, p.eta() );
       fHistoSplitter.fillShapeHistogramTriplet(hCtrlJetEtaPhiAfterAllSelections     , bIsGenuineB, p.eta(), p.phi() );
-      // fHistoSplitter.fillShapeHistogramTriplet(hCtrlBDiscriminatorAfterAllSelections, bIsGenuineB, p.bjetDiscriminator() );
+      fHistoSplitter.fillShapeHistogramTriplet(hCtrlBDiscriminatorAfterAllSelections, bIsGenuineB, p.bjetDiscriminator() );
     }
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlHTAfterAllSelections , bIsGenuineB, fJetData.HT());
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlMHTAfterAllSelections, bIsGenuineB, std::sqrt(fJetData.MHT().perp2()));

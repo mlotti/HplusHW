@@ -178,6 +178,46 @@ def getScalarUncertainties(datasetName, isGenuineTau):
     myList.append(getLuminosityUncertainty())
     return myList
 
+def getBinningForTetrajetMass(binLevel=0):
+    '''
+    Binning for H->tb invariant mass histogram 
+    tetrajet object = ldg (in pT) trijet  + ldg (in ) free bjet 
+    '''
+    myBins = []
+    if binLevel == -1: #default binning
+        myBins = [0.0, 4000.0] 
+    elif binLevel == 0: #default binning
+        for i in range(0, 1000, 50):
+            myBins.append(i)
+        for i in range(1000, 2000, 100):
+            myBins.append(i)
+        for i in range(2000, 4000+500, 500):
+            myBins.append(i)
+    elif binLevel == 1: #finer binning
+        for i in range(0, 1000, 25):
+            myBins.append(i)
+        for i in range(1000, 2000, 50):
+            myBins.append(i)
+        for i in range(2000, 4000+250, 250):
+            myBins.append(i)
+    elif binLevel == 2: #even finer binning
+        for i in range(0, 1000, 20):
+            myBins.append(i)
+        for i in range(1000, 2000, 40):
+            myBins.append(i)
+        for i in range(2000, 4000+200, 200):
+            myBins.append(i)
+    elif binLevel == 3: #even more finer binning
+        for i in range(0, 1000, 10):
+            myBins.append(i)
+        for i in range(1000, 2000, 20):
+            myBins.append(i)
+        for i in range(2000, 4000+50, 50):
+            myBins.append(i)
+    else:
+        raise Exception(ShellStyles.ErrorStyle() + "Please choose bin-level from -1 to 2" + ShellStyles.NormalStyle())
+    return myBins
+
 # Binning for data-driven control plots and final shapes
 # Needed to get systematics right for QCD anti-isol. -> isol. systematics
 # Format: list of left bin edges; last entry is maximum value
@@ -255,11 +295,8 @@ _dataDrivenCtrlPlotBinning = {
     "MinDeltaPhiTauJet_AfterAllSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
     "MaxDeltaPhiTauJet_AfterAllSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
     "NVertices_AfterAllSelections": None,
-#    "LdgTetrajetMass_AfterAllSelections": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,520,540,560,580,600,620,640,660,680,700,750,800,850,900,950,1000,1200,1400,1600,1800,2000,3000,4000], # for H+ -> tb analysis
-#    "LdgTetrajetMass_AfterAllSelections": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,520,540,560,580,600,620,640,660,680,700,720,740,760,780,800,820,840,860,880,900,920,940,960,980,1000,1050,1100,1150,1200,1250,1300,1350,1400,1500,1600,1700,1800,1900,2000,2500,3000,3500,4000], # for H+ -> tb analysis
-#    "LdgTetrajetMass_AfterAllSelections": [0,60,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,520,540,560,580,600,620,640,660,680,700,720,740,760,780,800,820,840,860,880,900,920,940,960,980,1000,1020,1040,1060,1080,1100,1120,1140,1160,1180,1200,1220,1240,1260,1280,1300,1350,1400,1450,1500,1600,1700,1800,1900,2000,2200,2400,2600,2800,3000,3500,4000], # for H+ -> tb analysis
-    "LdgTetrajetMass_AfterAllSelections": [0,50,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,520,540,560,580,600,620,640,660,680,700,720,740,760,780,800,820,840,860,880,900,920,940,960,980,1000,1020,1040,1060,1080,1100,1150,1200,1250,1300,1350,1400,1450,1500,1750,2000,2250,2500,2750,3000,3250,3500,3750,4000], # for H+ -> tb analysis
-
+    #"LdgTetrajetMass_AfterAllSelections": [0,50,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,520,540,560,580,600,620,640,660,680,700,720,740,760,780,800,820,840,860,880,900,920,940,960,980,1000,1020,1040,1060,1080,1100,1150,1200,1250,1300,1350,1400,1450,1500,1750,2000,2250,2500,2750,3000,3250,3500,3750,4000], # for H+ -> tb analysis    
+    "LdgTetrajetMass_AfterAllSelections": getBinningForTetrajetMass(1) #testing
 }
 # Add EWK fake tau shape definitions
 for key in _dataDrivenCtrlPlotBinning.keys():
