@@ -109,7 +109,7 @@ def analyze(analysis=None):
 ### fit types: binned maximum likelihood "ML", Chi2 fit "Chi"
         
         if (howAnalyse == "--fit" ):
-            datafit = fitType("datafit",p,eff1_MET80_histo,eff1_MET80,20,300,"Crystal","ML")
+            datafit = fitType("datafit",p,eff1_MET80_histo,eff1_MET80,20,300,"Sigmoid","ML")
             mcfit = fitType("mcfit",p,eff2_MET80_histo,eff2_MET80,20,300,"Richard","ML")
 	
         opts = {"ymin": 0, "ymax": 1.1}
@@ -399,8 +399,8 @@ def analyze(analysis=None):
     histo_eff1PU = getEfficiency(dataset1,"NumeratorPU","DenominatorPU")
     histo_eff2PU = getEfficiency(dataset2,"NumeratorPU","DenominatorPU")
   
-    eff1PU = convert2tGraph(histo_eff1PU)
-    eff2PU = convert2tGraph(histo_eff2PU)
+    eff1PU = convert2TGraph(histo_eff1PU)
+    eff2PU = convert2TGraph(histo_eff2PU)
 
     styles.dataStyle.apply(eff1PU)
     styles.mcStyle.apply(eff2PU)
