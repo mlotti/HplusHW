@@ -91,10 +91,10 @@ class AnalysisConfig:
 		# Trigger
 		elif value.startswith("TauTrgEff"):
                     variationType = value.replace("TauTrgEff","").replace("Minus","").replace("Plus","")
-                    scaleFactors.assignTauTriggerSF(self._config.TauSelection, self._getDirectionString(value), variationType, analysisType = self._config.Trigger.triggerEfficiencyAnalysisType)
+                    scaleFactors.assignTauTriggerSF(self._config.TauSelection, self._getDirectionString(value), variationType, tauTrgJson = self._config.Trigger.TautriggerEfficiencyJsonName)
                 elif value.startswith("METTrgEff"):
                     variationType = value.replace("METTrgEff","").replace("Minus","").replace("Plus","")
-                    scaleFactors.assignMETTriggerSF(self._config.METSelection, self._config.BJetSelection.bjetDiscrWorkingPoint, self._getDirectionString(value), variationType, analysisType = self._config.Trigger.triggerEfficiencyAnalysisType)
+                    scaleFactors.assignMETTriggerSF(self._config.METSelection, self._config.BJetSelection.bjetDiscrWorkingPoint, self._getDirectionString(value), variationType, metTrgJson = self._config.Trigger.METtriggerEfficiencyJsonName)
 
                 # tau ID syst
                 elif value.startswith("TauIDSyst"):

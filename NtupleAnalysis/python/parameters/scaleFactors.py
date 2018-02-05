@@ -68,7 +68,7 @@ def _assignJetToTauSF(tauSelectionPset, etaRegion, dirNumber):
 # \param tauSelectionPset  the tau config PSet
 # \param direction         "nominal, "up", "down"
 # \param variationType     "MC", "data"  (the uncertainty in MC and data are variated separately)
-def assignTauTriggerSF(tauSelectionPset, direction, variationType="MC", analysisType="fit"):
+def assignTauTriggerSF(tauSelectionPset, direction, variationType="MC", tauTrgJson="tauLegTriggerEfficiency_2016_bin.json"):
     # FIXME: there is no mechanic right now to choose correct era / run range
     # FIXME: this approach works as long as there is just one efficiency for the simulated samples
 
@@ -81,12 +81,7 @@ def assignTauTriggerSF(tauSelectionPset, direction, variationType="MC", analysis
 ####    tauTrgJson = "tauLegTriggerEfficiency2015_"+nprongs+".json"
 ####    tauTrgJson = "tauLegTriggerEfficiency2016_ICHEP.json"
 
-    if analysisType == "fit":
-        tauTrgJson = "tauLegTriggerEfficiency_2016_fit.json"
-    else:
-        tauTrgJson = "tauLegTriggerEfficiency_2016_bin.json"
-
-    print "Taking tau trigger eff/sf from",tauTrgJson, "which uses", analysisType ,"method"
+    print "Taking tau trigger eff/sf from",tauTrgJson
 
     reader = TriggerSFJsonReader("2016", "runs_273150_284044", tauTrgJson)
 
@@ -102,18 +97,14 @@ def assignTauTriggerSF(tauSelectionPset, direction, variationType="MC", analysis
 # \param METSelectionPset  the MET selection config PSet
 # \param direction         "nominal, "up", "down"
 # \param variationType     "MC", "data"  (the uncertainty in MC and data are variated separately)
-def assignMETTriggerSF(METSelectionPset, btagDiscrWorkingPoint, direction, variationType="MC", analysisType="fit"):
+def assignMETTriggerSF(METSelectionPset, btagDiscrWorkingPoint, direction, variationType="MC", metTrgJson = "metLegTriggerEfficiency_2016_MET90_bin.json"):
     # FIXME: there is no mechanic right now to choose correct era / run range
     # FIXME: this approach works as long as there is just one efficiency for the simulated samples
 ####    reader = TriggerSFJsonReader("2015D", "runs_256629_260627", "metLegTriggerEfficiency2015_btag%s.json"%btagDiscrWorkingPoint)
 ####    reader = TriggerSFJsonReader("2016", "runs_271036_279588", "metLegTriggerEfficiency2016.json") 
 
-    if analysisType == "fit":
-        metTrgJson = "metLegTriggerEfficiency_2016_MET90_fit.json"
-    else: 
-  	metTrgJson = "metLegTriggerEfficiency_2016_MET90_bin.json"
 
-    print "Taking MET trigger eff/sf from",metTrgJson, "which uses", analysisType ,"method"
+    print "Taking MET trigger eff/sf from",metTrgJson
 
     reader = TriggerSFJsonReader("2016_MET90", "runs_271036_284044", metTrgJson)
 
