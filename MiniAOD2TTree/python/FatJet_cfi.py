@@ -6,7 +6,7 @@ import FWCore.ParameterSet.Config as cms
 AK8Jets = cms.PSet(
     branchname = cms.untracked.string("AK8Jets"),
     src        = cms.InputTag("updatedPatJetsAK8PFCHS"),
-    systVariations = cms.bool(False),
+    systVariations = cms.bool(True),
 
     discriminators = cms.vstring(
         "pfCombinedInclusiveSecondaryVertexV2BJetTags",
