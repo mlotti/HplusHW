@@ -14,9 +14,10 @@ Electrons = cms.VPSet(
                                      ),
 #        discriminators = cms.vstring("mvaEleID-PHYS14-PU20bx25-nonTrig-V1-wp80",
 #                                     "mvaEleID-PHYS14-PU20bx25-nonTrig-V1-wp90")
-
         # Marina
-        pfcands = cms.InputTag("packedPFCandidates"),
+        pfcands     = cms.InputTag("packedPFCandidates"),
+        ElectronMVA = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values"),
+        rhoSourceMiniIso = cms.InputTag("fixedGridRhoFastjetCentralNeutral"),
     )
 )
 

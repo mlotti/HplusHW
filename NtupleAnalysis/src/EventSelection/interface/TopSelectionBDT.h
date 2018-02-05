@@ -42,9 +42,19 @@ struct TrijetSelection{
   std::vector<Jet> Jet2;
   std::vector<Jet> BJet;
   std::vector <double> MVA;
-  std::vector<math::XYZTLorentzVector> TrijetP4; //temporary
-  std::vector<math::XYZTLorentzVector> DijetP4;  //temporary
+  std::vector<math::XYZTLorentzVector> TrijetP4;
+  std::vector<math::XYZTLorentzVector> DijetP4; 
 };
+
+struct SelectedTrijets{
+  Jet Jet1;
+  Jet Jet2;
+  Jet BJet;
+  math::XYZTLorentzVector TrijetP4;
+  math::XYZTLorentzVector DijetP4;
+  double MVA;
+};
+
 
 class TopSelectionBDT: public BaseSelection {
 public:
@@ -62,8 +72,8 @@ public:
     bool isGenuineB() const { return bIsGenuineB; }
     bool hasFreeBJet() const { return bHasFreeBJet; }
     // FakeB Measurement
-    const std::vector<Jet>& getJetsUsedAsBJetsInFit() const { return fJetsUsedAsBJetsInFit;}
-    const std::vector<Jet>& getFailedBJetsUsedAsBJetsInFit() const { return fFailedBJetsUsedAsBJetsInFit;}
+    // const std::vector<Jet>& getJetsUsedAsBJets() const { return fJetsUsedAsBJets;}
+    // const std::vector<Jet>& getFailedBJetsUsedAsBJets() const { return fFailedBJetsUsedAsBJets;}
     // Trijet-1
     const float getMVAmax1() const { return fMVAmax1; }
     const Jet getTrijet1Jet1() const { return fTrijet1Jet1; } 
@@ -140,6 +150,18 @@ public:
       if (fTrijet1Dijet_p4.pt() > fTrijet2Dijet_p4.pt()) return fTrijet2Dijet_p4; 
       else return fTrijet1Dijet_p4;
     }
+    
+    const float getLdgTrijetMVA() const
+    {
+      if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) return fMVAmax1;
+      else return fMVAmax2;
+    }
+
+    const float getSubldgTrijetMVA() const
+    {
+      if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) return fMVAmax2;
+      else return fMVAmax1;
+    }
 
     friend class TopSelectionBDT;
 
@@ -149,8 +171,8 @@ public:
     // GenuineB = All selected b-jets are genuine, FakeB=At least one selected b-jet is not genuine
     bool bIsGenuineB;    
     // FakeB Measurement
-    std::vector<Jet> fJetsUsedAsBJetsInFit;
-    std::vector<Jet> fFailedBJetsUsedAsBJetsInFit;
+    std::vector<Jet> fJetsUsedAsBJets;
+    std::vector<Jet> fFailedBJetsUsedAsBJets;
     // A free bjet is left after the top reconstruction (for invariant mass)
     bool bHasFreeBJet;
     /// Trijet-1
@@ -191,8 +213,8 @@ public:
   /// analyze does fill histograms and incrementes counters
   Data analyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const bool doMatching=true);
   // analyze for FakeBMeasurement
-  Data silentAnalyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData,  bool doMatching=true, const std::string failedBJetsSortType="Random");
-  Data analyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData,  bool doMatching=true, const std::string failedBJetsSortType="Random");
+  Data silentAnalyzeWithoutBJets(const Event& event, const std::vector<Jet> selectedJets, const std::vector<Jet> selectedBjets, bool doMatching=true);
+  Data analyzeWithoutBJets(const Event& event, const std::vector<Jet> selectedJets, const std::vector<Jet> selectedBjets, bool doMatching=true);
   TMVA::Reader *reader;
   
   Float_t TrijetPtDR;
@@ -214,7 +236,6 @@ public:
   Float_t TrijetSubldgJetAxis2;
   Float_t TrijetLdgJetMult;
   Float_t TrijetSubldgJetMult;
-
   Float_t TrijetLdgJetQGLikelihood;
   Float_t TrijetSubldgJetQGLikelihood;
 
@@ -224,24 +245,17 @@ private:
   void initialize(const ParameterSet& config);
   /// The actual selection
   Data privateAnalyze(const Event& event, const std::vector<Jet> selectedJets, const std::vector<Jet> selectedBjets, bool doMatching);
-  // Returns true if the two jets are the same
+  /// Returns true if the two jets are the same
   bool areSameJets(const Jet& jet1, const Jet& jet2);
-  // Return true if a selected jet matches a selected bjet
+  /// Return true if a selected jet matches a selected bjet
   bool isBJet(const Jet& jet1, const std::vector<Jet>& bjets);
-  // Replaces all output objects with MCJet information (N.B: Wherever possible!)
-  void ReplaceJetsWithGenJets(Data &output);
-
   /// Determine if event is GenuineB or FakeB  and store internally
   bool _getIsGenuineB(bool bIsMC, const std::vector<Jet>& selectedBjets);  
-
   /// Determine if top candidate is MC matched
   bool _getIsMatchedTop(bool isMC, Jet bjet, Jet jet1, Jet jet2, TrijetSelection mcTrueTrijets);
-  
-  
-  virtual std::vector<genParticle> GetGenParticles(const std::vector<genParticle> genParticles, const int pdgId);
-  
-  const genParticle GetLastCopy(const std::vector<genParticle> genParticles, const genParticle &p);
 
+  virtual std::vector<genParticle> GetGenParticles(const std::vector<genParticle> genParticles, const int pdgId);
+  const genParticle GetLastCopy(const std::vector<genParticle> genParticles, const genParticle &p);
   Jet getLeadingSubleadingJet(const Jet& jet0, const Jet& jet1, string selectedJet);
   bool isMatchedJet(const Jet& jet, const std::vector<Jet>& jets);
   bool isWsubjet(const Jet& jet, const std::vector<Jet>& jets1, const std::vector<Jet>& jets2);
@@ -252,26 +266,19 @@ private:
   bool foundFreeBjet(const Jet& trijet1Jet1, const Jet& trijet1Jet2, const Jet& trijet1BJet, const Jet& trijet2Jet1, const Jet& trijet2Jet2, const Jet& trijet2BJet , const std::vector<Jet>& bjets);
   bool HasMother(const Event& event, const genParticle &p, const int mom_pdgId);
   int getTopFromHiggs(TrijetSelection TopCand, const Jet&  MCtrueTopFromH_LdgJet, const Jet& MCtrueTopFromH_SubldgJet, const Jet& MCtrueTopFromH_Bjet);
-
-  const std::vector<Jet> GetJetsToBeUsedInFit(const JetSelection::Data& jetData,
-					      const unsigned int maxNumberOfJets);
-
-  const std::vector<Jet> GetBjetsToBeUsedInFit(const BJetSelection::Data& bjetData,
-					       const unsigned int maxNumberOfBJets,
-					       const std::string jetSortType="Random");
-  
-  const std::vector<Jet>& GetFailedBJetsUsedAsBJetsInFit(void) const { return myFailedBJetsUsedAsBJetsInFit;} 
-
-
+  int GetTrijet1(TrijetSelection TopCand, const std::vector<Jet>& bjets);
+  int GetTrijet2(TrijetSelection TopCand, const std::vector<Jet>& bjets, SelectedTrijets trijet1);
+  SelectedTrijets getLeadingSubleadingTrijet(SelectedTrijets trijet1, SelectedTrijets trijet2, string selectedTrijet, float MVAmax1, float MVAmax2);
+  SelectedTrijets GetSelectedTopCandidate(TrijetSelection TopCand, int index);
   // Input parameters
+  const DirectionalCut<double> cfg_LdgMVACut;
+  const DirectionalCut<double> cfg_SubldgMVACut;
   const DirectionalCut<double> cfg_MVACut;
   const DirectionalCut<double> cfg_MassCut;
   const DirectionalCut<double> cfg_CSV_bDiscCut;
   const unsigned int cfg_NjetsMax;
   const unsigned int cfg_NBjetsMax;
-  const bool cfg_ReplaceJetsWithGenJets;
-  const std::vector<float> cfg_MVACuts;
-  std::vector<Jet> myFailedBJetsUsedAsBJetsInFit;
+
   // Event counter for passing selection
   Count cPassedTopSelectionBDT;
 
@@ -310,6 +317,11 @@ private:
   WrappedTH1  *hLdgTrijetDiJetMass;
   WrappedTH1  *hLdgTrijetDijetDeltaR;
 
+  WrappedTH1  *hLdgTrijet_DeltaR_Trijet_TetrajetBjet;
+  WrappedTH1  *hLdgTrijet_DeltaEta_Trijet_TetrajetBjet;
+  WrappedTH1  *hLdgTrijet_DeltaPhi_Trijet_TetrajetBjet;
+  WrappedTH1  *hLdgTrijet_DeltaY_Trijet_TetrajetBjet;
+
   WrappedTH1  *hSubldgTrijetPt;
   WrappedTH1  *hSubldgTrijetMass;
   WrappedTH1  *hSubldgTrijetJet1Pt;
@@ -325,6 +337,11 @@ private:
   WrappedTH1  *hSubldgTrijetDiJetEta;
   WrappedTH1  *hSubldgTrijetDiJetMass;
   WrappedTH1  *hSubldgTrijetDijetDeltaR;
+
+  WrappedTH1  *hSubldgTrijet_DeltaR_Trijet_TetrajetBjet;
+  WrappedTH1  *hSubldgTrijet_DeltaEta_Trijet_TetrajetBjet;
+  WrappedTH1  *hSubldgTrijet_DeltaPhi_Trijet_TetrajetBjet;
+  WrappedTH1  *hSubldgTrijet_DeltaY_Trijet_TetrajetBjet;
 
   WrappedTH1 *hTopQuarkPt;
   WrappedTH1 *hTopQuarkPt_InTopDirBDT;
@@ -393,7 +410,6 @@ private:
   WrappedTH1 *hLdgBjetPt_isLdgFreeBjet;
   WrappedTH1 *hTrijetPtMaxMVASameFakeObj_BjetPassCSV;
   WrappedTH1 *hTrijetPtMaxMVASameFakeObj;
-  WrappedTH1 *hNSelectedTrijets;
   WrappedTH1 *hTopFromHiggsPt_isLdgMVATrijet;
   WrappedTH1 *hTopFromHiggsPt_isSubldgMVATrijet;
   WrappedTH1 *hTopFromHiggsPt_isMVATrijet;
@@ -415,10 +431,10 @@ private:
   WrappedTH1 *hTrijetPt_PassBDT_BJetPassCSV;
   WrappedTH1 *hTrijetPt_PassBDT;
 
-
   WrappedTH1 *hChHiggsBjetPt_TetrajetBjetMatched_afterCuts;
   WrappedTH1 *hChHiggsBjetPt_foundTetrajetBjet_afterCuts;
   WrappedTH1 *hHiggsBjetPt_afterCuts;
+  WrappedTH1 *hHiggsBjetPt_isTrijetSubjet_afterCuts;
   WrappedTH1 *hHiggsBjetPt_LdgBjetMatched_afterCuts;
   WrappedTH1 *hLdgBjetPt_afterCuts;
   WrappedTH1 *hLdgBjetPt_isLdgFreeBjet_afterCuts;
@@ -426,6 +442,8 @@ private:
   WrappedTH1 *hTopFromHiggsPt_isLdgMVATrijet_afterCuts;
   WrappedTH1 *hTopFromHiggsPt_isSubldgMVATrijet_afterCuts;
   WrappedTH1 *hTopFromHiggsPt_isMVATrijet_afterCuts;
+  WrappedTH1 *hTopFromHiggsPt_notMVATrijet_afterCuts;
+
   WrappedTH1 *hDeltaPtOverPt_TopFromH_LdgMVATrijet_afterCuts;
   WrappedTH1 *hDeltaEta_TopFromH_LdgMVATrijet_afterCuts;
   WrappedTH1 *hDeltaPhi_TopFromH_LdgMVATrijet_afterCuts;
@@ -450,6 +468,21 @@ private:
   WrappedTH1 *hDeltaR_HiggsBjetPt_TetrajetBjetMatched_afterCuts;
   WrappedTH1 *hDeltaCSV_HiggsBjetPt_TetrajetBjetMatched_afterCuts;
 
+  WrappedTH1 *hChHiggdBJetPt_passCSV;
+  WrappedTH1 *hChHiggdBJetPt_passCSV_LdgTopReco;
+  WrappedTH1 *hChHiggdBJetPt_passCSV_SubldgTopReco;
+
+
+  WrappedTH1 *hHiggsBjet_isTrijetSubjet_TetrajetMass_afterCuts;
+  WrappedTH1 *hTopFromHiggs_isLdgMVATrijet_TetrajetMass_afterCuts;
+  WrappedTH1 *hTopFromHiggs_notMVATrijet_TetrajetMass_afterCuts;
+  WrappedTH1 *hChHiggsBjet_TetrajetBjetMatched_TetrajetMass_afterCuts;
+
+  WrappedTH1 *hDeltaR_BDTtrijets_TetrajetBjet;
+  WrappedTH1 *hTrijetJets_DeltaRmin;
+  WrappedTH1 *hTrijetJets_DeltaRmin_passBDT;
+  // WrappedTH1 *hChHiggdBJetPt_passCSV_LdgFreeBjet;
+  // WrappedTH1 *hChHiggdBJetPt_passCSV_SubldgFreeBjet;
   //next WrappedTH1
 
   // Histograms (2D)                                                                                                                             
@@ -460,12 +493,21 @@ private:
   WrappedTH2 *hDeltaMVAminVsTrijetPassBDTvalue;
   WrappedTH2 *hFakeTrijetMassVsBDTvalue;
   WrappedTH2 *hTopFromHiggsPtVSAssocTopPt;
-  WrappedTH2 *DEta_Trijet1TetrajetBjet_Vs_DEta_Trijet2TetrajetBjet;
-  WrappedTH2 *DPhi_Trijet1TetrajetBjet_Vs_DPhi_Trijet2TetrajetBjet;
-  WrappedTH2 *DR_Trijet1TetrajetBjet_Vs_DR_Trijet2TetrajetBjet;
-  WrappedTH2 *DEta_TopFromHBjetFromH_Vs_DEta_AssocTopBjetFromH;
-  WrappedTH2 *DPhi_TopFromHBjetFromH_Vs_DPhi_AssocTopBjetFromH;
-  WrappedTH2 *DR_TopFromHBjetFromH_Vs_DR_AssocTopBjetFromH;
+  WrappedTH2 *DEta_Dijet1TetrajetBjet_Vs_DEta_Dijet2TetrajetBjet;
+  WrappedTH2 *DPhi_Dijet1TetrajetBjet_Vs_DPhi_Dijet2TetrajetBjet;
+  WrappedTH2 *DR_Dijet1TetrajetBjet_Vs_DR_Dijet2TetrajetBjet;
+  WrappedTH2 *DEta_WFromHBjetFromH_Vs_DEta_WFromAssocTopBjetFromH;
+  WrappedTH2 *DPhi_WFromHBjetFromH_Vs_DPhi_WFromAssocTopBjetFromH;
+  WrappedTH2 *DR_WFromHBjetFromH_Vs_DR_WFromAssocTopBjetFromH;
+  WrappedTH2 *hTrijetJets_DeltaRmin_Vs_BDT;
+  WrappedTH2 *hTrijetJets_DeltaRmin_Vs_Pt;
+  WrappedTH2 *hTrijetJets_DeltaRmin_Vs_BDT_passBDT;
+  WrappedTH2 *hTrijetJets_DeltaRmin_Vs_Pt_passBDT;
+
+  WrappedTH2 *hDeltaR_LdgTrijet_TetrajetBjet_Vs_SubldgTrijet_TetrajetBjet;
+  WrappedTH2 *hDeltaEta_LdgTrijet_TetrajetBjet_Vs_SubldgTrijet_TetrajetBjet;
+  WrappedTH2 *hDeltaPhi_LdgTrijet_TetrajetBjet_Vs_SubldgTrijet_TetrajetBjet;
+  WrappedTH2 *hDeltaY_LdgTrijet_TetrajetBjet_Vs_SubldgTrijet_TetrajetBjet;
 
 };
 

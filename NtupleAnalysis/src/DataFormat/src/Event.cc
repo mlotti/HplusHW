@@ -10,7 +10,7 @@ Event::Event(const ParameterSet& config):
   fMET_Type1("MET_Type1"),
   fMET(config.getParameter<std::string>("METSelection.METType", "MET_Type1")),
   fCaloMET("CaloMET"),
-  fL1MET("L1MET"),
+  fL1MET("L1MET_pat"),
   fL1extraMET("L1MET_l1extra"),
   fGenWeight("GenWeight"),
   fTopPtWeight("topPtWeight"),
@@ -117,7 +117,7 @@ void Event::setupBranches(BranchManager& mgr) {
   fGenJetCollection.setupBranches(mgr);
   fMuonCollection.setupBranches(mgr);
   fElectronCollection.setupBranches(mgr);
-  fGenParticleCollection.setupBranches(mgr);
+  fGenParticleCollection.setupBranches(mgr);  
   fGenMET.setupBranches(mgr);
   fGenWeight.setupBranches(mgr);
   fTopPtWeight.setupBranches(mgr);
@@ -127,4 +127,6 @@ void Event::setupBranches(BranchManager& mgr) {
   fL1MET.setupBranches(mgr);
   fL1extraMET.setupBranches(mgr);
   fPFCandidates.setupBranches(mgr);
+  fAK8JetCollection.setupBranches(mgr);
+  fAK8JetsSoftDropCollection.setupBranches(mgr);
 }

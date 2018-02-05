@@ -836,8 +836,9 @@ def GetEOSHomeDir(opts):
         # prefix = "" #do NOT use this "FUSE mount" as it fails for multiple files
     elif "lxplus" in HOST:
         prefix = ""
-    else:
-        raise Exception("Unsupported host %s" % (HOST) )
+    else:        
+        prefix = ""
+        # raise Exception("Unsupported host %s" % (HOST) )
     home = prefix + "/store/user/%s/CRAB3_TransferData/%s" % (getpass.getuser(), opts.dirName)
     return home
 
@@ -2007,6 +2008,7 @@ def LinkFiles(taskName, fileList):
     Loops over all files in the list and creates symbolic links
     '''        
     Verbose("Task %s, creating symbolic links" % (taskName))
+
     # For-loop: All files
     for index, f in enumerate(fileList):
         srcFile  = f
@@ -2017,12 +2019,13 @@ def LinkFiles(taskName, fileList):
         # Create the symbolic link
         if not os.path.isfile(destFile):
             Verbose(cmd)
-            print cmd
-            #ret = os.system(cmd)
+            #print cmd
+            ret = os.system(cmd)
             # ret = Execute(cmd)
 
         # Update Progress bar
-        PrintProgressBar("Create symbolic links ", index, len(fileList), "[" + os.path.basename(destFile) + "]")
+        #PrintProgressBar("Create symbolic links ", index, len(fileList), "[" + os.path.basename(destFile) + "]")
+        PrintProgressBar("Create symbolic links ", index, len(fileList), os.path.basename(destFile) )
     return
 
 def DoNotUseFuseMount(dirPath):
@@ -2107,8 +2110,12 @@ def main(opts, args):
         else:
             Verbose(msg, False)
         
-        # If not all ROOT files exist, prepare report anyway and continue to next CRAB task 
-        rootFilesExist = CheckThatFilesExist(crabTask.GetTaskName(), crabTask.GetRootFiles(), opts)
+        # Determine whether ROOT files exist or not (Skip 'linking' is enabled)
+        if opts.linksToEOS:
+            rootFilesExist = True
+        else:
+            rootFilesExist = CheckThatFilesExist(crabTask.GetTaskName(), crabTask.GetRootFiles(), opts)
+        # If not all ROOT files exist, prepare report anyway and continue to next CRAB task
         if not rootFilesExist:
             continue    
 
@@ -2145,18 +2152,19 @@ def main(opts, args):
                 mergeName = mergeNameEOS
 
             # Save the mapping of this merged ROOT files to input ROOT file list
-            crabTask.MakeMergedToInputPair(mergeName, inputFiles)            
+            crabTask.MakeMergedToInputPair(mergeName, inputFiles)
             
             # Save/Update this task  list of CRAB tasks
             mcrabTask.AddCrabTaskObject(crabTask)
 
             # Determine if the new ROOT file to be created already exists
-            mergeFileExists = (mergeName in crabTask.GetPreMergedFiles())
+            mergeName_  = mergeName.replace("//", "/") #dirty fix (minor)
+            mergeFileExists = (mergeName_ in crabTask.GetPreMergedFiles())
             # mergeFileExists = FileExists(mergeName, opts)  # also works but more time-consuming
-
+            
             # If merged ROOT file already exists skip it or rename it as .backup
             if mergeFileExists and not opts.overwrite:
-               
+                
                 # Get the file size and save it (in GB) 
                 crabTask.MakeMergedToSizePair(mergeName, GetFileSize(mergeName, opts))
                 
@@ -2166,8 +2174,10 @@ def main(opts, args):
                                     
                 # Create symbolic links?
                 if opts.linksToEOS:
-                    LinkFiles(crabTask.GetTaskName(), crabTask.GetRootFiles())
-
+                    # LinkFiles(crabTask.GetTaskName(), crabTask.GetRootFiles())   # miniaod2tree_1.root
+                    # LinkFiles(crabTask.GetTaskName(), crabTask.GetMergedFiles()) # histograms-<sample>.root
+                    LinkFiles(crabTask.GetTaskName(), [mergeName]) #alex
+         
                 # Skip remaining steps
                 continue
             else:
@@ -2241,7 +2251,8 @@ def main(opts, args):
     Verbose("Merged files%s:" % GetDeleteMessage(opts), False)
     
     Verbose("Merging completed! Now to clean duplicate folders and write PU histos", True)
-    mcrabTask = DeleteFoldersAndWritePU(mcrabTask)
+    if 0: #alex-tmp
+        mcrabTask = DeleteFoldersAndWritePU(mcrabTask)
 
     # Print summary table using reports
     PrintSummary(mcrabTask)

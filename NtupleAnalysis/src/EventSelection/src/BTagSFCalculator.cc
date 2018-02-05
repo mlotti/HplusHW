@@ -191,12 +191,15 @@ BTagSFCalculator::BTagSFCalculator(const ParameterSet& config)
   fSFUp.setOverflowBinByPt("SFup");
   fSFDown.setOverflowBinByPt("SFdown");
   // Debug prints
-  //fEfficiencies.debug();
-  //fEfficienciesUp.debug();
-  //fEfficienciesDown.debug();
-  //fSF.debug();
-  //fSFUp.debug();
-  //fSFDown.debug();
+
+  // std::cout << "\n=== BTagSFCalculator::BTagSFCalculator() - DEBUG" << std::endl;
+  // fEfficiencies.debug();
+  // fEfficienciesUp.debug();
+  // fEfficienciesDown.debug();
+  // fSF.debug();
+  // fSFUp.debug();
+  // fSFDown.debug();
+
   // Check validity of input
   if (!sizeOfEfficiencyList(BTagSFInputStash::kBJet, "nominal") || !sizeOfSFList(BTagSFInputStash::kBJet, "nominal")) {
     isActive = false;
@@ -399,6 +402,8 @@ BTagSFInputStash::BTagJetFlavorType BTagSFCalculator::getFlavorTypeForEfficiency
   } else if (str == "C") {
     return BTagSFInputStash::kCJet;
   } else if (str == "Light") {
+    return BTagSFInputStash::kUDSGJet;
+  } else if (str == "G") {
     return BTagSFInputStash::kUDSGJet;
   }
   throw hplus::Exception("config") << "Unknown flavor '" << str << "'!";

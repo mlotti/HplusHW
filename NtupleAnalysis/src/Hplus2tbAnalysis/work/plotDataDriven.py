@@ -1,20 +1,20 @@
 #!/usr/bin/env python
 '''
-Description:
+DESCRIPTION:
 
-Usage:
+
+USAGE:
 ./plotDataDriven.py -m <pseudo_mcrab_directory> [opts]
 
-Examples:
-./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_HLTBJetTrgMatch_TopCut10_H2Cut0p5_170720_104648 --url -o ""
-./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170817_025841/ --url --signalMass 500
-./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170810_022933/ --url --signalMass 800
-./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_HLTBJetTrgMatch_TopCut10_H2Cut0p5_170720_104648 --url --signalMass 800
 
-Last Used:
-./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170827_075947/ --url
-./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --url --signalMass 800
-./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170817_025841/ --url --signalMass 500
+EXAMPLES:
+./plotDataDriven.py -m <mcrab1> -n <mcrab2>/FakeB/ --gridX --gridY --logY --signal 500
+./plotDataDriven.py -m <mcrab1> -n <mcrab2>/FakeBMeasurement/ --gridX --gridY --logY --useMC --unblind
+./plotDataDriven.py -m <Hplus2tbAnalysis> -n <FakeBMeasurement>/FakeBMeasurement/ --gridX --gridY --logY --unblind
+
+LAST USED:
+./plotDataDriven.py -m Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180126_030205 -n FakeBMeasurement_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180129_110659/FakeBMeasurement/ --gridX --gridY
+
 '''
 
 #================================================================================================ 
@@ -38,6 +38,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 
 #================================================================================================ 
 # Function Definition
@@ -57,9 +58,12 @@ def Verbose(msg, printHeader=True, verbose=False):
     Print(msg, printHeader)
     return
 
+def rchop(myString, endString):
+  if myString.endswith(endString):
+    return myString[:-len(endString)]
+  return myString
+
 def GetLumi(datasetsMgr):
-    Verbose("Determininig Integrated Luminosity")
-    
     lumi = 0.0
     for d in datasetsMgr.getAllDatasets():
         if d.isMC():
@@ -70,472 +74,612 @@ def GetLumi(datasetsMgr):
     return lumi
 
 def GetListOfEwkDatasets():
-    Verbose("Getting list of EWK datasets")
-    #return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
-    return  ["TT", "WJetsToQQ_HT_600ToInf", "SingleTop", "DYJetsToQQHT", "TTZToQQ",  "TTWJetsToQQ", "Diboson", "TTTT"]
+    ewkList = ["TT", "SingleTop", "TTZToQQ", "TTTT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "Diboson"]
+    # ewkList = ["TT", "SingleTop", "TTZToQQ", "TTTT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf"] #no "Diboson"
+    return  ewkList
 
-def GetDatasetsFromDir(opts):
-    Verbose("Getting datasets")
+def GetDatasetsFromDir(opts, otherDir=False):
     
-    if (not opts.includeOnlyTasks and not opts.excludeTasks):
-        datasets = dataset.getDatasetsFromMulticrabDirs([opts.mcrab],
-                                                        dataEra=opts.dataEra,
-                                                        searchMode=opts.searchMode, 
-                                                        analysisName=opts.analysisName,
-                                                        optimizationMode=opts.optMode)
-    elif (opts.includeOnlyTasks):
-        datasets = dataset.getDatasetsFromMulticrabDirs([opts.mcrab],
-                                                        dataEra=opts.dataEra,
-                                                        searchMode=opts.searchMode,
-                                                        analysisName=opts.analysisName,
-                                                        includeOnlyTasks=opts.includeOnlyTasks,
-                                                        optimizationMode=opts.optMode)
-    elif (opts.excludeTasks):
-        datasets = dataset.getDatasetsFromMulticrabDirs([opts.mcrab],
-                                                        dataEra=opts.dataEra,
-                                                        searchMode=opts.searchMode,
-                                                        analysisName=opts.analysisName,
-                                                        excludeTasks=opts.excludeTasks,
-                                                        optimizationMode=opts.optMode)
-    else:
-        raise Exception("This should never be reached")
+    myDir    = opts.mcrab1
+    analysis = opts.analysisName
+    if otherDir:
+        myDir    = opts.mcrab2        
+        #analysis = "FakeBMeasurement"
+    datasets = dataset.getDatasetsFromMulticrabDirs([myDir],
+                                                    dataEra=opts.dataEra,
+                                                    searchMode=opts.searchMode, 
+                                                    analysisName=analysis,
+                                                    optimizationMode=opts.optMode)
     return datasets
     
+def GetBinWidthMinMax(binList):
+    if not isinstance(binList, list):
+        raise Exception("Argument is not a list instance!")
+
+    minWidth = +1e6
+    maxWidth = -1e6
+    # For-loop: All bin values (centre)
+    for i in range(0, len(binList)-1):
+        j = i + 1
+        iBin = binList[i]
+        jBin = binList[j]
+        wBin = jBin-iBin
+        if wBin < minWidth:
+            minWidth = wBin
+
+        if wBin > maxWidth:
+            maxWidth = wBin
+    return minWidth, maxWidth
+
 def main(opts):
 
-    #optModes = ["", "OptChiSqrCutValue50", "OptChiSqrCutValue100"]
-    optModes = [""]
+    # Apply TDR style
+    style = tdrstyle.TDRStyle()
+    style.setOptStat(False)
+    style.setGridX(opts.gridX)
+    style.setGridY(opts.gridY)
+    style.setLogX(opts.logX)
+    # If you want BOTH pads (main and ratio) in log scale 
+    if 0:
+        style.setLogY(opts.logY) 
+
+    # Overwrite default legends
+    plots._legendLabels["MCStatError"] = "Bkg. stat."
+    plots._legendLabels["MCStatSystError"] = "Bkg. stat.#oplussyst."
+    plots._legendLabels["BackgroundStatError"] = "Bkg. stat. unc"
+    plots._legendLabels["BackgroundStatSystError"] = "Bkg. stat.#oplussyst. unc."
+    
+    # Define optimisatio modes to run on
+    optModes = [""] #["", "OptChiSqrCutValue50", "OptChiSqrCutValue100"]
 
     if opts.optMode != None:
         optModes = [opts.optMode]
         
+    # Inform user of EWK datasets used
+    ewkList = GetListOfEwkDatasets()
+    Print("The EWK datasets used are the following:", True)
+    for i,d in enumerate(ewkList, 1):
+        Print(ShellStyles.NoteStyle() + d + ShellStyles.NormalStyle(), i==0)
+
     # For-loop: All opt Mode
     for opt in optModes:
         opts.optMode = opt
 
         # Setup & configure the dataset manager 
-        datasetsMgr = GetDatasetsFromDir(opts)
-        datasetsMgr.updateNAllEventsToPUWeighted()
-        datasetsMgr.loadLuminosities() # from lumi.json
+        dsetMgr1 = GetDatasetsFromDir(opts, False) 
+        dsetMgr2 = GetDatasetsFromDir(opts, True)
 
-        # Set/Overwrite cross-sections
-        for d in datasetsMgr.getAllDatasets():
+        # Setup the dataset managers
+        dsetMgr1.updateNAllEventsToPUWeighted()
+        dsetMgr2.updateNAllEventsToPUWeighted()
+
+        # Load luminosities
+        dsetMgr1.loadLuminosities() # from lumi.json
+        # dsetMgr2.loadLuminosities()
+
+        # Print PSets. Perhaps i can use this to ensure parameters are matching!
+        if 0:
+            dsetMgr1.printSelections()
+            dsetMgr2.printSelections()
+            PrintPSet("FakeBMeasurement", dsetMgr1)
+            PrintPSet("TopSelectionBDT" , dsetMgr2)
+
+        # Remove datasets with overlap?
+        removeList = ["QCD-b"]
+        dsetDY     = "DYJetsToQQ_HT180"
+        dsetZJ     = "ZJetsToQQ_HT600toInf"
+        dsetRM     = dsetZJ # datasets with overlap
+        removeList.append(dsetRM)
+
+        # Set/Overwrite cross-sections. Remove all but 1 signal mass 
+        for d in dsetMgr1.getAllDatasets():
             if "ChargedHiggs" in d.getName():
-                datasetsMgr.getDataset(d.getName()).setCrossSection(1.0) # ATLAS 13 TeV H->tb exclusion limits
-                
+                dsetMgr1.getDataset(d.getName()).setCrossSection(1.0) # ATLAS 13 TeV H->tb exclusion limits
+                if d.getName() != opts.signal:
+                    removeList.append(d.getName())
+
+        # Print useful information?
         if opts.verbose:
-            datasetsMgr.PrintCrossSections()
-            datasetsMgr.PrintLuminosities()
+            dsetMgr1.PrintCrossSections()
+            dsetMgr1.PrintLuminosities()
+            dsetMgr2.PrintCrossSections()
+            dsetMgr2.PrintLuminosities()
 
-        # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
-        plots.mergeRenameReorderForDataMC(datasetsMgr) 
+        # Merge histograms
+        plots.mergeRenameReorderForDataMC(dsetMgr1) 
    
+        # Get the luminosity
+        if opts.intLumi < 0:
+            opts.intLumi = dsetMgr1.getDataset("Data").getLuminosity()
+
         # Custom Filtering of datasets 
-        datasetsMgr.remove(filter(lambda name: "QCD-b" in name, datasetsMgr.getAllDatasetNames()))
-        # datasetsMgr.remove(filter(lambda name: "Charged" in name, datasetsMgr.getAllDatasetNames()))
-
-        # Replace QCD MC with QCD-DataDriven
-        qcdDatasetName    = "FakeBMeasurementTrijetMass"
-        qcdDatasetNameNew = "QCD-Data"
-        if opts.mcQCD:
-            pass
-        else:
-            replaceQCDFromData(datasetsMgr, qcdDatasetName, qcdDatasetNameNew)
-
-        # Re-order datasets (different for inverted than default=baseline)
-        newOrder = ["Data"]
-        if opts.signalMass != 0:
-            signal = "ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass
-            newOrder.extend([signal])
-        if opts.mcQCD:
-            newOrder.extend(["QCD"])
-        else:
-            newOrder.extend(["QCD-Data"])
-        newOrder.extend(GetListOfEwkDatasets())
-        datasetsMgr.selectAndReorder(newOrder)
-        
-        # Merge EWK samples
-        if opts.mergeEWK:
-            datasetsMgr.merge("EWK", GetListOfEwkDatasets())
-            plots._plotStyles["EWK"] = styles.getAltEWKStyle()
+        for i, d in enumerate(removeList, 1):
+            msg = "Removing datasets %s from dataset manager" % (ShellStyles.NoteStyle() + d + ShellStyles.NormalStyle())
+            Verbose(msg, i==1)
+            dsetMgr1.remove(filter(lambda name: d == name, dsetMgr1.getAllDatasetNames()))
 
         # Print dataset information
-        datasetsMgr.PrintInfo()
+        dsetMgr1.PrintInfo()
+        dsetMgr2.PrintInfo()
 
-        # Apply TDR style
-        style = tdrstyle.TDRStyle()
-        style.setOptStat(True)
+        # Replace MC datasets with data-driven
+        if not opts.useMC:
+            replaceQCD(dsetMgr1, dsetMgr2, "FakeBMeasurementTrijetMass", "FakeB") #dsetMgr1 now contains "FakeB" pseudo-dataset
 
-        # Do Data-MC histograms with DataDriven QCD
-        DataMCHistograms(datasetsMgr, qcdDatasetNameNew)
+        # Definitions
+        allHistos   = dsetMgr2.getAllDatasets()[0].getDirectoryContent(opts.folder)
+        histoPaths  = []
+        ignoreKeys  = ["MCEWK", "Purity", "BJetPt", "BJetEta", "BtagDiscriminator", "METPhi", "MHT", "NBjets", "Njets"]
+        # For-loop: All histograms in directory
+        for h in allHistos:
+            bKeep = True
+            for k in ignoreKeys:
+                if k in h:
+                    bKeep = False
+                    continue
+            if bKeep:
+                histoPaths.append(os.path.join(opts.folder, h))
+
+        # For-loop: All histograms in list
+        for i, hName in enumerate(histoPaths, 1):
+            
+            msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % i, "/", "%s:" % (len(histoPaths)), hName)
+            Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), i==1)
+
+            PlotHistogram(dsetMgr1, hName, opts)
+
+    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + opts.saveDir + ShellStyles.NormalStyle()), True)
     return
 
-def GetHistoKwargs(histoList, opts):
+def GetHistoKwargs(hName, opts):
     '''
     Dictionary with 
     key   = histogramName
     value = kwargs
     '''
-    
-    histoKwargs = {}
-    _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": 0.1}
-    if opts.mergeEWK:
-        _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": -0.12}    
-    logY = True
-
-    _kwargs = {
+    ymaxF  = 1.2
+    ymin   = 1e-1 #if any smaller than 1e-1 legend problems
+    kwargs = {
+        "ratioCreateLegend": True,
+        "ratioType"        : "errorScale", #"errorScale", #binomial #errorPropagation
+        "ratioErrorOptions": {"numeratorStatSyst": False},# "denominatorStatSyst": True, "numeratorOriginatesFromTH1": True},
+        "ratioMoveLegend"  : {"dx": -0.51, "dy": 0.03, "dh": -0.05},
+        "errorBarsX"       : True,
         "ylabel"           : "Events / %.0f",
         "rebinX"           : 1,
         "rebinY"           : None,
-        "ratioYlabel"      : "Data/Bkg",
+        "ratioYlabel"      : "Data/Bkg. ",
         "ratio"            : True, 
         "stackMCHistograms": True,
-        "ratioInvert"      : False, 
-        "addMCUncertainty" : False, 
+        "ratioInvert"      : False,
+        "addMCUncertainty" : True, 
         "addLuminosityText": True,
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
-        "opts"             : {"ymin": 2e-1, "ymaxfactor": 10}, #1.2
-        "opts2"            : {"ymin": 0.0, "ymax": 2.0},
-        "log"              : logY,
-        "moveLegend"       : _moveLegend,
+        "opts"             : {"ymin": ymin, "ymaxfactor": ymaxF},
+        "opts2"            : {"ymin": 0.0, "ymax": 2.0}, #{"ymin": 0.2, "ymax": 2.0-0.2},
+        "log"              : opts.logY,
+        "moveLegend"       : {"dx": -0.06, "dy": -0.01, "dh": 0.15},
+        "cutBoxY"          : {"cutValue": 1.2, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": False, "ratioCanvas": False}
         }
 
-    for h in histoList:
-        kwargs = copy.deepcopy(_kwargs)
-        if "met" in h.lower():
-            units            = "GeV/c"
-            kwargs["ylabel"] = "Events / %.0f " + units
-            kwargs["xlabel"] = "E_{T}^{miss} (%s)" % units
-        if "NVertices" in h:
-            kwargs["ylabel"] = "Events / %.0f"
-            kwargs["xlabel"] = "Vertices"
-        if "Njets" in h:                
-            kwargs["ylabel"] = "Events / %.0f"
-            kwargs["xlabel"] = "Jets Multiplicity"
-            kwargs["cutBox"] = {"cutValue": 7.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": 7.0, "xmax": +16.0, "ymin": 1e+0, "ymaxfactor": 10}
-            ROOT.gStyle.SetNdivisions(10, "X")
-        if "JetPt" in h:                
-            units            = "GeV/c"
-            kwargs["ylabel"] = "Events / %.0f " + units
-            kwargs["xlabel"] = "p_{T} (%s)"  % units
-            kwargs["cutBox"] = {"cutValue": 30.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        if "JetEta" in h:                
-            kwargs["ylabel"] = "Events / %.2f"
-            kwargs["xlabel"] = "#eta"
-            kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": 1e+0, "ymaxfactor": 10}
-        if "NBjets" in h:                
-            kwargs["ylabel"] = "Events / %.0f"
-            kwargs["xlabel"] = "b-Jets Multiplicity"
-            kwargs["cutBox"] = {"cutValue": 3.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": 10.0, "ymin": 1e+0, "ymaxfactor": 10}
-        if "BjetPt" in h:                
-            units = "GeV/c"
-            kwargs["ylabel"] = "Events / %.0f " + units
-            kwargs["xlabel"] = "p_{T} (%s)"  % units
-            kwargs["cutBox"] = {"cutValue": 30.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        if "BjetEta" in h:                
-            kwargs["ylabel"] = "Events / %.2f"
-            kwargs["xlabel"] = "#eta"
-            kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": 1e+0, "ymaxfactor": 10}
-        if "BtagDiscriminator" in h:                
-            kwargs["ylabel"]     = "Events / %.2f"
-            kwargs["xlabel"]     = "b-Tag Discriminator"
-            kwargs["cutBox"]     = {"cutValue": 0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["moveLegend"] = {"dx": -0.5, "dy": -0.01, "dh": 0.0}
-            kwargs["opts"]       = {"xmin": 0.0, "xmax": 1.05, "ymin": 1e+0, "ymaxfactor": 10}
-        if "HT" in h:
-            units            = "GeV"
-            kwargs["ylabel"] = "Events / %.0f " + units
-            kwargs["xlabel"] = "H_{T} (%s)"  % units
-            kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["rebinX"] = 5
-            kwargs["opts"]   = {"xmin": 500.0, "xmax": 3000, "ymin": 1e+0, "ymaxfactor": 10}
-            # kwargs["opts"]   = {"xmin": 500.0, "xmax": 4100, "ymin": 1e+0, "ymaxfactor": 10}
-        if "MHT" in h:
-            units            = "GeV"
-            kwargs["ylabel"] = "Events / %.0f " + units
-            kwargs["xlabel"] = "MHT (%s)"  % units
-            kwargs["rebinX"] = 2
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": 400, "ymin": 1e+0, "ymaxfactor": 10}
-        if "Sphericity" in h:
-            kwargs["ylabel"] = "Events / %.2f"
-            kwargs["xlabel"] = "Sphericity"
-        if "Aplanarity" in h:
-            kwargs["ylabel"] = "Events / %.2f"
-            kwargs["xlabel"] = "Aplanarity"
-        if "Circularity" in h:
-            kwargs["ylabel"] = "Events / %.2f"
-            kwargs["xlabel"] = "Circularity"
-        if "Circularity" in h:
-            kwargs["ylabel"] = "Events / %.2f"
-            kwargs["xlabel"] = "Circularity"
-        if "ThirdJetResolution" in h:
-            kwargs["ylabel"] = "Events / %.2f"
-            kwargs["xlabel"] = "y_{23}"
-        if "FoxWolframMoment" in h:
-            kwargs["ylabel"] = "Events / %.2f"
-            kwargs["xlabel"] = "H_{2}"
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": 1.01}
-            kwargs["cutBox"] = {"cutValue": 0.5, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": +1.0, "ymin": 1e+0, "ymaxfactor": 10}
-            kwargs["moveLegend"] = {"dx": +0.0}
-            #kwargs["moveLegend"] = {"dx": -0.53, "dy": -0.5, "dh": 0.0}
-        if "Centrality" in h:
-            kwargs["ylabel"] = "Events / %.2f"
-            kwargs["xlabel"] = "Centrality"
-            kwargs["moveLegend"] = {"dx": -0.53, "dy": 0.0, "dh": 0.0}
-        if "TopFitChiSqr" in h:
-            kwargs["ylabel"] = "Events / %.0f"
-            kwargs["xlabel"] = "#chi^{2}"
-            kwargs["cutBox"] = {"cutValue": 100.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["rebinX"] = 2
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": 180.0, "ymin": 1e+0, "ymaxfactor": 10}
-        if "LdgTrijetPt" in h:
-            units = "GeV/c"
-            kwargs["ylabel"] = "Events / %.0f " + units
-            kwargs["xlabel"] = "p_{T} (%s)"  % units
-        if "LdgTrijetDijetPt" in h:
-            units = "GeV/c"
-            kwargs["ylabel"] = "Events / %.0f " + units
-            kwargs["xlabel"] = "p_{T} (%s)"  % units
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": 700.0, "ymin": 1e+0, "ymaxfactor": 10}
-        if "LdgTrijetMass" in h:
-            startBlind       = 115 #135 v. sensitive to bin-width!
-            endBlind         = 225 #205 v. sensitive to bin-width!
-            kwargs["rebinX"] = 4
-            units            = "GeV/c^{2}"
-            kwargs["ylabel"] = "Events / %.0f " + units
-            kwargs["xlabel"] = "m_{jjb} (%s)"  % units
-            kwargs["cutBox"] = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": 1200.0, "ymin": 1e+0, "ymaxfactor": 10}
-            if "AllSelections" in h:
-                kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind)
-                kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.12}
-        if "LdgTrijetBjetPt" in h:
-            units            = "GeV/c"
-            kwargs["ylabel"] = "Events / %.0f " + units
-            kwargs["xlabel"] = "p_{T} (%s)"  % units
-        if "LdgTrijetBjetEta" in h:
-            kwargs["ylabel"] = "Events / %.2f"
-            kwargs["xlabel"] = "#eta"
-            kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": 1e+0, "ymaxfactor": 10}
-        if "SubldgTrijetPt" in h:
-            units = "GeV/c"
-            kwargs["ylabel"] = "Events / %.0f " + units
-            kwargs["xlabel"] = "p_{T} (%s)"  % units
-        if "SubldgTrijetMass" in h:
-            startBlind       = 115 #135 v. sensitive to bin-width!
-            endBlind         = 225 #205 v. sensitive to bin-width!
-            kwargs["rebinX"] = 1
-            units            = "GeV/c^{2}"
-            kwargs["ylabel"] = "Events / %.0f " + units
-            kwargs["xlabel"] = "m_{jjb} (%s)"  % units
-            kwargs["cutBox"] = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": 1200.0, "ymin": 1e+0, "ymaxfactor": 10}
-            if "AllSelections" in h:
-                kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind)
-                kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.12}
-        if "SubldgTrijetBjetPt" in h:
-            units            = "GeV/c"
-            kwargs["ylabel"] = "Events / %.0f " + units
-            kwargs["xlabel"] = "p_{T} (%s)"  % units
-        if "SubldgTrijetBjetEta" in h:
-            kwargs["ylabel"] = "Events / %.2f"
-            kwargs["xlabel"] = "#eta"
-            kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": 1e+0, "ymaxfactor": 10}
-        if "LdgTetrajetPt" in h:
-            units            = "GeV/c"
-            kwargs["ylabel"] = "Events / %.0f " + units
-            kwargs["xlabel"] = "p_{T} (%s)"  % units
-        if "LdgTetrajetMass" in h:
-            ROOT.gStyle.SetNdivisions(5, "X")
-            startBlind       = 150  # 135 v. sensitive to bin-width!
-            endBlind         = 2500 #v. sensitive to bin-width!
-            kwargs["rebinX"] = 4
-            units            = "GeV/c^{2}"
-            kwargs["ylabel"] = "Events / %.0f " + units
-            kwargs["xlabel"] = "m_{jjbb} (%s)"  % units
-            kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": endBlind, "ymin": 1e+0, "ymaxfactor": 10}
-            #kwargs["opts"]   = {"xmin": 0.0, "xmax": 2000, "ymin": 1e+0, "ymaxfactor": 10}
-            if "AllSelections" in h:
-                kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind)
-                kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.12}
-        if "SubldgTetrajetPt" in h:
-            units            = "GeV/c"
-            kwargs["ylabel"] = "Events / %.0f " + units
-            kwargs["xlabel"] = "p_{T} (%s)"  % units
-        if "SubldgTetrajetMass" in h:
-            startBlind       = 135  # 175 v. sensitive to bin-width!
-            endBlind         = 3000
-            kwargs["rebinX"] = 2
-            units            = "GeV/c^{2}"
-            kwargs["ylabel"] = "Events / %.0f " + units
-            kwargs["xlabel"] = "m_{jjbb} (%s)"  % units
-            kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": endBlind, "ymin": 1e+0, "ymaxfactor": 10}
-            kwargs["cutBox"] = {"cutValue": 7.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
-            if "AllSelections" in h:
-                kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind)
-                kwargs["moveBlindedText"] = {"dx": -0.22, "dy": +0.08, "dh": -0.12}
-        if "TetrajetBjetPt" in h:
-            units            = "GeV/c"
-            kwargs["ylabel"] = "Events / %.0f " + units
-            kwargs["xlabel"] = "p_{T} (%s)"  % units
-        if "TetrajetBjetEta" in h:
-            kwargs["ylabel"] = "Events / %.2f"
-            kwargs["xlabel"] = "#eta"
-            kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": 1e+0, "ymaxfactor": 10}
-        if "TopMassWMassRatio" in h:
-            kwargs["ylabel"] = "Events / %.1f"
-            kwargs["xlabel"] = "R_{3/2}"
-            kwargs["cutBox"] = {"cutValue": (173.21/80.385), "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            # kwargs["cutBox"] = {"cutValue": (172.5/80.385), "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            #kwargs["cutBox"] = {"cutValue": 2.1, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            #kwargs["opts"]   = {"xmin": 0, "xmax": +10.0, "ymin": 1e+0, "ymaxfactor": 1.2}
-            kwargs["opts"]   = {"xmin": 0, "xmax": +10.0, "ymin": 1e+0, "ymaxfactor": 10}
-            kwargs["log"]    = True#False
+    if "MET" in hName:
+        myBins = []
+        for j in range(0, 100, 10):
+            myBins.append(j)
+        for k in range(100, 200, 20):
+            myBins.append(k)
+        for k in range(200, 300, 50):
+            myBins.append(k)
+        for k in range(300, 400+100, 100):
+            myBins.append(k)
+        units            = "GeV/c"
+        binWmin, binWmax = GetBinWidthMinMax(myBins)
+        kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
+        kwargs["xlabel"] = "E_{T}^{miss} (%s)" % units
+        kwargs["rebinX"] = myBins
+        kwargs["opts"]   = {"ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True
+    if "WMassRatio" in hName:
+        units            = ""
+        kwargs["ylabel"] = "Events / %.2f"
+        kwargs["rebinX"] = 2
+        kwargs["opts"]   = {"ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True
+        kwargs["cutBox"] = {"cutValue": 173.21/80.385, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": 1.0, "xmax": 4.0, "ymin": ymin, "ymaxfactor": ymaxF}
+    if "NVertices" in hName:
+        myBins = []
+        for j in range(0, 40, 2):
+            myBins.append(j)
+        for j in range(40, 60, 5):
+            myBins.append(j)
+        for j in range(60, 100+10, 10):
+            myBins.append(j)
+        units            = "GeV/c"
+        binWmin, binWmax = GetBinWidthMinMax(myBins)
+        kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
+        kwargs["xlabel"] = "vertex multiplicity"
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": 70.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True
+        kwargs["rebinX"] = myBins
+    if "Njets" in hName:                
+        kwargs["ylabel"] = "Events / %.0f"
+        kwargs["xlabel"] = "jets multiplicity"
+        kwargs["cutBox"] = {"cutValue": 7.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": 6.0, "xmax": 19.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True
+        ROOT.gStyle.SetNdivisions(10, "X")
+    if "JetPt" in hName:                
+        units            = "GeV/c"
+        kwargs["xlabel"] = "p_{T} (%s)" % (units)
+        kwargs["cutBox"] = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +500.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True        
+        ROOT.gStyle.SetNdivisions(10, "X")
+    if "JetEta" in hName:                
+        kwargs["ylabel"] = "Events / %.2f"
+        kwargs["xlabel"] = "#eta"
+        kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True        
+        # kwargs["moveLegend"] = {"dx": -0.1, "dy": -0.4, "dh": 0.15}
+        kwargs["moveLegend"] = {"dx": -5.0, "dy": -5.0, "dh": -500.0}
+    if "TetrajetBjetPt" in hName:                
+        units            = "GeV/c"
+        kwargs["xlabel"] = "p_{T} (%s)" % (units)
+        kwargs["cutBox"] = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["log"]    = True
+        myBins = []
+        for j in range(0, 400, 10):
+            myBins.append(j)
+        for k in range(400, 600, 50):
+            myBins.append(k)
+        for k in range(600, 900+100, 100):
+            myBins.append(k)
+        kwargs["rebinX"] = myBins
+        binWmin, binWmax = GetBinWidthMinMax(myBins)
+        kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +900.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        ROOT.gStyle.SetNdivisions(10, "X")
+    if "TetrajetBjetEta" in hName:                
+        kwargs["ylabel"] = "Events / %.2f"
+        kwargs["xlabel"] = "#eta"
+        kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True        
+        # kwargs["moveLegend"] = {"dx": -0.1, "dy": -0.4, "dh": 0.15}
+        kwargs["moveLegend"] = {"dx": -5.0, "dy": -5.0, "dh": -500.0}
+    if "BtagDiscriminator" in hName:                
+        kwargs["ylabel"]     = "Events / %.2f"
+        kwargs["xlabel"]     = "b-tag discriminator"
+        kwargs["cutBox"]     = {"cutValue": 0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["moveLegend"] = {"dx": -0.5, "dy": -0.01, "dh": 0.0}
+        kwargs["opts"]       = {"xmin": 0.0, "xmax": 1.05, "ymin": ymin, "ymaxfactor": ymaxF}
+    if "HT" in hName:
+        myBins = []
+        for i in range(500, 1500, 50):
+            myBins.append(i)
+        for i in range(1500, 2000, 100):
+            myBins.append(i)
+        for i in range(2000, 3000+500, 500):
+            myBins.append(i)
+        units            = "GeV"
+        binWmin, binWmax = GetBinWidthMinMax(myBins)
+        kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
+        # kwargs["ylabel"] = "Events / %.0f " + units
+        kwargs["xlabel"] = "H_{T} (%s)"  % units
+        kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        kwargs["rebinX"] = myBins #5
+        kwargs["opts"]   = {"xmin": 500.0, "xmax": 3000, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True
+    if "TrijetPt" in hName:
+        units = "GeV/c"
+        kwargs["xlabel"] = "p_{T} (%s)"  % units
+        kwargs["opts"]   = {"xmax": +900.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        myBins = []
+        for j in range(0, 500, 20):
+            myBins.append(j)
+        for k in range(500, 700, 50):
+            myBins.append(k)
+        for k in range(700, 900+100, 100):
+            myBins.append(k)
+        kwargs["rebinX"] = myBins
+        binWmin, binWmax = GetBinWidthMinMax(myBins)
+        kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
+        # kwargs["ylabel"] = "Events / %.0f " + units
+        kwargs["log"]    = True
+    if "TrijetMass" in hName:
+        startBlind       = 135
+        endBlind         = 205
+        kwargs["rebinX"] = 2
+        units            = "GeV/c^{2}"
+        kwargs["ylabel"] = "Events / %.0f " + units
+        kwargs["xlabel"] = "m_{jjb} (%s)"  % units
+        kwargs["cutBox"] = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": 50.0, "xmax": 350.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True
+        # Blind data
+        kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind)
+        kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.1}
+    if "TrijetBjetPt" in hName: # FIXME: Why do i have values below 40 GeV/c?
+        units            = "GeV/c"
+        kwargs["xlabel"] = "p_{T} (%s)"  % units
+        myBins = []
+        for j in range(0, 300, 10): #10 steps!
+            myBins.append(j)
+        for k in range(300, 700+40, 40):
+            myBins.append(k)
+        kwargs["rebinX"] = myBins
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": 600.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["cutBox"] = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["log"]    = True
+        binWmin, binWmax = GetBinWidthMinMax(myBins)
+        kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
+    if "TrijetBjetEta" in hName:
+        kwargs["ylabel"]     = "Events / %.2f"
+        kwargs["xlabel"]     = "#eta"
+        kwargs["cutBox"]     = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]       = {"xmin": -2.5, "xmax": +2.5, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]        = True
+        # kwargs["moveLegend"] = {"dx": -0.1, "dy": -0.4, "dh": 0.15}
+        kwargs["moveLegend"] = {"dx": -5.0, "dy": -5.0, "dh": -500.0}
+    if "TrijetDijetPt" in hName:
+        units            = "GeV/c"
+        kwargs["xlabel"] = "p_{T} (%s)"  % units
+        myBins = []
+        for j in range(0, 300, 20):
+            myBins.append(j)
+        for k in range(300, 500, 40):
+            myBins.append(k)
+        for k in range(500, 700+100, 100):
+            myBins.append(k)
+        kwargs["rebinX"] = myBins
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": 700.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True
+        binWmin, binWmax = GetBinWidthMinMax(myBins)
+        kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
+    if "TrijetDijetMass" in hName:
+        kwargs["rebinX"] = 1
+        units            = "GeV/c^{2}"
+        kwargs["ylabel"] = "Events / %.0f " + units
+        kwargs["xlabel"] = "m_{jj} (%s)"  % units
+        kwargs["cutBox"] = {"cutValue": 80.385, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": 30.0, "xmax": 160.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True
+    if "TetrajetPt" in hName:
+        units            = "GeV/c"
+        kwargs["xlabel"] = "p_{T} (%s)"  % units
+        kwargs["opts"]   = {"xmax": +900.0, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["log"]    = True
+        myBins = []
+        for j in range(0, 500, 20):
+            myBins.append(j)
+        for k in range(500, 700, 50):
+            myBins.append(k)
+        for k in range(700, 900+100, 100):
+            myBins.append(k)
+        kwargs["rebinX"] = myBins
+        binWmin, binWmax = GetBinWidthMinMax(myBins)
+        kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
+        # kwargs["ylabel"] = "Events / %.0f " + units
+    if "TetrajetMass" in hName:
+        myBins = []
+        for j in range(0, 1000, 50):
+            myBins.append(j)
+        for k in range(1000, 2000, 100):
+            myBins.append(k)
+        for l in range(2000, 3500, 500):
+            myBins.append(l)
+        # Currenty in Combine:
+        #myBins = [0,50,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,520,540,560,580,600,620,640,660,680,700,720,740,
+        #          760,780,800,820,840,860,880,900,920,940,960,980,1000,1020,1040,1060,1080,1100,1150,1200,1250,1300,1350,1400,1450,1500,1750,2000,2250,2500,
+        #          2750,3000,3250,3500,3750,4000]
+        ROOT.gStyle.SetNdivisions(8, "X")
+        startBlind       = 150  # 135 v. sensitive to bin-width!
+        endBlind         = 3000 #4000 #3000 # v. sensitive to bin-width!
+        kwargs["rebinX"] = myBins
+        units            = "GeV/c^{2}"
+        binWmin, binWmax = GetBinWidthMinMax(myBins)
+        kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
+        kwargs["log"]    = True
+        kwargs["xlabel"] = "m_{jjbb} (%s)"  % units
+        kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": endBlind, "ymin": ymin, "ymaxfactor": ymaxF}
+        kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind) #ale
+        kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.12}
 
-        histoKwargs[h] = kwargs
-    return histoKwargs
+    if opts.unblind:
+        key = "blindingRangeString"
+        if key in kwargs.keys():
+            del kwargs[key]
+
+    if kwargs["log"]==True or opts.logY == True:
+        kwargs["opts"]["ymaxfactor"] = 7.0
+
+    return kwargs
     
-def DataMCHistograms(datasetsMgr, qcdDatasetName):
-    Verbose("Plotting Data-MC Histograms")
+def ApplyBlinding(myObject, blindedRange = []):
+    '''
+    myObject must be an instance of:
+    h=histograms.Histo(rootHisto, "Label")
+    and the rooHistos is an instance of:
+    rootHisto = p.histoMgr.getHisto("HistoName").getRootHisto()
+    '''
+
+    if len(blindedRange) != 2:
+        msg = "Blinded range list requires exactly 2 values (got %s)" % len(blindedRange) 
+        raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
 
     # Definitions
-    histoNames  = []
-    saveFormats = [".png"] #[".C", ".png", ".pdf"]
+    myMin = None
+    myMax = None
+    myHisto = myObject.getRootHisto()
 
-    # Get list of histograms
-    dataPath    = "ForDataDrivenCtrlPlots"
-    allHistos   = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(dataPath)
-    histoList   = [h for h in allHistos if "StandardSelections" in h]
-    histoList.extend([h for h in allHistos if "AllSelections" in h])
-    histoList   = [h for h in histoList if "_MCEWK" not in h]
-    histoList   = [h for h in histoList if "_Purity" not in h]
-    histoPaths  = [dataPath + "/" + h for h in histoList]
+    # For-loop: All histogram bins
+    for i in range (1, myHisto.GetNbinsX()+1):
+        myUpEdge  = myHisto.GetXaxis().GetBinUpEdge(i)
+        myLowEdge = myHisto.GetXaxis().GetBinLowEdge(i)
+        
+        # Define conditions
+        c1 = (myLowEdge >= blindedRange[0] and myLowEdge <= blindedRange[1]) 
+        c2 = (myUpEdge  >= blindedRange[0] and myUpEdge  <= blindedRange[1])
+        c3 = (myLowEdge <= blindedRange[0] and myUpEdge  >= blindedRange[1])
 
-    # Get histogram<->kwargs dictionary 
-    histoKwargs = GetHistoKwargs(histoPaths, opts)
+        # Blind if any edge of the current bin is inside the blinded range or if bin spans over the blinded range
+        if ( c1 or c2 or c3):
+            if myMin == None or myLowEdge < myMin:
+                myMin = myLowEdge
+            if myMax == None or myUpEdge > myMax:
+                myMax = myUpEdge
+            #  Blind data by setting bin content to -1.0
+            myHisto.SetBinContent(i, -1.0)
+            myHisto.SetBinError(i, 0.0)
 
-    # For-loop: All histograms in list
-    for histoName in histoPaths:
+    if myMin == None:
+        return None
+    
+    # Prepare blinding string for printing on canvas
+    myMinFormat = "%" + "d"
+    myMaxFormat = "%" + "d"
+    if abs(myMin) < 1.0 and abs(myMin) > 0.00000001:
+        myMinFormat = "%%.%df" % (abs(int(log10(myMin)))+1)
+    if abs(myMax) < 1.0  and abs(myMax) > 0.00000001:
+        myMaxFormat = "%%.%df" % (abs(int(log10(myMax)))+1)
+    bString = myMinFormat%myMin+"-"+myMaxFormat%myMax
+    return bString
 
-        if "Fox" not in histoName:
-            continue
 
-        if "JetEtaPhi" in histoName:
-            continue
+def PlotHistogram(dsetMgr, histoName, opts):
 
-        if opts.signalMass == 0:
-            if "LdgTrijetMass" in histoName:
-                continue
-            
-            if "LdgTetrajetMass" in histoName:
-                continue
+    # Get kistogram argumetns
+    kwargs   = GetHistoKwargs(histoName, opts)
+    saveName = histoName.replace(opts.folder + "/", "")
 
-        if "Vs" in histoName:
-            continue
+    # Create the plotting object (Data, "FakeB")
+    p1 = plots.DataMCPlot(dsetMgr, histoName, saveFormats=[])
 
-        # Not used in this analysis (yet)
-        if "MHT" in histoName:
-            continue
+    # Copy dataset manager before changing datasets. Keep only EWK (GenuineB) datasets
+    datasetMgr = dsetMgr.deepCopy()
+    datasetMgr.selectAndReorder(GetListOfEwkDatasets())
+        
+    # Create the MCPlot for the EWKGenuineB histograms
+    if opts.useMC:
+        p2 = plots.MCPlot(datasetMgr, histoName, normalizeToLumi=opts.intLumi, saveFormats=[])
+    else:
+        histoNameGenuineB = histoName.replace(opts.folder, opts.folder + "EWKGenuineB")
+        p2 = plots.MCPlot(datasetMgr, histoNameGenuineB, normalizeToLumi=opts.intLumi, saveFormats=[])
 
-        # By definition of the Inverted sample the following histos cannot agree!
-        if "NBjets_" in histoName:
-            continue
-        if "BJetPt_" in histoName:
-            continue
-        if "_BJetEta_" in histoName:
-            continue
-        if "_BtagDiscriminator_" in histoName:
-            continue
+    # Add the datasets to be included in the plot
+    myStackList = []
 
-        kwargs_  = histoKwargs[histoName]
-        saveName = histoName.replace("/", "_")
+    # Data-driven FakeB background
+    if not opts.useMC:
+        hFakeB  = p1.histoMgr.getHisto("FakeB").getRootHisto()
+        hhFakeB = histograms.Histo(hFakeB, "FakeB", legendLabel="Fake-b")
+        hhFakeB.setIsDataMC(isData=False, isMC=True)
+        myStackList.append(hhFakeB)
+    else:
+        hQCD  = p1.histoMgr.getHisto("QCD").getRootHisto()
+        hhQCD = histograms.Histo(hQCD, "QCD", legendLabel="QCD")
+        hhQCD.setIsDataMC(isData=False, isMC=True)
+        myStackList.append(hhQCD)
 
-        # Create the plotting object
-        p = plots.DataMCPlot(datasetsMgr, histoName, saveFormats=[])
+    # EWK GenuineB background (Replace all EWK histos with GenuineB histos)
+    ewkNameList  = GetListOfEwkDatasets()
+    ewkHistoList = []
+    # For-loop: All EWK datasets 
+    for dataset in ewkNameList:
+        h = p2.histoMgr.getHisto(dataset).getRootHisto()
+        hh = histograms.Histo(h, dataset,  plots._legendLabels[dataset])
+        hh.setIsDataMC(isData=False, isMC=True)
+        myStackList.append(hh)
 
-        # Apply QCD data-driven style
-        if opts.signalMass != 0:
-            signal = "ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass
-            mHPlus = "%s" % int(opts.signalMass)
-            p.histoMgr.forHisto(signal, styles.getSignalStyleHToTB_M(mHPlus))
+    # Collision data
+    hData  = p1.histoMgr.getHisto("Data").getRootHisto()
+    hhData = histograms.Histo(hData, "Data")
+    hhData.setIsDataMC(isData=True, isMC=False)
+    myStackList.insert(0, hhData)
 
-        #p.histoMgr.forHisto(opts.signalMass, styles.getSignalStyleHToTB())
-        if opts.mcQCD:
-            pass
-        else:
-            p.histoMgr.forHisto(qcdDatasetName, styles.getAltQCDStyle())
-            p.histoMgr.setHistoDrawStyle(qcdDatasetName, "HIST")
-            p.histoMgr.setHistoLegendStyle(qcdDatasetName, "F")
+    # Signal
+    hSignal  = p1.histoMgr.getHisto(opts.signal).getRootHisto()
+    hhSignal = histograms.Histo(hSignal, opts.signal, plots._legendLabels[opts.signal])
+    hhSignal.setIsDataMC(isData=False, isMC=True)
+    myStackList.insert(1, hhSignal)
 
-        if not opts.mcQCD:
-            p.histoMgr.setHistoLegendLabelMany({
-                    qcdDatasetName: "QCD (Data)",
-                    })
-        else:
-            p.histoMgr.setHistoLegendLabelMany({
-                    "QCD": "QCD (MC)",
-                    })            
+    # Create the final plot by passing the histogram list
+    p3 = plots.DataMCPlot2(myStackList, saveFormats=[])
+    p3.setLuminosity(opts.intLumi)
+    p3.setDefaultStyles()
 
-        # Apply blinding of signal region
-        if "blindingRangeString" in kwargs_:
-            startBlind = float(kwargs_["blindingRangeString"].split("-")[1])
-            endBlind   = float(kwargs_["blindingRangeString"].split("-")[0])
-            plots.partiallyBlind(p, maxShownValue=startBlind, minShownValue=endBlind, invert=True, moveBlindedText=kwargs_["moveBlindedText"])
+    # Apply blinding of data in Signal Region (After creating the plot)
+    if "blindingRangeString" in kwargs:
+        startBlind = float(kwargs["blindingRangeString"].split("-")[1])
+        endBlind   = float(kwargs["blindingRangeString"].split("-")[0])
+        plots.partiallyBlind(p3, maxShownValue=startBlind, minShownValue=endBlind, invert=True, moveBlindedText=kwargs["moveBlindedText"])
 
-        # Draw and save the plot
-        plots.drawPlot(p, saveName, **kwargs_) #the "**" unpacks the kwargs_ dictionary
-        SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode) )
+    # Draw and save the plot
+    plots.drawPlot(p3, saveName, **kwargs)
+    SavePlot(p3, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png"])
     return
 
-def getHisto(datasetsMgr, datasetName, histoName):
+def PrintPSet(selection, dsetMgr):
+    selection = "\"%s\":"  % (selection)
+    thePSets = dsetMgr.getAllDatasets()[0].getParameterSet()
+
+    # First drop everything before the selection
+    thePSet_1 = thePSets.split(selection)[-1]
+
+    # Then drop everything after the selection
+    thePSet_2 = thePSet_1.split("},")[0]
+
+    # Final touch
+    thePSet = selection + thePSet_2
+
+    Print(thePSet, True)
+    return
+
+def getHisto(dsetMgr, datasetName, histoName):
     Verbose("getHisto()", True)
 
-    h1 = datasetsMgr.getDataset(datasetName).getDatasetRootHisto(histoName)
+    h1 = dsetMgr.getDataset(datasetName).getDatasetRootHisto(histoName)
     h1.setName(datasetName)
     return h1
 
-def replaceQCDFromData(dMgr, dataDrivenDatasetName, newName="QCD-Data"):
+def replaceQCD(dMgr1, dMgr2, newName, newLabel="FakeB"):
+    '''
+    Replaces the QCD dataset with 
+    a data-driven pseudo-dataset
+    '''
     
     # Define variables
-    mcQCDName      = "QCD"
-    dataDrivenQCD  = dMgr.getDataset(dataDrivenDatasetName)
-    dataDrivenQCD.setName(newName)
+    oldName    = "QCD"
+    newDataset = dMgr2.getDataset(newName)
+    dMgr1.append(newDataset)
+    newDataset.setName(newLabel)
 
     # Get list of dataset names
-    names = dMgr.getAllDatasetNames()
+    names = dMgr1.getAllDatasetNames()
 
-    # Return the index in the list of the first dataset whose name is mcQCDName.
-    index = names.index(mcQCDName)
+    # Return the index in the list of the first dataset whose name is oldName.
+    index = names.index(oldName)
 
     # Remove the dataset at the given position in the list, and return it. 
     names.pop(index)
     
     # Insert the dataset to the given position  (index) of the list
-    names.insert(index, dataDrivenQCD.getName())
+    names.insert(index, newDataset.getName())
 
-    # Remove from the dataset manager the mcQCDName
-    dMgr.remove(mcQCDName)
-    names.pop(names.index(dataDrivenQCD.getName()))
+    # Remove from the dataset manager the oldName
+    dMgr1.remove(oldName)
+    names.pop(names.index(newDataset.getName()))
     
     # Select and reorder Datasets. 
     # This method can be used to either select a set of dataset.Dataset objects. reorder them, or both.
-    dMgr.selectAndReorder(names)
+    dMgr1.selectAndReorder(names)
     return
 
 def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
-    Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
-
     # Check that path exists
     if not os.path.exists(saveDir):
         os.makedirs(saveDir)
@@ -544,13 +688,15 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
     saveName = os.path.join(saveDir, plotName.replace("/", "_"))
 
     # For-loop: All save formats
-    for i, ext in enumerate(saveFormats):
-        saveNameURL = saveName + ext
-        saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
+    for i, ext in enumerate(saveFormats, 0):
+        saveNameURL  = saveName + ext
+        saveNameURL  = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
         if opts.url:
-            Print(saveNameURL, i==0)
+            Verbose(saveNameURL, False) #i==0)
+            opts.saveDir = os.path.dirname(saveNameURL) + "/"
         else:
-            Print(saveName + ext, i==0)
+            Verbose(saveName + ext, False) #i==0)
+            opts.saveDir = os.path.dirname(saveName) + "/"
         plot.saveAs(saveName, formats=saveFormats)
     return
 
@@ -577,29 +723,32 @@ if __name__ == "__main__":
     
     # Default Settings
     ANALYSISNAME = "Hplus2tbAnalysis"
-    MCQCD        = False
+    USEMC        = False
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
     OPTMODE      = None
     BATCHMODE    = True
-    PRECISION    = 3
     INTLUMI      = -1.0
-    SUBCOUNTERS  = False
-    LATEX        = False
-    MCONLY       = False
-    SIGNALMASS   = 0
-    MERGEEWK     = False
+    SIGNALMASS   = 800
+    SIGNAL       = None
     URL          = False
-    NOERROR      = True
-    SAVEDIR      = "/publicweb/a/aattikis/DataDriven/"
+    SAVEDIR      = "/publicweb/a/aattikis/"
     VERBOSE      = False
-    HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug' 
+    GRIDX        = False
+    UNBLIND      = False
+    GRIDY        = False
+    LOGX         = False
+    LOGY         = False
+    FOLDER       = "ForDataDrivenCtrlPlots"
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
 
-    parser.add_option("-m", "--mcrab", dest="mcrab", action="store", 
-                      help="Path to the multicrab directory for input")
+    parser.add_option("-m", "--mcrab1", dest="mcrab1", action="store", 
+                      help="Path to the multicrab directory with the Hplus2tbAnalysis")
+
+    parser.add_option("-n", "--mcrab2", dest="mcrab2", action="store", 
+                      help="Path to the multicrab directory with the data-driven pseudo-datasets (e.g. FakeB)")
 
     parser.add_option("-o", "--optMode", dest="optMode", type="string", default=OPTMODE, 
                       help="The optimization mode when analysis variation is enabled  [default: %s]" % OPTMODE)
@@ -610,11 +759,11 @@ if __name__ == "__main__":
     parser.add_option("--analysisName", dest="analysisName", type="string", default=ANALYSISNAME,
                       help="Override default analysisName [default: %s]" % ANALYSISNAME)
 
-    parser.add_option("--mcQCD", dest="mcQCD", action="store_true", default=MCQCD,
-                      help="Do not replace QCD MC with Data-Driven QCD Background Estiomation [default: %s]" % MCQCD)
+    parser.add_option("--useMC", dest="useMC", action="store_true", default=USEMC,
+                      help="Use all backgrounds from MC. Do not use data-driven background estimation [default: %s]" % USEMC)
 
-    parser.add_option("--mcOnly", dest="mcOnly", action="store_true", default=MCONLY,
-                      help="Plot only MC info [default: %s]" % MCONLY)
+    parser.add_option("--unblind", dest="unblind", action="store_true", default=UNBLIND,
+                      help="Switch off blinging of data in the signal region [default: %s]" % UNBLIND)
 
     parser.add_option("--intLumi", dest="intLumi", type=float, default=INTLUMI,
                       help="Override the integrated lumi [default: %s]" % INTLUMI)
@@ -625,10 +774,7 @@ if __name__ == "__main__":
     parser.add_option("--dataEra", dest="dataEra", type="string", default=DATAERA, 
                       help="Override default dataEra [default: %s]" % DATAERA)
 
-    parser.add_option("--mergeEWK", dest="mergeEWK", action="store_true", default=MERGEEWK, 
-                      help="Merge all EWK samples into a single sample called \"EWK\" [default: %s]" % MERGEEWK)
-
-    parser.add_option("--signalMass", dest="signalMass", type=float, default=SIGNALMASS, 
+    parser.add_option("--signalMass", dest="signalMass", type=int, default=SIGNALMASS, 
                      help="Mass value of signal to use [default: %s]" % SIGNALMASS)
 
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR, 
@@ -640,14 +786,21 @@ if __name__ == "__main__":
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE, 
                       help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
 
-    parser.add_option("--histoLevel", dest="histoLevel", action="store", default = HISTOLEVEL,
-                      help="Histogram ambient level (default: %s)" % (HISTOLEVEL))
+    parser.add_option("--gridX", dest="gridX", action="store_true", default=GRIDX,
+                      help="Enable the x-axis grid lines [default: %s]" % GRIDX)
 
-    parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
-                      help="List of datasets in mcrab to include")
+    parser.add_option("--gridY", dest="gridY", action="store_true", default=GRIDY,
+                      help="Enable the y-axis grid lines [default: %s]" % GRIDY)
 
-    parser.add_option("-e", "--excludeTasks", dest="excludeTasks", action="store", 
-                      help="List of datasets in mcrab to exclude")
+    parser.add_option("--logX", dest="logX", action="store_true", default=LOGX,
+                      help="Set x-axis to logarithm scale [default: %s]" % LOGX)
+
+    parser.add_option("--logY", dest="logY", action="store_true", default=LOGY,
+                      help="Set y-axis to logarithm scale [default: %s]" % LOGY)
+
+    parser.add_option("--folder", dest="folder", action="store_true", default=FOLDER,
+                      help="Folder inside the ROOT files where all histograms for plotting are located [default: %s]" % FOLDER)
+
 
     (opts, parseArgs) = parser.parse_args()
 
@@ -656,19 +809,32 @@ if __name__ == "__main__":
         parser.print_help()
         sys.exit(1)
 
-    if opts.mcrab == None:
+    if opts.mcrab1 == None:
         Print("Not enough arguments passed to script execution. Printing docstring & EXIT.")
         parser.print_help()
         #print __doc__
         sys.exit(1)
+    elif opts.mcrab2 == None:
+        Print("Not enough arguments passed to script execution. Printing docstring & EXIT.")
+        parser.print_help()
+        #print __doc__
+        sys.exit(1)
+    else:
+        mcrabDir = rchop(opts.mcrab1, "/")
+        if len(mcrabDir.split("/")) > 1:
+            mcrabDir = mcrabDir.split("/")[-1]
+        opts.saveDir += mcrabDir + "/DataDriven/"
+
 
     # Sanity check
-    allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 2000, 3000]
+    allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 1500, 2000, 2500, 3000, 5000, 7000]
     if opts.signalMass!=0 and opts.signalMass not in allowedMass:
         Print("Invalid signal mass point (=%.0f) selected! Please select one of the following:" % (opts.signalMass), True)
         for m in allowedMass:
             Print(m, False)
         sys.exit()
+    else:
+        opts.signal = "ChargedHiggs_HplusTB_HplusToTB_M_%i" % opts.signalMass
 
     # Call the main function
     main(opts)

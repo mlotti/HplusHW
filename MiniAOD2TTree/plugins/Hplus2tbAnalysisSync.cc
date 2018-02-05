@@ -68,6 +68,12 @@ private:
   const double cfg_jetEtCut;
   const double cfg_jetEtaCut;
   const int cfg_nJets;
+
+  edm::EDGetTokenT<edm::View<pat::Jet>> cfg_ak8jetToken;
+  const double cfg_ak8jetEtCut;
+  const double cfg_ak8jetEtaCut;
+  const int cfg_ak8nJets;
+  
   // Marina - start
   edm::EDGetTokenT<edm::View<pat::PackedCandidate> > cfg_pfcandsToken;
   // Marina - end
@@ -119,12 +125,18 @@ Hplus2tbAnalysisSync::Hplus2tbAnalysisSync(const edm::ParameterSet& iConfig)
   : cfg_verbose(iConfig.getParameter<bool>("Verbose")),
     cfg_trgResultsToken(consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("TriggerResults"))),
     cfg_triggerBits(iConfig.getParameter<std::vector<std::string> >("HLTPaths")),
+    
     cfg_jetToken(consumes<edm::View<pat::Jet>>(iConfig.getParameter<edm::InputTag>("JetCollection"))),
     cfg_jetUserFloats(iConfig.getParameter<std::vector<std::string> >("JetUserFloats")),
     cfg_jetEtCut(iConfig.getParameter<double>("JetEtCut")),
     cfg_jetEtaCut(iConfig.getParameter<double>("JetEtaCut")),
     cfg_nJets(iConfig.getParameter<int>("NJets")),
     
+    cfg_ak8jetToken(consumes<edm::View<pat::Jet>>(iConfig.getParameter<edm::InputTag>("AK8JetCollection"))),
+    cfg_ak8jetEtCut(iConfig.getParameter<double>("AK8JetEtCut")),
+    cfg_ak8jetEtaCut(iConfig.getParameter<double>("AK8JetEtaCut")),
+    cfg_ak8nJets(iConfig.getParameter<int>("AK8NJets")),
+
     // Marina
     cfg_pfcandsToken(consumes<edm::View<pat::PackedCandidate> >(iConfig.getParameter<edm::InputTag>("PackedCandidatesCollection"))),
     
@@ -262,6 +274,30 @@ bool Hplus2tbAnalysisSync::filter(edm::Event& iEvent, const edm::EventSetup& iSe
 	    nJets++;
 	}
     }
+    // ============================================================================================================================================================================= AK8 Jets
+    edm::Handle<edm::View<pat::Jet> > AK8jethandle;
+    iEvent.getByToken(cfg_ak8jetToken, AK8jethandle);
+    int ak8nJets = 0;
+    if (AK8jethandle.isValid())
+      {
+	
+	// FOr-loop: All AK8 jets
+	for (unsigned i=0; i<AK8jethandle->size(); ++i)
+	  {
+	    const pat::Jet& obj = AK8jethandle->at(i);
+	    
+	    if (obj.p4().pt() < cfg_ak8jetEtCut) continue;
+	    if (fabs(obj.p4().eta()) > cfg_ak8jetEtaCut) continue;
+	    
+	    
+
+	    //std::cout<<"Fat Jet ="<<i<<"   Pt = "<<obj.p4().pt()<<"   Eta = "<<obj.p4().eta()<<std::endl;
+	    
+	    
+	    
+	    ak8nJets++;
+	  }
+      }
     
     //============================================================================================================================================================================== Electrons
    
@@ -272,6 +308,10 @@ bool Hplus2tbAnalysisSync::filter(edm::Event& iEvent, const edm::EventSetup& iSe
     edm::Handle<pat::ElectronCollection>  electronHandle;
     iEvent.getByToken(cfg_electronToken, electronHandle);
     int nElectrons = 0;
+    
+    //std::cout<<" "<<std::endl;
+    //std::cout<<"Taking  electronMVA handle"<<std::endl;
+    //std::cout<<" "<<std::endl;
     
     edm::Handle<edm::ValueMap<float> > electronMVAHandle;
     iEvent.getByToken(cfg_electronMVAToken, electronMVAHandle);
@@ -284,6 +324,10 @@ bool Hplus2tbAnalysisSync::filter(edm::Event& iEvent, const edm::EventSetup& iSe
     edm::Handle<double> rhoHandle;
     iEvent.getByToken(cfg_rhoToken, rhoHandle);
     
+    std::vector<pat::Electron> selectedElectrons;
+    std::vector<float> selectedElectrons_MVA;
+    std::vector<float> selectedElectrons_Iso;
+
     if(electronHandle.isValid()){
       
       // For-loop: All electrons
@@ -296,14 +340,36 @@ bool Hplus2tbAnalysisSync::filter(edm::Event& iEvent, const edm::EventSetup& iSe
 	// Calculate Mini relative isolarion for the electron with effective area
 	double miniRelIsoEA = getMiniIsolation_EffectiveArea(pfcandHandle, dynamic_cast<const reco::Candidate *>(&obj), 0.05, 0.2, 10., false, false, *rhoHandle);
 	
-	// Find a way to do the MVA thingie
 	float mvaValue = (*electronMVAHandle)[ref];
+	float AbsEta = fabs(obj.p4().eta());
 	
+	bool isLoose = false;
+	if (AbsEta <= 0.8 and mvaValue >= -0.041)
+	  {
+	    isLoose = true;
+	  }
+	if (AbsEta > 0.8 and AbsEta < 1.479 and mvaValue >= 0.383)
+	  {
+	    isLoose = true;
+	  }
+	if (AbsEta >= 1.479 and mvaValue >= -0.515)
+	  {
+	    isLoose = true;
+	  }
+	
+	//std::cout<<"Electron "<<iEle<<"  with mva value = "<<mvaValue<<"   and |eta|="<<AbsEta<<"  is Loose ="<<isLoose<<std::endl;
 	// Apply acceptance cuts
+	if (!isLoose) continue;	
 	if (miniRelIsoEA > cfg_electronMiniRelIsoEA) continue;
 	if(obj.p4().pt() < cfg_electronPtCut) continue;
 	if(fabs(obj.p4().eta()) > cfg_electronEtaCut) continue;
+	
+	selectedElectrons.push_back(obj);
+	selectedElectrons_Iso.push_back(miniRelIsoEA);
+	selectedElectrons_MVA.push_back(mvaValue);
+
 	nElectrons++;
+	
       }
     }
     
@@ -311,6 +377,9 @@ bool Hplus2tbAnalysisSync::filter(edm::Event& iEvent, const edm::EventSetup& iSe
     edm::Handle<edm::View<pat::Muon> > muonHandle;
     iEvent.getByToken(cfg_muonToken, muonHandle);
     
+    std::vector<pat::Muon> selectedMuons;
+    std::vector<float>     selectedMuons_Iso;
+
     int nMuons = 0;
     if(muonHandle.isValid()){
       
@@ -334,7 +403,6 @@ bool Hplus2tbAnalysisSync::filter(edm::Event& iEvent, const edm::EventSetup& iSe
 	// Apply muon selections
 	double miniRelIsoEA = getMiniIsolation_EffectiveArea(pfcandHandle, dynamic_cast<const reco::Candidate *>(&obj), 0.05, 0.2, 10., false, false, *rhoHandle);
 	
-	
 	if (cfg_muonID == "loose" || cfg_muonID == "Loose") 
 	  {
 	    if (isLoose  == false) continue;
@@ -355,6 +423,9 @@ bool Hplus2tbAnalysisSync::filter(edm::Event& iEvent, const edm::EventSetup& iSe
 	if (miniRelIsoEA > cfg_muonMiniRelIsoEA)  continue;
 	if(obj.p4().pt() < cfg_muonPtCut)         continue;
 	if(fabs(obj.p4().eta()) > cfg_muonEtaCut) continue;
+	
+	selectedMuons.push_back(obj);
+	selectedMuons_Iso.push_back(miniRelIsoEA);
 	
 	nMuons++;
       }
@@ -384,17 +455,42 @@ bool Hplus2tbAnalysisSync::filter(edm::Event& iEvent, const edm::EventSetup& iSe
     }
     //===================================================================================================================================================================== Passed all selections
     
+    int nLeptons = nElectrons + nMuons;
+
     if (nElectrons <= cfg_electronNCut) nEventsPassedElectronVeto++;
     if (nMuons     <= cfg_muonNCut)     nEventsPassedMuonVeto++;
     if (nTaus      <= cfg_tauNCut)      nEventsPassedTauVeto++;
-    
-    // Apply Electron Veto
-    if(nElectrons > cfg_electronNCut) return false;
-    if (cfg_verbose) std::cout << "=== nElectrons:\n\t" << nElectrons << " < " << cfg_electronNCut << std::endl;
+
     
     // Apply Muon Veto
     if(nMuons > cfg_muonNCut) return false;
     if (cfg_verbose) std::cout << "=== Passed Muons:\n\t" << nMuons << " < " << cfg_muonNCut << std::endl;
+    
+    
+    std::cout<<"======================================="<<std::endl;
+    std::cout<<"run="<<iEvent.run()<<" lumi="<<iEvent.luminosityBlock()<<" evt="<<iEvent.id().event()<<std::endl;
+    std::cout<<"nLeps="<<nLeptons<<" nMu="<<nMuons<<" nEle="<<nElectrons<<std::endl;
+    if (nMuons > 0)
+      {
+	for (unsigned int i=0; i<selectedMuons.size(); i++)
+	  {
+	    pat::Muon obj = selectedMuons.at(i);
+	    std::cout<<" "<<i+1<<" Pt="<<obj.p4().pt()<<" Eta="<<obj.p4().eta()<<" Phi="<<obj.p4().phi()<<" PDGID="<<obj.pdgId()<<" miniIso="<<selectedMuons_Iso.at(i)<<std::endl;
+	  }
+      }
+    if (nElectrons > 0)
+      {
+	for (unsigned int i=0; i<selectedElectrons.size(); i++)
+	  {
+	    pat::Electron obj = selectedElectrons.at(i);
+	    std::cout<<" "<<i+1<<" Pt="<<obj.p4().pt()<<" Eta="<<obj.p4().eta()<<" Phi="<<obj.p4().phi()<<" PDGID="<<obj.pdgId()<<" Mva="<<selectedElectrons_MVA.at(i)<<" miniIso="<<selectedElectrons_Iso.at(i)<<std::endl;
+	  } 
+      }
+
+    
+    // Apply Electron Veto
+    if(nElectrons > cfg_electronNCut) return false;
+    if (cfg_verbose) std::cout << "=== nElectrons:\n\t" << nElectrons << " < " << cfg_electronNCut << std::endl;
     
     // Apply Tau Veto
     //if (nTaus > cfg_tauNCut) return false;

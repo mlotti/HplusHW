@@ -14,7 +14,7 @@ JetDumper::JetDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<ed
     booked           = false;
 
     systVariations = inputCollections[0].getParameter<bool>("systVariations");
-
+        
     pt  = new std::vector<double>[inputCollections.size()];
     eta = new std::vector<double>[inputCollections.size()];    
     phi = new std::vector<double>[inputCollections.size()];    
@@ -82,6 +82,10 @@ JetDumper::JetDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<ed
       systJERup = new FourVectorDumper[inputCollections.size()];
       systJERdown = new FourVectorDumper[inputCollections.size()];
     }
+    // Marina - start
+    nSubjets     = new std::vector<int>[inputCollections.size()];
+    hasBTagSubjet= new std::vector<bool>[inputCollections.size()];
+    // Marina - end
 }
 
 JetDumper::~JetDumper(){}
@@ -99,7 +103,7 @@ void JetDumper::book(TTree* tree){
     tree->Branch((name+"_pdgId").c_str(),&pdgId[i]);
     tree->Branch((name+"_hadronFlavour").c_str(),&hadronFlavour[i]);
     tree->Branch((name+"_partonFlavour").c_str(),&partonFlavour[i]);
-
+    
     std::vector<std::string> discriminatorNames = inputCollections[i].getParameter<std::vector<std::string> >("discriminators");
     for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
       tree->Branch((name+"_"+discriminatorNames[iDiscr]).c_str(),&discriminators[inputCollections.size()*iDiscr+i]);
@@ -141,6 +145,14 @@ void JetDumper::book(TTree* tree){
       systJERup[i].book(tree, name, "JERup");
       systJERdown[i].book(tree, name, "JERdown");
     }
+    
+    // Marina - start
+    bool checkSubjets = inputCollections[i].getUntrackedParameter<bool>("checkSubjets",false);
+    if (checkSubjets){
+      tree->Branch((name+"_nSubjets").c_str(),&nSubjets[i]);
+      tree->Branch((name+"_hasBTagSubjet").c_str(), &hasBTagSubjet[i]);
+    }
+    // Marina - end
   }
 }
 
@@ -180,6 +192,10 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	std::vector<std::string> userfloatNames = inputCollections[ic].getParameter<std::vector<std::string> >("userFloats");
 	std::vector<std::string> userintNames = inputCollections[ic].getParameter<std::vector<std::string> >("userInts");
 	
+	// Marina - start
+	bool checkSubjets = inputCollections[ic].getUntrackedParameter<bool>("checkSubjets",false);
+	// Marina - end
+
         edm::Handle<edm::View<pat::Jet>> jetHandle;
         iEvent.getByToken(jetToken[ic], jetHandle);
 
@@ -360,6 +376,22 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                   // JER
 */                
                 }
+		// Marina - start		
+		if (checkSubjets){
+		  auto &subjets = obj.subjets("SoftDrop");
+		  
+		  int nSub = 0;
+		  bool hasBSubjet = false;
+		  for (auto const & sj: subjets)
+		    {
+		      float csv = sj->bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags");
+		      if (csv >= 0.8484) hasBSubjet = true;   // Medium working point (Recommended for 2016 Analysis)
+		      nSub++;
+		    }
+		  nSubjets[ic].push_back(nSub);
+		  hasBTagSubjet[ic].push_back(hasBSubjet);
+		}
+		// Marina - end
             }
         }
     }
@@ -400,6 +432,10 @@ void JetDumper::reset(){
           systJERup[ic].reset();
           systJERdown[ic].reset();
 	}
+	// Marina - start
+	nSubjets[ic].clear();
+	hasBTagSubjet[ic].clear();
+	// Marina - end
     }
     for(size_t ic = 0; ic < inputCollections.size()*nDiscriminators; ++ic){
         discriminators[ic].clear();
