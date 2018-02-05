@@ -229,6 +229,7 @@ void MiniAOD2TTreeFilter::reset(){
     if (electronDumper) electronDumper->reset();
     if (muonDumper) muonDumper->reset();
     if (jetDumper) jetDumper->reset();
+    if (fatJetDumper) fatJetDumper->reset();
     if (topDumper) topDumper->reset();
     if (metDumper) metDumper->reset();
     if (genMetDumper) genMetDumper->reset();
