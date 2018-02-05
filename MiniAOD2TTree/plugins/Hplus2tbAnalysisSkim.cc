@@ -85,7 +85,6 @@ private:
   const double cfg_muonEtaCut;
   const int cfg_muonNCut;
   
-  bool cfg_ApplyTauSkim;
   edm::EDGetTokenT<edm::View<pat::Tau> > cfg_tauToken;
   std::vector<std::string>  cfg_tauDiscriminators;
   const double cfg_tauPtCut;
@@ -127,7 +126,6 @@ Hplus2tbAnalysisSkim::Hplus2tbAnalysisSkim(const edm::ParameterSet& iConfig)
     cfg_muonEtaCut(iConfig.getParameter<double>("MuonEtaCut")),
     cfg_muonNCut(iConfig.getParameter<int>("MuonNCut")),
     
-    cfg_ApplyTauSkim(iConfig.getParameter<bool>("ApplyTauSkim")),
     cfg_tauToken(consumes<edm::View<pat::Tau> >(iConfig.getParameter<edm::InputTag>("TauCollection"))),
     cfg_tauDiscriminators(iConfig.getParameter<std::vector<std::string> >("TauDiscriminators")),
     cfg_tauPtCut(iConfig.getParameter<double>("TauPtCut")),
@@ -373,30 +371,28 @@ bool Hplus2tbAnalysisSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSe
     if (cfg_verbose) std::cout << "=== Passed Muons:\n\t" << nMuons << " < " << cfg_muonNCut << std::endl;
     
     // Taus
-    if (cfg_ApplyTauSkim){
-      edm::Handle<edm::View<pat::Tau> > tauHandle;
-      iEvent.getByToken(cfg_tauToken, tauHandle);
+    edm::Handle<edm::View<pat::Tau> > tauHandle;
+    iEvent.getByToken(cfg_tauToken, tauHandle);
       
-      int nTaus = 0;
-      if(tauHandle.isValid()){
+    int nTaus = 0;
+    if(tauHandle.isValid()){
 	
-	// For-loop: All taus
-	for (const pat::Tau &obj: *tauHandle){
+      // For-loop: All taus
+      for (const pat::Tau &obj: *tauHandle){
 	  
-	  if (obj.p4().pt() < cfg_tauPtCut)         continue;
-	  if (fabs(obj.p4().eta()) > cfg_tauEtaCut) continue;
+	if (obj.p4().pt() < cfg_tauPtCut)         continue;
+	if (fabs(obj.p4().eta()) > cfg_tauEtaCut) continue;
 	  
-	  bool d = true;
-	  for(size_t j=0; j<cfg_tauDiscriminators.size(); ++j) {
-	    d = d && obj.tauID(cfg_tauDiscriminators[j]);
-	  }
-	  if(!d) continue;
-	  nTaus++;
+	bool d = true;
+	for(size_t j=0; j<cfg_tauDiscriminators.size(); ++j) {
+	  d = d && obj.tauID(cfg_tauDiscriminators[j]);
 	}
+	if(!d) continue;
+	nTaus++;
       }
-      if (nTaus > cfg_tauNCut) return false;
-      if (cfg_verbose) std::cout << "=== Passed Taus:\n\t" << nTaus << " < " << cfg_tauNCut << std::endl;
     }
+    if (nTaus > cfg_tauNCut) return false;
+    if (cfg_verbose) std::cout << "=== Passed Taus:\n\t" << nTaus << " < " << cfg_tauNCut << std::endl;
     
     // All selections passed
     nSelectedEvents++;
