@@ -197,6 +197,8 @@ def getModifiedBinLabelString(binLabel):
     label = label.replace(".","p")
     label = label.replace("/","_")
     label = label.replace(" ","_")
+    label = label.replace("(","")
+    label = label.replace(")","")
     return label
 
 ## Inverse bin label modification
