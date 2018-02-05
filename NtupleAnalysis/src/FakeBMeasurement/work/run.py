@@ -176,17 +176,14 @@ def main():
 
     allSelections.verbose = opts.verbose
     allSelections.histogramAmbientLevel = opts.histoLevel
-    allSelections.BJetSelection.jetPtCuts = [40.0, 30.0]
 
     # Set splitting of phase-space (first bin is below first edge value and last bin is above last edge value)
     allSelections.CommonPlots.histogramSplitting = [
-        # PSet(label="LdgFreeBjetPt", binLowEdges=[60.0, 80.0, 100.0], useAbsoluteValues=False),
-        PSet(label="TetrajetBjetEta", binLowEdges=[0.8], useAbsoluteValues=True),
+        PSet(label="TetrajetBjetEta", binLowEdges=[1.3], useAbsoluteValues=True),
+        #PSet(label="TetrajetBjetEta", binLowEdges=[0.6, 1.4], useAbsoluteValues=True),
         ]
     
     # allSelections.BJetSelection.triggerMatchingApply = True # at least 1 trg b-jet matched to offline b-jets
-    # allSelections.Trigger.triggerOR = ["HLT_PFHT400_SixJet30", #Prescale 110 at inst. lumi 1.35E+34
-    #                                    "HLT_PFHT450_SixJet40", #Prescale  26 at inst. lumi 1.35E+34]
     # allSelections.Trigger.triggerOR = ["HLT_PFHT400_SixJet30_DoubleBTagCSV_p056"]
     # allSelections.Trigger.triggerOR = ["HLT_PFHT450_SixJet40_BTagCSV_p056"]
 
