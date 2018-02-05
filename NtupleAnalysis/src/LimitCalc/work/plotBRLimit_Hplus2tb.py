@@ -14,11 +14,15 @@ cd datacards_test4b/CombineResults_taujets_170913_192047
 
 EXAMPLES:
 ../../plotBRLimit_Hplus2tb.py [opts]
-
-Last Used:
 ../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY
 ../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY --yMin 1e-3 --settings Default
 ../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY --yMin 1e-3 --settings NoLumi
+../../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY --yMin 1e-3 --settings Default --url
+
+
+LAST USED:
+../../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY --yMin 1e-3 --yMax 10 --settings NoLumi
+
 '''
 
 #================================================================================================
@@ -220,7 +224,10 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf", ".C"]):
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
         saveNameURL = saveName + ext
-        saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
+        if "afs" in saveNameURL: #lxplus
+            saveNameURL = saveNameURL.replace("/afs/cern.ch/user/a/attikis/public/html/", "https://cmsdoc.cern.ch/~attikis/")
+        else: #lpc
+            saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
         if i==0:
             print "=== plotBRLimit_Hpluts2tb.py:"
 

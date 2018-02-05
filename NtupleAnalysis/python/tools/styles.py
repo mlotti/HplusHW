@@ -485,15 +485,15 @@ def getQCDLineStyle():
 def getABCDStyle(region):
     if region == "SR":
         return FakeBStyle1
-    elif region == "CR1":
+    elif region == "CR1" or region == "CRone":
         return FakeBStyle2
     elif region == "VR":
         return FakeBStyle3
-    elif region == "CR2":
+    elif region == "CR2" or region == "CRtwo":
         return FakeBStyle4
-    elif region == "CR3":
+    elif region == "CR3" or region == "CRthree":
         return FakeBStyle5
-    elif region == "CR4":
+    elif region == "CR4" or region == "CRfour":
         return FakeBStyle6
     else:
         print "Invalid region \"%s\". Returning qcd style" % (region)
