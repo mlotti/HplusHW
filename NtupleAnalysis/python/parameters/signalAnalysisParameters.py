@@ -6,8 +6,6 @@ import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
 
 #====== General parameters
 histoLevel = "Debug"  # Options: Systematics, Vital, Informative, Debug
-#useTriggerEfficiencyFitting = False # false if you want to use bin-by-bin method,
-#useTriggerEfficiencyFitting = True   # true if you want to use fits in the efficiency / SF
 
 #====== Trigger
 trg = PSet(

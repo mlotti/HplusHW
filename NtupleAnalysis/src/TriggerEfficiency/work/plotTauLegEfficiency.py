@@ -434,7 +434,7 @@ def analyze(analysis=None):
 ## FIT TYPES: binned max likelihood: "ML" , Chi2-fit: "Chi" ##
     
     if (howAnalyse == "--fit" ):
-        datafit = fitType("Data",p,histeff1,eff1,20,500,"Sigmoid","ML")
+        datafit = fitType("Data",p,histeff1,eff1,20,500,"Crystal","ML")
         mcfit = fitType("MC",p,histeff2,eff2,20,500,"Crystal","ML")
     
     if isinstance(datasetsH125,dataset.DatasetManager):
@@ -499,6 +499,7 @@ def analyze(analysis=None):
 ##
     lumi = 0.0
     for d in datasets.getDataDatasets():
+      if(d.getName() != "SingleMuon_Run2016F_03Feb2017_v1_277932_278800" and d.getName() != "SingleMuon_Run2016C_03Feb2017_v1_275656_276283"):
         print "luminosity",d.getName(),d.getLuminosity()
         lumi += d.getLuminosity()
     print "luminosity, sum",lumi
