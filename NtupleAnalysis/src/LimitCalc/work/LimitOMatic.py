@@ -119,12 +119,10 @@ class Result:
             msg      = "Found %s sub-directories and %s files under %s" % (nSubDirs, nFiles, dirname)
             Verbose(msg, counter==0)
 
-            # For-loop: All directories inside basedir            
+            # For-loop: All directories inside basedir
             for subdirname in dirnames:
                 if "LandSMultiCrab" in subdirname or "CombineMultiCrab" or "CombineResults" in subdirname:
                     self._jobDir = subdirname
-                else:
-                    pass
             counter += 1
         return
 
@@ -292,9 +290,10 @@ class Result:
         '''
         Print the results table with the BR limits
         '''
-        for row in self.getResultsTable(unblindedStatus, nDigits):
-            Print(row)
-        print
+        table = self.getResultsTable(unblindedStatus, nDigits)
+        for i, row in enumerate(table, 1):
+            Print(row, i==1)
+        #print
         return
 
 
@@ -303,10 +302,12 @@ class Result:
         Returns a table (list) with the BR limits
         '''
         # Open json file to read the results
-        filePath   = os.path.join(self._basedir, self._jobDir,"limits.json")
+        filePath   = os.path.join(self._basedir, self._jobDir, "limits.json") 
         fileMode   = "r"
-        jsonFile   = open(filePath, fileMode) #fixme
-        myResults  = json.load(jsonFile) #fixme
+        if not os.path.isfile(filePath):
+            return []
+        jsonFile   = open(filePath, fileMode)
+        myResults  = json.load(jsonFile)
 
         # Definitions
         masspoints = myResults["masspoints"]
@@ -469,7 +470,7 @@ if __name__ == "__main__":
     parser.add_option("-v", "--verbose", dest="verbose", default = VERBOSE,
                       help = "Enable verbosity (-1=very quiet; 0=quiet, 1=verbose, 2+=debug) [default = %s]" % VERBOSE)
 
-    parser.add_option("--htb", dest="htb", default = HToTB,
+    parser.add_option("--htb", dest="htb", default = HToTB, action="store_true",
                       help = "Use default setting for H->tb (and not H->tau nu) [default = %s]" % HToTB)
 
     parser.add_option("--precision", dest="precision", type="int", default = PRECISION,
@@ -492,14 +493,14 @@ if __name__ == "__main__":
         if len(myDirs) == 0:
             raise Exception("Error: Could not find any sub directories starting with 'datacards_' below this directory!")
     myDirs.sort()
-    myResults   = []
-    dir_counter = 1
+    Verbose("Found %s datacard directories" % (len(myDirs)), True)
 
+    myResults   = []
     # For-loop: All datacard directories
     for counter, d in enumerate(myDirs, 1):
         msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Directory", "%i" % counter, "/", "%i:" % len(myDirs), "%s" % d)
         Print(ShellStyles.HighlightAltStyle()  + msg + ShellStyles.NormalStyle(), counter==1)
-        myResults.append(Result(opts, d))
+        myResults.append( Result(opts, d) )
 
         # Inform user of success
         msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Directory", "%i" % counter, "/", "%i:" % len(myDirs), "Success")
@@ -515,9 +516,8 @@ if __name__ == "__main__":
         for r in myResults:
             r.printResultsAlt()
     else:
-        Print("Printing results for all directories:", True)    
+        Verbose("Printing results for all directories:", True)
         r.printResults(unblindedStatus=opts.unblinded, nDigits=opts.precision)
-
 
     # Manual submitting of merge
     s = ""
