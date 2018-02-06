@@ -26,8 +26,8 @@ AK8Jets = cms.PSet(
         "ak8PFJetsCHSPrunedMass",
         "ak8PFJetsCHSSoftDropMass",
         ),
-    mcjecPath   = cms.untracked.string("../test/jec/Summer16_23Sep2016V4"),
-    datajecPath = cms.untracked.string("../test/jec/Summer16_23Sep2016BCDV4"), 
+    mcjecPath   = cms.untracked.string("jec/Summer16_23Sep2016V4"),
+    datajecPath = cms.untracked.string("jec/Summer16_23Sep2016BCDV4"), 
     rho         = cms.InputTag("fixedGridRhoFastjetAll"),
     vertices    = cms.InputTag("offlineSlimmedPrimaryVertices"),
 
