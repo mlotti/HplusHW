@@ -15,7 +15,7 @@ from HiggsAnalysis.MiniAOD2TTree.tools.HChOptions import getOptionsDataVersion
 maxEvents    = 100
 maxWarnings  = 100
 reportEvery  = 100
-testWithData = True
+testWithData = False
 if testWithData:
     dataVersion  = "80Xdata"
     datasetFiles = [
@@ -190,7 +190,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     Muons     = process.Muons,
     Jets      = process.Jets,
     FatJets   = process.FatJets,
-    SoftBTag  = process.SoftBTag,
+    #SoftBTag  = process.SoftBTag,
     Top       = process.Top,
     METs      = process.METs,
     GenWeights = cms.VPSet(
