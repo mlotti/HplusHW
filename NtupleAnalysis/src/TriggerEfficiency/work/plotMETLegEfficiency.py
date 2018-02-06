@@ -43,8 +43,8 @@ def analyze(analysis=None):
     if (len(sys.argv) == 3):
         howAnalyse = sys.argv[2]
     else:
-#       howAnalyse = "--fit"
-        howAnalyse = "--bin"
+        howAnalyse = "--fit"
+ #       howAnalyse = "--bin"
 
     if not analysis == None:
 #        datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis, includeOnlyTasks="Tau|TT")
@@ -178,10 +178,11 @@ def analyze(analysis=None):
             pythonWriter.addParameters(plotDir,label,runRange,lumi,datafit)
             pythonWriter.addMCParameters(label,mcfit)
             pythonWriter.writeJSON(os.path.join(plotDir,"metLegTriggerEfficiency_"+label+"_fit.json"))
-        if (howAnalyse == "--bin"):
-            pythonWriter.addParameters(plotDir,label,runRange,lumi,eff1_MET80)
-            pythonWriter.addMCParameters(label,eff2_MET80)
-            pythonWriter.writeJSON(os.path.join(plotDir,"metLegTriggerEfficiency_"+label+"_bin.json"))
+            pythonWriter.__init__()
+#	 if (howAnalyse == "--bin"):
+        pythonWriter.addParameters(plotDir,label,runRange,lumi,eff1_MET80)
+        pythonWriter.addMCParameters(label,eff2_MET80)
+        pythonWriter.writeJSON(os.path.join(plotDir,"metLegTriggerEfficiency_"+label+"_bin.json"))
 
     #########################################################################                                             
 

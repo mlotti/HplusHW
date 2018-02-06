@@ -367,8 +367,8 @@ def analyze(analysis=None):
     if (len(sys.argv) == 3):
         howAnalyse = sys.argv[2]
     else:
-#       howAnalyse = "--fit" 
-        howAnalyse = "--bin"
+       howAnalyse = "--fit" 
+#        howAnalyse = "--bin"
 
     if not analysis == None:
         datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="Silver|GluGluHToTauTau_M125")
@@ -513,10 +513,11 @@ def analyze(analysis=None):
         pythonWriter.addParameters(plotDir,label,runRange,lumi,datafit)
         pythonWriter.addMCParameters(label,mcfit)
         pythonWriter.writeJSON(os.path.join(plotDir,"tauLegTriggerEfficiency_"+label+"_fit.json"))
-    if (howAnalyse == "--bin"):
-        pythonWriter.addParameters(plotDir,label,runRange,lumi,eff1)
-        pythonWriter.addMCParameters(label,eff2)
-        pythonWriter.writeJSON(os.path.join(plotDir,"tauLegTriggerEfficiency_"+label+"_bin.json"))
+        pythonWriter.__init__() #need to clear the Json arrays
+#    if (howAnalyse == "--bin"):
+    pythonWriter.addParameters(plotDir,label,runRange,lumi,eff1)
+    pythonWriter.addMCParameters(label,eff2)
+    pythonWriter.writeJSON(os.path.join(plotDir,"tauLegTriggerEfficiency_"+label+"_bin.json"))
 
 #    if not createRatio:
 #        sys.exit()
