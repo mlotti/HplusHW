@@ -6,13 +6,14 @@ import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
 
 #====== General parameters
 histoLevel = "Debug"  # Options: Systematics, Vital, Informative, Debug
-#useTriggerEfficiencyFitting = False # false if you want to use bin-by-bin method,
-#useTriggerEfficiencyFitting = True   # true if you want to use fits in the efficiency / SF
 
 #====== Trigger
 trg = PSet(
   # No need to specify version numbers, they are automatically scanned in range 1--100 (remove the '_v' suffix)
-  triggerEfficiencyAnalysisType = "fit", #"fit" or "bin"
+  TautriggerEfficiencyJsonName =  "tauLegTriggerEfficiency_2016_bin.json",
+#  TautriggerEfficiencyJsonName =  "tauLegTriggerEfficiency_2016_fit.json",
+  METtriggerEfficiencyJsonName = "metLegTriggerEfficiency_2016_MET90_bin.json",
+#  triggerEfficiencyJsonName ="metLegTriggerEfficiency_2016_MET90_fit.json",
   L1ETM = 80,
   triggerOR = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_MET90"
                ],
@@ -59,23 +60,28 @@ scaleFactors.assignTauMisidentificationSF(tauSelection, "muToTau", "full", "nomi
 scaleFactors.assignTauMisidentificationSF(tauSelection, "jetToTau", "full", "nominal")
 # tau trigger SF
 
-scaleFactors.assignTauTriggerSF(tauSelection, "nominal", analysisType = trg.triggerEfficiencyAnalysisType)
+scaleFactors.assignTauTriggerSF(tauSelection, "nominal", tauTrgJson= = trg.TautriggerEfficiencyJsonName)
 
 #====== Electron veto
 eVeto = PSet(
-         electronPtCut = 15.0,
-        electronEtaCut = 2.5,
+    electronPtCut = 15.0,
+    electronEtaCut = 2.5,
 #            electronID = "mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90", # highest (wp90) for vetoing (2012: wp95)
-            electronID = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
-     electronIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
+    electronID = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
+    electronIDType    = "default",  # options: "default", "MVA"
+    electronMVA       = "ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values",
+    electronMVACut    = "Loose",
+    electronIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
+    electronIsolType  = "mini", # options: "mini", "default"
 )
 
 #====== Muon veto
 muVeto = PSet(
-             muonPtCut = 10.0,
-            muonEtaCut = 2.5,
-                muonID = "muIDLoose", # loosest option for vetoing (options: muIDLoose, muIDMedium, muIDTight)
-         muonIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
+    muonPtCut = 10.0,
+    muonEtaCut = 2.5,
+    muonID = "muIDLoose", # loosest option for vetoing (options: muIDLoose, muIDMedium, muIDTight)
+    muonIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
+    muonIsolType      = "mini",      # options: "mini", "default" 
 )
 
 #====== Muon selection (for embedding)
@@ -145,7 +151,7 @@ metSelection = PSet(
    applyPhiCorrections = False  # FIXME: no effect yet
 )
 # MET trigger SF
-scaleFactors.assignMETTriggerSF(metSelection, bjetSelection.bjetDiscrWorkingPoint, "nominal",analysisType = trg.triggerEfficiencyAnalysisType)
+scaleFactors.assignMETTriggerSF(metSelection, bjetSelection.bjetDiscrWorkingPoint, "nominal",metTrgJson= = trg.METtriggerEfficiencyJsonName)
 #====== Angular cuts / back-to-back
 angularCutsBackToBack = PSet(
        nConsideredJets = 3,    # Number of highest-pt jets to consider (excluding jet corresponding to tau)
@@ -263,4 +269,4 @@ def applyAnalysisCommandLineOptions(argv, config):
         config.TauSelection.prongs = 2
     elif "3prong" in argv or "3pr" in argv:
         config.TauSelection.prongs = 3
-    scaleFactors.assignTauTriggerSF(config.TauSelection, "nominal",analysisType = config.Trigger.triggerEfficiencyAnalysisType)
+    scaleFactors.assignTauTriggerSF(config.TauSelection, "nominal",tauTrgJson = config.Trigger.TautriggerEfficiencyJsonName)

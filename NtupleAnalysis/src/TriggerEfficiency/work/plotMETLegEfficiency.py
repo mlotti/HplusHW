@@ -43,8 +43,8 @@ def analyze(analysis=None):
     if (len(sys.argv) == 3):
         howAnalyse = sys.argv[2]
     else:
-#       howAnalyse = "--fit"
-        howAnalyse = "--bin"
+        howAnalyse = "--fit"
+ #       howAnalyse = "--bin"
 
     if not analysis == None:
 #        datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis, includeOnlyTasks="Tau|TT")
@@ -109,8 +109,8 @@ def analyze(analysis=None):
 ### fit types: binned maximum likelihood "ML", Chi2 fit "Chi"
         
         if (howAnalyse == "--fit" ):
-            datafit = fitType("datafit",p,eff1_MET80_histo,eff1_MET80,20,300,"Sigmoid","ML")
-            mcfit = fitType("mcfit",p,eff2_MET80_histo,eff2_MET80,20,300,"Richard","ML")
+            datafit = fitType("datafit",p,eff1_MET80_histo,eff1_MET80,20,300,"Crystal","ML")
+            mcfit = fitType("mcfit",p,eff2_MET80_histo,eff2_MET80,20,300,"Sigmoid","ML")
 	
         opts = {"ymin": 0, "ymax": 1.1}
         opts2 = {"ymin": 0.5, "ymax": 1.5}
@@ -178,10 +178,11 @@ def analyze(analysis=None):
             pythonWriter.addParameters(plotDir,label,runRange,lumi,datafit)
             pythonWriter.addMCParameters(label,mcfit)
             pythonWriter.writeJSON(os.path.join(plotDir,"metLegTriggerEfficiency_"+label+"_fit.json"))
-        if (howAnalyse == "--bin"):
-            pythonWriter.addParameters(plotDir,label,runRange,lumi,eff1_MET80)
-            pythonWriter.addMCParameters(label,eff2_MET80)
-            pythonWriter.writeJSON(os.path.join(plotDir,"metLegTriggerEfficiency_"+label+"_bin.json"))
+            pythonWriter.__init__()
+#	 if (howAnalyse == "--bin"):
+        pythonWriter.addParameters(plotDir,label,runRange,lumi,eff1_MET80)
+        pythonWriter.addMCParameters(label,eff2_MET80)
+        pythonWriter.writeJSON(os.path.join(plotDir,"metLegTriggerEfficiency_"+label+"_bin.json"))
 
     #########################################################################                                             
 

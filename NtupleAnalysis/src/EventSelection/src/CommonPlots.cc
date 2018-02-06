@@ -886,6 +886,8 @@ void CommonPlots::initialize() {
   // fTopData = TopSelection::Data();
   fTopData = TopSelectionBDT::Data();
   fBackToBackAngularCutsData = AngularCutsCollinear::Data();
+  // fFatJetData = FatJetSelection::Data();
+  // fFatJetSoftDropData = FatJetSoftDropSelection::Data();
   fHistoSplitter.initialize();
   
   for (auto& p: fBaseObjects) p->reset();
@@ -1035,16 +1037,17 @@ void CommonPlots::fillControlPlotsAfterStandardSelections(const Event& event,
 							  const METSelection::Data& METData,
 							  const TopologySelection::Data& topologyData,
 							  // const TopSelection::Data& topData, 
-							  const TopSelectionBDT::Data& topData, 
+							  const TopSelectionBDT::Data& topData,
 							  bool bIsGenuineB) {
   fJetData      = jetData;
   fBJetData     = bjetData;
   fTopologyData = topologyData;
   fTopData      = topData;
   fMETData      = METData;
+  bIsGenuineB   = bjetData.isGenuineB();
   // if (bIsInverted) bIsGenuineB = topData.isGenuineB();
   // else bIsGenuineB = bjetData.isGenuineB();
-
+  
   // Fill Histogram Triplets
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNVerticesAfterStdSelections, bIsGenuineB, iVertices);
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNJetsAfterStdSelections    , bIsGenuineB, fJetData.getSelectedJets().size());
@@ -1099,14 +1102,15 @@ void CommonPlots::fillControlPlotsAfterStandardSelections(const Event& event,
   return;
 }
 
-void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event, int isInverted) {
+void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event, int isGenuineB) {
   // NB: Call only afer fillControlPlotsAfterStandardSelections() has been called
   // Variables fJetData, fBJetData, fTopologyData, fTopData, fMETData, bIsGenuineB already set!
-
-  // NB: isInverted is a dumbie variable. Introduced to be able to overload the function
-  fHistoSplitter.fillShapeHistogramTriplet(hCtrlNVerticesAfterAllSelections, bIsGenuineTau, iVertices);
+  
+  // Store boolean  
+  bIsGenuineB = isGenuineB;
 
   // Fill Histogram Triplets
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlNVerticesAfterAllSelections, bIsGenuineB, iVertices);
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNVerticesAfterAllSelections, bIsGenuineB, iVertices);
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNJetsAfterAllSelections    , bIsGenuineB, fJetData.getSelectedJets().size());
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNBJetsAfterAllSelections   , bIsGenuineB, fBJetData.getSelectedBJets().size());
@@ -1117,7 +1121,7 @@ void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event, int isI
       fHistoSplitter.fillShapeHistogramTriplet(hCtrlJetPtAfterAllSelections         , bIsGenuineB, p.pt() );
       fHistoSplitter.fillShapeHistogramTriplet(hCtrlJetEtaAfterAllSelections        , bIsGenuineB, p.eta() );
       fHistoSplitter.fillShapeHistogramTriplet(hCtrlJetEtaPhiAfterAllSelections     , bIsGenuineB, p.eta(), p.phi() );
-      // fHistoSplitter.fillShapeHistogramTriplet(hCtrlBDiscriminatorAfterAllSelections, bIsGenuineB, p.bjetDiscriminator() );
+      fHistoSplitter.fillShapeHistogramTriplet(hCtrlBDiscriminatorAfterAllSelections, bIsGenuineB, p.bjetDiscriminator() );
     }
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlHTAfterAllSelections , bIsGenuineB, fJetData.HT());
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlMHTAfterAllSelections, bIsGenuineB, std::sqrt(fJetData.MHT().perp2()));
@@ -1144,6 +1148,7 @@ void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event, int isI
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlLdgTrijetPt_Vs_LdgTrijetDijetPtAfterAllSelections, bIsGenuineB, fTopData.getLdgTrijet().pt(), fTopData.getLdgTrijetDijet().pt());
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlLdgTrijetBJetEtaAfterAllSelections   , bIsGenuineB, fTopData.getLdgTrijetBJet().p4().eta() );
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlSubldgTrijetPtAfterAllSelections     , bIsGenuineB, fTopData.getSubldgTrijet().pt() );
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSubldgTrijetDijetPtAfterAllSelections, bIsGenuineB, fTopData.getSubldgTrijetDijet().pt() );
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlSubldgTrijetDijetMassAfterAllSelections, bIsGenuineB, fTopData.getSubldgTrijetDijet().mass() );
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlSubldgTrijetMassAfterAllSelections   , bIsGenuineB, fTopData.getSubldgTrijet().mass() );
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlSubldgTrijetTopMassWMassRatioAfterAllSelections, bIsGenuineB, fTopData.getSubldgTrijetTopMassWMassRatio() );

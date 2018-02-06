@@ -275,21 +275,26 @@ signal500Style = StyleCompound([
         StyleFill(fillStyle=1001, fillColor=ROOT.kBlue+3), 
         StyleLine(lineStyle=ROOT.kDashed, lineWidth=3, lineColor=ROOT.kBlue+3) ])
 """
-signal200Style = signalStyle.clone()
-signal220Style = signalStyle.clone()
-signal250Style = signalStyle.clone()
-signal300Style = signalStyle.clone()   
-signal350Style = signalStyle.clone()   
-signal400Style = signalStyle.clone()   
-signal500Style = signalStyle.clone()   
-signal600Style = signalStyle.clone()
-signal700Style = signalStyle.clone()
-signal750Style = signalStyle.clone()
-signal800Style = signalStyle.clone()
+signal180Style  = signalStyle.clone()
+signal200Style  = signalStyle.clone()
+signal220Style  = signalStyle.clone()
+signal250Style  = signalStyle.clone()
+signal300Style  = signalStyle.clone()   
+signal350Style  = signalStyle.clone()   
+signal400Style  = signalStyle.clone()   
+signal500Style  = signalStyle.clone()   
+signal600Style  = signalStyle.clone()
+signal700Style  = signalStyle.clone()
+signal750Style  = signalStyle.clone()
+signal800Style  = signalStyle.clone()
 signal1000Style = signalStyle.clone()
 signal1500Style = signalStyle.clone()
 signal2000Style = signalStyle.clone()
+signal2500Style = signalStyle.clone()
 signal3000Style = signalStyle.clone()
+signal5000Style = signalStyle.clone()
+signal7000Style = signalStyle.clone()
+signal1000Style = signalStyle.clone()
 
 dibStyle          = Style(ROOT.kMultiply, ROOT.kBlue-4)
 dyStyle           = Style(ROOT.kStar, ROOT.kTeal-9)
@@ -343,9 +348,9 @@ invertedLineStyle = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.
 altQCDStyle       = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange-2, markerSizes=None, markerStyle=ROOT.kFullDiamond),
                                    StyleLine(lineColor=ROOT.kOrange-2, lineStyle=ROOT.kSolid, lineWidth=3), 
                                    StyleFill(fillColor=ROOT.kOrange-2, fillStyle=3001)])
-genuineBStyle     = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kGreen+2, markerSizes=None, markerStyle=ROOT.kFullCircle),
-                                   StyleLine(lineColor=ROOT.kGreen+2, lineStyle=ROOT.kSolid, lineWidth=3), 
-                                   StyleFill(fillColor=ROOT.kGreen+2, fillStyle=3001)])
+genuineBStyle     = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kAzure-2, markerSizes=None, markerStyle=ROOT.kFullCircle),
+                                   StyleLine(lineColor=ROOT.kAzure-2, lineStyle=ROOT.kSolid, lineWidth=3), 
+                                   StyleFill(fillColor=ROOT.kAzure-2, fillStyle=1001)])
 genuineBLineStyle = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kGreen+2, markerSizes=None, markerStyle=ROOT.kFullCircle),
                                    StyleLine(lineColor=ROOT.kGreen+2, lineStyle=ROOT.kSolid, lineWidth=3), 
                                    StyleFill(fillColor=ROOT.kGreen+2, fillStyle=0)])
@@ -387,12 +392,12 @@ signalStyleHToTB3000 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT
 FakeBStyle1 = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kRed, markerSizes=None, markerStyle=ROOT.kFullTriangleUp),
                                    StyleLine(lineColor=ROOT.kRed, lineStyle=ROOT.kSolid, lineWidth=3), 
                                    StyleFill(fillColor=ROOT.kRed, fillStyle=1001)])
-FakeBStyle2 = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kBlue, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
-                                   StyleLine(lineColor=ROOT.kBlue, lineStyle=ROOT.kSolid, lineWidth=3), 
-                                   StyleFill(fillColor=ROOT.kBlue, fillStyle=1001)])
-FakeBStyle3 = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange-3, markerSizes=None, markerStyle=ROOT.kFullTriangleUp),
+FakeBStyle2 = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange-3, markerSizes=None, markerStyle=ROOT.kFullTriangleUp),
                                    StyleLine(lineColor=ROOT.kOrange-3, lineStyle=ROOT.kSolid, lineWidth=3), 
                                    StyleFill(fillColor=ROOT.kOrange-3, fillStyle=1001)])
+FakeBStyle3 = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kBlue, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
+                                   StyleLine(lineColor=ROOT.kBlue, lineStyle=ROOT.kSolid, lineWidth=3), 
+                                   StyleFill(fillColor=ROOT.kBlue, fillStyle=1001)])
 FakeBStyle4 = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kAzure+1, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
                                    StyleLine(lineColor=ROOT.kAzure+1, lineStyle=ROOT.kSolid, lineWidth=3), 
                                    StyleFill(fillColor=ROOT.kAzure+1, fillStyle=1001)])

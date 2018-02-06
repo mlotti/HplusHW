@@ -1,21 +1,34 @@
 #!/usr/bin/env python
 '''
-Description:
+DESCRIPTIONM:
 Script that plots Data/MC for all histograms under a given folder (passsed as option to the script)
 Good for sanity checks for key points in the cut-flow
 
-Usage:
+
+USAGE:
 ./plotDataMC_ControlPlots.py -m <pseudo_mcrab_directory> [opts]
 
-Examples:
+
+EXAMPLES:
 ./plotDataMC_ControlPlots.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/SignalAnalysis/Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_TopCut10_171012_011451 --folder topologySelection_
 ./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_TopCut10_171012_011451 --folder jetSelection_ --url
 ./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_TopMVA0p90_171106_064503 --folder topbdtSelection_ -e "QCD_HT50to100|QCD_HT100to200|QCD_HT200to300|QCD_HT300to500"
 ./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_TopMVA0p90_171106_064503/ --url --signalMass 500
 ./plotDataMC_ControlPlots.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/SignalAnalysis/Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_TopCut10_171012_011451 --folder ForDataDrivenCtrlPlots --signalMass 500 -e "FakeB"
-
-Last Used:
 ./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_MVA0p80_MVA0p80_TopMassCutOff600GeV_180104_043952 --folder counters/weighted --url
+
+
+LAST USED:
+./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900/ --folder PUDependency
+./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900/ --folder counters/weighted
+./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900/ --folder eSelection_Veto
+./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900/ --folder muSelection_Veto
+./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900/ --folder tauSelection_Veto
+./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900/ --folder jetSelection_
+./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900/ --folder bjetSelection_
+./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900/ --folder topbdtSelection_
+./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900/ --folder ForDataDrivenCtrlPlots
+
 '''
 
 #================================================================================================ 
@@ -260,11 +273,13 @@ def GetHistoKwargs(h, opts):
         "ylabel"           : _yLabel,
         "rebinX"           : 1,
         "rebinY"           : None,
+        "ratioType"        : "errorScale", #new
+        "ratioErrorOptions": {"numeratorStatSyst": False}, #new
         "ratioYlabel"      : "Data/MC",
         "ratio"            : True, 
         "stackMCHistograms": True,
         "ratioInvert"      : False, 
-        "addMCUncertainty" : False, 
+        "addMCUncertainty" : True, 
         "addLuminosityText": True,
         "addCmText"       : True,
         "cmsExtraText"     : "Preliminary",
@@ -443,6 +458,18 @@ def GetHistoKwargs(h, opts):
         if "AfterAllSelections" in h:
             kwargs["opts"]   = {"xmin": 175-80, "xmax": +175+100, "ymin": yMin, "ymaxfactor": yMaxF}
 
+    if "dgTrijetDijetMass" in h:
+        units            = "GeV/c^{2}"
+        kwargs["rebinX"] = 2
+        kwargs["xlabel"] = "m_{jj} (%s)" % units
+        kwargs["ylabel"] = _yLabel + units
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +400.0, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["cutBox"] = {"cutValue": 80.385, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        if "AfterStandardSelections" in h:
+            kwargs["opts"]   = {"xmin": 0, "xmax": +600, "ymin": yMin, "ymaxfactor": yMaxF}
+        if "AfterAllSelections" in h:
+            kwargs["opts"]   = {"xmin": 0, "xmax": +500, "ymin": yMin, "ymaxfactor": yMaxF}
+
     if "ldgTrijetPt" in h:
         ROOT.gStyle.SetNdivisions(8, "X")
         units            = "GeV/c"
@@ -493,14 +520,14 @@ def GetHistoKwargs(h, opts):
 
     if "counters" in opts.folder:
         ROOT.gStyle.SetLabelSize(16.0, "X")
-        #ROOT.gStyle.SetLabelFont(62, "X")
-        #ROOT.gStyle.SetLabelOffset(1.0)
-        kwargs["moveLegend"] = {"dx": -0.52, "dy": -0.55, "dh": 0.0}
+        kwargs["moveLegend"] = {"dx": -0.08, "dy": 0.0, "dh": 0.1}
+        kwargs["opts2"]      = {"ymin": 0.6, "ymax": 2.0-0.6}
+        # kwargs["moveLegend"] = {"dx": -0.52, "dy": -0.55, "dh": 0.0}
 
     if h == "counter":
-        xMin = 15
-        kwargs["opts"]   = {"xmin": xMin, "xmax": +21.0, "ymin": 1e0, "ymaxfactor": 1.2}
-        #kwargs["opts"]   = {"xmin": xMin, "xmax": +21.0, "ymin": yMin, "ymaxfactor": 1.2}
+        xMin = 15.0
+        xMax = 20.0
+        kwargs["opts"]   = {"xmin": xMin, "xmax": xMax, "ymin": 1e0, "ymaxfactor": 1.2}
         kwargs["cutBox"] = {"cutValue": xMin+2, "fillColor": 16, "box": False, "line": True, "greaterThan": True} #indicate btag SF
 
     if "IsolPt" in h:
@@ -515,6 +542,12 @@ def GetHistoKwargs(h, opts):
         kwargs["ylabel"] = "Events / %.2f "
         kwargs["opts"]   = {"xmin": 0.0, "xmax": +0.25, "ymin": yMin, "ymaxfactor": yMaxF}
 
+    if "IsolMiniIso" in h or "MiniIso" in h:
+        kwargs["ylabel"] = "Events / %.2f "
+        kwargs["xlabel"] = "mini relative isolation"        
+        if "after" in h.lower() or "passed" in h.lower():
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": +1.0, "ymin": yMin, "ymaxfactor": yMaxF}
+
     if "vtx" in h.lower():
         kwargs["xlabel"] = "PV multiplicity"
         kwargs["cutBox"] = {"cutValue": 1.0, "fillColor": 16, "box": True, "line": True, "greaterThan": True}
@@ -527,7 +560,8 @@ def GetHistoKwargs(h, opts):
     if h == "tauNpassed":
         units            = "GeV/c"
         kwargs["xlabel"] = "#tau-jet multiplicity"
-        kwargs["opts"]   = {"xmin": 0.0, "xmax": 8.0, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": 7.0, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["cutBox"] = {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": False}
 
     if "HT" in h or "JT" in h:
         ROOT.gStyle.SetNdivisions(8, "X")
@@ -582,7 +616,7 @@ def GetHistoKwargs(h, opts):
         kwargs["ylabel"] = "Events / %.2f "
         if "_" in h.lower():
             ROOT.gStyle.SetNdivisions(8, "X")
-            kwargs["cutBox"] = {"cutValue": 0.8484, "fillColor": 16, "box": True, "line": True, "greaterThan": True}
+            kwargs["cutBox"] = {"cutValue": 0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["opts"]   = {"xmin": 0.8, "xmax": +1.0, "ymin": yMin, "ymaxfactor": yMaxF}
         else:
             #ROOT.gStyle.SetNdivisions(8, "X")
@@ -795,6 +829,7 @@ def DataMCHistograms(datasetsMgr, histoName):
 
     # Replace bin labels
     if "counter" in opts.folder:
+        # p.getFrame().GetXaxis().LabelsOption("v") #vertical orientation of bin labels
         replaceBinLabels(p, saveName)
 
     # Save the plots in custom list of saveFormats
@@ -807,7 +842,7 @@ def replaceBinLabels(p, histoName):
     '''
     myBinList = []
     if histoName == "counter" or histoName == "weighted/counter":
-        myBinList = ["#geq 7 jets", "#geq 3 b-jets", "b-jets SF", "E_{T}^{miss}", "Topology", "TopReco"]
+        myBinList = ["#geq 7 jets", "#geq 3 b-jets", "b-jets SF", "#geq 2 tops", "All"]
     elif "bjet" in histoName:
         myBinList = ["All", "#eta", "p_{T}", "CSVv2 (M)", "Trg Match", "#geq 3"]
     elif "jet" in histoName:

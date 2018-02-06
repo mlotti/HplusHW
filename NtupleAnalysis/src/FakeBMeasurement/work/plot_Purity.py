@@ -1,23 +1,25 @@
 #!/usr/bin/env python
 '''
-Usage:
+DESCRIPTION:
+Plots purity of FakeB background in all Control Regions (CR)
+on the same cavnas. In particular it plots the FakeB Purity 
+for VR, CR1, and CR2.
+
+
+USAGE:
 ./plot_Purity.py -m <pseudo_mcrab_directory> [opts]
 
-Examples:
+
+EXAMPLES:
 ./plot_Purity.py -m FakeBMeasurement_SRCR1VR_CSV2M_EE2_CSV2L_GE1_StdSelections_MVA_GE0p40_AllSelections_LdgTopMVA_GE0p80_SubldgMVA_GE0p80_RandomSort_180108_043300/ --folder ForFakeBMeasurement --doEWK
 ./plot_Purity.py -m FakeBMeasurement_SRCR1VR_CSV2M_EE2_CSV2L_GE1_StdSelections_MVA_GE0p40_AllSelections_LdgTopMVA_GE0p80_SubldgMVA_GE0p80_RandomSort_180108_043300/ --folder ForFakeBMeasurement --doEWK --doQCD
 ./plot_Purity.py -m FakeBMeasurement_SRCR1VR_CSV2M_EE2_CSV2L_GE0_StdSelections_MVA_GE0p40_AllSelections_LdgTopMVA_GE0p80_SubldgMVA_GE0p80_RandomSort_180107_122559/ --url --doQCD
-
-Last Used:
 ./plot_Purity.py -m FakeBMeasurement_SRCR1VR_CSV2M_EE2_CSV2L_GE1_StdSelections_MVA_GE0p40_AllSelections_LdgTopMVA_GE0p80_SubldgMVA_GE0p80_RandomSort_180108_043300/ --folder ForFakeBMeasurement
 
-NOTE:
-If unsure about the parameter settings a pseudo-multicrab do:
-root -l /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar/TT/res/histograms-TT.root
-gDirectory->ls()
-FakeBMeasurement_80to1000_Run2016->cd()
-gDirectory->ls()
-config->ls()
+
+LAST USED:
+./plot_Purity.py -m FakeBMeasurement_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p50to085_180129_133455 
+
 '''
 
 #================================================================================================ 
@@ -42,6 +44,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
 import HiggsAnalysis.NtupleAnalysis.tools.errorPropagation as errorPropagation
 
@@ -56,6 +59,12 @@ def Print(msg, printHeader=False):
     else:
         print "\t", msg
     return
+
+
+def rchop(myString, endString):
+  if myString.endswith(endString):
+    return myString[:-len(endString)]
+  return myString
 
 
 def Verbose(msg, printHeader=True, verbose=False):
@@ -150,8 +159,16 @@ def main(opts):
         datasetsMgr.updateNAllEventsToPUWeighted()
         datasetsMgr.loadLuminosities() # from lumi.json
         
+        if 0:
+            datasetsMgr.printSelections()
+        
         # Print PSets used for FakeBMeasurement
-        PrintPSet("FakeBMeasurement", datasetsMgr)
+        if 0:
+            datasetsMgr.printSelections()
+            PrintPSet("BJetSelection", datasetsMgr)
+            PrintPSet("TopSelectionBDT", datasetsMgr)
+            PrintPSet("FakeBMeasurement", datasetsMgr)
+            sys.exit()
 
         # Set/Overwrite cross-sections
         for d in datasetsMgr.getAllDatasets():
@@ -198,21 +215,33 @@ def main(opts):
         # hList.extend([h for h in allHistos if "StandardSelections" in h and "_Vs" not in h])
 
         # Create a list with strings included in the histogram names you want to plot
-        myHistos = ["LdgTrijetPt", "LdgTrijetM", "LdgTetrajetMass", "MVAmax2", "MVAmax1", "Njets", "NBjets", 
-                    "Bjet3BtagDisc", "Bjet2BtagDisc", "Bjet1BtagDisc", "Bjet3Pt", "Bjet2Pt", "Bjet1Pt"]
+        myHistos = ["LdgTrijetPt", "LdgTrijetMass", "LdgTetrajetMass", "MVAmax2", "MVAmax1", "Njets", "NBjets", 
+                    "Bjet3Bdisc", "Bjet2Bdisc", "Bjet1Bdisc", "Bjet3Pt", "Bjet2Pt", "Bjet1Pt"]
 
         # For-loop: All histos
-        for h in myHistos:
+        for i, h in enumerate(myHistos, 1):
             hGraphList = []
             for b in ["Baseline_", "Inverted_"]:
                 for r in ["_AfterAllSelections", "_AfterCRSelections"]:
                     histoName = b + h + r
                     hgQCD, kwargs = GetPurityHistoGraph(datasetsMgr, opts.folder, histoName)
+
                     # Do not draw SR in multigraph plot!
                     if GetControlRegionLabel(histoName) != "SR":
                         hGraphList.append(hgQCD)
-                    PlotHistoGraph(hgQCD, kwargs)
+
+                    # Plot individual purity graphs?
+                    if 0:
+                        PlotHistoGraph(hgQCD, kwargs)
+
+            msg   = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % i, "/", "%s:" % (len(myHistos)), h)
+            Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), i==1)
             PlotHistoGraphs(hGraphList, kwargs)
+    
+    savePath = opts.saveDir
+    if opts.url:
+        savePath = savePath.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
+    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + savePath + ShellStyles.NormalStyle()), True)
     return
 
 
@@ -256,7 +285,7 @@ def PlotHistoGraph(histoGraph, _kwargs):
     # Save the plots
     histoName = histoName.replace("ForFakeBMeasurement/", "")
     histoName = GetSaveName(histoName) #introduced for ABCD method
-    SavePlot(p, histoName, os.path.join(opts.saveDir, "Purity", opts.optMode), saveFormats = [".png", ".pdf"] )
+    SavePlot(p, histoName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf"] )
     return
 
 
@@ -346,7 +375,7 @@ def PlotHistoGraphs(hGraphList, _kwargs):
     plots.drawPlot(p, histoName, **_kwargs)
 
     # Save the plot
-    SavePlot(p, histoName, os.path.join(opts.saveDir, "Purity", opts.optMode), saveFormats = [".png", ".pdf"] )
+    SavePlot(p, histoName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf"] )
     return
 
 def GetHistoKwargs(histoName, opts):
@@ -392,11 +421,6 @@ def GetHistoKwargs(histoName, opts):
     mvaBins    = []
     triMBins   = [] 
     tetraMBins = [] 
-    step1      = 20
-    step2      = 50
-    step3      = 100
-    step4      = 200
-    step5      = 2000
 
     for i in range(0, 21, 1):
         mvaBins.append(i*0.05)
@@ -410,23 +434,25 @@ def GetHistoKwargs(histoName, opts):
     for i in range(0, 9, 1):
         bjetBins.append(i)
 
-    for i in range(0, 100, 10):
+    for i in range(0, 100, 25):
         ptBins.append(i)
-    for j in range(100, 200, step1):
+    for j in range(100, 300, 50):
         ptBins.append(j)
-    for j in range(200, 300+step2, step2):
+    for j in range(300, 400+100, 100):
+        ptBins.append(j)
+    for j in range(400, 500+100, 100):
         ptBins.append(j)
 
-    for j in range(0, 300, step1):
+    for j in range(0, 300, 20):
         triMBins.append(j)
-    for j in range(300, 500+step2, step2):
+    for j in range(300, 500+50, 50):
         triMBins.append(j)
 
-    for j in range(0, 1000, step3):
+    for j in range(0, 1000, 100):
         tetraMBins.append(j)
-    for k in range(1000, 2000, step4):
+    for k in range(1000, 2000, 200):
         tetraMBins.append(k)
-    for l in range(2000, 4000+step5, step5):
+    for l in range(2000, 4000+1000, 1000):
         tetraMBins.append(l)
 
     # Set x-axis divisions
@@ -440,7 +466,7 @@ def GetHistoKwargs(histoName, opts):
     if "pt" in h.lower():# don't move further down!
         _xlabel           = "p_{T} (GeV/c)"
         myBins            = ptBins
-
+        
     if "mvamax1" in h.lower():
         _xlabel = "Leading MVA"
         _cutBox = {"cutValue": 0.8, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
@@ -458,17 +484,19 @@ def GetHistoKwargs(histoName, opts):
         _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _xlabel = "p_{T} (GeV/c)"
         myBins  = ptBins
-        myBins.extend([400, 600])
+        #myBins.extend([400, 600])
     if "bjet2pt" in h.lower():
         _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _xlabel = "p_{T} (GeV/c)"
-        myBins.extend([400, 600])
-    if "bjet3pt" in h.lower():
+        myBins  = ptBins
+        #myBins.extend([400, 600])
+    if "bjet3pt" in h.lower():        
         _cutBox = {"cutValue": 30.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _xlabel = "p_{T} (GeV/c)"
-    if "btagdisc" in h.lower():
+        myBins  = ptBins
+    if "bdisc" in h.lower():
         _units  = "" 
-        _xlabel = "b-jet discriminator"
+        _xlabel = "b-tag discriminant"
         # _cutBox = {"cutValue": 0.5426, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _cutBox = {"cutValue": 0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         myBins  = btagBins
@@ -541,9 +569,9 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".C", ".pdf"]):
         saveNameURL = saveName + ext
         saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
         if opts.url:
-            Print(saveNameURL, i==0)
+            Verbose(saveNameURL, i==0)
         else:
-            Print(saveName + ext, i==0)
+            Verbose(saveName + ext, i==0)
         plot.saveAs(saveName, formats=saveFormats)
     return
 
@@ -648,7 +676,7 @@ def GetPurityHisto(hData, hEWK, kwargs, printValues=False, hideZeros=True):
         
         # Treat negative bins for EWK (possible if -ve weights are applied)
         if ewkSum < 0.0:
-            Print("Sum is below 0 (Sum=%.3f +/- %.3f). Forcing value to 0.0." % (ewkSum,  ewkSumUncert), False)
+            Verbose("Sum is below 0 (Sum=%.3f +/- %.3f). Forcing value to 0.0." % (ewkSum,  ewkSumUncert))
             ewkSum = 0.0 
 
         # Ignore zero bins
@@ -730,10 +758,10 @@ if __name__ == "__main__":
     URL          = False
     NOERROR      = True
     DOEWK        = False
-    SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"
+    SAVEDIR      = "/publicweb/a/aattikis/"
     VERBOSE      = False
     DOQCD        = False
-    FOLDER       = "ForFakeBMeasurement" #"ForDataDrivenCtrlPlots"
+    FOLDER       = "ForFakeBMeasurement"
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -797,7 +825,12 @@ if __name__ == "__main__":
         Print("Not enough arguments passed to script execution. Printing docstring & EXIT.")
         parser.print_help()
         #print __doc__
-        sys.exit(1)        
+        sys.exit(1)
+    else:
+        mcrabDir = rchop(opts.mcrab, "/")
+        if len(mcrabDir.split("/")) > 1:
+            mcrabDir = mcrabDir.split("/")[-1]
+        opts.saveDir += mcrabDir + "/Purity/"
         
     # Sanity check
     allowedFolders = ["ForDataDrivenCtrlPlots", "ForFakeBMeasurement"]
