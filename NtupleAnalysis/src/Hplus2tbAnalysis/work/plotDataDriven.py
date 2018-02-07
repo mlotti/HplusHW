@@ -853,10 +853,13 @@ if __name__ == "__main__":
         #print __doc__
         sys.exit(1)
     else:
-        mcrabDir = rchop(opts.mcrab1, "/")
-        if len(mcrabDir.split("/")) > 1:
-            mcrabDir = mcrabDir.split("/")[-1]
-        opts.saveDir += mcrabDir + "/DataDriven/"
+        mcrabDir1 = rchop(opts.mcrab1, "/")
+        mcrabDir2 = rchop(opts.mcrab2, "/")
+        if len(mcrabDir1.split("/")) > 1:
+            mcrabDir1 = mcrabDir1.split("/")[-1]
+        if len(mcrabDir2.split("/")) > 1:
+            mcrabDir2 = mcrabDir2.split("/")[-1]
+        opts.saveDir += mcrabDir1 + mcrabDir2 + "/DataDriven/"
 
 
     # Sanity check
