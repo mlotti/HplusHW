@@ -303,9 +303,9 @@ void QGLAnalysis::book(TDirectory *dir) {
   hGluonJetsN_320pt400   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "GluonJetsN_320pt400"  , "Gluon Jets Multiplicity with p_{T} in the range [320,400)"              , nNBins, fNMin, fNMax); 
   hGluonJetsPt_320pt400  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "GluonJetsPt_320pt400" , "Gluon Jets p_{T} (GeV) in the range [320,400)"                          , nPtBins, fPtMin, fPtMax);
   
-  hLightJetsQGL_320pt400 = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "LightJetsQGL_250pt320", "Quark-Gluon discriminator for Light Jets in the p_{T} range [320,400)"  , nBinsQGL, minQGL, maxQGL);
-  hLightJetsN_320pt400   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "LightJetsN_250pt320" , "Gluon Jets Multiplicity with p_{T} in the range [320,400)"              , nNBins, fNMin, fNMax); 
-  hLightJetsPt_320pt400  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "LightJetsPt_250pt320" , "Gluon Jets p_{T} (GeV) in the range [320,400)"                          , nPtBins, fPtMin, fPtMax);
+  hLightJetsQGL_320pt400 = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "LightJetsQGL_320pt400", "Quark-Gluon discriminator for Light Jets in the p_{T} range [320,400)"  , nBinsQGL, minQGL, maxQGL);
+  hLightJetsN_320pt400   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "LightJetsN_320pt400" , "Gluon Jets Multiplicity with p_{T} in the range [320,400)"              , nNBins, fNMin, fNMax); 
+  hLightJetsPt_320pt400  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "LightJetsPt_320pt400" , "Gluon Jets p_{T} (GeV) in the range [320,400)"                          , nPtBins, fPtMin, fPtMax);
   // pT in the range [400,630)
   hGluonJetsQGL_400pt630 = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "GluonJetsQGL_400pt630", "Quark-Gluon discriminator for Gluon Jets in the p_{T} range [400,630)"  , nBinsQGL, minQGL, maxQGL);
   hGluonJetsN_400pt630   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "GluonJetsN_400pt630"  , "Gluon Jets Multiplicity with p_{T} in the range [400,630)"              , nNBins, fNMin, fNMax); 

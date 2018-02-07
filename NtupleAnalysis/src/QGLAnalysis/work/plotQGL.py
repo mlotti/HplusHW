@@ -189,47 +189,52 @@ def main(opts, signalMass):
     style.setOptStat(True)
     style.setGridX(True)
     style.setGridY(False)
-    
-    histos = ["GluonJetsQGL",
-              "GluonJetsPt", 
-              "GluonJetsN",
-             
-              "LightJetsQGL",
-              "LightJetsPt", 
-              "LightJetsN",
-              ]
-    
-    jsonhistos = ["GluonJetsQGL",
-                  "LightJetsQGL",
-                  ]
 
 
+    JetTypes = ["Light", "Gluon"]
+
+    PtRange = ["30pt40", "40pt50", "50pt65", "65pt80", "80pt100", "100pt125", "125pt160", "160pt200", "200pt250", 
+               "250pt320", "320pt400", "400pt630", "630pt800", "800ptInf"] 
+
+    histos = ["LightJetsQGL_"+ pt for pt in PtRange]
+    histos.extend("GluonJetsQGL_"+ pt for pt in PtRange)
+
+    
     for h in histos:
-        
-        # Produce & save the plots (inclusive)
+        # Produce & save the plots
         PlotMC(datasetsMgr, h, intLumi)
         
-    for h in jsonhistos:
+    
+    # Dump the pdfs in a JSON file
+    for dataset in datasetsMgr.getAllDatasets():
         
-        # Produced the plots separately and dump the results in a JSON file
-        for dataset in datasetsMgr.getAllDatasets():
+        for JetType in JetTypes:
             
-            JetType = h.split("Jets")[0]
+            jsonhistos = [JetType+"JetsQGL_"+ pt for pt in PtRange]
+
             results = []
             
-            dsetHisto = dataset.getDatasetRootHisto(h)
-            dsetHisto.normalizeToOne()
-            histo = dsetHisto.getHistogram()
+            for h in jsonhistos:
             
-            for k in range(1, histo.GetNbinsX()+1):
+                dsetHisto = dataset.getDatasetRootHisto(h)
+                dsetHisto.normalizeToOne()
+                histo = dsetHisto.getHistogram()
                 
-                resultObject = {}
-                resultObject["Jet"]       = JetType
-                resultObject["QGLmin"]    = histo.GetBinLowEdge(k) 
-                resultObject["QGLmax"]    = histo.GetBinLowEdge(k)+histo.GetBinWidth(k)
-                resultObject["prob"]      = histo.GetBinContent(k)
-                resultObject["probError"] = histo.GetBinError(k)
-                results.append(resultObject)
+                ptbin   = h.split("_")[-1]
+                minPt   = ptbin.split("pt")[0]
+                maxPt   = ptbin.split("pt")[-1]
+            
+                for k in range(1, histo.GetNbinsX()+1):
+                    
+                    resultObject = {}
+                    resultObject["Jet"]       = JetType
+                    resultObject["QGLmin"]    = histo.GetBinLowEdge(k) 
+                    resultObject["QGLmax"]    = histo.GetBinLowEdge(k)+histo.GetBinWidth(k)
+                    resultObject["Ptmin"]     = minPt
+                    resultObject["Ptmax"]     = maxPt
+                    resultObject["prob"]      = histo.GetBinContent(k)
+                    resultObject["probError"] = histo.GetBinError(k)
+                    results.append(resultObject)
                                 
             filename = "QGLdiscriminator_%s_%sJets.json"%(dataset.name, JetType)
             with open(filename, 'w') as outfile:
@@ -237,8 +242,6 @@ def main(opts, signalMass):
             
             print "Written results to %s"%filename
 
-                
-                
 
     return
 
@@ -270,8 +273,6 @@ def PlotMC(datasetsMgr, histo, intLumi):
             _xlabel = "Gluon Jets Multiplicity"
         elif "Light" in histo:
             _xlabel = "Light Jets Multiplicity"
-
-    
 
 
     if "QGL" in histo:
@@ -308,16 +309,9 @@ def PlotMC(datasetsMgr, histo, intLumi):
 
     # Save plot in all formats    
     saveName = histo.split("/")[-1]
-    savePath = os.path.join(opts.saveDir, "QGL", histo.split("/")[0], opts.optMode)
+    savePath = os.path.join(opts.saveDir, "", "", opts.optMode)
     SavePlot(p, saveName, savePath) 
     return
-
-
-
-
-
-
-
 
 
 def SavePlot(plot, saveName, saveDir, saveFormats = [".pdf"]):
@@ -362,7 +356,7 @@ if __name__ == "__main__":
     '''
     
     # Default Settings
-    ANALYSISNAME = "QGLR"
+    ANALYSISNAME = "QGLAnalysis"
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
     OPTMODE      = ""
@@ -382,7 +376,6 @@ if __name__ == "__main__":
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
     NORMALISE    = False
     FOLDER       = "" #"topSelection_" #"ForDataDrivenCtrlPlots" #"topologySelection_"
-    MVACUT       = "MVA"
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
 
@@ -410,9 +403,6 @@ if __name__ == "__main__":
     parser.add_option("--mergeEWK", dest="mergeEWK", action="store_true", default=MERGEEWK, 
                       help="Merge all EWK samples into a single sample called \"EWK\" [default: %s]" % MERGEEWK)
 
-    #parser.add_option("--signalMass", dest="signalMass", type=float, default=SIGNALMASS, 
-                      #help="Mass value of signal to use [default: %s]" % SIGNALMASS)
-
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR, 
                       help="Directory where all pltos will be saved [default: %s]" % SAVEDIR)
 
@@ -436,9 +426,6 @@ if __name__ == "__main__":
 
     parser.add_option("--folder", dest="folder", type="string", default = FOLDER,
                       help="ROOT file folder under which all histograms to be plotted are located [default: %s]" % (FOLDER) )
-
-    parser.add_option("--MVAcut", dest="MVAcut", type="string", default = MVACUT,
-                      help="Save plots to directory in respect of the MVA cut value [default: %s]" % (MVACUT) )
 
     (opts, parseArgs) = parser.parse_args()
 
