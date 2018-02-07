@@ -55,7 +55,7 @@ import aux
 #================================================================================================
 _lightHplusMasses        = [ 80,  90, 100, 120, 140, 150, 155, 160]
 _heavyHplusMasses        = [180, 200, 220, 250, 300, 350, 400, 500, 600, 700, 750,  800, 1000, 2000, 3000]
-_heavyHplusToTBbarMasses = [180, 200, 220, 250, 300, 350, 400, 500, 600, 800, 1000, 2000, 3000]
+_heavyHplusToTBbarMasses = [180, 200, 220, 250, 300, 350, 400, 500, 600, 800, 1000, 1500, 2000, 2500, 3000, 5000, 7000]
 
 ## These MC datasets must be added together before any
 ## merging/renaming. They are split to two datasets just for more
@@ -88,6 +88,23 @@ _physicalMcAdd = {
     "WJetsToLNu_ext1": "WJetsToLNu",
     "WJetsToLNu_ext2": "WJetsToLNu",
 
+    #"QCD_HT50to100"        : 
+    #"QCD_HT100to200"       : 
+    "QCD_HT200to300"       : "QCD_HT200to300",
+    "QCD_HT200to300_ext1"  : "QCD_HT200to300",
+    "QCD_HT300to500"       : "QCD_HT300to500",
+    "QCD_HT300to500_ext1"  : "QCD_HT300to500",
+    "QCD_HT500to700"       : "QCD_HT500to700",
+    "QCD_HT500to700_ext1"  : "QCD_HT500to700",
+    "QCD_HT700to1000"      : "QCD_HT700to1000",
+    "QCD_HT700to1000_ext1" : "QCD_HT700to1000",
+    "QCD_HT1000to1500"     : "QCD_HT1000to1500",
+    "QCD_HT1000to1500_ext1": "QCD_HT1000to1500",
+    "QCD_HT1500to2000"     : "QCD_HT1500to2000",
+    "QCD_HT1500to2000_ext1": "QCD_HT1500to2000",
+    "QCD_HT2000toInf"      : "QCD_HT2000toInf",
+    "QCD_HT2000toInf_ext1" : "QCD_HT2000toInf",
+    
     "WJetsToLNu_HT_0To70"          : "WJetsToLNu_HT_0To70",
     "WJetsToLNu_HT_0To70_ext2"     : "WJetsToLNu_HT_0To70",
     "WJetsToLNu_HT_100To200"       : "WJetsToLNu_HT_100To200",
@@ -370,6 +387,7 @@ for process in ["TTToHplusBWB_M%d", "TTToHplusBHminusB_M%d", "TTToHplus_M%d", "H
 for mass in _heavyHplusMasses:
     _datasetOrder.append("HplusTB_M%d"%mass)
 _datasetOrder.extend([
+    "FakeB", #Htb
     "QCD",
     "QCDdata",
     "QCD-b",
@@ -418,6 +436,8 @@ _legendLabels = {
     "noTop"    : "No t",
     "SingleTop": "Single t",
     "QCD"      : "QCD",#"Mis-ID. #tau_{h} (data)",
+    "FakeB"    : "Fake b (data)",
+    "GenuineB" : "Genuine b (MC)",
     "QCD-b"    : "QCD (b enr.)",
     "QCDdata"  : "Mis-ID. #tau_{h} (data)", #"QCD (data driven)"
 
@@ -543,14 +563,29 @@ for mass in _heavyHplusMasses:
     _legendLabels["ChargedHiggs_HplusTB_HplusToTB_M_%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
 
 for mass in _heavyHplusToTBbarMasses:
+    _legendLabels["ChargedHiggs_HplusTB_HplusToTB_M_%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
     _legendLabels["HplusToTBbar_M%d"%mass] = "H^{+}#rightarrowtb m_{H^{+}}=%d GeV" % mass
     
 
 ## Map the logical dataset names to plot styles
 _plotStyles = {
-    "ChargedHiggs_HplusTB_HplusToTB_M_200": styles.signal200Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_300": styles.signal300Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_500": styles.signal500Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_180" : styles.signal180Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_200" : styles.signal200Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_220" : styles.signal220Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_250" : styles.signal250Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_300" : styles.signal300Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_350" : styles.signal350Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_400" : styles.signal400Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_500" : styles.signal500Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_800" : styles.signal800Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_1000": styles.signal1000Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_1500": styles.signal1500Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_2000": styles.signal2000Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_2500": styles.signal2500Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_3000": styles.signal3000Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_5000": styles.signal5000Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_7000": styles.signal7000Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_10000": styles.signal1000Style,
 
     "DYJetsToLL"    : styles.dyStyle,
     "DYJetsToLLHT"  : styles.dyStyle,
@@ -559,6 +594,7 @@ _plotStyles = {
     "Diboson"       : styles.dibStyle,
     "EWK"           : styles.wStyle,
     "QCD"           : styles.qcdStyle,
+    "FakeB"         : styles.fakeBStyle,
     "QCD-b"         : styles.qcdBEnrichedStyle,
     "ttX"           : styles.ttXStyle,
     "noTop"         : styles.noTopStyle,
@@ -1620,7 +1656,17 @@ class PlotBase:
     def addCutBoxAndLineY(self, *args, **kwargs):
         objs = _createCutBoxAndLineY(self.getFrame(), *args, **kwargs)
         for o in objs:
-            self.appendPlotObject(o)
+            if "mainCanvas" in kwargs:
+                if kwargs["mainCanvas"]:
+                    self.appendPlotObject(o)
+            else:
+                self.appendPlotObject(o)
+            if "ratioCanvas" in kwargs:
+                if kwargs["ratioCanvas"]:
+                    self.prependPlotObjectToRatio(o)
+            else:
+                self.prependPlotObjectToRatio(o) 
+                
 
     ## Add MC uncertainty histogram
     def addMCUncertainty(self):
@@ -1841,7 +1887,7 @@ class PlotRatioBase:
     def addCutBoxAndLineToRatio(self, *args, **kwargs):
         if len(self.ratioHistoMgr) == 0:
             return
-
+        
         objs = _createCutBoxAndLine(self.getFrame2(), *args, **kwargs)
         for o in objs:
             self.prependPlotObjectToRatio(o)
@@ -3232,7 +3278,7 @@ class PlotDrawer:
             lst = cutBoxY
             if not isinstance(lst, list):
                 lst = [lst]
-    
+
             for box in lst:
                 p.addCutBoxAndLineY(**box)
         return

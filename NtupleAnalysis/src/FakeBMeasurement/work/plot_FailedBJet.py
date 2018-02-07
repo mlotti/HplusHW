@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Description:
+DESCRIPTION:
 Plots properties of all failed b-jets (aka inverted b-jets) in triplets:
 a) Inclusive
 b) GenuineB
@@ -8,22 +8,18 @@ c) FakeB
 Thesee b-jets are taken from topData.getFailedBJetsUsedAsBJetsInFit() and 
 include the b-jets with a "Loose" (instead of "Medium") discriminator WP.
 
-Usage:
+
+USAGE:
 ./plot_FailedBJet.py -m <pseudo_mcrab_directory> [opts]
 
-Examples:
+
+EXAMPLES:
 ./plot_FailedBJet.py -m FakeBMeasurement_GE2MediumPt40Pt30_GE1LooseMaxDiscr0p7_StdSelections_TopCut100_AllSelections_TopCut10_RandomFailedBJetSort_171012_012105/ --plotEWK --url
 
-Last Used::
+
+LAST USED:
 ./plot_FailedBJet.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171115_101036 -e "Charged" --url --plotEWK
 
-NOTE:
-If unsure about the parameter settings a pseudo-multicrab do:
-root -l /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar/TT/res/histograms-TT.root
-gDirectory->ls()
-FakeBMeasurement_80to1000_Run2016->cd()
-gDirectory->ls()
-config->ls()
 '''
 
 #================================================================================================ 
@@ -47,6 +43,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
 
 #================================================================================================ 
@@ -60,6 +57,12 @@ def Print(msg, printHeader=False):
     else:
         print "\t", msg
     return
+
+
+def rchop(myString, endString):
+  if myString.endswith(endString):
+    return myString[:-len(endString)]
+  return myString
 
 
 def Verbose(msg, printHeader=True, verbose=False):
@@ -98,8 +101,8 @@ def GetLumi(datasetsMgr):
 
 def GetListOfEwkDatasets():
     Verbose("Getting list of EWK datasets")
-    #return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
-    return ["TT", "noTop", "SingleTop", "ttX"]
+    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    #return ["TT", "noTop", "SingleTop", "ttX"]
 
 
 def GetDatasetsFromDir(opts):
@@ -172,6 +175,9 @@ def main(opts):
         datasetsMgr = GetDatasetsFromDir(opts)
         datasetsMgr.updateNAllEventsToPUWeighted()
         datasetsMgr.loadLuminosities() # from lumi.json
+
+        if 0:
+            datasetsMgr.printSelections()
         
         # Set/Overwrite cross-sections
         for d in datasetsMgr.getAllDatasets():
@@ -185,6 +191,11 @@ def main(opts):
         # Custom Filtering of datasets 
         if 0:
             datasetsMgr.remove(filter(lambda name: "Charged" in name and not "M_500" in name, datasetsMgr.getAllDatasetNames()))
+
+        # ZJets and DYJets overlap!
+        if "ZJetsToQQ_HT600toInf" in datasetsMgr.getAllDatasetNames() and "DYJetsToQQ_HT180" in datasetsMgr.getAllDatasetNames():
+            Print("Cannot use both ZJetsToQQ and DYJetsToQQ due to duplicate events? Investigate. Removing ZJetsToQQ datasets for now ..", True)
+            datasetsMgr.remove(filter(lambda name: "ZJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
                
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
@@ -207,28 +218,50 @@ def main(opts):
         style = tdrstyle.TDRStyle()
         style.setOptStat(True)
 
-        # Only do these histos
-        myHistos = ["FailedBJet1BDisc",
-                    "FailedBJet1Pt", 
-                    "FailedBJet1Eta", 
-                    #"FailedBJet1PdgId", 
-                    #"FailedBJet1PartonFlavour", 
-                    #"FailedBJet1HadronFlavour", 
-                    #"FailedBJet1Ancestry"
-                    ]
-        
-        # For-loop: All histos
-        folders = ["", "FakeB", "GenuineB"]
-        for f in folders:
+        # Get the histogram list based on a key list
+        keyList    = ["FailedBJet1BDisc", "FailedBJet1Pt", "FailedBJet2BDisc", "FailedBJet2Pt", "FailedBJet3BDisc", "FailedBJet3Pt"]
+        folderList = ["FailedBJet", "FailedBJetFakeB", "FailedBJetGenuineB"]
+        histoList  = GetHistoList(datasetsMgr, keyList, folderList)
 
-            folder = "FailedBJet" + f
-            hList  = datasetsMgr.getDataset("EWK").getDirectoryContent(folder)
-            
-            for hName in hList:
-                if hName.split("_")[-2] not in myHistos:
-                    continue
-                PlotHisto(datasetsMgr, os.path.join(folder, hName))
+        # For-loop: All histos
+        for i, h in enumerate(histoList, 1):
+            msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % i,"/", "%s:" % (len(histoList)), h)
+            Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), i==1)
+            PlotHisto(datasetsMgr, h)
+
+        # Add by hand 3 non-triplet TH1s
+        if 0:
+            PlotHisto(datasetsMgr, "FailedBJet/Inverted_NFailedBJets_AfterStandardSelections")
+            PlotHisto(datasetsMgr, "FailedBJet/Baseline_NFailedBJets_AfterAllSelections")   #SR
+            PlotHisto(datasetsMgr, "FailedBJet/Baseline_NFailedBJets_AfterCRSelections")    #CR1
+        PlotHisto(datasetsMgr, "FailedBJet/Inverted_NFailedBJets_AfterAllSelections")   #VR
+        PlotHisto(datasetsMgr, "FailedBJet/Inverted_NFailedBJets_AfterCRSelections")    #CR2
+
+    savePath = opts.saveDir
+    if opts.url:
+        savePath = savePath.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
+    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + savePath + ShellStyles.NormalStyle()), True)
     return
+
+
+def GetHistoList(dsetMgr, keyList, folderList):
+
+    keepList = []
+    # For-loop: All folders
+    for folder in folderList:
+        hList  = dsetMgr.getDataset("EWK").getDirectoryContent(folder)
+
+        # For-loop: All histograms in list
+        for i, hName in enumerate(hList):
+            if "StandardSelections" in hName:
+                continue
+            
+            if hName.split("_")[-2] not in keyList:
+                continue
+            else:
+                keepList.append(os.path.join(folder, hName))
+    return keepList
+
 
 def getHistos(datasetsMgr, histoName):
     
@@ -240,6 +273,31 @@ def getHistos(datasetsMgr, histoName):
     return [h1, h2]
 
 
+def GetControlRegionLabel(histoName):
+    histoName = histoName.split("/")[1] # .replace("FailedBJet/", "")
+    base = histoName.split("_")[0]
+    var  = histoName.split("_")[1]
+    sel  = histoName.split("_")[2]
+
+    if base == "Baseline":
+        if sel == "AfterAllSelections":
+            return "SR"
+        elif sel == "AfterCRSelections":
+            return "CR1"
+        else:
+            return "StdSel"
+    elif base == "Inverted":
+        if sel == "AfterAllSelections":
+            return "VR"
+        elif sel == "AfterCRSelections":
+            return "CR2"
+        else:
+            return "StdSel"
+    else:
+        raise Exception("Cannot determine Control Region label. Got unexpeted histogram name \"%s\". " % histoName)
+    return
+
+
 def PlotHisto(datasetsMgr, histoName):
     Verbose("Plotting histogram %s for Data, EWK, QCD " % (histoName), True)
 
@@ -248,9 +306,10 @@ def PlotHisto(datasetsMgr, histoName):
     _rebinX = 1
     logY    = True
     yMaxF   = 1.2
+    yMax    = 1.0
     if logY:
         yMaxF = 10        
-    _opts   = {"ymin": 1e-4, "ymaxfactor": yMaxF}
+    _opts   = {"ymin": 1e-4, "ymax": yMax} #"ymaxfactor": yMaxF}
     _format = "%0.0f"
     _xlabel = None
     _ylabel = "Events / "
@@ -268,7 +327,7 @@ def PlotHisto(datasetsMgr, histoName):
         _cutBox = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _opts["xmin"] = -3.0
         _opts["xmax"] = +3.0
-    if "bjetbdisc" in h.lower():
+    if "bdisc" in h.lower():
         _format = "%0.2f" 
         _opts["xmin"] = 0.0
         _opts["xmax"] = 1.2
@@ -355,9 +414,20 @@ def PlotHisto(datasetsMgr, histoName):
                    )
     
     # Save plot in all formats
-    SavePlot(p, histoName, os.path.join(opts.saveDir, "FailedBJet", opts.optMode), saveFormats = [".png"] )
+    histoName, histoDir = GetSaveName(histoName)
+    SavePlot(p, histoName, os.path.join(opts.saveDir, histoDir, opts.optMode), saveFormats = [".png"] )
     return
 
+
+def GetSaveName(histoName):
+    base = histoName.split("_")[0]
+    var  = histoName.split("_")[1]
+    sel  = histoName.split("_")[2]
+    name = var + "_" + GetControlRegionLabel(histoName)
+
+    histoName = name
+    histoDir  = base.split("/")[0]
+    return histoName, histoDir
 
 def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".pdf", ".png"]):
     # Check that path exists
@@ -372,9 +442,9 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".pdf", ".png"]):
         saveNameURL = saveName + ext
         saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
         if opts.url:
-            Print(saveNameURL, i==0)
+            Verbose(saveNameURL, i==0)
         else:
-            Print(saveName + ext, i==0)
+            Verbose(saveName + ext, i==0)
         plot.saveAs(saveName, formats=saveFormats)
     return
 
@@ -410,12 +480,11 @@ if __name__ == "__main__":
     SUBCOUNTERS  = False
     LATEX        = False
     MCONLY       = False
-    PLOTEWK      = False
+    PLOTEWK      = True
     URL          = False
     NOERROR      = True
-    SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"
+    SAVEDIR      = "/publicweb/a/aattikis/" #FakeBMeasurement/"
     VERBOSE      = False
-    HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug' 
     NORMALISE    = True
 
     # Define the available script options
@@ -457,9 +526,6 @@ if __name__ == "__main__":
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE, 
                       help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
 
-    parser.add_option("--histoLevel", dest="histoLevel", action="store", default = HISTOLEVEL,
-                      help="Histogram ambient level (default: %s)" % (HISTOLEVEL))
-
     parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
                       help="List of datasets in mcrab to include")
 
@@ -481,6 +547,12 @@ if __name__ == "__main__":
         parser.print_help()
         #print __doc__
         sys.exit(1)
+    else:
+        mcrabDir = rchop(opts.mcrab, "/")
+        if len(mcrabDir.split("/")) > 1:
+            mcrabDir = mcrabDir.split("/")[-1]
+        opts.saveDir += mcrabDir
+
         
     # Call the main function
     main(opts)

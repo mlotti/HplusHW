@@ -37,9 +37,9 @@ public:
     const float getHighestSelectedElectronPt() const { return fHighestSelectedElectronPt; }
     const float getHighestSelectedElectronEta() const { return fHighestSelectedElectronEta; }
     // FIXME: Add MC information if deemed necessary
-//     const bool eventContainsElectronFromCJet() const { return fHasElectronFromCjetStatus; }
-//     const bool eventContainsElectronFromBJet() const { return fHasElectronFromBjetStatus; }
-//     const bool eventContainsElectronFromCorBJet() const { return eventContainsElectronFromCJet() || eventContainsElectronFromBJet(); }
+    // const bool eventContainsElectronFromCJet() const { return fHasElectronFromCjetStatus; }
+    // const bool eventContainsElectronFromBJet() const { return fHasElectronFromBjetStatus; }
+    // const bool eventContainsElectronFromCorBJet() const { return eventContainsElectronFromCJet() || eventContainsElectronFromBJet(); }
 
     friend class ElectronSelection;
 
@@ -73,12 +73,18 @@ private:
   void initialize(const ParameterSet& config, const std::string& postfix);
   /// The actual selection
   Data privateAnalyze(const Event& iEvent);
-
+  /// Return MVA decision based on MVA Cut
+  bool getMVADecision(const Electron& ele, const std::string mvaCut);
+  
   // Input parameters
   const double fElectronPtCut;
   const double fElectronEtaCut;
   float fRelIsoCut;
+  float fMiniIsoCut;
   bool fVetoMode;
+  bool fMiniIsol;
+  bool fElectronMVA;
+  const std::string fElectronMVACut;
   
   // Event counter for passing selection
   Count cPassedElectronSelection;
@@ -93,20 +99,28 @@ private:
   WrappedTH1 *hElectronPtAll;
   WrappedTH1 *hElectronEtaAll;
   WrappedTH1 *hElectronRelIsoAll;
+  WrappedTH1 *hElectronMiniIsoAll;
+
   WrappedTH1 *hElectronPtPassed;
   WrappedTH1 *hElectronEtaPassed;
   WrappedTH1 *hElectronRelIsoPassed;
+  WrappedTH1 *hElectronMiniIsoPassed;
+
   WrappedTH1 *hPtResolution;
   WrappedTH1 *hEtaResolution;
   WrappedTH1 *hPhiResolution;
+
   WrappedTH1 *hIsolPtBefore;
   WrappedTH1 *hIsolEtaBefore;
   WrappedTH1 *hIsolVtxBefore;
   WrappedTH1 *hIsolRelIsoBefore;
+  WrappedTH1 *hIsolMiniIsoBefore;
+
   WrappedTH1 *hIsolPtAfter;
   WrappedTH1 *hIsolEtaAfter;
   WrappedTH1 *hIsolVtxAfter;
   WrappedTH1 *hIsolRelIsoAfter;
+  WrappedTH1 *hIsolMiniIsoAfter;
 };
 
 #endif

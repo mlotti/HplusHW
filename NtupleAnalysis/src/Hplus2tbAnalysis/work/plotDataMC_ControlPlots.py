@@ -1,20 +1,34 @@
 #!/usr/bin/env python
 '''
-Description:
+DESCRIPTIONM:
 Script that plots Data/MC for all histograms under a given folder (passsed as option to the script)
 Good for sanity checks for key points in the cut-flow
 
-Usage:
+
+USAGE:
 ./plotDataMC_ControlPlots.py -m <pseudo_mcrab_directory> [opts]
 
-Examples:
+
+EXAMPLES:
+./plotDataMC_ControlPlots.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/SignalAnalysis/Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_TopCut10_171012_011451 --folder topologySelection_
 ./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_TopCut10_171012_011451 --folder jetSelection_ --url
 ./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_TopMVA0p90_171106_064503 --folder topbdtSelection_ -e "QCD_HT50to100|QCD_HT100to200|QCD_HT200to300|QCD_HT300to500"
 ./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_TopMVA0p90_171106_064503/ --url --signalMass 500
 ./plotDataMC_ControlPlots.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/SignalAnalysis/Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_TopCut10_171012_011451 --folder ForDataDrivenCtrlPlots --signalMass 500 -e "FakeB"
+./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_MVA0p80_MVA0p80_TopMassCutOff600GeV_180104_043952 --folder counters/weighted --url
 
-Last Used:
-./plotDataMC_ControlPlots.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/SignalAnalysis/Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_TopCut10_171012_011451 --folder topologySelection_
+
+LAST USED:
+./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900/ --folder PUDependency
+./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900/ --folder counters/weighted
+./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900/ --folder eSelection_Veto
+./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900/ --folder muSelection_Veto
+./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900/ --folder tauSelection_Veto
+./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900/ --folder jetSelection_
+./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900/ --folder bjetSelection_
+./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900/ --folder topbdtSelection_
+./plotDataMC_ControlPlots.py -m Hplus2tbAnalysis_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900/ --folder ForDataDrivenCtrlPlots
+
 '''
 
 #================================================================================================ 
@@ -24,6 +38,7 @@ import sys
 import math
 import copy
 import os
+import array
 import re
 from optparse import OptionParser
 
@@ -59,6 +74,12 @@ def Verbose(msg, printHeader=True, verbose=False):
     Print(msg, printHeader)
     return
 
+def rchop(myString, endString):
+  if myString.endswith(endString):
+    return myString[:-len(endString)]
+  return myString
+
+
 def GetLumi(datasetsMgr):
     Verbose("Determininig Integrated Luminosity")
     
@@ -73,13 +94,13 @@ def GetLumi(datasetsMgr):
 
 def GetListOfEwkDatasets():
     Verbose("Getting list of EWK datasets")
-    if 0: # TopSelection
+    if 1: # TopSelection
         return  ["TT", "WJetsToQQ_HT_600ToInf", "SingleTop", "DYJetsToQQHT", "TTZToQQ",  "TTWJetsToQQ", "Diboson", "TTTT"]
-    else: # TopSelectionBDT
-        if opts.afterTop:
-            return  ["TT", "SingleTop", "ttX", "noTop"]
-        else:
-            return  ["TT", "noTop", "SingleTop", "ttX"]
+    #else: # TopSelectionBDT
+    #    if opts.afterTop:
+    #        return  ["TT", "SingleTop", "ttX", "noTop"]
+    #    else:
+    #        return  ["TT", "noTop", "SingleTop", "ttX"]
 
 
 def GetDatasetsFromDir(opts):
@@ -126,9 +147,21 @@ def main(opts):
         datasetsMgr.updateNAllEventsToPUWeighted()
         datasetsMgr.loadLuminosities() # from lumi.json
 
+        # Define datasets to remove by default
+        QCD_list = ["QCD_HT700to1000", "QCD_HT50to100", "QCD_HT500to700", "QCD_HT300to500", 
+                    "QCD_HT200to300", "QCD_HT2000toInf", "QCD_HT1500to2000", "QCD_HT100to200", "QCD_HT1000to1500"]
+        QCDExt_list = [x+"_ext1" for x in QCD_list]
+        datasetsToRemove = ["QCD-b"]
+        # datasetsToRemove.extend(QCD_list)
+        # datasetsToRemove.extend(QCDExt_list)
+
+        # ZJets and DYJets overlap
+        if "ZJetsToQQ_HT600toInf" in datasetsMgr.getAllDatasetNames() and "DYJetsToQQ_HT180" in datasetsMgr.getAllDatasetNames():
+            Print("Cannot use both ZJetsToQQ and DYJetsToQQ due to duplicate events? Investigate. Removing ZJetsToQQ datasets for now ..", True)
+            datasetsMgr.remove(filter(lambda name: "ZJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
+            # datasetsMgr.remove(filter(lambda name: "DYJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
+        
         # Set/Overwrite cross-sections
-        datasetsToRemove = ["QCD-b", "QCD_HT50to100", "QCD_HT100to200", "QCD_HT200to300"] # QCD_HT removed should NOT make a noticable difference
-        #datasetsToRemove = ["QCD-b"]
         for d in datasetsMgr.getAllDatasets():
             if "ChargedHiggs" in d.getName():
                 datasetsMgr.getDataset(d.getName()).setCrossSection(1.0) # ATLAS 13 TeV H->tb exclusion limits
@@ -143,8 +176,10 @@ def main(opts):
         for i, d in enumerate(datasetsToRemove, 0):
             msg = "Removing dataset %s" % d
             Print(ShellStyles.WarningLabel() + msg + ShellStyles.NormalStyle(), i==0)
-            datasetsMgr.remove(filter(lambda name: d in name, datasetsMgr.getAllDatasetNames()))
-        if opts.verbose:
+            #datasetsMgr.remove(filter(lambda name: d in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr.remove(filter(lambda name: d == name, datasetsMgr.getAllDatasetNames()))
+
+        if 1: #opts.verbose:
             datasetsMgr.PrintInfo()
 
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
@@ -185,12 +220,23 @@ def main(opts):
 
         # Do Data-MC histograms with DataDriven QCD
         folder     = opts.folder
-        histoList  = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(folder)
+        histoList  = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(folder)        
         histoPaths = [os.path.join(folder, h) for h in histoList]
+        ignoreList = ["Aplanarity", "Planarity", "Sphericity", "FoxWolframMoment", "Circularity", "ThirdJetResolution", "Centrality"]
+
         for h in histoPaths:
-            
+            skip = False
+
+            # Skip unwanted histos
+            for i in ignoreList:
+                if i in h:
+                    skip = True
+
+            if skip:
+                continue
+
             # Re-arrange dataset order if after top selection!
-            if "AfterAllSelections" in h:
+            if "AfterAllSelections" in h and opts.afterTop:
                 s = newOrder.pop( newOrder.index("noTop") )
                 newOrder.insert(len(newOrder), s) 
                 datasetsMgr.selectAndReorder(newOrder)
@@ -201,28 +247,41 @@ def main(opts):
     return
 
 def GetHistoKwargs(h, opts):
+
+    # Common bin settings
+    myBins  = []
+    vtxBins = []
+    ptBins  = []
+    bWidth  = 2    
+    for i in range(0, 40, bWidth):
+        vtxBins.append(i)
+    bWidth  = 10 #25
+    for i in range(40, 100+bWidth, bWidth):
+        vtxBins.append(i)
+
     _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": 0.1}
     if opts.mergeEWK:
         _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": -0.12}    
     logY    = True
     _yLabel = "Events / %.0f "
     yMin    = 1e-1
+    yMaxF   = 1.2
     if logY:
-        yMaxF = 10
-    else:
-        yMaxF = 1.2
+        yMaxF = 20#10
 
     _kwargs = {
         "ylabel"           : _yLabel,
         "rebinX"           : 1,
         "rebinY"           : None,
+        "ratioType"        : "errorScale", #new
+        "ratioErrorOptions": {"numeratorStatSyst": False}, #new
         "ratioYlabel"      : "Data/MC",
         "ratio"            : True, 
         "stackMCHistograms": True,
         "ratioInvert"      : False, 
-        "addMCUncertainty" : False, 
+        "addMCUncertainty" : True, 
         "addLuminosityText": True,
-        "addCmsText"       : True,
+        "addCmText"       : True,
         "cmsExtraText"     : "Preliminary",
         "opts"             : {"ymin": yMin, "ymaxfactor": yMaxF},
         #"opts2"            : {"ymin": 0.0, "ymax": 2.0},
@@ -394,7 +453,22 @@ def GetHistoKwargs(h, opts):
         kwargs["opts"]   = {"xmin": 0.0, "xmax": +400.0, "ymin": yMin, "ymaxfactor": yMaxF}
         kwargs["cutBox"] = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         if "AfterStandardSelections" in h:
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": +1500.0, "ymin": yMin, "ymaxfactor": yMaxF}
+            #kwargs["opts"]   = {"xmin": 0.0, "xmax": +1500.0, "ymin": yMin, "ymaxfactor": yMaxF}
+            kwargs["opts"]   = {"xmin": 50, "xmax": +600, "ymin": yMin, "ymaxfactor": yMaxF}
+        if "AfterAllSelections" in h:
+            kwargs["opts"]   = {"xmin": 175-80, "xmax": +175+100, "ymin": yMin, "ymaxfactor": yMaxF}
+
+    if "dgTrijetDijetMass" in h:
+        units            = "GeV/c^{2}"
+        kwargs["rebinX"] = 2
+        kwargs["xlabel"] = "m_{jj} (%s)" % units
+        kwargs["ylabel"] = _yLabel + units
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +400.0, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["cutBox"] = {"cutValue": 80.385, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        if "AfterStandardSelections" in h:
+            kwargs["opts"]   = {"xmin": 0, "xmax": +600, "ymin": yMin, "ymaxfactor": yMaxF}
+        if "AfterAllSelections" in h:
+            kwargs["opts"]   = {"xmin": 0, "xmax": +500, "ymin": yMin, "ymaxfactor": yMaxF}
 
     if "ldgTrijetPt" in h:
         ROOT.gStyle.SetNdivisions(8, "X")
@@ -438,7 +512,7 @@ def GetHistoKwargs(h, opts):
 
     if h == "TetrajetMass" in h:
         units            = "GeV/c^{2}"
-        kwargs["rebinX"] = 2
+        kwargs["rebinX"] = 5
         kwargs["xlabel"] = "m_{jjbb} (%s)" % units
         kwargs["ylabel"] = _yLabel + units
         kwargs["opts"]   = {"xmin": 0.0, "xmax": +3000.0, "ymin": yMin, "ymaxfactor": yMaxF}
@@ -446,13 +520,14 @@ def GetHistoKwargs(h, opts):
 
     if "counters" in opts.folder:
         ROOT.gStyle.SetLabelSize(16.0, "X")
-        #ROOT.gStyle.SetLabelFont(62, "X")
-        #ROOT.gStyle.SetLabelOffset(1.0)
-        kwargs["moveLegend"] = {"dx": -0.52, "dy": -0.55, "dh": 0.0}
+        kwargs["moveLegend"] = {"dx": -0.08, "dy": 0.0, "dh": 0.1}
+        kwargs["opts2"]      = {"ymin": 0.6, "ymax": 2.0-0.6}
+        # kwargs["moveLegend"] = {"dx": -0.52, "dy": -0.55, "dh": 0.0}
 
     if h == "counter":
-        xMin = 15
-        kwargs["opts"]   = {"xmin": xMin, "xmax": +21.0, "ymin": 1e0, "ymaxfactor": 1.2}
+        xMin = 15.0
+        xMax = 20.0
+        kwargs["opts"]   = {"xmin": xMin, "xmax": xMax, "ymin": 1e0, "ymaxfactor": 1.2}
         kwargs["cutBox"] = {"cutValue": xMin+2, "fillColor": 16, "box": False, "line": True, "greaterThan": True} #indicate btag SF
 
     if "IsolPt" in h:
@@ -467,6 +542,12 @@ def GetHistoKwargs(h, opts):
         kwargs["ylabel"] = "Events / %.2f "
         kwargs["opts"]   = {"xmin": 0.0, "xmax": +0.25, "ymin": yMin, "ymaxfactor": yMaxF}
 
+    if "IsolMiniIso" in h or "MiniIso" in h:
+        kwargs["ylabel"] = "Events / %.2f "
+        kwargs["xlabel"] = "mini relative isolation"        
+        if "after" in h.lower() or "passed" in h.lower():
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": +1.0, "ymin": yMin, "ymaxfactor": yMaxF}
+
     if "vtx" in h.lower():
         kwargs["xlabel"] = "PV multiplicity"
         kwargs["cutBox"] = {"cutValue": 1.0, "fillColor": 16, "box": True, "line": True, "greaterThan": True}
@@ -479,7 +560,8 @@ def GetHistoKwargs(h, opts):
     if h == "tauNpassed":
         units            = "GeV/c"
         kwargs["xlabel"] = "#tau-jet multiplicity"
-        kwargs["opts"]   = {"xmin": 0.0, "xmax": 8.0, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": 7.0, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["cutBox"] = {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": False}
 
     if "HT" in h or "JT" in h:
         ROOT.gStyle.SetNdivisions(8, "X")
@@ -498,7 +580,7 @@ def GetHistoKwargs(h, opts):
             kwargs["opts"]   = {"xmin": 0.0, "xmax": +3500.0, "ymin": yMin, "ymaxfactor": yMaxF}
 
     if "MHT" in h:
-        kwargs["rebinX"] = 1
+        kwargs["rebinX"] = 2
         units            = "GeV"
         kwargs["xlabel"] = "MHT (%s)" % units
         kwargs["ylabel"] = _yLabel + units
@@ -534,7 +616,7 @@ def GetHistoKwargs(h, opts):
         kwargs["ylabel"] = "Events / %.2f "
         if "_" in h.lower():
             ROOT.gStyle.SetNdivisions(8, "X")
-            kwargs["cutBox"] = {"cutValue": 0.8484, "fillColor": 16, "box": True, "line": True, "greaterThan": True}
+            kwargs["cutBox"] = {"cutValue": 0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["opts"]   = {"xmin": 0.8, "xmax": +1.0, "ymin": yMin, "ymaxfactor": yMaxF}
         else:
             #ROOT.gStyle.SetNdivisions(8, "X")
@@ -549,9 +631,12 @@ def GetHistoKwargs(h, opts):
 
     if "met" in h.lower():
         units            = "GeV"
+        kwargs["rebinX"] = 2
         kwargs["xlabel"] = "E_{T}^{miss} (%s)" % (units)
         kwargs["ylabel"] = _yLabel + units
         kwargs["opts"]   = {"xmin": 0.0, "xmax": 800.0, "ymin": yMin, "ymaxfactor": yMaxF}
+        if "METFilter" in h:
+            kwargs["rebinX"] = 1
         if "Selections" in h:
             kwargs["opts"]   = {"xmin": 0.0, "xmax": 400.0, "ymin": yMin, "ymaxfactor": yMaxF}
             
@@ -628,7 +713,7 @@ def GetHistoKwargs(h, opts):
 
     if "NBjets" in h:
         kwargs["xlabel"] = "b-jet multiplicity"
-        kwargs["opts"]   = {"xmin": 0.0, "xmax": 12.0, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["opts"]   = {"xmin": 2.0, "xmax": 10.0, "ymin": yMin, "ymaxfactor": yMaxF}
         kwargs["cutBox"] = {"cutValue": 3, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
 
     if "Njets" in h:
@@ -636,22 +721,41 @@ def GetHistoKwargs(h, opts):
         kwargs["opts"]   = {"xmin": 0.0, "xmax": 18.0, "ymin": yMin, "ymaxfactor": yMaxF}
         kwargs["cutBox"] = {"cutValue": 7, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         if "Selections" in h:
-            kwargs["moveLegend"] = {"dx": -0.52, "dy": -0.0, "dh": 0.0}
+            kwargs["opts"]   = {"xmin": 6.0, "xmax": 18.0, "ymin": yMin, "ymaxfactor": yMaxF}
+            #kwargs["moveLegend"] = {"dx": -0.52, "dy": -0.0, "dh": 0.0}
 
     if "NVertices" in h:
+        kwargs["rebinX"] = vtxBins
+        binWmin, binWmax = GetBinWidthMinMax(vtxBins)
+        kwargs["ylabel"] = "Events / %.0f-%.0f" % (binWmin, binWmax)
         kwargs["xlabel"] = "PV multiplicity"
-        kwargs["cutBox"] = {"cutValue": 1.0, "fillColor": 16, "box": True, "line": True, "greaterThan": True}
-        if "AllSelections" in h:
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": 80.0, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["cutBox"] = {"cutValue": 20.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
 
     if "SubldgTrijetBjetPt" in h:
         if "AllSelections" in h:
             kwargs["opts"]   = {"xmin": 0.0, "xmax": 500.0, "ymin": yMin, "ymaxfactor": yMaxF}
 
-    # alex
-
     return kwargs
     
+
+def GetBinWidthMinMax(binList):
+    if not isinstance(binList, list):
+        raise Exception("Argument is not a list instance!")
+
+    minWidth = +1e6
+    maxWidth = -1e6
+    # For-loop: All bin values (centre)
+    for i in range(0, len(binList)-1):
+        j = i + 1
+        iBin = binList[i]
+        jBin = binList[j]
+        wBin = jBin-iBin
+        if wBin < minWidth:
+            minWidth = wBin
+
+        if wBin > maxWidth:
+            maxWidth = wBin
+    return minWidth, maxWidth
 
 def getHistos(datasetsMgr, histoName):
 
@@ -692,7 +796,7 @@ def DataMCHistograms(datasetsMgr, histoName):
     if opts.folder == "topologySelection_":
         skipStrings = ["_Vs_"]
     if "ForDataDrivenCtrlPlots" in opts.folder:
-        skipStrings = ["_Vs_", "JetEtaPhi", "MinDeltaPhiJet", "MaxDeltaPhiJet", "MinDeltaRJet", "SubldgTetrajet"]
+        skipStrings = ["_Vs_", "JetEtaPhi", "MinDeltaPhiJet", "MaxDeltaPhiJet", "MinDeltaRJet"]
 
     # Skip histograms if they contain a given string
     for keyword in skipStrings:
@@ -710,7 +814,6 @@ def DataMCHistograms(datasetsMgr, histoName):
     if opts.signalMass != 0:
         p.histoMgr.forHisto(opts.signal, styles.getSignalStyleHToTB_M(opts.signalMass))
 
-    # p.histoMgr.forHisto(opts.signalMass, styles.getSignalStyleHToTB())
     p.histoMgr.setHistoLegendLabelMany({
             "QCD": "QCD (MC)",
             })
@@ -726,6 +829,7 @@ def DataMCHistograms(datasetsMgr, histoName):
 
     # Replace bin labels
     if "counter" in opts.folder:
+        # p.getFrame().GetXaxis().LabelsOption("v") #vertical orientation of bin labels
         replaceBinLabels(p, saveName)
 
     # Save the plots in custom list of saveFormats
@@ -738,7 +842,7 @@ def replaceBinLabels(p, histoName):
     '''
     myBinList = []
     if histoName == "counter" or histoName == "weighted/counter":
-        myBinList = ["#geq 7 jets", "#geq 3 b-jets", "b-jets SF", "E_{T}^{miss}", "Topology", "TopReco"]
+        myBinList = ["#geq 7 jets", "#geq 3 b-jets", "b-jets SF", "#geq 2 tops", "All"]
     elif "bjet" in histoName:
         myBinList = ["All", "#eta", "p_{T}", "CSVv2 (M)", "Trg Match", "#geq 3"]
     elif "jet" in histoName:
@@ -809,7 +913,7 @@ if __name__ == "__main__":
     MERGEEWK     = False
     URL          = False
     NOERROR      = True
-    SAVEDIR      = "/publicweb/a/aattikis/DataMC/"
+    SAVEDIR      = "/publicweb/a/aattikis/"
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug' 
     FOLDER       = "topbdtSelection_" #jetSelection_
@@ -890,6 +994,11 @@ if __name__ == "__main__":
         parser.print_help()
         #print __doc__
         sys.exit(1)
+    else:
+        mcrabDir = rchop(opts.mcrab, "/")
+        if len(mcrabDir.split("/")) > 1:
+            mcrabDir = mcrabDir.split("/")[-1]#:]
+        opts.saveDir += mcrabDir + "/DataMC"
 
     # Sanity check
     allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 2000, 3000]

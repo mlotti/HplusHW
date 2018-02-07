@@ -38,7 +38,7 @@ private:
   BJetSelection fBJetSelection;
   Count cBTaggingSFCounter;
   METSelection fMETSelection;
-  TopologySelection fTopologySelection;
+  // TopologySelection fTopologySelection;
   TopSelectionBDT fTopSelection;
   Count cSelected;
     
@@ -65,8 +65,9 @@ Hplus2tbAnalysis::Hplus2tbAnalysis(const ParameterSet& config, const TH1* skimCo
     fJetSelection(config.getParameter<ParameterSet>("JetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cBTaggingSFCounter(fEventCounter.addCounter("b tag SF")),
-    fMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    fTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    // fMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fMETSelection(config.getParameter<ParameterSet>("METSelection")), // no subcounter in main counter
+    // fTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cSelected(fEventCounter.addCounter("Selected Events"))
 { }
@@ -86,7 +87,7 @@ void Hplus2tbAnalysis::book(TDirectory *dir) {
   fJetSelection.bookHistograms(dir);
   fBJetSelection.bookHistograms(dir);
   fMETSelection.bookHistograms(dir);
-  fTopologySelection.bookHistograms(dir);
+  // fTopologySelection.bookHistograms(dir);
   fTopSelection.bookHistograms(dir);
   
   // Book non-common histograms
@@ -192,9 +193,9 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   //================================================================================================
   // 11) Topology selection
   //================================================================================================
-  if (0) std::cout << "=== Topology selection" << std::endl;
-  const TopologySelection::Data topologyData = fTopologySelection.analyze(fEvent, jetData);
-  // if (!topologyData.passedSelection()) return; 
+  // if (0) std::cout << "=== Topology selection" << std::endl;
+  // const TopologySelection::Data topologyData = fTopologySelection.analyze(fEvent, jetData);
+  // // if (!topologyData.passedSelection()) return; 
 
   //================================================================================================
   // 12) Top selection
@@ -217,12 +218,13 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   // Standard Selections
   //================================================================================================
   if (0) std::cout << "=== Standard Selections" << std::endl;
-  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, bjetData.isGenuineB());
+  // fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, bjetData.isGenuineB());
+  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, TopologySelection::Data(), topData, bjetData.isGenuineB());  
   
   //================================================================================================
   // All Selections
   //================================================================================================
-  if (!topologyData.passedSelection()) return;
+  // if (!topologyData.passedSelection()) return;
   if (!topData.passedSelection()) return;
 
   if (0) std::cout << "=== All Selections" << std::endl;
@@ -231,7 +233,8 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   //================================================================================================
   // Fill final plots
   //===============================================================================================
-  fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, 1);
+  int isGenuineB = bjetData.isGenuineB();
+  fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, isGenuineB);
  
   //================================================================================================
   // Finalize
