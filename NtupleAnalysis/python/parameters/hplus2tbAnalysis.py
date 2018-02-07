@@ -2,6 +2,7 @@
 
 from HiggsAnalysis.NtupleAnalysis.main import PSet
 import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
+import HiggsAnalysis.NtupleAnalysis.parameters.jsonReader as jsonReader
 
 #================================================================================================
 # General parameters
@@ -156,6 +157,20 @@ bjetSelection = PSet(
     numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
 )
 
+#=================================================================================================
+# QGL selection
+#=================================================================================================
+qglSelection = PSet(
+    triggerMatchingApply      = False,
+    triggerMatchingCone       = 0.1,  # DeltaR for matching offline bjet with trigger::TriggerBjet
+    jetPtCuts                 = [40.0],
+    jetEtaCuts                = [2.4],
+    bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
+    bjetDiscrWorkingPoint     = "Medium",
+    numberOfBJetsCutValue     = 3,
+    numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >= 
+)
+
 #================================================================================================
 # Scale Factors
 #================================================================================================
@@ -164,6 +179,10 @@ scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection,
                                     #btagEfficiencyFilename = "btageff_hybrid_HToTB.json",
                                     btagEfficiencyFilename = "btageff_HToTB.json",
                                     direction              = "nominal")
+
+jsonReader.setupQGLInformation(QGLRPset  = qglSelection,
+                               jsonname_Light  = "QGLdiscriminator_QCD_LightJets.json",
+                               jsonname_Gluon  = "QGLdiscriminator_QCD_GluonJets.json")
 
 #================================================================================================
 # MET selection
@@ -284,6 +303,7 @@ commonPlotsOptions = PSet(
 #================================================================================================
 allSelections = PSet(
     BJetSelection         = bjetSelection,
+    QGLRSelection         = qglSelection,
     CommonPlots           = commonPlotsOptions,
     ElectronSelection     = eVeto,
     HistogramAmbientLevel = histogramAmbientLevel,
