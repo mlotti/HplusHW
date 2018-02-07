@@ -2,7 +2,7 @@
 '''
 PREREQUISITES:
 ./run.py -m <multicrab> [opts]
-./plotQCD_Fit.py -m <pseudo_multicrab> [opts]
+./getABCD_TF.py -m <pseudo_multicrab> [opts]
 
 Description: (* = prerequisites)
 *1) Generate a pseudo-multicrab directory by running the FakeBMeasurement analyzer: (~12 hours)
@@ -40,7 +40,7 @@ This script takes TWO pseudomulticrabs as input:
 
 
 USAGE:
-./makeInvertedPseudoMultirab.py -m <same_pseudo_multicrab> [opts]
+./makePseudoMulticrab.py -m <same_pseudo_multicrab> [opts]
 
 
 EXAMPLES:
@@ -48,7 +48,7 @@ EXAMPLES:
 ./getABCD_TF.py -m FakeBMeasurement_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180125_123834 --ratio
 
 2) Then either run on all modules (eras, search-modes, optimization modes) automatically
-./makeInvertedPseudoMulticrab.py -m FakeBMeasurement_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180125_123834/
+./makePseudoMulticrab.py -m FakeBMeasurement_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180125_123834/
 
 * Can use the counters to debug; study if the histograms are correct!
 hplusPrintCounters.py --mainCounterOnly --weighted --dataEra "Run2016" --mergeForDataMC --mergeData --mergeMC FakeBMeasurement_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180120_092605
@@ -59,7 +59,7 @@ hplusPrintCounters.py --mainCounterOnly --weighted --dataEra "Run2016" --mergeFo
 
 
 LAST USED:
-./makeInvertedPseudoMulticrab.py -m FakeBMeasurement_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180125_123834/
+./makePseudoMulticrab.py -m FakeBMeasurement_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180125_123834/
 
 '''
 #================================================================================================ 
@@ -761,4 +761,4 @@ if __name__ == "__main__":
     main(opts)
 
     if not opts.batchMode:
-        raw_input("=== makeInvertedPseudoMulticrab.py: Press any key to quit ROOT ...")
+        raw_input("=== makePseudoMulticrab.py: Press any key to quit ROOT ...")
