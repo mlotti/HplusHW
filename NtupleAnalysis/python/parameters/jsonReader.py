@@ -21,8 +21,7 @@ def _setupQGL(jsonname):
             raise Exception("Error: file '%s' does not exist!"%filename)
         f = open(filename)
         contents = json.load(f)
-        #print contents
-        
+                
         f.close()
         
         # Loop over the contents to convert as list of PSets the requested information
