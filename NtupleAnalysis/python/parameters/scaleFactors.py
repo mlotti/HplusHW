@@ -68,7 +68,7 @@ def _assignJetToTauSF(tauSelectionPset, etaRegion, dirNumber):
 # \param tauSelectionPset  the tau config PSet
 # \param direction         "nominal, "up", "down"
 # \param variationType     "MC", "data"  (the uncertainty in MC and data are variated separately)
-def assignTauTriggerSF(tauSelectionPset, direction, variationType="MC"):
+def assignTauTriggerSF(tauSelectionPset, direction, tauTrgJson, variationType="MC"):
     # FIXME: there is no mechanic right now to choose correct era / run range
     # FIXME: this approach works as long as there is just one efficiency for the simulated samples
 
@@ -80,10 +80,10 @@ def assignTauTriggerSF(tauSelectionPset, direction, variationType="MC"):
 
 ####    tauTrgJson = "tauLegTriggerEfficiency2015_"+nprongs+".json"
 ####    tauTrgJson = "tauLegTriggerEfficiency2016_ICHEP.json"
-    tauTrgJson = "tauLegTriggerEfficiency_2016.json"
+
     print "Taking tau trigger eff/sf from",tauTrgJson
 
-    reader = TriggerSFJsonReader("2016", "runs_271036_284044", tauTrgJson)
+    reader = TriggerSFJsonReader("2016", "runs_273150_284044", tauTrgJson)
 
     result = reader.getResult()
     if variationType == "MC":
@@ -97,12 +97,17 @@ def assignTauTriggerSF(tauSelectionPset, direction, variationType="MC"):
 # \param METSelectionPset  the MET selection config PSet
 # \param direction         "nominal, "up", "down"
 # \param variationType     "MC", "data"  (the uncertainty in MC and data are variated separately)
-def assignMETTriggerSF(METSelectionPset, btagDiscrWorkingPoint, direction, variationType="MC"):
+def assignMETTriggerSF(METSelectionPset, btagDiscrWorkingPoint, direction, metTrgJson, variationType="MC"):
     # FIXME: there is no mechanic right now to choose correct era / run range
     # FIXME: this approach works as long as there is just one efficiency for the simulated samples
 ####    reader = TriggerSFJsonReader("2015D", "runs_256629_260627", "metLegTriggerEfficiency2015_btag%s.json"%btagDiscrWorkingPoint)
 ####    reader = TriggerSFJsonReader("2016", "runs_271036_279588", "metLegTriggerEfficiency2016.json") 
-    reader = TriggerSFJsonReader("2016_MET90", "runs_273150_284044", "metLegTriggerEfficiency_2016_MET90_L1ETM100.json")
+
+
+    print "Taking MET trigger eff/sf from",metTrgJson
+
+    reader = TriggerSFJsonReader("2016_MET90", "runs_273150_284044", metTrgJson)
+
     result = reader.getResult()
     if variationType == "MC":
         _assignTrgSF("metTriggerSF", result["binEdges"], result["SF"], result["SFmcUp"], result["SFmcDown"], METSelectionPset, direction)
@@ -309,12 +314,14 @@ class TriggerSFJsonReader:
         for item in inputdict["bins"]:
             bindict = {}
             bindict[label+"eff"] = item["efficiency"]
-            value = item["efficiency"]*(1.0+item["uncertaintyPlus"])
+#            value = item["efficiency"]*(1.0+item["uncertaintyPlus"])
+	    value = item["efficiency"]+item["uncertaintyPlus"]
             if value > 1.0:
                 bindict[label+"effup"] = 1.0
             else:
                 bindict[label+"effup"] = value
-            value = item["efficiency"]*(1.0-item["uncertaintyMinus"])
+#            value = item["efficiency"]*(1.0-item["uncertaintyMinus"])
+	    value = item["efficiency"]-item["uncertaintyMinus"]
             if value < 0.0:
                 bindict[label+"effdown"] = 0.0
             else:
