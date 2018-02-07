@@ -670,8 +670,8 @@ def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
             histoName = histoList[0] + "_CR1vCR2"
         else:
             histoName = histoList[0] + "_CR1vCR2_bin%s" % (bin)
-        saveName = histoName.split("/")[-1]
-
+        saveName = histoName.split("/")[-1].replace("CRone0_", "").replace("CRtwo0_", "")
+        
         # Get the histogram customisations (keyword arguments)
         p.appendPlotObject(histograms.PlotText(0.18, 0.88, GetBinText(bin), bold=True, size=22))
         plots.drawPlot(p, saveName, **GetHistoKwargs(saveName))
