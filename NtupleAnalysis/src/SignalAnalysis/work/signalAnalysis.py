@@ -31,6 +31,7 @@ allSelections.CommonPlots.histogramSplitting = [
     #PSet(label="tauPt", binLowEdges=[60.0, 70.0, 80.0, 100.0], useAbsoluteValues=False),
   ]
 #===== Selection customisations
+
 allSelections.TauSelection.prongs = 1
 allSelections.TauSelection.tauPtCut = 50.0 
 allSelections.METSelection.METCutValue = 90.0
@@ -40,6 +41,10 @@ allSelections.AngularCutsBackToBack.cutValueJet3 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet4 = 40.0
 allSelections.TauSelection.rtau = 0.7
 allSelections.BJetSelection.bjetDiscrWorkingPoint = "Medium"
+
+
+#allSelections.Trigger.TautriggerEfficiencyJsonName = "tauLegTriggerEfficiency_2016_bin.json"
+#allSelections.Trigger.METtriggerEfficiencyJsonName = "metLegTriggerEfficiency_2016_MET90_bin.json"
 
 #allSelections.AngularCutsCollinear.cutValueJet1 = 80.0
 #allSelections.AngularCutsCollinear.cutValueJet2 = 80.0
