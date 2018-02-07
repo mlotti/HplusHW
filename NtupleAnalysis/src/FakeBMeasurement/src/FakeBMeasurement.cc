@@ -37,6 +37,9 @@ private:
   const std::string cfg_BaselineBJetsDiscriminatorWP;
   const DirectionalCut<double> cfg_LdgTopMVACut;
   const DirectionalCut<double> cfg_SubldgTopMVACut;
+  const std::vector<double> cfg_AllBJetsPtCuts;
+  const std::vector<double> cfg_AllBJetsEtaCuts; 
+  const DirectionalCut<int> cfg_AllBJetsNCut; 
 
   // Common plots
   CommonPlots fCommonPlots;
@@ -488,6 +491,9 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
     cfg_BaselineBJetsDiscriminatorWP(config.getParameter<std::string>("BJetSelection.bjetDiscrWorkingPoint")),
     cfg_LdgTopMVACut(config, "FakeBMeasurement.LdgTopMVACut"),
     cfg_SubldgTopMVACut(config, "FakeBMeasurement.SubldgTopMVACut"),
+    cfg_AllBJetsPtCuts(config.getParameter<std::vector<double>>("FakeBMeasurement.allBJetsPtCuts")),
+    cfg_AllBJetsEtaCuts(config.getParameter<std::vector<double>>("FakeBMeasurement.allBJetsEtaCuts")),
+    cfg_AllBJetsNCut(config, "FakeBMeasurement.allBJetsNCut"),
     fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kFakeBMeasurement, fHistoWrapper),
     // fNormalizationSystematicsSignalRegion(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kQCDNormalizationSystematicsSignalRegion, fHistoWrapper), // fixme
     // fNormalizationSystematicsControlRegion(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kQCDNormalizationSystematicsControlRegion, fHistoWrapper),// fixme
@@ -2736,6 +2742,21 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
 
   // Sort all b-jets by descending pt value (http://en.cppreference.com/w/cpp/algorithm/sort)
   std::sort(myBJets.begin(), myBJets.end(), [](const Jet& a, const Jet& b){return a.pt() > b.pt();});
+
+  // Final sanity check for the pt of the bjets
+  unsigned int ptCut_index  = 0;
+  unsigned int etaCut_index = 0;
+  unsigned int nBJets       = 0;
+  for(const Jet& b: myBJets)
+    {
+      //=== Apply cut on pt and eta
+      const float jetPtCut  = cfg_AllBJetsPtCuts.at(ptCut_index);
+      const float jetEtaCut = cfg_AllBJetsEtaCuts.at(etaCut_index);
+      if (b.pt() < jetPtCut) continue;
+      if (std::fabs(b.eta()) > jetEtaCut) continue;
+      nBJets++;
+    }
+  if (!cfg_AllBJetsNCut.passedCut(nBJets) ) return;
 
   //================================================================================================  
   // 9) BJet SF  
