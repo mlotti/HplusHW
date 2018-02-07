@@ -146,6 +146,11 @@ def GetHistoKwargs(histoName):
         #_opts["xmax"] = 300
         _cutBox       = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         _rebinX       = 2
+        if "trijet" in histoName.lower():
+            _opts["xmax"] = 800
+            _rebinX = getBinningForPt(0)
+            if "tetrajetbjet" in histoName.lower():
+                _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         if "tetrajet" in histoName.lower():
             _rebinX = getBinningForPt(0)
             _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
@@ -163,14 +168,17 @@ def GetHistoKwargs(histoName):
         _opts["xmax"] = 300
         _cutBox       = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
 
+        if "trijet" in histoName.lower():
+            _rebinX = 2
+
         if "tetrajet" in histoName.lower():
             _xlabel       = "m_{jjbb} (%s)" % (_units)
             _opts["xmin"] =    0
             _opts["xmax"] = 3000
             _rebinX       = getBinningForTetrajetMass()
-            if isinstance(_rebinX, list):
-                binWmin, binWmax = GetBinWidthMinMax(_rebinX)
-                _ylabel = "Events / %.0f-%.0f %s" % (binWmin, binWmax, _units)
+        if isinstance(_rebinX, list):
+            binWmin, binWmax = GetBinWidthMinMax(_rebinX)
+            _ylabel = "Events / %.0f-%.0f %s" % (binWmin, binWmax, _units)
 
     if "met" in histoName.lower():
         _units        = "GeV"
@@ -196,20 +204,20 @@ def GetHistoKwargs(histoName):
         _units   = ""
         _xlabel  = "#eta"
         _cutBox  = {"cutValue": 0.7, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmin"] = -2.5
-        _opts["xmax"] = +2.5
         _rebinX  = 1
         _ylabel  = "Events / %.2f"
+        _opts["xmin"] = -2.5
+        _opts["xmax"] = +2.5
 
     if "bdisc" in histoName.lower():
         _format = "%0.2f"
-        _ylabel  = "Events / " + _format
-        _rebinX = 1 #2
-        _opts["xmin"] = 0.0
+        _ylabel = "Events / " + _format
+        _rebinX = 2
+        _opts["xmin"] = 0.8
         _opts["xmax"] = 1.0
         _cutBox = {"cutValue": +0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _xlabel = "b-tag discriminant"
-
+        ROOT.gStyle.SetNdivisions(8, "X")
 
     # Define plotting options
     kwargs = {
@@ -673,7 +681,7 @@ def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
         saveName = histoName.split("/")[-1].replace("CRone0_", "").replace("CRtwo0_", "")
         
         # Get the histogram customisations (keyword arguments)
-        p.appendPlotObject(histograms.PlotText(0.18, 0.88, GetBinText(bin), bold=True, size=22))
+        p.appendPlotObject(histograms.PlotText(0.20, 0.88, GetBinText(bin), bold=True, size=22))
         plots.drawPlot(p, saveName, **GetHistoKwargs(saveName))
         SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf"])
     return

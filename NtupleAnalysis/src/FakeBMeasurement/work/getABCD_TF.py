@@ -351,9 +351,7 @@ def main(opts):
             datasetsMgr.PrintLuminosities()
             
         # Get the PSets:
-        if 1:
-            # thePSets = datasetsMgr.getDataset("TT").getParameterSet()
-            # Print("Printing the PSet:\n" + thePSets, True)
+        if 0:
             datasetsMgr.printSelections()
             #PrintPSet("BJetSelection", datasetsMgr, depth=150)
 
