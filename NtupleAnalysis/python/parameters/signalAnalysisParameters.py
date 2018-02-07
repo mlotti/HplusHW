@@ -10,10 +10,8 @@ histoLevel = "Debug"  # Options: Systematics, Vital, Informative, Debug
 #====== Trigger
 trg = PSet(
   # No need to specify version numbers, they are automatically scanned in range 1--100 (remove the '_v' suffix)
-  TautriggerEfficiencyJsonName =  "tauLegTriggerEfficiency_2016_bin.json",
-#  TautriggerEfficiencyJsonName =  "tauLegTriggerEfficiency_2016_fit.json",
-  METtriggerEfficiencyJsonName = "metLegTriggerEfficiency_2016_MET90_bin.json",
-#  triggerEfficiencyJsonName ="metLegTriggerEfficiency_2016_MET90_fit.json",
+  TautriggerEfficiencyJsonName = "tauLegTriggerEfficiency_2016_fit.json",
+  METtriggerEfficiencyJsonName = "metLegTriggerEfficiency_2016_MET90_fit.json",
   L1ETM = 80,
   triggerOR = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_MET90"
                ],
@@ -60,7 +58,7 @@ scaleFactors.assignTauMisidentificationSF(tauSelection, "muToTau", "full", "nomi
 scaleFactors.assignTauMisidentificationSF(tauSelection, "jetToTau", "full", "nominal")
 # tau trigger SF
 
-scaleFactors.assignTauTriggerSF(tauSelection, "nominal", tauTrgJson= = trg.TautriggerEfficiencyJsonName)
+scaleFactors.assignTauTriggerSF(tauSelection, "nominal", trg.TautriggerEfficiencyJsonName)
 
 #====== Electron veto
 eVeto = PSet(
@@ -151,7 +149,7 @@ metSelection = PSet(
    applyPhiCorrections = False  # FIXME: no effect yet
 )
 # MET trigger SF
-scaleFactors.assignMETTriggerSF(metSelection, bjetSelection.bjetDiscrWorkingPoint, "nominal",metTrgJson= = trg.METtriggerEfficiencyJsonName)
+scaleFactors.assignMETTriggerSF(metSelection, bjetSelection.bjetDiscrWorkingPoint, "nominal", trg.METtriggerEfficiencyJsonName)
 #====== Angular cuts / back-to-back
 angularCutsBackToBack = PSet(
        nConsideredJets = 3,    # Number of highest-pt jets to consider (excluding jet corresponding to tau)
@@ -269,4 +267,4 @@ def applyAnalysisCommandLineOptions(argv, config):
         config.TauSelection.prongs = 2
     elif "3prong" in argv or "3pr" in argv:
         config.TauSelection.prongs = 3
-    scaleFactors.assignTauTriggerSF(config.TauSelection, "nominal",tauTrgJson = config.Trigger.TautriggerEfficiencyJsonName)
+    scaleFactors.assignTauTriggerSF(config.TauSelection, "nominal",config.Trigger.TautriggerEfficiencyJsonName)
