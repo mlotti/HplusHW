@@ -122,7 +122,7 @@ def main(opts):
 
         Print("The multicrab directory to be used is %s" % (multicrabDir), True)
         # Get the datasets    
-        datasetsMgr = dataset.getDatasetsFromMulticrabDirs([multicrabDir],opts=opts, weightedCounters=opts.weighted)
+        datasetsMgr = dataset.getDatasetsFromMulticrabDirs([multicrabDir],opts=opts, weightedCounters=opts.weighted, optimizationMode=opts.optMode)
 
     # Optional: Apply include/exclude datasets
     datasetsMgr = FilterDatasets(datasetsMgr, opts)
@@ -335,6 +335,9 @@ if __name__ == "__main__":
 
     parser.add_option("--excludeCounter", dest="excludeCounter", default="", type="string",
                                             help="Exclude this counter [default: \"\"]")
+
+    parser.add_option("-o", "--optMode", dest="optMode", default="", type="string", 
+                      help="The optimization mode when analysis variation is enabled  [default: \"\"]")
 
     (opts, args) = parser.parse_args()
     opts.dirs.extend(args)

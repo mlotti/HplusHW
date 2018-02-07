@@ -48,6 +48,7 @@ class JsonWriter:
         fOUT.write("}\n")
                 
         fOUT.close()
+        print "Created",fOUTname
 
         sys.exit()
         """

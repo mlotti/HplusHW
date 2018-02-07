@@ -118,7 +118,8 @@ private:
   bool passMuonDiscriminator(const Tau& tau) const { return tau.againstMuonDiscriminator(); }
   bool passNprongsCut(const Tau& tau) const;
   bool passIsolationDiscriminator(const Tau& tau) const { return tau.isolationDiscriminator(); }
-  bool passRtauCut(const Tau& tau) const { return tau.rtau() > fTauRtauCut; }
+  bool passRtauLargerThanCut(const Tau& tau) const { return tau.rtau() > fTauRtauCut; }
+  bool passRtauSmallerThanCut(const Tau& tau) const { return tau.rtau() <= fTauRtauSmallerThanCut; }
   std::vector<TauMisIDRegionType> assignTauMisIDSFRegion(const ParameterSet& config, const std::string& label) const;
   std::vector<float> assignTauMisIDSFValue(const ParameterSet& config, const std::string& label) const;
   void setTauIDSFValue(Data& data);
@@ -134,6 +135,7 @@ private:
   const float fTauLdgTrkPtCut;
   const int fTauNprongs;
   const float fTauRtauCut;
+  const float fTauRtauSmallerThanCut;
   bool fVetoMode;
   // tau identification SF
   float fTauIDSF;
