@@ -147,8 +147,8 @@ fatjetSoftDropSelection = PSet(
 bjetSelection = PSet(
     triggerMatchingApply      = False,
     triggerMatchingCone       = 0.1,  # DeltaR for matching offline bjet with trigger::TriggerBjet
-    jetPtCuts                 = [40.0, 40.0, 30.0], # [default: [40.0, 40.0, 30.0] ]
-    #jetPtCuts                 = [40.0], # [default: [40.0, 40.0, 30.0] ]
+    #jetPtCuts                 = [40.0, 40.0, 30.0], # [default: [40.0, 40.0, 30.0] ]
+    jetPtCuts                 = [40.0], # [default: [40.0, 40.0, 30.0] ]
     jetEtaCuts                = [2.4],
     bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
     bjetDiscrWorkingPoint     = "Medium",
@@ -227,7 +227,7 @@ topSelectionBDT = PSet(
 # FakeB Measurement Options
 #================================================================================================
 fakeBMeasurement = PSet(
-    prelimTopMVACutValue              = 0.60,     # [default: 0.60]
+    prelimTopMVACutValue              = 0.50,     # [default: 0.60]
     prelimTopMVACutDirection          =  ">=",    # [default: ">="]
     # CSVv2-M (Baseline b-jets)
     numberOfBJetsCutValue             = 2,        # [VR, CR2: 2   , CR3, CR4: 1   ]
@@ -244,6 +244,11 @@ fakeBMeasurement = PSet(
     LdgTopMVACutDirection             = topSelectionBDT.LdgMVACutDirection, 
     SubldgTopMVACutValue              = topSelectionBDT.SubldgMVACutValue, # [VR CR2: 0.8 , CR3, CR4: 0.8 ]
     SubldgTopMVACutDirection          = "<",                               # [VR CR2: ">=", CR3, CR4: "<" ]
+    # All bjets (CSVv2-M and CSVv2-L)
+    allBJetsPtCuts        = bjetSelection.jetPtCuts,
+    allBJetsEtaCuts       = bjetSelection.jetEtaCuts,
+    allBJetsNCutValue     = bjetSelection.numberOfBJetsCutValue,
+    allBJetsNCutDirection = bjetSelection.numberOfBJetsCutDirection
     )
 
 

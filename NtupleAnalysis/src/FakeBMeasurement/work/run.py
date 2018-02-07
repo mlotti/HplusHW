@@ -179,8 +179,9 @@ def main():
 
     # Set splitting of phase-space (first bin is below first edge value and last bin is above last edge value)
     allSelections.CommonPlots.histogramSplitting = [
-        PSet(label="TetrajetBjetEta", binLowEdges=[1.3], useAbsoluteValues=True),
-        #PSet(label="TetrajetBjetEta", binLowEdges=[0.6, 1.4], useAbsoluteValues=True),
+        PSet(label="TetrajetBjetEta", binLowEdges=[1.2], useAbsoluteValues=True),
+        #PSet(label="TetrajetBjetEta", binLowEdges=[1.3], useAbsoluteValues=True), # good but perhaps limit to 1.2
+        #PSet(label="TetrajetBjetEta", binLowEdges=[0.6, 1.4], useAbsoluteValues=True), #middle bin is bad
         ]
     
     # allSelections.BJetSelection.triggerMatchingApply = True # at least 1 trg b-jet matched to offline b-jets
