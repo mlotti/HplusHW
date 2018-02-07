@@ -45,10 +45,11 @@ USAGE:
 
 
 EXAMPLES:
-./plot_ClosureBinned.py -m FakeBMeasurement_NewLeptonVeto_PreSel_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_3BinsEta0p6Eta1p4_180203_14315 --url
+./plot_ClosureBinned.py -m FakeBMeasurement_NewLeptonVeto_PreSel_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_3BinsEta0p6Eta1p4_180203_14315 --normaliseToOne --url
+
 
 LAST USED:
-./plot_ClosureBinned.py -m FakeBMeasurement_NewLeptonVeto_PreSel_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_3BinsEta0p6Eta1p4_180203_14315
+./plot_ClosureBinned.py -m FakeBMeasurement_NewLeptonVeto_PreSel_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_3BinsEta0p6Eta1p4_180203_14315 -m
 
 '''
 
@@ -129,10 +130,13 @@ def GetHistoKwargs(histoName):
     _cutBox = {}
     _rebinX = 1
     _logY   = True
-    _opts   = {"ymin": 1e-4, "ymaxfactor": 2.0}
     _ylabel = "Events / %.0f"
+    if opts.normaliseToOne:
+        _opts   = {"ymin": 1e-4, "ymaxfactor": 2.0}
+    else:
+        _opts   = {"ymin": 1e0, "ymaxfactor": 2.0}
     if _logY:
-        _opts = {"ymin": 1e-4, "ymaxfactor": 2.0}
+        _opts["ymaxfactor"] = 5.0
 
     if "pt" in histoName.lower():
         _units        = "GeV/c"
@@ -142,9 +146,14 @@ def GetHistoKwargs(histoName):
         #_opts["xmax"] = 300
         _cutBox       = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         _rebinX       = 2
-        if "tetrajetbjet" in histoName.lower():
-            _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            _rebinX = 1
+        if "tetrajet" in histoName.lower():
+            _rebinX = getBinningForPt(0)
+            _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+            if "tetrajetbjet" in histoName.lower():
+                _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        if isinstance(_rebinX, list):
+            binWmin, binWmax = GetBinWidthMinMax(_rebinX)
+            _ylabel = "Events / %.0f-%.0f %s" % (binWmin, binWmax, _units)
 
     if "mass" in histoName.lower():
         _units        = "GeV/c^{2}"
@@ -186,9 +195,9 @@ def GetHistoKwargs(histoName):
     if "tetrajetbjeteta" in histoName.lower():
         _units   = ""
         _xlabel  = "#eta"
-        _cutBox  = {"cutValue": 0.8, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        #_opts["xmin"] =   0
-        #_opts["xmax"] = 400
+        _cutBox  = {"cutValue": 0.7, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _opts["xmin"] = -2.5
+        _opts["xmax"] = +2.5
         _rebinX  = 1
         _ylabel  = "Events / %.2f"
 
@@ -242,30 +251,11 @@ def GetBinWidthMinMax(binList):
     return minWidth, maxWidth
 
 def GetDatasetsFromDir(opts):
-    Verbose("Getting datasets")
-    
-    if (not opts.includeOnlyTasks and not opts.excludeTasks):
-        datasets = dataset.getDatasetsFromMulticrabDirs([opts.mcrab],
-                                                        dataEra=opts.dataEra,
-                                                        searchMode=opts.searchMode, 
-                                                        analysisName=opts.analysisName,
-                                                        optimizationMode=opts.optMode)
-    elif (opts.includeOnlyTasks):
-        datasets = dataset.getDatasetsFromMulticrabDirs([opts.mcrab],
-                                                        dataEra=opts.dataEra,
-                                                        searchMode=opts.searchMode,
-                                                        analysisName=opts.analysisName,
-                                                        includeOnlyTasks=opts.includeOnlyTasks,
-                                                        optimizationMode=opts.optMode)
-    elif (opts.excludeTasks):
-        datasets = dataset.getDatasetsFromMulticrabDirs([opts.mcrab],
-                                                        dataEra=opts.dataEra,
-                                                        searchMode=opts.searchMode,
-                                                        analysisName=opts.analysisName,
-                                                        excludeTasks=opts.excludeTasks,
-                                                        optimizationMode=opts.optMode)
-    else:
-        raise Exception("This should never be reached")
+    datasets = dataset.getDatasetsFromMulticrabDirs([opts.mcrab],
+                                                    dataEra=opts.dataEra,
+                                                    searchMode=opts.searchMode, 
+                                                    analysisName=opts.analysisName,
+                                                    optimizationMode=opts.optMode)
     return datasets
     
 def PrintPSet(selection, datasetsMgr, depth=0):
@@ -460,6 +450,26 @@ def GetBinLabels(region, histoPaths):
             binLabels.append(h.split(region)[-1])
     return binLabels
         
+def getBinningForPt(binLevel=0):
+    myBins = []
+    if binLevel == 0:  #default binning
+        for i in range(0, 300, 25):
+            myBins.append(i)
+        for i in range(300, 600, 50):
+            myBins.append(i)
+        for i in range(600, 1000+100, 100):
+            myBins.append(i)
+    elif binLevel == 1: #finer
+        for i in range(0, 300, 10):
+            myBins.append(i)
+        for i in range(300, 600, 20):
+            myBins.append(i)
+        for i in range(600, 1000+100, 40):
+            myBins.append(i)
+    else:
+        raise Exception(ShellStyles.ErrorStyle() + "Please choose bin-level from 0 to 1" + ShellStyles.NormalStyle())
+    return myBins
+
 def getBinningForTetrajetMass(binLevel=0):
     '''
     Currenty in Combine:
@@ -628,8 +638,9 @@ def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
             continue
 
         # Normalise to unity
-        rhDict[key1].Scale(1.0/rhDict[key1].Integral())
-        rhDict[key2].Scale(1.0/rhDict[key2].Integral())
+        if opts.normaliseToOne:
+            rhDict[key1].Scale(1.0/rhDict[key1].Integral())
+            rhDict[key2].Scale(1.0/rhDict[key2].Integral())
 
         rFakeB_CRone = rhDict[key1]
         rFakeB_CRtwo = rhDict[key2]
@@ -664,7 +675,7 @@ def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
         # Get the histogram customisations (keyword arguments)
         p.appendPlotObject(histograms.PlotText(0.18, 0.88, GetBinText(bin), bold=True, size=22))
         plots.drawPlot(p, saveName, **GetHistoKwargs(saveName))
-        SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png"])
+        SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf"])
     return
 
 if __name__ == "__main__":
@@ -691,14 +702,13 @@ if __name__ == "__main__":
     OPTMODE      = None
     BATCHMODE    = True
     INTLUMI      = -1.0
-    MCONLY       = False
     URL          = False
     SAVEDIR      = "/publicweb/a/aattikis/"
     VERBOSE      = False
     USEMC        = False
     RATIO        = True
     FOLDER       = "ForFakeBMeasurement"
-    INCLUSIVE    = False
+    NORMALISE    = False
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -715,8 +725,8 @@ if __name__ == "__main__":
     parser.add_option("--analysisName", dest="analysisName", type="string", default=ANALYSISNAME,
                       help="Override default analysisName [default: %s]" % ANALYSISNAME)
 
-    parser.add_option("--mcOnly", dest="mcOnly", action="store_true", default=MCONLY,
-                      help="Plot only MC info [default: %s]" % MCONLY)
+    parser.add_option("-n", "--normaliseToOne", dest="normaliseToOne", action="store_true", default=NORMALISE,
+                      help="Normalise the baseline and inverted shapes to one? [default: %s]" % (NORMALISE) )
 
     parser.add_option("--intLumi", dest="intLumi", type=float, default=INTLUMI,
                       help="Override the integrated lumi [default: %s]" % INTLUMI)
@@ -735,9 +745,6 @@ if __name__ == "__main__":
     
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE, 
                       help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
-
-    parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
-                      help="List of datasets in mcrab to include")
 
     parser.add_option("-e", "--excludeTasks", dest="excludeTasks", action="store", 
                       help="List of datasets in mcrab to exclude")
@@ -768,7 +775,7 @@ if __name__ == "__main__":
         mcrabDir = rchop(opts.mcrab, "/")
         if len(mcrabDir.split("/")) > 1:
             mcrabDir = mcrabDir.split("/")[-1]
-        opts.saveDir += mcrabDir + "/Closure/"
+        opts.saveDir += mcrabDir + "/Closure/Binned/"
 
     # Call the main function
     main(opts)
