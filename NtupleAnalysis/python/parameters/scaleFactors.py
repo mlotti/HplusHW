@@ -68,7 +68,7 @@ def _assignJetToTauSF(tauSelectionPset, etaRegion, dirNumber):
 # \param tauSelectionPset  the tau config PSet
 # \param direction         "nominal, "up", "down"
 # \param variationType     "MC", "data"  (the uncertainty in MC and data are variated separately)
-def assignTauTriggerSF(tauSelectionPset, direction, variationType="MC", tauTrgJson="tauLegTriggerEfficiency_2016_bin.json"):
+def assignTauTriggerSF(tauSelectionPset, direction, tauTrgJson, variationType="MC"):
     # FIXME: there is no mechanic right now to choose correct era / run range
     # FIXME: this approach works as long as there is just one efficiency for the simulated samples
 
@@ -97,7 +97,7 @@ def assignTauTriggerSF(tauSelectionPset, direction, variationType="MC", tauTrgJs
 # \param METSelectionPset  the MET selection config PSet
 # \param direction         "nominal, "up", "down"
 # \param variationType     "MC", "data"  (the uncertainty in MC and data are variated separately)
-def assignMETTriggerSF(METSelectionPset, btagDiscrWorkingPoint, direction, variationType="MC", metTrgJson = "metLegTriggerEfficiency_2016_MET90_bin.json"):
+def assignMETTriggerSF(METSelectionPset, btagDiscrWorkingPoint, direction, metTrgJson, variationType="MC"):
     # FIXME: there is no mechanic right now to choose correct era / run range
     # FIXME: this approach works as long as there is just one efficiency for the simulated samples
 ####    reader = TriggerSFJsonReader("2015D", "runs_256629_260627", "metLegTriggerEfficiency2015_btag%s.json"%btagDiscrWorkingPoint)
@@ -106,7 +106,7 @@ def assignMETTriggerSF(METSelectionPset, btagDiscrWorkingPoint, direction, varia
 
     print "Taking MET trigger eff/sf from",metTrgJson
 
-    reader = TriggerSFJsonReader("2016_MET90", "runs_271036_284044", metTrgJson)
+    reader = TriggerSFJsonReader("2016_MET90", "runs_273150_284044", metTrgJson)
 
     result = reader.getResult()
     if variationType == "MC":
