@@ -176,6 +176,7 @@ def GetHistoKwargs(histoName):
             _opts["xmin"] =    0
             _opts["xmax"] = 3000
             _rebinX       = getBinningForTetrajetMass()
+            _cutBox       = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         if isinstance(_rebinX, list):
             binWmin, binWmax = GetBinWidthMinMax(_rebinX)
             _ylabel = "Events / %.0f-%.0f %s" % (binWmin, binWmax, _units)
@@ -203,7 +204,7 @@ def GetHistoKwargs(histoName):
     if "tetrajetbjeteta" in histoName.lower():
         _units   = ""
         _xlabel  = "#eta"
-        _cutBox  = {"cutValue": 0.7, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _cutBox  = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _rebinX  = 1
         _ylabel  = "Events / %.2f"
         _opts["xmin"] = -2.5
@@ -317,15 +318,24 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
 
 def GetBinText(bin):
     if bin == "0":
-        return "|eta| < 0.6"
+        #return "|#eta| \leq 1.2"
+        return "|#eta| < 1.2"
     elif bin == "1":
-        return "0.6 < |eta| < 1.4"
-    elif bin == "2":
-        return "|eta| > 1.4"
+        return "|#eta| > 1.2"
     elif bin == "Inclusive":
         return bin
     else:
         raise Exception(ShellStyles.ErrorStyle() + "Unexpected bin %s" % (bin)  + ShellStyles.NormalStyle())
+#    if bin == "0":
+#        return "|eta| < 0.6"
+#    elif bin == "1":
+#        return "0.6 < |eta| < 1.4"
+#    elif bin == "2":
+#        return "|eta| > 1.4"
+#    elif bin == "Inclusive":
+#        return bin
+#    else:
+#        raise Exception(ShellStyles.ErrorStyle() + "Unexpected bin %s" % (bin)  + ShellStyles.NormalStyle())
 
 #================================================================================================ 
 # Main

@@ -209,7 +209,7 @@ def main(opts):
         # Definitions
         allHistos   = dsetMgr2.getAllDatasets()[0].getDirectoryContent(opts.folder)
         histoPaths  = []
-        ignoreKeys  = ["MCEWK", "Purity", "BJetPt", "BJetEta", "BtagDiscriminator", "METPhi", "MHT", "NBjets", "Njets"]
+        ignoreKeys  = ["MCEWK", "Purity", "BJetPt", "BJetEta", "BtagDiscriminator", "METPhi", "MHT", "NBjets", "Njets", "_Vs_", "JetEta"]
         # For-loop: All histograms in directory
         for h in allHistos:
             bKeep = True
@@ -653,7 +653,7 @@ def PlotHistogram(dsetMgr, histoName, opts):
 
     # Draw and save the plot
     plots.drawPlot(p3, saveName, **kwargs)
-    SavePlot(p3, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png"])
+    SavePlot(p3, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf"])
     return
 
 def PrintPSet(selection, dsetMgr):
@@ -854,12 +854,12 @@ if __name__ == "__main__":
         sys.exit(1)
     else:
         mcrabDir1 = rchop(opts.mcrab1, "/")
-        mcrabDir2 = rchop(opts.mcrab2, "/")
+        mcrabDir2 = opts.mcrab2.split("/")[0]
         if len(mcrabDir1.split("/")) > 1:
             mcrabDir1 = mcrabDir1.split("/")[-1]
         if len(mcrabDir2.split("/")) > 1:
             mcrabDir2 = mcrabDir2.split("/")[-1]
-        opts.saveDir += mcrabDir1 + mcrabDir2 + "/DataDriven/"
+        opts.saveDir += mcrabDir1 + "/" + mcrabDir2 + "/DataDriven/"
 
 
     # Sanity check
