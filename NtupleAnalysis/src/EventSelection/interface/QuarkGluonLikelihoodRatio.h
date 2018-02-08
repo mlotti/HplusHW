@@ -26,7 +26,7 @@ class WrappedTH2;
 class QGLInputItem {
 public:
   
-  QGLInputItem(float minQGL, float maxQGL, float prob, float probErr);
+  QGLInputItem(float minQGL, float maxQGL, float minPt, float maxPt, float prob, float probErr);
   ~QGLInputItem();
   
   /// Returns the minimum QGL value
@@ -35,8 +35,9 @@ public:
   const float getMaxQGL() const {return fmaxQGL; };
   /// Returns whether the QGL is within the range
   const bool isWithinQGLRange(float qgl) const {return (qgl >= fminQGL && qgl < fmaxQGL); }; 
+  /// Returns whether the pT is within the range
+  const bool isWithinPtRange(float pt) const {return (pt >= fminPt && pt < fmaxPt); };
   
-
   /// Returns the probability
   const float getProb() const {return fProb; };
   /// Returns the probability error
@@ -45,6 +46,8 @@ public:
 private:
   float fminQGL;
   float fmaxQGL;
+  float fminPt;
+  float fmaxPt;
   float fProb;
   float fProbErr;
 };
@@ -58,9 +61,9 @@ public:
   ~QGLInputStash();
   
   /// Add input 
-  void addInput(std::string jetType, float minQGL, float maxQGL, float Prob, float ProbErr);
-  /// Returns value by QGL
-  const float getInputValueByQGL(std::string jetType, float pt);
+  void addInput(std::string jetType, float minQGL, float maxQGL, float minPt, float maxPt, float Prob, float ProbErr);
+  /// Returns value
+  const float getInputValue(std::string jetType, float qgl, float pt);
   
 private:
   

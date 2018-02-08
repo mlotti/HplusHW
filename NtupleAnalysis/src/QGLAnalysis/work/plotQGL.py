@@ -198,8 +198,10 @@ def main(opts, signalMass):
 
     histos = ["LightJetsQGL_"+ pt for pt in PtRange]
     histos.extend("GluonJetsQGL_"+ pt for pt in PtRange)
+    #histos.extend("JetsQGL")
+    #histos.extend("GluonJetsQGL")
+    #histos.extend("LightJetsQGL")
 
-    
     for h in histos:
         # Produce & save the plots
         PlotMC(datasetsMgr, h, intLumi)
@@ -223,7 +225,11 @@ def main(opts, signalMass):
                 ptbin   = h.split("_")[-1]
                 minPt   = ptbin.split("pt")[0]
                 maxPt   = ptbin.split("pt")[-1]
-            
+                
+                if maxPt == "Inf":
+                    maxPt = 9999999999.9
+                
+
                 for k in range(1, histo.GetNbinsX()+1):
                     
                     resultObject = {}

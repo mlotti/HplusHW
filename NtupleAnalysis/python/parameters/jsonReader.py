@@ -28,11 +28,17 @@ def _setupQGL(jsonname):
         psetList = []
         for row in contents:
             
-            p = PSet(jetType=row["Jet"],
-                     prob=float(row["prob"]),
-                     probError=float(row["probError"]),
-                     QGLmin=float(row["QGLmin"]),
-                     QGLmax=float(row["QGLmax"]))
+            print "Setting PSet:  ", "Probability=", float(row["prob"]), " Error=", float(row["probError"]), "  QGL min=", float(row["QGLmin"]), "   QGL max=", float(row["QGLmax"]), "  Pt min=", float(row["Ptmin"]), " Pt max=", float(row["Ptmax"]) 
+            
+
+            p = PSet(jetType   = row["Jet"],
+                     prob      = float(row["prob"]),
+                     probError = float(row["probError"]),
+                     QGLmin    = float(row["QGLmin"]),
+                     QGLmax    = float(row["QGLmax"]),
+                     Ptmin     = float(row["Ptmin"]),
+                     Ptmax     = float(row["Ptmax"]),
+                     )
 
             psetList.append(p)
             

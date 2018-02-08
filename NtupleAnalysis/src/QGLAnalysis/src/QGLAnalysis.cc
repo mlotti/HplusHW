@@ -43,7 +43,10 @@ private:
   Count cSelected;
     
   // Non-common histograms
-  
+  WrappedTH1 *hJetsQGL;
+  WrappedTH1 *hGluonJets;
+  WrappedTH1 *hLightJets;
+
   // pT in the range [30,40)
   WrappedTH1 *hGluonJetsQGL_30pt40;
   WrappedTH1 *hGluonJetsN_30pt40;  
@@ -216,8 +219,11 @@ void QGLAnalysis::book(TDirectory *dir) {
   const float fPtMax      = 2*fCommonPlots.getPtBinSettings().max();
   
   // Book non-common histograms
+  hJetsQGL   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "JetsQGL", "Quark-Gluon discriminator for all jets", nBinsQGL, minQGL, maxQGL);
+  hGluonJetsQGL = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "GluonJetsQGL", "Quark-Gluon discriminator for gluon jets", nBinsQGL, minQGL, maxQGL);
+  hLightJetsQGL = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "LightJetsQGL", "Quark-Gluon discriminator for light jets", nBinsQGL, minQGL, maxQGL);
+  
   // 30-40, 40-50, 50-65, 65-80, 80-100. 100-125, 125-160,160-200, 200-250, 250-320, 320-400,400-630, 630-800, 800-1000
-
   // pT in the range [30,40)
   hGluonJetsQGL_30pt40 = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "GluonJetsQGL_30pt40", "Quark-Gluon discriminator for Gluon Jets in the p_{T} range [30,40)"  , nBinsQGL, minQGL, maxQGL);
   hGluonJetsN_30pt40   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "GluonJetsN_30pt40"  , "Gluon Jets Multiplicity with p_{T} in the range [30,40)"              , nNBins, fNMin, fNMax); 
@@ -450,12 +456,18 @@ void QGLAnalysis::process(Long64_t entry) {
     
     const short jetPartonFlavour = std::abs(jet.partonFlavour());
     
+    if (jetPartonFlavour != 21 && jetPartonFlavour != 1 && jetPartonFlavour != 2 && jetPartonFlavour != 3) continue;
+    
     double QGL = jet.QGTaggerAK4PFCHSqgLikelihood();
     double pt  = jet.pt();
     
+    hJetsQGL -> Fill(QGL);
+   
     // Gluon Jets
     if (jetPartonFlavour == 21)
       {
+	hGluonJetsQGL -> Fill(QGL);
+
 	// 30-40, 40-50, 50-65, 65-80, 80-100. 100-125, 125-160,160-200, 200-250, 250-320, 320-400,400-630, 630-800, 800-1000
 	if (pt >= 30 && pt < 40){
 	  nGluonJets_30pt40++;
@@ -533,6 +545,8 @@ void QGLAnalysis::process(Long64_t entry) {
     if (jetPartonFlavour == 1 || jetPartonFlavour == 2 || jetPartonFlavour == 3)
       {
 	
+	hLightJetsQGL -> Fill(QGL);
+		
 	// 30-40, 40-50, 50-65, 65-80, 80-100. 100-125, 125-160,160-200, 200-250, 250-320, 320-400,400-630, 630-800, 800-1000
 	if (pt >= 30 && pt < 40){
 	  nLightJets_30pt40++;
