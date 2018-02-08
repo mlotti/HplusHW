@@ -238,7 +238,7 @@ def GetHistoKwargs(hName, opts):
     value = kwargs
     '''
     ymaxF  = 1.2
-    ymin   = 1e-1 #if any smaller than 1e-1 legend problems
+    ymin   = 8e-2 #if any smaller than 1e-1 legend problems
     kwargs = {
         "ratioCreateLegend": True,
         "ratioType"        : "errorScale", #"errorScale", #binomial #errorPropagation
@@ -257,7 +257,9 @@ def GetHistoKwargs(hName, opts):
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
         "opts"             : {"ymin": ymin, "ymaxfactor": ymaxF},
-        "opts2"            : {"ymin": 0.0, "ymax": 2.0}, #{"ymin": 0.2, "ymax": 2.0-0.2},
+        #"opts2"            : {"ymin": 0.55, "ymax": 1.55},
+        "opts2"            : {"ymin": 0.30, "ymax": 1.70},
+        #"opts2"            : {"ymin": 0.0, "ymax": 2.0},
         "log"              : opts.logY,
         "moveLegend"       : {"dx": -0.06, "dy": -0.01, "dh": 0.15},
         "cutBoxY"          : {"cutValue": 1.2, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": False, "ratioCanvas": False}
@@ -465,9 +467,9 @@ def GetHistoKwargs(hName, opts):
         # kwargs["ylabel"] = "Events / %.0f " + units
     if "TetrajetMass" in hName:
         ROOT.gStyle.SetNdivisions(8, "X")
-        startBlind       = 150  # 135 v. sensitive to bin-width!
-        endBlind         = 4000 #3000 # v. sensitive to bin-width!
-        myBins           = getBinningForTetrajetMass(binLevel=0)
+        startBlind       =  150  # 135 v. sensitive to bin-width!
+        endBlind         = 3000 #4000 # v. sensitive to bin-width!
+        myBins           = getBinningForTetrajetMass(binLevel=0, endValue=endBlind)
         kwargs["rebinX"] = myBins
         units            = "GeV/c^{2}"
         binWmin, binWmax = GetBinWidthMinMax(myBins)
@@ -489,7 +491,7 @@ def GetHistoKwargs(hName, opts):
 
     return kwargs
     
-def getBinningForTetrajetMass(binLevel=0):
+def getBinningForTetrajetMass(binLevel=0, endValue=4000):
     '''
     Currenty in Combine:
     myBins = [0,50,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,520,540,560,580,600,620,640,660,680,700,720,740,
@@ -504,28 +506,30 @@ def getBinningForTetrajetMass(binLevel=0):
             myBins.append(i)
         for i in range(1000, 2000, 100):
             myBins.append(i)
-        for i in range(2000, 4000+500, 500):
+        for i in range(2000, 3000, 500):
+            myBins.append(i)
+        for i in range(3000, endValue+1000, 1000):
             myBins.append(i)
     elif binLevel == 1: #finer binning
         for i in range(0, 1000, 25):
             myBins.append(i)
         for i in range(1000, 2000, 50):
             myBins.append(i)
-        for i in range(2000, 4000+250, 250):
+        for i in range(2000, endValue+250, 250):
             myBins.append(i)
     elif binLevel == 2:
         for i in range(0, 1000, 20):
             myBins.append(i)
         for i in range(1000, 2000, 40):
             myBins.append(i)
-        for i in range(2000, 4000+200, 200):
+        for i in range(2000, endValue+200, 200):
             myBins.append(i)
     elif binLevel == 3:
         for i in range(0, 1000, 10):
             myBins.append(i)
         for i in range(1000, 2000, 20):
             myBins.append(i)
-        for i in range(2000, 4000+50, 50):
+        for i in range(2000, endValue+50, 50):
             myBins.append(i)
     else:
         raise Exception(ShellStyles.ErrorStyle() + "Please choose bin-level from -1 to 3" + ShellStyles.NormalStyle())

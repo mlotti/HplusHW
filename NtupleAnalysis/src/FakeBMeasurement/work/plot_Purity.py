@@ -215,8 +215,7 @@ def main(opts):
         # hList.extend([h for h in allHistos if "StandardSelections" in h and "_Vs" not in h])
 
         # Create a list with strings included in the histogram names you want to plot
-        myHistos = ["LdgTrijetPt", "LdgTrijetMass", "LdgTetrajetMass", "MVAmax2", "MVAmax1", "HT", "MET",
-                    "Bjet3Bdisc", "Bjet2Bdisc", "Bjet1Bdisc", "Bjet3Pt", "Bjet2Pt", "Bjet1Pt"]
+        myHistos = ["LdgTrijetPt", "LdgTrijetMass", "LdgTetrajetMass", "MVAmax2", "MVAmax1", "HT", "MET"]
         #myHistos = ["LdgTrijetPt", "LdgTrijetMass", "LdgTetrajetMass", "MVAmax2", "MVAmax1", "Njets", "NBjets", 
         #            "Bjet3Bdisc", "Bjet2Bdisc", "Bjet1Bdisc", "Bjet3Pt", "Bjet2Pt", "Bjet1Pt"]
 
@@ -494,11 +493,11 @@ def GetHistoKwargs(histoName, opts):
         
     if "mvamax1" in h.lower():
         _xlabel = "Leading MVA"
-        _cutBox = {"cutValue": 0.8, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _cutBox = {"cutValue": 0.85, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         myBins  = mvaBins
     if "mvamax2" in h.lower():
         _xlabel = "Subleading MVA"
-        _cutBox = {"cutValue": 0.8, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _cutBox = {"cutValue": 0.85, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         myBins  = mvaBins
     if "trijetm" in h.lower():
         _units  = "GeV/c^{2}" 
