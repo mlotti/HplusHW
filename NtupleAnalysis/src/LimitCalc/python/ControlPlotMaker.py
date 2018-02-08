@@ -17,8 +17,8 @@ import os
 import sys
 import ROOT
 
-#_legendLabelQCD = "Multijets (data)"
-_legendLabelQCD = "Mis-ID. #tau_{h} (data)" 
+_legendLabelQCD = "QCD" 
+_legendLabelQCDdata = "Mis-ID. #tau_{h} (data)" 
 _legendLabelEmbedding = "EWK+t#bar{t} with #tau_{h} (data)"
 _legendLabelEWKFakes = "EWK+t#bar{t} no #tau_{h} (sim.)"
 #_legendLabelEWKFakes = "EWK+tt with e/#mu/jet#rightarrow#tau_{h} (sim.)"
@@ -77,6 +77,7 @@ class ControlPlotMaker:
                     # Initialize histograms
                     hSignal = None
                     hQCD = None
+                    hQCDdata = None
                     hEmbedded = None
                     hEWKfake = None
                     hData = None
@@ -97,8 +98,12 @@ class ControlPlotMaker:
                                     hSignal = h.Clone()
                                 else:
                                     hSignal.Add(h)
+                            elif c.typeIsQCDinverted():
+                                if hQCDdata == None:
+                                    hQCDdata = h.Clone()
+                                else:
+                                    hQCDdata.Add(h)
                             elif c.typeIsQCD():
-                                #print "QCD:",c.getLabel(),h.getRootHisto().Integral(0,h.GetNbinsX()+2)
                                 if hQCD == None:
                                     hQCD = h.Clone()
                                 else:
@@ -121,8 +126,12 @@ class ControlPlotMaker:
                                 else:
                                     hEWKfake.Add(h)
                     if len(myStackList) > 0 or self._config.OptionGenuineTauBackgroundSource == "DataDriven":
-                        if hQCD != None:
-                            myHisto = histograms.Histo(hQCD,"QCD",legendLabel=_legendLabelQCD)
+                        if hQCDdata != None:
+                            myHisto = histograms.Histo(hQCDdata,"QCDdata",legendLabel=_legendLabelQCDdata)
+                            myHisto.setIsDataMC(isData=False, isMC=True)
+                            myStackList.insert(0, myHisto)
+                        elif hQCD != None:
+                            myHisto = histograms.Histo(hQCD,"QCDdata",legendLabel=_legendLabelQCD)
                             myHisto.setIsDataMC(isData=False, isMC=True)
                             myStackList.insert(0, myHisto)
                         if hEmbedded != None:
@@ -450,6 +459,8 @@ class SelectionFlowPlotMaker:
             myRHWU.makeFlowBinsVisible()
             if self._expectedLabelList[i] == "QCD":
                 myHisto = histograms.Histo(myRHWU, self._expectedLabelList[i], legendLabel=_legendLabelQCD)
+            elif self._expectedLabelList[i] == "QCDdata":
+                myHisto = histograms.Histo(myRHWU, self._expectedLabelList[i], legendLabel=_legendLabelQCDdata)
             elif self._expectedLabelList[i] == "Embedding":
                 myHisto = histograms.Histo(myRHWU, self._expectedLabelList[i], legendLabel=_legendLabelEmbedding)
             elif self._expectedLabelList[i] == "EWKfakes":

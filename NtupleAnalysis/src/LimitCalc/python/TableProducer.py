@@ -67,34 +67,38 @@ def createBinByBinStatUncertHistograms(hRate, minimumStatUncertainty=0.5, xmin=N
 
     nNegativeRate = 0
     nBelowMinStatUncert = 0
+    nEmptyDownHistograms = 0
     # For-loop: All histogram bins
     for i in range(1, hRate.GetNbinsX()+1):
         #print hRate.GetXaxis().GetBinLowEdge(i), xmin, hRate.GetXaxis().GetBinUpEdge(i), xmax
         
         if hRate.GetXaxis().GetBinLowEdge(i) > myRangeMin-0.0001 and hRate.GetXaxis().GetBinUpEdge(i) < myRangeMax+0.0001:
 
+            # Make sure that there are no negative rates in nominal histogram (hRate)
+            if hRate.GetBinContent(i) < 0.0:
+                nNegativeRate += 1
+
+            # Clone hRate histogram to hUp and hDown
             hUp   = aux.Clone(hRate, "%s_%s_statBin%dUp"  % (myName, myName,i) )
             hDown = aux.Clone(hRate, "%s_%s_statBin%dDown"% (myName, myName,i) )
             hUp.SetTitle(hUp.GetName())
             hDown.SetTitle(hDown.GetName())
 
-            # Sanity check
+            # Set hUp rate
+            hUp.SetBinContent(i, hUp.GetBinContent(i) + hUp.GetBinError(i))
+            # Make sure that the hUp rate is larger than the minimum stat. uncertainty
             if hRate.GetBinContent(i) < minimumStatUncertainty:
-                nBelowMinStatUncert += 1
                 hUp.SetBinContent(i, minimumStatUncertainty)
-                #msg = "Rate is zero for bin %d. Setting up stat. uncert. to %f for %s."% (i, minimumStatUncertainty, hRate.GetTitle())
-                # Print(ShellStyles.WarningLabel() + msg)
 
-                if hRate.GetBinContent(i) < 0.0:
-                    nNegativeRate += 1
-                    #msg = "Rate is negative for bin %d, continue at your own risk!" % (i)
-                    # Print(ShellStyles.WarningLabel() + msg)
-            else:
-                hUp.SetBinContent(i, hUp.GetBinContent(i) + hUp.GetBinError(i))
-            
+            # Set hDown rate
             statBinDown = hDown.GetBinContent(i)-hDown.GetBinError(i)
             # hDown.SetBinContent(i, statBinDown) # Bug fix (8Nov2017)
-            hDown.SetBinContent(i, max(0, statBinDown))
+            hDown.SetBinContent(i, max(0.0, statBinDown)) # make sure hDown rate is not negative
+            # Varying dowards can in rare cases lead to a completely empty hDown histo, not accepted as input by Combine
+            # To prevent this from happening, we do as follows:
+            if hDown.Integral() <= 0:
+                 hDown.SetBinContent(i, max(0.00001, statBinDown))
+                 nEmptyDownHistograms += 1
                     
             # Clear uncertainty bins, because they have no effect on LandS/Combine
             for j in range(1, hRate.GetNbinsX()+1):
@@ -112,6 +116,9 @@ def createBinByBinStatUncertHistograms(hRate, minimumStatUncertainty=0.5, xmin=N
     if nBelowMinStatUncert > 0:
         msg = "Rate value for \"%s\" was below minimum statistical uncertainty (hence set to default min of %f) in %d bins" % (hRate.GetName(), minimumStatUncertainty, nBelowMinStatUncert)
         Print(ShellStyles.WarningLabel() + msg, False)
+    if nEmptyDownHistograms > 0:
+        msg = "Rate value for \"%s\" was negative but it could not be forced to zero (this would lead to empty hDown histogram), so it was set to 0.00001 in %d bins" % (hRate.GetName(), nEmptyDownHistograms)
+        Print(ShellStyles.WarningLabel() + msg)
 
     return myList
 

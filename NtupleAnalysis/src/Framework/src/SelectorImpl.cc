@@ -36,7 +36,8 @@ SelectorImpl::SelectorImpl():
   fPrintStep(20000), fPrintLastTime(0), fPrintAdaptCount(0), fPrintStatus(false),
   fOptionString("{}"),
   bIsMC(true),
-  bIsttbar(false)
+  bIsttbar(false),
+  bIsIntermediateNN(false)
 {}
 
 SelectorImpl::~SelectorImpl() { }
@@ -66,6 +67,7 @@ void SelectorImpl::Init(TTree *tree) {
     selector->setSkimCounters(hSkimCounters);
     if(hPUdata) selector->setPileUpWeights(hPUdata,hPUdataUp,hPUdataDown,hPUmc);
     selector->setIsttbar(bIsttbar);
+    selector->setIsIntermediateNN(bIsIntermediateNN);
   }
 }
 
@@ -142,6 +144,10 @@ void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
   const TNamed* ttbarNamed = dynamic_cast<const TNamed*>(fInput->FindObject("isttbar"));
   if (ttbarNamed != nullptr) {
     bIsttbar = (ttbarNamed->GetTitle()[0] == '1');
+  }
+  const TNamed* intermediateNNNamed = dynamic_cast<const TNamed*>(fInput->FindObject("isIntermediateNoNeutral"));
+  if (intermediateNNNamed != nullptr) {
+    bIsIntermediateNN = (intermediateNNNamed->GetTitle()[0] == '1');
   }
   //if (gProofServ) gProofServ->SendAsynMessage(TString::Format("slave %d opt %s",int(fEntries),fOptionString.Data()));
   //if (gProofServ) gProofServ->SendAsynMessage(TString::Format("********** %d %s", gProofServ->GetTotSessions(), gProofServ->GetOrdinal()));
