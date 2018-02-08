@@ -167,8 +167,8 @@ class ModuleBuilder:
             self._dsetMgr.remove(filter(lambda name: d in name, self._dsetMgr.getAllDatasetNames()))
         
         # Print final dataset info
-        self._dsetMgr.PrintInfo()
-
+        if opts.verbose:
+            self._dsetMgr.PrintInfo()
 
         # Obtain luminosity
         self._luminosity = self._dsetMgr.getDataset("Data").getLuminosity()
@@ -396,13 +396,14 @@ def importNormFactors(era, searchMode, optimizationMode, multicrabDirName):
     normFactorsImport = __import__(srcBase)
     
     # Get the function definition
-    myNormFactorsSafetyCheck = getattr(normFactorsImport, "QCDInvertedNormalizationSafetyCheck") #FIXME - What does this do?
-    
+    myNormFactorsSafetyCheck = getattr(normFactorsImport, "QCDInvertedNormalizationSafetyCheck")
     Verbose("Check that the era=%s, searchMode=%s, optimizationMode=%s info matches!" % (era, searchMode, optimizationMode) )
     myNormFactorsSafetyCheck(era, searchMode, optimizationMode)
 
     # Obtain normalization factors
     myNormFactorsImport = getattr(normFactorsImport, "QCDNormalization")
+
+    # Systematic Variations
     msg = "Disabled NormFactors SystVar Fake Weighting Up/Down"
     Print(ShellStyles.WarningLabel() + msg, True)    
     # myNormFactorsImportSystVarFakeWeightingDown = getattr(normFactorsImport, "QCDPlusEWKFakeTausNormalizationSystFakeWeightingVarDown") #FIXME
@@ -413,10 +414,11 @@ def importNormFactors(era, searchMode, optimizationMode, multicrabDirName):
     if "FakeB" in opts.analysisName:
         myNormFactors[opts.normFactorKey] = myNormFactorsImport
     elif "GenuineB" in opts.analysisName:
-        myNormFactors[opts.normFactorKey] = {'Inclusive': 1.0} #fime: does the EWKGenuineB require normalisation?
+        myNormFactors[opts.normFactorKey] = {'Inclusive': 1.0}
     else:
         raise Exception("This should not be reached!")
-    # Inform user of normalisation factos
+
+    # Inform user of normalisation factors
     msg = "Obtained %s normalisation factor dictionary. The values are:" % (ShellStyles.NoteStyle() + opts.normFactorKey + ShellStyles.NormalStyle() )
     Print(msg, True)
     for i, k in  enumerate(myNormFactors[opts.normFactorKey], 1):
@@ -628,7 +630,7 @@ if __name__ == "__main__":
     EWK_SRC          = DATA_SRC + "EWKGenuineB" # FakeB = Data - EWK GenuineB
     NORM_DATA_SRC    = DATA_SRC + "EWKGenuineB" 
     NORM_EWK_SRC     = DATA_SRC + "EWKGenuineB"
-    INCLUSIVE_ONLY   = True
+    INCLUSIVE_ONLY   = False #True
     MULTICRAB        = None
     SHAPE            = ["TrijetMass"]
     NORMFACTOR_KEY   = "nominal"
