@@ -74,7 +74,7 @@ muVeto = PSet(
     muonPtCut         = 10.0,        # sync: 10.0
     muonEtaCut        = 2.4,         # sync:  2.4
     muonID            = "muIDLoose", # options: "muIDLoose", "muIDMedium", "muIDTight"
-    muonIsolation     = "veto",      # options: "veto", "tight")
+    muonIsolation     = "veto",      # options: "veto", "tight"
     muonIsolType      = "mini",      # options: "mini", "default"
 )
 
@@ -147,7 +147,7 @@ fatjetSoftDropSelection = PSet(
 bjetSelection = PSet(
     triggerMatchingApply      = False,
     triggerMatchingCone       = 0.1,  # DeltaR for matching offline bjet with trigger::TriggerBjet
-    jetPtCuts                 = [40.0], # [default: [40.0, 40.0, 30.0] ]
+    jetPtCuts                 = [40.0, 40.0, 30.0],
     jetEtaCuts                = [2.4],
     bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
     bjetDiscrWorkingPoint     = "Medium",
@@ -226,7 +226,7 @@ topSelectionBDT = PSet(
 # FakeB Measurement Options
 #================================================================================================
 fakeBMeasurement = PSet(
-    prelimTopMVACutValue              = 0.60,     # [default: 0.60]
+    prelimTopMVACutValue              = 0.50,     # [default: 0.60]
     prelimTopMVACutDirection          =  ">=",    # [default: ">="]
     # CSVv2-M (Baseline b-jets)
     numberOfBJetsCutValue             = 2,        # [VR, CR2: 2   , CR3, CR4: 1   ]
@@ -243,6 +243,11 @@ fakeBMeasurement = PSet(
     LdgTopMVACutDirection             = topSelectionBDT.LdgMVACutDirection, 
     SubldgTopMVACutValue              = topSelectionBDT.SubldgMVACutValue, # [VR CR2: 0.8 , CR3, CR4: 0.8 ]
     SubldgTopMVACutDirection          = "<",                               # [VR CR2: ">=", CR3, CR4: "<" ]
+    # All bjets (CSVv2-M and CSVv2-L)
+    allBJetsPtCuts        = bjetSelection.jetPtCuts,
+    allBJetsEtaCuts       = bjetSelection.jetEtaCuts,
+    allBJetsNCutValue     = bjetSelection.numberOfBJetsCutValue,
+    allBJetsNCutDirection = bjetSelection.numberOfBJetsCutDirection
     )
 
 
@@ -267,10 +272,10 @@ commonPlotsOptions = PSet(
     htBins            = PSet(nBins = 500, axisMin =  0.0, axisMax = 5000.0), # 10 GeV bin width 
     bjetDiscrBins     = PSet(nBins = 120, axisMin =  0.0, axisMax =    1.2),
     angularCuts1DBins = PSet(nBins =  52, axisMin =  0.0, axisMax =  260.0), 
-    topMassBins       = PSet(nBins = 300, axisMin =  0.0, axisMax = 1500.0), # 5 GeV bin width 
-    wMassBins         = PSet(nBins = 200, axisMin =  0.0, axisMax = 1000.0), # 5 GeV bin width 
-    mtBins            = PSet(nBins = 800, axisMin =  0.0, axisMax = 4000.0), # 5 GeV bin width
-    invMassBins       = PSet(nBins = 800, axisMin =  0.0, axisMax = 4000.0), # 5 GeV bin width    
+    topMassBins       = PSet(nBins = 300, axisMin =  0.0, axisMax = 1500.0), #  5 GeV bin width 
+    wMassBins         = PSet(nBins = 200, axisMin =  0.0, axisMax = 1000.0), #  5 GeV bin width 
+    mtBins            = PSet(nBins = 800, axisMin =  0.0, axisMax = 4000.0), #  5 GeV bin width
+    invMassBins       = PSet(nBins = 200, axisMin =  0.0, axisMax = 4000.0), # 20 GeV bin width    
 )
 
 #================================================================================================

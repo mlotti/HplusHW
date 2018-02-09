@@ -1,25 +1,24 @@
 #!/usr/bin/env python
 '''
-Description:
+DESCRIPTION:
 Script that plots Data/MC for all histograms under a given folder (passsed as option to the script)
 Good for sanity checks for key points in the cut-flow
 
-Usage:
+
+USAGE:
 ./plot_DataMC.py -m <pseudo_mcrab_directory> [opts]
 
 
-Examples:
+EXAMPLES:
 ./plot_DataMC.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_TopCut10_171012_011451 --folder jetSelection_ --url
 ./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurement --ratio
 ./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurementEWKGenuineB --onlyMC
 ./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurementEWKFakeB --onlyMC --nostack
-
-Last Used:
 ./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --mergeEWK --nostack --onlyMC
 
+LAST USED:
+./plot_DataMC.py -m FakeBMeasurement_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p50to085_180129_133455/ --folder counters/weighted --url --ratio
 
-Useful Paths:
-/uscms_data/d3/aattikis/workspace/pseudo-multicrab/QCDMeaurement/TopSelectionBDT/
 '''
 
 #================================================================================================ 
@@ -199,26 +198,24 @@ def main(opts):
         # Do Data-MC histograms with DataDriven QCD
         folder     = opts.folder
         histoList  = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(folder)
-        histoPaths = [os.path.join(folder, h) for h in histoList]
-        for h in histoPaths:
+        histoPaths1 = [os.path.join(folder, h) for h in histoList]
+        histoPaths2 = [h for h in histoPaths1 if "jet" not in h.lower()]
+        nHistos     = len(histoPaths2)
 
-            # Re-arrange dataset order if after top selection!
-            if "AfterAllSelections" in h:
-                if "noTop" in datasetsMgr.getAllDatasetNames():
-                    s = newOrder.pop( newOrder.index("noTop") )
-                    newOrder.insert(len(newOrder), s) 
-                    datasetsMgr.selectAndReorder(newOrder)
+        # For-loop: All histograms
+        for i, h in enumerate(histoPaths2, 1):
+            msg   = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % i, "/", "%s:" % (nHistos), h)
+            Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), i==1)
+            PlotHistograms(datasetsMgr, h, intLumi)
 
-            # Plot the histograms!
-            if "jet" in h.lower():
-                continue
-            DataMCHistograms(datasetsMgr, h, intLumi)
+    savePath = opts.saveDir
+    if opts.url:
+        savePath = opts.saveDir.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
+    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + savePath + ShellStyles.NormalStyle()), True)
     return
 
 def GetHistoKwargs(h, opts):
-    _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": 0.1}
-    if opts.mergeEWK:
-        _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": -0.12}    
+    _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": 0.1}    
     logY    = True
     _yLabel = "Events / %.0f "
     yMin    = 1e0
@@ -231,8 +228,12 @@ def GetHistoKwargs(h, opts):
         "ylabel"           : _yLabel,
         "rebinX"           : 1,
         "rebinY"           : None,
-        "ratioYlabel"      : "Data/MC",
+        "ratioYlabel"      : "Data/Bkg. ",
         "ratio"            : opts.ratio,
+        "ratioCreateLegend": True,
+        "ratioType"        : "errorScale",
+        "ratioErrorOptions": {"numeratorStatSyst": False},
+        "ratioMoveLegend"  : {"dx": -0.51, "dy": 0.03, "dh": -0.05},
         "stackMCHistograms": not opts.nostack,
         "ratioInvert"      : False, 
         "addMCUncertainty" : True, 
@@ -469,19 +470,18 @@ def GetHistoKwargs(h, opts):
 
     if "counters" in opts.folder:
         ROOT.gStyle.SetLabelSize(16.0, "X")        
-        # ROOT.gStyle.SetLabelOffset(1.2)
-        if opts.ratio:
-            kwargs["moveLegend"] = {"dx": -0.52, "dy": -0.55, "dh": 0.0}
-        else:
-            kwargs["moveLegend"] = {"dx": -0.52, "dy": -0.45, "dh": 0.0}
+        kwargs["moveLegend"] = {"dx": -500.0, "dy": -500.0, "dh": -500.0}
+        #if opts.ratio:
+        #    kwargs["moveLegend"] = {"dx": -0.52, "dy": -0.55, "dh": 0.0}
+        #else:
+        #    kwargs["moveLegend"] = {"dx": -0.52, "dy": -0.45, "dh": 0.0}
             
-        
     if h == "counter":
         ROOT.gStyle.SetLabelSize(16.0, "X")
         xMin = 17  # 15 = jets selection, 16 = bjets selection, 17 = baseline: bjets selection, 18 = bjets SF
         xMax = 29
-        kwargs["opts"]   = {"xmin": xMin, "ymin": 8e-2, "ymax": 3e6}#"ymaxfactor": yMaxF}
-        kwargs["moveLegend"] = {"dx": -0.52, "dy": -0.38, "dh": 0.1}
+        kwargs["opts"] = {"xmin": xMin, "ymin": 1e0, "ymax": 5e6}#"ymaxfactor": yMaxF}
+        kwargs["moveLegend"] = {"dx": -500.0, "dy": -500.0, "dh": -500.0}
 
     if "IsolPt" in h:
         ROOT.gStyle.SetNdivisions(8, "X")
@@ -696,7 +696,7 @@ def getHisto(datasetsMgr, histoName, dataset):
     return h
 
 
-def DataMCHistograms(datasetsMgr, histoName, intLumi):
+def PlotHistograms(datasetsMgr, histoName, intLumi):
     Verbose("Plotting Data-MC Histograms")
 
     # Skip 2-D plots
@@ -751,9 +751,10 @@ def DataMCHistograms(datasetsMgr, histoName, intLumi):
         p.histoMgr.forHisto(opts.signal, styles.getSignalStyleHToTB_M(opts.signalMass))
 
     # p.histoMgr.forHisto(opts.signalMass, styles.getSignalStyleHToTB())
-    p.histoMgr.setHistoLegendLabelMany({
-            "QCD": "QCD (MC)",
-            })
+    if "QCD" in datasetsMgr.getAllDatasetNames():
+        p.histoMgr.setHistoLegendLabelMany({
+                "QCD": "QCD (MC)",
+                })
     
     # Apply blinding of signal region
     if "blindingRangeString" in kwargs_:
@@ -769,7 +770,7 @@ def DataMCHistograms(datasetsMgr, histoName, intLumi):
         replaceBinLabels(p, histoName)
 
     # Save the plots in custom list of saveFormats
-    SavePlot(p, saveName, os.path.join(opts.saveDir, "DataMC", opts.optMode), [".png"])#, ".pdf"] )
+    SavePlot(p, saveName, os.path.join(opts.saveDir, opts.folder, opts.optMode), [".png", ".pdf"] )
     return
 
 def replaceBinLabels(p, histoName):
@@ -824,9 +825,9 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
         saveNameURL = saveName + ext
         saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
         if opts.url:
-            Print(saveNameURL, i==0)
+            Verbose(saveNameURL, i==0)
         else:
-            Print(saveName + ext, i==0)
+            Verbose(saveName + ext, i==0)
         plot.saveAs(saveName, formats=saveFormats)
     return
 
@@ -957,7 +958,7 @@ if __name__ == "__main__":
         mcrabDir = rchop(opts.mcrab, "/")
         if len(mcrabDir.split("/")) > 1:
             mcrabDir = mcrabDir.split("/")[-1]
-        opts.saveDir += mcrabDir + "/" + opts.folder
+        opts.saveDir += mcrabDir + "/DataMC"
 
 
     # Sanity check

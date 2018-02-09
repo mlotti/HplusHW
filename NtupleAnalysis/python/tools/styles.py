@@ -247,8 +247,17 @@ signalHH150Style = signalHHStyle.clone()
 signalHH155Style = signalHHStyle.clone()
 signalHH160Style = signalHHStyle.clone()
 
+signal145Style = signalStyle.clone()
+signal150Style = signalStyle.clone()
+signal155Style = signalStyle.clone()
+signal160Style = signalStyle.clone()
+signal165Style = signalStyle.clone()
+signal170Style = signalStyle.clone()
+signal175Style = signalStyle.clone()
 signal180Style = signalStyle.clone()
 signal190Style = signalStyle.clone()
+signal200Style = signalStyle.clone()
+
 """
 # Problem with StyleCompound: solid signal histo in control plots. 13122016/SL
 signal200Style = StyleCompound([
@@ -275,21 +284,26 @@ signal500Style = StyleCompound([
         StyleFill(fillStyle=1001, fillColor=ROOT.kBlue+3), 
         StyleLine(lineStyle=ROOT.kDashed, lineWidth=3, lineColor=ROOT.kBlue+3) ])
 """
-signal200Style = signalStyle.clone()
-signal220Style = signalStyle.clone()
-signal250Style = signalStyle.clone()
-signal300Style = signalStyle.clone()   
-signal350Style = signalStyle.clone()   
-signal400Style = signalStyle.clone()   
-signal500Style = signalStyle.clone()   
-signal600Style = signalStyle.clone()
-signal700Style = signalStyle.clone()
-signal750Style = signalStyle.clone()
-signal800Style = signalStyle.clone()
+signal180Style  = signalStyle.clone()
+signal200Style  = signalStyle.clone()
+signal220Style  = signalStyle.clone()
+signal250Style  = signalStyle.clone()
+signal300Style  = signalStyle.clone()   
+signal350Style  = signalStyle.clone()   
+signal400Style  = signalStyle.clone()   
+signal500Style  = signalStyle.clone()   
+signal600Style  = signalStyle.clone()
+signal700Style  = signalStyle.clone()
+signal750Style  = signalStyle.clone()
+signal800Style  = signalStyle.clone()
 signal1000Style = signalStyle.clone()
 signal1500Style = signalStyle.clone()
 signal2000Style = signalStyle.clone()
+signal2500Style = signalStyle.clone()
 signal3000Style = signalStyle.clone()
+signal5000Style = signalStyle.clone()
+signal7000Style = signalStyle.clone()
+signal1000Style = signalStyle.clone()
 
 dibStyle          = Style(ROOT.kMultiply, ROOT.kBlue-4)
 dyStyle           = Style(ROOT.kStar, ROOT.kTeal-9)
@@ -343,9 +357,9 @@ invertedLineStyle = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.
 altQCDStyle       = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange-2, markerSizes=None, markerStyle=ROOT.kFullDiamond),
                                    StyleLine(lineColor=ROOT.kOrange-2, lineStyle=ROOT.kSolid, lineWidth=3), 
                                    StyleFill(fillColor=ROOT.kOrange-2, fillStyle=3001)])
-genuineBStyle     = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kGreen+2, markerSizes=None, markerStyle=ROOT.kFullCircle),
-                                   StyleLine(lineColor=ROOT.kGreen+2, lineStyle=ROOT.kSolid, lineWidth=3), 
-                                   StyleFill(fillColor=ROOT.kGreen+2, fillStyle=3001)])
+genuineBStyle     = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kAzure-2, markerSizes=None, markerStyle=ROOT.kFullCircle),
+                                   StyleLine(lineColor=ROOT.kAzure-2, lineStyle=ROOT.kSolid, lineWidth=3), 
+                                   StyleFill(fillColor=ROOT.kAzure-2, fillStyle=1001)])
 genuineBLineStyle = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kGreen+2, markerSizes=None, markerStyle=ROOT.kFullCircle),
                                    StyleLine(lineColor=ROOT.kGreen+2, lineStyle=ROOT.kSolid, lineWidth=3), 
                                    StyleFill(fillColor=ROOT.kGreen+2, fillStyle=0)])
@@ -480,15 +494,15 @@ def getQCDLineStyle():
 def getABCDStyle(region):
     if region == "SR":
         return FakeBStyle1
-    elif region == "CR1":
+    elif region == "CR1" or region == "CRone":
         return FakeBStyle2
     elif region == "VR":
         return FakeBStyle3
-    elif region == "CR2":
+    elif region == "CR2" or region == "CRtwo":
         return FakeBStyle4
-    elif region == "CR3":
+    elif region == "CR3" or region == "CRthree":
         return FakeBStyle5
-    elif region == "CR4":
+    elif region == "CR4" or region == "CRfour":
         return FakeBStyle6
     else:
         print "Invalid region \"%s\". Returning qcd style" % (region)

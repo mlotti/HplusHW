@@ -71,6 +71,12 @@ void EventCounter::Counter::bookWeighted(TDirectory *dir) {
 }
 void EventCounter::Counter::serialize() {
   if (counter == nullptr) return;
+  if (labels.size() > 2 && weights[0]==0 && weights[1]==0){
+    weights[1] = weights[2]*values[1]/values[2];
+    weightsSquared[1] = values[1];
+    weights[0] = weights[2]*values[0]/values[2];
+    weightsSquared[0] = values[0];
+  }
   for(size_t i=0; i<labels.size(); ++i) {
     size_t bin = i+1;
     counter->SetBinContent(bin, values[i]);

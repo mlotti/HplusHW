@@ -201,7 +201,8 @@ ElectronSelection::Data ElectronSelection::privateAnalyze(const Event& event) {
 
     // Apply cut on electron ID
     bool passedCutBasedID = electron.electronIDDiscriminator();
-    bool passedMVA        = getMVADecision(electron, fElectronMVACut); 
+    bool passedMVA        = false;
+    if(fElectronMVA) passedMVA = getMVADecision(electron, fElectronMVACut); 
     bool passedIDCut      = false;
     if (fElectronMVA) passedIDCut = passedMVA;
     else passedIDCut = passedCutBasedID;

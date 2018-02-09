@@ -37,11 +37,14 @@ private:
   const std::string cfg_BaselineBJetsDiscriminatorWP;
   const DirectionalCut<double> cfg_LdgTopMVACut;
   const DirectionalCut<double> cfg_SubldgTopMVACut;
+  const std::vector<double> cfg_AllBJetsPtCuts;
+  const std::vector<double> cfg_AllBJetsEtaCuts; 
+  const DirectionalCut<int> cfg_AllBJetsNCut; 
 
   // Common plots
   CommonPlots fCommonPlots;
-  // CommonPlots fNormalizationSystematicsSignalRegion;  // todo
-  // CommonPlots fNormalizationSystematicsControlRegion; // todo
+  // CommonPlots fNormalizationSystematicsSignalRegion;  // fixme
+  // CommonPlots fNormalizationSystematicsControlRegion; // fixme
 
   // Event selection classes and event counters (in same order like they are applied)
   Count cAllEvents;
@@ -75,78 +78,74 @@ private:
   const std::vector<Jet> GetInvertedBJets(const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
   bool IsGenuineBEvent(const std::vector<Jet>& bJets);
 
+  // Splitted histograms
+  HistoSplitter::SplittedTripletTH1s hLdgTrijetPt_CRone;
+  HistoSplitter::SplittedTripletTH1s hLdgTrijetMass_CRone;
+  HistoSplitter::SplittedTripletTH1s hLdgTrijetBJetBdisc_CRone;
+  HistoSplitter::SplittedTripletTH1s hTetrajetBJetPt_CRone;
+  HistoSplitter::SplittedTripletTH1s hTetrajetBJetEta_CRone;
+  HistoSplitter::SplittedTripletTH1s hTetrajetBJetBdisc_CRone;
+  HistoSplitter::SplittedTripletTH1s hLdgTetrajetPt_CRone;
+  HistoSplitter::SplittedTripletTH1s hLdgTetrajetMass_CRone;
+  //
+  HistoSplitter::SplittedTripletTH1s hLdgTrijetPt_SR;
+  HistoSplitter::SplittedTripletTH1s hLdgTrijetMass_SR;
+  HistoSplitter::SplittedTripletTH1s hLdgTrijetBJetBdisc_SR;
+  HistoSplitter::SplittedTripletTH1s hTetrajetBJetPt_SR;
+  HistoSplitter::SplittedTripletTH1s hTetrajetBJetEta_SR;
+  HistoSplitter::SplittedTripletTH1s hTetrajetBJetBdisc_SR;
+  HistoSplitter::SplittedTripletTH1s hLdgTetrajetPt_SR;
+  HistoSplitter::SplittedTripletTH1s hLdgTetrajetMass_SR;
+  //
+  HistoSplitter::SplittedTripletTH1s hLdgTrijetPt_CRtwo;
+  HistoSplitter::SplittedTripletTH1s hLdgTrijetMass_CRtwo;
+  HistoSplitter::SplittedTripletTH1s hLdgTrijetBJetBdisc_CRtwo;
+  HistoSplitter::SplittedTripletTH1s hTetrajetBJetPt_CRtwo;
+  HistoSplitter::SplittedTripletTH1s hTetrajetBJetEta_CRtwo;
+  HistoSplitter::SplittedTripletTH1s hTetrajetBJetBdisc_CRtwo;
+  HistoSplitter::SplittedTripletTH1s hLdgTetrajetPt_CRtwo;
+  HistoSplitter::SplittedTripletTH1s hLdgTetrajetMass_CRtwo;
+  //
+  HistoSplitter::SplittedTripletTH1s hLdgTrijetPt_VR;
+  HistoSplitter::SplittedTripletTH1s hLdgTrijetMass_VR;
+  HistoSplitter::SplittedTripletTH1s hLdgTrijetBJetBdisc_VR;
+  HistoSplitter::SplittedTripletTH1s hTetrajetBJetPt_VR;
+  HistoSplitter::SplittedTripletTH1s hTetrajetBJetEta_VR;
+  HistoSplitter::SplittedTripletTH1s hTetrajetBJetBdisc_VR;
+  HistoSplitter::SplittedTripletTH1s hLdgTetrajetPt_VR;
+  HistoSplitter::SplittedTripletTH1s hLdgTetrajetMass_VR;
+
   // Sanity checks
   WrappedTH1 *hBaseline_IsGenuineB; 
   WrappedTH1 *hInverted_IsGenuineB; 
 
-  // Normalisation Triplets
-  WrappedTH1Triplet *hBaseline_LdgTrijetMass_AfterStandardSelections;
-  WrappedTH1Triplet *hBaseline_LdgTrijetMass_AfterAllSelections;
-  WrappedTH1Triplet *hBaseline_LdgTrijetMass_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_LdgTrijetMass_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_LdgTrijetMass_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_LdgTrijetMass_AfterCRSelections;
-  
-  // Triplets for Failed (aka inverted) Bjets 
-  WrappedTH1 *hInverted_NFailedBJets_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet1BDisc_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet1Pt_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet1Eta_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet1PdgId_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet1PartonFlavour_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet1HadronFlavour_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet2BDisc_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet2Pt_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet2Eta_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet2PdgId_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet2PartonFlavour_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet2HadronFlavour_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet3BDisc_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet3Pt_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet3Eta_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet3PdgId_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet3PartonFlavour_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet3HadronFlavour_AfterStandardSelections;
-  //
-  WrappedTH1 *hInverted_NFailedBJets_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet1BDisc_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet1Pt_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet1Eta_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet1PdgId_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet1PartonFlavour_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet1HadronFlavour_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet2BDisc_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet2Pt_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet2Eta_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet2PdgId_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet2PartonFlavour_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet2HadronFlavour_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet3BDisc_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet3Pt_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet3Eta_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet3PdgId_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet3PartonFlavour_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet3HadronFlavour_AfterAllSelections;
-  //
-  WrappedTH1 *hInverted_NFailedBJets_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet1BDisc_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet1Pt_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet1Eta_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet1PdgId_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet1PartonFlavour_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet1HadronFlavour_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet2BDisc_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet2Pt_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet2Eta_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet2PdgId_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet2PartonFlavour_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet2HadronFlavour_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet3BDisc_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet3Pt_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet3Eta_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet3PdgId_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet3PartonFlavour_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_FailedBJet3HadronFlavour_AfterCRSelections;
+  // Triplets for failed b-jets (bjet candidates passing pT and eta cuts, but fail b-disc + additional criteria)
+  WrappedTH1 *hNFailedBJets_VR;
+  WrappedTH1Triplet *hFailedBJet1BDisc_VR;
+  WrappedTH1Triplet *hFailedBJet1Pt_VR;
+  WrappedTH1Triplet *hFailedBJet1Eta_VR;
+  WrappedTH1Triplet *hFailedBJet1HadronFlavour_VR;
+  WrappedTH1Triplet *hFailedBJet2BDisc_VR;
+  WrappedTH1Triplet *hFailedBJet2Pt_VR;
+  WrappedTH1Triplet *hFailedBJet2Eta_VR;
+  WrappedTH1Triplet *hFailedBJet2HadronFlavour_VR;
+  WrappedTH1Triplet *hFailedBJet3BDisc_VR;
+  WrappedTH1Triplet *hFailedBJet3Pt_VR;
+  WrappedTH1Triplet *hFailedBJet3Eta_VR;
+  WrappedTH1Triplet *hFailedBJet3HadronFlavour_VR;
+  WrappedTH1 *hNFailedBJets_CRtwo;
+  WrappedTH1Triplet *hFailedBJet1BDisc_CRtwo;
+  WrappedTH1Triplet *hFailedBJet1Pt_CRtwo;
+  WrappedTH1Triplet *hFailedBJet1Eta_CRtwo;
+  WrappedTH1Triplet *hFailedBJet1HadronFlavour_CRtwo;
+  WrappedTH1Triplet *hFailedBJet2BDisc_CRtwo;
+  WrappedTH1Triplet *hFailedBJet2Pt_CRtwo;
+  WrappedTH1Triplet *hFailedBJet2Eta_CRtwo;
+  WrappedTH1Triplet *hFailedBJet2HadronFlavour_CRtwo;
+  WrappedTH1Triplet *hFailedBJet3BDisc_CRtwo;
+  WrappedTH1Triplet *hFailedBJet3Pt_CRtwo;
+  WrappedTH1Triplet *hFailedBJet3Eta_CRtwo;
+  WrappedTH1Triplet *hFailedBJet3HadronFlavour_CRtwo;
 
   // FakeB Triplets (Baseline)
   WrappedTH1Triplet *hBaseline_NBjets_AfterStandardSelections;
@@ -182,6 +181,7 @@ private:
   WrappedTH1Triplet *hBaseline_Jet6Bdisc_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_Jet7Bdisc_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_MET_AfterStandardSelections;
+  WrappedTH1Triplet *hBaseline_HT_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_MVAmax1_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_MVAmax2_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_LdgTetrajetPt_AfterStandardSelections;
@@ -193,10 +193,10 @@ private:
   WrappedTH1Triplet *hBaseline_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_DeltaRLdgTrijetBJetTetrajetBJet_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_LdgTrijetPt_AfterStandardSelections;
-  WrappedTH1Triplet *hBaseline_LdgTrijetM_AfterStandardSelections;
+  WrappedTH1Triplet *hBaseline_LdgTrijetMass_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_LdgTrijetBJetBdisc_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_SubLdgTrijetPt_AfterStandardSelections;
-  WrappedTH1Triplet *hBaseline_SubLdgTrijetM_AfterStandardSelections;
+  WrappedTH1Triplet *hBaseline_SubLdgTrijetMass_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_SubLdgTrijetBJetBdisc_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_LdgDijetPt_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_LdgDijetM_AfterStandardSelections;
@@ -236,6 +236,7 @@ private:
   WrappedTH1Triplet *hBaseline_Jet6Bdisc_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_Jet7Bdisc_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_MET_AfterAllSelections;
+  WrappedTH1Triplet *hBaseline_HT_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_MVAmax1_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_MVAmax2_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_LdgTetrajetPt_AfterAllSelections;
@@ -247,10 +248,10 @@ private:
   WrappedTH1Triplet *hBaseline_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_DeltaRLdgTrijetBJetTetrajetBJet_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_LdgTrijetPt_AfterAllSelections;
-  WrappedTH1Triplet *hBaseline_LdgTrijetM_AfterAllSelections;
+  WrappedTH1Triplet *hBaseline_LdgTrijetMass_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_LdgTrijetBJetBdisc_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_SubLdgTrijetPt_AfterAllSelections;
-  WrappedTH1Triplet *hBaseline_SubLdgTrijetM_AfterAllSelections;
+  WrappedTH1Triplet *hBaseline_SubLdgTrijetMass_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_SubLdgTrijetBJetBdisc_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_LdgDijetPt_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_LdgDijetM_AfterAllSelections;
@@ -290,6 +291,7 @@ private:
   WrappedTH1Triplet *hBaseline_Jet6Bdisc_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_Jet7Bdisc_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_MET_AfterCRSelections;
+  WrappedTH1Triplet *hBaseline_HT_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_MVAmax1_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_MVAmax2_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_LdgTetrajetPt_AfterCRSelections;
@@ -301,10 +303,10 @@ private:
   WrappedTH1Triplet *hBaseline_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_DeltaRLdgTrijetBJetTetrajetBJet_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_LdgTrijetPt_AfterCRSelections;
-  WrappedTH1Triplet *hBaseline_LdgTrijetM_AfterCRSelections;
+  WrappedTH1Triplet *hBaseline_LdgTrijetMass_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_LdgTrijetBJetBdisc_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_SubLdgTrijetPt_AfterCRSelections;
-  WrappedTH1Triplet *hBaseline_SubLdgTrijetM_AfterCRSelections;
+  WrappedTH1Triplet *hBaseline_SubLdgTrijetMass_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_SubLdgTrijetBJetBdisc_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_LdgDijetPt_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_LdgDijetM_AfterCRSelections;
@@ -345,6 +347,7 @@ private:
   WrappedTH1Triplet *hInverted_Jet6Bdisc_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_Jet7Bdisc_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_MET_AfterStandardSelections;
+  WrappedTH1Triplet *hInverted_HT_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_MVAmax1_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_MVAmax2_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_LdgTetrajetPt_AfterStandardSelections;
@@ -356,10 +359,10 @@ private:
   WrappedTH1Triplet *hInverted_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_DeltaRLdgTrijetBJetTetrajetBJet_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_LdgTrijetPt_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_LdgTrijetM_AfterStandardSelections;
+  WrappedTH1Triplet *hInverted_LdgTrijetMass_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_LdgTrijetBJetBdisc_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_SubLdgTrijetPt_AfterStandardSelections;
-  WrappedTH1Triplet *hInverted_SubLdgTrijetM_AfterStandardSelections;
+  WrappedTH1Triplet *hInverted_SubLdgTrijetMass_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_SubLdgTrijetBJetBdisc_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_LdgDijetPt_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_LdgDijetM_AfterStandardSelections;
@@ -399,6 +402,7 @@ private:
   WrappedTH1Triplet *hInverted_Jet6Bdisc_AfterAllSelections;
   WrappedTH1Triplet *hInverted_Jet7Bdisc_AfterAllSelections;
   WrappedTH1Triplet *hInverted_MET_AfterAllSelections;
+  WrappedTH1Triplet *hInverted_HT_AfterAllSelections;
   WrappedTH1Triplet *hInverted_MVAmax1_AfterAllSelections;
   WrappedTH1Triplet *hInverted_MVAmax2_AfterAllSelections;
   WrappedTH1Triplet *hInverted_LdgTetrajetPt_AfterAllSelections;
@@ -410,10 +414,10 @@ private:
   WrappedTH1Triplet *hInverted_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterAllSelections;
   WrappedTH1Triplet *hInverted_DeltaRLdgTrijetBJetTetrajetBJet_AfterAllSelections;
   WrappedTH1Triplet *hInverted_LdgTrijetPt_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_LdgTrijetM_AfterAllSelections;
+  WrappedTH1Triplet *hInverted_LdgTrijetMass_AfterAllSelections;
   WrappedTH1Triplet *hInverted_LdgTrijetBJetBdisc_AfterAllSelections;
   WrappedTH1Triplet *hInverted_SubLdgTrijetPt_AfterAllSelections;
-  WrappedTH1Triplet *hInverted_SubLdgTrijetM_AfterAllSelections;
+  WrappedTH1Triplet *hInverted_SubLdgTrijetMass_AfterAllSelections;
   WrappedTH1Triplet *hInverted_SubLdgTrijetBJetBdisc_AfterAllSelections;
   WrappedTH1Triplet *hInverted_LdgDijetPt_AfterAllSelections;
   WrappedTH1Triplet *hInverted_LdgDijetM_AfterAllSelections;
@@ -453,6 +457,7 @@ private:
   WrappedTH1Triplet *hInverted_Jet6Bdisc_AfterCRSelections;
   WrappedTH1Triplet *hInverted_Jet7Bdisc_AfterCRSelections;
   WrappedTH1Triplet *hInverted_MET_AfterCRSelections;
+  WrappedTH1Triplet *hInverted_HT_AfterCRSelections;
   WrappedTH1Triplet *hInverted_MVAmax1_AfterCRSelections;
   WrappedTH1Triplet *hInverted_MVAmax2_AfterCRSelections;
   WrappedTH1Triplet *hInverted_LdgTetrajetPt_AfterCRSelections;
@@ -464,10 +469,10 @@ private:
   WrappedTH1Triplet *hInverted_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterCRSelections;
   WrappedTH1Triplet *hInverted_DeltaRLdgTrijetBJetTetrajetBJet_AfterCRSelections;
   WrappedTH1Triplet *hInverted_LdgTrijetPt_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_LdgTrijetM_AfterCRSelections;
+  WrappedTH1Triplet *hInverted_LdgTrijetMass_AfterCRSelections;
   WrappedTH1Triplet *hInverted_LdgTrijetBJetBdisc_AfterCRSelections;
   WrappedTH1Triplet *hInverted_SubLdgTrijetPt_AfterCRSelections;
-  WrappedTH1Triplet *hInverted_SubLdgTrijetM_AfterCRSelections;
+  WrappedTH1Triplet *hInverted_SubLdgTrijetMass_AfterCRSelections;
   WrappedTH1Triplet *hInverted_SubLdgTrijetBJetBdisc_AfterCRSelections;
   WrappedTH1Triplet *hInverted_LdgDijetPt_AfterCRSelections;
   WrappedTH1Triplet *hInverted_LdgDijetM_AfterCRSelections;
@@ -492,7 +497,12 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
     cfg_BaselineBJetsDiscriminatorWP(config.getParameter<std::string>("BJetSelection.bjetDiscrWorkingPoint")),
     cfg_LdgTopMVACut(config, "FakeBMeasurement.LdgTopMVACut"),
     cfg_SubldgTopMVACut(config, "FakeBMeasurement.SubldgTopMVACut"),
+    cfg_AllBJetsPtCuts(config.getParameter<std::vector<double>>("FakeBMeasurement.allBJetsPtCuts")),
+    cfg_AllBJetsEtaCuts(config.getParameter<std::vector<double>>("FakeBMeasurement.allBJetsEtaCuts")),
+    cfg_AllBJetsNCut(config, "FakeBMeasurement.allBJetsNCut"),
     fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kFakeBMeasurement, fHistoWrapper),
+    // fNormalizationSystematicsSignalRegion(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kQCDNormalizationSystematicsSignalRegion, fHistoWrapper), // fixme
+    // fNormalizationSystematicsControlRegion(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kQCDNormalizationSystematicsControlRegion, fHistoWrapper),// fixme
     cAllEvents(fEventCounter.addCounter("All events")),
     cTrigger(fEventCounter.addCounter("Passed trigger")),
     fMETFilterSelection(config.getParameter<ParameterSet>("METFilter"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
@@ -505,7 +515,8 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
     // Baseline selection
     cBaselineBTaggingCounter(fEventCounter.addCounter("Baseline: passed b-jet selection")),
     cBaselineBTaggingSFCounter(fEventCounter.addCounter("Baseline: b tag SF")),
-    fBaselineMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
+    // fBaselineMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
+    fBaselineMETSelection(config.getParameter<ParameterSet>("METSelection")),
     // fBaselineTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
     fBaselineTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
     cBaselineSelected(fEventCounter.addCounter("Baseline: selected events")),
@@ -513,7 +524,8 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
     // Inverted selection
     cInvertedBTaggingCounter(fEventCounter.addCounter("Inverted: passed b-jet selection")),
     cInvertedBTaggingSFCounter(fEventCounter.addCounter("Inverted: b tag SF")),
-    fInvertedMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
+    // fInvertedMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
+    fInvertedMETSelection(config.getParameter<ParameterSet>("METSelection")),
     // fInvertedTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
     fInvertedTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
     cInvertedSelected(fEventCounter.addCounter("Inverted: selected events")),
@@ -521,81 +533,71 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
 { }
 
 
-FakeBMeasurement::~FakeBMeasurement() {
-  // fCommonPlots.getHistoSplitter().deleteHistograms(hNormalizationBaselineTauAfterStdSelections);
-  // fCommonPlots.getHistoSplitter().deleteHistograms(hMtBaselineTauAfterStdSelections);
+FakeBMeasurement::~FakeBMeasurement() {  
+  // CRone (Baseline b-jets, Inverted Top MVA2)
+  fCommonPlots.getHistoSplitter().deleteHistograms(hLdgTrijetPt_CRone);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hLdgTrijetMass_CRone);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hLdgTrijetBJetBdisc_CRone);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hTetrajetBJetPt_CRone);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hTetrajetBJetEta_CRone);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hTetrajetBJetBdisc_CRone);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hLdgTetrajetPt_CRone);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hLdgTetrajetMass_CRone);
+  // SR (Baseline b-jets, Baseline Top MVA2)
+  fCommonPlots.getHistoSplitter().deleteHistograms(hLdgTrijetPt_SR);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hLdgTrijetMass_SR);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hLdgTrijetBJetBdisc_SR);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hTetrajetBJetPt_SR);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hTetrajetBJetEta_SR);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hTetrajetBJetBdisc_SR);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hLdgTetrajetPt_SR);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hLdgTetrajetMass_SR);
+  // VR (Inverted b-jets, Inverted Top MVA2)
+  fCommonPlots.getHistoSplitter().deleteHistograms(hLdgTrijetPt_CRtwo);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hLdgTrijetMass_CRtwo);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hLdgTrijetBJetBdisc_CRtwo);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hTetrajetBJetPt_CRtwo);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hTetrajetBJetEta_CRtwo);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hTetrajetBJetBdisc_CRtwo);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hLdgTetrajetPt_CRtwo);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hLdgTetrajetMass_CRtwo);
+  // VR (Inverted b-jets, Baseline Top MVA2)
+  fCommonPlots.getHistoSplitter().deleteHistograms(hLdgTrijetPt_VR);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hLdgTrijetMass_VR);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hLdgTrijetBJetBdisc_VR);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hTetrajetBJetPt_VR);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hTetrajetBJetEta_VR);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hTetrajetBJetBdisc_VR);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hLdgTetrajetPt_VR);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hLdgTetrajetMass_VR);
 
-  delete hBaseline_IsGenuineB;
-  delete hInverted_IsGenuineB;
-
-  // Normalization Triplets
-  delete hBaseline_LdgTrijetMass_AfterStandardSelections;
-  delete hBaseline_LdgTrijetMass_AfterAllSelections;
-  delete hBaseline_LdgTrijetMass_AfterCRSelections;
-  delete hInverted_LdgTrijetMass_AfterStandardSelections;
-  delete hInverted_LdgTrijetMass_AfterAllSelections;
-  delete hInverted_LdgTrijetMass_AfterCRSelections;
-
-  // Triplets for Failed (aka inverted) Bjets 
-  delete hInverted_NFailedBJets_AfterStandardSelections;
-  delete hInverted_FailedBJet1BDisc_AfterStandardSelections;
-  delete hInverted_FailedBJet1Pt_AfterStandardSelections;
-  delete hInverted_FailedBJet1Eta_AfterStandardSelections;
-  delete hInverted_FailedBJet1PdgId_AfterStandardSelections;
-  delete hInverted_FailedBJet1PartonFlavour_AfterStandardSelections;
-  delete hInverted_FailedBJet1HadronFlavour_AfterStandardSelections;
-  delete hInverted_FailedBJet2BDisc_AfterStandardSelections;
-  delete hInverted_FailedBJet2Pt_AfterStandardSelections;
-  delete hInverted_FailedBJet2Eta_AfterStandardSelections;
-  delete hInverted_FailedBJet2PdgId_AfterStandardSelections;
-  delete hInverted_FailedBJet2PartonFlavour_AfterStandardSelections;
-  delete hInverted_FailedBJet2HadronFlavour_AfterStandardSelections;
-  delete hInverted_FailedBJet3BDisc_AfterStandardSelections;
-  delete hInverted_FailedBJet3Pt_AfterStandardSelections;
-  delete hInverted_FailedBJet3Eta_AfterStandardSelections;
-  delete hInverted_FailedBJet3PdgId_AfterStandardSelections;
-  delete hInverted_FailedBJet3PartonFlavour_AfterStandardSelections;
-  delete hInverted_FailedBJet3HadronFlavour_AfterStandardSelections;
-
-  delete hInverted_NFailedBJets_AfterAllSelections;
-  delete hInverted_FailedBJet1BDisc_AfterAllSelections;
-  delete hInverted_FailedBJet1Pt_AfterAllSelections;
-  delete hInverted_FailedBJet1Eta_AfterAllSelections;
-  delete hInverted_FailedBJet1PdgId_AfterAllSelections;
-  delete hInverted_FailedBJet1PartonFlavour_AfterAllSelections;
-  delete hInverted_FailedBJet1HadronFlavour_AfterAllSelections;
-  delete hInverted_FailedBJet2BDisc_AfterAllSelections;
-  delete hInverted_FailedBJet2Pt_AfterAllSelections;
-  delete hInverted_FailedBJet2Eta_AfterAllSelections;
-  delete hInverted_FailedBJet2PdgId_AfterAllSelections;
-  delete hInverted_FailedBJet2PartonFlavour_AfterAllSelections;
-  delete hInverted_FailedBJet2HadronFlavour_AfterAllSelections;
-  delete hInverted_FailedBJet3BDisc_AfterAllSelections;
-  delete hInverted_FailedBJet3Pt_AfterAllSelections;
-  delete hInverted_FailedBJet3Eta_AfterAllSelections;
-  delete hInverted_FailedBJet3PdgId_AfterAllSelections;
-  delete hInverted_FailedBJet3PartonFlavour_AfterAllSelections;
-  delete hInverted_FailedBJet3HadronFlavour_AfterAllSelections;
-
-  delete hInverted_NFailedBJets_AfterCRSelections;
-  delete hInverted_FailedBJet1BDisc_AfterCRSelections;
-  delete hInverted_FailedBJet1Pt_AfterCRSelections;
-  delete hInverted_FailedBJet1Eta_AfterCRSelections;
-  delete hInverted_FailedBJet1PdgId_AfterCRSelections;
-  delete hInverted_FailedBJet1PartonFlavour_AfterCRSelections;
-  delete hInverted_FailedBJet1HadronFlavour_AfterCRSelections;
-  delete hInverted_FailedBJet2BDisc_AfterCRSelections;
-  delete hInverted_FailedBJet2Pt_AfterCRSelections;
-  delete hInverted_FailedBJet2Eta_AfterCRSelections;
-  delete hInverted_FailedBJet2PdgId_AfterCRSelections;
-  delete hInverted_FailedBJet2PartonFlavour_AfterCRSelections;
-  delete hInverted_FailedBJet2HadronFlavour_AfterCRSelections;
-  delete hInverted_FailedBJet3BDisc_AfterCRSelections;
-  delete hInverted_FailedBJet3Pt_AfterCRSelections;
-  delete hInverted_FailedBJet3Eta_AfterCRSelections;
-  delete hInverted_FailedBJet3PdgId_AfterCRSelections;
-  delete hInverted_FailedBJet3PartonFlavour_AfterCRSelections;
-  delete hInverted_FailedBJet3HadronFlavour_AfterCRSelections;
+  // Triplets for failed b-jets (bjet candidates passing pT and eta cuts, but fail b-disc + additional criteria)
+  delete hNFailedBJets_VR;
+  delete hFailedBJet1BDisc_VR;
+  delete hFailedBJet1Pt_VR;
+  delete hFailedBJet1Eta_VR;
+  delete hFailedBJet1HadronFlavour_VR;
+  delete hFailedBJet2BDisc_VR;
+  delete hFailedBJet2Pt_VR;
+  delete hFailedBJet2Eta_VR;
+  delete hFailedBJet2HadronFlavour_VR;
+  delete hFailedBJet3BDisc_VR;
+  delete hFailedBJet3Pt_VR;
+  delete hFailedBJet3Eta_VR;
+  delete hFailedBJet3HadronFlavour_VR;
+  delete hNFailedBJets_CRtwo;
+  delete hFailedBJet1BDisc_CRtwo;
+  delete hFailedBJet1Pt_CRtwo;
+  delete hFailedBJet1Eta_CRtwo;
+  delete hFailedBJet1HadronFlavour_CRtwo;
+  delete hFailedBJet2BDisc_CRtwo;
+  delete hFailedBJet2Pt_CRtwo;
+  delete hFailedBJet2Eta_CRtwo;
+  delete hFailedBJet2HadronFlavour_CRtwo;
+  delete hFailedBJet3BDisc_CRtwo;
+  delete hFailedBJet3Pt_CRtwo;
+  delete hFailedBJet3Eta_CRtwo;
+  delete hFailedBJet3HadronFlavour_CRtwo;
 
   // FakeB Triplets (Baseline)
   delete hBaseline_NBjets_AfterStandardSelections;
@@ -637,6 +639,7 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hBaseline_Jet7Bdisc_AfterStandardSelections;
   // hBaseline_JetsBdisc_AfterStandardSelections.clear();
   delete hBaseline_MET_AfterStandardSelections;
+  delete hBaseline_HT_AfterStandardSelections;
   delete hBaseline_MVAmax1_AfterStandardSelections;
   delete hBaseline_MVAmax2_AfterStandardSelections;
   delete hBaseline_LdgTetrajetPt_AfterStandardSelections;
@@ -648,10 +651,10 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hBaseline_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterStandardSelections;
   delete hBaseline_DeltaRLdgTrijetBJetTetrajetBJet_AfterStandardSelections;
   delete hBaseline_LdgTrijetPt_AfterStandardSelections;
-  delete hBaseline_LdgTrijetM_AfterStandardSelections;
+  delete hBaseline_LdgTrijetMass_AfterStandardSelections;
   delete hBaseline_LdgTrijetBJetBdisc_AfterStandardSelections;
   delete hBaseline_SubLdgTrijetPt_AfterStandardSelections;
-  delete hBaseline_SubLdgTrijetM_AfterStandardSelections;
+  delete hBaseline_SubLdgTrijetMass_AfterStandardSelections;
   delete hBaseline_SubLdgTrijetBJetBdisc_AfterStandardSelections;
   delete hBaseline_LdgDijetPt_AfterStandardSelections;
   delete hBaseline_LdgDijetM_AfterStandardSelections;
@@ -697,6 +700,7 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hBaseline_Jet7Bdisc_AfterAllSelections;
   //  hBaseline_JetsBdisc_AfterAllSelections.clear();
   delete hBaseline_MET_AfterAllSelections;
+  delete hBaseline_HT_AfterAllSelections;
   delete hBaseline_MVAmax1_AfterAllSelections;
   delete hBaseline_MVAmax2_AfterAllSelections;
   delete hBaseline_LdgTetrajetPt_AfterAllSelections;
@@ -708,10 +712,10 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hBaseline_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterAllSelections;
   delete hBaseline_DeltaRLdgTrijetBJetTetrajetBJet_AfterAllSelections;
   delete hBaseline_LdgTrijetPt_AfterAllSelections;
-  delete hBaseline_LdgTrijetM_AfterAllSelections;
+  delete hBaseline_LdgTrijetMass_AfterAllSelections;
   delete hBaseline_LdgTrijetBJetBdisc_AfterAllSelections;
   delete hBaseline_SubLdgTrijetPt_AfterAllSelections;
-  delete hBaseline_SubLdgTrijetM_AfterAllSelections;
+  delete hBaseline_SubLdgTrijetMass_AfterAllSelections;
   delete hBaseline_SubLdgTrijetBJetBdisc_AfterAllSelections;
   delete hBaseline_LdgDijetPt_AfterAllSelections;
   delete hBaseline_LdgDijetM_AfterAllSelections;
@@ -757,6 +761,7 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hBaseline_Jet7Bdisc_AfterCRSelections;
   //  hBaseline_JetsBdisc_AfterCRSelections.clear();
   delete hBaseline_MET_AfterCRSelections;
+  delete hBaseline_HT_AfterCRSelections;
   delete hBaseline_MVAmax1_AfterCRSelections;
   delete hBaseline_MVAmax2_AfterCRSelections;
   delete hBaseline_LdgTetrajetPt_AfterCRSelections;
@@ -768,10 +773,10 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hBaseline_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterCRSelections;
   delete hBaseline_DeltaRLdgTrijetBJetTetrajetBJet_AfterCRSelections;
   delete hBaseline_LdgTrijetPt_AfterCRSelections;
-  delete hBaseline_LdgTrijetM_AfterCRSelections;
+  delete hBaseline_LdgTrijetMass_AfterCRSelections;
   delete hBaseline_LdgTrijetBJetBdisc_AfterCRSelections;
   delete hBaseline_SubLdgTrijetPt_AfterCRSelections;
-  delete hBaseline_SubLdgTrijetM_AfterCRSelections;
+  delete hBaseline_SubLdgTrijetMass_AfterCRSelections;
   delete hBaseline_SubLdgTrijetBJetBdisc_AfterCRSelections;
   delete hBaseline_LdgDijetPt_AfterCRSelections;
   delete hBaseline_LdgDijetM_AfterCRSelections;
@@ -818,6 +823,7 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hInverted_Jet7Bdisc_AfterStandardSelections;
   //  hInverted_JetsBdisc_AfterStandardSelections.clear();
   delete hInverted_MET_AfterStandardSelections;
+  delete hInverted_HT_AfterStandardSelections;
   delete hInverted_MVAmax1_AfterStandardSelections;
   delete hInverted_MVAmax2_AfterStandardSelections;
   delete hInverted_LdgTetrajetPt_AfterStandardSelections;
@@ -829,10 +835,10 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hInverted_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterStandardSelections;
   delete hInverted_DeltaRLdgTrijetBJetTetrajetBJet_AfterStandardSelections;
   delete hInverted_LdgTrijetPt_AfterStandardSelections;
-  delete hInverted_LdgTrijetM_AfterStandardSelections;
+  delete hInverted_LdgTrijetMass_AfterStandardSelections;
   delete hInverted_LdgTrijetBJetBdisc_AfterStandardSelections;
   delete hInverted_SubLdgTrijetPt_AfterStandardSelections;
-  delete hInverted_SubLdgTrijetM_AfterStandardSelections;
+  delete hInverted_SubLdgTrijetMass_AfterStandardSelections;
   delete hInverted_SubLdgTrijetBJetBdisc_AfterStandardSelections;
   delete hInverted_LdgDijetPt_AfterStandardSelections;
   delete hInverted_LdgDijetM_AfterStandardSelections;
@@ -878,6 +884,7 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hInverted_Jet7Bdisc_AfterAllSelections;
   //  hInverted_JetsBdisc_AfterAllSelections.clear();
   delete hInverted_MET_AfterAllSelections;
+  delete hInverted_HT_AfterAllSelections;
   delete hInverted_MVAmax1_AfterAllSelections;
   delete hInverted_MVAmax2_AfterAllSelections;
   delete hInverted_LdgTetrajetPt_AfterAllSelections;
@@ -889,10 +896,10 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hInverted_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterAllSelections;
   delete hInverted_DeltaRLdgTrijetBJetTetrajetBJet_AfterAllSelections;
   delete hInverted_LdgTrijetPt_AfterAllSelections;
-  delete hInverted_LdgTrijetM_AfterAllSelections;
+  delete hInverted_LdgTrijetMass_AfterAllSelections;
   delete hInverted_LdgTrijetBJetBdisc_AfterAllSelections;
   delete hInverted_SubLdgTrijetPt_AfterAllSelections;
-  delete hInverted_SubLdgTrijetM_AfterAllSelections;
+  delete hInverted_SubLdgTrijetMass_AfterAllSelections;
   delete hInverted_SubLdgTrijetBJetBdisc_AfterAllSelections;
   delete hInverted_LdgDijetPt_AfterAllSelections;
   delete hInverted_LdgDijetM_AfterAllSelections;
@@ -938,6 +945,7 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hInverted_Jet7Bdisc_AfterCRSelections;
   //  hInverted_JetsBdisc_AfterCRSelections.clear();
   delete hInverted_MET_AfterCRSelections;
+  delete hInverted_HT_AfterCRSelections;
   delete hInverted_MVAmax1_AfterCRSelections;
   delete hInverted_MVAmax2_AfterCRSelections;
   delete hInverted_LdgTetrajetPt_AfterCRSelections;
@@ -949,10 +957,10 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hInverted_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterCRSelections;
   delete hInverted_DeltaRLdgTrijetBJetTetrajetBJet_AfterCRSelections;
   delete hInverted_LdgTrijetPt_AfterCRSelections;
-  delete hInverted_LdgTrijetM_AfterCRSelections;
+  delete hInverted_LdgTrijetMass_AfterCRSelections;
   delete hInverted_LdgTrijetBJetBdisc_AfterCRSelections;
   delete hInverted_SubLdgTrijetPt_AfterCRSelections;
-  delete hInverted_SubLdgTrijetM_AfterCRSelections;
+  delete hInverted_SubLdgTrijetMass_AfterCRSelections;
   delete hInverted_SubLdgTrijetBJetBdisc_AfterCRSelections;
   delete hInverted_LdgDijetPt_AfterCRSelections;
   delete hInverted_LdgDijetM_AfterCRSelections;
@@ -966,6 +974,8 @@ void FakeBMeasurement::book(TDirectory *dir) {
   
   // Book common plots histograms
   fCommonPlots.book(dir, isData());
+  // fNormalizationSystematicsSignalRegion.book(dir, isData()); // fixme
+  // fNormalizationSystematicsControlRegion.book(dir, isData()); // fixme
 
   // Book histograms in event selection classes
   fMETFilterSelection.bookHistograms(dir);
@@ -983,8 +993,8 @@ void FakeBMeasurement::book(TDirectory *dir) {
   // fInvertedTopologySelection.bookHistograms(dir);
   fInvertedTopSelection.bookHistograms(dir);
   
-  // ====== Normalization histograms
-  // HistoSplitter histoSplitter = fCommonPlots.getHistoSplitter();
+  // ====== Histogram settings
+  HistoSplitter histoSplitter = fCommonPlots.getHistoSplitter();
 
   // Obtain binning
   const int nNBins        = fCommonPlots.getNjetsBinSettings().bins();
@@ -996,7 +1006,7 @@ void FakeBMeasurement::book(TDirectory *dir) {
   const float fBtagMax    = fCommonPlots.getBJetDiscBinSettings().max();
 
   const int  nPtBins      = 2*fCommonPlots.getPtBinSettings().bins();
-  const float fPtMin      = fCommonPlots.getPtBinSettings().min();
+  const float fPtMin      = 2*fCommonPlots.getPtBinSettings().min();
   const float fPtMax      = 2*fCommonPlots.getPtBinSettings().max();
 
   const int  nEtaBins     = fCommonPlots.getEtaBinSettings().bins();
@@ -1035,38 +1045,18 @@ void FakeBMeasurement::book(TDirectory *dir) {
   const float fMetMin = fCommonPlots.getMetBinSettings().min();
   const float fMetMax = fCommonPlots.getMetBinSettings().max();
 
+  const int nHtBins  = fCommonPlots.getHtBinSettings().bins();
+  const float fHtMin = fCommonPlots.getHtBinSettings().min();
+  const float fHtMax = fCommonPlots.getHtBinSettings().max();
+
   // Create directories for normalization
   std::string myInclusiveLabel  = "ForFakeBNormalization";
   std::string myFakeLabel       = myInclusiveLabel+"EWKFakeB";
   std::string myGenuineLabel    = myInclusiveLabel+"EWKGenuineB";
-  TDirectory* myNormDir         = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myInclusiveLabel);
-  TDirectory* myNormEWKFakeBDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myFakeLabel);
-  TDirectory* myNormGenuineBDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myGenuineLabel);
-  std::vector<TDirectory*> myNormalizationDirs = {myNormDir, myNormEWKFakeBDir, myNormGenuineBDir};
-
-  hBaseline_LdgTrijetMass_AfterStandardSelections =
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myNormalizationDirs, 
-				      "Baseline_LdgTrijetMass_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
-
-  hBaseline_LdgTrijetMass_AfterAllSelections =
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myNormalizationDirs, 
-				      "Baseline_LdgTrijetMass_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
-
-  hBaseline_LdgTrijetMass_AfterCRSelections =
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myNormalizationDirs, 
-				      "Baseline_LdgTrijetMass_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
-
-  hInverted_LdgTrijetMass_AfterStandardSelections =
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myNormalizationDirs, 
-				      "Inverted_LdgTrijetMass_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
-
-  hInverted_LdgTrijetMass_AfterAllSelections =
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myNormalizationDirs, 
-				      "Inverted_LdgTrijetMass_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
-
-  hInverted_LdgTrijetMass_AfterCRSelections =
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myNormalizationDirs, 
-				      "Inverted_LdgTrijetMass_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+  // TDirectory* myNormDir         = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myInclusiveLabel);
+  // TDirectory* myNormEWKFakeBDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myFakeLabel);
+  // TDirectory* myNormGenuineBDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myGenuineLabel);
+  // std::vector<TDirectory*> myNormalizationDirs = {myNormDir, myNormEWKFakeBDir, myNormGenuineBDir};
 
   // Purity histograms [(Data-EWK)/Data]
   myInclusiveLabel = "FailedBJet";
@@ -1079,341 +1069,62 @@ void FakeBMeasurement::book(TDirectory *dir) {
   TDirectory* myPurityGenuineBDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myGenuineLabel);
   std::vector<TDirectory*> myFailedDirs = {myFailedDir, myPurityEWKFakeBDir, myPurityGenuineBDir};
 
-  // Create histograms
-  hInverted_NFailedBJets_AfterStandardSelections = 
-    fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, myFailedDir, "Inverted_NFailedBJets_AfterStandardSelections", ";b-jet multiplicity;Occur / %.0f", nNBins, fNMin, fNMax);
+  // Normal TH1
+  hNFailedBJets_VR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, myFailedDir, "NFailedBJets_VR", 
+						   ";b-jet multiplicity;Occur / %.0f", nNBins, fNMin, fNMax);
+  hNFailedBJets_CRtwo = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, myFailedDir, "NFailedBJets_CRtwo", 
+						   ";b-jet multiplicity;Occur / %.0f", nNBins, fNMin, fNMax);
 
-  hInverted_FailedBJet1BDisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet1BDisc_AfterStandardSelections",
-				      "Inverted_FailedBJet1BDisc_AfterStandardSelections;b-tag discriminator;Occur / %.2f",
-				      nBDiscBins, fBDiscMin, fBDiscMax);
-  
-  hInverted_FailedBJet1Pt_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet1Pt_AfterStandardSelections",
-				      "Inverted_FailedBJet1Pt_AfterStandardSelections;p_{T} (GeV/c);Occur / %.0f GeV/c",
-				      nPtBins, fPtMin, fPtMax);
-
-  hInverted_FailedBJet1Eta_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet1Eta_AfterStandardSelections",
-				      "Inverted_FailedBJet1Eta_AfterStandardSelections;#eta;Occur / %.2f",
-				      nEtaBins, fEtaMin, fEtaMax);
-
-  hInverted_FailedBJet1PdgId_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet1PdgId_AfterStandardSelections",
-				      "Inverted_FailedBJet1PdgId_AfterStandardSelections;pdgId;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  hInverted_FailedBJet1PartonFlavour_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet1PartonFlavour_AfterStandardSelections",
-				      "Inverted_FailedBJet1PartonFlavour_AfterStandardSelections;parton flavour;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  hInverted_FailedBJet1HadronFlavour_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet1HadronFlavour_AfterStandardSelections",
-				      "Inverted_FailedBJet1HadronFlavour_AfterStandardSelections;hadron flavour;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  hInverted_FailedBJet2BDisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet2BDisc_AfterStandardSelections",
-				      "Inverted_FailedBJet2BDisc_AfterStandardSelections;b-tag discriminator;Occur / %.2f",
-				      nBDiscBins, fBDiscMin, fBDiscMax);
-  
-  hInverted_FailedBJet2Pt_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet2Pt_AfterStandardSelections",
-				      "Inverted_FailedBJet2Pt_AfterStandardSelections;p_{T} (GeV/c);Occur / %.0f GeV/c",
-				      nPtBins, fPtMin, fPtMax);
-
-  hInverted_FailedBJet2Eta_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet2Eta_AfterStandardSelections",
-				      "Inverted_FailedBJet2Eta_AfterStandardSelections;#eta;Occur / %.2f",
-				      nEtaBins, fEtaMin, fEtaMax);
-
-  hInverted_FailedBJet2PdgId_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet2PdgId_AfterStandardSelections",
-				      "Inverted_FailedBJet2PdgId_AfterStandardSelections;pdgId;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  hInverted_FailedBJet2PartonFlavour_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet2PartonFlavour_AfterStandardSelections",
-				      "Inverted_FailedBJet2PartonFlavour_AfterStandardSelections;parton flavour;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  hInverted_FailedBJet2HadronFlavour_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet2HadronFlavour_AfterStandardSelections",
-				      "Inverted_FailedBJet2HadronFlavour_AfterStandardSelections;hadron flavour;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  hInverted_FailedBJet3BDisc_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet3BDisc_AfterStandardSelections",
-				      "Inverted_FailedBJet3BDisc_AfterStandardSelections;b-tag discriminator;Occur / %.2f",
-				      nBDiscBins, fBDiscMin, fBDiscMax);
-  
-  hInverted_FailedBJet3Pt_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet3Pt_AfterStandardSelections",
-				      "Inverted_FailedBJet3Pt_AfterStandardSelections;p_{T} (GeV/c);Occur / %.0f GeV/c",
-				      nPtBins, fPtMin, fPtMax);
-
-  hInverted_FailedBJet3Eta_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet3Eta_AfterStandardSelections",
-				      "Inverted_FailedBJet3Eta_AfterStandardSelections;#eta;Occur / %.2f",
-				      nEtaBins, fEtaMin, fEtaMax);
-
-  hInverted_FailedBJet3PdgId_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet3PdgId_AfterStandardSelections",
-				      "Inverted_FailedBJet3PdgId_AfterStandardSelections;pdgId;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  hInverted_FailedBJet3PartonFlavour_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet3PartonFlavour_AfterStandardSelections",
-				      "Inverted_FailedBJet3PartonFlavour_AfterStandardSelections;parton flavour;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  hInverted_FailedBJet3HadronFlavour_AfterStandardSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet3HadronFlavour_AfterStandardSelections",
-				      "Inverted_FailedBJet3HadronFlavour_AfterStandardSelections;hadron flavour;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  // Create histograms (AllSelections) 
-  hInverted_NFailedBJets_AfterAllSelections = 
-    fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, myFailedDir, "Inverted_NFailedBJets_AfterAllSelections", ";b-jet multiplicity;Occur / %.0f", nNBins, fNMin, fNMax);
-
-  hInverted_FailedBJet1BDisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet1BDisc_AfterAllSelections",
-				      "Inverted_FailedBJet1BDisc_AfterAllSelections;b-tag discriminator;Occur / %.2f",
-				      nBDiscBins, fBDiscMin, fBDiscMax);
-  
-  hInverted_FailedBJet1Pt_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet1Pt_AfterAllSelections",
-				      "Inverted_FailedBJet1Pt_AfterAllSelections;p_{T} (GeV/c);Occur / %.0f GeV/c",
-				      nPtBins, fPtMin, fPtMax);
-
-  hInverted_FailedBJet1Eta_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet1Eta_AfterAllSelections",
-				      "Inverted_FailedBJet1Eta_AfterAllSelections;#eta;Occur / %.2f",
-				      nEtaBins, fEtaMin, fEtaMax);
-
-  hInverted_FailedBJet1PdgId_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet1PdgId_AfterAllSelections",
-				      "Inverted_FailedBJet1PdgId_AfterAllSelections;pdgId;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  hInverted_FailedBJet1PartonFlavour_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet1PartonFlavour_AfterAllSelections",
-				      "Inverted_FailedBJet1PartonFlavour_AfterAllSelections;parton flavour;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  hInverted_FailedBJet1HadronFlavour_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet1HadronFlavour_AfterAllSelections",
-				      "Inverted_FailedBJet1HadronFlavour_AfterAllSelections;hadron flavour;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  hInverted_FailedBJet2BDisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet2BDisc_AfterAllSelections",
-				      "Inverted_FailedBJet2BDisc_AfterAllSelections;b-tag discriminator;Occur / %.2f",
-				      nBDiscBins, fBDiscMin, fBDiscMax);
-  
-  hInverted_FailedBJet2Pt_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet2Pt_AfterAllSelections",
-				      "Inverted_FailedBJet2Pt_AfterAllSelections;p_{T} (GeV/c);Occur / %.0f GeV/c",
-				      nPtBins, fPtMin, fPtMax);
-
-  hInverted_FailedBJet2Eta_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet2Eta_AfterAllSelections",
-				      "Inverted_FailedBJet2Eta_AfterAllSelections;#eta;Occur / %.2f",
-				      nEtaBins, fEtaMin, fEtaMax);
-
-  hInverted_FailedBJet2PdgId_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet2PdgId_AfterAllSelections",
-				      "Inverted_FailedBJet2PdgId_AfterAllSelections;pdgId;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  hInverted_FailedBJet2PartonFlavour_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet2PartonFlavour_AfterAllSelections",
-				      "Inverted_FailedBJet2PartonFlavour_AfterAllSelections;parton flavour;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  hInverted_FailedBJet2HadronFlavour_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet2HadronFlavour_AfterAllSelections",
-				      "Inverted_FailedBJet2HadronFlavour_AfterAllSelections;hadron flavour;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  hInverted_FailedBJet3BDisc_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet3BDisc_AfterAllSelections",
-				      "Inverted_FailedBJet3BDisc_AfterAllSelections;b-tag discriminator;Occur / %.2f",
-				      nBDiscBins, fBDiscMin, fBDiscMax);
-  
-  hInverted_FailedBJet3Pt_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet3Pt_AfterAllSelections",
-				      "Inverted_FailedBJet3Pt_AfterAllSelections;p_{T} (GeV/c);Occur / %.0f GeV/c",
-				      nPtBins, fPtMin, fPtMax);
-
-  hInverted_FailedBJet3Eta_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet3Eta_AfterAllSelections",
-				      "Inverted_FailedBJet3Eta_AfterAllSelections;#eta;Occur / %.2f",
-				      nEtaBins, fEtaMin, fEtaMax);
-
-  hInverted_FailedBJet3PdgId_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet3PdgId_AfterAllSelections",
-				      "Inverted_FailedBJet3PdgId_AfterAllSelections;pdgId;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  hInverted_FailedBJet3PartonFlavour_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet3PartonFlavour_AfterAllSelections",
-				      "Inverted_FailedBJet3PartonFlavour_AfterAllSelections;parton flavour;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  hInverted_FailedBJet3HadronFlavour_AfterAllSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet3HadronFlavour_AfterAllSelections",
-				      "Inverted_FailedBJet3HadronFlavour_AfterAllSelections;hadron flavour;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  // Create histograms (CRSelections) 
-  hInverted_NFailedBJets_AfterCRSelections = 
-    fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, myFailedDir, "Inverted_NFailedBJets_AfterCRSelections", ";b-jet multiplicity;Occur / %.0f", nNBins, fNMin, fNMax);
-
-  hInverted_FailedBJet1BDisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet1BDisc_AfterCRSelections",
-				      "Inverted_FailedBJet1BDisc_AfterCRSelections;b-tag discriminator;Occur / %.2f",
-				      nBDiscBins, fBDiscMin, fBDiscMax);
-  
-  hInverted_FailedBJet1Pt_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet1Pt_AfterCRSelections",
-				      "Inverted_FailedBJet1Pt_AfterCRSelections;p_{T} (GeV/c);Occur / %.0f GeV/c",
-				      nPtBins, fPtMin, fPtMax);
-
-  hInverted_FailedBJet1Eta_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet1Eta_AfterCRSelections",
-				      "Inverted_FailedBJet1Eta_AfterCRSelections;#eta;Occur / %.2f",
-				      nEtaBins, fEtaMin, fEtaMax);
-
-  hInverted_FailedBJet1PdgId_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet1PdgId_AfterCRSelections",
-				      "Inverted_FailedBJet1PdgId_AfterCRSelections;pdgId;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  hInverted_FailedBJet1PartonFlavour_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet1PartonFlavour_AfterCRSelections",
-				      "Inverted_FailedBJet1PartonFlavour_AfterCRSelections;parton flavour;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  hInverted_FailedBJet1HadronFlavour_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet1HadronFlavour_AfterCRSelections",
-				      "Inverted_FailedBJet1HadronFlavour_AfterCRSelections;hadron flavour;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  hInverted_FailedBJet2BDisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet2BDisc_AfterCRSelections",
-				      "Inverted_FailedBJet2BDisc_AfterCRSelections;b-tag discriminator;Occur / %.2f",
-				      nBDiscBins, fBDiscMin, fBDiscMax);
-  
-  hInverted_FailedBJet2Pt_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet2Pt_AfterCRSelections",
-				      "Inverted_FailedBJet2Pt_AfterCRSelections;p_{T} (GeV/c);Occur / %.0f GeV/c",
-				      nPtBins, fPtMin, fPtMax);
-
-  hInverted_FailedBJet2Eta_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet2Eta_AfterCRSelections",
-				      "Inverted_FailedBJet2Eta_AfterCRSelections;#eta;Occur / %.2f",
-				      nEtaBins, fEtaMin, fEtaMax);
-
-  hInverted_FailedBJet2PdgId_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet2PdgId_AfterCRSelections",
-				      "Inverted_FailedBJet2PdgId_AfterCRSelections;pdgId;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  hInverted_FailedBJet2PartonFlavour_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet2PartonFlavour_AfterCRSelections",
-				      "Inverted_FailedBJet2PartonFlavour_AfterCRSelections;parton flavour;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  hInverted_FailedBJet2HadronFlavour_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet2HadronFlavour_AfterCRSelections",
-				      "Inverted_FailedBJet2HadronFlavour_AfterCRSelections;hadron flavour;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  hInverted_FailedBJet3BDisc_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet3BDisc_AfterCRSelections",
-				      "Inverted_FailedBJet3BDisc_AfterCRSelections;b-tag discriminator;Occur / %.2f",
-				      nBDiscBins, fBDiscMin, fBDiscMax);
-  
-  hInverted_FailedBJet3Pt_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet3Pt_AfterCRSelections",
-				      "Inverted_FailedBJet3Pt_AfterCRSelections;p_{T} (GeV/c);Occur / %.0f GeV/c",
-				      nPtBins, fPtMin, fPtMax);
-
-  hInverted_FailedBJet3Eta_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet3Eta_AfterCRSelections",
-				      "Inverted_FailedBJet3Eta_AfterCRSelections;#eta;Occur / %.2f",
-				      nEtaBins, fEtaMin, fEtaMax);
-
-  hInverted_FailedBJet3PdgId_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs,
-				      "Inverted_FailedBJet3PdgId_AfterCRSelections",
-				      "Inverted_FailedBJet3PdgId_AfterCRSelections;pdgId;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  hInverted_FailedBJet3PartonFlavour_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet3PartonFlavour_AfterCRSelections",
-				      "Inverted_FailedBJet3PartonFlavour_AfterCRSelections;parton flavour;Occur / %.0f",
-				      23, -0.5, 22.5);
-
-  hInverted_FailedBJet3HadronFlavour_AfterCRSelections = 
-    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs,
-				      "Inverted_FailedBJet3HadronFlavour_AfterCRSelections",
-				      "Inverted_FailedBJet3HadronFlavour_AfterCRSelections;hadron flavour;Occur / %.0f",
-				      23, -0.5, 22.5);
+  // Triplets for failed b-jets (bjet candidates passing pT and eta cuts, but fail b-disc + additional criteria)  
+  hFailedBJet1BDisc_VR         = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs, "FailedBJet1BDisc_VR",
+								   ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
+  hFailedBJet1Pt_VR            = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs, "FailedBJet1Pt_VR",
+								   ";p_{T} (GeV/c);Occur / %.0f GeV/c", nPtBins, fPtMin, fPtMax);
+  hFailedBJet1Eta_VR           = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs, "FailedBJet1Eta_VR", 
+								   ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  hFailedBJet1HadronFlavour_VR = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs, "FailedBJet1HadronFlavour_VR",
+								   ";hadron flavour;Occur / %.0f", 23, -0.5, 22.5);
+  hFailedBJet2BDisc_VR         = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs, "FailedBJet2BDisc_VR",
+								   ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
+  hFailedBJet2Pt_VR            = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs, "FailedBJet2Pt_VR",
+								   ";p_{T} (GeV/c);Occur / %.0f GeV/c", nPtBins, fPtMin, fPtMax);
+  hFailedBJet2Eta_VR           = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs, "FailedBJet2Eta_VR",
+								   ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  hFailedBJet2HadronFlavour_VR = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs, "FailedBJet2HadronFlavour_VR",
+								   ";hadron flavour;Occur / %.0f", 23, -0.5, 22.5);
+  hFailedBJet3BDisc_VR         = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs, "FailedBJet3BDisc_VR",
+								   ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
+  hFailedBJet3Pt_VR            = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs, "FailedBJet3Pt_VR",
+								   ";p_{T} (GeV/c);Occur / %.0f GeV/c", nPtBins, fPtMin, fPtMax);
+  hFailedBJet3Eta_VR           = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs, "FailedBJet3Eta_VR",
+								   ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  hFailedBJet3HadronFlavour_VR = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs, "FailedBJet3HadronFlavour_VR",
+								   ";hadron flavour;Occur / %.0f", 23, -0.5, 22.5);
+  // 
+  hFailedBJet1BDisc_CRtwo         = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs, "FailedBJet1BDisc_CRtwo",
+								     ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
+  hFailedBJet1Pt_CRtwo            = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs, "FailedBJet1Pt_CRtwo",
+								     ";p_{T} (GeV/c);Occur / %.0f GeV/c", nPtBins, fPtMin, fPtMax);
+  hFailedBJet1Eta_CRtwo           = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs, "FailedBJet1Eta_CRtwo",
+								     ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  hFailedBJet1HadronFlavour_CRtwo = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs, "FailedBJet1HadronFlavour_CRtwo",
+								     ";hadron flavour;Occur / %.0f", 23, -0.5, 22.5);
+  hFailedBJet2BDisc_CRtwo         = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs, "FailedBJet2BDisc_CRtwo",
+								     ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
+  hFailedBJet2Pt_CRtwo            = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs, "FailedBJet2Pt_CRtwo",				      
+								     ";p_{T} (GeV/c);Occur / %.0f GeV/c", nPtBins, fPtMin, fPtMax);
+  hFailedBJet2Eta_CRtwo           = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs, "FailedBJet2Eta_CRtwo",
+								     ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  hFailedBJet2HadronFlavour_CRtwo = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs, "FailedBJet2HadronFlavour_CRtwo",
+								     ";hadron flavour;Occur / %.0f", 23, -0.5, 22.5);
+  hFailedBJet3BDisc_CRtwo         = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs, "FailedBJet3BDisc_CRtwo",
+								     ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
+  hFailedBJet3Pt_CRtwo            = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFailedDirs, "FailedBJet3Pt_CRtwo",
+								     ";p_{T} (GeV/c);Occur / %.0f GeV/c", nPtBins, fPtMin, fPtMax);
+  hFailedBJet3Eta_CRtwo           = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs, "FailedBJet3Eta_CRtwo",
+								     ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  hFailedBJet3HadronFlavour_CRtwo = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kDebug, myFailedDirs, "FailedBJet3HadronFlavour_CRtwo",
+								     ";hadron flavour;Occur / %.0f", 23, -0.5, 22.5);
 
   // Other histograms
   myInclusiveLabel = "ForFakeBMeasurement";
@@ -1424,10 +1135,79 @@ void FakeBMeasurement::book(TDirectory *dir) {
   TDirectory* myFakeBEWKFakeBDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myFakeLabel);
   TDirectory* myFakeBGenuineBDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myGenuineLabel);
   std::vector<TDirectory*> myFakeBDirs = {myFakeBDir, myFakeBEWKFakeBDir, myFakeBGenuineBDir};
+  
+  // Splitted Histo Triplets
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hLdgTrijetPt_CRone, "LdgTrijetPt_CRone", 
+  						  ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hLdgTrijetMass_CRone, "LdgTrijetMass_CRone", 
+  						  ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hLdgTrijetBJetBdisc_CRone, "LdgTrijetBJetBdisc_CRone", 
+  						  ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hTetrajetBJetPt_CRone, "TetrajetBJetPt_CRone", 
+  						  ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hTetrajetBJetEta_CRone, "TetrajetBJetEta_CRone", 
+  						  ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hTetrajetBJetBdisc_CRone, "TetrajetBJetBdisc_CR",
+  						  ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hLdgTetrajetPt_CRone, "LdgTetrajetPt_CRone",
+  						  ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hLdgTetrajetMass_CRone, "LdgTetrajetMass_CRone", 
+						  ";m_{jjbb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nInvMassBins, fInvMassMin, fInvMassMax);
+  
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hLdgTrijetPt_SR, "LdgTrijetPt_SR", 
+  						  ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hLdgTrijetMass_SR, "LdgTrijetMass_SR", 
+  						  ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hLdgTrijetBJetBdisc_SR, "LdgTrijetBJetBdisc_SR", 
+  						  ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hTetrajetBJetPt_SR, "TetrajetBJetPt_SR", 
+  						  ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hTetrajetBJetEta_SR, "TetrajetBJetEta_SR", 
+  						  ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hTetrajetBJetBdisc_SR, "TetrajetBJetBdisc_SR",
+  						  ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hLdgTetrajetPt_SR, "LdgTetrajetPt_SR", 
+  						  ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hLdgTetrajetMass_SR, "LdgTetrajetMass_SR", 
+  						  ";m_{jjbb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nInvMassBins, fInvMassMin, fInvMassMax);
+  
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hLdgTrijetPt_CRtwo, "LdgTrijetPt_CRtwo", 
+  						  ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hLdgTrijetMass_CRtwo, "LdgTrijetMass_CRtwo", 
+  						  ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hLdgTrijetBJetBdisc_CRtwo, "LdgTrijetBJetBdisc_CRtwo", 
+  						  ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hTetrajetBJetPt_CRtwo, "TetrajetBJetPt_CRtwo", 
+  						  ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hTetrajetBJetEta_CRtwo, "TetrajetBJetEta_CRtwo",
+  						  ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs,	hTetrajetBJetBdisc_CRtwo, "TetrajetBJetBdisc_CRtwo", 
+  						  ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hLdgTetrajetPt_CRtwo, "LdgTetrajetPt_CRtwo", 
+  						  ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hLdgTetrajetMass_CRtwo, "LdgTetrajetMass_CRtwo",
+  						  ";m_{jjbb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nInvMassBins, fInvMassMin, fInvMassMax);
 
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hLdgTrijetPt_VR, "LdgTrijetPt_VR", 
+  						  ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hLdgTrijetMass_VR, "LdgTrijetMass_VR", 
+  						  ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hLdgTrijetBJetBdisc_VR, "LdgTrijetBJetBdisc_VR",
+  						  ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hTetrajetBJetPt_VR, "TetrajetBJetPt_VR", 
+  						  ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hTetrajetBJetEta_VR, "TetrajetBJetEta_VR", 
+  						  ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hTetrajetBJetBdisc_VR, "TetrajetBJetBdisc_VR", 
+  						  ";b tag discriminator;Occur / %.2f", nBtagBins, fBtagMin, fBtagMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hLdgTetrajetPt_VR, "LdgTetrajetPt_VR",
+  						  ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myFakeBDirs, hLdgTetrajetMass_VR, "LdgTetrajetMass_VR",
+  						  ";m_{jjbb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nInvMassBins, fInvMassMin, fInvMassMax);						 
 
-  hBaseline_IsGenuineB = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, myFakeBDir, "Baseline_IsGenuineB", ";is genuine-b event;Occur / %0.f", 2, 0.0, 2.0);
-  hInverted_IsGenuineB = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, myFakeBDir, "Inverted_IsGenuineB", ";is genuine-b event;Occur / %0.f", 2, 0.0, 2.0);
+  // Normal Histos
+  hBaseline_IsGenuineB = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, myFakeBDir, "Baseline_IsGenuineB", ";is genuine-b;Events / %0.0f", 2, 0.0, 2.0);
+  hInverted_IsGenuineB = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, myFakeBDir, "Inverted_IsGenuineB", ";is genuine-b;Events / %0.0f", 2, 0.0, 2.0);
 
   // Baseline selection (StandardSelections)
   hBaseline_NBjets_AfterStandardSelections = 
@@ -1503,6 +1283,8 @@ void FakeBMeasurement::book(TDirectory *dir) {
 
   hBaseline_MET_AfterStandardSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MET_AfterStandardSelections", ";E_{T}^{miss};Occur / %.1f", nMetBins, fMetMin, fMetMax);
+  hBaseline_HT_AfterStandardSelections =  
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_HT_AfterStandardSelections", ";H_{T};Occur / %.1f", nHtBins, fHtMin, fHtMax);
   hBaseline_MVAmax1_AfterStandardSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MVAmax1_AfterStandardSelections", ";#BDT discriminant;Occur / %.2f", 40, -1.0, +1.0);
   hBaseline_MVAmax2_AfterStandardSelections =  
@@ -1544,9 +1326,9 @@ void FakeBMeasurement::book(TDirectory *dir) {
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
 				      "Baseline_LdgTrijetPt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
-  hBaseline_LdgTrijetM_AfterStandardSelections =
+  hBaseline_LdgTrijetMass_AfterStandardSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_LdgTrijetM_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Baseline_LdgTrijetMass_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hBaseline_LdgTrijetBJetBdisc_AfterStandardSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
@@ -1556,9 +1338,9 @@ void FakeBMeasurement::book(TDirectory *dir) {
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Baseline_SubLdgTrijetPt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
-  hBaseline_SubLdgTrijetM_AfterStandardSelections = 
+  hBaseline_SubLdgTrijetMass_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_SubLdgTrijetM_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Baseline_SubLdgTrijetMass_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hBaseline_SubLdgTrijetBJetBdisc_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
@@ -1654,6 +1436,8 @@ void FakeBMeasurement::book(TDirectory *dir) {
 
   hBaseline_MET_AfterAllSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MET_AfterAllSelections", ";E_{T}^{miss};Occur / %.1f", nMetBins, fMetMin, fMetMax);
+  hBaseline_HT_AfterAllSelections =  
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_HT_AfterAllSelections", ";H_{T};Occur / %.1f", nHtBins, fHtMin, fHtMax);
   hBaseline_MVAmax1_AfterAllSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MVAmax1_AfterAllSelections", ";#BDT discriminant;Occur / %.2f", 40, -1.0, +1.0);
   hBaseline_MVAmax2_AfterAllSelections =  
@@ -1695,9 +1479,9 @@ void FakeBMeasurement::book(TDirectory *dir) {
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
 				      "Baseline_LdgTrijetPt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
-  hBaseline_LdgTrijetM_AfterAllSelections =
+  hBaseline_LdgTrijetMass_AfterAllSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_LdgTrijetM_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Baseline_LdgTrijetMass_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hBaseline_LdgTrijetBJetBdisc_AfterAllSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
@@ -1707,9 +1491,9 @@ void FakeBMeasurement::book(TDirectory *dir) {
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Baseline_SubLdgTrijetPt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
-  hBaseline_SubLdgTrijetM_AfterAllSelections = 
+  hBaseline_SubLdgTrijetMass_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_SubLdgTrijetM_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Baseline_SubLdgTrijetMass_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hBaseline_SubLdgTrijetBJetBdisc_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
@@ -1805,6 +1589,8 @@ void FakeBMeasurement::book(TDirectory *dir) {
 
   hBaseline_MET_AfterCRSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MET_AfterCRSelections", ";E_{T}^{miss};Occur / %.1f", nMetBins, fMetMin, fMetMax);
+  hBaseline_HT_AfterCRSelections =  
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_HT_AfterCRSelections", ";H_{T};Occur / %.1f", nHtBins, fHtMin, fHtMax);
   hBaseline_MVAmax1_AfterCRSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MVAmax1_AfterCRSelections", ";#BDT discriminant;Occur / %.2f", 40, -1.0, +1.0);
   hBaseline_MVAmax2_AfterCRSelections =  
@@ -1846,9 +1632,9 @@ void FakeBMeasurement::book(TDirectory *dir) {
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs,
 				      "Baseline_LdgTrijetPt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
-  hBaseline_LdgTrijetM_AfterCRSelections =
+  hBaseline_LdgTrijetMass_AfterCRSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_LdgTrijetM_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Baseline_LdgTrijetMass_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hBaseline_LdgTrijetBJetBdisc_AfterCRSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
@@ -1858,9 +1644,9 @@ void FakeBMeasurement::book(TDirectory *dir) {
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Baseline_SubLdgTrijetPt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
-  hBaseline_SubLdgTrijetM_AfterCRSelections = 
+  hBaseline_SubLdgTrijetMass_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Baseline_SubLdgTrijetM_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Baseline_SubLdgTrijetMass_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hBaseline_SubLdgTrijetBJetBdisc_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
@@ -1956,6 +1742,8 @@ void FakeBMeasurement::book(TDirectory *dir) {
 
   hInverted_MET_AfterStandardSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MET_AfterStandardSelections", ";E_{T}^{miss};Occur / %.1f", nMetBins, fMetMin, fMetMax);
+  hInverted_HT_AfterStandardSelections =  
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_HT_AfterStandardSelections", ";H_{T};Occur / %.1f", nHtBins, fHtMin, fHtMax);
   hInverted_MVAmax1_AfterStandardSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MVAmax1_AfterStandardSelections", ";#BDT discriminant;Occur / %.2f", 40, -1.0, +1.0);
   hInverted_MVAmax2_AfterStandardSelections =  
@@ -1997,9 +1785,9 @@ void FakeBMeasurement::book(TDirectory *dir) {
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Inverted_LdgTrijetPt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
-  hInverted_LdgTrijetM_AfterStandardSelections =
+  hInverted_LdgTrijetMass_AfterStandardSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_LdgTrijetM_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Inverted_LdgTrijetMass_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hInverted_LdgTrijetBJetBdisc_AfterStandardSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
@@ -2009,9 +1797,9 @@ void FakeBMeasurement::book(TDirectory *dir) {
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Inverted_SubLdgTrijetPt_AfterStandardSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
-  hInverted_SubLdgTrijetM_AfterStandardSelections = 
+  hInverted_SubLdgTrijetMass_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_SubLdgTrijetM_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Inverted_SubLdgTrijetMass_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hInverted_SubLdgTrijetBJetBdisc_AfterStandardSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
@@ -2107,6 +1895,8 @@ void FakeBMeasurement::book(TDirectory *dir) {
 
   hInverted_MET_AfterAllSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MET_AfterAllSelections", ";E_{T}^{miss};Occur / %.1f", nMetBins, fMetMin, fMetMax);
+  hInverted_HT_AfterAllSelections =  
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_HT_AfterAllSelections", ";H_{T};Occur / %.1f", nHtBins, fHtMin, fHtMax);
   hInverted_MVAmax1_AfterAllSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MVAmax1_AfterAllSelections", ";#BDT discriminant;Occur / %.2f", 40, -1.0, +1.0);
   hInverted_MVAmax2_AfterAllSelections =  
@@ -2148,9 +1938,9 @@ void FakeBMeasurement::book(TDirectory *dir) {
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Inverted_LdgTrijetPt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
-  hInverted_LdgTrijetM_AfterAllSelections =
+  hInverted_LdgTrijetMass_AfterAllSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_LdgTrijetM_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Inverted_LdgTrijetMass_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hInverted_LdgTrijetBJetBdisc_AfterAllSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
@@ -2160,9 +1950,9 @@ void FakeBMeasurement::book(TDirectory *dir) {
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Inverted_SubLdgTrijetPt_AfterAllSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
-  hInverted_SubLdgTrijetM_AfterAllSelections = 
+  hInverted_SubLdgTrijetMass_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_SubLdgTrijetM_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Inverted_SubLdgTrijetMass_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hInverted_SubLdgTrijetBJetBdisc_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
@@ -2258,6 +2048,8 @@ void FakeBMeasurement::book(TDirectory *dir) {
 
   hInverted_MET_AfterCRSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MET_AfterCRSelections", ";E_{T}^{miss};Occur / %.1f", nMetBins, fMetMin, fMetMax);
+  hInverted_HT_AfterCRSelections =  
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_HT_AfterCRSelections", ";H_{T};Occur / %.1f", nHtBins, fHtMin, fHtMax);
   hInverted_MVAmax1_AfterCRSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MVAmax1_AfterCRSelections", ";#BDT discriminant;Occur / %.2f", 40, -1.0, +1.0);
   hInverted_MVAmax2_AfterCRSelections =  
@@ -2299,9 +2091,9 @@ void FakeBMeasurement::book(TDirectory *dir) {
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Inverted_LdgTrijetPt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
-  hInverted_LdgTrijetM_AfterCRSelections =
+  hInverted_LdgTrijetMass_AfterCRSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_LdgTrijetM_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Inverted_LdgTrijetMass_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hInverted_LdgTrijetBJetBdisc_AfterCRSelections =
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
@@ -2311,9 +2103,9 @@ void FakeBMeasurement::book(TDirectory *dir) {
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
 				      "Inverted_SubLdgTrijetPt_AfterCRSelections", ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins*2, fPtMin, fPtMax*2);
 
-  hInverted_SubLdgTrijetM_AfterCRSelections = 
+  hInverted_SubLdgTrijetMass_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
-				      "Inverted_SubLdgTrijetM_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+				      "Inverted_SubLdgTrijetMass_AfterCRSelections", ";m_{jjb} (GeV/c^{2});Occur / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   hInverted_SubLdgTrijetBJetBdisc_AfterCRSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, 
@@ -2349,9 +2141,12 @@ void FakeBMeasurement::process(Long64_t entry) {
 
   //====== Initialize
   fCommonPlots.initialize();
-  fCommonPlots.setFactorisationBinForEvent(std::vector<float> {});
+  // fNormalizationSystematicsSignalRegion.initialize();  // fixme
+  // fNormalizationSystematicsControlRegion.initialize(); // fixme
 
   cAllEvents.increment();
+  int nVertices = fEvent.vertexInfo().value();
+  fCommonPlots.setNvertices(nVertices);
 
   if (0) std::cout << "\nentry = " << entry << std::endl;
 
@@ -2362,8 +2157,6 @@ void FakeBMeasurement::process(Long64_t entry) {
   if ( !(fEvent.passTriggerDecision()) ) return;
 
   cTrigger.increment();
-  int nVertices = fEvent.vertexInfo().value();
-  fCommonPlots.setNvertices(nVertices);
   fCommonPlots.fillControlPlotsAfterTrigger(fEvent);
 
   //================================================================================================   
@@ -2407,19 +2200,14 @@ void FakeBMeasurement::process(Long64_t entry) {
   // 7) Jet Selection
   //================================================================================================
   if (0) std::cout << "=== Jet selection" << std::endl;
-  const JetSelection::Data jetData = fJetSelection.analyzeWithoutTau(fEvent);
+  const JetSelection::Data jetData = fJetSelection.silentAnalyzeWithoutTau(fEvent);
   if (!jetData.passedSelection()) return;
-  fCommonPlots.fillControlPlotsAfterTopologicalSelections(fEvent, true);
   
   //================================================================================================  
   // 8) BJet Selection
   //================================================================================================
   if (0) std::cout << "=== BJet selection" << std::endl;
-  // Enable histogram filling and counter with silent analyze
-  const BJetSelection::Data bjetData = fBJetSelection.analyze(fEvent, jetData);
-  // Disable histogram filling and counter with silent analyze
-  // const BJetSelection::Data bjetData = fBJetSelection.silentAnalyze(fEvent, jetData);
-
+  const BJetSelection::Data bjetData = fBJetSelection.silentAnalyze(fEvent, jetData);
 
   // Baseline Selection
   if (bjetData.passedSelection())
@@ -2506,7 +2294,11 @@ const std::vector<Jet> FakeBMeasurement::GetInvertedBJets(const JetSelection::Da
       if (!passBjetDiscrMin) continue;
       
       // Skip events if a jet has a b-discrininator above max allowed value
-      if (!passBjetDiscrMax) break;
+      if (!passBjetDiscrMax) 
+	{
+	  invertedBJets.clear();
+	  break;
+	}
       
       // Save jets satisfying inverted b-jet criteria
       invertedBJets.push_back(jet);
@@ -2539,17 +2331,11 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   // 10) MET selection
   //================================================================================================
   if (0) std::cout << "=== Baseline: MET selection" << std::endl;
-  const METSelection::Data METData = fBaselineMETSelection.analyze(fEvent, nVertices);
+  const METSelection::Data METData = fBaselineMETSelection.silentAnalyze(fEvent, nVertices);
   // if (!METData.passedSelection()) return;
-
+ 
   //================================================================================================
-  // 11) Topology
-  //================================================================================================
-  // if (0) std::cout << "=== Baseline: Topology selection" << std::endl;
-  // const TopologySelection::Data topologyData = fBaselineTopologySelection.analyze(fEvent, jetData);
-
-  //================================================================================================
-  // 12) Top selection
+  // 11) Top selection
   //================================================================================================
   if (0) std::cout << "=== Baseline: Top selection" << std::endl;
   const TopSelectionBDT::Data topData = fBaselineTopSelection.analyze(fEvent, jetData, bjetData);
@@ -2558,20 +2344,24 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   if (!hasFreeBJet) return;
   if (!passPrelimMVACut) return;
 
+  // Defining the splitting of phase-space as the eta of the Tetrajet b-jet
+  std::vector<float> myFactorisationInfo;
+  myFactorisationInfo.push_back(topData.getTetrajetBJet().eta() );
+  fCommonPlots.setFactorisationBinForEvent(myFactorisationInfo);
+  // fNormalizationSystematicsSignalRegion.setFactorisationBinForEvent(myFactorisationInfo); //fixme
+
   // If 1 or more untagged genuine bjets are found the event is considered fakeB. Otherwise genuineB  
   bool isGenuineB = IsGenuineBEvent(bjetData.getSelectedBJets());
   hBaseline_IsGenuineB->Fill(isGenuineB);
-  if (0) std::cout << "=== FakeBMeasurement::DoBaselineAnalysis()\n\tisGenuineB = " << isGenuineB << std::endl;
   
   //================================================================================================
-  // Standard Selections
+  // Preselections (aka Standard Selections)
   //================================================================================================
   if (0) std::cout << "=== Baseline: Standard Selections" << std::endl;
   // NB: CtrlPlotsAfterStandardSelections should only be called for Inverted!
   // fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, bjetData.isGenuineB());
 
   // Fill Triplets  (Baseline)
-  hBaseline_LdgTrijetMass_AfterStandardSelections->Fill(isGenuineB, topData.getLdgTrijet().M());
   hBaseline_Njets_AfterStandardSelections->Fill(isGenuineB, jetData.getSelectedJets().size());
   hBaseline_NBjets_AfterStandardSelections->Fill(isGenuineB, bjetData.getSelectedBJets().size());
 
@@ -2664,6 +2454,7 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
     }
 
   hBaseline_MET_AfterStandardSelections ->Fill(isGenuineB, METData.getMET().R());
+  hBaseline_HT_AfterStandardSelections ->Fill(isGenuineB, jetData.HT());
   hBaseline_MVAmax1_AfterStandardSelections ->Fill(isGenuineB, topData.getMVAmax1());
   hBaseline_MVAmax2_AfterStandardSelections ->Fill(isGenuineB, topData.getMVAmax2());
   hBaseline_LdgTetrajetPt_AfterStandardSelections->Fill(isGenuineB, topData.getLdgTetrajet().pt() );
@@ -2678,10 +2469,10 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   hBaseline_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterStandardSelections->Fill(isGenuineB, dPhi);
   hBaseline_DeltaRLdgTrijetBJetTetrajetBJet_AfterStandardSelections->Fill(isGenuineB, dR);
   hBaseline_LdgTrijetPt_AfterStandardSelections->Fill(isGenuineB, topData.getLdgTrijet().pt() );
-  hBaseline_LdgTrijetM_AfterStandardSelections ->Fill(isGenuineB, topData.getLdgTrijet().M() );
+  hBaseline_LdgTrijetMass_AfterStandardSelections ->Fill(isGenuineB, topData.getLdgTrijet().M() );
   hBaseline_LdgTrijetBJetBdisc_AfterStandardSelections ->Fill(isGenuineB, topData.getLdgTrijetBJet().bjetDiscriminator() );
   hBaseline_SubLdgTrijetPt_AfterStandardSelections->Fill(isGenuineB, topData.getSubldgTrijet().pt() );
-  hBaseline_SubLdgTrijetM_AfterStandardSelections ->Fill(isGenuineB, topData.getSubldgTrijet().M() );
+  hBaseline_SubLdgTrijetMass_AfterStandardSelections ->Fill(isGenuineB, topData.getSubldgTrijet().M() );
   hBaseline_SubLdgTrijetBJetBdisc_AfterStandardSelections ->Fill(isGenuineB, topData.getSubldgTrijetBJet().bjetDiscriminator() );
   hBaseline_LdgDijetPt_AfterStandardSelections->Fill(isGenuineB, topData.getLdgDijet().pt() );
   hBaseline_LdgDijetM_AfterStandardSelections ->Fill(isGenuineB, topData.getLdgDijet().M() );
@@ -2691,21 +2482,19 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
 
   //================================================================================================
   // All Selections
-  //================================================================================================
-  // if (!topologyData.passedSelection()) return;
+  //================================================================================================  
   if (!topData.passedSelection()) 
     {
-      // If top fails fill Control Region (CR) histograms and return
+      // If top fails fill determine if it qualifies for Control Region 1 (CRone)
       bool passLdgTopMVA    = cfg_LdgTopMVACut.passedCut( topData.getMVAmax1() );
       bool passSubldgTopMVA = cfg_SubldgTopMVACut.passedCut( topData.getMVAmax2() );
       bool passInvertedTop  = passLdgTopMVA * passSubldgTopMVA;
       if (!passInvertedTop) return;
 
-      if (0) std::cout << "=== Baseline: All Selections (Inverted Top)" << std::endl;
+      if (0) std::cout << "=== Baseline: Control Region 1 (CRone)" << std::endl;
       cBaselineSelectedCR.increment();
 
       // Fill histos
-      hBaseline_LdgTrijetMass_AfterCRSelections->Fill(isGenuineB, topData.getLdgTrijet().M());
       hBaseline_Njets_AfterCRSelections->Fill(isGenuineB, jetData.getSelectedJets().size());
       hBaseline_NBjets_AfterCRSelections->Fill(isGenuineB, bjetData.getSelectedBJets().size());
 
@@ -2797,6 +2586,7 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
 	}
       
       hBaseline_MET_AfterCRSelections ->Fill(isGenuineB, METData.getMET().R());
+      hBaseline_HT_AfterCRSelections ->Fill(isGenuineB, jetData.HT());
       hBaseline_MVAmax1_AfterCRSelections ->Fill(isGenuineB, topData.getMVAmax1());
       hBaseline_MVAmax2_AfterCRSelections ->Fill(isGenuineB, topData.getMVAmax2());
       hBaseline_LdgTetrajetPt_AfterCRSelections->Fill(isGenuineB, topData.getLdgTetrajet().pt() );
@@ -2808,26 +2598,35 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
       hBaseline_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterCRSelections->Fill(isGenuineB, dPhi);
       hBaseline_DeltaRLdgTrijetBJetTetrajetBJet_AfterCRSelections->Fill(isGenuineB, dR);
       hBaseline_LdgTrijetPt_AfterCRSelections->Fill(isGenuineB, topData.getLdgTrijet().pt() );
-      hBaseline_LdgTrijetM_AfterCRSelections ->Fill(isGenuineB, topData.getLdgTrijet().M() );
+      hBaseline_LdgTrijetMass_AfterCRSelections ->Fill(isGenuineB, topData.getLdgTrijet().M() );
       hBaseline_LdgTrijetBJetBdisc_AfterCRSelections ->Fill(isGenuineB, topData.getLdgTrijetBJet().bjetDiscriminator() );
       hBaseline_SubLdgTrijetPt_AfterCRSelections->Fill(isGenuineB, topData.getSubldgTrijet().pt() );
-      hBaseline_SubLdgTrijetM_AfterCRSelections ->Fill(isGenuineB, topData.getSubldgTrijet().M() );
+      hBaseline_SubLdgTrijetMass_AfterCRSelections ->Fill(isGenuineB, topData.getSubldgTrijet().M() );
       hBaseline_SubLdgTrijetBJetBdisc_AfterCRSelections ->Fill(isGenuineB, topData.getSubldgTrijetBJet().bjetDiscriminator() );
       hBaseline_LdgDijetPt_AfterCRSelections->Fill(isGenuineB, topData.getLdgDijet().pt() );
       hBaseline_LdgDijetM_AfterCRSelections ->Fill(isGenuineB, topData.getLdgDijet().M() );
       hBaseline_SubLdgDijetPt_AfterCRSelections->Fill(isGenuineB, topData.getSubldgDijet().pt() );
       hBaseline_SubLdgDijetM_AfterCRSelections ->Fill(isGenuineB, topData.getSubldgDijet().M() );
       
+      // Splitted histos
+      fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hLdgTrijetPt_CRone, isGenuineB, topData.getLdgTrijet().pt() );
+      fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hLdgTrijetMass_CRone, isGenuineB, topData.getLdgTrijet().M() );
+      fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hLdgTrijetBJetBdisc_CRone, isGenuineB, topData.getLdgTrijetBJet().bjetDiscriminator() );
+      fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hTetrajetBJetPt_CRone, isGenuineB, topData.getTetrajetBJet().pt() );
+      fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hTetrajetBJetEta_CRone, isGenuineB, topData.getTetrajetBJet().eta() );
+      fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hTetrajetBJetBdisc_CRone, isGenuineB, topData.getTetrajetBJet().bjetDiscriminator() );
+      fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hLdgTetrajetPt_CRone, isGenuineB, topData.getLdgTetrajet().pt() );
+      fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hLdgTetrajetMass_CRone, isGenuineB, topData.getLdgTetrajet().M());
+      
       return;
     }
 
-  if (0) std::cout << "=== Baseline: All Selections" << std::endl;
+  if (0) std::cout << "=== Baseline: Signal Region (SR)" << std::endl;
   cBaselineSelected.increment();
 
   //================================================================================================
   // Fill final plots
   //================================================================================================
-  hBaseline_LdgTrijetMass_AfterAllSelections->Fill(isGenuineB, topData.getLdgTrijet().M());
   hBaseline_Njets_AfterAllSelections->Fill(isGenuineB, jetData.getSelectedJets().size());
   hBaseline_NBjets_AfterAllSelections->Fill(isGenuineB, bjetData.getSelectedBJets().size());
 
@@ -2919,6 +2718,7 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
     }
 
   hBaseline_MET_AfterAllSelections ->Fill(isGenuineB, METData.getMET().R());
+  hBaseline_HT_AfterAllSelections ->Fill(isGenuineB, jetData.HT());
   hBaseline_MVAmax1_AfterAllSelections ->Fill(isGenuineB, topData.getMVAmax1());
   hBaseline_MVAmax2_AfterAllSelections ->Fill(isGenuineB, topData.getMVAmax2());
   hBaseline_LdgTetrajetPt_AfterAllSelections->Fill(isGenuineB, topData.getLdgTetrajet().pt() );
@@ -2930,15 +2730,25 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   hBaseline_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterAllSelections->Fill(isGenuineB, dPhi);
   hBaseline_DeltaRLdgTrijetBJetTetrajetBJet_AfterAllSelections->Fill(isGenuineB, dR);
   hBaseline_LdgTrijetPt_AfterAllSelections->Fill(isGenuineB, topData.getLdgTrijet().pt() );
-  hBaseline_LdgTrijetM_AfterAllSelections ->Fill(isGenuineB, topData.getLdgTrijet().M() );
+  hBaseline_LdgTrijetMass_AfterAllSelections ->Fill(isGenuineB, topData.getLdgTrijet().M() );
   hBaseline_LdgTrijetBJetBdisc_AfterAllSelections ->Fill(isGenuineB, topData.getLdgTrijetBJet().bjetDiscriminator() );
   hBaseline_SubLdgTrijetPt_AfterAllSelections->Fill(isGenuineB, topData.getSubldgTrijet().pt() );
-  hBaseline_SubLdgTrijetM_AfterAllSelections ->Fill(isGenuineB, topData.getSubldgTrijet().M() );
+  hBaseline_SubLdgTrijetMass_AfterAllSelections ->Fill(isGenuineB, topData.getSubldgTrijet().M() );
   hBaseline_SubLdgTrijetBJetBdisc_AfterAllSelections ->Fill(isGenuineB, topData.getSubldgTrijetBJet().bjetDiscriminator() );
   hBaseline_LdgDijetPt_AfterAllSelections->Fill(isGenuineB, topData.getLdgDijet().pt() );
   hBaseline_LdgDijetM_AfterAllSelections ->Fill(isGenuineB, topData.getLdgDijet().M() );
   hBaseline_SubLdgDijetPt_AfterAllSelections->Fill(isGenuineB, topData.getSubldgDijet().pt() );
   hBaseline_SubLdgDijetM_AfterAllSelections ->Fill(isGenuineB, topData.getSubldgDijet().M() );
+
+  // Splitted Histos
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hLdgTrijetPt_SR, isGenuineB, topData.getLdgTrijet().pt() );
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hLdgTrijetMass_SR, isGenuineB, topData.getLdgTrijet().M() );
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hLdgTrijetBJetBdisc_SR, isGenuineB, topData.getLdgTrijetBJet().bjetDiscriminator() );
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hTetrajetBJetPt_SR, isGenuineB, topData.getTetrajetBJet().pt() );
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hTetrajetBJetEta_SR, isGenuineB, topData.getTetrajetBJet().eta() );
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hTetrajetBJetBdisc_SR, isGenuineB, topData.getTetrajetBJet().bjetDiscriminator() );
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hLdgTetrajetPt_SR, isGenuineB, topData.getLdgTetrajet().pt() );
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hLdgTetrajetMass_SR, isGenuineB, topData.getLdgTetrajet().M());
 
   // Save selected event ID for pick events
   fEventSaver.save();
@@ -2950,9 +2760,6 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
                                           const BJetSelection::Data& bjetData,
 					  const std::vector<Jet> invertedBJets,
 					  const int nVertices){
-  // Increment counter
-  cInvertedBTaggingCounter.increment();
-
   //================================================================================================  
   // The b-jets (selected + inverted)
   //================================================================================================  
@@ -2968,6 +2775,25 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   // Sort all b-jets by descending pt value (http://en.cppreference.com/w/cpp/algorithm/sort)
   std::sort(myBJets.begin(), myBJets.end(), [](const Jet& a, const Jet& b){return a.pt() > b.pt();});
 
+  // Final sanity check for the pt of the bjets
+  unsigned int ptCut_index  = 0;
+  unsigned int etaCut_index = 0;
+  unsigned int nBJets       = 0;
+  for(const Jet& b: myBJets)
+    {
+      //=== Apply cut on pt and eta
+      const float jetPtCut  = cfg_AllBJetsPtCuts.at(ptCut_index);
+      const float jetEtaCut = cfg_AllBJetsEtaCuts.at(etaCut_index);
+      if (b.pt() < jetPtCut) continue;
+      if (std::fabs(b.eta()) > jetEtaCut) continue;
+      nBJets++;
+    }
+  if (!cfg_AllBJetsNCut.passedCut(nBJets) ) return;
+
+
+  // Increment counter
+  cInvertedBTaggingCounter.increment();
+
   //================================================================================================  
   // 9) BJet SF  
   //================================================================================================
@@ -2982,17 +2808,11 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   // 10) MET selection
   //================================================================================================
   if (0) std::cout << "=== Inverted: MET selection" << std::endl;
-  const METSelection::Data METData = fInvertedMETSelection.analyze(fEvent, nVertices);
+  const METSelection::Data METData = fInvertedMETSelection.silentAnalyze(fEvent, nVertices);
   // if (!METData.passedSelection()) return;
 
   //================================================================================================
-  // 11) Topology
-  //================================================================================================
-  // if (0) std::cout << "=== Inverted: Topology selection" << std::endl;
-  // const TopologySelection::Data topologyData = fInvertedTopologySelection.analyze(fEvent, jetData);
-
-  //================================================================================================
-  // 12) Top selection
+  // 11) Top selection
   //================================================================================================
   if (0) std::cout << "=== Inverted: Top selection" << std::endl;
   const TopSelectionBDT::Data topData = fInvertedTopSelection.analyzeWithoutBJets(fEvent, jetData.getSelectedJets(), myBJets, true);
@@ -3001,72 +2821,28 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   if (!hasFreeBJet) return;
   if (!passPrelimMVACut) return;
 
+  // Defining the splitting of phase-space as the eta of the Tetrajet b-jet
+  std::vector<float> myFactorisationInfo;
+  myFactorisationInfo.push_back(topData.getTetrajetBJet().eta() );
+  fCommonPlots.setFactorisationBinForEvent(myFactorisationInfo);
+  // fNormalizationSystematicsControlRegion.setFactorisationBinForEvent(myFactorisationInfo); //fixme
+  // fNormalizationSystematicsControlRegion.fillControlPlotsAfterTauSelection(fEvent, tauData); //fixme
+
   // If 1 or more untagged genuine bjets are found the event is considered fakeB. Otherwise genuineB
   bool isGenuineB = IsGenuineBEvent(myBJets);
   hInverted_IsGenuineB->Fill(isGenuineB);
-  if (0) std::cout << "=== FakeBMeasurement::DoInvertedAnalysis()\n\tisGenuineB = " << isGenuineB << std::endl;
 
   //================================================================================================
-  // Standard Selections
+  // Preselections (aka Standard Selections)
   //================================================================================================
-  if (0) std::cout << "=== Inverted: Standard Selections" << std::endl;
-  // fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, isGenuineB);
+  if (0) std::cout << "=== Inverted: Preselections" << std::endl;
   fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, TopologySelection::Data(), topData, isGenuineB);
 
   // Fill Triplets  (Inverted)
-  hInverted_LdgTrijetMass_AfterStandardSelections->Fill(isGenuineB, topData.getLdgTrijet().M());
   hInverted_Njets_AfterStandardSelections->Fill(isGenuineB, jetData.getSelectedJets().size());
   hInverted_NBjets_AfterStandardSelections->Fill(isGenuineB, myBJets.size());
 
   int index = -1;
-  hInverted_NFailedBJets_AfterStandardSelections -> Fill(invertedBJets.size());
-  // For-loop: All inverted b-jets
-  for (auto bjet: invertedBJets)
-    {
-      index++;
-      
-      // Only consider the first 3 b-jets
-      if (index > 2) break;
-
-      // NOTE: Definition change of boolean used in filling (now jet-by-jet, not event)
-      bool isNotFakeB = (abs(bjet.hadronFlavour()) == 5);
-
-      // Triplets (Inverted)
-      if (index == 0)
-	{
-      	  hInverted_FailedBJet1BDisc_AfterStandardSelections->Fill(isNotFakeB, bjet.bjetDiscriminator());
-	  hInverted_FailedBJet1Pt_AfterStandardSelections->Fill(isNotFakeB, bjet.pt());
-	  hInverted_FailedBJet1Eta_AfterStandardSelections->Fill(isNotFakeB, bjet.eta());
-	  hInverted_FailedBJet1PdgId_AfterStandardSelections->Fill(isNotFakeB, bjet.pdgId());
-	  hInverted_FailedBJet1PartonFlavour_AfterStandardSelections->Fill(isNotFakeB, bjet.partonFlavour());
-	  hInverted_FailedBJet1HadronFlavour_AfterStandardSelections->Fill(isNotFakeB, bjet.hadronFlavour());
-	}
-
-      // Use case: >= 2 inverted b-jets
-      if (index == 1)
-	{
-	  hInverted_FailedBJet2BDisc_AfterStandardSelections->Fill(isNotFakeB, bjet.bjetDiscriminator());
-	  hInverted_FailedBJet2Pt_AfterStandardSelections->Fill(isNotFakeB, bjet.pt());
-	  hInverted_FailedBJet2Eta_AfterStandardSelections->Fill(isNotFakeB, bjet.eta());
-	  hInverted_FailedBJet2PdgId_AfterStandardSelections->Fill(isNotFakeB, bjet.pdgId());
-	  hInverted_FailedBJet2PartonFlavour_AfterStandardSelections->Fill(isNotFakeB, bjet.partonFlavour());
-	  hInverted_FailedBJet2HadronFlavour_AfterStandardSelections->Fill(isNotFakeB, bjet.hadronFlavour());
-	}
-
-      // Use case: >= 3 inverted b-jets
-      if (index == 2)
-	{
-	  hInverted_FailedBJet3BDisc_AfterStandardSelections->Fill(isNotFakeB, bjet.bjetDiscriminator());
-	  hInverted_FailedBJet3Pt_AfterStandardSelections->Fill(isNotFakeB, bjet.pt());
-	  hInverted_FailedBJet3Eta_AfterStandardSelections->Fill(isNotFakeB, bjet.eta());
-	  hInverted_FailedBJet3PdgId_AfterStandardSelections->Fill(isNotFakeB, bjet.pdgId());
-	  hInverted_FailedBJet3PartonFlavour_AfterStandardSelections->Fill(isNotFakeB, bjet.partonFlavour());
-	  hInverted_FailedBJet3HadronFlavour_AfterStandardSelections->Fill(isNotFakeB, bjet.hadronFlavour());
-	}
-
-    }
-
-  index = -1;
   // For-loop: All BJets (Real or Inverted) used in top fit
   for (auto bjet: myBJets)
     {
@@ -3158,6 +2934,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
     }
 
   hInverted_MET_AfterStandardSelections ->Fill(isGenuineB, METData.getMET().R());
+  hInverted_HT_AfterStandardSelections ->Fill(isGenuineB, jetData.HT());
   hInverted_MVAmax1_AfterStandardSelections ->Fill(isGenuineB, topData.getMVAmax1());
   hInverted_MVAmax2_AfterStandardSelections ->Fill(isGenuineB, topData.getMVAmax2());
   hInverted_LdgTetrajetPt_AfterStandardSelections->Fill(isGenuineB, topData.getLdgTetrajet().pt() );
@@ -3172,10 +2949,10 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   hInverted_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterStandardSelections->Fill(isGenuineB, dPhi);
   hInverted_DeltaRLdgTrijetBJetTetrajetBJet_AfterStandardSelections->Fill(isGenuineB, dR);
   hInverted_LdgTrijetPt_AfterStandardSelections->Fill(isGenuineB, topData.getLdgTrijet().pt() );
-  hInverted_LdgTrijetM_AfterStandardSelections ->Fill(isGenuineB, topData.getLdgTrijet().M() );
+  hInverted_LdgTrijetMass_AfterStandardSelections ->Fill(isGenuineB, topData.getLdgTrijet().M() );
   hInverted_LdgTrijetBJetBdisc_AfterStandardSelections ->Fill(isGenuineB, topData.getLdgTrijetBJet().bjetDiscriminator() );
   hInverted_SubLdgTrijetPt_AfterStandardSelections->Fill(isGenuineB, topData.getSubldgTrijet().pt() );
-  hInverted_SubLdgTrijetM_AfterStandardSelections ->Fill(isGenuineB, topData.getSubldgTrijet().M() );
+  hInverted_SubLdgTrijetMass_AfterStandardSelections ->Fill(isGenuineB, topData.getSubldgTrijet().M() );
   hInverted_SubLdgTrijetBJetBdisc_AfterStandardSelections ->Fill(isGenuineB, topData.getSubldgTrijetBJet().bjetDiscriminator() );
   hInverted_LdgDijetPt_AfterStandardSelections->Fill(isGenuineB, topData.getLdgDijet().pt() );
   hInverted_LdgDijetM_AfterStandardSelections ->Fill(isGenuineB, topData.getLdgDijet().M() );
@@ -3185,21 +2962,20 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   // All Selections
   //================================================================================================
-  // if (!topologyData.passedSelection()) return;
   if (!topData.passedSelection()) 
     {
-      // If top fails fill Control Region (CR) histograms and return
+      // If top fails determine if event fall into  Control Region 2 (CR2)
       bool passLdgTopMVA    = cfg_LdgTopMVACut.passedCut( topData.getMVAmax1() );
       bool passSubldgTopMVA = cfg_SubldgTopMVACut.passedCut( topData.getMVAmax2() );
       bool passInvertedTop  = passLdgTopMVA * passSubldgTopMVA;
       if (!passInvertedTop) return;
 
-      if (0) std::cout << "=== Inverted: All Selections (Inverted Top)" << std::endl;
+      if (0) std::cout << "=== Inverted: Control Region 2 (CR2)" << std::endl;
       cInvertedSelectedCR.increment();
-      
-      // Fill histos
+
+      // Fill final plots (CR2)
       index = -1;
-      hInverted_NFailedBJets_AfterCRSelections -> Fill(invertedBJets.size());
+      hNFailedBJets_CRtwo -> Fill(invertedBJets.size());
       // For-loop: Only failed BJets used as bjets in top fit
       for (auto bjet: invertedBJets)
 	{
@@ -3214,41 +2990,34 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
 	  // Triplets (Inverted)
 	  if (index == 0)
 	    {
-	      hInverted_FailedBJet1BDisc_AfterCRSelections->Fill(isNotFakeB, bjet.bjetDiscriminator());
-	      hInverted_FailedBJet1Pt_AfterCRSelections->Fill(isNotFakeB, bjet.pt());
-	      hInverted_FailedBJet1Eta_AfterCRSelections->Fill(isNotFakeB, bjet.eta());
-	      hInverted_FailedBJet1PdgId_AfterCRSelections->Fill(isNotFakeB, bjet.pdgId());
-	      hInverted_FailedBJet1PartonFlavour_AfterCRSelections->Fill(isNotFakeB, bjet.partonFlavour());
-	      hInverted_FailedBJet1HadronFlavour_AfterCRSelections->Fill(isNotFakeB, bjet.hadronFlavour());
+	      hFailedBJet1BDisc_CRtwo->Fill(isNotFakeB, bjet.bjetDiscriminator());
+	      hFailedBJet1Pt_CRtwo->Fill(isNotFakeB, bjet.pt());
+	      hFailedBJet1Eta_CRtwo->Fill(isNotFakeB, bjet.eta());
+	      hFailedBJet1HadronFlavour_CRtwo->Fill(isNotFakeB, bjet.hadronFlavour());
 	    }
 	  
 	  // Use case: >= 2 inverted b-jets
 	  if (index == 1)
 	    {
-	      hInverted_FailedBJet2BDisc_AfterCRSelections->Fill(isNotFakeB, bjet.bjetDiscriminator());
-	      hInverted_FailedBJet2Pt_AfterCRSelections->Fill(isNotFakeB, bjet.pt());
-	      hInverted_FailedBJet2Eta_AfterCRSelections->Fill(isNotFakeB, bjet.eta());
-	      hInverted_FailedBJet2PdgId_AfterCRSelections->Fill(isNotFakeB, bjet.pdgId());
-	      hInverted_FailedBJet2PartonFlavour_AfterCRSelections->Fill(isNotFakeB, bjet.partonFlavour());
-	      hInverted_FailedBJet2HadronFlavour_AfterCRSelections->Fill(isNotFakeB, bjet.hadronFlavour());
+	      hFailedBJet2BDisc_CRtwo->Fill(isNotFakeB, bjet.bjetDiscriminator());
+	      hFailedBJet2Pt_CRtwo->Fill(isNotFakeB, bjet.pt());
+	      hFailedBJet2Eta_CRtwo->Fill(isNotFakeB, bjet.eta());
+	      hFailedBJet2HadronFlavour_CRtwo->Fill(isNotFakeB, bjet.hadronFlavour());
 	    }
 	  
 	  // Use case: >= 3 inverted b-jets
 	  if (index == 2)
 	    {
 	      
-	      hInverted_FailedBJet3BDisc_AfterCRSelections->Fill(isNotFakeB, bjet.bjetDiscriminator());
-	      hInverted_FailedBJet3Pt_AfterCRSelections->Fill(isNotFakeB, bjet.pt());
-	      hInverted_FailedBJet3Eta_AfterCRSelections->Fill(isNotFakeB, bjet.eta());
-	      hInverted_FailedBJet3PdgId_AfterCRSelections->Fill(isNotFakeB, bjet.pdgId());
-	      hInverted_FailedBJet3PartonFlavour_AfterCRSelections->Fill(isNotFakeB, bjet.partonFlavour());
-	      hInverted_FailedBJet3HadronFlavour_AfterCRSelections->Fill(isNotFakeB, bjet.hadronFlavour());
+	      hFailedBJet3BDisc_CRtwo->Fill(isNotFakeB, bjet.bjetDiscriminator());
+	      hFailedBJet3Pt_CRtwo->Fill(isNotFakeB, bjet.pt());
+	      hFailedBJet3Eta_CRtwo->Fill(isNotFakeB, bjet.eta());
+	      hFailedBJet3HadronFlavour_CRtwo->Fill(isNotFakeB, bjet.hadronFlavour());
 	    }
 	  
 	}
       
       // Fill Triplets (Inverted)
-      hInverted_LdgTrijetMass_AfterCRSelections->Fill(isGenuineB, topData.getLdgTrijet().M());
       hInverted_Njets_AfterCRSelections->Fill(isGenuineB, jetData.getSelectedJets().size());
       hInverted_NBjets_AfterCRSelections->Fill(isGenuineB, myBJets.size()); //bjetData.getSelectedBJets().size()); 
       
@@ -3339,6 +3108,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
 	}
       
       hInverted_MET_AfterCRSelections ->Fill(isGenuineB, METData.getMET().R());
+      hInverted_HT_AfterCRSelections ->Fill(isGenuineB, jetData.HT());
       hInverted_MVAmax1_AfterCRSelections ->Fill(isGenuineB, topData.getMVAmax1());
       hInverted_MVAmax2_AfterCRSelections ->Fill(isGenuineB, topData.getMVAmax2());
       hInverted_LdgTetrajetPt_AfterCRSelections->Fill(isGenuineB, topData.getLdgTetrajet().pt() );
@@ -3350,29 +3120,39 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
       hInverted_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterCRSelections->Fill(isGenuineB, dPhi);
       hInverted_DeltaRLdgTrijetBJetTetrajetBJet_AfterCRSelections->Fill(isGenuineB, dR);
       hInverted_LdgTrijetPt_AfterCRSelections->Fill(isGenuineB, topData.getLdgTrijet().pt() );
-      hInverted_LdgTrijetM_AfterCRSelections ->Fill(isGenuineB, topData.getLdgTrijet().M() );
+      hInverted_LdgTrijetMass_AfterCRSelections ->Fill(isGenuineB, topData.getLdgTrijet().M() );
       hInverted_LdgTrijetBJetBdisc_AfterCRSelections ->Fill(isGenuineB, topData.getLdgTrijetBJet().bjetDiscriminator() );
       hInverted_SubLdgTrijetPt_AfterCRSelections->Fill(isGenuineB, topData.getSubldgTrijet().pt() );
-      hInverted_SubLdgTrijetM_AfterCRSelections ->Fill(isGenuineB, topData.getSubldgTrijet().M() );
+      hInverted_SubLdgTrijetMass_AfterCRSelections ->Fill(isGenuineB, topData.getSubldgTrijet().M() );
       hInverted_SubLdgTrijetBJetBdisc_AfterCRSelections ->Fill(isGenuineB, topData.getSubldgTrijetBJet().bjetDiscriminator() );
       hInverted_LdgDijetPt_AfterCRSelections->Fill(isGenuineB, topData.getLdgDijet().pt() );
       hInverted_LdgDijetM_AfterCRSelections ->Fill(isGenuineB, topData.getLdgDijet().M() );
       hInverted_SubLdgDijetPt_AfterCRSelections->Fill(isGenuineB, topData.getSubldgDijet().pt() );
       hInverted_SubLdgDijetM_AfterCRSelections ->Fill(isGenuineB, topData.getSubldgDijet().M() );
       
+      // Splitted Histos
+      fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hLdgTrijetPt_CRtwo, isGenuineB, topData.getLdgTrijet().pt() );
+      fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hLdgTrijetMass_CRtwo, isGenuineB, topData.getLdgTrijet().M() );
+      fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hLdgTrijetBJetBdisc_CRtwo, isGenuineB, topData.getLdgTrijetBJet().bjetDiscriminator() );
+      fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hTetrajetBJetPt_CRtwo, isGenuineB, topData.getTetrajetBJet().pt() );
+      fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hTetrajetBJetEta_CRtwo, isGenuineB, topData.getTetrajetBJet().eta() );
+      fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hTetrajetBJetBdisc_CRtwo, isGenuineB, topData.getTetrajetBJet().bjetDiscriminator() );
+      fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hLdgTetrajetPt_CRtwo, isGenuineB, topData.getLdgTetrajet().pt() );
+      fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hLdgTetrajetMass_CRtwo, isGenuineB, topData.getLdgTetrajet().M());
+      
       return;
     }
 
-  if (0) std::cout << "=== Inverted: All Selections" << std::endl;
+  if (0) std::cout << "=== Inverted: Verification Region (VR)" << std::endl;
   cInvertedSelected.increment();
 
   //================================================================================================
-  // Fill final plots
+  // Fill final plots (VR)
   //================================================================================================
-  fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, 1);
-
+  fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, (int) isGenuineB);
+  
   index = -1;
-  hInverted_NFailedBJets_AfterAllSelections -> Fill(invertedBJets.size());//ew
+  hNFailedBJets_VR -> Fill(invertedBJets.size());
   // For-loop: Only failed BJets used as bjets in top fit
   for (auto bjet: invertedBJets)
     {
@@ -3387,41 +3167,34 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
       // Triplets (Inverted)
       if (index == 0)
 	{
-	  hInverted_FailedBJet1BDisc_AfterAllSelections->Fill(isNotFakeB, bjet.bjetDiscriminator());
-	  hInverted_FailedBJet1Pt_AfterAllSelections->Fill(isNotFakeB, bjet.pt());
-	  hInverted_FailedBJet1Eta_AfterAllSelections->Fill(isNotFakeB, bjet.eta());
-	  hInverted_FailedBJet1PdgId_AfterAllSelections->Fill(isNotFakeB, bjet.pdgId());
-	  hInverted_FailedBJet1PartonFlavour_AfterAllSelections->Fill(isNotFakeB, bjet.partonFlavour());
-	  hInverted_FailedBJet1HadronFlavour_AfterAllSelections->Fill(isNotFakeB, bjet.hadronFlavour());
+	  hFailedBJet1BDisc_VR->Fill(isNotFakeB, bjet.bjetDiscriminator());
+	  hFailedBJet1Pt_VR->Fill(isNotFakeB, bjet.pt());
+	  hFailedBJet1Eta_VR->Fill(isNotFakeB, bjet.eta());
+	  hFailedBJet1HadronFlavour_VR->Fill(isNotFakeB, bjet.hadronFlavour());
 	}
 
       // Use case: >= 2 inverted b-jets
       if (index == 1)
 	{
-	  hInverted_FailedBJet2BDisc_AfterAllSelections->Fill(isNotFakeB, bjet.bjetDiscriminator());
-	  hInverted_FailedBJet2Pt_AfterAllSelections->Fill(isNotFakeB, bjet.pt());
-	  hInverted_FailedBJet2Eta_AfterAllSelections->Fill(isNotFakeB, bjet.eta());
-	  hInverted_FailedBJet2PdgId_AfterAllSelections->Fill(isNotFakeB, bjet.pdgId());
-	  hInverted_FailedBJet2PartonFlavour_AfterAllSelections->Fill(isNotFakeB, bjet.partonFlavour());
-	  hInverted_FailedBJet2HadronFlavour_AfterAllSelections->Fill(isNotFakeB, bjet.hadronFlavour());
+	  hFailedBJet2BDisc_VR->Fill(isNotFakeB, bjet.bjetDiscriminator());
+	  hFailedBJet2Pt_VR->Fill(isNotFakeB, bjet.pt());
+	  hFailedBJet2Eta_VR->Fill(isNotFakeB, bjet.eta());
+	  hFailedBJet2HadronFlavour_VR->Fill(isNotFakeB, bjet.hadronFlavour());
 	}
 
       // Use case: >= 3 inverted b-jets
       if (index == 2)
 	{
 
-	  hInverted_FailedBJet3BDisc_AfterAllSelections->Fill(isNotFakeB, bjet.bjetDiscriminator());
-	  hInverted_FailedBJet3Pt_AfterAllSelections->Fill(isNotFakeB, bjet.pt());
-	  hInverted_FailedBJet3Eta_AfterAllSelections->Fill(isNotFakeB, bjet.eta());
-	  hInverted_FailedBJet3PdgId_AfterAllSelections->Fill(isNotFakeB, bjet.pdgId());
-	  hInverted_FailedBJet3PartonFlavour_AfterAllSelections->Fill(isNotFakeB, bjet.partonFlavour());
-	  hInverted_FailedBJet3HadronFlavour_AfterAllSelections->Fill(isNotFakeB, bjet.hadronFlavour());
+	  hFailedBJet3BDisc_VR->Fill(isNotFakeB, bjet.bjetDiscriminator());
+	  hFailedBJet3Pt_VR->Fill(isNotFakeB, bjet.pt());
+	  hFailedBJet3Eta_VR->Fill(isNotFakeB, bjet.eta());
+	  hFailedBJet3HadronFlavour_VR->Fill(isNotFakeB, bjet.hadronFlavour());
 	}
 
     }
 
   // Fill Triplets (Inverted)
-  hInverted_LdgTrijetMass_AfterAllSelections->Fill(isGenuineB, topData.getLdgTrijet().M());
   hInverted_Njets_AfterAllSelections->Fill(isGenuineB, jetData.getSelectedJets().size());
   hInverted_NBjets_AfterAllSelections->Fill(isGenuineB, myBJets.size()); //bjetData.getSelectedBJets().size()); 
   
@@ -3512,6 +3285,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
     }
 
   hInverted_MET_AfterAllSelections ->Fill(isGenuineB, METData.getMET().R());
+  hInverted_HT_AfterAllSelections ->Fill(isGenuineB, jetData.HT());
   hInverted_MVAmax1_AfterAllSelections ->Fill(isGenuineB, topData.getMVAmax1());
   hInverted_MVAmax2_AfterAllSelections ->Fill(isGenuineB, topData.getMVAmax2());
   hInverted_LdgTetrajetPt_AfterAllSelections->Fill(isGenuineB, topData.getLdgTetrajet().pt() );
@@ -3523,15 +3297,25 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   hInverted_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterAllSelections->Fill(isGenuineB, dPhi);
   hInverted_DeltaRLdgTrijetBJetTetrajetBJet_AfterAllSelections->Fill(isGenuineB, dR);
   hInverted_LdgTrijetPt_AfterAllSelections->Fill(isGenuineB, topData.getLdgTrijet().pt() );
-  hInverted_LdgTrijetM_AfterAllSelections ->Fill(isGenuineB, topData.getLdgTrijet().M() );
+  hInverted_LdgTrijetMass_AfterAllSelections ->Fill(isGenuineB, topData.getLdgTrijet().M() );
   hInverted_LdgTrijetBJetBdisc_AfterAllSelections ->Fill(isGenuineB, topData.getLdgTrijetBJet().bjetDiscriminator() );
   hInverted_SubLdgTrijetPt_AfterAllSelections->Fill(isGenuineB, topData.getSubldgTrijet().pt() );
-  hInverted_SubLdgTrijetM_AfterAllSelections ->Fill(isGenuineB, topData.getSubldgTrijet().M() );
+  hInverted_SubLdgTrijetMass_AfterAllSelections ->Fill(isGenuineB, topData.getSubldgTrijet().M() );
   hInverted_SubLdgTrijetBJetBdisc_AfterAllSelections ->Fill(isGenuineB, topData.getSubldgTrijetBJet().bjetDiscriminator() );
   hInverted_LdgDijetPt_AfterAllSelections->Fill(isGenuineB, topData.getLdgDijet().pt() );
   hInverted_LdgDijetM_AfterAllSelections ->Fill(isGenuineB, topData.getLdgDijet().M() );
   hInverted_SubLdgDijetPt_AfterAllSelections->Fill(isGenuineB, topData.getSubldgDijet().pt() );
   hInverted_SubLdgDijetM_AfterAllSelections ->Fill(isGenuineB, topData.getSubldgDijet().M() );
+
+  // Splitted histos
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hLdgTrijetPt_VR, isGenuineB, topData.getLdgTrijet().pt() );
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hLdgTrijetMass_VR, isGenuineB, topData.getLdgTrijet().M() );
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hLdgTrijetBJetBdisc_VR, isGenuineB, topData.getLdgTrijetBJet().bjetDiscriminator() );
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hTetrajetBJetPt_VR, isGenuineB, topData.getTetrajetBJet().pt() );
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hTetrajetBJetEta_VR, isGenuineB, topData.getTetrajetBJet().eta() );
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hTetrajetBJetBdisc_VR, isGenuineB, topData.getTetrajetBJet().bjetDiscriminator() );
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hLdgTetrajetPt_VR, isGenuineB, topData.getLdgTetrajet().pt() );
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hLdgTetrajetMass_VR, isGenuineB, topData.getLdgTetrajet().M());
 
   // Save selected event ID for pick events
   fEventSaver.save();

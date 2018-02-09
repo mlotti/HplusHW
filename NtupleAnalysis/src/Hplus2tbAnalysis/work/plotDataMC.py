@@ -176,7 +176,7 @@ def GetHistoKwargs(histoList, opts):
         "ylabel"           : "Events / %.0f",
         "rebinX"           : 1,
         "rebinY"           : None,
-        "ratioYlabel"      : "Data/Bkg",
+        "ratioYlabel"      : "Data/Bkg. ",
         "ratio"            : True, 
         "stackMCHistograms": True,
         "ratioInvert"      : False, 

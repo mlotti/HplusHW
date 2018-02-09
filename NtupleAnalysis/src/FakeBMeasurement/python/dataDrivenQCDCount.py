@@ -12,6 +12,7 @@ from HiggsAnalysis.NtupleAnalysis.tools.extendedCount import ExtendedCount
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import array
 import os
+import sys
 
 import ROOT
 ROOT.gROOT.SetBatch(True) # no flashing canvases
@@ -24,24 +25,23 @@ class DataDrivenQCDShape:
     '''
     Container class for information of data and MC EWK at certain point of selection
     '''
-    def __init__(self, dsetMgr, dsetLabelData, dsetLabelEwk, histoName, dataPath, ewkPath, luminosity,  optionUseInclusiveNorm, verbose=False):
+    def __init__(self, dsetMgr, dsetLabelData, dsetLabelEwk, histoName, dataPath, ewkPath, luminosity, optionUseInclusiveNorm, verbose=False):
         self._verbose = verbose
         self._uniqueN = 0
         self._splittedHistoReader = splittedHistoReader.SplittedHistoReader(dsetMgr, dsetLabelData)
         self._histoName = histoName
-        self._optionUseInclusiveNorm = optionUseInclusiveNorm #ALEX-NEW
+        self._optionUseInclusiveNorm = optionUseInclusiveNorm 
         dataFullName    = os.path.join(dataPath, histoName)
         ewkFullName     = os.path.join(ewkPath, histoName)
 
-        # ALEX-NEW 
         if (self._optionUseInclusiveNorm):
-            msg = "Disabled call for getting splitted histograms. Getting \"Inclusive\" histogram only instead."
-            self.Verbose(ShellStyles.WarningLabel() + msg, self._verbose)
+            msg = "Will create \"Inclusive\"-histogram results"
+            self.Verbose(ShellStyles.NoteStyle() + msg + ShellStyles.NormalStyle(), False)
             self._dataList  = list(self._getInclusiveHistogramsFromSingleSource(dsetMgr, dsetLabelData, dataFullName, luminosity)) # was called by default
             self._ewkList   = list(self._getInclusiveHistogramsFromSingleSource(dsetMgr, dsetLabelEwk , ewkFullName , luminosity)) # was called by default
         else:
-            msg = "This splitted histograms method is not validated! Use \"Inclusive\" histogram only instead."
-            self.Print(ShellStyles.WarningLabel() + msg, False)
+            msg = "Will create \"Splitted\"-histogram results"
+            self.Verbose(ShellStyles.NoteStyle() + msg + ShellStyles.NormalStyle(), False)
             self._dataList  = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelData, dataFullName, luminosity)) #FIXME: Does this work for Inclusive?
             self._ewkList   = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelEwk , ewkFullName , luminosity)) #FIXME: Does this work for Inclusive?
         return
@@ -59,29 +59,30 @@ class DataDrivenQCDShape:
         if not self._verbose:
             return
         fName = __file__.split("/")[-1]
-        Print(msg, printHeader)
+        self.Print(msg, printHeader)
         return
 
     def _getInclusiveHistogramsFromSingleSource(self, dsetMgr, dsetlabel, histoName, luminosity):
-        '''
-        TEMPORARY Function Definition - Brand new fucntion created by Alexandros
-        '''
         myHistoList = []
         myNameList  = histoName.split("/")
         myMultipleFileNameStem = histoName
 
-        self.Print("Getting ROOT histo \"%s\" of dataset \"%s\"" % (myMultipleFileNameStem, dsetlabel), True)
+        self.Verbose("Getting ROOT histo \"%s\" of dataset \"%s\"" % (myMultipleFileNameStem, dsetlabel), True)
         myDsetRootHisto = dsetMgr.getDataset(dsetlabel).getDatasetRootHisto(myMultipleFileNameStem)
 
         # If the dataset is MC set the appropriate luminosity
         if dsetMgr.getDataset(dsetlabel).isMC():
-            self.Print("Setting luminosity to \"%d\" pb-1 for dataset \"%s\"" % (luminosity, dsetlabel), False)
+            self.Verbose("Setting luminosity to \"%d\" pb-1 for dataset \"%s\"" % (luminosity, dsetlabel), False)
             myDsetRootHisto.normalizeToLuminosity(luminosity)
 
+        # Get histogram, rename it and set owenership
         h = myDsetRootHisto.getHistogram()
+        newName = histoName + "_" + dsetlabel
+        self.Verbose("Setting histogram name to \"%s\"" % (newName), False)
+        h.SetName(newName)
         ROOT.SetOwnership(h, True)
 
-        self.Print("Appending histogram \"%s\" of dataset \"%s\" to the list" % (h.GetName(), dsetlabel), False)
+        self.Verbose("Appending histogram \"%s\" of dataset \"%s\" to the list" % (h.GetName(), dsetlabel), False)
         myHistoList.append(h)
         return myHistoList
         
@@ -110,11 +111,21 @@ class DataDrivenQCDShape:
     def getDataDrivenQCDHistoForSplittedBin(self, binIndex):
         '''
         Return the sum of data-ewk in a given phase space split bin
+        
+        at bin-index 0 you have the inclusive histogram!
         '''
         if binIndex >= len(self._dataList):
-            raise Exception(ShellStyles.ErrorLabel()+"DataDrivenQCDShape::getDataDrivenQCDForSplittedBin: requested bin index %d out of range (0-%d)!"%(binIndex,len(self._dataList)))
+            msg = "Requested bin index %d out of range (0-%d)!" % (binIndex, len(self._dataList) )
+            raise Exception(ShellStyles.ErrorStyle() + msg, ShellStyles.NormalStyle() )
+
+        # Clone the Data histos
         h = aux.Clone(self._dataList[binIndex])
-        h.SetName(h.GetName()+"dataDriven")
+        newName = h.GetName() + "_DataDriven"
+        h.SetName(newName)
+        self.Verbose("Cloned histo %s from histo %s" % (h.GetName(), self._dataList[0].GetName()), True)
+        
+        # Subtract the EWK histos
+        self.Verbose("Subtracting histo %s from histo %s (bin=%i)" % (self._ewkList[binIndex].GetName(), h.GetName(), binIndex), False)
         h.Add(self._ewkList[binIndex], -1.0)
         return h
 
@@ -143,22 +154,26 @@ class DataDrivenQCDShape:
         Return the sum of data-ewk integrated over the phase space splitted bins
         '''
         
-        # 1) Do the "Inclusive" histogram (here I assume that the first in the list is the inclusive)
-        h = aux.Clone(self._dataList[0])        
-        histoName = "_".join(h.GetName().split("_", 2)[:2]) + "_DataMinusEWK_Integrated"
-        # histoName = h.GetName()+"Integrated" #original code
+        # Do the "Inclusive" histogram (here I assume that the first in the list is the inclusive)
+        h = aux.Clone(self._dataList[0])
+        histoName = "_".join(h.GetName().split("_", 2)[:2]) + "_DataDriven_Integrated"
         h.SetName(histoName)
-        # Subtract the EWK histo from Data histo (QCD=Data-EWK)
+        self.Verbose("Cloned histo %s from histo %s" % (h.GetName(), self._dataList[0].GetName()), True)
+
+        # Subtract the EWK histo from Data histo (QCD=Data-EWK)        
+        self.Verbose("Subtracting histo %s from histo %s" % (self._ewkList[0].GetName(), h.GetName()), False)
         h.Add(self._ewkList[0], -1.0)
         
-        # 2) Do the bin-by-bin histograms
-        # For-loop: All data histos
-        for i in range(1, len(self._dataList)): # starts from bin #1 (not zero)
-            # Bin-by-bin mode has not been validated by me yet
-            print "FIXME "*20 
-            
+        # For-loop: All data histos [N.B. Starts from bin 1 (not 0=inclusive) ]
+        for i in range(1, len(self._dataList)):
+
+            msg = "Splitted-bin mode has not been validated yet"
+            #raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
+
+            # Accumulate given bin-histo from Data
             h.Add(self._dataList[i])
-            # Subtract the EWK histo from Data histo (QCD=Data-EWK)
+
+            # Subtract given bin-histo from EWK
             h.Add(self._ewkList[i], -1.0)
         return h
 
@@ -188,11 +203,13 @@ class DataDrivenQCDShape:
         '''
         Return the QCD purity as a histogram with splitted bins on x-axis
         '''
+        # Sanity check - Are there splitted histos or is it just the inclusive one?
+        if len(self._dataList) <= 1:
+            return None
+            
         # Create histogram
-        myNameList = self._ewkList[0].GetName().split("_")
-        # histoName  = "%s_purity_%d"%(self._ewkList[0].GetName(), self._uniqueN)  #original code
-        # histoTitle = "PurityBySplittedBin_%s"%myNameList[0][:len(myNameList[0])-1] #original code
-        histoName  = "_".join(self._ewkList[0].GetName().split("_", 2)[:2]) + "_Purity"
+        # histoName  = "_".join(self._ewkList[0].GetName().split("_", 2)[:2]) + "_Purity"
+        histoName  = "_".join(self._dataList[0].GetName().split("_", 2)[:2]) + "_Purity"
         histoTitle = histoName
 
         # Create the Purity histogram with one bin for each measurement bin (e.g. tau pT bins in HToTauNu)
@@ -201,15 +218,18 @@ class DataDrivenQCDShape:
         h.SetYTitle("Purity, %")
         ROOT.SetOwnership(h, True)
         self._uniqueN += 1
-        # For-loop: All data
-        for i in range(0, len(self._dataList)):
+
+        # For-loop: All data histos [N.B. Starts from bin 1 (not 0=inclusive) ]
+        for i in range(1, len(self._dataList)): # for i in range(0, len(self._dataList)):
             h.GetXaxis().SetBinLabel(i+1, self._dataList[i].GetTitle())
             nData = 0.0
             nEwk  = 0.0
+
             # For-loop: All bins
             for j in range(0, self._dataList[i].GetNbinsX()+2):
                 nData += self._dataList[i].GetBinContent(j)
-                nEwk += self._ewkList[i].GetBinContent(j)
+                nEwk  += self._ewkList[i].GetBinContent(j)
+
             myPurity = 0.0
             myUncert = 0.0
             if (nData > 0.0):
@@ -219,6 +239,7 @@ class DataDrivenQCDShape:
             # Set value and error
             h.SetBinContent(i+1, myPurity * 100.0)
             h.SetBinError(  i+1, myUncert * 100.0)
+        print h.GetName()
         return h
     
     def getIntegratedPurity(self):
@@ -274,33 +295,43 @@ class DataDrivenQCDShape:
         '''
         Return the QCD purity in bins of the final shape
         '''
-        hData     = self.getIntegratedDataHisto()
-        hEwk      = self.getIntegratedEwkHisto()
-        #cloneName =  "%s_purity_%d" % (hData, self._uniqueN) # original code
-        cloneName =  ("_".join(hData.GetName().split("_", 2)[:2]) + "_IntegratedPurity_" + str(self._uniqueN) )
-        h         = aux.Clone(hData, cloneName)
-        nameList =  self._dataList[0].GetName().split("_")
-        h.SetTitle("PurityByFinalShapeBin_%s"%nameList[0][:len(nameList[0])-1])
+        hData    = self.getIntegratedDataHisto()
+        hEwk     = self.getIntegratedEwkHisto()
+        # newName  =  ("_".join(hData.GetName().split("_", 2)[:2]) + "_IntegratedPurity_" + str(self._uniqueN) )
+        newName  = hData.GetName() + "_Purity"
+        h        = aux.Clone(hData, newName)
+        nameList = self._dataList[0].GetName().split("_")
+        newTitle = "PurityByFinalShapeBin_%s" % nameList[0][:len(nameList[0])-1]
+        h.SetTitle(newTitle)
         self._uniqueN += 1
 
         # For-loop: All bins
         for i in range(1, h.GetNbinsX()+1):
             myPurity = 0.0
             myUncert = 0.0
-            if (hData.GetBinContent(i) > 0.0):
-                myPurity = (hData.GetBinContent(i) - hEwk.GetBinContent(i)) / hData.GetBinContent(i)
+            nData    = hData.GetBinContent(i)
+            nEWK     = hEwk.GetBinContent(i)
+
+            # Calculate the purity
+            if (nData > 0.0):
+                
+                myPurity = (nData - nEWK) / nData
+
+                # Sanity check
                 if myPurity < 0.0:
                     myPurity = 0.0
                     myUncert = 0.0
                 else:
                     # Assume binomial error
-                    myUncertSq = myPurity * (1.0-myPurity) / hData.GetBinContent(i)
+                    myUncertSq = myPurity * (1.0-myPurity) / nData
                     if myUncertSq >= 0.0:
-                        myUncert   = sqrt(myUncertSq)
+                        myUncert = sqrt(myUncertSq)
                     else:
                         msg = "Purity is greater than 1 (%.4f) in bin %i of histogram %s" % (myPurity, i, h.GetName())
                         self.Verbose(ShellStyles.WarningLabel() + msg, True)
-                        myUncert   = 0.0
+                        myUncert = 0.0
+
+            # Set the purity value for the given bin
             h.SetBinContent(i, myPurity)
             h.SetBinError(i, myUncert)
         return h

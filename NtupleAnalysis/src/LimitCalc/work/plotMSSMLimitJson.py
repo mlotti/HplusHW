@@ -91,7 +91,7 @@ def main():
     mHplus         = str(limits["mHplus"])
     graphs         = json2graph(limits)
     xmin,xmax      = xaminmax(limits)
-    regime = "heavy"
+    regime         = str(limits["regime"])#"heavy"
     if xmax < 175:
         regime = "light"
     if xmin < 175 and xmax > 175:
