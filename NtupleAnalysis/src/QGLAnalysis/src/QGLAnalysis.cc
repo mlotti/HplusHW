@@ -44,8 +44,8 @@ private:
     
   // Non-common histograms
   WrappedTH1 *hJetsQGL;
-  WrappedTH1 *hGluonJets;
-  WrappedTH1 *hLightJets;
+  WrappedTH1 *hGluonJetsQGL;
+  WrappedTH1 *hLightJetsQGL;
 
   // pT in the range [30,40)
   WrappedTH1 *hGluonJetsQGL_30pt40;

@@ -281,11 +281,11 @@ QuarkGluonLikelihoodRatio::Data QuarkGluonLikelihoodRatio::privateAnalyze(const 
   
   int Permutations = factorial(N)/(factorial(N-Ng)*factorial(Ng));
   
-  std::cout<<"Number of B-Jets= "<<nBJets<<"  Number of non b-jets= "<<nNoBJets<<"  Number of all light Jets= "<<N<<"    Quark Jets="<<Nq<<"     Gluon Jets="<<Ng<<"    Permutations="<<Permutations<<std::endl;
+  //std::cout<<"Number of B-Jets= "<<nBJets<<"  Number of non b-jets= "<<nNoBJets<<"  Number of all light Jets= "<<N<<"    Quark Jets="<<Nq<<"     Gluon Jets="<<Ng<<"    Permutations="<<Permutations<<std::endl;
   
   double QGLR = calculateQGLR(iEvent, output.fGluonLightJets, output.fLightJets, output.fGluonJets);
   
-  std::cout<<"QGLR="<<QGLR<<std::endl;
+  //std::cout<<"QGLR="<<QGLR<<std::endl;
 
 
   // Fill Histograms
@@ -302,29 +302,32 @@ QuarkGluonLikelihoodRatio::Data QuarkGluonLikelihoodRatio::privateAnalyze(const 
 
 double QuarkGluonLikelihoodRatio::calculateQGLR(const Event& iEvent, const std::vector<Jet> Jets, const std::vector<Jet> LightJets, const std::vector<Jet> GluonJets)
 {
+  // Quark term
+  double LNq0g = calculateL(iEvent, Jets, Jets.size(), 0);
+  //std::cout<<"Quark term L(Nq=N, Ng=0) = L("<<Jets.size()<<",0) ="<<LNq0g<<std::endl;
   
-  std::cout<<"...calculating L("<<Jets.size()<<",0)"<<std::endl;
-  double LNq0 = calculateL(iEvent, Jets, Jets.size(), 0);
+  // Gluon term
+  double L0qNg = calculateL(iEvent, Jets, 0, Jets.size());
+  //std::cout<<"Gluon term L(Nq=0, Ng=N) = L(0,"<<Jets.size()<<") ="<<L0qNg<<std::endl;
   
-  std::cout<<"Numerator L(Nq=N, 0 ) = L("<<Jets.size()<<",0) ="<<LNq0<<std::endl;
+  double QGLR = LNq0g / ( LNq0g+L0qNg);
   
-  std::cout<<"...calculating QGLR"<<std::endl;
-  
+  /*
   double sum = 0;
   std::cout<<"Sum = "<<sum<<std::endl;
-  
   for (unsigned int iNg=1; iNg<Jets.size()+1; iNg++)
     {
       int iNq = Jets.size() - iNg;
-      //std::cout<<"    L("<<iNq<<","<<iNg<<")"<<std::endl;
       double L = calculateL(iEvent, Jets, iNq, iNg);
       std::cout<<"    L("<<iNq<<","<<iNg<<") = "<<L<<std::endl;
       sum +=  L;
     }
-  
   std::cout<<"Sum="<<sum<<std::endl;
   
-  return LNq0 / (LNq0+sum);
+  double QGLR = LNq0g / (LNq0g+sum);
+  */
+  
+  return QGLR;
 }
 
 
@@ -373,11 +376,10 @@ double QuarkGluonLikelihoodRatio::calculateL(const Event& iEvent, const std::vec
 	  
 	  productQuark *= fProb.getInputValue("Light", QGL, pt);
 	  
-	  std::cout<<"Light Jet |  q="<<q<<"  with index="<<index<<"   pt ="<<pt<<"  QGL="<<QGL<<"  Probability="<<fProb.getInputValue("Light", QGL, pt)<<std::endl;
+	  //std::cout<<"Light Jet |  q="<<q<<"  with index="<<index<<"   pt ="<<pt<<"  QGL="<<QGL<<"  Probability="<<fProb.getInputValue("Light", QGL, pt)<<std::endl;
 
 	  //std::cout<<" Quark "<<q<<"  QGL="<<QGL<<"   Probability ="<<fProb.getInputValueByQGL("Light", QGL)<<std::endl;
 	}
-      //std::cout<<"Quark product = "<<productQuark<<std::endl;
 
       for (unsigned int g=Nq; g<v.size(); g++)
 	{
@@ -385,16 +387,13 @@ double QuarkGluonLikelihoodRatio::calculateL(const Event& iEvent, const std::vec
 	  Jet GluonJet = iEvent.jets()[index];
 	  double QGL   = GluonJet.QGTaggerAK4PFCHSqgLikelihood();
 	  double pt    = GluonJet.pt();
-
+	  
 	  productGluon *= fProb.getInputValue("Gluon", QGL, pt);
-
+	  
 	  //std::cout<<" GLuon "<<g<<"  QGL="<<QGL<<"   Probability = "<<fProb.getInputValueByQGL("Gluon", QGL)<<std::endl;
-
-	  std::cout<<"Gluon Jet |  g="<<g<<"  with index="<<index<<"   pt ="<<pt<<"  QGL="<<QGL<<"  Probability="<<fProb.getInputValue("Gluon", QGL, pt)<<std::endl;
+	  
+	  //std::cout<<"Gluon Jet |  g="<<g<<"  with index="<<index<<"   pt ="<<pt<<"  QGL="<<QGL<<"  Probability="<<fProb.getInputValue("Gluon", QGL, pt)<<std::endl;
 	}
-      
-      std::cout<<"Product = "<<productQuark * productGluon<<std::endl;
-      std::cout<<" "<<std::endl;
       
       sum+= productQuark * productGluon;
     }
