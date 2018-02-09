@@ -2294,7 +2294,11 @@ const std::vector<Jet> FakeBMeasurement::GetInvertedBJets(const JetSelection::Da
       if (!passBjetDiscrMin) continue;
       
       // Skip events if a jet has a b-discrininator above max allowed value
-      if (!passBjetDiscrMax) break;
+      if (!passBjetDiscrMax) 
+	{
+	  invertedBJets.clear();
+	  break;
+	}
       
       // Save jets satisfying inverted b-jet criteria
       invertedBJets.push_back(jet);
