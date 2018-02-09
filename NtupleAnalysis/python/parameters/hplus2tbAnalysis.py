@@ -226,7 +226,7 @@ topSelectionBDT = PSet(
 # FakeB Measurement Options
 #================================================================================================
 fakeBMeasurement = PSet(
-    prelimTopMVACutValue              = 0.70,     # [default: 0.60]
+    prelimTopMVACutValue              = 0.50,     # [default: 0.60]
     prelimTopMVACutDirection          =  ">=",    # [default: ">="]
     # CSVv2-M (Baseline b-jets)
     numberOfBJetsCutValue             = 2,        # [VR, CR2: 2   , CR3, CR4: 1   ]
