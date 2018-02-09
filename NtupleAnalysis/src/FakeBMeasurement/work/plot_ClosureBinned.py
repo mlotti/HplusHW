@@ -61,6 +61,7 @@ import math
 import copy
 import os
 import array
+import getpass
 from optparse import OptionParser
 
 import ROOT
@@ -308,7 +309,7 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
         saveNameURL = saveName + ext
-        saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
+        saveNameURL = saveNameURL.replace(opts.saveDir, "http://home.fnal.gov/~%s/" % (getpass.getuser()))
         if opts.url:
             Verbose(saveNameURL, i==0)
         else:
@@ -317,15 +318,6 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
     return
 
 def GetBinText(bin):
-#    if bin == "0":
-#        return "|#eta| < 1.2"
-#    elif bin == "1":
-#        return "|#eta| > 1.2"
-#    elif bin == "Inclusive":
-#        return bin
-#    else:
-#        pass
-
     if bin == "0":
         return "|eta| < 0.6"
     elif bin == "1":
@@ -451,7 +443,7 @@ def main(opts):
     # Save the plots
     savePath = opts.saveDir
     if opts.url:
-        savePath = opts.saveDir.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
+        savePath = opts.saveDir.replace(opts.saveDir, "http://home.fnal.gov/~%s/" % (getpass.getuser()))
     Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + savePath + ShellStyles.NormalStyle()), True)
     return
 
@@ -693,7 +685,7 @@ def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
         # Get the histogram customisations (keyword arguments)
         p.appendPlotObject(histograms.PlotText(0.20, 0.88, GetBinText(bin), bold=True, size=22))
         plots.drawPlot(p, saveName, **GetHistoKwargs(saveName))
-        SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf"])
+        SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png"])#, ".pdf"])
     return
 
 if __name__ == "__main__":
@@ -721,7 +713,7 @@ if __name__ == "__main__":
     BATCHMODE    = True
     INTLUMI      = -1.0
     URL          = False
-    SAVEDIR      = "/publicweb/a/aattikis/"
+    SAVEDIR      = "/publicweb/%s/%s/" % (getpass.getuser()[0], getpass.getuser())
     VERBOSE      = False
     USEMC        = False
     RATIO        = True
