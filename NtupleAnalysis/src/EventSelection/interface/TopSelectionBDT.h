@@ -275,7 +275,6 @@ private:
   const DirectionalCut<double> cfg_SubldgMVACut;
   const DirectionalCut<double> cfg_MVACut;
   const DirectionalCut<double> cfg_MassCut;
-  const DirectionalCut<double> cfg_DeltaRCut;
   const DirectionalCut<double> cfg_CSV_bDiscCut;
   const unsigned int cfg_NjetsMax;
   const unsigned int cfg_NBjetsMax;

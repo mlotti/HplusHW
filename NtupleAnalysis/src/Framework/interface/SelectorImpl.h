@@ -101,7 +101,7 @@ private:
   TH1 *hPUdataDown;
   TH1 *hPUmc;
   bool bIsttbar;
-  
+  bool bIsIntermediateNN;
 };
 
 #endif

@@ -42,7 +42,6 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config, EventCounter& event
     cfg_SubldgMVACut(config, "SubldgMVACut"), //alex
     cfg_MVACut(config, "MVACut"),
     cfg_MassCut(config, "MassCut"),
-    cfg_DeltaRCut(config, "DeltaRCut"),
     cfg_CSV_bDiscCut(config, "CSV_bDiscCut"),
     cfg_NjetsMax(config.getParameter<unsigned int>("NjetsMax")),
     cfg_NBjetsMax(config.getParameter<unsigned int>("NBjetsMax")),
@@ -63,7 +62,6 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config)
   cfg_SubldgMVACut(config, "SubldgMVACut"), //alex
   cfg_MVACut(config, "MVACut"),
   cfg_MassCut(config, "MassCut"),
-  cfg_DeltaRCut(config, "DeltaRCut"), //soti
   cfg_CSV_bDiscCut(config, "CSV_bDiscCut"),
   cfg_NjetsMax(config.getParameter<int>("NjetsMax")),
   cfg_NBjetsMax(config.getParameter<int>("NBjetsMax")),
@@ -768,21 +766,6 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   if (0) std::cout << "\nnJets = " << jets.size() << ", \033[1;31mnBJets = " << bjets.size() << "\033[0m" << std::endl;
   hNjets -> Fill(jets.size());
 
-    /*                           
-  if (event.isMC()){
-    std::vector<genParticle> GenTops_test;
-    GenTops_test = GetGenParticles(event.genparticles().getGenParticles(), 6);
-    // For-loop: All top quarks                                                                                                                                                             
-
-    int nBoostedTops = 0;
-    if (1){
-      for (auto& top: GenTops_test){
-	//	if (top.pt() > 500) return output;
-	if (top.pt() > 500) nBoostedTops++;
-      }
-    }
-  }
-  */
 
   // Vector with 19 different BDT cut values (later use)
   vector<int> mva;
@@ -833,13 +816,6 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	      //Skip trijet combinations which do not fulfil the invariant mass or bjet_CSV threshold
 	      if (!cfg_MassCut.passedCut(Trijet_p4.M())) continue;
 	      if (!cfg_CSV_bDiscCut.passedCut(bjet.bjetDiscriminator())) continue;
-
-	      double dR12 = ROOT::Math::VectorUtil::DeltaR( jet1.p4(), jet2.p4());
-	      double dR1b = ROOT::Math::VectorUtil::DeltaR( jet1.p4(), bjet.p4());
-	      double dR2b = ROOT::Math::VectorUtil::DeltaR( jet2.p4(), bjet.p4());
-	      double drMin = min(dR12, min(dR1b, dR2b));
-	      
-	      if (!cfg_DeltaRCut.passedCut(drMin)) continue;
 
 	      // Calculate variables
 	      double dr_sd = ROOT::Math::VectorUtil::DeltaR( jet1.p4(), jet2.p4());

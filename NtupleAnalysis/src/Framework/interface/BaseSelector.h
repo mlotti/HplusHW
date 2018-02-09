@@ -63,6 +63,9 @@ public:
   /// Sets tflag for ttbar
   void setIsttbar(bool status) { bIsttbar = status; }
 
+  /// Sets tflag for intermediate NoNeutral sample
+  void setIsIntermediateNN(bool status) { bIsIntermediateNN = status; }
+
   /// Book internal histograms
   void bookInternal(TDirectory *dir);
    
@@ -75,6 +78,7 @@ protected:
   bool isMC() const { return fIsMC; }
   bool isData() const { return !isMC(); }
   bool isttbar() const { return bIsttbar; }
+  bool isIntermediateNN() const { return bIsIntermediateNN; }
 
   Event fEvent;
   EventWeight fEventWeight;
@@ -95,6 +99,7 @@ private:
 
   const bool fIsMC;
   bool bIsttbar;
+  bool bIsIntermediateNN;
   int iTopPtVariation;
   int iPileupWeightVariation;
     

@@ -215,8 +215,9 @@ def main(opts):
         # hList.extend([h for h in allHistos if "StandardSelections" in h and "_Vs" not in h])
 
         # Create a list with strings included in the histogram names you want to plot
-        myHistos = ["LdgTrijetPt", "LdgTrijetMass", "LdgTetrajetMass", "MVAmax2", "MVAmax1", "Njets", "NBjets", 
-                    "Bjet3Bdisc", "Bjet2Bdisc", "Bjet1Bdisc", "Bjet3Pt", "Bjet2Pt", "Bjet1Pt"]
+        myHistos = ["LdgTrijetPt", "LdgTrijetMass", "LdgTetrajetMass", "MVAmax2", "MVAmax1", "HT", "MET"]
+        #myHistos = ["LdgTrijetPt", "LdgTrijetMass", "LdgTetrajetMass", "MVAmax2", "MVAmax1", "Njets", "NBjets", 
+        #            "Bjet3Bdisc", "Bjet2Bdisc", "Bjet1Bdisc", "Bjet3Pt", "Bjet2Pt", "Bjet1Pt"]
 
         # For-loop: All histos
         for i, h in enumerate(myHistos, 1):
@@ -455,6 +456,20 @@ def GetHistoKwargs(histoName, opts):
     for l in range(2000, 4000+1000, 1000):
         tetraMBins.append(l)
 
+    metBins = []
+    for j in range(0, 100, 20):
+        metBins.append(j)
+    for j in range(100, 400, 150):
+        metBins.append(j)
+
+    htBins = []
+    for j in range(400, 2000, 100):
+        htBins.append(j)
+    for j in range(2000, 2500, 500):
+        htBins.append(j)
+    for j in range(2500, 3500+1000, 1000):
+        htBins.append(j)
+
     # Set x-axis divisions
     n1 = 8 # primary divisions
     n2 = 5 # second order divisions
@@ -464,16 +479,25 @@ def GetHistoKwargs(histoName, opts):
         ROOT.gStyle.SetNdivisions(nDivs, "X")
 
     if "pt" in h.lower():# don't move further down!
-        _xlabel           = "p_{T} (GeV/c)"
-        myBins            = ptBins
+        _xlabel = "p_{T} (GeV/c)"
+        myBins  = ptBins
+
+    if "ht" in h.lower():
+        _xlabel  = "H_{T} (GeV"
+        myBins   = htBins
+        _cutBox  = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+
+    if "met" in h.lower():
+        _xlabel  = "E_{T}^{miss} (GeV"
+        myBins   = metBins
         
     if "mvamax1" in h.lower():
         _xlabel = "Leading MVA"
-        _cutBox = {"cutValue": 0.8, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _cutBox = {"cutValue": 0.85, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         myBins  = mvaBins
     if "mvamax2" in h.lower():
         _xlabel = "Subleading MVA"
-        _cutBox = {"cutValue": 0.8, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _cutBox = {"cutValue": 0.85, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         myBins  = mvaBins
     if "trijetm" in h.lower():
         _units  = "GeV/c^{2}" 
@@ -672,7 +696,7 @@ def GetPurityHisto(hData, hEWK, kwargs, printValues=False, hideZeros=True):
         ewkSum         = hEWK.GetBinContent(i)
         ewkSumUncert   = hEWK.GetBinError(i)
         dataSum        = hData.GetBinContent(i)
-        dataSumUncert  = hData.GetBinContent(i)
+        dataSumUncert  = hData.GetBinError(i)  # hData.GetBinContent(i)
         
         # Treat negative bins for EWK (possible if -ve weights are applied)
         if ewkSum < 0.0:

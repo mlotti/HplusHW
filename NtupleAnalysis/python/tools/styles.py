@@ -247,8 +247,17 @@ signalHH150Style = signalHHStyle.clone()
 signalHH155Style = signalHHStyle.clone()
 signalHH160Style = signalHHStyle.clone()
 
+signal145Style = signalStyle.clone()
+signal150Style = signalStyle.clone()
+signal155Style = signalStyle.clone()
+signal160Style = signalStyle.clone()
+signal165Style = signalStyle.clone()
+signal170Style = signalStyle.clone()
+signal175Style = signalStyle.clone()
 signal180Style = signalStyle.clone()
 signal190Style = signalStyle.clone()
+signal200Style = signalStyle.clone()
+
 """
 # Problem with StyleCompound: solid signal histo in control plots. 13122016/SL
 signal200Style = StyleCompound([
@@ -505,15 +514,15 @@ def getQCDLineStyle():
 def getABCDStyle(region):
     if region == "SR":
         return FakeBStyle1
-    elif region == "CR1":
+    elif region == "CR1" or region == "CRone":
         return FakeBStyle2
     elif region == "VR":
         return FakeBStyle3
-    elif region == "CR2":
+    elif region == "CR2" or region == "CRtwo":
         return FakeBStyle4
-    elif region == "CR3":
+    elif region == "CR3" or region == "CRthree":
         return FakeBStyle5
-    elif region == "CR4":
+    elif region == "CR4" or region == "CRfour":
         return FakeBStyle6
     else:
         print "Invalid region \"%s\". Returning qcd style" % (region)

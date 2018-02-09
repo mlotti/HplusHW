@@ -121,7 +121,7 @@ class QCDInvertedShape:
 
     Shape has to be a dataDrivenQCDCount object
     '''
-    def __init__(self, shape, moduleInfoString, normFactors, optionPrintPurityByBins=True, optionDoNQCDByBinHistograms=False, optionUseInclusiveNorm=False, verbose=False):
+    def __init__(self, shape, moduleInfoString, normFactors, optionPrintPurityByBins=False, optionDoNQCDByBinHistograms=False, optionUseInclusiveNorm=False, verbose=False):
         self._verbose = verbose
         self._shape   = shape
         self._moduleInfoString  = moduleInfoString
@@ -260,7 +260,8 @@ class QCDInvertedShape:
                 self._histogramsList.append(hBin)
 
         if isinstance(self._resultShape, ROOT.TH2):
-            self._doCalculate2D(nSplitBins, shape, normFactors, optionPrintPurityByBins, optionDoNQCDByBinHistograms, myUncertaintyLabels)
+            self.Verbose("Skippings TH2 histogram with name '%s'. The 2d function needs validation first!" % (self._resultShape.GetName()), False)
+            # self._doCalculate2D(nSplitBins, shape, normFactors, optionPrintPurityByBins, optionDoNQCDByBinHistograms, myUncertaintyLabels)
             return
 
         # Intialize counters for purity calculation in final shape binning
@@ -287,13 +288,13 @@ class QCDInvertedShape:
             hEwk  = shape.getEwkHistoForSplittedBin(i)
             
             self.Verbose("Get normalization factor", True)
-            wQCDLabel = shape.getPhaseSpaceBinFileFriendlyTitle(i)
+            wQCDLabel = "%s" % i #shape.getPhaseSpaceBinFileFriendlyTitle(i)
             if self._optionUseInclusiveNorm:
                 wQCDLabel = "Inclusive"
             wQCD = 0.0
             
             if not wQCDLabel in normFactors.keys():
-                msg = "No normalization factors available for bin '%s' when accessing histogram %s! Ignoring this bin..." % (wQCDLabel,shape.getHistoName())
+                msg = "No normalization factors available for bin '%s' when accessing histogram %s! Ignoring this bin..." % (wQCDLabel, shape.getHistoName())
                 self.Print(ShellStyles.WarningLabel() + msg, True)
             else:
                 wQCD = normFactors[wQCDLabel]                
@@ -459,12 +460,14 @@ class QCDInvertedShape:
             myShapeDataSumUncert.append(myList[:])
             myShapeEwkSum.append(myList[:])
             myShapeEwkSumUncert.append(myList[:])
-        # Calculate results separately for each phase space bin and then combine
+
+        # Calculate results separately for each phase-space bin, and then combine them to get inclusive result
         for i in range(0, nSplitBins):
             # Get data-driven QCD, data, and MC EWK shape histogram for the phase space bin
-            h = shape.getDataDrivenQCDHistoForSplittedBin(i)
+            h     = shape.getDataDrivenQCDHistoForSplittedBin(i)
             hData = shape.getDataHistoForSplittedBin(i)
-            hEwk = shape.getEwkHistoForSplittedBin(i)
+            hEwk  = shape.getEwkHistoForSplittedBin(i)
+
             # Get normalization factor
             wQCDLabel = shape.getPhaseSpaceBinFileFriendlyTitle(i)
             if self._optionUseInclusiveNorm:
@@ -595,7 +598,7 @@ class QCDInvertedResultManager:
             
             self.Verbose("Obtaining shape plots (the returned object is not owned)", True)
             myShapeHisto = self._obtainShapeHistograms(i, dataPath, ewkPath, dsetMgr, plotName, luminosity, normFactors)
-            
+
             # Obtain plots for systematics coming from shape difference for control plots # fixme: Systematics
             if optionCalculateQCDNormalizationSyst:
                 if isinstance(myShapeHisto, ROOT.TH2):

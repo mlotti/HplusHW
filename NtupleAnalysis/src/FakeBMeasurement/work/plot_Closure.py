@@ -154,9 +154,9 @@ def main(opts):
 
         if 0:
             datasetsMgr.printSelections()
-            PrintPSet("BJetSelection", datasetsMgr)
-            PrintPSet("TopSelectionBDT", datasetsMgr)
-            PrintPSet("FakeBMeasurement", datasetsMgr)
+            # PrintPSet("BJetSelection", datasetsMgr)
+            # PrintPSet("TopSelectionBDT", datasetsMgr)
+            # PrintPSet("FakeBMeasurement", datasetsMgr)
             sys.exit()
 
         # Print dataset info?
@@ -407,6 +407,12 @@ def GetHistoKwargs(histoName, ext, opts):
         _units  = "GeV"
         _rebinX = 2 #2
         _opts["xmax"] = 300.0
+    if "ht_" in hName:
+        _units  = "GeV"
+        _rebinX = 5 #2
+        _opts["xmin"] =  400.0
+        _opts["xmax"] = 3000.0
+        _cutBox       = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
     if "mvamax" in hName:
         _rebinX = 1
         _units  = ""

@@ -494,7 +494,7 @@ class DatacardColumn():
                             print "..... Assuming this is signal -> set cross section to 1 pb for limit calculation"
                 # for light H+, use 13 TeV ttbar xsect from https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
                 elif (not config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH" or self._label[:2] == "WH")):
-                     ttbarxsect = xsect.backgroundCrossSections.crossSection("TTJets", energy="13")
+                     ttbarxsect = xsect.backgroundCrossSections.crossSection("TT", energy="13")
                      if abs(dsetMgr.getDataset(self.getDatasetMgrColumn()).getCrossSection() - ttbarxsect) > 0.0001:
                          print ShellStyles.WarningLabel()+"Forcing light H+ xsection to 13 TeV ttbar cross section %f in DatacardColumn.py"%ttbarxsect
                          dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(ttbarxsect)

@@ -10,10 +10,13 @@ histoLevel = "Debug"  # Options: Systematics, Vital, Informative, Debug
 #====== Trigger
 trg = PSet(
   # No need to specify version numbers, they are automatically scanned in range 1--100 (remove the '_v' suffix)
+  TautriggerEfficiencyJsonName = "tauLegTriggerEfficiency_2016_fit.json",
+  METtriggerEfficiencyJsonName = "metLegTriggerEfficiency_2016_MET90_fit.json",
   L1ETM = 80,
   triggerOR = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_MET90"
                ],
-  triggerOR2 = [],
+  triggerOR2 = [
+	        ],
 )
 
 #====== MET filter
@@ -35,12 +38,12 @@ metFilter = PSet(
 tauSelection = PSet(
   applyTriggerMatching = True,
    triggerMatchingCone = 0.1,   # DeltaR for matching offline tau with trigger tau
-              tauPtCut = 60.0, #for heavy H+, overriden in signalAnalysis.py for light H+
+              tauPtCut = 50.0,
              tauEtaCut = 2.1,
         tauLdgTrkPtCut = 30.0,
 #                prongs = 13,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
                 prongs = 1,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
-                  rtau = 0.7,   # to disable set to 0.0
+                  rtau = 0.8,   # to disable set to 0.0
   againstElectronDiscr = "againstElectronTightMVA6",
 #  againstElectronDiscr = "",
       againstMuonDiscr = "againstMuonLoose3",
@@ -54,23 +57,29 @@ scaleFactors.assignTauMisidentificationSF(tauSelection, "eToTau", "full", "nomin
 scaleFactors.assignTauMisidentificationSF(tauSelection, "muToTau", "full", "nominal")
 scaleFactors.assignTauMisidentificationSF(tauSelection, "jetToTau", "full", "nominal")
 # tau trigger SF
-scaleFactors.assignTauTriggerSF(tauSelection, "nominal")
+
+scaleFactors.assignTauTriggerSF(tauSelection, "nominal", trg.TautriggerEfficiencyJsonName)
 
 #====== Electron veto
 eVeto = PSet(
-         electronPtCut = 15.0,
-        electronEtaCut = 2.5,
+    electronPtCut = 15.0,
+    electronEtaCut = 2.5,
 #            electronID = "mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90", # highest (wp90) for vetoing (2012: wp95)
-            electronID = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
-     electronIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
+    electronID = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
+    electronIDType    = "default",  # options: "default", "MVA"
+    electronMVA       = "ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values",
+    electronMVACut    = "Loose",
+    electronIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
+    electronIsolType  = "mini", # options: "mini", "default"
 )
 
 #====== Muon veto
 muVeto = PSet(
-             muonPtCut = 10.0,
-            muonEtaCut = 2.5,
-                muonID = "muIDLoose", # loosest option for vetoing (options: muIDLoose, muIDMedium, muIDTight)
-         muonIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
+    muonPtCut = 10.0,
+    muonEtaCut = 2.5,
+    muonID = "muIDLoose", # loosest option for vetoing (options: muIDLoose, muIDMedium, muIDTight)
+    muonIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
+    muonIsolType      = "mini",      # options: "mini", "default" 
 )
 
 #====== Muon selection (for embedding)
@@ -140,8 +149,7 @@ metSelection = PSet(
    applyPhiCorrections = False  # FIXME: no effect yet
 )
 # MET trigger SF
-scaleFactors.assignMETTriggerSF(metSelection, bjetSelection.bjetDiscrWorkingPoint, "nominal")
-
+scaleFactors.assignMETTriggerSF(metSelection, bjetSelection.bjetDiscrWorkingPoint, "nominal", trg.METtriggerEfficiencyJsonName)
 #====== Angular cuts / back-to-back
 angularCutsBackToBack = PSet(
        nConsideredJets = 3,    # Number of highest-pt jets to consider (excluding jet corresponding to tau)
@@ -259,6 +267,4 @@ def applyAnalysisCommandLineOptions(argv, config):
         config.TauSelection.prongs = 2
     elif "3prong" in argv or "3pr" in argv:
         config.TauSelection.prongs = 3
-
-    scaleFactors.assignTauTriggerSF(config.TauSelection, "nominal")
-
+    scaleFactors.assignTauTriggerSF(config.TauSelection, "nominal",config.Trigger.TautriggerEfficiencyJsonName)
