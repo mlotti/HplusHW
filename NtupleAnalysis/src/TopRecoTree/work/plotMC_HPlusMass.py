@@ -41,6 +41,40 @@ import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 
+kwargs = {
+    "verbose"          : False,
+    "dataEra"          : None,
+    "searchMode"       : None,
+    "analysis"         : "MyHplus2tbKInematics",
+    "optMode"          : "",
+    "savePath"         : None,
+    "saveFormats"      : [".pdf"],
+    "xlabel"           : None,
+    "ylabel"           : "Probability",
+    "rebinX"           : 2,
+    "rebinY"           : 2,
+    "xlabelsize"       : None,
+    "ratio"            : True,
+    "ratioYlabel"      : None,
+    "ratioInvert"      : False,
+    "addMCUncertainty" : False,
+    "addLuminosityText": False,
+    "addCmsText"       : True,
+    "errorBarsX"       : True,
+    "logX"             : False,
+    "logY"             : False,
+    "gridX"            : True,
+    "gridY"            : True,
+    "cmsExtraText"     : "Simulation",
+    "removeLegend"     : False,
+    "moveLegend"       : {"dx": -0.1, "dy": +0.0, "dh": +0.1},
+    "cutValue"         : None,
+    "cutLine"          : False,
+    "cutBox"           : False,
+    "cutLessthan"      : False,
+    "cutFillColour"    : ROOT.kAzure-4,
+    }
+
 #================================================================================================ 
 # Function Definition
 #================================================================================================ 
@@ -129,26 +163,29 @@ def main(opts, signalMass):
             if "ChargedHiggs" in d.getName():
                 datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
                
-        # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
-        plots.mergeRenameReorderForDataMC(datasetsMgr) 
         
         # Determine integrated Lumi before removing data
-        intLumi = 0.0# datasetsMgr.getDataset("Data").getLuminosity() 
-
+        #intLumi = datasetsMgr.getDataset("Data").getLuminosity()
+        intLumi = 0
+        
         # Remove datasets
         if 1:
             datasetsMgr.remove(filter(lambda name: "Data" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "QCD-b" in name, datasetsMgr.getAllDatasetNames()))
-            #datasetsMgr.remove(filter(lambda name: "QCD" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "SingleTop" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "DYJetsToQQHT" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr.remove(filter(lambda name: "QCD" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "SingleTop" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "DYJetsToQQHT" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "TTZToQQ" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "TTWJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "WJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "Diboson" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "WJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "Diboson" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "TTTT" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "FakeBMeasurementTrijetMass" in name, datasetsMgr.getAllDatasetNames()))
             #datasetsMgr.remove(filter(lambda name: "M_" in name and "M_" + str(opts.signalMass) not in name, datasetsMgr.getAllDatasetNames()))
+
+        # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
+        plots.mergeRenameReorderForDataMC(datasetsMgr) 
+
 
         # Merge EWK samples
         if opts.mergeEWK:
@@ -162,6 +199,7 @@ def main(opts, signalMass):
                 if d not in signalMass:
                     continue
             datasetOrder.append(d.getName())
+            #newOrder = ["TT", "QCD"]
             #newOrder = ["TT", "QCD"]
         for m in signalMass:
             #newOrder.insert(0, m)
@@ -189,38 +227,25 @@ def main(opts, signalMass):
             # histoPaths1 = [os.path.join(folder, h) for h in hList0+hList1+hList2]
             histoPaths1 = [os.path.join(folder, h) for h in histoList]
         
-        folder     = "TrijetCandidate" #soti
-
+        folder     = "TrijetCandidate"
         histoList  = datasetsMgr.getDataset(datasetOrder[0]).getDirectoryContent(folder)
         hList0     = [x for x in histoList if "TrijetMass" in x]
         hList1     = [x for x in histoList if "TetrajetMass" in x]
         hList2     = [x for x in histoList if "TetrajetBjetPt" in x]
         histoPaths2 = [os.path.join(folder, h) for h in hList0+hList1+hList2]
 
-        #histoPaths = histoPaths1 + histoPaths2
-        histoPaths = histoPaths1 #soti
+        histoPaths = histoPaths1 + histoPaths2
         for h in histoPaths:
             if "Vs" in h: # Skip TH2D
                 continue
             PlotMC(datasetsMgr, h, intLumi)
+
+        HistoFit = ["TrijetDPtOverGenPt",]
+
+        for i in range(len(HistoFit)):
+            Fit(datasetsMgr.getAllDatasets(), folder+"/"+HistoFit[i], "gaus")
+
     return
-
-def fit(name,plot,graph,min,max):   #soti                                                                                                                                                
-    function = ROOT.TF1("fit"+name, "0.5*[0]*(1+TMath::Erf( (sqrt(x)-sqrt([1]))/(sqrt(2)*[2]) ))", min, max);
-    function.SetParameters(1., 50., 1.);
-    function.SetParLimits(0, 0.0, 1.0);
-    
-#     Background3_datasetsMgr=dataset.getDatasetsFromMulticrabDirs([opts.mcrab], analysisName=kwargs.get("analysis"), includeOnlyTasks="TT|ST_t|ttbb|TTZToQQ|TTWJetsToQQ|TTTT", folder=opts.folder)
-#     Background3_datasetsMgr.updateNAllEventsToPUWeighted()
-#     Background3_datasetsMgr.merge("Top", Background3Names, False)
-#     Background3_Dataset = Background3_datasetsMgr.getDataset("Top")
-#     rootHisto_Bkg3 = Background3_Dataset.getDatasetRootHisto(hName)
-#     NormalizeRootHisto(Background3_Dataset, rootHisto_Bkg3, Background3_Dataset.isMC(), "One")
-#     histoBkg3 = rootHisto_Bkg3.getHistogram()
-
-    fitResult = graph.Fit(function, "NRSE+EX0");
-    aux.copyStyle(graph, function)
-    plot.appendPlotObject(function)
 
 
 def PlotMC(datasetsMgr, histo, intLumi):
@@ -234,38 +259,36 @@ def PlotMC(datasetsMgr, histo, intLumi):
     # Draw the histograms
     _cutBox = None
     _rebinX = 1
-    _format = "%0.2f"
+    _format = "%0.0f"
     _xlabel = None
     logY    = False
     _opts   = {"ymin": 1e-3, "ymaxfactor": 1.0}
 
-
-    if "nmatchedtrijet" in histo.lower():
-        _xlabel = "Truth-matched top candidates"
-        _opts["xmax"] = 4
-        _opts["xmin"] = 0
-        _format = "%0.0f "
+    if "ChiSqr" in histo:
+        _rebinX = 1
+        logY    = True
+        _units  = ""
+        _format = "%0.1f " + _units
+        _xlabel = "#chi^{2}"
+        _cutBox = {"cutValue": 10.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _opts["xmax"] = 100
     elif "trijetmass" in histo.lower():
-#        _rebinX = 4
+        _rebinX = 4
         logY    = False
         _units  = "GeV/c^{2}"
         _format = "%0.0f " + _units
         _xlabel = "m_{jjb} (%s)" % _units
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 1005 #1005
-        
-        
-    elif "costheta" in histo.lower():
-        _xlabel = "cos#theta"
-#    elif "ht" in histo.lower():
-#        _rebinX = 2
-#        logY    = False
-#        _units  = "GeV"
-#        _format = "%0.0f " + _units
-#        _xlabel = "H_{T} (%s)" % _units
-#        _cutBox = {"cutValue": 500, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-#            #_opts["xmin"] = 500
-#        _opts["xmax"] = 2000
+        _opts["xmax"] = 805 #1005
+    elif "ht" in histo.lower():
+        _rebinX = 2
+        logY    = False
+        _units  = "GeV"
+        _format = "%0.0f " + _units
+        _xlabel = "H_{T} (%s)" % _units
+        _cutBox = {"cutValue": 500, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        #_opts["xmin"] = 500
+        _opts["xmax"] = 2000
     elif "tetrajetmass" in histo.lower():
         _rebinX = 5 #5 #10 #4
         logY    = False
@@ -308,15 +331,14 @@ def PlotMC(datasetsMgr, histo, intLumi):
     # Customise styling
     p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineStyle(ROOT.kSolid))
 
-
-    if "TT" in datasetsMgr.getAllDatasets():
-        p.histoMgr.setHistoDrawStyle("TT", "HIST") #"AP"
-        p.histoMgr.setHistoLegendStyle("TT", "LP")
-
     if "QCD" in datasetsMgr.getAllDatasets():
         p.histoMgr.forHisto("QCD", styles.getQCDFillStyle() )
-        p.histoMgr.setHistoDrawStyle("QCD", "AP") #"HIST"
+        p.histoMgr.setHistoDrawStyle("QCD", "HIST")
         p.histoMgr.setHistoLegendStyle("QCD", "F")
+
+    if "TT" in datasetsMgr.getAllDatasets():
+        p.histoMgr.setHistoDrawStyle("TT", "AP")
+        p.histoMgr.setHistoLegendStyle("TT", "LP")
 
     # Customise style
     signalM = []
@@ -331,7 +353,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
                    ylabel       = "Arbitrary Units / %s" % (_format),
                    log          = logY,
                    rebinX       = _rebinX, cmsExtraText = "Preliminary", 
-                   createLegend = {"x1": 0.58, "y1": 0.85, "x2": 0.92, "y2": 0.72}, #"y2": 0.92
+                   createLegend = {"x1": 0.58, "y1": 0.65, "x2": 0.92, "y2": 0.92},
                    opts         = _opts,
                    opts2        = {"ymin": 0.6, "ymax": 1.4},
                    cutBox       = _cutBox,
@@ -340,9 +362,85 @@ def PlotMC(datasetsMgr, histo, intLumi):
     # Save plot in all formats    
     saveName = histo.split("/")[-1]
     savePath = os.path.join(opts.saveDir, "HplusMasses", histo.split("/")[0], opts.optMode)
-#    savePath = "/publicweb/s/skonstan/MyPlots/"
     SavePlot(p, saveName, savePath) 
     return
+
+#Fit(datasetsMgr.getAllDatasets(), folder+"/"+HistoFit[i], "gaus")
+def Fit (datasets, histo, function):
+    
+    
+    FitList = []
+    for dataset in datasets:
+
+        datasetName = dataset.getName()
+        print "Dataset = ", datasetName
+        hh = dataset.getDatasetRootHisto(histo)
+ 
+        hh.normalizeToOne()
+        h = hh.getHistogram()
+
+        #h = dataset.getDatasetRootHisto(histo).getHistogram()
+        xMin  = h.GetXaxis().GetXmin()
+        xMax  = h.GetXaxis().GetXmax()
+        yMin  = 0
+        yMax  = 1.2
+        #statOption = ROOT.TEfficiency.kFNormal
+        if "TT" in datasetName:
+            if function == "gaus":
+                fitGauss = ROOT.TF1("fitGauss", "gaus", -2.5, 2.5)
+#                TF1 *fitBoFreq = new TF1("fitBoFreq","[0]*x+[1]",0,20);
+#                h.Fit("gaus")
+                #fitTest = ROOT.TF1("fitTest", "0.01", -2.5, 2.5)
+                
+                h.Fit("fitGauss","SRBM")
+                #h.GetListOfFunctions().Add(fitTest)
+                legend = "TT"
+
+        legend = "a legend"
+        print "Legend", legend
+        saveName = histo.split("/")[-1]+"_Fit"
+
+        print saveName
+
+        xTitle = "fixXTitle"
+        yTitle = "fixYTitle"
+    
+        yMin = 0.
+        yMax = 0.03
+        xMin = -2.3
+        xMax = 2.3
+        kwargs = {}
+
+        options = {"ymin": yMin  , "ymax": yMax, "xmin":xMin, "xMax":xMax}
+        FitList.append(h)
+        #p = plots.MCPlot(dataset, h, normalizeToLumi=0, saveFormats=[], **kwargs)
+
+        p = plots.PlotBase(datasetRootHistos=FitList, saveFormats=kwargs.get("saveFormats"))
+        p.createFrame(saveName, opts=options)
+        
+        p.getFrame().GetXaxis().SetTitle(xTitle)
+        p.getFrame().GetYaxis().SetTitle(yTitle)
+        #p.histoMgr.setHistoDrawStyle(datasetName, "AP")
+        
+# Set range                                                                                                                                                                          
+        p.getFrame().GetXaxis().SetRangeUser(xMin, xMax)
+
+        
+        moveLegend = {"dx": -0.55, "dy": -0.01, "dh": -0.1}
+
+        p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
+        # Add Standard Texts to plot        
+        histograms.addStandardTexts()
+    
+        p.draw()
+    
+    # Save plot in all formats                                                                                                                                                           
+        savePath = os.path.join(opts.saveDir, "HplusMasses", histo.split("/")[0], opts.optMode)
+        save_path = savePath 
+        SavePlot(p, saveName, save_path)
+    return
+
+        
 
 
 def SavePlot(plot, saveName, saveDir, saveFormats = [".pdf"]):
@@ -393,9 +491,10 @@ if __name__ == "__main__":
     OPTMODE      = ""
     BATCHMODE    = True
     PRECISION    = 3
-#    SIGNALMASS   = [200, 500, 800]
+    #SIGNALMASS   = [200, 500, 800, 2000]
+    #SIGNALMASS   = [300, 500, 800, 1000]
     SIGNALMASS   = []
-#    SIGNALMASS   = [200, 300, 500, 800, 1000]#, 2000, 3000]
+    #SIGNALMASS   = [200, 500, 800, 1000, 2000, 3000]
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False
@@ -406,7 +505,7 @@ if __name__ == "__main__":
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
     NORMALISE    = False
-    FOLDER       = "TrijetCandidate" #"topSelection_" #"ForDataDrivenCtrlPlots" #"topologySelection_"
+    FOLDER       = "" #"topSelection_" #"ForDataDrivenCtrlPlots" #"topologySelection_"
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")

@@ -220,6 +220,9 @@ topSelectionBDT = PSet(
     # FIXME: Phase this out (currently only used in plots)
     MVACutValue            = 0.85,    # [default: 0.85]
     MVACutDirection        =  ">=",   # [default: ">="]
+    WeightFile             = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/EventSelection/interface/weights/TMVAClassification_BDTG_default.weights.xml",
+#    WeightFile             = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TMVA_BDT/test/weights_DeltaRminQuarks08/TMVAClassification_BDTG.weights.xml",
+
 )
 
 #================================================================================================
