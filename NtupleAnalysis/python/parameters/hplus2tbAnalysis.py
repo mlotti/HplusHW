@@ -206,7 +206,7 @@ topologySelection = PSet(
 # Top selection BDT                                               
 #================================================================================================        
 topSelectionBDT = PSet(
-    LdgMVACutValue         = 0.8,    # [default: 0.85]
+    LdgMVACutValue         = 0.85,    # [default: 0.85]
     LdgMVACutDirection     =  ">=",   # [default: ">="]
     SubldgMVACutValue      = 0.8,    # [default: 0.85]
     SubldgMVACutDirection  =  ">=",   # [default: ">="]
