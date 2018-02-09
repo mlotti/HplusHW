@@ -751,9 +751,10 @@ def PlotHistograms(datasetsMgr, histoName, intLumi):
         p.histoMgr.forHisto(opts.signal, styles.getSignalStyleHToTB_M(opts.signalMass))
 
     # p.histoMgr.forHisto(opts.signalMass, styles.getSignalStyleHToTB())
-    p.histoMgr.setHistoLegendLabelMany({
-            "QCD": "QCD (MC)",
-            })
+    if "QCD" in datasetsMgr.getAllDatasetNames():
+        p.histoMgr.setHistoLegendLabelMany({
+                "QCD": "QCD (MC)",
+                })
     
     # Apply blinding of signal region
     if "blindingRangeString" in kwargs_:
