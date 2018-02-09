@@ -23,8 +23,6 @@ public:
     kBTagEfficiencyAnalysis,
     kTauAnalysis,
     kTopReco,
-    kMyHplusAnalysis,
-    kChargedHiggsReco,
     kMuAnalysis,
     kQCDMeasurement,
     kFakeBMeasurement,
