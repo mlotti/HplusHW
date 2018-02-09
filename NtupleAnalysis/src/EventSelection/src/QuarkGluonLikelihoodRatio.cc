@@ -159,7 +159,7 @@ void QuarkGluonLikelihoodRatio::handleQGLInput(const ParameterSet& config, std::
 
 void QuarkGluonLikelihoodRatio::bookHistograms(TDirectory* dir) {
   TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "QuarkGluonLikelihoodRatio_" + sPostfix);
-
+  
   // Histogram binning options
   int nQGLBins      = 100;
   float fQGLMin     = 0.0;
@@ -249,8 +249,8 @@ QuarkGluonLikelihoodRatio::Data QuarkGluonLikelihoodRatio::privateAnalyze(const 
       nBJets++;
       continue;
     }
-    
     nNoBJets++;
+    
     
     const short jetHadronFlavour = std::abs(jet.hadronFlavour());
     const short jetPartonFlavour = std::abs(jet.partonFlavour());
@@ -258,6 +258,7 @@ QuarkGluonLikelihoodRatio::Data QuarkGluonLikelihoodRatio::privateAnalyze(const 
     // === Reject jets consistent with b or c  (jet flavors:  https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagMCTools#Hadron_parton_based_jet_flavour )
     if (jetHadronFlavour != 0) continue;
     if (jetPartonFlavour != 1 && jetPartonFlavour != 2 && jetPartonFlavour != 3 && jetPartonFlavour != 21) continue;
+    
     
     output.fGluonLightJets.push_back(jet);
     
@@ -285,9 +286,8 @@ QuarkGluonLikelihoodRatio::Data QuarkGluonLikelihoodRatio::privateAnalyze(const 
   
   double QGLR = calculateQGLR(iEvent, output.fGluonLightJets, output.fLightJets, output.fGluonJets);
   
-  //std::cout<<"QGLR="<<QGLR<<std::endl;
-
-
+  output.fQGLR = QGLR;
+  
   // Fill Histograms
   hQGLR          -> Fill(QGLR);
   hQGLR_vs_HT    -> Fill(jetData.HT(), QGLR);
@@ -296,9 +296,6 @@ QuarkGluonLikelihoodRatio::Data QuarkGluonLikelihoodRatio::privateAnalyze(const 
   // Return data object
   return output;
 }
-
-
-
 
 double QuarkGluonLikelihoodRatio::calculateQGLR(const Event& iEvent, const std::vector<Jet> Jets, const std::vector<Jet> LightJets, const std::vector<Jet> GluonJets)
 {

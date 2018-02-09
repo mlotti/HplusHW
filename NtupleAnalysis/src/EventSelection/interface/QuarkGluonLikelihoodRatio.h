@@ -104,7 +104,8 @@ public:
     const std::vector<Jet>& getLightJetCands() const { return fLightJets; }
     /// Obtain collection of gluon jet candidates
     const std::vector<Jet>& getGluonJetCands() const { return fGluonJets; }
-    
+    /// Obtain QGLR
+    double getQGLR() const { return fQGLR; }
     
     friend class QuarkGluonLikelihoodRatio;
 
@@ -117,7 +118,8 @@ public:
     std::vector<Jet> fLightJets;
     // Gluon Jets
     std::vector<Jet> fGluonJets;
-     
+    // Quark-Gluon Likelihood Ratio
+    double fQGLR;
   };
   
   // Main class
