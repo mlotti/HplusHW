@@ -222,7 +222,6 @@ topSelectionBDT = PSet(
     MVACutDirection        =  ">=",   # [default: ">="]
     WeightFile             = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/EventSelection/interface/weights/TMVAClassification_BDTG_default.weights.xml",
 #    WeightFile             = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TMVA_BDT/test/weights_DeltaRminQuarks08/TMVAClassification_BDTG.weights.xml",
-
 )
 
 #================================================================================================
