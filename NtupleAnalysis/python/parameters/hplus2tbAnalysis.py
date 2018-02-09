@@ -147,7 +147,7 @@ fatjetSoftDropSelection = PSet(
 bjetSelection = PSet(
     triggerMatchingApply      = False,
     triggerMatchingCone       = 0.1,  # DeltaR for matching offline bjet with trigger::TriggerBjet
-    jetPtCuts                 = [40.0, 40.0, 30.0], # [default: [40.0, 40.0, 30.0] ]
+    jetPtCuts                 = [40.0, 40.0, 40.0], # [default: [40.0, 40.0, 30.0] ]
     jetEtaCuts                = [2.4],
     bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
     bjetDiscrWorkingPoint     = "Medium",
@@ -218,6 +218,12 @@ topSelectionBDT = PSet(
     MassCutValue           = 600.0,   # [default: 400.0]
     MassCutDirection       = "<=",    # [default: "<"]
     # FIXME: Phase this out (currently only used in plots)
+    DeltaRCutValue         = 0.0,     #trijet combinations when DeltaR among jets is less than given parameter
+    DeltaRCutDirection     = ">=",
+#    WeightFile             = "TMVAClassification_BDTG_default.weights.xml",
+#    WeightFile             = "TMVAClassification_BDTG_DeltaRQuarks08.weights.xml",
+    WeightFile             = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/EventSelection/interface/weights/TMVAClassification_BDTG_default.weights.xml",
+#    WeightFile             = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TMVA_BDT/test/weights_DeltaRminQuarks08/TMVAClassification_BDTG.weights.xml",
     MVACutValue            = 0.8,    # [default: 0.85]
     MVACutDirection        =  ">=",   # [default: ">="]
 )
