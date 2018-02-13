@@ -51,6 +51,9 @@ import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 
+# Ignore Runtime warnings: Base category for warnings about dubious runtime features.
+import warnings
+warnings.filterwarnings("ignore")
 #================================================================================================ 
 # Function Definition
 #================================================================================================ 
@@ -81,9 +84,36 @@ def GetLumi(datasetsMgr):
     Verbose("Luminosity = %s (pb)" % (lumi), True)
     return lumi
 
+#def GetListOfQCDatasets():
+#    Verbose("Getting list of QCD datasets")
+#    return ["QCD_HT1000to1500", "QCD_HT1500to2000","QCD_HT2000toInf","QCD_HT300to500","QCD_HT500to700","QCD_HT700to1000"]
 def GetListOfQCDatasets():
     Verbose("Getting list of QCD datasets")
-    return ["QCD_HT1000to1500", "QCD_HT1500to2000","QCD_HT2000toInf","QCD_HT300to500","QCD_HT500to700","QCD_HT700to1000"]
+    return ["QCD_bEnriched_HT200to300",
+            "QCD_bEnriched_HT300to500",
+            "QCD_bEnriched_HT500to700",
+            "QCD_bEnriched_HT700to1000",
+            "QCD_HT1000to1500",
+            "QCD_bEnriched_HT1000to1500",
+            "QCD_bEnriched_HT1500to2000",
+            "QCD_bEnriched_HT2000toInf",
+            "QCD_HT1500to2000_ext1",
+            "QCD_HT2000toInf",
+            "QCD_HT2000toInf_ext1",
+            "QCD_HT200to300",
+            "QCD_HT200to300_ext1",
+            "QCD_HT1000to1500_ext1",
+            "QCD_HT100to200",
+            "QCD_HT1500to2000",
+            "QCD_HT500to700_ext1",
+            "QCD_HT50to100",
+            "QCD_HT700to1000",
+            "QCD_HT700to1000_ext1",
+            "QCD_HT300to500",
+            "QCD_HT300to500_ext1",
+            "QCD_HT500to700"
+            ]
+
 
 def GetListOfEwkDatasets():
     Verbose("Getting list of EWK datasets")
@@ -144,15 +174,29 @@ def GetHistoKwargs(histoName, opts):
         "moveLegend"       : {"dx": -0.08, "dy": -0.01, "dh": -0.18},
         "cutBoxY"          : {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
         }
+    if "event" in h:
+        print "HERE!"
+        units   = "GeV/c"
+        xlabel  = "candidate p_{T} (%s)" % (units)
+        myBins  = [0, 50, 100, 150, 200, 250, 300, 400, 500, 600, 800]
+        kwargs["cutBox"] = {"cutValue": 100.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
 
     if "pt" in h:
         units   = "GeV/c"
-        xlabel  = "p_{T} (%s)" % (units)
-        myBins  = [0, 50, 100, 150, 200, 250, 300, 400, 500, 600, 800]
+        xlabel  = "candidate p_{T} (%s)" % (units)
+        #myBins  = [0, 50, 100, 150, 200, 250, 300, 400, 500, 600, 800]
+        #myBins  = [0, 100, 200, 300, 400, 500, 800]
+        myBins  = [0, 100, 150, 200, 250, 300, 400, 500, 800]
         kwargs["cutBox"] = {"cutValue": 100.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         
         if "topquark" in h:
             xlabel = "generated top p_{T} (%s)" % (units)
+        if 0:
+            ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
+
+        if "fake" in h:
+            xlabel = "candidate p_{T} (%s)" % (units)
+            kwargs["ylabel"] = "Misidentification rate / " #+ units
         if 0:
             ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
 
@@ -200,7 +244,7 @@ def main(opts, signalMass):
                 datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
 
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
-        plots.mergeRenameReorderForDataMC(datasetsMgr) 
+        #plots.mergeRenameReorderForDataMC(datasetsMgr) 
         
         # Print dataset information before removing anything?
         if 0:
@@ -209,12 +253,14 @@ def main(opts, signalMass):
         # Determine integrated Lumi before removing data
         if "Data" in datasetsMgr.getAllDatasetNames():
             intLumi = datasetsMgr.getDataset("Data").getLuminosity()
-
+        else:
+            intLumi = 35800
         # Remove datasets
-        filterKeys = ["Data", "QCD", "TTZToQQ", "TTWJets", "TTTT"]
+        #filterKeys = ["Data", "QCD", "TTZToQQ", "TTWJets", "TTTT"]
+        filterKeys = ["Data", "TTZToQQ", "TTWJets", "TTTT"]
         for key in filterKeys:
             datasetsMgr.remove(filter(lambda name: key in name, datasetsMgr.getAllDatasetNames()))
-
+            
         # Re-order datasets
         datasetOrder = []
         for d in datasetsMgr.getAllDatasets():
@@ -235,20 +281,27 @@ def main(opts, signalMass):
         HistoMap = {
             "AllTopQuarkPt_MatchedBDT"  : "AllTopQuarkPt_Matched",
             "TrijetFakePt_BDT"          : "TrijetFakePt",
-            "AllTopQuarkPt_Matched"     : "TopQuarkPt",
+            #"AllTopQuarkPt_Matched"     : "TopQuarkPt",
             "EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T_BDT",
-            "EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T_Matched",
-            "EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T",
+            #"EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T_Matched",
+            #"EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T",
             "AllTopQuarkPt_MatchedBDT"  : "TopQuarkPt",
             "SelectedTrijetsPt_BjetPassCSVdisc_afterCuts": "SelectedTrijetsPt_afterCuts",
             "TrijetPt_PassBDT_BJetPassCSV": "TrijetPt_PassBDT",
             }
         
+        datasetsMgr.merge("QCD", GetListOfQCDatasets())
+        plots._plotStyles["QCD"] = styles.getQCDEffStyle()
+        #Background1_Dataset = datasetsMgr.getDataset("QCD")
+
+        # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
+        plots.mergeRenameReorderForDataMC(datasetsMgr) 
+
         # For-loop: All numerator-denominator pairs
         for key in HistoMap:
             numerator   = os.path.join(opts.folder, key)
             denominator = os.path.join(opts.folder, HistoMap[key])
-            PlotEfficiency(datasetsMgr, numerator, denominator)
+            PlotEfficiency(datasetsMgr, numerator, denominator, intLumi)
     return
 
 
@@ -296,19 +349,27 @@ def RemoveNegatives(histo):
     return
 
 
-def PlotEfficiency(datasetsMgr, numPath, denPath):
+def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
   
     # Definitions
     myList  = []
     index   = 0
     _kwargs = GetHistoKwargs(numPath, opts)        
-
     # For-loop: All datasets
     for dataset in datasetsMgr.getAllDatasets():
-
+        if "Fake" in numPath and "TT" in dataset.getName():
+            continue
         # Get the histograms
-        num = dataset.getDatasetRootHisto(numPath).getHistogram()
-        den = dataset.getDatasetRootHisto(denPath).getHistogram()
+        #num = dataset.getDatasetRootHisto(numPath).getHistogram()
+        #den = dataset.getDatasetRootHisto(denPath).getHistogram()
+
+        n = dataset.getDatasetRootHisto(numPath)
+        n.normalizeToLuminosity(intLumi)                                                                                                                       
+        num = n.getHistogram()
+        d = dataset.getDatasetRootHisto(denPath)
+        d.normalizeToLuminosity(intLumi)                                                                                                                       
+        den = d.getHistogram()
+
         
         if "binList" in _kwargs:
             xBins   = _kwargs["binList"]
@@ -318,23 +379,24 @@ def PlotEfficiency(datasetsMgr, numPath, denPath):
 
         # Sanity checks
         if den.GetEntries() == 0 or num.GetEntries() == 0:
+            print "here1", den.GetEntries(), num.GetEntries()
             continue
         if num.GetEntries() > den.GetEntries():
+            print "here2"
             continue
 
         # Remove negative bins and ensure numerator bin <= denominator bin
-        CheckNegatives(num, den, True)
+        #CheckNegatives(num, den, True)
         # RemoveNegatives(num)
         # RemoveNegatives(den)
                 
         # Sanity check (Histograms are valid and consistent) - Always false!
         # if not ROOT.TEfficiency.CheckConsistency(num, den):
         #    continue
-        
+
         # Create Efficiency plots with Clopper-Pearson stats
         eff = ROOT.TEfficiency(num, den) # fixme: investigate warnings
-        eff.SetStatisticOption(ROOT.TEfficiency.kFCP) #
-        
+        eff.SetStatisticOption(ROOT.TEfficiency.kFCP) #FCP
         # Set the weights - Why is this needed?
         if 0:
             weight = 1
@@ -344,7 +406,6 @@ def PlotEfficiency(datasetsMgr, numPath, denPath):
                 
         # Convert to TGraph
         eff = convert2TGraph(eff)
-    
         # Apply default style (according to dataset name)
         plots._plotStyles[dataset.getName()].apply(eff)
 
@@ -360,8 +421,9 @@ def PlotEfficiency(datasetsMgr, numPath, denPath):
 
     # Save plot in all formats
     savePath = os.path.join(opts.saveDir, "HplusMasses", numPath.split("/")[0], opts.optMode)
+    #savePath = os.path.join(opts.saveDir, numPath.split("/")[0], opts.optMode)
     save_path = savePath + opts.MVAcut
-    SavePlot(p, saveName, save_path, saveFormats = [".png"])#, ".pdf"])
+    SavePlot(p, saveName, save_path, saveFormats = [".png", ".pdf"])
     return
 
 
@@ -405,7 +467,9 @@ def SavePlot(plot, saveName, saveDir, saveFormats = [".png"]):
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
         saveNameURL = savePath + ext
-        saveNameURL = saveNameURL.replace(opts.saveDir, "http://home.fnal.gov/~%s/" % (getpass.getuser()))
+#        saveNameURL = saveNameURL.replace(opts.saveDir, "http://home.fnal.gov/~%s" % (getpass.getuser()))
+        saveNameURL = saveNameURL.replace("/publicweb/%s/%s" % (getpass.getuser()[0], getpass.getuser()), "http://home.fnal.gov/~%s" % (getpass.getuser()))
+        #SAVEDIR      = "/publicweb/%s/%s/%s" % (getpass.getuser()[0], getpass.getuser(), ANALYSISNAME)
         if opts.url:
             Print(saveNameURL, i==0)
         else:
@@ -435,7 +499,7 @@ if __name__ == "__main__":
     '''
     
     # Default Settings
-    ANALYSISNAME = "MyHplusAnalysis"
+    ANALYSISNAME = "TopRecoAnalysis"
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
     OPTMODE      = ""
