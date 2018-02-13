@@ -368,7 +368,7 @@ def PlotHistoGraphs(hGraphList, _kwargs):
     histoName = histoName.split("_")[1]
 
     # Overwrite some canvas options
-    _kwargs["opts"]["ymin"] = 0.5
+    _kwargs["opts"]["ymin"] = 0.0
     _kwargs["opts"]["ymax"] = 1.02
 
     # Create & draw the plot    
@@ -463,7 +463,9 @@ def GetHistoKwargs(histoName, opts):
         metBins.append(j)
 
     htBins = []
-    for j in range(400, 2000, 100):
+    for j in range(500, 1000, 100):
+        htBins.append(j)
+    for j in range(1000, 2000, 200):
         htBins.append(j)
     for j in range(2000, 2500, 500):
         htBins.append(j)
@@ -485,7 +487,7 @@ def GetHistoKwargs(histoName, opts):
     if "ht" in h.lower():
         _xlabel  = "H_{T} (GeV"
         myBins   = htBins
-        _cutBox  = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _cutBox  = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
 
     if "met" in h.lower():
         _xlabel  = "E_{T}^{miss} (GeV"
