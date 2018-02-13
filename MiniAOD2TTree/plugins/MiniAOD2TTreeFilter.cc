@@ -15,7 +15,11 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
     cmEnergy(iConfig.getParameter<int>("CMEnergy")),
     eventInfoCollections(iConfig.getParameter<edm::ParameterSet>("EventInfo"))
 {
-  
+
+  PUInfoPSInputFileName = "";  
+  if (iConfig.exists("PUInfoPSInputFileName")) {
+    PUInfoPSInputFileName = iConfig.getParameter<std::string>("PUInfoPSInputFileName");
+  }
   fOUT = TFile::Open(outputFileName.c_str(),"RECREATE");	
     Events = new TTree("Events","");
 
@@ -305,10 +309,28 @@ void MiniAOD2TTreeFilter::endJob(){
           TH1F* hPUclone = dynamic_cast<TH1F*>(hPU->Clone());
           hPUclone->SetDirectory(fOUT);
 	  infodir->cd();
+          if(dataVersion.find("data") < dataVersion.length()) hPUclone->SetName("pileupPS"); 
           hPUclone->Write();
         }
       }
       fPU->Close();
+    }
+// in case there is a PU distribution for a prescaled trigger..
+    if (PUInfoPSInputFileName.size()) {
+      TFile* fPU_PS = TFile::Open(PUInfoPSInputFileName.c_str());
+      if (fPU_PS) {
+        // File open is successful
+        TH1F* hPU_PS = dynamic_cast<TH1F*>(fPU_PS->Get("pileup"));
+        if (hPU_PS) {
+          // Histogram exists
+          TH1F* hPUclone = dynamic_cast<TH1F*>(hPU_PS->Clone());
+          hPUclone->SetDirectory(fOUT);
+          infodir->cd();
+          hPUclone->SetName("pileupPS");
+          hPUclone->Write();
+        }
+      }
+      fPU_PS->Close();
     }
 
 // copy top pt weight histogram from separate file (makes merging of root files so much easier)
