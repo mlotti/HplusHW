@@ -319,7 +319,13 @@ stsStyle          = Style(ROOT.kPlus, ROOT.kSpring-9)
 sttStyle          = Style(ROOT.kPlus, ROOT.kSpring-7)
 sttwStyle         = stStyle
 #ttStyle           = Style(ROOT.kFullSquare, ROOT.kMagenta-2)
-ttStyle           = StyleCompound([StyleFill(fillColor=ROOT.kMagenta-2), StyleLine(lineColor=ROOT.kMagenta-2, lineStyle=ROOT.kSolid, lineWidth=3)])
+#ttStyle           = StyleCompound([StyleFill(fillColor=ROOT.kMagenta-2), StyleLine(lineColor=ROOT.kMagenta-2, lineStyle=ROOT.kSolid, lineWidth=3), 
+#                                   StyleMarker(markerSize=1.2, markerColor=ROOT.kMagenta-2, markerSizes=None, markerStyle=4] )
+                                  
+ttStyle           = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kMagenta-2, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
+                                   StyleLine(lineColor=ROOT.kMagenta-2, lineStyle=ROOT.kSolid, lineWidth=3),
+                                   StyleFill(fillColor=ROOT.kMagenta-2, fillStyle=1001)])
+
 ttbbStyle         = Style(ROOT.kOpenCross, ROOT.kPink-9)
 ttjetsStyle       = Style(ROOT.kPlus, ROOT.kMagenta-4)
 ttttStyle         = Style(ROOT.kFullStar, ROOT.kYellow-9)
@@ -393,6 +399,11 @@ signalStyleHToTB800 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.
 signalStyleHToTB300 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kOrange+7, markerSizes=None, markerStyle=ROOT.kFullCircle),
                                    StyleLine(lineColor=ROOT.kOrange+7, lineStyle=ROOT.kDashed, lineWidth=4), 
                                    StyleFill(fillColor=ROOT.kOrange+7, fillStyle=0)])
+
+#qcdEffStyle = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kOrange+7, markerSizes=None, markerStyle=ROOT.kFullCircle),
+#                             StyleLine(lineColor=ROOT.kOrange+7, lineStyle=ROOT.kSolid, lineWidth=3),
+#                             StyleFill(fillColor=ROOT.kOrange+7, fillStyle=0)])
+                               
 #soti
 
 #signalStyleHToTB200 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kPink-2, markerSizes=None, markerStyle=4),
@@ -619,3 +630,9 @@ def generator2(styleCustomisations, styles=styles):
     if not isinstance(styleCustomisations, list):
         styleCustomisations = [styleCustomisations]
     return Generator([StyleCompound([s]+styleCustomisations) for s in styles])
+
+
+#Soti
+#def getQCDEffStyle():
+#    return qcdEffStyle
+
