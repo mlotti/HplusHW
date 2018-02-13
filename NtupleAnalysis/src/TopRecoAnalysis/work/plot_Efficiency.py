@@ -256,8 +256,8 @@ def main(opts, signalMass):
         else:
             intLumi = 35800
         # Remove datasets
-        #filterKeys = ["Data", "QCD", "TTZToQQ", "TTWJets", "TTTT"]
-        filterKeys = ["Data", "TTZToQQ", "TTWJets", "TTTT"]
+        filterKeys = ["Data", "QCD", "TTZToQQ", "TTWJets", "TTTT"]
+        #filterKeys = ["Data", "TTZToQQ", "TTWJets", "TTTT"]
         for key in filterKeys:
             datasetsMgr.remove(filter(lambda name: key in name, datasetsMgr.getAllDatasetNames()))
             
@@ -290,9 +290,9 @@ def main(opts, signalMass):
             "TrijetPt_PassBDT_BJetPassCSV": "TrijetPt_PassBDT",
             }
         
-        datasetsMgr.merge("QCD", GetListOfQCDatasets())
-        plots._plotStyles["QCD"] = styles.getQCDEffStyle()
-        #Background1_Dataset = datasetsMgr.getDataset("QCD")
+        #datasetsMgr.merge("QCD", GetListOfQCDatasets())
+        #plots._plotStyles["QCD"] = styles.getQCDLineStyle()
+        
 
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
@@ -379,10 +379,8 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
 
         # Sanity checks
         if den.GetEntries() == 0 or num.GetEntries() == 0:
-            print "here1", den.GetEntries(), num.GetEntries()
             continue
         if num.GetEntries() > den.GetEntries():
-            print "here2"
             continue
 
         # Remove negative bins and ensure numerator bin <= denominator bin
