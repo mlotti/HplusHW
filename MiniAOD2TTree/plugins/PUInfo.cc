@@ -59,7 +59,7 @@ void PUInfo::beginJob(){}
 void PUInfo::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup){
   if (!runOnData && iEvent.isRealData())
     return;
-  std::cout << "check PUInfo::analyze" << std::endl;
+
   edm::Handle<GenEventInfoProduct> genEventInfoHandle;
   iEvent.getByToken(eventInfoToken, genEventInfoHandle);
   double w = 1.0;
@@ -71,7 +71,6 @@ void PUInfo::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup){
   edm::Handle<std::vector<PileupSummaryInfo> > hpileup;
     iEvent.getByToken(puSummaryToken, hpileup);
     if(hpileup.isValid()) {
-std::cout << "check hpileup.isValid" << std::endl;
 	short nPU = 0;
         for(std::vector<PileupSummaryInfo>::const_iterator iPV = hpileup->begin(); iPV != hpileup->end(); ++iPV) {
             if(iPV->getBunchCrossing() == 0) {
@@ -89,7 +88,6 @@ std::cout << "check hpileup.isValid" << std::endl;
 }
 
 void PUInfo::endJob(){
-std::cout << "check PUInfo::endJob " << hPU->GetEntries() << std::endl;
   if(hPU->GetEntries() > 0){
     TFile* fOUT = TFile::Open(filename.c_str(),"RECREATE");
     fOUT->cd();
