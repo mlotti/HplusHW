@@ -315,6 +315,9 @@ void TopSelectionBDT::initialize(const ParameterSet& config) {
   // Load TMVA library
   TMVA::Tools::Instance();
   
+  //Insert xml weight file
+  std::string sWeightFile = config.getParameter<std::string>("WeightFile");
+
   // Create the reader
   reader = new TMVA::Reader( "!Color:Silent" );
   
@@ -340,9 +343,10 @@ void TopSelectionBDT::initialize(const ParameterSet& config) {
   reader->AddVariable( "TrijetSubldgJetMult",     &TrijetSubldgJetMult     );
 
   // Read the xml file
-  reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/EventSelection/interface/weights/TMVAClassification_BDTG_default.weights.xml");
+  reader->BookMVA("BTDG method", sWeightFile);
+  //reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/EventSelection/interface/weights/TMVAClassification_BDTG_default.weights.xml");
+  //reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TMVA_BDT/test/weights_DeltaRminQuarks08/TMVAClassification_BDTG.weights.xml");
   //reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TMVA_BDT/test/weights_NewTrainingFP/TMVAClassification_BDTG.weights.xml");
-  //reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TMVA_BDT/test/weights_DeltaRJets08/TMVAClassification_BDTG.weights.xml");
   //reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TMVA_BDT/test/weights_topPtle500/TMVAClassification_BDTG.weights.xml");
 }
 
@@ -414,7 +418,7 @@ void TopSelectionBDT::bookHistograms(TDirectory* dir) {
   hLdgTrijetDiJetPt     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetDiJetPt"  ,";p_{T} (GeV/c)", nPtBins     , fPtMin     , fPtMax);
   hLdgTrijetDiJetEta    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetDiJetEta" ,";#eta"         , nEtaBins    , fEtaMin    , fEtaMax);
   hLdgTrijetDiJetMass   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetDiJetMass",";M (GeV/c^{2})", nWMassBins  , fWMassMin  , fWMassMax);
-  hLdgTrijetDijetDeltaR = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetDijetDR"  , ";#Delta R(j_{1},j_{2})"  , nDRBins     , fDRMin     , fDRMax);
+  hLdgTrijetDijetDeltaR = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetDijetDR"  , ";#Delta R(j_{1},j_{2})"  , 2*nDRBins     , fDRMin     , fDRMax);
 
   hLdgTrijet_DeltaR_Trijet_TetrajetBjet   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijet_DeltaR_Trijet_TetrajetBjet"  , ";#Delta R(Trijet,b_{free})"  , nDRBins     , fDRMin     , fDRMax);
   hLdgTrijet_DeltaEta_Trijet_TetrajetBjet = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijet_DeltaEta_Trijet_TetrajetBjet"  , ";#Delta Eta(Trijet,b_{free})", nDEtaBins, fDEtaMin, fDEtaMax);
@@ -628,7 +632,7 @@ void TopSelectionBDT::bookHistograms(TDirectory* dir) {
 
   // Histograms (2D) 
   hTrijetCountForBDTcuts           = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "TrijetCountVsBDTcuts",             ";BDT cut value;Trijet multiplicity", 
-								21, -1.0,1.0, 125,0,125);
+								20, -1.0,1.0, 125,0,125);
   hNjetsVsNTrijets_beforeBDT       = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "NjetsVsNTrijets_beforeBDT",        ";Jet Multiplicity;Trijets_beforeBDT multiplicity", 
 								8,6,14, 670, 0, 670);
   hNjetsVsNTrijets_afterBDT        = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "NjetsVsNTrijets_afterBDT",         ";Jet Multiplicity;Trijets_afterBDT multiplicity", 
@@ -762,21 +766,6 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   if (0) std::cout << "\nnJets = " << jets.size() << ", \033[1;31mnBJets = " << bjets.size() << "\033[0m" << std::endl;
   hNjets -> Fill(jets.size());
 
-    /*                           
-  if (event.isMC()){
-    std::vector<genParticle> GenTops_test;
-    GenTops_test = GetGenParticles(event.genparticles().getGenParticles(), 6);
-    // For-loop: All top quarks                                                                                                                                                             
-
-    int nBoostedTops = 0;
-    if (1){
-      for (auto& top: GenTops_test){
-	//	if (top.pt() > 500) return output;
-	if (top.pt() > 500) nBoostedTops++;
-      }
-    }
-  }
-  */
 
   // Vector with 19 different BDT cut values (later use)
   vector<int> mva;
@@ -1836,9 +1825,9 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   hLdgTrijetBJetPt      -> Fill(leadingTrijet.BJet.pt());
   hLdgTrijetBJetEta     -> Fill(leadingTrijet.BJet.eta());
   hLdgTrijetBJetBDisc   -> Fill(leadingTrijet.BJet.bjetDiscriminator());
-  hLdgTrijetDiJetPt     -> Fill(leadingTrijet.TrijetP4.Pt());
-  hLdgTrijetDiJetEta    -> Fill(leadingTrijet.TrijetP4.Eta());
-  hLdgTrijetDiJetMass   -> Fill(leadingTrijet.TrijetP4.M());
+  hLdgTrijetDiJetPt     -> Fill(leadingTrijet.DijetP4.Pt());
+  hLdgTrijetDiJetEta    -> Fill(leadingTrijet.DijetP4.Eta());
+  hLdgTrijetDiJetMass   -> Fill(leadingTrijet.DijetP4.M());
 
   hLdgTrijetDijetDeltaR -> Fill(ROOT::Math::VectorUtil::DeltaR(leadingTrijet.Jet1.p4(), leadingTrijet.Jet2.p4()));
   hLdgTrijet_DeltaR_Trijet_TetrajetBjet   -> Fill(ROOT::Math::VectorUtil::DeltaR(leadingTrijet.TrijetP4, output.fTetrajetBJet.p4()));
@@ -2318,12 +2307,14 @@ SelectedTrijets TopSelectionBDT::getLeadingSubleadingTrijet(SelectedTrijets trij
   if(trijet1.TrijetP4.Pt() > trijet2.TrijetP4.Pt())
     {
       leadingTrijet.TrijetP4 = trijet1.TrijetP4;
+      leadingTrijet.DijetP4 = trijet1.DijetP4;
       leadingTrijet.Jet1 = getLeadingSubleadingJet(trijet1.Jet1,trijet1.Jet2,"leading");
       leadingTrijet.Jet2 = getLeadingSubleadingJet(trijet1.Jet1,trijet1.Jet2,"subleading");
       leadingTrijet.BJet  = trijet1.BJet;
       leadingTrijet.MVA = MVAmax1;
 
       subleadingTrijet.TrijetP4 = trijet2.TrijetP4;
+      subleadingTrijet.DijetP4 = trijet2.DijetP4;
       subleadingTrijet.Jet1 = getLeadingSubleadingJet(trijet2.Jet1,trijet2.Jet2,"leading");
       subleadingTrijet.Jet2 = getLeadingSubleadingJet(trijet2.Jet1,trijet2.Jet2,"subleading");
       subleadingTrijet.BJet = trijet2.BJet;
@@ -2332,12 +2323,14 @@ SelectedTrijets TopSelectionBDT::getLeadingSubleadingTrijet(SelectedTrijets trij
   else // if(trijet2.Pt() > trijet1.Pt()) 
     {
       leadingTrijet.TrijetP4 = trijet2.TrijetP4;
+      leadingTrijet.DijetP4 = trijet2.DijetP4;
       leadingTrijet.Jet1 = getLeadingSubleadingJet(trijet2.Jet1,trijet2.Jet2,"leading");
       leadingTrijet.Jet2 = getLeadingSubleadingJet(trijet2.Jet1,trijet2.Jet2,"subleading");
       leadingTrijet.BJet  = trijet2.BJet;
       leadingTrijet.MVA = MVAmax2;
 
       subleadingTrijet.TrijetP4 = trijet1.TrijetP4;
+      subleadingTrijet.DijetP4 = trijet1.DijetP4;
       subleadingTrijet.Jet1 = getLeadingSubleadingJet(trijet1.Jet1,trijet1.Jet2,"leading");
       subleadingTrijet.Jet2 = getLeadingSubleadingJet(trijet1.Jet1,trijet1.Jet2,"subleading");
       subleadingTrijet.BJet = trijet1.BJet;

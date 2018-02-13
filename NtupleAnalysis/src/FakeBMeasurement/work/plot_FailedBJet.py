@@ -222,6 +222,7 @@ def main(opts):
         keyList    = ["FailedBJet1BDisc", "FailedBJet1Pt", "FailedBJet2BDisc", "FailedBJet2Pt", "FailedBJet3BDisc", "FailedBJet3Pt"]
         folderList = ["FailedBJet", "FailedBJetFakeB", "FailedBJetGenuineB"]
         histoList  = GetHistoList(datasetsMgr, keyList, folderList)
+        histoList.extend(["FailedBJet/NFailedBJets_VR", "FailedBJet/NFailedBJets_CRtwo"])
 
         # For-loop: All histos
         for i, h in enumerate(histoList, 1):
@@ -229,14 +230,7 @@ def main(opts):
             Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), i==1)
             PlotHisto(datasetsMgr, h)
 
-        # Add by hand 3 non-triplet TH1s
-        if 0:
-            PlotHisto(datasetsMgr, "FailedBJet/Inverted_NFailedBJets_AfterStandardSelections")
-            PlotHisto(datasetsMgr, "FailedBJet/Baseline_NFailedBJets_AfterAllSelections")   #SR
-            PlotHisto(datasetsMgr, "FailedBJet/Baseline_NFailedBJets_AfterCRSelections")    #CR1
-        PlotHisto(datasetsMgr, "FailedBJet/Inverted_NFailedBJets_AfterAllSelections")   #VR
-        PlotHisto(datasetsMgr, "FailedBJet/Inverted_NFailedBJets_AfterCRSelections")    #CR2
-
+    # Inform user where the plots where saved
     savePath = opts.saveDir
     if opts.url:
         savePath = savePath.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
@@ -274,28 +268,10 @@ def getHistos(datasetsMgr, histoName):
 
 
 def GetControlRegionLabel(histoName):
-    histoName = histoName.split("/")[1] # .replace("FailedBJet/", "")
-    base = histoName.split("_")[0]
-    var  = histoName.split("_")[1]
-    sel  = histoName.split("_")[2]
-
-    if base == "Baseline":
-        if sel == "AfterAllSelections":
-            return "SR"
-        elif sel == "AfterCRSelections":
-            return "CR1"
-        else:
-            return "StdSel"
-    elif base == "Inverted":
-        if sel == "AfterAllSelections":
-            return "VR"
-        elif sel == "AfterCRSelections":
-            return "CR2"
-        else:
-            return "StdSel"
-    else:
-        raise Exception("Cannot determine Control Region label. Got unexpeted histogram name \"%s\". " % histoName)
-    return
+    hName  = histoName.split("/")[1] # .replace("FailedBJet/", "")
+    base   = hName.split("_")[0]
+    region = hName.split("_")[1]
+    return region
 
 
 def PlotHisto(datasetsMgr, histoName):
@@ -420,13 +396,13 @@ def PlotHisto(datasetsMgr, histoName):
 
 
 def GetSaveName(histoName):
-    base = histoName.split("_")[0]
-    var  = histoName.split("_")[1]
-    sel  = histoName.split("_")[2]
+    hDir = histoName.split("/")[0]
+    var  = histoName.split("_")[0]
+    reg  = histoName.split("_")[1]
     name = var + "_" + GetControlRegionLabel(histoName)
 
-    histoName = name
-    histoDir  = base.split("/")[0]
+    histoName = histoName.split("/")[1]
+    histoDir  = hDir
     return histoName, histoDir
 
 def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".pdf", ".png"]):

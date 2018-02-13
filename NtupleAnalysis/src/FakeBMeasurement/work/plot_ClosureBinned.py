@@ -41,18 +41,15 @@ properly the "Control-Region" data.
 
 
 USAGE:
-./getABCD_TF.py -m <pseudo_mcrab_directory> [opts]
+./plot_ClosureBinned.py.py -m <pseudo_mcrab_directory> [opts]
 
 
-EXAMPLES: 
-./getABCD_TF.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDT0p70_AllSelections_BDT0p70to0p90_RandomSort_171124_144802/ --url --useMC -e "QCD_HT50to100|QCD_HT100to200|QCD_HT200to300|QCD_HT300to500"
-./getABCD_TF.py -m FakeBMeasurement_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180120_092605/ --url --useMC --ratio
-./getABCD_TF.py -m FakeBMeasurement_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180120_092605/ --url --ratio
-./getABCD_TF.py -m FakeBMeasurement_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180125_123834 --ratio --altPlot
+EXAMPLES:
+./plot_ClosureBinned.py -m FakeBMeasurement_NewLeptonVeto_PreSel_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_3BinsEta0p6Eta1p4_180203_14315 --normaliseToOne --url
 
 
 LAST USED:
-./getABCD_TF.py -m FakeBMeasurement_NewLeptonVeto_PreSel_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_3BinsEta0p6Eta1p4_180203_143156 --url
+./plot_ClosureBinned.py -m FakeBMeasurement_NewLeptonVeto_PreSel_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_3BinsEta0p6Eta1p4_180203_14315 -m
 
 '''
 
@@ -64,6 +61,7 @@ import math
 import copy
 import os
 import array
+import getpass
 from optparse import OptionParser
 
 import ROOT
@@ -133,10 +131,13 @@ def GetHistoKwargs(histoName):
     _cutBox = {}
     _rebinX = 1
     _logY   = True
-    _opts   = {"ymin": 1e0, "ymaxfactor": 1.2}
     _ylabel = "Events / %.0f"
+    if opts.normaliseToOne:
+        _opts   = {"ymin": 0.7e-4, "ymaxfactor": 2.0}
+    else:
+        _opts   = {"ymin": 1e0, "ymaxfactor": 2.0}
     if _logY:
-        _opts = {"ymin": 1e0, "ymaxfactor": 5.0}
+        _opts["ymaxfactor"] = 5.0
 
     if "pt" in histoName.lower():
         _units        = "GeV/c"
@@ -146,9 +147,19 @@ def GetHistoKwargs(histoName):
         #_opts["xmax"] = 300
         _cutBox       = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         _rebinX       = 2
-        if "tetrajetbjet" in histoName.lower():
-            _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            _rebinX = 1
+        if "trijet" in histoName.lower():
+            _opts["xmax"] = 800
+            _rebinX = 2 #getBinningForPt(0)
+            if "tetrajetbjet" in histoName.lower():
+                _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        if "tetrajet" in histoName.lower():
+            _rebinX = 2 #getBinningForPt(0)
+            _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+            if "tetrajetbjet" in histoName.lower():
+                _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        if isinstance(_rebinX, list):
+            binWmin, binWmax = GetBinWidthMinMax(_rebinX)
+            _ylabel = "Events / %.0f-%.0f %s" % (binWmin, binWmax, _units)
 
     if "mass" in histoName.lower():
         _units        = "GeV/c^{2}"
@@ -158,20 +169,25 @@ def GetHistoKwargs(histoName):
         _opts["xmax"] = 300
         _cutBox       = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
 
+        if "trijet" in histoName.lower():
+            _rebinX = 2
+
         if "tetrajet" in histoName.lower():
             _xlabel       = "m_{jjbb} (%s)" % (_units)
             _opts["xmin"] =    0
             _opts["xmax"] = 3000
-            _cutBox       = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
-            _rebinX       = getBinningForTetrajetMass()
-            if isinstance(_rebinX, list):
-                _ylabel = "Events / bin"
+            _rebinX       = 2 #getBinningForTetrajetMass()
+            _cutBox       = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        if isinstance(_rebinX, list):
+            binWmin, binWmax = GetBinWidthMinMax(_rebinX)
+            _ylabel = "Events / %.0f-%.0f %s" % (binWmin, binWmax, _units)
 
     if "met" in histoName.lower():
         _units        = "GeV"
         _xlabel       = "E_{T}^{miss} (%s)" % (_units)
         _cutBox       = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
-        _opts         = {"xmin": 0.0, "xmax": 400.0, "ymin": 1e0, "ymax": 1e3}
+        _opts["xmin"] =   0
+        _opts["xmax"] = 400
         myBins = []
         for j in range(0, 100, 10):
             myBins.append(j)
@@ -189,28 +205,45 @@ def GetHistoKwargs(histoName):
     if "tetrajetbjeteta" in histoName.lower():
         _units   = ""
         _xlabel  = "#eta"
-        _cutBox  = {"cutValue": 0.8, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts   = {"xmin": -2.5, "xmax": +2.5, "ymin": 1e0, "ymax": 1e3}
+        _cutBox  = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         _rebinX  = 1
         _ylabel  = "Events / %.2f"
-                
+        _opts["xmin"] = -2.5
+        _opts["xmax"] = +2.5
+
+    if "bdisc" in histoName.lower():
+        _format = "%0.2f"
+        _ylabel = "Events / " + _format
+        _rebinX = 2
+        _opts["xmin"] = 0.8
+        _opts["xmax"] = 1.0
+        _cutBox = {"cutValue": +0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _xlabel = "b-tag discriminant"
+        ROOT.gStyle.SetNdivisions(8, "X")
+
     # Define plotting options
     kwargs = {
+        "ratioCreateLegend": True,
+        "ratioType"        : None, #"errorScale", #"errorScale", #binomial #errorPropagation
+        "ratioErrorOptions": {"numeratorStatSyst": False, "denominatorStatSyst": False}, # Include stat.+syst. to numerator (if syst globally enabled)      
+        "ratioMoveLegend"  : {"dx": -0.51, "dy": 0.03, "dh": -0.05},
+        "errorBarsX"       : True,
         "xlabel"           : _xlabel,
         "rebinX"           : _rebinX,
         "ylabel"           : _ylabel,
         "log"              : _logY,
         "opts"             : _opts,
-        "opts2"            : {"ymin": 0.6, "ymax": 2.0-0.6},
-        "stackMCHistograms": True,
+        #"opts2"            : {"ymin": 0.6, "ymax": 2.0-0.6},
+        "opts2"            : {"ymin": 0.30, "ymax": 1.70},
+        "stackMCHistograms": False,
+        "addLuminosityText": True,
         "ratio"            : opts.ratio, 
-        "ratioYlabel"      : "Ratio",
-        "ratioInvert"      : False, 
+        "ratioYlabel"      : "CR1/CR2",
+        "ratioInvert"      : True, 
         "cutBox"           : _cutBox,
-        "addLuminosityText": True, # cannot do that
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
-        "createLegend"     : {"x1": 0.66, "y1": 0.78, "x2": 0.92, "y2": 0.92},
+        "createLegend"     : {"x1": 0.80, "y1": 0.78, "x2": 0.98, "y2": 0.92},
         }
     return kwargs
 
@@ -234,30 +267,11 @@ def GetBinWidthMinMax(binList):
     return minWidth, maxWidth
 
 def GetDatasetsFromDir(opts):
-    Verbose("Getting datasets")
-    
-    if (not opts.includeOnlyTasks and not opts.excludeTasks):
-        datasets = dataset.getDatasetsFromMulticrabDirs([opts.mcrab],
-                                                        dataEra=opts.dataEra,
-                                                        searchMode=opts.searchMode, 
-                                                        analysisName=opts.analysisName,
-                                                        optimizationMode=opts.optMode)
-    elif (opts.includeOnlyTasks):
-        datasets = dataset.getDatasetsFromMulticrabDirs([opts.mcrab],
-                                                        dataEra=opts.dataEra,
-                                                        searchMode=opts.searchMode,
-                                                        analysisName=opts.analysisName,
-                                                        includeOnlyTasks=opts.includeOnlyTasks,
-                                                        optimizationMode=opts.optMode)
-    elif (opts.excludeTasks):
-        datasets = dataset.getDatasetsFromMulticrabDirs([opts.mcrab],
-                                                        dataEra=opts.dataEra,
-                                                        searchMode=opts.searchMode,
-                                                        analysisName=opts.analysisName,
-                                                        excludeTasks=opts.excludeTasks,
-                                                        optimizationMode=opts.optMode)
-    else:
-        raise Exception("This should never be reached")
+    datasets = dataset.getDatasetsFromMulticrabDirs([opts.mcrab],
+                                                    dataEra=opts.dataEra,
+                                                    searchMode=opts.searchMode, 
+                                                    analysisName=opts.analysisName,
+                                                    optimizationMode=opts.optMode)
     return datasets
     
 def PrintPSet(selection, datasetsMgr, depth=0):
@@ -301,13 +315,27 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
         saveNameURL = saveName + ext
-        saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
+        saveNameURL = saveNameURL.replace(opts.saveDir, "http://home.fnal.gov/~%s/" % (getpass.getuser()))
         if opts.url:
-            Print(saveNameURL, i==0)
+            Verbose(saveNameURL, i==0)
         else:
-            Print(saveName + ext, i==0)
+            Verbose(saveName + ext, i==0)
         plot.saveAs(saveName, formats=saveFormats)
     return
+
+def GetBinText(bin):
+    if bin == "0":
+        return "|eta| < 0.4"
+    elif bin == "1":
+        return "0.4 < |eta| < 1.2"
+    elif bin == "2":
+        return "1.2 < |eta| < 1.8"
+    elif bin == "3":
+        return "|eta| > 1.8"
+    elif bin == "Inclusive":
+        return bin
+    else:
+        raise Exception(ShellStyles.ErrorStyle() + "Unexpected bin %s" % (bin)  + ShellStyles.NormalStyle())
 
 #================================================================================================ 
 # Main
@@ -386,25 +414,45 @@ def main(opts):
         # Print dataset information
         datasetsMgr.PrintInfo()
         
-        # Do the fit on the histo after ALL selections (incl. topology cuts)
-        folderList = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(opts.folder)
-        #folderList1 = [h for h in folderList if "TetrajetPt" in h]
-        folderList1 = [h for h in folderList if "TetrajetMass" in h]
-        #folderList1 = [h for h in folderList if "MET" in h]
-        #folderList1 = [h for h in folderList if "TetrajetBJetPt" in h]
-        #folderList1 = [h for h in folderList if "TetrajetBJetEta" in h]
-        folderList2 = [h for h in folderList1 if "CRtwo" in h or "VR" in h or "SR" in h or "CRone" in h]
+        # List of TDirectoryFile (_CRone, _CRtwo, _VR, _SR)
+        tdirs  = ["LdgTrijetPt_"   , "LdgTrijetMass_"  , "LdgTrijetBJetBdisc_", "TetrajetBJetPt_",
+                  "TetrajetBJetEta_", "TetrajetBJetBdisc_" , "LdgTetrajetPt_", "LdgTetrajetMass_"]
+        region = ["CRone", "CRtwo"]
+        hList  = []
+        for d in tdirs:
+            for r in region:
+                hList.append(d + r)
+
+        # Get the folders with the binned histograms
+        folderList_ = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(opts.folder)
+        folderList  = [h for h in folderList_ if h in hList]
         
         # For-loop: All folders
         histoPaths = []
-        for f in folderList2:
+        for f in folderList:
             folderPath = os.path.join(opts.folder, f)
             histoList  = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(folderPath)            
             pathList   = [os.path.join(folderPath, h) for h in histoList]
             histoPaths.extend( pathList )
 
+        # Get all the bin labels 
         binLabels = GetBinLabels("CRone", histoPaths)
-        PlotHistosAndCalculateTF(datasetsMgr, histoPaths, binLabels, opts)
+    
+        for i, t in enumerate(tdirs, 1):
+            myList = []
+            for p in histoPaths:
+                if t in p:
+                    myList.append(p)
+            msg   = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % i, "/", "%s:" % (len(tdirs)), t.replace("_", ""))
+            Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), i==1)
+
+            PlotHistograms(datasetsMgr, myList, binLabels, opts)
+
+    # Save the plots
+    savePath = opts.saveDir
+    if opts.url:
+        savePath = opts.saveDir.replace(opts.saveDir, "http://home.fnal.gov/~%s/" % (getpass.getuser()))
+    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + savePath + ShellStyles.NormalStyle()), True)
     return
 
 
@@ -420,6 +468,26 @@ def GetBinLabels(region, histoPaths):
             binLabels.append(h.split(region)[-1])
     return binLabels
         
+def getBinningForPt(binLevel=0):
+    myBins = []
+    if binLevel == 0:  #default binning
+        for i in range(0, 300, 25):
+            myBins.append(i)
+        for i in range(300, 600, 50):
+            myBins.append(i)
+        for i in range(600, 1000+100, 100):
+            myBins.append(i)
+    elif binLevel == 1: #finer
+        for i in range(0, 300, 10):
+            myBins.append(i)
+        for i in range(300, 600, 20):
+            myBins.append(i)
+        for i in range(600, 1000+100, 40):
+            myBins.append(i)
+    else:
+        raise Exception(ShellStyles.ErrorStyle() + "Please choose bin-level from 0 to 1" + ShellStyles.NormalStyle())
+    return myBins
+
 def getBinningForTetrajetMass(binLevel=0):
     '''
     Currenty in Combine:
@@ -464,28 +532,28 @@ def getBinningForTetrajetMass(binLevel=0):
     return myBins
 
 def GetHistoPathDict(histoList, printList=False):
+    '''
+    Maps keys to histogram paths in the ROOT files
+    The key naming is in the form 
+    region - bin (- Triplet)
+    for example:
+    CRone - Inclusive
+    CRone - Inclusive - EWKGenuineB
+    CRone - Inclusive - EWKFakeB
+    or:
+    CRone - 0
+    CRone - 0 - EWKGenuineB
+    CRone - 0 - EWKFakeB
+    '''
     histoDict = {}
 
     # For-loop: All histograms (full paths)
     for h in histoList:
-        if "_SR" in h:
-            region = "SR"
-        elif "_VR" in h:
-            region = "VR"
-        elif "_CRone" in h:
-            region = "CRone"
-        elif "_CRtwo" in h:
-            region = "CRtwo"
-        else:
-            raise Exception("Could not determine Control Region for histogram %s" % (h) )
-        # Save histogram in dictionary
-        binLabel = h.split(region)[-1]
-        label1 = "%s-%s" % (region, binLabel)
-        label2 = "%s-%s-%s" % (region, binLabel, "EWKGenuineB")
-        label3 = "%s-%s-%s" % (region, binLabel, "EWKFakeB")
-        histoDict[label1] = h
-        histoDict[label2] = h.replace(opts.folder, opts.folder + "EWKGenuineB")
-        histoDict[label3] = h.replace(opts.folder, opts.folder + "EWKFakeB")
+
+        inclu, genuB, fakeB = GetHistoLabelTriplet(h)
+        histoDict[inclu] = h
+        histoDict[genuB] = h.replace(opts.folder, opts.folder + "EWKGenuineB")
+        histoDict[fakeB] = h.replace(opts.folder, opts.folder + "EWKFakeB")
 
     # Create table of key->histogram mapping
     rows   = []
@@ -505,40 +573,51 @@ def GetHistoPathDict(histoList, printList=False):
             Print(row, i==1)
     return histoDict
 
-def GetRootHistos(datasetsMgr, histoList, regions, binLabels):
-    # Definition
+def GetHistoLabelTriplet(histoName):
+    if "_SR" in histoName:
+        region = "SR"
+    elif "_VR" in histoName:
+        region = "VR"
+    elif "_CRone" in histoName:
+        region = "CRone"
+    elif "_CRtwo" in histoName:
+        region = "CRtwo"
+    else:
+        raise Exception("Could not determine Control Region for histogram %s" % (h) )
+
+    # Save histogram in dictionary
+    binLabel = histoName.split(region)[-1]
+    inclu = "%s-%s" % (region, binLabel)
+    genuB = "%s-%s-%s" % (region, binLabel, "EWKGenuineB")
+    fakeB = "%s-%s-%s" % (region, binLabel, "EWKFakeB")
+    return inclu, genuB, fakeB
+
+
+def GetRootHistos(datasetsMgr, histoList):
     hPathDict = GetHistoPathDict(histoList, printList=False)
     rhDict    = {}
 
-    # For-loop: All Control Regions (CR)
-    for region in regions:
-        # For-loop: All bins 
-        for binLabel in binLabels:
+    # For-loop: All histograms
+    for h in histoList:
+        inclu, genuB, fakeB = GetHistoLabelTriplet(h)
 
-            # Define labels
-            lIncl  = "%s-%s" % (region, binLabel)
-            lGenB  = "%s-%s-%s" % (region, binLabel, "EWKGenuineB")
-            lFakeB = "%s-%s-%s" % (region, binLabel, "EWKFakeB")
+        pIncl  = plots.DataMCPlot(datasetsMgr, hPathDict[inclu])
+        pGenB  = plots.DataMCPlot(datasetsMgr, hPathDict[genuB])
+        pFakeB = plots.DataMCPlot(datasetsMgr, hPathDict[fakeB])
 
-            # Get the desired histograms
-            pIncl  = plots.DataMCPlot(datasetsMgr, hPathDict[lIncl])
-            pGenB  = plots.DataMCPlot(datasetsMgr, hPathDict[lGenB])
-            pFakeB = plots.DataMCPlot(datasetsMgr, hPathDict[lFakeB])
-                        
-            # Clone and Save the root histograms
-            rhDict["Data-" + lIncl] = pIncl.histoMgr.getHisto("Data").getRootHisto().Clone("Data-" + lIncl)
-            rhDict["EWK-"  + lGenB] = pGenB.histoMgr.getHisto("EWK").getRootHisto().Clone("EWK-"   + lGenB)
-            rhDict["EWK-"  + lFakeB] = pFakeB.histoMgr.getHisto("EWK").getRootHisto().Clone("EWK-" + lFakeB)
-            if opts.useMC:
-                rhDict["QCD-" + lIncl] = pIncl.histoMgr.getHisto("QCD").getRootHisto().Clone("QCD-" + lIncl)
-                # Add EWKFakeB (MC) to QCD (MC) to get FakeB (= QCD_inclusive + EWK_fakeB)
-                rhDict["FakeB-" + lIncl] = rhDict["QCD- "+ lIncl].Clone("FakeB-" + lIncl)
-                rhDict["FakeB-" + lIncl].Add( rhDict["EWK-" + lFakeB], +1 )
-            else:
-                # Subtract EWKGenuineB (MC) from Data to get FakeB (= Data - EWK_genuineB)
-                rhDict["FakeB-" + lIncl] = rhDict["Data-" + lIncl].Clone("FakeB-" + lIncl)
-                rhDict["FakeB-" + lIncl].Add( rhDict["EWK-" + lGenB], -1 )
+        # Define mapping keys: "Datasets-Region-Bin-Triplet"
+        key1 = "Data-%s" % (inclu)
+        key2 = "EWKGenuineB-%s" % (genuB)
+        key3 = "EWKFakeB-%s" % (fakeB)
+        key4 = "FakeB-%s" % (inclu)
 
+        # Clone and Save the root histograms
+        rhDict[key1] = pIncl.histoMgr.getHisto("Data").getRootHisto().Clone("Data-" + h)
+        rhDict[key2] = pGenB.histoMgr.getHisto("EWK").getRootHisto().Clone("EWKGenuineB-" + h)
+        rhDict[key3] = pFakeB.histoMgr.getHisto("EWK").getRootHisto().Clone("EWKFakeB-" + h)
+        rhDict[key4] = pIncl.histoMgr.getHisto("Data").getRootHisto().Clone("FakeB-" + h)
+        rhDict[key4].Add( rhDict[key2], -1 )
+            
     # For debugging:
     if 0:
         for k in rhDict:
@@ -548,133 +627,104 @@ def GetRootHistos(datasetsMgr, histoList, regions, binLabels):
     return rhDict
 
 
-def PlotHistosAndCalculateTF(datasetsMgr, histoList, binLabels, opts):
+def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
 
-    # Get the histogram customisations (keyword arguments)
-    _kwargs = GetHistoKwargs(histoList[0])
-
+    '''
+    histoList contains all histograms for all bins for CR1 and CR2 
+    
+    '''
     # Get the root histos for all datasets and Control Regions (CRs)
-    regions = ["SR", "VR", "CRone", "CRtwo"]
-    rhDict  = GetRootHistos(datasetsMgr, histoList, regions, binLabels)
-
-    #=========================================================================================
-    # Calculate the Transfer Factor (TF) and save to file
-    #=========================================================================================
-    manager = FakeBNormalization.FakeBNormalizationManager(binLabels, opts.mcrab, opts.optMode, verbose=False)
-    if opts.inclusiveOnly:
-        #manager.CalculateTransferFactor(binLabels[0], rhDict["CRone-FakeB"], rhDict["CRtwo-FakeB"])
-        binLabel = "Inclusive"
-        manager.CalculateTransferFactor("Inclusive", rhDict["FakeB-CRone-Inclusive"], rhDict["FakeB-CRtwo-Inclusive"])
-    else:
-        for bin in binLabels:
-            manager.CalculateTransferFactor(bin, rhDict["FakeB-CRone-%s" % bin], rhDict["FakeB-CRtwo-%s" % bin])
+    rhDict  = GetRootHistos(datasetsMgr, histoList)
 
     # Get unique a style for each region
-    for k in rhDict:
-        dataset = k.split("-")[0]
-        region  = k.split("-")[1]
-        styles.getABCDStyle(region).apply(rhDict[k])
-        if "FakeB" in k:
-            styles.getFakeBStyle().apply(rhDict[k])
-        # sr.apply(rhDict[k])
+    for key1 in rhDict:
 
-    # =========================================================================================
-    # Create the final plot object
-    # =========================================================================================
-    rData_SR        = rhDict["Data-SR-Inclusive"] 
-    rEWKGenuineB_SR = rhDict["EWK-SR-Inclusive-EWKGenuineB"]
-    rBkgSum_SR      = rhDict["FakeB-VR-Inclusive"].Clone("BkgSum-SR-Inclusive")
-    rBkgSum_SR.Reset()
+        # Definitions
+        region1      = "CRone"
+        region2      = "CRtwo"
+        key2         = key1.replace(region1, region2)
+        dataset      = key1.split("-")[0]
+        region       = key1.split("-")[1]
+        bin          = key1.split("-")[2]
+        hName1       = rhDict[key1].GetName()
+        hName2       = rhDict[key2].GetName()
+        bInclusive   = "Inclusive" in key1
 
-    if opts.inclusiveOnly:
-        bin = "Inclusive"
-        # Normalise the VR histogram with the Transfer Factor ( BkgSum = VR * (CR1/CR2) )
-        binHisto_VR = rhDict["FakeB-VR-%s" % (bin)]
-        VRtoSR_TF   = manager.GetTransferFactor(bin)
-        Print("Applying TF = %s%0.6f%s to VR shape" % (ShellStyles.NoteStyle(), VRtoSR_TF, ShellStyles.NormalStyle()), True)
-        binHisto_VR.Scale(VRtoSR_TF) 
-                # Add the normalised histogram to the final Inclusive SR (predicted) histo
-        rBkgSum_SR.Add(binHisto_VR, +1)
-    else:
-        # For-loop: All bins
-        for i, bin in enumerate(binLabels, 1):
-            if bin == "Inclusive":
-                continue
-            # Normalise the VR histogram with the Transfer Factor ( BkgSum = VR * (CR1/CR2) )
-            binHisto_VR = rhDict["FakeB-VR-%s" % (bin)]
-            VRtoSR_TF   = manager.GetTransferFactor(bin)
-            Print("Applying TF = %s%0.6f%s to VR shape" % (ShellStyles.NoteStyle(), VRtoSR_TF, ShellStyles.NormalStyle()), i==1)
-            binHisto_VR.Scale(VRtoSR_TF) 
-            # Add the normalised histogram to the final Inclusive SR (predicted) histo
-            rBkgSum_SR.Add(binHisto_VR, +1)
+        # Dataset and Region filter
+        if dataset != "FakeB":
+            continue
+        if region != region1:
+            continue
+        
+        # Normalise to unity
+        if bInclusive:
+            rFakeB_CRone = rhDict[key1].Clone()
+            w1 = rFakeB_CRone.Integral()
+            rFakeB_CRone.Reset()
 
-    #Print("Got Verification Region (VR) shape %s%s%s" % (ShellStyles.NoteStyle(), rFakeB_VR.GetName(), ShellStyles.NormalStyle()), True)
+            rFakeB_CRtwo = rhDict[key2].Clone()
+            w2 = rFakeB_CRtwo.Integral()
+            rFakeB_CRtwo.Reset()
 
-    # Normalise the VR histogram with the Transfer Factor ( BkgSum = VR * (CR1/CR2) )
-    #VRtoSR_TF = manager.GetTransferFactor("Inclusive")
-    #Print("Applying TF = %s%0.6f%s to VR shape" % (ShellStyles.NoteStyle(), VRtoSR_TF, ShellStyles.NormalStyle()), True)
-    #rBkgSum_SR.Scale(VRtoSR_TF) 
-    
-    # Plot histograms    
-    if opts.altPlot:
-        # Add the SR EWK Genuine-b to the SR FakeB ( BkgSum = [FakeB] + [GenuineB-MC] = [VR * (CR1/CR2)] + [GenuineB-MC] )
-        rBkgSum_SR.Add(rEWKGenuineB_SR, +1) 
+            for i, b in enumerate(binLabels, 1):
+                if "Inclusive" in b:
+                    continue
+                # Determine keys
+                k1 = key1.replace("Inclusive", b)
+                k2 = key2.replace("Inclusive", b)
 
-        # Change style
-        styles.getGenuineBStyle().apply(rBkgSum_SR)
+                # Normalise bin histo to one (before adding to inclusive histo)
+                h1 = rhDict[k1].Clone()
+                h2 = rhDict[k2].Clone()
+                h1.Scale(1.0/h1.Integral())
+                h2.Scale(1.0/h2.Integral())
 
-        # Remove unsupported settings of kwargs
-        _kwargs["stackMCHistograms"] = False
-        _kwargs["addLuminosityText"] = False
+                # Add this binned histo to the inclusive histo
+                Verbose("Adding %s" % k1, True)
+                rFakeB_CRone += h1 #rhDict[k1]
+                rFakeB_CRtwo += h2 #rhDict[k2]
+        else:
+            # Get the histos
+            rFakeB_CRone = rhDict[key1]
+            rFakeB_CRtwo = rhDict[key2]
 
+        # Normalise the histos?
+        if opts.normaliseToOne:
+            rFakeB_CRone.Scale(1.0/rFakeB_CRone.Integral())
+            rFakeB_CRtwo.Scale(1.0/rFakeB_CRtwo.Integral())
+
+
+        # Apply histogram styles          
+        styles.getABCDStyle("CRone").apply(rFakeB_CRone)
+        styles.getABCDStyle("CRtwo").apply(rFakeB_CRtwo)
+        
         # Create the plot
-        p = plots.ComparisonManyPlot(rData_SR, [rBkgSum_SR], saveFormats=[])
-
-        # Set draw / legend style
-        p.histoMgr.setHistoDrawStyle("Data-SR-Inclusive", "P")
-        p.histoMgr.setHistoLegendStyle("Data-SR-Inclusive" , "LP")
-        p.histoMgr.setHistoDrawStyle("BkgSum-SR-Inclusive", "HIST")
-        p.histoMgr.setHistoLegendStyle("BkgSum-SR-Inclusive" , "F")
-
+        p = plots.ComparisonManyPlot(rFakeB_CRone, [rFakeB_CRtwo], saveFormats=[])
+        p.setLuminosity(opts.intLumi)
+    
+        # Set draw/legend style
+        p.histoMgr.setHistoDrawStyle(hName1, "AP")
+        p.histoMgr.setHistoDrawStyle(hName2, "HIST")
+        p.histoMgr.setHistoLegendStyle(hName1, "LP")
+        p.histoMgr.setHistoLegendStyle(hName2, "F")
+        
         # Set legend labels
         p.histoMgr.setHistoLegendLabelMany({
-                "Data-SR"       : "Data",
-                "BkgSum-SR"     : "Fake-b + Gen-b",
+                hName1 : "CR1",
+                hName2 : "CR2",
                 })
-    else:
-        # Create empty histogram stack list
-        myStackList = []
-        
-        # Add the FakeB data-driven background to the histogram list    
-        hFakeB = histograms.Histo(rBkgSum_SR, "FakeB", "Fake-b")
-        hFakeB.setIsDataMC(isData=False, isMC=True)
-        myStackList.append(hFakeB)
-        
-        # Add the EWKGenuineB MC background to the histogram list
-        hGenuineB = histograms.Histo(rEWKGenuineB_SR, "GenuineB", "EWK Genuine-b")
-        hGenuineB.setIsDataMC(isData=False, isMC=True)
-        myStackList.append(hGenuineB)
 
-        # Add the collision datato the histogram list        
-        hData = histograms.Histo(rData_SR, "Data", "Data")
-        hData.setIsDataMC(isData=True, isMC=False)
-        myStackList.insert(0, hData)
+        # Draw the plot and save it
+        if bin == "Inclusive":
+            histoName = histoList[0] + "_CR1vCR2"
+        else:
+            histoName = histoList[0] + "_CR1vCR2_bin%s" % (bin)
+        saveName = histoName.split("/")[-1].replace("CRone0_", "").replace("CRtwo0_", "")
         
-        p = plots.DataMCPlot2( myStackList, saveFormats=[])
-        p.setLuminosity(opts.intLumi)
-        p.setDefaultStyles()
-
-    # Draw the plot and save it
-    hName = "test"
-    plots.drawPlot(p, hName, **_kwargs)
-    SavePlot(p, hName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png"])
-
-    #=========================================================================================
-    # Calculate the Transfer Factor (TF) and save to file
-    #=========================================================================================
-    Verbose("Write the normalisation factors to a python file", True)
-    fileName = os.path.join(opts.mcrab, "FakeBTransferFactors%s.py"% ( getModuleInfoString(opts) ) )
-    manager.writeNormFactorFile(fileName, opts)
+        # Get the histogram customisations (keyword arguments)
+        p.appendPlotObject(histograms.PlotText(0.20, 0.88, GetBinText(bin), bold=True, size=22))
+        plots.drawPlot(p, saveName, **GetHistoKwargs(saveName))
+        SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf"])
     return
 
 if __name__ == "__main__":
@@ -700,16 +750,14 @@ if __name__ == "__main__":
     DATAERA      = "Run2016"
     OPTMODE      = None
     BATCHMODE    = True
-    ALTPLOT      = False
     INTLUMI      = -1.0
-    MCONLY       = False
     URL          = False
-    SAVEDIR      = "/publicweb/a/aattikis/"
+    SAVEDIR      = "/publicweb/%s/%s/" % (getpass.getuser()[0], getpass.getuser())
     VERBOSE      = False
     USEMC        = False
     RATIO        = True
     FOLDER       = "ForFakeBMeasurement"
-    INCLUSIVE    = False
+    NORMALISE    = False
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -726,17 +774,14 @@ if __name__ == "__main__":
     parser.add_option("--analysisName", dest="analysisName", type="string", default=ANALYSISNAME,
                       help="Override default analysisName [default: %s]" % ANALYSISNAME)
 
-    parser.add_option("--mcOnly", dest="mcOnly", action="store_true", default=MCONLY,
-                      help="Plot only MC info [default: %s]" % MCONLY)
+    parser.add_option("-n", "--normaliseToOne", dest="normaliseToOne", action="store_true", default=NORMALISE,
+                      help="Normalise the baseline and inverted shapes to one? [default: %s]" % (NORMALISE) )
 
     parser.add_option("--intLumi", dest="intLumi", type=float, default=INTLUMI,
                       help="Override the integrated lumi [default: %s]" % INTLUMI)
 
     parser.add_option("--searchMode", dest="searchMode", type="string", default=SEARCHMODE,
                       help="Override default searchMode [default: %s]" % SEARCHMODE)
-
-    parser.add_option("--altPlot", dest="altPlot", action="store_true", default=ALTPLOT, 
-                      help="Draw alternative plot with Data and Bkg-Sum [default: %s]" % ALTPLOT)
 
     parser.add_option("--dataEra", dest="dataEra", type="string", default=DATAERA, 
                       help="Override default dataEra [default: %s]" % DATAERA)
@@ -750,17 +795,11 @@ if __name__ == "__main__":
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE, 
                       help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
 
-    parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
-                      help="List of datasets in mcrab to include")
-
     parser.add_option("-e", "--excludeTasks", dest="excludeTasks", action="store", 
                       help="List of datasets in mcrab to exclude")
 
     parser.add_option("--useMC", dest="useMC", action="store_true", default=USEMC,
                       help="Use QCD MC instead of QCD=Data-EWK? [default: %s]" % (USEMC) )
-
-    parser.add_option("--inclusiveOnly", dest="inclusiveOnly", action="store_true", default=INCLUSIVE,
-                      help="Only calculate the inclusive Transfer Factor (TF). Do not calculated binned TF? [default: %s]" % (INCLUSIVE) )
 
     parser.add_option("--ratio", dest="ratio", action="store_true", default=RATIO,
                       help="Draw ratio canvas for Data/MC curves? [default: %s]" % (RATIO) )
@@ -785,10 +824,10 @@ if __name__ == "__main__":
         mcrabDir = rchop(opts.mcrab, "/")
         if len(mcrabDir.split("/")) > 1:
             mcrabDir = mcrabDir.split("/")[-1]
-        opts.saveDir += mcrabDir + "/TransferFactor/"
+        opts.saveDir += mcrabDir + "/Closure/Binned/"
 
     # Call the main function
     main(opts)
 
     if not opts.batchMode:
-        raw_input("=== getABCD_TF.py: Press any key to quit ROOT ...")
+        raw_input("=== plot_ClosureBinned.py: Press any key to quit ROOT ...")
