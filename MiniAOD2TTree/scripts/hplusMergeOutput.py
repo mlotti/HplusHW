@@ -2251,8 +2251,7 @@ def main(opts, args):
     Verbose("Merged files%s:" % GetDeleteMessage(opts), False)
     
     Verbose("Merging completed! Now to clean duplicate folders and write PU histos", True)
-    if 0: #alex-tmp
-        mcrabTask = DeleteFoldersAndWritePU(mcrabTask)
+    mcrabTask = DeleteFoldersAndWritePU(mcrabTask)
 
     # Print summary table using reports
     PrintSummary(mcrabTask)
@@ -2310,7 +2309,7 @@ def DeleteFoldersAndWritePU(mcrabTask):
         for j, f in enumerate(crabTask.GetMergedFiles(), 0):
 
             # Add pile-up histos (for data only!)
-            isData, fOUT = IsDataRootfile(f)
+            isData, fOUT = IsDataRootfile(f) #alex
             time_start = time.time()
             if isData:
                 PrintProgressBar("Write PU histos (isData=%s)" % (isData) , j, nMergedFiles, os.path.basename(f))

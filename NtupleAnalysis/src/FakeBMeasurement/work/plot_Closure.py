@@ -389,7 +389,7 @@ def GetHistoKwargs(histoName, ext, opts):
     _rebinX = 1
     if opts.normaliseToOne:
         #_opts   = {"ymin": 3e-4, "ymaxfactor": 2.0}
-        _opts   = {"ymin": 7e-5, "ymaxfactor": 2.0}
+        _opts   = {"ymin": 0.7e-4, "ymaxfactor": 2.0}
     else:
         _opts   = {"ymin": 1e0, "ymaxfactor": 2.0}
     _format = "%0.0f"
@@ -546,6 +546,11 @@ def GetHistoKwargs(histoName, ext, opts):
         #_opts["xmax"] = 3500.0
         
     _kwargs = {
+        "ratioCreateLegend": True,
+        "ratioType"        : None, #"errorScale", #"errorScale", #binomial #errorPropagation
+        "ratioErrorOptions": {"numeratorStatSyst": False, "denominatorStatSyst": False}, # Include stat.+syst. to numerator (if syst globally enabled)
+        "ratioMoveLegend"  : {"dx": -0.51, "dy": 0.03, "dh": -0.05},
+        "errorBarsX"       : True,
         "xlabel"           : _xlabel,
         "ylabel"           : "Arbitrary Units / %s" % (_format),
         "rebinX"           : _rebinX, 
@@ -558,7 +563,8 @@ def GetHistoKwargs(histoName, ext, opts):
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
         "opts"             : _opts,
-        "opts2"            : {"ymin": 0.6, "ymax": 1.4},
+        #"opts2"            : {"ymin": 0.6, "ymax": 1.4},
+        "opts2"            : {"ymin": 0.30, "ymax": 1.70},
         "log"              : True,
         "createLegend"     : {"x1": 0.80, "y1": 0.78, "x2": 0.98, "y2": 0.92},
         #"moveLegend"       : {"dx": -0.1, "dy": -0.01, "dh": 0.1},

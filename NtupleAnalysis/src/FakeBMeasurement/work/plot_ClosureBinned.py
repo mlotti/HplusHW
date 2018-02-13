@@ -61,6 +61,7 @@ import math
 import copy
 import os
 import array
+import getpass
 from optparse import OptionParser
 
 import ROOT
@@ -132,7 +133,7 @@ def GetHistoKwargs(histoName):
     _logY   = True
     _ylabel = "Events / %.0f"
     if opts.normaliseToOne:
-        _opts   = {"ymin": 1e-4, "ymaxfactor": 2.0}
+        _opts   = {"ymin": 0.7e-4, "ymaxfactor": 2.0}
     else:
         _opts   = {"ymin": 1e0, "ymaxfactor": 2.0}
     if _logY:
@@ -148,14 +149,14 @@ def GetHistoKwargs(histoName):
         _rebinX       = 2
         if "trijet" in histoName.lower():
             _opts["xmax"] = 800
-            _rebinX = getBinningForPt(0)
+            _rebinX = 2 #getBinningForPt(0)
             if "tetrajetbjet" in histoName.lower():
-                _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+                _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         if "tetrajet" in histoName.lower():
-            _rebinX = getBinningForPt(0)
+            _rebinX = 2 #getBinningForPt(0)
             _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
             if "tetrajetbjet" in histoName.lower():
-                _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+                _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         if isinstance(_rebinX, list):
             binWmin, binWmax = GetBinWidthMinMax(_rebinX)
             _ylabel = "Events / %.0f-%.0f %s" % (binWmin, binWmax, _units)
@@ -175,7 +176,7 @@ def GetHistoKwargs(histoName):
             _xlabel       = "m_{jjbb} (%s)" % (_units)
             _opts["xmin"] =    0
             _opts["xmax"] = 3000
-            _rebinX       = getBinningForTetrajetMass()
+            _rebinX       = 2 #getBinningForTetrajetMass()
             _cutBox       = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         if isinstance(_rebinX, list):
             binWmin, binWmax = GetBinWidthMinMax(_rebinX)
@@ -204,7 +205,7 @@ def GetHistoKwargs(histoName):
     if "tetrajetbjeteta" in histoName.lower():
         _units   = ""
         _xlabel  = "#eta"
-        _cutBox  = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _cutBox  = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         _rebinX  = 1
         _ylabel  = "Events / %.2f"
         _opts["xmin"] = -2.5
@@ -222,17 +223,23 @@ def GetHistoKwargs(histoName):
 
     # Define plotting options
     kwargs = {
+        "ratioCreateLegend": True,
+        "ratioType"        : None, #"errorScale", #"errorScale", #binomial #errorPropagation
+        "ratioErrorOptions": {"numeratorStatSyst": False, "denominatorStatSyst": False}, # Include stat.+syst. to numerator (if syst globally enabled)      
+        "ratioMoveLegend"  : {"dx": -0.51, "dy": 0.03, "dh": -0.05},
+        "errorBarsX"       : True,
         "xlabel"           : _xlabel,
         "rebinX"           : _rebinX,
         "ylabel"           : _ylabel,
         "log"              : _logY,
         "opts"             : _opts,
-        "opts2"            : {"ymin": 0.6, "ymax": 2.0-0.6},
+        #"opts2"            : {"ymin": 0.6, "ymax": 2.0-0.6},
+        "opts2"            : {"ymin": 0.30, "ymax": 1.70},
         "stackMCHistograms": False,
         "addLuminosityText": True,
         "ratio"            : opts.ratio, 
         "ratioYlabel"      : "CR1/CR2",
-        "ratioInvert"      : False, 
+        "ratioInvert"      : True, 
         "cutBox"           : _cutBox,
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
@@ -308,7 +315,7 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
         saveNameURL = saveName + ext
-        saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
+        saveNameURL = saveNameURL.replace(opts.saveDir, "http://home.fnal.gov/~%s/" % (getpass.getuser()))
         if opts.url:
             Verbose(saveNameURL, i==0)
         else:
@@ -317,21 +324,14 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
     return
 
 def GetBinText(bin):
-#    if bin == "0":
-#        return "|#eta| < 1.2"
-#    elif bin == "1":
-#        return "|#eta| > 1.2"
-#    elif bin == "Inclusive":
-#        return bin
-#    else:
-#        pass
-
     if bin == "0":
-        return "|eta| < 0.6"
+        return "|eta| < 0.4"
     elif bin == "1":
-        return "0.6 < |eta| < 1.4"
+        return "0.4 < |eta| < 1.2"
     elif bin == "2":
-        return "|eta| > 1.4"
+        return "1.2 < |eta| < 1.8"
+    elif bin == "3":
+        return "|eta| > 1.8"
     elif bin == "Inclusive":
         return bin
     else:
@@ -415,8 +415,9 @@ def main(opts):
         datasetsMgr.PrintInfo()
         
         # List of TDirectoryFile (_CRone, _CRtwo, _VR, _SR)
-        tdirs  = ["LdgTrijetPt_"   , "LdgTrijetMass_"  , "LdgTrijetBJetBdisc_", "TetrajetBJetPt_",
-                  "TetrajetBJetEta_", "TetrajetBJetBdisc_" , "LdgTetrajetPt_", "LdgTetrajetMass_"]
+        #tdirs  = ["LdgTrijetPt_"   , "LdgTrijetMass_"  , "LdgTrijetBJetBdisc_", "TetrajetBJetPt_",
+        #          "TetrajetBJetEta_", "TetrajetBJetBdisc_" , "LdgTetrajetPt_", "LdgTetrajetMass_"]
+        tdirs  = ["TetrajetBJetEta_", "LdgTetrajetMass_"]
         region = ["CRone", "CRtwo"]
         hList  = []
         for d in tdirs:
@@ -451,7 +452,7 @@ def main(opts):
     # Save the plots
     savePath = opts.saveDir
     if opts.url:
-        savePath = opts.saveDir.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
+        savePath = opts.saveDir.replace(opts.saveDir, "http://home.fnal.gov/~%s/" % (getpass.getuser()))
     Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + savePath + ShellStyles.NormalStyle()), True)
     return
 
@@ -640,28 +641,59 @@ def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
     for key1 in rhDict:
 
         # Definitions
-        region1 = "CRone"
-        region2 = "CRtwo"
-        key2    = key1.replace(region1, region2)
-        dataset = key1.split("-")[0]
-        region  = key1.split("-")[1]
-        bin     = key1.split("-")[2]
-        hName1  = rhDict[key1].GetName()
-        hName2  = rhDict[key2].GetName()
+        region1      = "CRone"
+        region2      = "CRtwo"
+        key2         = key1.replace(region1, region2)
+        dataset      = key1.split("-")[0]
+        region       = key1.split("-")[1]
+        bin          = key1.split("-")[2]
+        hName1       = rhDict[key1].GetName()
+        hName2       = rhDict[key2].GetName()
+        bInclusive   = "Inclusive" in key1
 
         # Dataset and Region filter
         if dataset != "FakeB":
             continue
         if region != region1:
             continue
-
+        
         # Normalise to unity
-        if opts.normaliseToOne:
-            rhDict[key1].Scale(1.0/rhDict[key1].Integral())
-            rhDict[key2].Scale(1.0/rhDict[key2].Integral())
+        if bInclusive:
+            rFakeB_CRone = rhDict[key1].Clone()
+            w1 = rFakeB_CRone.Integral()
+            rFakeB_CRone.Reset()
 
-        rFakeB_CRone = rhDict[key1]
-        rFakeB_CRtwo = rhDict[key2]
+            rFakeB_CRtwo = rhDict[key2].Clone()
+            w2 = rFakeB_CRtwo.Integral()
+            rFakeB_CRtwo.Reset()
+
+            for i, b in enumerate(binLabels, 1):
+                if "Inclusive" in b:
+                    continue
+                # Determine keys
+                k1 = key1.replace("Inclusive", b)
+                k2 = key2.replace("Inclusive", b)
+
+                # Normalise bin histo to one (before adding to inclusive histo)
+                h1 = rhDict[k1].Clone()
+                h2 = rhDict[k2].Clone()
+                h1.Scale(1.0/h1.Integral())
+                h2.Scale(1.0/h2.Integral())
+
+                # Add this binned histo to the inclusive histo
+                Verbose("Adding %s" % k1, True)
+                rFakeB_CRone += h1 #rhDict[k1]
+                rFakeB_CRtwo += h2 #rhDict[k2]
+        else:
+            # Get the histos
+            rFakeB_CRone = rhDict[key1]
+            rFakeB_CRtwo = rhDict[key2]
+
+        # Normalise the histos?
+        if opts.normaliseToOne:
+            rFakeB_CRone.Scale(1.0/rFakeB_CRone.Integral())
+            rFakeB_CRtwo.Scale(1.0/rFakeB_CRtwo.Integral())
+
 
         # Apply histogram styles          
         styles.getABCDStyle("CRone").apply(rFakeB_CRone)
@@ -721,7 +753,7 @@ if __name__ == "__main__":
     BATCHMODE    = True
     INTLUMI      = -1.0
     URL          = False
-    SAVEDIR      = "/publicweb/a/aattikis/"
+    SAVEDIR      = "/publicweb/%s/%s/" % (getpass.getuser()[0], getpass.getuser())
     VERBOSE      = False
     USEMC        = False
     RATIO        = True

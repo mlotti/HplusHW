@@ -333,9 +333,9 @@ def GetHistoKwargs(hName, opts):
         kwargs["cutBox"] = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         kwargs["log"]    = True
         myBins = []
-        for j in range(0, 400, 10):
+        for j in range(0, 400, 20):
             myBins.append(j)
-        for k in range(400, 600, 50):
+        for k in range(400, 600, 40):
             myBins.append(k)
         for k in range(600, 900+100, 100):
             myBins.append(k)
@@ -402,8 +402,9 @@ def GetHistoKwargs(hName, opts):
         kwargs["opts"]   = {"xmin": 50.0, "xmax": 350.0, "ymin": ymin, "ymaxfactor": ymaxF}
         kwargs["log"]    = True
         # Blind data
-        kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind)
-        kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.1}
+        if 0:
+            kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind)
+            kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.1}
     if "TrijetBjetPt" in hName: # FIXME: Why do i have values below 40 GeV/c?
         units            = "GeV/c"
         kwargs["xlabel"] = "p_{T} (%s)"  % units
@@ -467,7 +468,7 @@ def GetHistoKwargs(hName, opts):
         # kwargs["ylabel"] = "Events / %.0f " + units
     if "TetrajetMass" in hName:
         ROOT.gStyle.SetNdivisions(8, "X")
-        startBlind       =  150  # 135 v. sensitive to bin-width!
+        startBlind       =  190 # 150 v. sensitive to bin-width!
         endBlind         = 3000 #4000 # v. sensitive to bin-width!
         myBins           = getBinningForTetrajetMass(binLevel=0, endValue=endBlind)
         kwargs["rebinX"] = myBins
