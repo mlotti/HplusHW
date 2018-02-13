@@ -229,17 +229,17 @@ topSelectionBDT = PSet(
 #================================================================================================
 fakeBMeasurement = PSet(
     # CSVv2-M (Baseline b-jets)
-    baselineNumberOfBJetsCutValue      = 2,        # [VR, CR2: 2   , CR3, CR4: 1   ]
-    baselineNumberOfBJetsCutDirection  = "==",     # [VR, CR2: "==", CR3, CR4: "=="]
-    baselineBjetPtCuts                 = [40.0, 30.0],
-    baselineBjetEtaCuts                = [2.4],
+    baselineNumberOfBJetsCutValue      = 2,            # [default: 2]
+    baselineNumberOfBJetsCutDirection  = "==",         # [default: "=="]
+    baselineBjetPtCuts                 = [40.0, 30.0], # [default: [40.0, 30.0]]
+    baselineBjetEtaCuts                = [2.4],        # [default: [2.4]]
     baselineBjetDiscr                  = bjetSelection.bjetDiscr,
     baselineBjetDiscrWorkingPoint      = bjetSelection.bjetDiscrWorkingPoint,
     # CSVv2-L (Inverted b-jets)
     invertedNumberOfBJetsCutValue     = 1,        # [default: 1]
     invertedNumberOfBJetsCutDirection = ">=",     # [default: ">="]
     invertedBJetsDiscr                = bjetSelection.bjetDiscr,
-    invertedBJetsDiscrMaxCutValue     = 0.8483,   # [default: 0.8483] NOTE: CSVv2-L = 0.5426, CSVv2-M = +0.8484, CSVv2-T = 0.9535]
+    invertedBJetsDiscrMaxCutValue     = 0.8483,   # [default: 0.8483] (NOTE: CSVv2-L = 0.5426, CSVv2-M = +0.8484, CSVv2-T = 0.9535)
     invertedBJetsDiscrMaxCutDirection = "<=",     # [default: "<="]
     invertedBJetsWorkingPoint         = "Loose",  # [default: "Loose"]
     # Top and Inverted Top
@@ -247,7 +247,7 @@ fakeBMeasurement = PSet(
     LdgTopMVACutDirection             = topSelectionBDT.LdgMVACutDirection, 
     SubldgTopMVACutValue              = topSelectionBDT.SubldgMVACutValue,
     SubldgTopMVACutDirection          = "<",   # [default: "<"]
-    minTopMVACutValue                 = 0.50,  # [default: 0.50]
+    minTopMVACutValue                 = 0.40,  # [default: 0.50]
     minTopMVACutDirection             =  ">=", # [default: ">="]
     # All bjets (CSVv2-M and CSVv2-L)
     allBJetsPtCuts        = bjetSelection.jetPtCuts,
