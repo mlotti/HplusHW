@@ -68,8 +68,10 @@ class DataGroup:
     def setLabel(self, label):
 	self.label = label
 
-    def setNuisances(self,nuisances):
-	self.nuisances = nuisances[:]
+    def setNuisances(self, nuisances):
+        if nuisances:
+            self.nuisances = nuisances[:]
+        return
 
     def setShapeHisto(self,path,histo):
 	self.histoPath = path

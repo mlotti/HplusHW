@@ -13,7 +13,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
 
-from plotTauLegEfficiency import getEfficiency,convert2TGraph,Print
+from plotTauLegEfficiency import getEfficiency,convert2TGraph,Print,fitType,propagateFitError,getFittedEfficiency
 from PythonWriter import PythonWriter
 pythonWriter = PythonWriter()
 
@@ -39,6 +39,12 @@ def main():
 def analyze(analysis=None):
 
     paths = [sys.argv[1]]
+
+    if (len(sys.argv) == 3):
+        howAnalyse = sys.argv[2]
+    else:
+        howAnalyse = "--fit"
+ #       howAnalyse = "--bin"
 
     if not analysis == None:
 #        datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis, includeOnlyTasks="Tau|TT")
@@ -80,9 +86,13 @@ def analyze(analysis=None):
                 dataset2 = datasetsMC.getMCDatasets()
                 createRatio = True
 
-        eff1_MET80 = getEfficiency(dataset1)
-        eff2_MET80 = getEfficiency(dataset2)
-
+        eff1_MET80_histo = getEfficiency(dataset1)
+        eff2_MET80_histo = getEfficiency(dataset2)
+        
+        eff1_MET80 = convert2TGraph(eff1_MET80_histo)
+        eff2_MET80 = convert2TGraph(eff2_MET80_histo)
+        
+        
         styles.dataStyle.apply(eff1_MET80)
         eff1_MET80.SetMarkerSize(1)
         if createRatio:
@@ -94,12 +104,14 @@ def analyze(analysis=None):
                                      histograms.HistoGraph(eff2_MET80, "eff2_MET80", "p", "P"))
         else:
             p = plots.PlotBase([histograms.HistoGraph(eff1_MET80, "eff1_MET80", "p", "P")])
-
-
-        #from plotTauLegEfficiency import fit
-        #fit("Data",p,eff1_MET80,20,300)
-        #fit("MC",p,eff2_MET80,20,300)
-
+	
+### OPTIONS : Functions: "Sigmoid","Error","Gompertz","Richard","Crystal"
+### fit types: binned maximum likelihood "ML", Chi2 fit "Chi"
+        
+        if (howAnalyse == "--fit" ):
+            datafit = fitType("datafit",p,eff1_MET80_histo,eff1_MET80,20,300,"Richard","ML")
+            mcfit = fitType("mcfit",p,eff2_MET80_histo,eff2_MET80,20,300,"Richard","ML")
+	
         opts = {"ymin": 0, "ymax": 1.1}
         opts2 = {"ymin": 0.5, "ymax": 1.5}
         moveLegend = {"dx": -0.55, "dy": -0.15}
@@ -137,6 +149,20 @@ def analyze(analysis=None):
         histograms.addText(0.2, 0.46, "Runs "+runRange, 17)
 
         p.draw()
+
+## does the ratio of the fits
+        if (howAnalyse == "--fit"):
+            funcRatio = ROOT.TH1F("","",280,20,300)
+            for i in range(0,480):
+                ratio = datafit.Eval(i+20-1)/mcfit.Eval(i+20-1) 
+                funcRatio.SetBinContent(i,ratio)
+            p.getPad().GetCanvas().cd(2)
+            funcRatio.Draw("SAME")
+   	    p.getPad().GetCanvas().cd(1)
+
+##
+
+
         lumi = 0.0
         for d in datasets.getDataDatasets():
             print "luminosity",d.getName(),d.getLuminosity()
@@ -148,15 +174,23 @@ def analyze(analysis=None):
             os.mkdir(plotDir)
         p.save(formats)
 
+        if (howAnalyse == "--fit"):
+            pythonWriter.addParameters(plotDir,label,runRange,lumi,datafit)
+            pythonWriter.addMCParameters(label,mcfit)
+            pythonWriter.writeJSON(os.path.join(plotDir,"metLegTriggerEfficiency_"+label+"_fit.json"))
+            pythonWriter.__init__()
+#	 if (howAnalyse == "--bin"):
         pythonWriter.addParameters(plotDir,label,runRange,lumi,eff1_MET80)
         pythonWriter.addMCParameters(label,eff2_MET80)
-
-    pythonWriter.writeJSON(os.path.join(plotDir,"metLegTriggerEfficiency_"+label+".json"))
+        pythonWriter.writeJSON(os.path.join(plotDir,"metLegTriggerEfficiency_"+label+"_bin.json"))
 
     #########################################################################                                             
 
-    eff1phi = getEfficiency(dataset1,"NumeratorPhi","DenominatorPhi")
-    eff2phi = getEfficiency(dataset2,"NumeratorPhi","DenominatorPhi")
+    histoeff1phi = getEfficiency(dataset1,"NumeratorPhi","DenominatorPhi")
+    histoeff2phi = getEfficiency(dataset2,"NumeratorPhi","DenominatorPhi")
+
+    eff1phi = convert2TGraph(histoeff1phi)
+    eff2phi = convert2TGraph(histoeff2phi)
 
     styles.dataStyle.apply(eff1phi)
     styles.mcStyle.apply(eff2phi)
@@ -213,8 +247,11 @@ def analyze(analysis=None):
     dataset1 = datasets.getDataDatasets()
     dataset2 = datasets.getMCDatasets()
 
-    eff1_MET120 = getEfficiency(dataset1)
-    eff2_MET120 = getEfficiency(dataset2)
+    histo_eff1_MET120 = getEfficiency(dataset1)
+    histo_eff2_MET120 = getEfficiency(dataset2)
+   
+    eff1_MET120 = convert2TGraph(histo_eff1_MET120)
+    eff2_MET120 = convert2TGraph(histo_eff2_MET120)
 
     styles.dataStyle.apply(eff1_MET120)
     styles.mcStyle.apply(eff2_MET120)
@@ -266,8 +303,11 @@ def analyze(analysis=None):
     dataset1c = datasetsc.getDataDatasets()
     dataset2c = datasetsc.getMCDatasets()
 
-#    eff1c_MET80 = getEfficiency(dataset1c)
-    eff2c_MET80 = getEfficiency(dataset2c)
+#    histo_eff1c_MET80 = getEfficiency(dataset1c)
+    histo_eff2c_MET80 = getEfficiency(dataset2c)
+
+#    eff1c_MET80 = convert2TGraph(histo_eff1c_MET80)
+    eff2c_MET80 = convert2TGraph(histo_eff2c_MET80)
 
 #    styles.dataStyle.apply(eff1c_MET80)
     styles.mcStyle.apply(eff2c_MET80)
@@ -316,8 +356,11 @@ def analyze(analysis=None):
     dataset1c = datasetsc.getDataDatasets()
     dataset2c = datasetsc.getMCDatasets()
 
-    eff1c_MET120 = getEfficiency(dataset1c)
-    eff2c_MET120 = getEfficiency(dataset2c)
+    histo_eff1c_MET120 = getEfficiency(dataset1c)
+    histo_eff2c_MET120 = getEfficiency(dataset2c)
+
+    eff1c_MET120 = convert2TGraph(histo_eff1c_MET120)
+    eff2c_MET120 = convert2TGraph(histo_eff2c_MET120)
 
     styles.dataStyle.apply(eff1c_MET120)
     styles.mcStyle.apply(eff1c_MET120)
@@ -354,8 +397,11 @@ def analyze(analysis=None):
 
     namePU = "TauMET_"+analysis+"_DataVsMC_nVtx"
 
-    eff1PU = getEfficiency(dataset1,"NumeratorPU","DenominatorPU")
-    eff2PU = getEfficiency(dataset2,"NumeratorPU","DenominatorPU")
+    histo_eff1PU = getEfficiency(dataset1,"NumeratorPU","DenominatorPU")
+    histo_eff2PU = getEfficiency(dataset2,"NumeratorPU","DenominatorPU")
+  
+    eff1PU = convert2TGraph(histo_eff1PU)
+    eff2PU = convert2TGraph(histo_eff2PU)
 
     styles.dataStyle.apply(eff1PU)
     styles.mcStyle.apply(eff2PU)

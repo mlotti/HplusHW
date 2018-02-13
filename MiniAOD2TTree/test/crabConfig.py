@@ -10,6 +10,8 @@ https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookCRAB3Tutorial#Setup_the_e
 from WMCore.Configuration import Configuration
 from CRABClient.UserUtilities import getUsernameFromSiteDB
 
+# Definitions
+jecDB = ['Summer16_23Sep2016AllV4_DATA_JEC.db','Summer16_23Sep2016V4_MC_JEC.db','Spring16_25nsV10_MC_JER.db']
 
 #================================================================================================
 # General Section: The user specifies generic parameters about the request (e.g. request name).
@@ -34,7 +36,10 @@ config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = 'miniAOD2TTree_cfg.py'
 config.JobType.pyCfgParams = ''
 config.JobType.outputFiles = ['miniaod2tree.root']
-config.JobType.inputFiles = ['Summer16_23Sep2016AllV4_DATA_JEC.db','Summer16_23Sep2016V4_MC_JEC.db','Spring16_25nsV10_MC_JER.db']
+config.JobType.inputFiles  = ['jec']
+config.JobType.inputFiles.extend(jecDB)
+
+
 # options:
 #config.JobType.generator
 #config.JobType.inputFiles
