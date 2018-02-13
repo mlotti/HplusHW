@@ -54,6 +54,7 @@ import aux
 # Global Definitions
 #================================================================================================
 _lightHplusMasses        = [ 80,  90, 100, 120, 140, 150, 155, 160]
+_intermediateHplusMasses = [145,150,155,160,165,170,175,180,190,200]
 _heavyHplusMasses        = [180, 200, 220, 250, 300, 350, 400, 500, 600, 700, 750,  800, 1000, 2000, 3000]
 _heavyHplusToTBbarMasses = [180, 200, 220, 250, 300, 350, 400, 500, 600, 800, 1000, 1500, 2000, 2500, 3000, 5000, 7000]
 
@@ -71,6 +72,8 @@ _physicalMcAdd = {
     "WZ"     : "WZ",
     "WZ_ext" : "WZ",
     "WZ_ext1": "WZ",
+    "ZZ"     : "ZZ",
+    "ZZ_ext1": "ZZ",
 
     "ST_tW_antitop_5f_inclusiveDecays"     : "ST_tW_antitop_5f_inclusiveDecays",
     "ST_tW_antitop_5f_inclusiveDecays_ext" : "ST_tW_antitop_5f_inclusiveDecays",
@@ -168,8 +171,13 @@ _physicalToLogical = {
 for mass in _lightHplusMasses:
     _physicalToLogical["ChargedHiggs_TTToHplusBWB_HplusToTauNu_M_%d"%(mass)] = "TTToHplusBWB_M%d"%mass
 
+for mass in _intermediateHplusMasses:
+    _physicalToLogical[" ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTBNoNeutral_M%d"%mass
+    _physicalToLogical[" ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassWithNeutral_M_%d"%(mass)] = "HplusTBWithNeutral_M%d"%mass
+
 for mass in _heavyHplusMasses:
     _physicalToLogical["ChargedHiggs_HplusTB_HplusToTauNu_M_%d"%(mass)] = "HplusTB_M%d"%mass
+    _physicalToLogical["ChargedHiggs_HplusTB_HplusToTauNu_HeavyMass_M_%d"%(mass)] = "HplusTB_M%d"%mass
 
 for mass in _heavyHplusToTBbarMasses:
     _physicalToLogical["ChargedHiggs_HplusTB_HplusToTB_M%d"%(mass)] = "HplusToTBbar_M%d" % mass
@@ -263,8 +271,8 @@ _physicalToLogical.update({
 _ttSignalMerge    = {}
 _tSignalMerge     = {}
 _lightSignalMerge = {}
-#for mass in _lightHplusMasses:
 
+#for mass in _lightHplusMasses:
     #_lightSignalMerge["TTToHplus_M%d"%mass] = "TTOrTToHplus_M%d"%mass
     #_lightSignalMerge["Hplus_taunu_M%d" % mass] = "TTOrTToHplus_M%d"%mass
 
@@ -377,6 +385,10 @@ _datasetMerge = {
     #"ZZTo4Q"               : "ZZTo4Q",
     }
 
+for mass in _intermediateHplusMasses:
+    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTB_M%d"%mass
+    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassWithNeutral_M_%d"%(mass)] = "HplusTB_M%d"%mass
+
 #================================================================================================
 # Dataset ordering (default)
 #================================================================================================
@@ -384,6 +396,8 @@ _datasetOrder = ["Data"]
 for process in ["TTToHplusBWB_M%d", "TTToHplusBHminusB_M%d", "TTToHplus_M%d", "Hplus_taunu_t-channel_M%d", "Hplus_taunu_tW-channel_M%d", "Hplus_taunu_s-channel_M%d", "Hplus_taunu_M%d", "TTOrTToHplus_M%d"]:
     for mass in _lightHplusMasses:
         _datasetOrder.append(process%mass)
+for mass in _intermediateHplusMasses:
+    _datasetOrder.append("HplusTB_M%d"%mass)
 for mass in _heavyHplusMasses:
     _datasetOrder.append("HplusTB_M%d"%mass)
 _datasetOrder.extend([
@@ -558,6 +572,9 @@ for mass in _lightHplusMasses:
 
     _legendLabels["TTOrTToHplus_M%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
 
+for mass in _intermediateHplusMasses:
+    _legendLabels["TTToHplus_M%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
+
 for mass in _heavyHplusMasses:
     _legendLabels["HplusTB_M%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
     _legendLabels["ChargedHiggs_HplusTB_HplusToTB_M_%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
@@ -651,6 +668,10 @@ for mass in _lightHplusMasses:
     _plotStyles["Hplus_taunu_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
 
     _plotStyles["TTOrTToHplus_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
+
+for mass in _intermediateHplusMasses:
+    _plotStyles["TTToHplus_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
+    _plotStyles["HplusTB_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
 
 for mass in _heavyHplusMasses:
     _plotStyles["HplusTB_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
@@ -770,6 +791,9 @@ def UpdatePlotStyleFill(styleMap, namesToFilled):
 # datasets not in the plots._datasetOrder list are left at the end in
 # the same order they were originally.
 def mergeRenameReorderForDataMC(datasetMgr, keepSourcesMC=False):
+    # print cross sections
+#    print "Merging data with mergeRenameReorderForDataMC method. The cross sections in use are:"
+#    datasetMgr.PrintCrossSections()
     # merge data
     datasetMgr.mergeData(allowMissingDatasets=True)
     # check that _ext* datasets are defined to be added in _physicalMcAdd

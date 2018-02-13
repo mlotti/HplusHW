@@ -50,7 +50,7 @@
 #include "TMVA/Tools.h"
 #endif
 
-void TMVAClassificationTopRec( TString myMethodList = "", TString fout = "TMVA_TopRecNoCuts.root")
+void TMVAClassificationTopRec( TString myMethodList = "", TString fout = "TMVA_TopRec.root")
 
 {
    // The explicit loading of the shared libTMVA is done in TMVAlogon.C, defined in .rootrc
@@ -207,7 +207,7 @@ void TMVAClassificationTopRec( TString myMethodList = "", TString fout = "TMVA_T
      factory->AddVariable( "TrijetMass",             "m_{t}",                "GeV",  'F');
      factory->AddVariable( "TrijetDijetMass","m_{W}","",'F');   
      factory->AddVariable( "TrijetBJetBDisc","b-tagged jet CSV","",'F');  
-     factory->AddVariable( "TrijetSoftDrop_n2","SoftDrop_n2","",'F');  //to be added
+     factory->AddVariable( "TrijetSoftDrop_n2","SoftDrop_n2","",'F'); 
      factory->AddVariable( "TrijetLdgJetCvsL","Leading jet CvsL","",'F');
      factory->AddVariable( "TrijetSubldgJetCvsL","Subleading jet CvsL","",'F');
      factory->AddVariable( "TrijetLdgJetPtD","Leading jet p_{T}D","",'F');
@@ -217,16 +217,26 @@ void TMVAClassificationTopRec( TString myMethodList = "", TString fout = "TMVA_T
      factory->AddVariable( "TrijetLdgJetMult","Leading jet mult","",'I');
      factory->AddVariable( "TrijetSubldgJetMult","Subleading jet mult","",'I');
 
+     //New variable
+     // factory->AddVariable( "TrijetLdgJetQGLikelihood","Leading jet Q-G Likelihood","",'F');
+     // factory->AddVariable( "TrijetSubldgJetQGLikelihood","Subleading jet Q-G Likelihood ","",'F');
+     
   }
 
    // Read training and test data
    // (it is also possible to use ASCII format as input -> see TMVA Users Guide)OA
 
-  //  TString fnameS_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_171012_TTfull/TT/res/histograms-TT.root";//"histograms_TTsd.root";
-  //  TString fnameB_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_171012_TTfull/TT/res/histograms-TT.root";
-  TString fnameS_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_171014_173553/TT/res/histograms-TT.root";//"histograms_TTsd.root";                            
-  TString fnameB_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_171014_173553/TT/res/histograms-TT.root";                                                     
-
+  /*      TString fnameS_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_171215_TT_trainingcheck/TT/res/histograms-TT.root";
+	  TString fnameB_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_171215_TT_trainingcheck/TT/res/histograms-TT.root";
+	  
+	  TString fnameS_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_180107_Tople500/TT/res/histograms-TT.root";
+	  TString fnameB_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_180107_Tople500/TT/res/histograms-TT.root";
+  */
+  // TString fnameS_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_MVA101117/TT/res/histograms-TT.root";
+  // TString fnameB_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_MVA101117/TT/res/histograms-TT.root";
+  
+  TString fnameS_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_180115_DeltaRJets08/TT/res/histograms-TT.root";
+  TString fnameB_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TopReco_180115_DeltaRJets08/TT/res/histograms-TT.root";
    //   if (gSystem->AccessPathName( fname ))  // file does not exist in local directory
    //   gSystem->Exec("curl -O http://root.cern.ch/files/tmva_class_example.root");
    
@@ -289,8 +299,8 @@ void TMVAClassificationTopRec( TString myMethodList = "", TString fout = "TMVA_T
    //                                         "NSigTrain=3000:NBkgTrain=3000:NSigTest=3000:NBkgTest=3000:SplitMode=Random:!V" );
    factory->PrepareTrainingAndTestTree( mycuts, mycutb,
 					//					"nTrain_Signal=70000:nTrain_Background=70000:NTest_Signal=70000:nTest_Background=70000:SplitMode=Random:NormMode=NumEvents:!V" );
-					"nTrain_Signal=70000:nTrain_Background=70000:NTest_Signal=70000:nTest_Background=70000:SplitMode=Random:NormMode=NumEvents:!V" );
-					//				"nTrain_Signal=0:nTrain_Background=0:SplitMode=Random:NormMode=NumEvents:!V" );
+					"nTrain_Signal=20000:nTrain_Background=20000:NTest_Signal=20000:nTest_Background=20000:SplitMode=Random:NormMode=NumEvents:!V" );
+   //"nTrain_Signal=0:nTrain_Background=0:SplitMode=Random:NormMode=NumEvents:!V" );
 
    // ---- Book MVA methods
    //

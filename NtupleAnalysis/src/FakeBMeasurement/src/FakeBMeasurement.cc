@@ -25,18 +25,22 @@ public:
   virtual bool areSameJets(const Jet& jet1, const Jet& jet2);
 
 private:
-  // Input parameters
-  const DirectionalCut<double> cfg_PrelimTopMVACut;
-  const DirectionalCut<int> cfg_NumberOfBJets;
-  const DirectionalCut<int> cfg_NumberOfInvertedBJets;
+  // Input parameters (Baseline Bjets)
+  const DirectionalCut<int> cfg_BaselineNumberOfBJets;
+  const std::vector<float> cfg_BaselineBJetPtCuts;
+  const std::vector<float> cfg_BaselineBJetEtaCuts;
+  const std::string cfg_BaselineBJetsDiscriminator;
+  const std::string cfg_BaselineBJetsDiscriminatorWP;
+  // Input parameters (Inverted BJets)
+  const DirectionalCut<int> cfg_InvertedNumberOfBJets;
   const std::string cfg_InvertedBJetsDiscriminator;
   const std::string cfg_InvertedBJetsDiscriminatorWP;
   const DirectionalCut<double> cfg_InvertedBJetsDiscrMax;
-  const std::string cfg_InvertedBJetsSortType;
-  const std::string cfg_BaselineBJetsDiscriminator;
-  const std::string cfg_BaselineBJetsDiscriminatorWP;
+  // Top and Inverted top
   const DirectionalCut<double> cfg_LdgTopMVACut;
   const DirectionalCut<double> cfg_SubldgTopMVACut;
+  const DirectionalCut<double> cfg_MinTopMVACut;
+  // Baseline + Inverted BJets (sanity check)
   const std::vector<double> cfg_AllBJetsPtCuts;
   const std::vector<double> cfg_AllBJetsEtaCuts; 
   const DirectionalCut<int> cfg_AllBJetsNCut; 
@@ -73,9 +77,13 @@ private:
   Count cInvertedSelected;
   Count cInvertedSelectedCR;
 
-  void DoInvertedAnalysis(const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const std::vector<Jet> invertedBJets, const int nVertices);
+  void DoInvertedAnalysis(const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const std::vector<Jet> myBJets, const int nVertices);
   void DoBaselineAnalysis(const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const int nVertices);
-  const std::vector<Jet> GetInvertedBJets(const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
+  const std::vector<Jet> GetBaselineBJets(const std::vector<Jet>& jets);
+  const std::vector<Jet> GetJetsWithoutBaselineBJets(const std::vector<Jet>& jets, const std::vector<Jet>& baselineBjets);
+  const std::vector<Jet> GetInvertedBJets(const std::vector<Jet>& jets);
+  const std::vector<Jet> GetMyBJets(const std::vector<Jet>& baselineBjets, const std::vector<Jet>& invertedBjets);
+
   bool IsGenuineBEvent(const std::vector<Jet>& bJets);
 
   // Splitted histograms
@@ -181,6 +189,7 @@ private:
   WrappedTH1Triplet *hBaseline_Jet6Bdisc_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_Jet7Bdisc_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_MET_AfterStandardSelections;
+  WrappedTH1Triplet *hBaseline_HT_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_MVAmax1_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_MVAmax2_AfterStandardSelections;
   WrappedTH1Triplet *hBaseline_LdgTetrajetPt_AfterStandardSelections;
@@ -235,6 +244,7 @@ private:
   WrappedTH1Triplet *hBaseline_Jet6Bdisc_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_Jet7Bdisc_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_MET_AfterAllSelections;
+  WrappedTH1Triplet *hBaseline_HT_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_MVAmax1_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_MVAmax2_AfterAllSelections;
   WrappedTH1Triplet *hBaseline_LdgTetrajetPt_AfterAllSelections;
@@ -289,6 +299,7 @@ private:
   WrappedTH1Triplet *hBaseline_Jet6Bdisc_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_Jet7Bdisc_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_MET_AfterCRSelections;
+  WrappedTH1Triplet *hBaseline_HT_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_MVAmax1_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_MVAmax2_AfterCRSelections;
   WrappedTH1Triplet *hBaseline_LdgTetrajetPt_AfterCRSelections;
@@ -344,6 +355,7 @@ private:
   WrappedTH1Triplet *hInverted_Jet6Bdisc_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_Jet7Bdisc_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_MET_AfterStandardSelections;
+  WrappedTH1Triplet *hInverted_HT_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_MVAmax1_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_MVAmax2_AfterStandardSelections;
   WrappedTH1Triplet *hInverted_LdgTetrajetPt_AfterStandardSelections;
@@ -398,6 +410,7 @@ private:
   WrappedTH1Triplet *hInverted_Jet6Bdisc_AfterAllSelections;
   WrappedTH1Triplet *hInverted_Jet7Bdisc_AfterAllSelections;
   WrappedTH1Triplet *hInverted_MET_AfterAllSelections;
+  WrappedTH1Triplet *hInverted_HT_AfterAllSelections;
   WrappedTH1Triplet *hInverted_MVAmax1_AfterAllSelections;
   WrappedTH1Triplet *hInverted_MVAmax2_AfterAllSelections;
   WrappedTH1Triplet *hInverted_LdgTetrajetPt_AfterAllSelections;
@@ -452,6 +465,7 @@ private:
   WrappedTH1Triplet *hInverted_Jet6Bdisc_AfterCRSelections;
   WrappedTH1Triplet *hInverted_Jet7Bdisc_AfterCRSelections;
   WrappedTH1Triplet *hInverted_MET_AfterCRSelections;
+  WrappedTH1Triplet *hInverted_HT_AfterCRSelections;
   WrappedTH1Triplet *hInverted_MVAmax1_AfterCRSelections;
   WrappedTH1Triplet *hInverted_MVAmax2_AfterCRSelections;
   WrappedTH1Triplet *hInverted_LdgTetrajetPt_AfterCRSelections;
@@ -480,17 +494,18 @@ REGISTER_SELECTOR(FakeBMeasurement);
 
 FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCounters)
   : BaseSelector(config, skimCounters),
-    cfg_PrelimTopMVACut(config, "FakeBMeasurement.prelimTopMVACut"),
-    cfg_NumberOfBJets(config, "FakeBMeasurement.numberOfBJetsCut"),
-    cfg_NumberOfInvertedBJets(config, "FakeBMeasurement.numberOfInvertedBJetsCut"),
+    cfg_BaselineNumberOfBJets(config, "FakeBMeasurement.baselineNumberOfBJetsCut"),
+    cfg_BaselineBJetPtCuts(config.getParameter<std::vector<float>>("FakeBMeasurement.baselineBjetPtCuts")),
+    cfg_BaselineBJetEtaCuts(config.getParameter<std::vector<float>>("FakeBMeasurement.baselineBjetEtaCuts")),
+    cfg_BaselineBJetsDiscriminator(config.getParameter<std::string>("FakeBMeasurement.baselineBjetDiscr")),
+    cfg_BaselineBJetsDiscriminatorWP(config.getParameter<std::string>("FakeBMeasurement.baselineBjetDiscrWorkingPoint")),
+    cfg_InvertedNumberOfBJets(config, "FakeBMeasurement.invertedNumberOfBJetsCut"),
     cfg_InvertedBJetsDiscriminator(config.getParameter<std::string>("FakeBMeasurement.invertedBJetsDiscr")),
     cfg_InvertedBJetsDiscriminatorWP(config.getParameter<std::string>("FakeBMeasurement.invertedBJetsWorkingPoint")),
     cfg_InvertedBJetsDiscrMax(config, "FakeBMeasurement.invertedBJetsDiscrMaxCut"),
-    cfg_InvertedBJetsSortType(config.getParameter<std::string>("FakeBMeasurement.invertedBJetsSortType")),
-    cfg_BaselineBJetsDiscriminator(config.getParameter<std::string>("BJetSelection.bjetDiscr")),
-    cfg_BaselineBJetsDiscriminatorWP(config.getParameter<std::string>("BJetSelection.bjetDiscrWorkingPoint")),
     cfg_LdgTopMVACut(config, "FakeBMeasurement.LdgTopMVACut"),
     cfg_SubldgTopMVACut(config, "FakeBMeasurement.SubldgTopMVACut"),
+    cfg_MinTopMVACut(config, "FakeBMeasurement.minTopMVACut"),
     cfg_AllBJetsPtCuts(config.getParameter<std::vector<double>>("FakeBMeasurement.allBJetsPtCuts")),
     cfg_AllBJetsEtaCuts(config.getParameter<std::vector<double>>("FakeBMeasurement.allBJetsEtaCuts")),
     cfg_AllBJetsNCut(config, "FakeBMeasurement.allBJetsNCut"),
@@ -633,6 +648,7 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hBaseline_Jet7Bdisc_AfterStandardSelections;
   // hBaseline_JetsBdisc_AfterStandardSelections.clear();
   delete hBaseline_MET_AfterStandardSelections;
+  delete hBaseline_HT_AfterStandardSelections;
   delete hBaseline_MVAmax1_AfterStandardSelections;
   delete hBaseline_MVAmax2_AfterStandardSelections;
   delete hBaseline_LdgTetrajetPt_AfterStandardSelections;
@@ -693,6 +709,7 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hBaseline_Jet7Bdisc_AfterAllSelections;
   //  hBaseline_JetsBdisc_AfterAllSelections.clear();
   delete hBaseline_MET_AfterAllSelections;
+  delete hBaseline_HT_AfterAllSelections;
   delete hBaseline_MVAmax1_AfterAllSelections;
   delete hBaseline_MVAmax2_AfterAllSelections;
   delete hBaseline_LdgTetrajetPt_AfterAllSelections;
@@ -753,6 +770,7 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hBaseline_Jet7Bdisc_AfterCRSelections;
   //  hBaseline_JetsBdisc_AfterCRSelections.clear();
   delete hBaseline_MET_AfterCRSelections;
+  delete hBaseline_HT_AfterCRSelections;
   delete hBaseline_MVAmax1_AfterCRSelections;
   delete hBaseline_MVAmax2_AfterCRSelections;
   delete hBaseline_LdgTetrajetPt_AfterCRSelections;
@@ -814,6 +832,7 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hInverted_Jet7Bdisc_AfterStandardSelections;
   //  hInverted_JetsBdisc_AfterStandardSelections.clear();
   delete hInverted_MET_AfterStandardSelections;
+  delete hInverted_HT_AfterStandardSelections;
   delete hInverted_MVAmax1_AfterStandardSelections;
   delete hInverted_MVAmax2_AfterStandardSelections;
   delete hInverted_LdgTetrajetPt_AfterStandardSelections;
@@ -874,6 +893,7 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hInverted_Jet7Bdisc_AfterAllSelections;
   //  hInverted_JetsBdisc_AfterAllSelections.clear();
   delete hInverted_MET_AfterAllSelections;
+  delete hInverted_HT_AfterAllSelections;
   delete hInverted_MVAmax1_AfterAllSelections;
   delete hInverted_MVAmax2_AfterAllSelections;
   delete hInverted_LdgTetrajetPt_AfterAllSelections;
@@ -934,6 +954,7 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hInverted_Jet7Bdisc_AfterCRSelections;
   //  hInverted_JetsBdisc_AfterCRSelections.clear();
   delete hInverted_MET_AfterCRSelections;
+  delete hInverted_HT_AfterCRSelections;
   delete hInverted_MVAmax1_AfterCRSelections;
   delete hInverted_MVAmax2_AfterCRSelections;
   delete hInverted_LdgTetrajetPt_AfterCRSelections;
@@ -1032,6 +1053,10 @@ void FakeBMeasurement::book(TDirectory *dir) {
   const int nMetBins  = fCommonPlots.getMetBinSettings().bins();
   const float fMetMin = fCommonPlots.getMetBinSettings().min();
   const float fMetMax = fCommonPlots.getMetBinSettings().max();
+
+  const int nHtBins  = fCommonPlots.getHtBinSettings().bins();
+  const float fHtMin = fCommonPlots.getHtBinSettings().min();
+  const float fHtMax = fCommonPlots.getHtBinSettings().max();
 
   // Create directories for normalization
   std::string myInclusiveLabel  = "ForFakeBNormalization";
@@ -1267,6 +1292,8 @@ void FakeBMeasurement::book(TDirectory *dir) {
 
   hBaseline_MET_AfterStandardSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MET_AfterStandardSelections", ";E_{T}^{miss};Occur / %.1f", nMetBins, fMetMin, fMetMax);
+  hBaseline_HT_AfterStandardSelections =  
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_HT_AfterStandardSelections", ";H_{T};Occur / %.1f", nHtBins, fHtMin, fHtMax);
   hBaseline_MVAmax1_AfterStandardSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MVAmax1_AfterStandardSelections", ";#BDT discriminant;Occur / %.2f", 40, -1.0, +1.0);
   hBaseline_MVAmax2_AfterStandardSelections =  
@@ -1418,6 +1445,8 @@ void FakeBMeasurement::book(TDirectory *dir) {
 
   hBaseline_MET_AfterAllSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MET_AfterAllSelections", ";E_{T}^{miss};Occur / %.1f", nMetBins, fMetMin, fMetMax);
+  hBaseline_HT_AfterAllSelections =  
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_HT_AfterAllSelections", ";H_{T};Occur / %.1f", nHtBins, fHtMin, fHtMax);
   hBaseline_MVAmax1_AfterAllSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MVAmax1_AfterAllSelections", ";#BDT discriminant;Occur / %.2f", 40, -1.0, +1.0);
   hBaseline_MVAmax2_AfterAllSelections =  
@@ -1569,6 +1598,8 @@ void FakeBMeasurement::book(TDirectory *dir) {
 
   hBaseline_MET_AfterCRSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MET_AfterCRSelections", ";E_{T}^{miss};Occur / %.1f", nMetBins, fMetMin, fMetMax);
+  hBaseline_HT_AfterCRSelections =  
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_HT_AfterCRSelections", ";H_{T};Occur / %.1f", nHtBins, fHtMin, fHtMax);
   hBaseline_MVAmax1_AfterCRSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Baseline_MVAmax1_AfterCRSelections", ";#BDT discriminant;Occur / %.2f", 40, -1.0, +1.0);
   hBaseline_MVAmax2_AfterCRSelections =  
@@ -1720,6 +1751,8 @@ void FakeBMeasurement::book(TDirectory *dir) {
 
   hInverted_MET_AfterStandardSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MET_AfterStandardSelections", ";E_{T}^{miss};Occur / %.1f", nMetBins, fMetMin, fMetMax);
+  hInverted_HT_AfterStandardSelections =  
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_HT_AfterStandardSelections", ";H_{T};Occur / %.1f", nHtBins, fHtMin, fHtMax);
   hInverted_MVAmax1_AfterStandardSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MVAmax1_AfterStandardSelections", ";#BDT discriminant;Occur / %.2f", 40, -1.0, +1.0);
   hInverted_MVAmax2_AfterStandardSelections =  
@@ -1871,6 +1904,8 @@ void FakeBMeasurement::book(TDirectory *dir) {
 
   hInverted_MET_AfterAllSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MET_AfterAllSelections", ";E_{T}^{miss};Occur / %.1f", nMetBins, fMetMin, fMetMax);
+  hInverted_HT_AfterAllSelections =  
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_HT_AfterAllSelections", ";H_{T};Occur / %.1f", nHtBins, fHtMin, fHtMax);
   hInverted_MVAmax1_AfterAllSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MVAmax1_AfterAllSelections", ";#BDT discriminant;Occur / %.2f", 40, -1.0, +1.0);
   hInverted_MVAmax2_AfterAllSelections =  
@@ -2022,6 +2057,8 @@ void FakeBMeasurement::book(TDirectory *dir) {
 
   hInverted_MET_AfterCRSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MET_AfterCRSelections", ";E_{T}^{miss};Occur / %.1f", nMetBins, fMetMin, fMetMax);
+  hInverted_HT_AfterCRSelections =  
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_HT_AfterCRSelections", ";H_{T};Occur / %.1f", nHtBins, fHtMin, fHtMax);
   hInverted_MVAmax1_AfterCRSelections =  
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_MVAmax1_AfterCRSelections", ";#BDT discriminant;Occur / %.2f", 40, -1.0, +1.0);
   hInverted_MVAmax2_AfterCRSelections =  
@@ -2188,23 +2225,29 @@ void FakeBMeasurement::process(Long64_t entry) {
     }
   else // Inverted Selection
     {
- 
-      // CSVv2-Medium (Selected)
-      bool passSelected = cfg_NumberOfBJets.passedCut(bjetData.getNumberOfSelectedBJets());
-      if (!passSelected) return;
 
-      // CSVv2-Loose (Inverted)
-      const std::vector<Jet> invertedBJets = GetInvertedBJets(jetData, bjetData); // failed bjets (sorted by some quality) that are within some b-discriminator range
-      bool passInverted = cfg_NumberOfInvertedBJets.passedCut(invertedBJets.size());
+      // Baseline (CSVv2-Medium)
+      const std::vector<Jet> baselineBjets = GetBaselineBJets(jetData.getSelectedJets());
+      bool passBaseline = cfg_BaselineNumberOfBJets.passedCut(baselineBjets.size());
+      if (!passBaseline) return;
+      
+      // Inverted (CSVc2-Loose) (First remove baseline bjets from selected jets)
+      const std::vector<Jet> jetsWithoutBaselineBjets = GetJetsWithoutBaselineBJets(jetData.getSelectedJets(), baselineBjets);
+      const std::vector<Jet> invertedBjets = GetInvertedBJets(jetsWithoutBaselineBjets); 
+      bool passInverted = cfg_InvertedNumberOfBJets.passedCut(invertedBjets.size());
       if (!passInverted) return;
 
-      // Do the inverted analysis
-      DoInvertedAnalysis(jetData, bjetData, invertedBJets, nVertices);
-    }
+      // Merge Baseline and Inverted b-jets (CSVv2-Medium + CSVv2-Loose)
+      std::vector<Jet> myBJets = GetMyBJets(baselineBjets, invertedBjets);
+      if (!cfg_AllBJetsNCut.passedCut(myBJets.size()) ) return;
 
+      // Do the inverted analysis
+      DoInvertedAnalysis(jetData, bjetData,  myBJets, nVertices); 
+    }
+ 
   return;
 }
-
+      
 
 bool FakeBMeasurement::isBJet(const Jet& jet, const std::vector<Jet>& bjets) {
   for (auto bjet: bjets)
@@ -2222,58 +2265,131 @@ bool FakeBMeasurement::areSameJets(const Jet& jet1, const Jet& jet2) {
 }
 
 
-const std::vector<Jet> FakeBMeasurement::GetInvertedBJets(const JetSelection::Data& jetData, const BJetSelection::Data& bjetData)
+const std::vector<Jet> FakeBMeasurement::GetJetsWithoutBaselineBJets(const std::vector<Jet>& jets, 
+								     const std::vector<Jet>& baselineBjets)
 {
-  /*
-    This function returns the inverted bjets. First, it gets the failed b-jets from the BJetSelection class.
-    These bjets are jets that pass the pt and eta cuts of the bjet requirements and only fail the b-discriminator cut.
-    Once these are obtained, they are shuffled according to the user settings (passed through cfg file) and then additional
-    cuts are applied (e.g. b-discriminator min and max) also according to the user settings (passed through cfg file).
-    Whatever jet objects survive the above selections are returned by this function as "failed" or "inverted" bjets.
-   */
 
-  if (0) std::cout << "=== FakeBMeasurement::GetInvertedBJets()" << std::endl;
-  
-  // Apply requirement on selected b-jets (CSVv2-Medium)
-  std::vector<Jet> invertedBJets;
-  
-  // Apply requirement on inverted b-jets (CSVv2-Loose)
-  float invertedBJetDiscrMin = fBJetSelection.getDiscriminatorWP(cfg_InvertedBJetsDiscriminator, cfg_InvertedBJetsDiscriminatorWP);
-  // float baselineBJetDiscr = fBJetSelection.getDiscriminatorWP(cfg_BaselineBJetsDiscriminator, cfg_BaselineBJetsDiscriminatorWP);
-  
-  // Get the failed b-jets (pass pT and eta cuts, failed bDiscriminator cut)
-  std::vector<Jet> failedBJets;
-  if (cfg_InvertedBJetsSortType.compare("Random") == 0 ) failedBJets = bjetData.getFailedBJetCandsShuffled();
-  else if (cfg_InvertedBJetsSortType.compare("AscendingPt") == 0 ) failedBJets = bjetData.getFailedBJetCandsAscendingPt();
-  else if (cfg_InvertedBJetsSortType.compare("DescendingPt") == 0 ) failedBJets = bjetData.getFailedBJetCandsDescendingPt();
-  else if (cfg_InvertedBJetsSortType.compare("AscendingBDiscriminator") == 0 ) failedBJets = bjetData.getFailedBJetCandsAscendingDiscr();
-  else if (cfg_InvertedBJetsSortType.compare("DescendingBDiscriminator") == 0 ) failedBJets = bjetData.getFailedBJetCandsDescendingDiscr();
-  else
+  std::vector<Jet> myJets;
+  // For-loop: All jets
+  for (auto jet: jets)
     {
-      throw hplus::Exception("logic") << "Uknown jet sort type \"" << cfg_InvertedBJetsSortType << "\" passed to TopSelection class. "
-				      << "Please select one of the following:\n\t\"Random\", \"AscendingPt\", \"DescendingPt\", \"AscendingBDiscriminator\", \"DescendingBDiscriminator\".";
+      bool bAdd = true;
+      // For-loop: All baseline bjets
+      for (auto bjet: baselineBjets)
+	{
+	  if (areSameJets(jet, bjet)) bAdd = false;
+	}
+      if (!bAdd) continue;
+      myJets.push_back(jet);
+    }
+  return myJets;
+}
+  
+
+const std::vector<Jet> FakeBMeasurement::GetBaselineBJets(const std::vector<Jet>& jets)
+{
+
+  // Definitions
+  std::vector<Jet> baselineBjets;
+  int jet_index  = -1;
+  float bjetDiscr = fBJetSelection.getDiscriminatorWP(cfg_BaselineBJetsDiscriminator, cfg_BaselineBJetsDiscriminatorWP);
+  unsigned int ptCut_index  = 0;
+  unsigned int etaCut_index = 0;
+      
+  // For-loop: All selected jets
+  for(const Jet& jet: jets) 
+    {
+      
+      // Jet index (for pT and eta cuts)
+      // jet pt and eta cuts can differ from the jet selection
+      jet_index++;
+     
+      //=== Apply cut on eta
+      const float jetEtaCut = cfg_BaselineBJetEtaCuts.at(etaCut_index);
+      if (std::fabs(jet.eta()) > jetEtaCut) continue;
+
+      //=== Apply cut on pt
+      const float jetPtCut = cfg_BaselineBJetPtCuts.at(ptCut_index);
+      if (jet.pt() < jetPtCut) continue;
+
+      //=== Apply discriminator. Save failed bjets
+      if (!(jet.bjetDiscriminator() > bjetDiscr)) continue;
+
+      //=== Save jets satisfying baseline b-jet criteria
+      if (0) std::cout << "=== FakeBMeasurement::GetBaselineBJets() jet.pt() = " << jet.pt() << ", jet.eta() = " << jet.eta() << ", jet.bjetDiscriminator() = " << jet.bjetDiscriminator() << std::endl;
+      baselineBjets.push_back(jet);
+
+      // Increment cut index only. Cannot be bigger than the size of the cut list provided
+      if (ptCut_index  < cfg_BaselineBJetPtCuts.size()-1  ) ptCut_index++;
+      if (etaCut_index < cfg_BaselineBJetEtaCuts.size()-1 ) etaCut_index++;
+    }
+  return baselineBjets;
+}
+
+const std::vector<Jet> FakeBMeasurement::GetMyBJets(const std::vector<Jet>& baselineBjets, const std::vector<Jet>& invertedBjets)
+{
+  
+  // Copy the baseline b-jets (CSVc2-M) and append the inverted b-jets (CSVc2-L)
+  std::vector<Jet> myBJets = baselineBjets;
+  myBJets.insert(myBJets.end(), invertedBjets.begin(), invertedBjets.end());
+  
+  // Sort all b-jets by descending pt value (http://en.cppreference.com/w/cpp/algorithm/sort)
+  std::sort(myBJets.begin(), myBJets.end(), [](const Jet& a, const Jet& b){return a.pt() > b.pt();});
+  
+  // Final sanity check for the pt of the bjets
+  unsigned int ptCut_index  = 0;
+  unsigned int etaCut_index = 0;
+  unsigned int nBJets       = 0;
+  for(const Jet& b: myBJets)
+    {
+      //=== Apply cut on pt and eta
+      const float jetPtCut  = cfg_AllBJetsPtCuts.at(ptCut_index);
+      const float jetEtaCut = cfg_AllBJetsEtaCuts.at(etaCut_index);
+      if (b.pt() < jetPtCut) continue;
+      if (std::fabs(b.eta()) > jetEtaCut) continue;
+      nBJets++;
     }
   
-  // For-loop: All failed b-jets (sorted as chosen by user)
-  for(const Jet& jet: failedBJets)
+  if (0)
     {
-      
+      for(const Jet& b: myBJets)
+	{
+	  std::cout << "=== FakeBMeasurement::DoInvertedAnalysis() b.pt() = " << b.pt() 
+		    << ", b.eta() = " << b.eta() << ", b.bjetDiscriminator() = " << b.bjetDiscriminator() << std::endl;
+	}
+    }
+  
+  return myBJets;
+}
+
+const std::vector<Jet> FakeBMeasurement::GetInvertedBJets(const std::vector<Jet>& jets)
+{
+  // Definitions
+  std::vector<Jet> invertedBJets;
+  float bjetDiscrMin = fBJetSelection.getDiscriminatorWP(cfg_InvertedBJetsDiscriminator, cfg_InvertedBJetsDiscriminatorWP);
+  
+  // For-loop: All failed b-jets (sorted as chosen by user)
+  for(const Jet& jet: jets) 
+    {
       // Apply discriminator WP cuts (min and max)
-      bool passBjetDiscrMin = (jet.bjetDiscriminator() > invertedBJetDiscrMin);
+      bool passBjetDiscrMin = (jet.bjetDiscriminator() > bjetDiscrMin);
       bool passBjetDiscrMax = cfg_InvertedBJetsDiscrMax.passedCut(jet.bjetDiscriminator());
       
-      // Skip jets with a b-discrininator below min allowed value
+      // Skip jets with a b-discrininator below min allowed value (e.g. at least CSVv2-Loose)
       if (!passBjetDiscrMin) continue;
       
-      // Skip events if a jet has a b-discrininator above max allowed value
-      if (!passBjetDiscrMax) break;
+      // Skip events if a jet has a b-discrininator above max allowed value (e.g. CSVv2-Medium)
+      if (!passBjetDiscrMax) 
+	{
+	  invertedBJets.clear();
+	  if (0) std::cout << "=== FakeBMeasurement::GetInvertedBJets() jet.pt() = " << jet.pt() << ", jet.eta() = " << jet.eta() 
+			   << ", jet.bjetDiscriminator() = " << jet.bjetDiscriminator() << " BREAK!" << std::endl;
+	  break;
+	}
       
-      // Save jets satisfying inverted b-jet criteria
+      //=== Save jets satisfying inverted b-jet criteria
+      if (0) std::cout << "=== FakeBMeasurement::GetInvertedBJets() jet.pt() = " << jet.pt() << ", jet.eta() = " << jet.eta() << ", jet.bjetDiscriminator() = " << jet.bjetDiscriminator() << std::endl;
       invertedBJets.push_back(jet);
-      
-      // Sanity check
-      if (0) std::cout << "\tjet.bjetDiscriminator() = " << jet.bjetDiscriminator() << " (nInvertedBJets = " << invertedBJets.size() << ")" << std::endl;
-      
     }
   
    return invertedBJets;
@@ -2307,7 +2423,7 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   if (0) std::cout << "=== Baseline: Top selection" << std::endl;
   const TopSelectionBDT::Data topData = fBaselineTopSelection.analyze(fEvent, jetData, bjetData);
-  bool passPrelimMVACut = cfg_PrelimTopMVACut.passedCut( std::min(topData.getMVAmax1(), topData.getMVAmax2()) );
+  bool passPrelimMVACut = cfg_MinTopMVACut.passedCut( std::min(topData.getMVAmax1(), topData.getMVAmax2()) );
   bool hasFreeBJet      = topData.hasFreeBJet();
   if (!hasFreeBJet) return;
   if (!passPrelimMVACut) return;
@@ -2422,6 +2538,7 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
     }
 
   hBaseline_MET_AfterStandardSelections ->Fill(isGenuineB, METData.getMET().R());
+  hBaseline_HT_AfterStandardSelections ->Fill(isGenuineB, jetData.HT());
   hBaseline_MVAmax1_AfterStandardSelections ->Fill(isGenuineB, topData.getMVAmax1());
   hBaseline_MVAmax2_AfterStandardSelections ->Fill(isGenuineB, topData.getMVAmax2());
   hBaseline_LdgTetrajetPt_AfterStandardSelections->Fill(isGenuineB, topData.getLdgTetrajet().pt() );
@@ -2553,6 +2670,7 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
 	}
       
       hBaseline_MET_AfterCRSelections ->Fill(isGenuineB, METData.getMET().R());
+      hBaseline_HT_AfterCRSelections ->Fill(isGenuineB, jetData.HT());
       hBaseline_MVAmax1_AfterCRSelections ->Fill(isGenuineB, topData.getMVAmax1());
       hBaseline_MVAmax2_AfterCRSelections ->Fill(isGenuineB, topData.getMVAmax2());
       hBaseline_LdgTetrajetPt_AfterCRSelections->Fill(isGenuineB, topData.getLdgTetrajet().pt() );
@@ -2684,6 +2802,7 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
     }
 
   hBaseline_MET_AfterAllSelections ->Fill(isGenuineB, METData.getMET().R());
+  hBaseline_HT_AfterAllSelections ->Fill(isGenuineB, jetData.HT());
   hBaseline_MVAmax1_AfterAllSelections ->Fill(isGenuineB, topData.getMVAmax1());
   hBaseline_MVAmax2_AfterAllSelections ->Fill(isGenuineB, topData.getMVAmax2());
   hBaseline_LdgTetrajetPt_AfterAllSelections->Fill(isGenuineB, topData.getLdgTetrajet().pt() );
@@ -2723,40 +2842,13 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
 
 void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
                                           const BJetSelection::Data& bjetData,
-					  const std::vector<Jet> invertedBJets,
+					  const std::vector<Jet> myBJets,
 					  const int nVertices){
+
+  if (0) std::cout << "\n=== FakeBMeasurement::DoInvertedAnalysis()" << std::endl;
+
   // Increment counter
   cInvertedBTaggingCounter.increment();
-
-  //================================================================================================  
-  // The b-jets (selected + inverted)
-  //================================================================================================  
-  const std::vector<Jet> selectedBJets = bjetData.getSelectedBJets();
-  std::vector<Jet> myBJets;
-  
-  // Append the selected b-jets (CSVc2-M)
-  myBJets.insert(myBJets.end(), selectedBJets.begin(), selectedBJets.end());
-
-  // Append the inverted b-jets (CSVc2-L)
-  myBJets.insert(myBJets.end(), invertedBJets.begin(), invertedBJets.end());
-
-  // Sort all b-jets by descending pt value (http://en.cppreference.com/w/cpp/algorithm/sort)
-  std::sort(myBJets.begin(), myBJets.end(), [](const Jet& a, const Jet& b){return a.pt() > b.pt();});
-
-  // Final sanity check for the pt of the bjets
-  unsigned int ptCut_index  = 0;
-  unsigned int etaCut_index = 0;
-  unsigned int nBJets       = 0;
-  for(const Jet& b: myBJets)
-    {
-      //=== Apply cut on pt and eta
-      const float jetPtCut  = cfg_AllBJetsPtCuts.at(ptCut_index);
-      const float jetEtaCut = cfg_AllBJetsEtaCuts.at(etaCut_index);
-      if (b.pt() < jetPtCut) continue;
-      if (std::fabs(b.eta()) > jetEtaCut) continue;
-      nBJets++;
-    }
-  if (!cfg_AllBJetsNCut.passedCut(nBJets) ) return;
 
   //================================================================================================  
   // 9) BJet SF  
@@ -2780,7 +2872,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   if (0) std::cout << "=== Inverted: Top selection" << std::endl;
   const TopSelectionBDT::Data topData = fInvertedTopSelection.analyzeWithoutBJets(fEvent, jetData.getSelectedJets(), myBJets, true);
-  bool passPrelimMVACut = cfg_PrelimTopMVACut.passedCut( std::min(topData.getMVAmax1(), topData.getMVAmax2()) );
+  bool passPrelimMVACut = cfg_MinTopMVACut.passedCut( std::min(topData.getMVAmax1(), topData.getMVAmax2()) );
   bool hasFreeBJet      = topData.hasFreeBJet();
   if (!hasFreeBJet) return;
   if (!passPrelimMVACut) return;
@@ -2898,6 +2990,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
     }
 
   hInverted_MET_AfterStandardSelections ->Fill(isGenuineB, METData.getMET().R());
+  hInverted_HT_AfterStandardSelections ->Fill(isGenuineB, jetData.HT());
   hInverted_MVAmax1_AfterStandardSelections ->Fill(isGenuineB, topData.getMVAmax1());
   hInverted_MVAmax2_AfterStandardSelections ->Fill(isGenuineB, topData.getMVAmax2());
   hInverted_LdgTetrajetPt_AfterStandardSelections->Fill(isGenuineB, topData.getLdgTetrajet().pt() );
@@ -2938,9 +3031,9 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
 
       // Fill final plots (CR2)
       index = -1;
-      hNFailedBJets_CRtwo -> Fill(invertedBJets.size());
+      hNFailedBJets_CRtwo -> Fill(myBJets.size());
       // For-loop: Only failed BJets used as bjets in top fit
-      for (auto bjet: invertedBJets)
+      for (auto bjet: myBJets)
 	{
 	  index++;
 	  
@@ -3071,6 +3164,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
 	}
       
       hInverted_MET_AfterCRSelections ->Fill(isGenuineB, METData.getMET().R());
+      hInverted_HT_AfterCRSelections ->Fill(isGenuineB, jetData.HT());
       hInverted_MVAmax1_AfterCRSelections ->Fill(isGenuineB, topData.getMVAmax1());
       hInverted_MVAmax2_AfterCRSelections ->Fill(isGenuineB, topData.getMVAmax2());
       hInverted_LdgTetrajetPt_AfterCRSelections->Fill(isGenuineB, topData.getLdgTetrajet().pt() );
@@ -3114,9 +3208,9 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, (int) isGenuineB);
   
   index = -1;
-  hNFailedBJets_VR -> Fill(invertedBJets.size());
+  hNFailedBJets_VR -> Fill(myBJets.size());
   // For-loop: Only failed BJets used as bjets in top fit
-  for (auto bjet: invertedBJets)
+  for (auto bjet: myBJets)
     {
       index++;
       
@@ -3247,6 +3341,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
     }
 
   hInverted_MET_AfterAllSelections ->Fill(isGenuineB, METData.getMET().R());
+  hInverted_HT_AfterAllSelections ->Fill(isGenuineB, jetData.HT());
   hInverted_MVAmax1_AfterAllSelections ->Fill(isGenuineB, topData.getMVAmax1());
   hInverted_MVAmax2_AfterAllSelections ->Fill(isGenuineB, topData.getMVAmax2());
   hInverted_LdgTetrajetPt_AfterAllSelections->Fill(isGenuineB, topData.getLdgTetrajet().pt() );

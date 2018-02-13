@@ -35,13 +35,13 @@ class DataDrivenQCDShape:
         ewkFullName     = os.path.join(ewkPath, histoName)
 
         if (self._optionUseInclusiveNorm):
-            msg = "Disabled call for getting splitted histograms. Getting \"Inclusive\" histogram only instead."
-            self.Verbose(ShellStyles.WarningLabel() + msg, self._verbose)
+            msg = "Will create \"Inclusive\"-histogram results"
+            self.Verbose(ShellStyles.NoteStyle() + msg + ShellStyles.NormalStyle(), False)
             self._dataList  = list(self._getInclusiveHistogramsFromSingleSource(dsetMgr, dsetLabelData, dataFullName, luminosity)) # was called by default
             self._ewkList   = list(self._getInclusiveHistogramsFromSingleSource(dsetMgr, dsetLabelEwk , ewkFullName , luminosity)) # was called by default
         else:
-            msg = "This splitted histograms method is not validated! Use \"Inclusive\" histogram only instead."
-            self.Print(ShellStyles.WarningLabel() + msg, False)
+            msg = "Will create \"Splitted\"-histogram results"
+            self.Verbose(ShellStyles.NoteStyle() + msg + ShellStyles.NormalStyle(), False)
             self._dataList  = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelData, dataFullName, luminosity)) #FIXME: Does this work for Inclusive?
             self._ewkList   = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelEwk , ewkFullName , luminosity)) #FIXME: Does this work for Inclusive?
         return
@@ -168,7 +168,7 @@ class DataDrivenQCDShape:
         for i in range(1, len(self._dataList)):
 
             msg = "Splitted-bin mode has not been validated yet"
-            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
+            #raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
 
             # Accumulate given bin-histo from Data
             h.Add(self._dataList[i])

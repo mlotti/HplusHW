@@ -3,7 +3,7 @@
 Description:
 
 Usage:
-./plotProbability.py -m <pseudo_mcrab> [opts]
+./plotMC_HPlusMass.py -m <pseudo_mcrab> [opts]
 
 Examples:
 ./plotMC_HPlusMass.py -m <peudo_mcrab> -o "" --url --normaliseToOne
@@ -29,8 +29,6 @@ import os
 from optparse import OptionParser
 
 import ROOT
-import array
-
 ROOT.gROOT.SetBatch(True)
 from ROOT import *
 
@@ -42,8 +40,6 @@ import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
-# ==============================================================================================
-
 
 kwargs = {
     "verbose"          : False,
@@ -54,7 +50,7 @@ kwargs = {
     "savePath"         : None,
     "saveFormats"      : [".pdf"],
     "xlabel"           : None,
-    "ylabel"           : "Probability",#"Probability",
+    "ylabel"           : "Probability",
     "rebinX"           : 2,
     "rebinY"           : 2,
     "xlabelsize"       : None,
@@ -78,7 +74,6 @@ kwargs = {
     "cutLessthan"      : False,
     "cutFillColour"    : ROOT.kAzure-4,
     }
-
 
 #================================================================================================ 
 # Function Definition
@@ -110,20 +105,6 @@ def GetLumi(datasetsMgr):
     Verbose("Luminosity = %s (pb)" % (lumi), True)
     return lumi
 
-#"QCD_HT1000to1500|QCD_HT1500to2000|QCD_HT200\
-
-
-
-
-def GetListOfQCDatasets():
-    Verbose("Getting list of QCD datasets")
-    return ["QCD_HT1000to1500", "QCD_HT1500to2000","QCD_HT2000toInf","QCD_HT300to500","QCD_HT500to700","QCD_HT700to1000", "QCD_bEnriched_HT1000to1500","QCD_bEnriched_HT1500to2000",
-            "QCD_bEnriched_HT2000toInf","QCD_bEnriched_HT200to300","QCD_bEnriched_HT300to500","QCD_bEnriched_HT500to700","QCD_bEnriched_HT700to1000","QCD_HT100to200",
-            "QCD_HT200to300","QCD_HT50to100"]
-
-#    return ["QCD_HT1000to1500", "QCD_HT1500to2000","QCD_HT2000toInf","QCD_HT300to500","QCD_HT500to700","QCD_HT700to1000"]
-#    return ["QCD_bEnriched_HT1000to1500","QCD_bEnriched_HT1500to2000",
-#            "QCD_bEnriched_HT2000toInf","QCD_bEnriched_HT200to300","QCD_bEnriched_HT300to500","QCD_bEnriched_HT500to700","QCD_bEnriched_HT700to1000"]
 
 def GetListOfEwkDatasets():
     Verbose("Getting list of EWK datasets")
@@ -158,9 +139,6 @@ def GetDatasetsFromDir(opts):
     return datasets
     
 
-# =========================================================================================================================================
-#                                                          MAIN
-# =========================================================================================================================================
 def main(opts, signalMass):
 
     optModes = ["OptChiSqrCutValue100"]                                                                                                                             
@@ -185,33 +163,34 @@ def main(opts, signalMass):
             if "ChargedHiggs" in d.getName():
                 datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
                
-        # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
-#####        plots.mergeRenameReorderForDataMC(datasetsMgr) 
         
         # Determine integrated Lumi before removing data
         #intLumi = datasetsMgr.getDataset("Data").getLuminosity()
         intLumi = 0
-
+        
         # Remove datasets
         if 1:
             datasetsMgr.remove(filter(lambda name: "Data" in name, datasetsMgr.getAllDatasetNames()))
-#            datasetsMgr.remove(filter(lambda name: "QCD-b" in name, datasetsMgr.getAllDatasetNames()))
-#            datasetsMgr.remove(filter(lambda name: "QCD" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr.remove(filter(lambda name: "QCD-b" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr.remove(filter(lambda name: "QCD" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "SingleTop" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "DYJetsToQQHT" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "TTZToQQ" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "TTWJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "WJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "Diboson" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "TTTT" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "TT" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "FakeBMeasurementTrijetMass" in name, datasetsMgr.getAllDatasetNames()))
-#            datasetsMgr.remove(filter(lambda name: "M_" in name and "M_" + str(opts.signalMass) not in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "M_" in name and "M_" + str(opts.signalMass) not in name, datasetsMgr.getAllDatasetNames()))
+
+        # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
+        plots.mergeRenameReorderForDataMC(datasetsMgr) 
+
 
         # Merge EWK samples
         if opts.mergeEWK:
             datasetsMgr.merge("EWK", GetListOfEwkDatasets())
             plots._plotStyles["EWK"] = styles.getAltEWKStyle()
-
-        datasetsMgr.merge("QCD", GetListOfQCDatasets())
-        plots._plotStyles["QCD"] = styles.getAltEWKStyle()
-        Background1_Dataset = datasetsMgr.getDataset("QCD")
 
         # Re-order datasets
         datasetOrder = []
@@ -220,9 +199,12 @@ def main(opts, signalMass):
                 if d not in signalMass:
                     continue
             datasetOrder.append(d.getName())
-            
+            #newOrder = ["TT", "QCD"]
+            #newOrder = ["TT", "QCD"]
         for m in signalMass:
+            #newOrder.insert(0, m)
             datasetOrder.insert(0, m)
+            #datasetsMgr.selectAndReorder(newOrder)
         datasetsMgr.selectAndReorder(datasetOrder)
 
         # Print dataset information
@@ -239,359 +221,33 @@ def main(opts, signalMass):
         histoPaths1 = []
         if folder != "":
             histoList  = datasetsMgr.getDataset(datasetOrder[0]).getDirectoryContent(folder)
+            # hList0     = [x for x in histoList if "TrijetMass" in x]
+            # hList1     = [x for x in histoList if "TetrajetMass" in x]
+            # hList2     = [x for x in histoList if "TetrajetBJetPt" in x]
+            # histoPaths1 = [os.path.join(folder, h) for h in hList0+hList1+hList2]
             histoPaths1 = [os.path.join(folder, h) for h in histoList]
         
-
-        numerators   = [#"TopQuarkPt_MatchedBDT",
-#                        "TopQuarkPt_MatchedBDT",
-#                        "TrijetMass_NotMatchedBDT",
-#                        "AllTopQuarkPt_MatchedBDT",
-#                        "AllTopQuarkPt_jjbMatchedBDT",
-#                        "LdgTrijetFake_BDT",
-                        "LdgTrijetFakeJJB_BDT",
-                        "TrijetFakePt_BDT",
-                        "TrijetFakeJJBPt_BDT",
-
-                        ]
-        denominators = [#"TopQuarkPt",
-#                        "TopQuarkPt_Matched",
-#                        "TrijetPt_BDT",
-#                        "AllTopQuarkPt_Matched",
-#                        "AllTopQuarkPt_jjbMatched",
-#                        "LdgTrijetFake",
-                        "LdgTrijetFakeJJB",
-                        "TrijetFakePt",
-                        "TrijetFakeJJBPt",
-                        ]
-        
-
-        for i in range(len(numerators)):
-#            PlotProb(datasetsMgr.getAllDatasets(), folder+"/"+numerators[i], folder+"/"+denominators[i])
-            dset = [Background1_Dataset]
-#            PlotProb(datasetsMgr, folder+"/"+numerators[i], folder+"/"+denominators[i]) 
-#             dset = [Background1_Dataset]
-            PlotProb(dset, folder+"/"+numerators[i], folder+"/"+denominators[i])
-#             hName = folder+"/"+numerators[i]
-#             rootHisto_Bkg1 = Background1_Dataset.getDatasetRootHisto(hName)
-
-        folder     = "ForDataDrivenCtrlPlots"
+        folder     = "TrijetCandidate"
         histoList  = datasetsMgr.getDataset(datasetOrder[0]).getDirectoryContent(folder)
         hList0     = [x for x in histoList if "TrijetMass" in x]
         hList1     = [x for x in histoList if "TetrajetMass" in x]
         hList2     = [x for x in histoList if "TetrajetBjetPt" in x]
         histoPaths2 = [os.path.join(folder, h) for h in hList0+hList1+hList2]
 
-        '''
         histoPaths = histoPaths1 + histoPaths2
         for h in histoPaths:
-            
-            if "Vs" in h:                     # Skip TH2D
+            if "Vs" in h: # Skip TH2D
                 continue
             PlotMC(datasetsMgr, h, intLumi)
-            '''
+
+        HistoFit = ["TrijetDPtOverGenPt",]
+
+        for i in range(len(HistoFit)):
+            Fit(datasetsMgr.getAllDatasets(), folder+"/"+HistoFit[i], "gaus")
+
     return
 
 
-def CheckNegatives(n, d, verbose=False):
-    '''
-    '''
-    table    = []
-    txtAlign = "{:<5} {:>20} {:>20}"
-    hLine    = "="*50
-    table.append(hLine)
-    table.append(txtAlign.format("Bin #", "Numerator (8f)", "Denominator (8f)"))
-    table.append(hLine)
-
-    # For-loop: All bins in x-axis
-    for i in range(1, n.GetNbinsX()+1):
-        nbin = n.GetBinContent(i)
-        dbin = d.GetBinContent(i)
-#        print i, nbin, dbin
-        table.append(txtAlign.format(i, "%0.8f" % (nbin), "%0.8f" % (dbin) ))
-
-        # Numerator > Denominator
-        if nbin > dbin:
-            n.SetBinContent(i,dbin)
-
-        # Numerator < 0 
-        if nbin < 0:
-            n.SetBinContent(i,0)
-            
-        # Denominator < 0
-        if dbin < 0:
-            n.SetBinContent(i,0)
-            d.SetBinContent(i,0)
-            
-    #if verbose:
-    #    for r in table:
-    #        print r
-    return
-
-# ----------------------------
-#  Remove Negatives
-# ----------------------------
-def RemoveNegatives(histo):
-    '''
-    '''
-    for binX in range(histo.GetNbinsX()+1):
-        if histo.GetBinContent(binX) < 0:
-            histo.SetBinContent(binX, 0.0)
-    return
-
-# ------------------------------------------------
-#    Plot Probabilities
-# ------------------------------------------------
-def PlotProb(datasets, numPath, denPath):
-
-
-    EfficiencyList = []
-
-    for dataset in datasets:
-        
-        datasetName = dataset.getName()
-        print "Dataset = ", datasetName
-        
-        statOption = ROOT.TEfficiency.kFNormal        
-        nn = dataset.getDatasetRootHisto(numPath)
-#        n = dataset.getDatasetRootHisto(numPath).getHistogram()
-#        nn.normalizeToOne()
-#        nn.normalizeToLuminosity(36.3*(10**3))
-        nn.normalizeByCrossSection()
-        n = nn.getHistogram()
-        dd = dataset.getDatasetRootHisto(denPath)
-
-#        d = dataset.getDatasetRootHisto(denPath).getHistogram()
-#        dd.normalizeToOne()
-#        dd.normalizeToLuminosity(36.3*(10**3))
-        dd.normalizeByCrossSection()
-        d = dd.getHistogram()
-
-        n.Rebin(5)
-        d.Rebin(5)
-
-        if d.GetEntries() == 0 or n.GetEntries() == 0:
-            continue
-
-
-        # Check Negatives
-        CheckNegatives(n, d, True)
-        
-        # Remove Negatives 
-        RemoveNegatives(n)
-                
-        nBins = d.GetNbinsX()
-        xMin  = d.GetXaxis().GetXmin()
-        xMax  = d.GetXaxis().GetXmax()
-
-                
-        # ----------------------------------------------------------------------------------------- #
-        #      Ugly hack to ignore EMPTY (in the wanted range) histograms with overflows/underflows
-        # ----------------------------------------------------------------------------------------- #
-        if (0):
-            print "\n"
-            print "=========== getEfficiency:"
-            print "Dataset             = ", dataset.getName()
-            print "Numerator:   entries=", n.GetEntries(), " Bins=", n.GetNbinsX(), " Low edge=", n.GetBinLowEdge(1)
-            print "Denominator: entries=", d.GetEntries(), " Bins=", d.GetNbinsX(), " Low edge=", d.GetBinLowEdge(1)
-            print "\n"
-            
-            print ">>>>>>  Sanity Check:  <<<<<<"
-            print "Numerator Mean       = ", n.GetMean()
-            print "Numerator RMS        = ", n.GetRMS()                                                                                                                
-            print "Numerator Integral   = ", n.Integral(1, nBins)
-            print "Denominator Mean     = ", d.GetMean()
-            print "Denominator RMS      = ", d.GetRMS()
-            print "Denominator Integral = ", d.Integral(1, nBins)
-            
-        if (n.GetMean() == 0 or d.GetMean() == 0): continue
-        if (n.GetRMS()  == 0 or d.GetRMS()  == 0): continue
-        if (n.Integral(1,nBins) == 0 or d.Integral(1,nBins) == 0): continue
-        
-        x_bins = n.GetXaxis().GetNbins()
-
-        passBkg = 0
-        passSignal = 0
-        x = []
-        y = []
-        ptcut = [100,200,300,400,500,600,700]
-        for xbin in range (0, x_bins):        
-            x_value = n.GetXaxis().GetBinLowEdge(xbin)+0.5*n.GetXaxis().GetBinWidth(xbin)
-            passBkg  = d.GetBinContent(xbin)
-            passSignal  = n.GetBinContent(xbin)
-            if passBkg == 0:
-                continue
-            EF = passSignal/passBkg
-            x.append(xbin)
-            y.append(EF)
-        qeffic = ROOT.TGraph(len(x), array.array("d", x), array.array("d", y))
-
-            
-        effic = ROOT.TEfficiency(n,d)
-        effic.SetStatisticOption(statOption)
-
-#        qeffic= ROOT.TGraphAsymmErrors()
-#        qeffic.BayesDivide(n,d)
-        
-        weight = 1
-        if dataset.isMC():
-            weight = dataset.getCrossSection()
-            effic.SetWeight(weight)
-            
-        eff = convert2TGraph(effic)
-
-
-        # Apply Styles
-        if "TT" in datasetName:
-            styles.ttStyle.apply(eff)
-            legend = "TT"
-        if "QCD" in datasetName:
-            styles.signalStyleHToTB500.apply(eff)
-            eff.SetLineStyle(1)
-            eff.SetLineWidth(2)
-            legend = "QCD"
-        elif "M_500" in datasetName:
-            styles.signalStyleHToTB500.apply(eff)
-            legend = "H^{+} m_{H^{+}} = 500 GeV"
-        elif "M_300" in datasetName:
-            styles.signalStyleHToTB300.apply(eff)
-            legend = "H^{+} m_{H^{+}} = 300 GeV"
-        elif "M_1000" in datasetName:
-            styles.signalStyleHToTB1000.apply(eff)
-            legend = "H^{+} m_{H^{+}} = 1000 GeV"
-        elif "M_800" in datasetName:
-            styles.signalStyleHToTB800.apply(eff)
-            legend = "H^{+} m_{H^{+}} = 800 GeV"
-        elif "M_200" in datasetName:
-            styles.signalStyleHToTB200.apply(eff)
-            legend = "H^{+} m_{H^{+}} = 200 GeV"
-        else:
-            styles.ttStyle.apply(eff)
-            legend = "other"
-
-
-#        EfficiencyList.append(histograms.HistoGraph(effic, legend, "lp", "P"))
-        EfficiencyList.append(histograms.HistoGraph(eff, legend, "lp", "P"))
-            
-
-    saveName = "Efficiency_QCD"+numPath.split("/")[-1]
-    
-    if "Pt" in numPath:
-        xMin = 90.0
-#        rebinX = 2
-        xMax = 600.0
-        xTitle = "p_{T} (GeV)"
-        yTitle = "Efficiency"
-        yMin = 0.0
-        yMax = 1.1
-
-    elif "_Eta" in numPath:
-        xMin = -3.0
-        xMax = +3.0
-        xTitle = "#eta"
-        yTitle = "Efficiency"
-        yMin = 0.0
-        yMax = 1.1
-
-    elif "_Mass" in numPath:
-        xMin = 50.0
-        xMax = 300
-        xTitle = "M (GeV/c^{2})"
-        yTitle = "Efficiency"
-        yMin = 0.0
-        yMax = 1.1
-
-    elif "_Phi" in numPath:
-        xMin = -3
-        xMax = +3
-        xTitle = "#phi"
-        yTitle = "Efficiency"
-        yMin = 0.0
-        yMax = 1.1
-
-    if "Fake" in numPath:
-        xMin = 95.0
-        rebinX = 1                                                                                                                                                                      
-        xMax = 605.0
-        xTitle = "candidate p_{T} [GeV]"
-        yTitle = "Misidentification rate"
-        yMin = 0.0
-        yMax = 0.11
-        
-    else:
-        xMin = 0.0
-        xMax = 250.0
-        xTitle = "xTitle"
-        yTitle = "yTitle"
-        yMin = 0.0
-        yMax = 1.1
-
-    options = {"ymin": yMin  , "ymax": yMax, "xmin":xMin, "xMax":xMax}
-
-    p = plots.PlotBase(datasetRootHistos=EfficiencyList, saveFormats=kwargs.get("saveFormats"))
-    
-    #p = plots.ComparisonManyPlot(refEff, EfficiencyList, saveFormats=[])
-    p.createFrame(saveName, opts=options)
-    
-    #p.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinX(kwargs.get("rebinX")))
-
-     # Set Titles                                                                                                                                                                                                
-#    p.getFrame().GetYaxis().SetTitle(kwargs.get("ylabel"))  #"ylabel"
-    p.getFrame().GetXaxis().SetTitle(xTitle)
-    p.getFrame().GetYaxis().SetTitle(yTitle)
-    
-    # Set range
-    p.getFrame().GetXaxis().SetRangeUser(xMin, xMax)
-    
-    
-    moveLegend = {"dx": -0.55, "dy": -0.01, "dh": -0.1}
-    p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
-    
-    # Add Standard Texts to plot                                                                                                                                                                
-    histograms.addStandardTexts()
-
-    p.draw()
-    
-    # Save plot in all formats
-    savePath = os.path.join(opts.saveDir, "HplusMasses", numPath.split("/")[0], opts.optMode)
-    save_path = savePath + opts.MVAcut
-
-#    SavePlot(p, saveName, savePath)
-    SavePlot(p, saveName, save_path)
-    return
-
-
-# ---------------------------------------
-#   Convert to TGraph
-# ---------------------------------------
-def convert2TGraph(tefficiency):
-    x     = []
-    y     = []
-    xerrl = []
-    xerrh = []
-    yerrl = []
-    yerrh = []
-    h = tefficiency.GetCopyTotalHisto()
-    n = h.GetNbinsX()
-    for i in range(1,n+1):
-        x.append(h.GetBinLowEdge(i)+0.5*h.GetBinWidth(i))
-        xerrl.append(0.5*h.GetBinWidth(i))
-        xerrh.append(0.5*h.GetBinWidth(i))
-        y.append(tefficiency.GetEfficiency(i))
-        yerrl.append(tefficiency.GetEfficiencyErrorLow(i))
-        # ugly hack to prevent error going above 1
-        errUp = tefficiency.GetEfficiencyErrorUp(i)
-        if y[-1] == 1.0:
-            errUp = 0
-        yerrh.append(errUp)
-    return ROOT.TGraphAsymmErrors(n,array.array("d",x),
-                                  array.array("d",y),
-                                  array.array("d",xerrl),
-                                  array.array("d",xerrh),
-                                  array.array("d",yerrl),
-                                  array.array("d",yerrh))
-# ------------------------------------------------
-#    Plot Histograms
-# ------------------------------------------------
 def PlotMC(datasetsMgr, histo, intLumi):
 
     kwargs = {}
@@ -608,9 +264,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
     logY    = False
     _opts   = {"ymin": 1e-3, "ymaxfactor": 1.0}
 
-    if "Pt" in histo:
-        _rebinX = 2
-    elif "ChiSqr" in histo:
+    if "ChiSqr" in histo:
         _rebinX = 1
         logY    = True
         _units  = ""
@@ -618,10 +272,6 @@ def PlotMC(datasetsMgr, histo, intLumi):
         _xlabel = "#chi^{2}"
         _cutBox = {"cutValue": 10.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _opts["xmax"] = 100
-    
-    if "_Mass" in histo:
-        _opts["xmin"] = 140
-        _opts["xmax"] = 220
     elif "trijetmass" in histo.lower():
         _rebinX = 4
         logY    = False
@@ -681,7 +331,6 @@ def PlotMC(datasetsMgr, histo, intLumi):
     # Customise styling
     p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineStyle(ROOT.kSolid))
 
-
     if "QCD" in datasetsMgr.getAllDatasets():
         p.histoMgr.forHisto("QCD", styles.getQCDFillStyle() )
         p.histoMgr.setHistoDrawStyle("QCD", "HIST")
@@ -716,12 +365,82 @@ def PlotMC(datasetsMgr, histo, intLumi):
     SavePlot(p, saveName, savePath) 
     return
 
+#Fit(datasetsMgr.getAllDatasets(), folder+"/"+HistoFit[i], "gaus")
+def Fit (datasets, histo, function):
+    
+    
+    FitList = []
+    for dataset in datasets:
 
+        datasetName = dataset.getName()
+        print "Dataset = ", datasetName
+        hh = dataset.getDatasetRootHisto(histo)
+ 
+        hh.normalizeToOne()
+        h = hh.getHistogram()
 
+        #h = dataset.getDatasetRootHisto(histo).getHistogram()
+        xMin  = h.GetXaxis().GetXmin()
+        xMax  = h.GetXaxis().GetXmax()
+        yMin  = 0
+        yMax  = 1.2
+        #statOption = ROOT.TEfficiency.kFNormal
+        if "TT" in datasetName:
+            if function == "gaus":
+                fitGauss = ROOT.TF1("fitGauss", "gaus", -2.5, 2.5)
+#                TF1 *fitBoFreq = new TF1("fitBoFreq","[0]*x+[1]",0,20);
+#                h.Fit("gaus")
+                #fitTest = ROOT.TF1("fitTest", "0.01", -2.5, 2.5)
+                
+                h.Fit("fitGauss","SRBM")
+                #h.GetListOfFunctions().Add(fitTest)
+                legend = "TT"
 
+        legend = "a legend"
+        print "Legend", legend
+        saveName = histo.split("/")[-1]+"_Fit"
 
+        print saveName
 
+        xTitle = "fixXTitle"
+        yTitle = "fixYTitle"
+    
+        yMin = 0.
+        yMax = 0.03
+        xMin = -2.3
+        xMax = 2.3
+        kwargs = {}
 
+        options = {"ymin": yMin  , "ymax": yMax, "xmin":xMin, "xMax":xMax}
+        FitList.append(h)
+        #p = plots.MCPlot(dataset, h, normalizeToLumi=0, saveFormats=[], **kwargs)
+
+        p = plots.PlotBase(datasetRootHistos=FitList, saveFormats=kwargs.get("saveFormats"))
+        p.createFrame(saveName, opts=options)
+        
+        p.getFrame().GetXaxis().SetTitle(xTitle)
+        p.getFrame().GetYaxis().SetTitle(yTitle)
+        #p.histoMgr.setHistoDrawStyle(datasetName, "AP")
+        
+# Set range                                                                                                                                                                          
+        p.getFrame().GetXaxis().SetRangeUser(xMin, xMax)
+
+        
+        moveLegend = {"dx": -0.55, "dy": -0.01, "dh": -0.1}
+
+        p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
+        # Add Standard Texts to plot        
+        histograms.addStandardTexts()
+    
+        p.draw()
+    
+    # Save plot in all formats                                                                                                                                                           
+        savePath = os.path.join(opts.saveDir, "HplusMasses", histo.split("/")[0], opts.optMode)
+        save_path = savePath 
+        SavePlot(p, saveName, save_path)
+    return
+
+        
 
 
 def SavePlot(plot, saveName, saveDir, saveFormats = [".pdf"]):
@@ -766,15 +485,16 @@ if __name__ == "__main__":
     '''
     
     # Default Settings
-    ANALYSISNAME = "Hplus2tbAnalysis"
+    ANALYSISNAME = "TopReco"
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
     OPTMODE      = ""
     BATCHMODE    = True
     PRECISION    = 3
     #SIGNALMASS   = [200, 500, 800, 2000]
-    SIGNALMASS   = [ ]
-#    SIGNALMASS   = [200, 500, 1000]
+    #SIGNALMASS   = [300, 500, 800, 1000]
+    SIGNALMASS   = []
+    #SIGNALMASS   = [200, 500, 800, 1000, 2000, 3000]
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False
@@ -786,7 +506,7 @@ if __name__ == "__main__":
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
     NORMALISE    = False
     FOLDER       = "" #"topSelection_" #"ForDataDrivenCtrlPlots" #"topologySelection_"
-    MVACUT       = "MVA"
+
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
 
@@ -840,9 +560,6 @@ if __name__ == "__main__":
 
     parser.add_option("--folder", dest="folder", type="string", default = FOLDER,
                       help="ROOT file folder under which all histograms to be plotted are located [default: %s]" % (FOLDER) )
-
-    parser.add_option("--MVAcut", dest="MVAcut", type="string", default = MVACUT,
-                      help="Save plots to directory in respect of the MVA cut value [default: %s]" % (MVACUT) )
 
     (opts, parseArgs) = parser.parse_args()
 

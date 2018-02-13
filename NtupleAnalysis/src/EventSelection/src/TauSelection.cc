@@ -48,6 +48,7 @@ TauSelection::TauSelection(const ParameterSet& config, EventCounter& eventCounte
   fTauLdgTrkPtCut(config.getParameter<float>("tauLdgTrkPtCut")),
   fTauNprongs(config.getParameter<int>("prongs")),
   fTauRtauCut(config.getParameter<float>("rtau")),
+  fTauRtauSmallerThanCut(config.getParameter<float>("rtauSmallerThan",999.0)),
   fVetoMode(false),
   // tau identification SF
   //fTauIDSF(config.getParameter<float>("tauIdentificationSF")), 
@@ -112,6 +113,7 @@ TauSelection::TauSelection(const ParameterSet& config, const std::string& postfi
   fTauLdgTrkPtCut(config.getParameter<float>("tauLdgTrkPtCut")),
   fTauNprongs(config.getParameter<int>("prongs")),
   fTauRtauCut(config.getParameter<float>("rtau")),
+  fTauRtauSmallerThanCut(config.getParameter<float>("rtauSmallerThan")),
   fVetoMode(false),
   // tau misidentification SF
   //fEToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "E")),
@@ -306,7 +308,7 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
       if (fCommonPlotsIsEnabled())
         hIsolVtxAfter->Fill(fCommonPlots->nVertices());
       // Apply cut on Rtau
-      if (!this->passRtauCut(tau))
+      if (!this->passRtauLargerThanCut(tau) || !this->passRtauSmallerThanCut(tau))
         continue;
       passedRtau = true;
       // Passed tau selection
@@ -321,7 +323,7 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
       // tau is not isolated
       passedAntiIsol = true;
       // Apply cut on Rtau
-      if (!this->passRtauCut(tau))
+      if (!this->passRtauLargerThanCut(tau) || !this->passRtauSmallerThanCut(tau))
         continue;
       passedAntiIsolRtau = true;
       // Passed anti-isolated tau selection

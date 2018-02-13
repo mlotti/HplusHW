@@ -2,7 +2,7 @@
 '''
 PREREQUISITES:
 ./run.py -m <multicrab> [opts]
-./plotQCD_Fit.py -m <pseudo_multicrab> [opts]
+./getABCD_TF.py -m <pseudo_multicrab> [opts]
 
 Description: (* = prerequisites)
 *1) Generate a pseudo-multicrab directory by running the FakeBMeasurement analyzer: (~12 hours)
@@ -40,7 +40,7 @@ This script takes TWO pseudomulticrabs as input:
 
 
 USAGE:
-./makeInvertedPseudoMultirab.py -m <same_pseudo_multicrab> [opts]
+./makePseudoMulticrab.py -m <same_pseudo_multicrab> [opts]
 
 
 EXAMPLES:
@@ -48,7 +48,7 @@ EXAMPLES:
 ./getABCD_TF.py -m FakeBMeasurement_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180125_123834 --ratio
 
 2) Then either run on all modules (eras, search-modes, optimization modes) automatically
-./makeInvertedPseudoMulticrab.py -m FakeBMeasurement_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180125_123834/
+./makePseudoMulticrab.py -m FakeBMeasurement_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180125_123834/
 
 * Can use the counters to debug; study if the histograms are correct!
 hplusPrintCounters.py --mainCounterOnly --weighted --dataEra "Run2016" --mergeForDataMC --mergeData --mergeMC FakeBMeasurement_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180120_092605
@@ -59,7 +59,7 @@ hplusPrintCounters.py --mainCounterOnly --weighted --dataEra "Run2016" --mergeFo
 
 
 LAST USED:
-./makeInvertedPseudoMulticrab.py -m FakeBMeasurement_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180125_123834/
+./makePseudoMulticrab.py -m FakeBMeasurement_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_180125_123834/
 
 '''
 #================================================================================================ 
@@ -167,8 +167,8 @@ class ModuleBuilder:
             self._dsetMgr.remove(filter(lambda name: d in name, self._dsetMgr.getAllDatasetNames()))
         
         # Print final dataset info
-        self._dsetMgr.PrintInfo()
-
+        if opts.verbose:
+            self._dsetMgr.PrintInfo()
 
         # Obtain luminosity
         self._luminosity = self._dsetMgr.getDataset("Data").getLuminosity()
@@ -396,13 +396,14 @@ def importNormFactors(era, searchMode, optimizationMode, multicrabDirName):
     normFactorsImport = __import__(srcBase)
     
     # Get the function definition
-    myNormFactorsSafetyCheck = getattr(normFactorsImport, "QCDInvertedNormalizationSafetyCheck") #FIXME - What does this do?
-    
+    myNormFactorsSafetyCheck = getattr(normFactorsImport, "QCDInvertedNormalizationSafetyCheck")
     Verbose("Check that the era=%s, searchMode=%s, optimizationMode=%s info matches!" % (era, searchMode, optimizationMode) )
     myNormFactorsSafetyCheck(era, searchMode, optimizationMode)
 
     # Obtain normalization factors
     myNormFactorsImport = getattr(normFactorsImport, "QCDNormalization")
+
+    # Systematic Variations
     msg = "Disabled NormFactors SystVar Fake Weighting Up/Down"
     Print(ShellStyles.WarningLabel() + msg, True)    
     # myNormFactorsImportSystVarFakeWeightingDown = getattr(normFactorsImport, "QCDPlusEWKFakeTausNormalizationSystFakeWeightingVarDown") #FIXME
@@ -413,10 +414,11 @@ def importNormFactors(era, searchMode, optimizationMode, multicrabDirName):
     if "FakeB" in opts.analysisName:
         myNormFactors[opts.normFactorKey] = myNormFactorsImport
     elif "GenuineB" in opts.analysisName:
-        myNormFactors[opts.normFactorKey] = {'Inclusive': 1.0} #fime: does the EWKGenuineB require normalisation?
+        myNormFactors[opts.normFactorKey] = {'Inclusive': 1.0}
     else:
         raise Exception("This should not be reached!")
-    # Inform user of normalisation factos
+
+    # Inform user of normalisation factors
     msg = "Obtained %s normalisation factor dictionary. The values are:" % (ShellStyles.NoteStyle() + opts.normFactorKey + ShellStyles.NormalStyle() )
     Print(msg, True)
     for i, k in  enumerate(myNormFactors[opts.normFactorKey], 1):
@@ -628,7 +630,7 @@ if __name__ == "__main__":
     EWK_SRC          = DATA_SRC + "EWKGenuineB" # FakeB = Data - EWK GenuineB
     NORM_DATA_SRC    = DATA_SRC + "EWKGenuineB" 
     NORM_EWK_SRC     = DATA_SRC + "EWKGenuineB"
-    INCLUSIVE_ONLY   = True
+    INCLUSIVE_ONLY   = False #True
     MULTICRAB        = None
     SHAPE            = ["TrijetMass"]
     NORMFACTOR_KEY   = "nominal"
@@ -761,4 +763,4 @@ if __name__ == "__main__":
     main(opts)
 
     if not opts.batchMode:
-        raw_input("=== makeInvertedPseudoMulticrab.py: Press any key to quit ROOT ...")
+        raw_input("=== makePseudoMulticrab.py: Press any key to quit ROOT ...")
