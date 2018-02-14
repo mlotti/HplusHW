@@ -164,6 +164,7 @@ void QuarkGluonLikelihoodRatio::bookHistograms(TDirectory* dir) {
   int nQGLBins      = 100;
   float fQGLMin     = 0.0;
   float fQGLMax     = 1.0;
+  /*
   int  nPtBins      =  50;
   float fPtMin      =   0.0;
   float fPtMax      = 500.0;
@@ -208,7 +209,8 @@ void QuarkGluonLikelihoodRatio::bookHistograms(TDirectory* dir) {
       fDRMin      = fCommonPlots->getDeltaRBinSettings().min();
       fDRMax      = fCommonPlots->getDeltaRBinSettings().max();
   }
-
+  */
+  
   hGluonJetQGL = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "GluonJetQGL", "Quark-Gluon discriminant for Gluon Jets", nQGLBins, fQGLMin, fQGLMax);
   hLightJetQGL = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LightJetQGL", "Quark-Gluon discriminant for Light Jets", nQGLBins, fQGLMin, fQGLMax);
  
@@ -276,13 +278,13 @@ QuarkGluonLikelihoodRatio::Data QuarkGluonLikelihoodRatio::privateAnalyze(const 
       }
   }
   
+  /*
   int N  = output.fGluonLightJets.size();
   int Nq = output.fLightJets.size();
   int Ng = output.fGluonJets.size();
-  
   int Permutations = factorial(N)/(factorial(N-Ng)*factorial(Ng));
-  
   //std::cout<<"Number of B-Jets= "<<nBJets<<"  Number of non b-jets= "<<nNoBJets<<"  Number of all light Jets= "<<N<<"    Quark Jets="<<Nq<<"     Gluon Jets="<<Ng<<"    Permutations="<<Permutations<<std::endl;
+  */
   
   double QGLR = calculateQGLR(iEvent, output.fGluonLightJets, output.fLightJets, output.fGluonJets);
   
@@ -364,7 +366,7 @@ double QuarkGluonLikelihoodRatio::calculateL(const Event& iEvent, const std::vec
       
       std::vector<int> v = permutations.at(i);
 
-      for (unsigned int q=0; q<Nq; q++)
+      for (int q=0; q<Nq; q++)
 	{
 	  int index    = v.at(q);
 	  Jet QuarkJet = iEvent.jets()[index];
@@ -446,12 +448,12 @@ bool QuarkGluonLikelihoodRatio::PermutationFound(std::vector<std::vector<int> > 
       int FoundAll = 0;
       
       // Loop over
-      for (unsigned int j=nStart; j<nEnd; j++){
+      for (int j=nStart; j<nEnd; j++){
 	
 	int FindIndex =  v.at(j);
 	
 	bool FoundIndex = false;
-	for (unsigned int k=nStart; k<nEnd;k++){
+	for (int k=nStart; k<nEnd;k++){
 	  if (perm.at(k) == FindIndex) FoundIndex = true;
 	}
 	if (FoundIndex) FoundAll++;
