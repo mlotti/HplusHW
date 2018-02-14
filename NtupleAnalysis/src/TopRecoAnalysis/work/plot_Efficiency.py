@@ -178,10 +178,11 @@ def GetHistoKwargs(histoName, opts):
         print "HERE!"
         units   = "GeV/c"
         xlabel  = "candidate p_{T} (%s)" % (units)
-        myBins  = [0, 50, 100, 150, 200, 250, 300, 400, 500, 600, 800]
+        #myBins  = [0, 50, 100, 150, 200, 250, 300, 400, 500, 600, 800]
+        myBins  = [0, 100, 200, 300, 400, 500, 800]
         kwargs["cutBox"] = {"cutValue": 100.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
 
-    if "pt" in h:
+    elif "pt" in h:
         units   = "GeV/c"
         xlabel  = "candidate p_{T} (%s)" % (units)
         #myBins  = [0, 50, 100, 150, 200, 250, 300, 400, 500, 600, 800]
@@ -279,15 +280,15 @@ def main(opts, signalMass):
 
         # Define the mapping histograms in numerator->denominator pairs
         HistoMap = {
-            "AllTopQuarkPt_MatchedBDT"  : "AllTopQuarkPt_Matched",
+            #"AllTopQuarkPt_MatchedBDT"  : "AllTopQuarkPt_Matched",
             "TrijetFakePt_BDT"          : "TrijetFakePt",
-            #"AllTopQuarkPt_Matched"     : "TopQuarkPt",
+            "AllTopQuarkPt_Matched"     : "TopQuarkPt",
             "EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T_BDT",
             #"EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T_Matched",
             #"EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T",
-            "AllTopQuarkPt_MatchedBDT"  : "TopQuarkPt",
-            "SelectedTrijetsPt_BjetPassCSVdisc_afterCuts": "SelectedTrijetsPt_afterCuts",
-            "TrijetPt_PassBDT_BJetPassCSV": "TrijetPt_PassBDT",
+            #"AllTopQuarkPt_MatchedBDT"  : "TopQuarkPt",
+            #"SelectedTrijetsPt_BjetPassCSVdisc_afterCuts": "SelectedTrijetsPt_afterCuts",
+            #"TrijetPt_PassBDT_BJetPassCSV": "TrijetPt_PassBDT",
             }
         
         #datasetsMgr.merge("QCD", GetListOfQCDatasets())

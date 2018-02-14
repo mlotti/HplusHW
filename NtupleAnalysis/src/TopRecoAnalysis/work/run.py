@@ -143,6 +143,9 @@ def main():
     allSelections.histogramAmbientLevel = opts.histoLevel
     # allSelections.BjetSelection.triggerMatchingApply = True
     # allSelections.TopSelection.ChiSqrCutValue = 100.0
+    #allSelections.TopSelectionBDT.LdgMVACutValue = 0.95
+    #allSelections.TopSelectionBDT.SubldgMVACutValue = 0.95
+    #allSelections.TopSelectionBDT.MVACutValue = 0.95
     # allSelections.BJetSelection.numberOfBJetsCutValue = 0
     # allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
 
