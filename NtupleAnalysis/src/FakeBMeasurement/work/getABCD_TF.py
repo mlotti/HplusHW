@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 '''
-Description:
-This script produces QCD normalization factors by employing an ABCD method
+DESCRIPTION:
+This script produces FakeB normalization factors by employing an ABCD method
 using regions created by inverting the b-jets selections and the MVA2 top 
 (i.e. subleading in BDT discrimant) as follows:
          MVA2max
@@ -389,10 +389,10 @@ def main(opts):
         # Do the fit on the histo after ALL selections (incl. topology cuts)
         folderList = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(opts.folder)
         #folderList1 = [h for h in folderList if "TetrajetPt" in h]
-        folderList1 = [h for h in folderList if "TetrajetMass" in h]
+        #folderList1 = [h for h in folderList if "TetrajetMass" in h]
         #folderList1 = [h for h in folderList if "MET" in h]
         #folderList1 = [h for h in folderList if "TetrajetBJetPt" in h]
-        #folderList1 = [h for h in folderList if "TetrajetBJetEta" in h]
+        folderList1 = [h for h in folderList if "TetrajetBJetEta" in h]
         folderList2 = [h for h in folderList1 if "CRtwo" in h or "VR" in h or "SR" in h or "CRone" in h]
         
         # For-loop: All folders
