@@ -93,13 +93,13 @@ public:
     /// Status of passing event selection
     bool passedSelection() const { return bPassedSelection; }
     /// Obtain number of light and gluon jets
-    int getNumberOfLightAndGluonJets() const { return fGluonLightJets.size(); }
+    int getNumberOfJetsForQGLR() const { return fJetsForQGLR.size(); }
     /// Obtain number of light jets
     int getNumberOfLightJets() const { return fLightJets.size(); }
     /// Obtain number of gluon jets
     int getNumberOfGluonJets() const { return fGluonJets.size(); }
     /// Obtain collection of light and gluon jets
-    const std::vector<Jet>& getLightAndGluonJetCands() const { return fGluonLightJets; }
+    const std::vector<Jet>& getLightAndGluonJetCands() const { return fJetsForQGLR; }
     /// Obtain collection of light jet candidates
     const std::vector<Jet>& getLightJetCands() const { return fLightJets; }
     /// Obtain collection of gluon jet candidates
@@ -112,8 +112,8 @@ public:
   private:
     /// Boolean for passing selection
     bool bPassedSelection;
-    // Light and Gluon Jets
-    std::vector<Jet> fGluonLightJets;
+    // Jets to consider in QGLR calculation
+    std::vector<Jet> fJetsForQGLR;
     // Light Jets
     std::vector<Jet> fLightJets;
     // Gluon Jets
@@ -144,7 +144,7 @@ private:
   /// Get the factorial of a number
   double factorial(const int N);
   /// Calculate QGLR
-  double calculateQGLR(const Event& iEvent, const std::vector<Jet> Jets, const std::vector<Jet> LightJets, const std::vector<Jet> GluonJets);
+  double calculateQGLR(const Event& iEvent, const std::vector<Jet> Jets);
   /// Calculate L(Nq, Ng)
   double calculateL(const Event& iEvent, const std::vector<Jet> Jets, const int Nq, const int Ng);
   /// Get permutations
@@ -176,6 +176,8 @@ private:
   QGLInputStash fProb;
   
   // Histograms
+  WrappedTH1* hAllJetsQGL;
+  WrappedTH1* hAllJetsNonBJetsQGL;
   WrappedTH1* hGluonJetQGL;
   WrappedTH1* hLightJetQGL;
   

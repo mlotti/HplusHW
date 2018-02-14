@@ -108,14 +108,11 @@ void TestQGLR::book(TDirectory *dir) {
   int nQGLBins      = 100;
   float fQGLMin     = 0.0;
   float fQGLMax     = 1.0;
-  int  nPtBins      =  50;
-  
+    
   // Book non-common histograms
   hQGLR = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "QGLR", "Quark-Gluon likelihood ratio", nQGLBins, fQGLMin, fQGLMax);
   hQGLR_isGenuineB = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "QGLR_isGenuineB", "Quark-Gluon likelihood ratio", nQGLBins, fQGLMin, fQGLMax);
   
-  // hAssociatedTop_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTop_Pt", "Associated t pT;p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
-  // hAssociatedTop_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTop_Eta", "Associated t eta;#eta", nBinsEta, minEta, maxEta);
   return;
 }
 
