@@ -1508,7 +1508,6 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	  // Fill histograms
 	  hDeltaRMinTopTrijet -> Fill(dR_tmin);
 	  
-	  // Find index of trijets In top direction (min DeltaR)
 	  if (genuineTop)
 	    {
 	      hAllTopQuarkPt_Matched-> Fill(top.pt());
