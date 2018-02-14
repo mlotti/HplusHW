@@ -296,6 +296,85 @@ private:
   WrappedTH1Triplet *hSubldgTrijetPt;
   WrappedTH1Triplet *hSubldgTrijetDijetPt;
 
+  WrappedTH1Triplet *hFatTop_LdgTrijet_Pt;
+  WrappedTH1Triplet *hFatW_LdgTrijet_Pt;
+  WrappedTH1Triplet *hFatJB_LdgTrijet_Pt;
+  WrappedTH1Triplet *hFatTop_SubldgTrijet_Pt;
+  WrappedTH1Triplet *hFatW_SubldgTrijet_Pt;
+  WrappedTH1Triplet *hFatJB_SubldgTrijet_Pt;
+
+  WrappedTH1 *hLdgFatJetPt;
+  WrappedTH1 *hLdgFatJet_tau21;
+  WrappedTH1 *hLdgFatJet_tau32;
+  WrappedTH1 *hLdgFatJetPt_beforeTopSelection;
+  WrappedTH1 *hLdgFatJet_tau21_beforeTopSelection;
+  WrappedTH1 *hLdgFatJet_tau32_beforeTopSelection;
+
+  WrappedTH1 *hSubldgFatJetPt;
+  WrappedTH1 *hSubldgFatJet_tau21;
+  WrappedTH1 *hSubldgFatJet_tau32;
+  WrappedTH1 *hSubldgFatJetPt_beforeTopSelection;
+  WrappedTH1 *hSubldgFatJet_tau21_beforeTopSelection;
+  WrappedTH1 *hSubldgFatJet_tau32_beforeTopSelection;
+
+  WrappedTH1Triplet *hFatTop_LdgTrijet_tau21;
+  WrappedTH1Triplet *hFatW_LdgTrijet_tau21;
+  WrappedTH1Triplet *hFatJB_LdgTrijet_tau21;
+  WrappedTH1Triplet *hFatTop_SubldgTrijet_tau21;
+  WrappedTH1Triplet *hFatW_SubldgTrijet_tau21;
+  WrappedTH1Triplet *hFatJB_SubldgTrijet_tau21;
+
+
+
+  WrappedTH1Triplet *hFatTop_LdgTrijet_tau32;
+  WrappedTH1Triplet *hFatW_LdgTrijet_tau32;
+  WrappedTH1Triplet *hFatJB_LdgTrijet_tau32;
+  WrappedTH1Triplet *hFatTop_SubldgTrijet_tau32;
+  WrappedTH1Triplet *hFatW_SubldgTrijet_tau32;
+  WrappedTH1Triplet *hFatJB_SubldgTrijet_tau32;
+
+
+
+  //=======
+
+  WrappedTH1Triplet *hFatTop_LdgTrijet_Pt_ht900;
+  WrappedTH1Triplet *hFatW_LdgTrijet_Pt_ht900;
+  WrappedTH1Triplet *hFatJB_LdgTrijet_Pt_ht900;
+  WrappedTH1Triplet *hFatTop_SubldgTrijet_Pt_ht900;
+  WrappedTH1Triplet *hFatW_SubldgTrijet_Pt_ht900;
+  WrappedTH1Triplet *hFatJB_SubldgTrijet_Pt_ht900;
+
+  WrappedTH1 *hLdgFatJetPt_ht900;
+  WrappedTH1 *hLdgFatJet_tau21_ht900;
+  WrappedTH1 *hLdgFatJet_tau32_ht900;
+  WrappedTH1 *hLdgFatJetPt_ht900_beforeTopSelection;
+  WrappedTH1 *hLdgFatJet_tau21_ht900_beforeTopSelection;
+  WrappedTH1 *hLdgFatJet_tau32_ht900_beforeTopSelection;
+
+  WrappedTH1 *hSubldgFatJetPt_ht900;
+  WrappedTH1 *hSubldgFatJet_tau21_ht900;
+  WrappedTH1 *hSubldgFatJet_tau32_ht900;
+  WrappedTH1 *hSubldgFatJetPt_ht900_beforeTopSelection;
+  WrappedTH1 *hSubldgFatJet_tau21_ht900_beforeTopSelection;
+  WrappedTH1 *hSubldgFatJet_tau32_ht900_beforeTopSelection;
+
+
+  WrappedTH1Triplet *hFatTop_LdgTrijet_tau21_ht900;
+  WrappedTH1Triplet *hFatW_LdgTrijet_tau21_ht900;
+  WrappedTH1Triplet *hFatJB_LdgTrijet_tau21_ht900;
+  WrappedTH1Triplet *hFatTop_SubldgTrijet_tau21_ht900;
+  WrappedTH1Triplet *hFatW_SubldgTrijet_tau21_ht900;
+  WrappedTH1Triplet *hFatJB_SubldgTrijet_tau21_ht900;
+
+
+  WrappedTH1Triplet *hFatTop_LdgTrijet_tau32_ht900;
+  WrappedTH1Triplet *hFatW_LdgTrijet_tau32_ht900;
+  WrappedTH1Triplet *hFatJB_LdgTrijet_tau32_ht900;
+  WrappedTH1Triplet *hFatTop_SubldgTrijet_tau32_ht900;
+  WrappedTH1Triplet *hFatW_SubldgTrijet_tau32_ht900;
+  WrappedTH1Triplet *hFatJB_SubldgTrijet_tau32_ht900;
+
+
 
 };
 
@@ -345,9 +424,9 @@ void TopRecoAnalysis::book(TDirectory *dir) {
   const float fWMassMin   = fCommonPlots.getWMassBinSettings().min();
   const float fWMassMax   = fCommonPlots.getWMassBinSettings().max();
 
-  const int nInvMassBins    = fCommonPlots.getInvMassBinSettings().bins();
-  const float fInvMassMin   = fCommonPlots.getInvMassBinSettings().min();
-  const float fInvMassMax   = fCommonPlots.getInvMassBinSettings().max();
+  // const int nInvMassBins    = fCommonPlots.getInvMassBinSettings().bins();
+  // const float fInvMassMin   = fCommonPlots.getInvMassBinSettings().min();
+  // const float fInvMassMax   = fCommonPlots.getInvMassBinSettings().max();
 
   const int nPtBins_modif       =     fCommonPlots.getPtBinSettings().bins();
   const double fPtMin_modif     = 2 * fCommonPlots.getPtBinSettings().min();
@@ -712,15 +791,15 @@ void TopRecoAnalysis::book(TDirectory *dir) {
 										     nDPhiBins , fDPhiMin , fDPhiMax, nPtBins_modif,fPtMin_modif,fPtMax_modif);
 
 
-  hTetrajetMass                     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass", ";m_{jjbb} (GeV/c^{2})",                 nInvMassBins, fInvMassMin, fInvMassMax);
-  hTetrajetMass_M800                     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_M800", ";m_{jjbb} (GeV/c^{2})",       nInvMassBins, fInvMassMin, fInvMassMax);
-  hTetrajetMass_LdgTopIsHTop        = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_LdgTopIsHTop", ";m_{jjbb} (GeV/c^{2})",    nInvMassBins, fInvMassMin, fInvMassMax);
-  hTetrajetMass_SubldgTopIsHTop     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_SubldgTopIsHTop", ";m_{jjbb} (GeV/c^{2})", nInvMassBins, fInvMassMin, fInvMassMax);
-  hTetrajetMass_deltaPhiCond        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TetrajetMass_deltaPhiCond", ";m_{jjbb} (GeV/c^{2})",              nInvMassBins, fInvMassMin, fInvMassMax);
-  hTetrajetMass_isGenuineB          = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_isGenuineB", ";m_{jjbb} (GeV/c^{2})",      nInvMassBins, fInvMassMin, fInvMassMax);
+  hTetrajetMass                     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass", ";m_{jjbb} (GeV/c^{2})",                 250,  0, 2500);
+  hTetrajetMass_M800                     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_M800", ";m_{jjbb} (GeV/c^{2})",       250,  0, 2500);
+  hTetrajetMass_LdgTopIsHTop        = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_LdgTopIsHTop", ";m_{jjbb} (GeV/c^{2})",    250,  0, 2500);
+  hTetrajetMass_SubldgTopIsHTop     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_SubldgTopIsHTop", ";m_{jjbb} (GeV/c^{2})", 250,  0, 2500);
+  hTetrajetMass_deltaPhiCond        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TetrajetMass_deltaPhiCond", ";m_{jjbb} (GeV/c^{2})",              250,  0, 2500);
+  hTetrajetMass_isGenuineB          = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_isGenuineB", ";m_{jjbb} (GeV/c^{2})",      250,  0, 2500);
 
 
-  hTetrajetMass_closeJetToTetrajetBjet = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_closeJetToTetrajetBjet", ";m_{jjbb} (GeV/c^{2})",      nInvMassBins, fInvMassMin, fInvMassMax);
+  hTetrajetMass_closeJetToTetrajetBjet = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_closeJetToTetrajetBjet", ";m_{jjbb} (GeV/c^{2})",      250,  0, 2500);
 
 
   hTetrajetPtDPhi                     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetPtDPhi", ";p_{T,jjbb}#Delta#phi(top,b) (GeV/c)",      nPtBins, fPtMin, fPtMax*fDPhiMax);
@@ -745,6 +824,91 @@ void TopRecoAnalysis::book(TDirectory *dir) {
   hLdgTrijetDijetPt      = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "LdgTrijetDijetPt", ";p_{T}",100, 0,1000);
   hSubldgTrijetPt           = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "SubldgTrijetPt", ";p_{T}", 100, 0, 1000);
   hSubldgTrijetDijetPt      = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "SubldgTrijetDijetPt", ";p_{T}",100, 0,1000);
+
+
+  hFatTop_LdgTrijet_Pt      = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatTop_LdgTrijet_Pt", ";p_{T} (GeV/c)", 100, 0, 1000);
+  hFatW_LdgTrijet_Pt        = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatW_LdgTrijet_Pt", ";p_{T} (GeV/c)", 100, 0, 1000);
+  hFatJB_LdgTrijet_Pt      = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatJB_LdgTrijet_Pt", ";p_{T} (GeV/c)", 100, 0, 1000);
+  hFatTop_SubldgTrijet_Pt   = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatTop_SubldgTrijet_Pt", ";p_{T} (GeV/c)", 100, 0, 1000);
+  hFatW_SubldgTrijet_Pt     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatW_SubldgTrijet_Pt", ";p_{T} (GeV/c)", 100, 0, 1000);
+  hFatJB_SubldgTrijet_Pt   = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatJB_SubldgTrijet_Pt", ";p_{T} (GeV/c)", 100, 0, 1000);
+
+  hLdgFatJetPt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdirTH1, "LdgFatJetPt", ";p_{T} (GeV/c)", 100, 0, 1000);
+  hLdgFatJet_tau21  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdirTH1, "LdgFatJet_tau21", ";#tau_{21}(#tau_{2}/#tau_{1})", 50, 0, 1.0);
+  hLdgFatJet_tau32  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdirTH1, "LdgFatJet_tau32", ";#tau_{32}(#tau_{3}/#tau_{2})", 50, 0, 1.0);
+  hLdgFatJetPt_beforeTopSelection      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdirTH1, "LdgFatJetPt_beforeTopSelection", ";p_{T} (GeV/c)", 100, 0, 1000);
+  hLdgFatJet_tau21_beforeTopSelection  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdirTH1, "LdgFatJet_tau21_beforeTopSelection", ";#tau_{21}(#tau_{2}/#tau_{1})", 50, 0, 1.0);
+  hLdgFatJet_tau32_beforeTopSelection  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdirTH1, "LdgFatJet_tau32_beforeTopSelection", ";#tau_{32}(#tau_{3}/#tau_{2})", 50, 0, 1.0);
+
+
+  hSubldgFatJetPt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdirTH1, "SubldgFatJetPt", ";p_{T} (GeV/c)", 100, 0, 1000);
+  hSubldgFatJet_tau21  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdirTH1, "SubldgFatJet_tau21", ";#tau_{21}(#tau_{2}/#tau_{1})", 50, 0, 1.0);
+  hSubldgFatJet_tau32  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdirTH1, "SubldgFatJet_tau32", ";#tau_{32}(#tau_{3}/#tau_{2})", 50, 0, 1.0);
+  hSubldgFatJetPt_beforeTopSelection      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdirTH1, "SubldgFatJetPt_beforeTopSelection", ";p_{T} (GeV/c)", 100, 0, 1000);
+  hSubldgFatJet_tau21_beforeTopSelection  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdirTH1, "SubldgFatJet_tau21_beforeTopSelection", ";#tau_{21}(#tau_{2}/#tau_{1})", 50, 0, 1.0);
+  hSubldgFatJet_tau32_beforeTopSelection  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdirTH1, "SubldgFatJet_tau32_beforeTopSelection", ";#tau_{32}(#tau_{3}/#tau_{2})", 50, 0, 1.0);
+
+
+  hFatTop_LdgTrijet_tau21      = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatTop_LdgTrijet_tau21", ";#tau_{21}(#tau_{2}/#tau_{1})", 50, 0, 1.0);
+  hFatW_LdgTrijet_tau21        = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatW_LdgTrijet_tau21", ";#tau_{21}(#tau_{2}/#tau_{1})", 50, 0, 1.0);
+  hFatJB_LdgTrijet_tau21      = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatJB_LdgTrijet_tau21", ";#tau_{21}(#tau_{2}/#tau_{1})", 50, 0, 1.0);
+  hFatTop_SubldgTrijet_tau21   = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatTop_SubldgTrijet_tau21", ";#tau_{21}(#tau_{2}/#tau_{1})", 50, 0, 1.0);
+  hFatW_SubldgTrijet_tau21     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatW_SubldgTrijet_tau21", ";#tau_{21}(#tau_{2}/#tau_{1})", 50, 0, 1.0);
+  hFatJB_SubldgTrijet_tau21   = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatJB_SubldgTrijet_tau21", ";#tau_{21}(#tau_{2}/#tau_{1})", 50, 0, 1.0);
+
+
+
+
+  hFatTop_LdgTrijet_tau32      = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatTop_LdgTrijet_tau32", ";#tau_{32}(#tau_{3}/#tau_{2})", 50, 0, 1.0);
+  hFatW_LdgTrijet_tau32        = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatW_LdgTrijet_tau32", ";#tau_{32}(#tau_{3}/#tau_{2})", 50, 0, 1.0);
+  hFatJB_LdgTrijet_tau32      = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatJB_LdgTrijet_tau32", ";#tau_{32}(#tau_{3}/#tau_{2})", 50, 0, 1.0);
+  hFatTop_SubldgTrijet_tau32   = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatTop_SubldgTrijet_tau32", ";#tau_{32}(#tau_{3}/#tau_{2})", 50, 0, 1.0);
+  hFatW_SubldgTrijet_tau32     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatW_SubldgTrijet_tau32", ";#tau_{32}(#tau_{3}/#tau_{2})", 50, 0, 1.0);
+  hFatJB_SubldgTrijet_tau32   = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatJB_SubldgTrijet_tau32", ";#tau_{32}(#tau_{3}/#tau_{2})", 50, 0, 1.0);
+
+
+
+  //===============
+
+  hFatTop_LdgTrijet_Pt_ht900      = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatTop_LdgTrijet_Pt_ht900", ";p_{T} (GeV/c)", 100, 0, 1000);
+  hFatW_LdgTrijet_Pt_ht900        = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatW_LdgTrijet_Pt_ht900", ";p_{T} (GeV/c)", 100, 0, 1000);
+  hFatJB_LdgTrijet_Pt_ht900      = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatJB_LdgTrijet_Pt_ht900", ";p_{T} (GeV/c)", 100, 0, 1000);
+  hFatTop_SubldgTrijet_Pt_ht900   = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatTop_SubldgTrijet_Pt_ht900", ";p_{T} (GeV/c)", 100, 0, 1000);
+  hFatW_SubldgTrijet_Pt_ht900     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatW_SubldgTrijet_Pt_ht900", ";p_{T} (GeV/c)", 100, 0, 1000);
+  hFatJB_SubldgTrijet_Pt_ht900   = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatJB_SubldgTrijet_Pt_ht900", ";p_{T} (GeV/c)", 100, 0, 1000);
+
+  hLdgFatJetPt_ht900  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdirTH1, "LdgFatJetPt_ht900", ";p_{T} (GeV/c)", 100, 0, 1000);
+  hLdgFatJet_tau21_ht900  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdirTH1, "LdgFatJet_tau21_ht900", ";#tau_{21}(#tau_{2}/#tau_{1})", 50, 0, 1.0);
+  hLdgFatJet_tau32_ht900  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdirTH1, "LdgFatJet_tau32_ht900", ";#tau_{32}(#tau_{3}/#tau_{2})", 50, 0, 1.0);
+  hLdgFatJetPt_ht900_beforeTopSelection  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdirTH1, "LdgFatJetPt_ht900_beforeTopSelection", ";p_{T} (GeV/c)", 100, 0, 1000);
+  hLdgFatJet_tau21_ht900_beforeTopSelection  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdirTH1, "LdgFatJet_tau21_ht900_beforeTopSelection", ";#tau_{21}(#tau_{2}/#tau_{1})", 50, 0, 1.0);
+  hLdgFatJet_tau32_ht900_beforeTopSelection  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdirTH1, "LdgFatJet_tau32_ht900_beforeTopSelection", ";#tau_{32}(#tau_{3}/#tau_{2})", 50, 0, 1.0);
+
+  hSubldgFatJetPt_ht900  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdirTH1, "SubldgFatJetPt_ht900", ";p_{T} (GeV/c)", 100, 0, 1000);
+  hSubldgFatJet_tau21_ht900  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdirTH1, "SubldgFatJet_tau21_ht900", ";#tau_{21}(#tau_{2}/#tau_{1})", 50, 0, 1.0);
+  hSubldgFatJet_tau32_ht900  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdirTH1, "SubldgFatJet_tau32_ht900", ";#tau_{32}(#tau_{3}/#tau_{2})", 50, 0, 1.0);
+  hSubldgFatJetPt_ht900_beforeTopSelection  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdirTH1, "SubldgFatJetPt_ht900_beforeTopSelection", ";p_{T} (GeV/c)", 100, 0, 1000);
+  hSubldgFatJet_tau21_ht900_beforeTopSelection  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdirTH1, "SubldgFatJet_tau21_ht900_beforeTopSelection", ";#tau_{21}(#tau_{2}/#tau_{1})", 50, 0, 1.0);
+  hSubldgFatJet_tau32_ht900_beforeTopSelection  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdirTH1, "SubldgFatJet_tau32_ht900_beforeTopSelection", ";#tau_{32}(#tau_{3}/#tau_{2})", 50, 0, 1.0);
+
+
+  hFatTop_LdgTrijet_tau21_ht900      = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatTop_LdgTrijet_tau21_ht900", ";#tau_{21}(#tau_{2}/#tau_{1})", 50, 0, 1.0);
+  hFatW_LdgTrijet_tau21_ht900        = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatW_LdgTrijet_tau21_ht900", ";#tau_{21}(#tau_{2}/#tau_{1})", 50, 0, 1.0);
+  hFatJB_LdgTrijet_tau21_ht900      = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatJB_LdgTrijet_tau21_ht900", ";#tau_{21}(#tau_{2}/#tau_{1})", 50, 0, 1.0);
+  hFatTop_SubldgTrijet_tau21_ht900   = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatTop_SubldgTrijet_tau21_ht900", ";#tau_{21}(#tau_{2}/#tau_{1})", 50, 0, 1.0);
+  hFatW_SubldgTrijet_tau21_ht900     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatW_SubldgTrijet_tau21_ht900", ";#tau_{21}(#tau_{2}/#tau_{1})", 50, 0, 1.0);
+  hFatJB_SubldgTrijet_tau21_ht900   = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatJB_SubldgTrijet_tau21_ht900", ";#tau_{21}(#tau_{2}/#tau_{1})", 50, 0, 1.0);
+
+  hFatTop_LdgTrijet_tau32_ht900      = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatTop_LdgTrijet_tau32_ht900", ";#tau_{32}(#tau_{3}/#tau_{2})", 50, 0, 1.0);
+  hFatW_LdgTrijet_tau32_ht900        = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatW_LdgTrijet_tau32_ht900", ";#tau_{32}(#tau_{3}/#tau_{2})", 50, 0, 1.0);
+  hFatJB_LdgTrijet_tau32_ht900      = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatJB_LdgTrijet_tau32_ht900", ";#tau_{32}(#tau_{3}/#tau_{2})", 50, 0, 1.0);
+  hFatTop_SubldgTrijet_tau32_ht900   = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatTop_SubldgTrijet_tau32_ht900", ";#tau_{32}(#tau_{3}/#tau_{2})", 50, 0, 1.0);
+  hFatW_SubldgTrijet_tau32_ht900     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatW_SubldgTrijet_tau32_ht900", ";#tau_{32}(#tau_{3}/#tau_{2})", 50, 0, 1.0);
+  hFatJB_SubldgTrijet_tau32_ht900   = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatJB_SubldgTrijet_tau32_ht900", ";#tau_{32}(#tau_{3}/#tau_{2})", 50, 0, 1.0);
+
+
+
+
 
 
   return;
@@ -1065,10 +1229,108 @@ void TopRecoAnalysis::process(Long64_t entry) {
   // All Selections
   //================================================================================================
   //  if (!topologyData.passedSelection()) return;
-  if (!topData.passedSelection()) return;
 
+  //Before TopSelection
+  AK8Jet LdgFatJet, SubldgFatJet;
+  double ldgFatJet_pt = -999.999, sldgFatJet_pt = -999.999;
+  double HT = jetData.HT();
+  
+  //  int i=0;
+
+  for(AK8Jet fatJet: fEvent.ak8jets())
+    {
+      if (ldgFatJet_pt > fatJet.pt()) continue;
+      // if (ldgFatJet_pt > -1.0){
+      // 	std::cout<<"never here?"<<std::endl;
+      // 	SubldgFatJet = LdgFatJet;
+      // 	sldgFatJet_pt = ldgFatJet_pt;
+      // }
+      ldgFatJet_pt = fatJet.pt();
+      LdgFatJet = fatJet;
+      //std::cout<<"here?"<<std::endl;
+    }
+
+  bool haveLdgFatJet = ldgFatJet_pt > -1;
+  if (haveLdgFatJet)
+    {
+      for(AK8Jet fatJet: fEvent.ak8jets())
+	{
+	  if (LdgFatJet.index() == fatJet.index()) continue;
+	  if (sldgFatJet_pt > fatJet.pt()) continue;
+	  sldgFatJet_pt = fatJet.pt();
+	  SubldgFatJet = fatJet;
+	}
+    }
+
+
+  bool haveSubldgFatJet = sldgFatJet_pt > -1;
+
+  //  std::cout<<ldgFatJet_pt<<" "<<sldgFatJet_pt<<std::endl;
+
+  if (haveLdgFatJet)
+    {
+      hLdgFatJetPt_beforeTopSelection     -> Fill(LdgFatJet.pt());
+      hLdgFatJet_tau21_beforeTopSelection -> Fill(LdgFatJet.NjettinessAK8CHStau2()/LdgFatJet.NjettinessAK8CHStau1());
+      hLdgFatJet_tau32_beforeTopSelection -> Fill(LdgFatJet.NjettinessAK8CHStau3()/LdgFatJet.NjettinessAK8CHStau2());
+
+      if (haveSubldgFatJet)
+	{
+	  hSubldgFatJetPt_beforeTopSelection     -> Fill(SubldgFatJet.pt());
+	  hSubldgFatJet_tau21_beforeTopSelection -> Fill(SubldgFatJet.NjettinessAK8CHStau2()/SubldgFatJet.NjettinessAK8CHStau1());
+	  hSubldgFatJet_tau32_beforeTopSelection -> Fill(SubldgFatJet.NjettinessAK8CHStau3()/SubldgFatJet.NjettinessAK8CHStau2());
+	}
+      if (HT > 900)
+	{
+	  hLdgFatJetPt_ht900_beforeTopSelection     -> Fill(LdgFatJet.pt());
+	  hLdgFatJet_tau21_ht900_beforeTopSelection -> Fill(LdgFatJet.NjettinessAK8CHStau2()/LdgFatJet.NjettinessAK8CHStau1());
+	  hLdgFatJet_tau32_ht900_beforeTopSelection -> Fill(LdgFatJet.NjettinessAK8CHStau3()/LdgFatJet.NjettinessAK8CHStau2());
+	  
+	  if (haveSubldgFatJet)
+	    {
+	      hSubldgFatJetPt_ht900_beforeTopSelection     -> Fill(SubldgFatJet.pt());
+	      hSubldgFatJet_tau21_ht900_beforeTopSelection -> Fill(SubldgFatJet.NjettinessAK8CHStau2()/SubldgFatJet.NjettinessAK8CHStau1());
+	      hSubldgFatJet_tau32_ht900_beforeTopSelection -> Fill(SubldgFatJet.NjettinessAK8CHStau3()/SubldgFatJet.NjettinessAK8CHStau2());
+	    }
+	}
+    }
+
+
+  if (!topData.passedSelection()) return;
   if (0) std::cout << "=== All Selections" << std::endl;
   cSelected.increment();
+
+
+
+  //After Top Selection
+
+  if (haveLdgFatJet)
+    {
+      hLdgFatJetPt     -> Fill(LdgFatJet.pt());
+      hLdgFatJet_tau21 -> Fill(LdgFatJet.NjettinessAK8CHStau2()/LdgFatJet.NjettinessAK8CHStau1());
+      hLdgFatJet_tau32 -> Fill(LdgFatJet.NjettinessAK8CHStau3()/LdgFatJet.NjettinessAK8CHStau2());
+
+      if (haveSubldgFatJet)
+	{
+	  hSubldgFatJetPt     -> Fill(SubldgFatJet.pt());
+	  hSubldgFatJet_tau21 -> Fill(SubldgFatJet.NjettinessAK8CHStau2()/SubldgFatJet.NjettinessAK8CHStau1());
+	  hSubldgFatJet_tau32 -> Fill(SubldgFatJet.NjettinessAK8CHStau3()/SubldgFatJet.NjettinessAK8CHStau2());
+	}
+      if (HT > 900)
+	{
+	  hLdgFatJetPt_ht900     -> Fill(LdgFatJet.pt());
+	  hLdgFatJet_tau21_ht900 -> Fill(LdgFatJet.NjettinessAK8CHStau2()/LdgFatJet.NjettinessAK8CHStau1());
+	  hLdgFatJet_tau32_ht900 -> Fill(LdgFatJet.NjettinessAK8CHStau3()/LdgFatJet.NjettinessAK8CHStau2());
+	  
+	  if (haveSubldgFatJet)
+	    {	  
+	      hSubldgFatJetPt_ht900     -> Fill(SubldgFatJet.pt());
+	      hSubldgFatJet_tau21_ht900 -> Fill(SubldgFatJet.NjettinessAK8CHStau2()/SubldgFatJet.NjettinessAK8CHStau1());
+	      hSubldgFatJet_tau32_ht900 -> Fill(SubldgFatJet.NjettinessAK8CHStau3()/SubldgFatJet.NjettinessAK8CHStau2());
+	    }
+	}
+    }
+
+
 
   //Soti Analysis
   //================================================================================================                             
@@ -1115,7 +1377,7 @@ void TopRecoAnalysis::process(Long64_t entry) {
 
   hCevts_FatJet_Pt450 -> Fill("All", 1);
   bool foundFatJet_Pt450 =false;
-  for(AK8JetsSoftDrop jet: fEvent.ak8jetsSoftDrop())
+  for(AK8Jet jet: fEvent.ak8jets())
     {
       if (jet.pt() > 450) foundFatJet_Pt450 = true;
     }
@@ -1683,6 +1945,121 @@ void TopRecoAnalysis::process(Long64_t entry) {
     }
 
 
+  for(AK8Jet fatJet: fEvent.ak8jets())
+    {
+
+      bool haveLdgFatTop = false, haveLdgFatW = false, haveLdgFatBJ = false;
+      bool haveSubldgFatTop = false, haveSubldgFatW = false, haveSubldgFatBJ = false;
+
+      double ldg_dR1fat =  ROOT::Math::VectorUtil::DeltaR( LdgTrijet.Jet1.p4(), fatJet.p4());
+      double ldg_dR2fat =  ROOT::Math::VectorUtil::DeltaR( LdgTrijet.Jet2.p4(), fatJet.p4());
+      double ldg_dRbfat =  ROOT::Math::VectorUtil::DeltaR( LdgTrijet.BJet.p4(), fatJet.p4());
+
+      double sldg_dR1fat =  ROOT::Math::VectorUtil::DeltaR( SubldgTrijet.Jet1.p4(), fatJet.p4());
+      double sldg_dR2fat =  ROOT::Math::VectorUtil::DeltaR( SubldgTrijet.Jet2.p4(), fatJet.p4());
+      double sldg_dRbfat =  ROOT::Math::VectorUtil::DeltaR( SubldgTrijet.BJet.p4(), fatJet.p4());
+
+      bool isLdgTrijetW_untagged    = max(LdgTrijet.Jet1.bjetDiscriminator(), LdgTrijet.Jet2.bjetDiscriminator()) < 0.5426;
+      bool isSubldgTrijetW_untagged = max(SubldgTrijet.Jet1.bjetDiscriminator(), SubldgTrijet.Jet2.bjetDiscriminator()) < 0.5426;
+
+      double tau21 = fatJet.NjettinessAK8CHStau2()/fatJet.NjettinessAK8CHStau1();
+      double tau32 = fatJet.NjettinessAK8CHStau3()/fatJet.NjettinessAK8CHStau2();
+      
+      if (max(ldg_dRbfat, max(ldg_dR1fat, ldg_dR2fat)) < 0.8)                        haveLdgFatTop = true;
+      else if (max(ldg_dR1fat, ldg_dR2fat) < 0.8)                                    haveLdgFatW = true;
+      else if (max(ldg_dRbfat, ldg_dR1fat)< 0.8 || max(ldg_dRbfat, ldg_dR2fat)< 0.8) haveLdgFatBJ = true;      
+
+      if (max(sldg_dRbfat, max(sldg_dR1fat, sldg_dR2fat)) < 0.8)                         haveSubldgFatTop = true;
+      else if (max(sldg_dR1fat, sldg_dR2fat) < 0.8)                                      haveSubldgFatW = true;
+      else if (max(sldg_dRbfat, sldg_dR1fat)< 0.8 || max(sldg_dRbfat, sldg_dR2fat)< 0.8) haveSubldgFatBJ = true;
+
+      // if (haveLdgFatTop+haveLdgFatW+haveLdgFatBJ > 0)
+      // 	{
+      // 	  std::cout<<"DeltaR "<<ldg_dR1fat<<" "<<ldg_dR2fat<<" "<<ldg_dRbfat<<std::endl;
+      // 	  std::cout<<haveLdgFatTop<<" "<<haveLdgFatW<<" "<<haveLdgFatBJ<<std::endl;
+      // 	}
+
+      // if (haveLdgFatTop || haveLdgFatW || haveLdgFatBJ) Fat_ldgTrijet = fatJet;
+      // if (haveSubldgFatTop || haveSubldgFatW || haveSubldgFatBJ) Fat_sldgTrijet = fatJet;
+      
+      if (haveLdgFatTop)
+	{
+	  hFatTop_LdgTrijet_Pt -> Fill(isLdgTrijetW_untagged, fatJet.pt());
+	  hFatTop_LdgTrijet_tau21 -> Fill(isLdgTrijetW_untagged, tau21);
+	  hFatTop_LdgTrijet_tau32 -> Fill(isLdgTrijetW_untagged, tau32);
+
+	  if (HT > 900)
+	    {
+	      hFatTop_LdgTrijet_Pt_ht900 -> Fill(isLdgTrijetW_untagged, fatJet.pt());
+	      hFatTop_LdgTrijet_tau21_ht900 -> Fill(isLdgTrijetW_untagged, tau21);
+	      hFatTop_LdgTrijet_tau32_ht900 -> Fill(isLdgTrijetW_untagged, tau32);
+	    }
+	}
+      if (haveLdgFatW)
+	{
+	  hFatW_LdgTrijet_Pt   -> Fill(isLdgTrijetW_untagged, fatJet.pt());
+	  hFatW_LdgTrijet_tau21  -> Fill(isLdgTrijetW_untagged, tau21);
+	  hFatW_LdgTrijet_tau32  -> Fill(isLdgTrijetW_untagged, tau32);
+	  if (HT > 900)
+	    {
+	      hFatW_LdgTrijet_Pt_ht900 -> Fill(isLdgTrijetW_untagged, fatJet.pt());
+	      hFatW_LdgTrijet_tau21_ht900 -> Fill(isLdgTrijetW_untagged, tau21);
+	      hFatW_LdgTrijet_tau32_ht900 -> Fill(isLdgTrijetW_untagged, tau32);
+	    }
+	}
+      if (haveLdgFatBJ)
+	{
+	  hFatJB_LdgTrijet_Pt -> Fill(isLdgTrijetW_untagged, fatJet.pt());
+	  hFatJB_LdgTrijet_tau21 -> Fill(isLdgTrijetW_untagged, tau21);
+	  hFatJB_LdgTrijet_tau32 -> Fill(isLdgTrijetW_untagged, tau32);
+	  if (HT > 900)
+	    {
+	      hFatJB_LdgTrijet_Pt_ht900 -> Fill(isLdgTrijetW_untagged, fatJet.pt());
+	      hFatJB_LdgTrijet_tau21_ht900 -> Fill(isLdgTrijetW_untagged, tau21);
+	      hFatJB_LdgTrijet_tau32_ht900 -> Fill(isLdgTrijetW_untagged, tau32);
+	    }
+	}
+
+      if (haveSubldgFatTop)
+	{
+	  hFatTop_SubldgTrijet_Pt -> Fill(isSubldgTrijetW_untagged, fatJet.pt());
+	  hFatTop_SubldgTrijet_tau21 -> Fill(isSubldgTrijetW_untagged, tau21);
+	  hFatTop_SubldgTrijet_tau32 -> Fill(isSubldgTrijetW_untagged, tau32);
+	  if (HT > 900)
+	    {
+	      hFatTop_SubldgTrijet_Pt_ht900 -> Fill(isSubldgTrijetW_untagged, fatJet.pt());
+	      hFatTop_SubldgTrijet_tau21_ht900 -> Fill(isSubldgTrijetW_untagged, tau21);
+	      hFatTop_SubldgTrijet_tau32_ht900 -> Fill(isSubldgTrijetW_untagged, tau32);
+	    }
+	}
+      if (haveSubldgFatW)
+	{
+	  hFatW_SubldgTrijet_Pt   -> Fill(isSubldgTrijetW_untagged, fatJet.pt());
+	  hFatW_SubldgTrijet_tau21   -> Fill(isSubldgTrijetW_untagged, tau21);
+	  hFatW_SubldgTrijet_tau32   -> Fill(isSubldgTrijetW_untagged, tau32);
+	  if (HT > 900)
+	    {
+	      hFatW_SubldgTrijet_Pt_ht900   -> Fill(isSubldgTrijetW_untagged, fatJet.pt());
+	      hFatW_SubldgTrijet_tau21_ht900   -> Fill(isSubldgTrijetW_untagged, tau21);
+	      hFatW_SubldgTrijet_tau32_ht900   -> Fill(isSubldgTrijetW_untagged, tau32);
+	    }
+	}
+      if (haveSubldgFatBJ)
+	{
+	  hFatJB_SubldgTrijet_Pt  -> Fill(isSubldgTrijetW_untagged, fatJet.pt());
+	  hFatJB_SubldgTrijet_tau21  -> Fill(isSubldgTrijetW_untagged, tau21);
+	  hFatJB_SubldgTrijet_tau32  -> Fill(isSubldgTrijetW_untagged, tau32);
+	  if (HT > 900)
+	    {
+	      hFatJB_SubldgTrijet_Pt_ht900  -> Fill(isSubldgTrijetW_untagged, fatJet.pt());
+	      hFatJB_SubldgTrijet_tau21_ht900  -> Fill(isSubldgTrijetW_untagged, tau21);
+	      hFatJB_SubldgTrijet_tau32_ht900  -> Fill(isSubldgTrijetW_untagged, tau32);
+	    }
+	}
+
+      //NjettinessAK8CHStau1
+    }
+  
   //===Definitions
   math::XYZTLorentzVector tetrajet_p4, subldgTetrajet_p4; 
   tetrajet_p4 = LdgTrijet.TrijetP4 + topData.getTetrajetBJet().p4();
@@ -1745,9 +2122,9 @@ void TopRecoAnalysis::process(Long64_t entry) {
   //===Fill Histograms
 
 
-  hLdgTrijetPt -> Fill(LdgTopIsTopFromH, LdgTrijet.TrijetP4.Pt());
-  hLdgTrijetDijetPt -> Fill(LdgTopIsTopFromH, topData.getLdgTrijetDijet().Pt());
-  hSubldgTrijetPt -> Fill(SubldgTopIsTopFromH, SubldgTrijet.TrijetP4.Pt());
+  hLdgTrijetPt         -> Fill(LdgTopIsTopFromH, LdgTrijet.TrijetP4.Pt());
+  hLdgTrijetDijetPt    -> Fill(LdgTopIsTopFromH, topData.getLdgTrijetDijet().Pt());
+  hSubldgTrijetPt      -> Fill(SubldgTopIsTopFromH, SubldgTrijet.TrijetP4.Pt());
   hSubldgTrijetDijetPt -> Fill(SubldgTopIsTopFromH, topData.getLdgTrijetDijet().Pt());
 
 
@@ -1954,6 +2331,7 @@ void TopRecoAnalysis::process(Long64_t entry) {
 
   
 
+  
  //================================================================================================
   // Fill final plots
   //===============================================================================================
