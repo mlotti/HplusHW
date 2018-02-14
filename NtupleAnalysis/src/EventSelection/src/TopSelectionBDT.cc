@@ -1755,15 +1755,12 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   if (IsInTopDirection)
     {
       hEventTrijetPt -> Fill(leadingTrijet.TrijetP4.Pt()); 
-      hEventTrijetPt -> Fill(subleadingTrijet.TrijetP4.Pt());  
       if (passBDTboth)
 	{
 	  hEventTrijetPt_BDT -> Fill(leadingTrijet.TrijetP4.Pt());
-	  hEventTrijetPt_BDT -> Fill(subleadingTrijet.TrijetP4.Pt());
 	  if (realInTopDirBoth)
 	    {
 	      hEventTrijetPt_InTopDirBDT -> Fill(leadingTrijet.TrijetP4.Pt());
-	      hEventTrijetPt_InTopDirBDT -> Fill(subleadingTrijet.TrijetP4.Pt());
 	    }//if (realInTopDirBoth)
 	}//if (passBDTboth)
     }//if (IsInTopDirection)
@@ -1772,20 +1769,16 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   if (MCtrue_Bjet.size() == GenTops.size())
     {
       hEventTrijetPt2T -> Fill(leadingTrijet.TrijetP4.Pt());              //Trijet.pt -- Inclusive
-      hEventTrijetPt2T -> Fill(subleadingTrijet.TrijetP4.Pt());              //Trijet.pt -- Inclusive
       if ( realtopBoth )
 	{
 	  hEventTrijetPt2T_Matched -> Fill(leadingTrijet.TrijetP4.Pt()); //Trijet.pt(Matched)  -- Inclusive
-	  hEventTrijetPt2T_Matched -> Fill(subleadingTrijet.TrijetP4.Pt()); //Trijet.pt(Matched)  -- Inclusive
 	}
       if ( passBDTboth )
 	{
 	  hEventTrijetPt2T_BDT -> Fill(leadingTrijet.TrijetP4.Pt());        //Trijet.pt(passBDT) -- Inclusive
-	  hEventTrijetPt2T_BDT -> Fill(subleadingTrijet.TrijetP4.Pt());        //Trijet.pt(passBDT) -- Inclusive
 	  if ( realtopBoth )
 	    {
 	      hEventTrijetPt2T_MatchedBDT -> Fill(leadingTrijet.TrijetP4.Pt()); //Trijet.pt(passBDT&&Matched) -- Inclusive
-	      hEventTrijetPt2T_MatchedBDT -> Fill(subleadingTrijet.TrijetP4.Pt()); //Trijet.pt(passBDT&&Matched) -- Inclusive
 	    }//if ( realtopBoth )
 	}//if ( passBDTboth )
     }//if (MCtrue_Bjet.size() == GenTops.size())
