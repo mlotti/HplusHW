@@ -39,7 +39,7 @@ def convertToURL(path, url=False):
     pathURL = path.replace(base, url)
     return pathURL
 
-def getSaveDirPath(pseudocrabDir, prefix, postfix):
+def getSaveDirPath(pseudocrabDir, prefix="", postfix="", pseudocrabDir2=None):
     '''
     return the save dir path for all plotting scripts in this format:
     saveDir = <baseDir>/<prefix>/<pseudocrabDir>/<postFix>
@@ -54,9 +54,9 @@ def getSaveDirPath(pseudocrabDir, prefix, postfix):
 
     # If path contains other subDirs keep the last dir name
     if len(pseudocrabDir.split("/")) > 1:
-        saveDir_ = pseudocrabDir.split("/")[-1]
+        saveDir_1 = pseudocrabDir.split("/")[-1]
     else:
-        saveDir_ = pseudocrabDir
+        saveDir_1 = pseudocrabDir
 
     # Determine <baseDir> according to hostname (CERN, FNAL)
     if "cern.ch" in socket.gethostname().lower():
@@ -67,7 +67,16 @@ def getSaveDirPath(pseudocrabDir, prefix, postfix):
         baseDir = ""
 
     # Put everything together to get the final path
-    saveDir  = os.path.join(baseDir, prefix, saveDir_, postfix)
+    if pseudocrabDir == None:
+        saveDir = os.path.join(baseDir, prefix, saveDir_1, postfix)
+    else:
+        # Is there a secondmulticrab in the save path? (Use-case: Data-Driven plots)
+        pseudocrabDir2 = rchop(pseudocrabDir2, "/")
+        if len(pseudocrabDir2.split("/")) > 1:
+            saveDir_2 = pseudocrabDir2.split("/")[-1]
+        else:
+            saveDir_2 = pseudocrabDir2
+        saveDir = os.path.join(baseDir, prefix, saveDir_1, saveDir_1, postfix)
     return saveDir
 
 def GetListOfEwkDatasets():
