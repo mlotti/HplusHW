@@ -208,6 +208,7 @@ def getBinningForTetrajetMass(binLevel=0):
         for i in range(2000, 4000+200, 200):
             myBins.append(i)
     elif binLevel == 3: #even more finer binning
+        print "%sWARNING! This binning will take hours to compute limits!%s" % (ShellStyles.ErrorStyle(), ShellStyles.NormalStyle())
         for i in range(0, 1000, 10):
             myBins.append(i)
         for i in range(1000, 2000, 20):
@@ -297,7 +298,7 @@ _dataDrivenCtrlPlotBinning = {
     "MaxDeltaPhiTauJet_AfterAllSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
     "NVertices_AfterAllSelections": None,
     #"LdgTetrajetMass_AfterAllSelections": [0,50,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,520,540,560,580,600,620,640,660,680,700,720,740,760,780,800,820,840,860,880,900,920,940,960,980,1000,1020,1040,1060,1080,1100,1150,1200,1250,1300,1350,1400,1450,1500,1750,2000,2250,2500,2750,3000,3250,3500,3750,4000], # for H+ -> tb analysis    
-    "LdgTetrajetMass_AfterAllSelections": getBinningForTetrajetMass(1) #testing
+    "LdgTetrajetMass_AfterAllSelections": getBinningForTetrajetMass(2)
 }
 # Add EWK fake tau shape definitions
 for key in _dataDrivenCtrlPlotBinning.keys():
