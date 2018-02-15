@@ -9,6 +9,69 @@ import stat
 import ROOT
 import OrderedDict
 import HiggsAnalysis.NtupleAnalysis.tools.git as git
+import getpass
+import socket
+
+def rchop(myString, endString):
+    '''
+    if myString ends with "/" return it without the "/"
+    else return as is. 
+    '''
+    if myString.endswith(endString):
+        return myString[:-len(endString)]
+    return myString
+
+def convertToURL(path, url=False):
+    if not url:
+        return path
+
+    # Determine path according to hostname (CERN, FNAL)
+    if "cern.ch" in socket.gethostname().lower():
+        url  = "https://cmsdoc.cern.ch/~%s/" % (getpass.getuser())
+        base = "/afs/cern.ch/user/%s/%s/public/html" % (getpass.getuser()[0], getpass.getuser())
+    elif "fnal.gov" in socket.gethostname().lower():
+        url  = "http://home.fnal.gov/~%s/" % (getpass.getuser())
+        base = "/publicweb/%s/%s/" % (getpass.getuser()[0], getpass.getuser())
+    else:
+        raise Exception("Cannot determine URL path for host %s" % socket.gethostname())
+    
+    # Get the URL path
+    pathURL = path.replace(base, url)
+    return pathURL
+
+def getSaveDirPath(pseudocrabDir, prefix, postfix):
+    '''
+    return the save dir path for all plotting scripts in this format:
+    saveDir = <baseDir>/<prefix>/<pseudocrabDir>/<postFix>
+
+    For LPC (FNAL):
+    <baseDir> = "/publicweb/%s/%s/" % (getpass.getuser()[0], getpass.getuser())
+    For LXPLUS (CERN):
+    <baseDir> = "/afs/cern.ch/user/%s/%s/public/html" % (getpass.getuser()[0], getpass.getuser())
+    '''
+    # Remove trailing "/" if any
+    pseudocrabDir = rchop(pseudocrabDir, "/")
+
+    # If path contains other subDirs keep the last dir name
+    if len(pseudocrabDir.split("/")) > 1:
+        saveDir_ = pseudocrabDir.split("/")[-1]
+    else:
+        saveDir_ = pseudocrabDir
+
+    # Determine <baseDir> according to hostname (CERN, FNAL)
+    if "cern.ch" in socket.gethostname().lower():
+        baseDir = "/afs/cern.ch/user/%s/%s/public/html" % (getpass.getuser()[0], getpass.getuser())
+    elif "fnal.gov" in socket.gethostname().lower():
+        baseDir = "/publicweb/%s/%s/" % (getpass.getuser()[0], getpass.getuser())
+    else:
+        baseDir = ""
+
+    # Put everything together to get the final path
+    saveDir  = os.path.join(baseDir, prefix, saveDir_, postfix)
+    return saveDir
+
+def GetListOfEwkDatasets():
+    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
 
 def cmsswVersion():
     if "CMSSW_VERSION" in os.environ:

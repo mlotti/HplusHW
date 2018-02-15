@@ -79,6 +79,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 import HiggsAnalysis.FakeBMeasurement.FakeBNormalization as FakeBNormalization
 import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
@@ -118,13 +119,6 @@ def GetLumi(datasetsMgr):
             lumi += d.getLuminosity()
     Verbose("Luminosity = %s (pb)" % (lumi), True)
     return lumi
-
-def GetListOfEwkDatasets(datasetsMgr):
-    Verbose("Getting list of EWK datasets")
-    if "noTop" in datasetsMgr.getAllDatasetNames():
-        return  ["TT", "noTop", "SingleTop", "ttX"]
-    else:
-        return  ["TT", "WJetsToQQ_HT_600ToInf", "SingleTop", "DYJetsToQQHT", "TTZToQQ",  "TTWJetsToQQ", "Diboson", "TTTT"]
 
 def GetHistoKwargs(histoName):
 
@@ -288,10 +282,7 @@ def getModuleInfoString(opts):
         moduleInfoString += "_%s" % (opts.optMode)
     return moduleInfoString
 
-def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
-    Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
-
-     # Check that path exists
+def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     if not os.path.exists(saveDir):
         os.makedirs(saveDir)
 
@@ -301,11 +292,8 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
         saveNameURL = saveName + ext
-        saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
-        if opts.url:
-            Print(saveNameURL, i==0)
-        else:
-            Print(saveName + ext, i==0)
+        saveNameURL = aux.convertToURL(saveNameURL, opts.url)
+        Verbose(saveNameURL, i==0)
         plot.saveAs(saveName, formats=saveFormats)
     return
 
@@ -381,7 +369,7 @@ def main(opts):
             datasetsMgr.PrintInfo()
         
         # Merge EWK samples
-        datasetsMgr.merge("EWK", GetListOfEwkDatasets(datasetsMgr))
+        datasetsMgr.merge("EWK", aux.GetListOfEwkDatasets())
             
         # Print dataset information
         datasetsMgr.PrintInfo()
@@ -704,7 +692,7 @@ if __name__ == "__main__":
     INTLUMI      = -1.0
     MCONLY       = False
     URL          = False
-    SAVEDIR      = "/publicweb/a/aattikis/"
+    SAVEDIR      = None
     VERBOSE      = False
     USEMC        = False
     RATIO        = True
@@ -781,11 +769,9 @@ if __name__ == "__main__":
         parser.print_help()
         #print __doc__
         sys.exit(1)
-    else:
-        mcrabDir = rchop(opts.mcrab, "/")
-        if len(mcrabDir.split("/")) > 1:
-            mcrabDir = mcrabDir.split("/")[-1]
-        opts.saveDir += mcrabDir + "/TransferFactor/"
+
+    if opts.saveDir == None:
+        opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="TransferFactor")
 
     # Call the main function
     main(opts)

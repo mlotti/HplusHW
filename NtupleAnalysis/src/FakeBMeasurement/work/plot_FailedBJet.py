@@ -42,6 +42,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
@@ -87,8 +88,6 @@ def MakeGraph(markerStyle, color, binList, valueDict, upDict, downDict):
 
 
 def GetLumi(datasetsMgr):
-    Verbose("Determininig Integrated Luminosity")
-    
     lumi = 0.0
     for d in datasetsMgr.getAllDatasets():
         if d.isMC():
@@ -99,15 +98,7 @@ def GetLumi(datasetsMgr):
     return lumi
 
 
-def GetListOfEwkDatasets():
-    Verbose("Getting list of EWK datasets")
-    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
-    #return ["TT", "noTop", "SingleTop", "ttX"]
-
-
 def GetDatasetsFromDir(opts):
-    Verbose("Getting datasets")
-    
     if (not opts.includeOnlyTasks and not opts.excludeTasks):
         datasets = dataset.getDatasetsFromMulticrabDirs([opts.mcrab],
                                                         dataEra=opts.dataEra,
@@ -204,11 +195,11 @@ def main(opts):
         # Re-order datasets (different for inverted than default=baseline)
         if 0:
             newOrder = ["Data"]
-            newOrder.extend(GetListOfEwkDatasets())
+            newOrder.extend(aux.GetListOfEwkDatasets())
             datasetsMgr.selectAndReorder(newOrder)
 
         # Merge EWK samples
-        datasetsMgr.merge("EWK", GetListOfEwkDatasets())
+        datasetsMgr.merge("EWK", aux.GetListOfEwkDatasets())
         plots._plotStyles["EWK"] = styles.getAltEWKStyle()
 
         # Print dataset information
@@ -231,10 +222,7 @@ def main(opts):
             PlotHisto(datasetsMgr, h)
 
     # Inform user where the plots where saved
-    savePath = opts.saveDir
-    if opts.url:
-        savePath = savePath.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
-    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + savePath + ShellStyles.NormalStyle()), True)
+    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)
     return
 
 
@@ -405,8 +393,7 @@ def GetSaveName(histoName):
     histoDir  = hDir
     return histoName, histoDir
 
-def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".pdf", ".png"]):
-    # Check that path exists
+def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     if not os.path.exists(saveDir):
         os.makedirs(saveDir)
 
@@ -416,11 +403,8 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".pdf", ".png"]):
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
         saveNameURL = saveName + ext
-        saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
-        if opts.url:
-            Verbose(saveNameURL, i==0)
-        else:
-            Verbose(saveName + ext, i==0)
+        saveNameURL = aux.convertToURL(saveNameURL, opts.url)
+        Verbose(saveNameURL, i==0)
         plot.saveAs(saveName, formats=saveFormats)
     return
 
@@ -459,7 +443,7 @@ if __name__ == "__main__":
     PLOTEWK      = True
     URL          = False
     NOERROR      = True
-    SAVEDIR      = "/publicweb/a/aattikis/" #FakeBMeasurement/"
+    SAVEDIR      = None
     VERBOSE      = False
     NORMALISE    = True
 
@@ -523,11 +507,9 @@ if __name__ == "__main__":
         parser.print_help()
         #print __doc__
         sys.exit(1)
-    else:
-        mcrabDir = rchop(opts.mcrab, "/")
-        if len(mcrabDir.split("/")) > 1:
-            mcrabDir = mcrabDir.split("/")[-1]
-        opts.saveDir += mcrabDir
+
+    if opts.saveDir == None:
+        opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="FailedBJet")
 
         
     # Call the main function

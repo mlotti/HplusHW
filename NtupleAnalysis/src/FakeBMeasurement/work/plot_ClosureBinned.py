@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Description:
+DESCRIPTION:
 This script produces QCD normalization factors by employing an ABCD method
 using regions created by inverting the b-jets selections and the MVA2 top 
 (i.e. subleading in BDT discrimant) as follows:
@@ -77,6 +77,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 import HiggsAnalysis.FakeBMeasurement.FakeBNormalization as FakeBNormalization
 import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
@@ -93,11 +94,6 @@ def Print(msg, printHeader=False):
     else:
         print "\t", msg
     return
-
-def rchop(myString, endString):
-  if myString.endswith(endString):
-    return myString[:-len(endString)]
-  return myString
 
 def Verbose(msg, printHeader=True, verbose=False):
     if not opts.verbose:
@@ -116,13 +112,6 @@ def GetLumi(datasetsMgr):
             lumi += d.getLuminosity()
     Verbose("Luminosity = %s (pb)" % (lumi), True)
     return lumi
-
-def GetListOfEwkDatasets(datasetsMgr):
-    Verbose("Getting list of EWK datasets")
-    if "noTop" in datasetsMgr.getAllDatasetNames():
-        return  ["TT", "noTop", "SingleTop", "ttX"]
-    else:
-        return  ["TT", "WJetsToQQ_HT_600ToInf", "SingleTop", "DYJetsToQQHT", "TTZToQQ",  "TTWJetsToQQ", "Diboson", "TTTT"]
 
 def GetHistoKwargs(histoName):
 
@@ -290,19 +279,19 @@ def PrintPSet(selection, datasetsMgr, depth=0):
     return
 
 def getHisto(datasetsMgr, datasetName, histoName, analysisType):
-    Verbose("getHisto()", True)
 
     h1 = datasetsMgr.getDataset(datasetName).getDatasetRootHisto(histoName)
     h1.setName(analysisType + "-" + datasetName)
     return h1
 
 def getModuleInfoString(opts):
+
     moduleInfoString = "_%s_%s" % (opts.dataEra, opts.searchMode)
     if len(opts.optMode) > 0:
         moduleInfoString += "_%s" % (opts.optMode)
     return moduleInfoString
 
-def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
+def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
 
      # Check that path exists
@@ -315,11 +304,8 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
         saveNameURL = saveName + ext
-        saveNameURL = saveNameURL.replace(opts.saveDir, "http://home.fnal.gov/~%s/" % (getpass.getuser()))
-        if opts.url:
-            Verbose(saveNameURL, i==0)
-        else:
-            Verbose(saveName + ext, i==0)
+        saveNameURL = aux.convertToURL(saveNameURL, opts.url)
+        Verbose(saveNameURL, i==0)
         plot.saveAs(saveName, formats=saveFormats)
     return
 
@@ -409,7 +395,7 @@ def main(opts):
             datasetsMgr.PrintInfo()
         
         # Merge EWK samples
-        datasetsMgr.merge("EWK", GetListOfEwkDatasets(datasetsMgr))
+        datasetsMgr.merge("EWK", aux.GetListOfEwkDatasets(datasetsMgr))
             
         # Print dataset information
         datasetsMgr.PrintInfo()
@@ -449,10 +435,7 @@ def main(opts):
             PlotHistograms(datasetsMgr, myList, binLabels, opts)
 
     # Save the plots
-    savePath = opts.saveDir
-    if opts.url:
-        savePath = opts.saveDir.replace(opts.saveDir, "http://home.fnal.gov/~%s/" % (getpass.getuser()))
-    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + savePath + ShellStyles.NormalStyle()), True)
+    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)
     return
 
 
@@ -752,7 +735,7 @@ if __name__ == "__main__":
     BATCHMODE    = True
     INTLUMI      = -1.0
     URL          = False
-    SAVEDIR      = "/publicweb/%s/%s/" % (getpass.getuser()[0], getpass.getuser())
+    SAVEDIR      = None
     VERBOSE      = False
     USEMC        = False
     RATIO        = True
@@ -820,13 +803,10 @@ if __name__ == "__main__":
         parser.print_help()
         #print __doc__
         sys.exit(1)
-    else:
-        mcrabDir = rchop(opts.mcrab, "/")
-        if len(mcrabDir.split("/")) > 1:
-            mcrabDir = mcrabDir.split("/")[-1]
-        opts.saveDir += mcrabDir + "/Closure/Binned/"
+    
+    if opts.saveDir == None:
+        opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="Closure/Binned")
 
-    # Call the main function
     main(opts)
 
     if not opts.batchMode:
