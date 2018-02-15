@@ -13,16 +13,14 @@ histogramAmbientLevel = "Debug"  # Options: Systematics, Vital, Informative, Deb
 # Trigger
 #================================================================================================
 trigger = PSet(
+    # scanned in range _v1--_v100 (=>remove the '_v' suffix)
     triggerOR = [
-        "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056", # scanned in range _v1--_v100 (=>remove the '_v' suffix)
-        "HLT_PFHT450_SixJet40_BTagCSV_p056",       # scanned in range _v1--_v100 (=>remove the '_v' suffix)
-        "HLT_PFJet450", # for trg eff recovery in 2016H
-        #"HLT_PFHT400_SixJet30", #Prescale 110 at inst. lumi 1.35E+34
-        #"HLT_PFHT450_SixJet40", #Prescale 26 at inst. lumi 1.35E+34
+        "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056",
+        "HLT_PFHT450_SixJet40_BTagCSV_p056",       
+        "HLT_PFJet450", #for trg eff recovery in 2016H
         ],
     triggerOR2 = [],
     )
-
 
 #================================================================================================
 # Tau selection (sync with HToTauNu analysis)
@@ -244,7 +242,7 @@ fakeBMeasurement = PSet(
     LdgTopMVACutDirection             = topSelectionBDT.LdgMVACutDirection, 
     SubldgTopMVACutValue              = topSelectionBDT.SubldgMVACutValue,
     SubldgTopMVACutDirection          = "<",   # [default: "<"]
-    minTopMVACutValue                 = 0.40,  # [default: 0.50]
+    minTopMVACutValue                 = 0.65,  # [default: 0.60]
     minTopMVACutDirection             =  ">=", # [default: ">="]
     # All bjets (CSVv2-M and CSVv2-L)
     allBJetsPtCuts        = bjetSelection.jetPtCuts,
