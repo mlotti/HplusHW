@@ -177,14 +177,14 @@ def main(opts):
         # Re-order datasets (different for inverted than default=baseline)
         if 0:
             newOrder = ["Data"]
-            newOrder.extend(aux.GetListOfEwkDatasets(datasetsMgr))
+            newOrder.extend(aux.GetListOfEwkDatasets())
             datasetsMgr.selectAndReorder(newOrder)
 
         # Print post-merged data dataset summary
         datasetsMgr.PrintInfo()
 
         # Merge EWK samples
-        datasetsMgr.merge("EWK", aux.GetListOfEwkDatasets(datasetsMgr))
+        datasetsMgr.merge("EWK", aux.GetListOfEwkDatasets())
         plots._plotStyles["EWK"] = styles.getAltEWKStyle()
             
         # Print post EWK-merge dataset summary
