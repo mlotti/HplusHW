@@ -67,7 +67,7 @@ def getSaveDirPath(pseudocrabDir, prefix="", postfix="", pseudocrabDir2=None):
         baseDir = ""
 
     # Put everything together to get the final path
-    if pseudocrabDir == None:
+    if pseudocrabDir2 == None:
         saveDir = os.path.join(baseDir, prefix, saveDir_1, postfix)
     else:
         # Is there a secondmulticrab in the save path? (Use-case: Data-Driven plots)
