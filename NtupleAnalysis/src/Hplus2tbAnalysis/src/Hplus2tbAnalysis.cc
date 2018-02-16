@@ -53,7 +53,7 @@ REGISTER_SELECTOR(Hplus2tbAnalysis);
 Hplus2tbAnalysis::Hplus2tbAnalysis(const ParameterSet& config, const TH1* skimCounters)
   : BaseSelector(config, skimCounters),
     // cfg_PrelimTopFitChiSqr(config, "FakeBMeasurement.prelimTopFitChiSqrCut"),
-    cfg_PrelimTopMVACut(config, "FakeBMeasurement.prelimTopMVACut"),
+    cfg_PrelimTopMVACut(config, "FakeBMeasurement.minTopMVACut"),
     fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kHplus2tbAnalysis, fHistoWrapper),
     cAllEvents(fEventCounter.addCounter("all events")),
     cTrigger(fEventCounter.addCounter("passed trigger")),

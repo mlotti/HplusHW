@@ -37,6 +37,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 
@@ -58,11 +59,6 @@ def Verbose(msg, printHeader=True, verbose=False):
     Print(msg, printHeader)
     return
 
-def rchop(myString, endString):
-  if myString.endswith(endString):
-    return myString[:-len(endString)]
-  return myString
-
 def GetLumi(datasetsMgr):
     lumi = 0.0
     for d in datasetsMgr.getAllDatasets():
@@ -72,11 +68,6 @@ def GetLumi(datasetsMgr):
             lumi += d.getLuminosity()
     Verbose("Luminosity = %s (pb)" % (lumi), True)
     return lumi
-
-def GetListOfEwkDatasets():
-    ewkList = ["TT", "SingleTop", "TTZToQQ", "TTTT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "Diboson"]
-    # ewkList = ["TT", "SingleTop", "TTZToQQ", "TTTT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf"] #no "Diboson"
-    return  ewkList
 
 def GetDatasetsFromDir(opts, otherDir=False):
     
@@ -136,9 +127,8 @@ def main(opts):
         optModes = [opts.optMode]
         
     # Inform user of EWK datasets used
-    ewkList = GetListOfEwkDatasets()
     Print("The EWK datasets used are the following:", True)
-    for i,d in enumerate(ewkList, 1):
+    for i,d in enumerate(aux.GetListOfEwkDatasets(), 1):
         Print(ShellStyles.NoteStyle() + d + ShellStyles.NormalStyle(), i==0)
 
     # For-loop: All opt Mode
@@ -228,7 +218,7 @@ def main(opts):
 
             PlotHistogram(dsetMgr1, hName, opts)
 
-    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + opts.saveDir + ShellStyles.NormalStyle()), True)
+    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)    
     return
 
 def GetHistoKwargs(hName, opts):
@@ -599,7 +589,7 @@ def PlotHistogram(dsetMgr, histoName, opts):
 
     # Copy dataset manager before changing datasets. Keep only EWK (GenuineB) datasets
     datasetMgr = dsetMgr.deepCopy()
-    datasetMgr.selectAndReorder(GetListOfEwkDatasets())
+    datasetMgr.selectAndReorder(aux.GetListOfEwkDatasets())
         
     # Create the MCPlot for the EWKGenuineB histograms
     if opts.useMC:
@@ -624,10 +614,9 @@ def PlotHistogram(dsetMgr, histoName, opts):
         myStackList.append(hhQCD)
 
     # EWK GenuineB background (Replace all EWK histos with GenuineB histos)
-    ewkNameList  = GetListOfEwkDatasets()
     ewkHistoList = []
     # For-loop: All EWK datasets 
-    for dataset in ewkNameList:
+    for dataset in aux.GetListOfEwkDatasets():
         h = p2.histoMgr.getHisto(dataset).getRootHisto()
         hh = histograms.Histo(h, dataset,  plots._legendLabels[dataset])
         hh.setIsDataMC(isData=False, isMC=True)
@@ -678,7 +667,6 @@ def PrintPSet(selection, dsetMgr):
     return
 
 def getHisto(dsetMgr, datasetName, histoName):
-    Verbose("getHisto()", True)
 
     h1 = dsetMgr.getDataset(datasetName).getDatasetRootHisto(histoName)
     h1.setName(datasetName)
@@ -717,8 +705,7 @@ def replaceQCD(dMgr1, dMgr2, newName, newLabel="FakeB"):
     dMgr1.selectAndReorder(names)
     return
 
-def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
-    # Check that path exists
+def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     if not os.path.exists(saveDir):
         os.makedirs(saveDir)
 
@@ -726,18 +713,12 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
     saveName = os.path.join(saveDir, plotName.replace("/", "_"))
 
     # For-loop: All save formats
-    for i, ext in enumerate(saveFormats, 0):
-        saveNameURL  = saveName + ext
-        saveNameURL  = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
-        if opts.url:
-            Verbose(saveNameURL, False) #i==0)
-            opts.saveDir = os.path.dirname(saveNameURL) + "/"
-        else:
-            Verbose(saveName + ext, False) #i==0)
-            opts.saveDir = os.path.dirname(saveName) + "/"
+    for i, ext in enumerate(saveFormats):
+        saveNameURL = saveName + ext
+        saveNameURL = aux.convertToURL(saveNameURL, opts.url)
+        Verbose(saveNameURL, i==0)
         plot.saveAs(saveName, formats=saveFormats)
     return
-
 
 #================================================================================================ 
 # Main
@@ -770,7 +751,7 @@ if __name__ == "__main__":
     SIGNALMASS   = 800
     SIGNAL       = None
     URL          = False
-    SAVEDIR      = "/publicweb/a/aattikis/"
+    SAVEDIR      = None
     VERBOSE      = False
     GRIDX        = False
     UNBLIND      = False
@@ -858,14 +839,10 @@ if __name__ == "__main__":
         #print __doc__
         sys.exit(1)
     else:
-        mcrabDir1 = rchop(opts.mcrab1, "/")
-        mcrabDir2 = opts.mcrab2.split("/")[0]
-        if len(mcrabDir1.split("/")) > 1:
-            mcrabDir1 = mcrabDir1.split("/")[-1]
-        if len(mcrabDir2.split("/")) > 1:
-            mcrabDir2 = mcrabDir2.split("/")[-1]
-        opts.saveDir += mcrabDir1 + "/" + mcrabDir2 + "/DataDriven/"
+        pass
 
+    if opts.saveDir == None:
+        opts.saveDir = aux.getSaveDirPath(opts.mcrab1, prefix="", postfix="DataDriven", pseudocrabDir2=opts.mcrab2)
 
     # Sanity check
     allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 1500, 2000, 2500, 3000, 5000, 7000]

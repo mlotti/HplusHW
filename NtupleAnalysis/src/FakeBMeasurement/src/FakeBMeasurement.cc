@@ -2241,6 +2241,16 @@ void FakeBMeasurement::process(Long64_t entry) {
       std::vector<Jet> myBJets = GetMyBJets(baselineBjets, invertedBjets);
       if (!cfg_AllBJetsNCut.passedCut(myBJets.size()) ) return;
 
+      if (0)
+	{
+	  for(const Jet& b: myBJets)
+	    {
+	      std::cout << "=== myBJets: (PASS!)" 
+			<< " b.pt() = " << b.pt() << ", b.eta() = " << b.eta() 
+			<< ", b.bjetDiscriminator() = " << b.bjetDiscriminator() << std::endl;
+	    }
+	}
+      
       // Do the inverted analysis
       DoInvertedAnalysis(jetData, bjetData,  myBJets, nVertices); 
     }
@@ -2330,35 +2340,32 @@ const std::vector<Jet> FakeBMeasurement::GetMyBJets(const std::vector<Jet>& base
 {
   
   // Copy the baseline b-jets (CSVc2-M) and append the inverted b-jets (CSVc2-L)
-  std::vector<Jet> myBJets = baselineBjets;
-  myBJets.insert(myBJets.end(), invertedBjets.begin(), invertedBjets.end());
+  std::vector<Jet> myBJets;
+  std::vector<Jet> tmpBJets = baselineBjets;
+  tmpBJets.insert(tmpBJets.end(), invertedBjets.begin(), invertedBjets.end());
   
   // Sort all b-jets by descending pt value (http://en.cppreference.com/w/cpp/algorithm/sort)
-  std::sort(myBJets.begin(), myBJets.end(), [](const Jet& a, const Jet& b){return a.pt() > b.pt();});
+  std::sort(tmpBJets.begin(), tmpBJets.end(), [](const Jet& a, const Jet& b){return a.pt() > b.pt();});
   
   // Final sanity check for the pt of the bjets
   unsigned int ptCut_index  = 0;
   unsigned int etaCut_index = 0;
-  unsigned int nBJets       = 0;
-  for(const Jet& b: myBJets)
+  for(const Jet& b: tmpBJets)
     {
       //=== Apply cut on pt and eta
       const float jetPtCut  = cfg_AllBJetsPtCuts.at(ptCut_index);
       const float jetEtaCut = cfg_AllBJetsEtaCuts.at(etaCut_index);
       if (b.pt() < jetPtCut) continue;
       if (std::fabs(b.eta()) > jetEtaCut) continue;
-      nBJets++;
+
+      //=== Save jets satisfying baseline b-jet criteria
+      myBJets.push_back(b);
+
+      // Increment cut index only. Cannot be bigger than the size of the cut list provided
+      if (ptCut_index  < cfg_AllBJetsPtCuts.size()-1  ) ptCut_index++;
+      if (etaCut_index < cfg_AllBJetsEtaCuts.size()-1 ) etaCut_index++;
     }
-  
-  if (0)
-    {
-      for(const Jet& b: myBJets)
-	{
-	  std::cout << "=== FakeBMeasurement::DoInvertedAnalysis() b.pt() = " << b.pt() 
-		    << ", b.eta() = " << b.eta() << ", b.bjetDiscriminator() = " << b.bjetDiscriminator() << std::endl;
-	}
-    }
-  
+    
   return myBJets;
 }
 
