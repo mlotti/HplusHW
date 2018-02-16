@@ -395,7 +395,7 @@ def main(opts):
             datasetsMgr.PrintInfo()
         
         # Merge EWK samples
-        datasetsMgr.merge("EWK", aux.GetListOfEwkDatasets(datasetsMgr))
+        datasetsMgr.merge("EWK", aux.GetListOfEwkDatasets())
             
         # Print dataset information
         datasetsMgr.PrintInfo()
