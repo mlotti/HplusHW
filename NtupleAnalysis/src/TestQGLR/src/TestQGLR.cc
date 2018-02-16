@@ -57,7 +57,7 @@ REGISTER_SELECTOR(TestQGLR);
 TestQGLR::TestQGLR(const ParameterSet& config, const TH1* skimCounters)
   : BaseSelector(config, skimCounters),
     // cfg_PrelimTopFitChiSqr(config, "FakeBMeasurement.prelimTopFitChiSqrCut"),
-    cfg_PrelimTopMVACut(config, "FakeBMeasurement.prelimTopMVACut"),
+    cfg_PrelimTopMVACut(config, "FakeBMeasurement.minTopMVACut"),
     fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kHplus2tbAnalysis, fHistoWrapper),
     cAllEvents(fEventCounter.addCounter("all events")),
     cTrigger(fEventCounter.addCounter("passed trigger")),
@@ -228,12 +228,13 @@ void TestQGLR::process(Long64_t entry) {
   */
   
   
-  if (0) std::cout << "=== Top (BDT) selection" << std::endl;
-  const TopSelectionBDT::Data topData = fTopSelection.analyze(fEvent, jetData, bjetData, true);
-  bool passPrelimMVACut = cfg_PrelimTopMVACut.passedCut( std::max(topData.getMVAmax1(), topData.getMVAmax2()) ); //fixme?
-  bool hasFreeBJet      = topData.hasFreeBJet();
-  if (!hasFreeBJet) return;
-  if (!passPrelimMVACut) return;
+  // Uncomment me 
+  //if (0) std::cout << "=== Top (BDT) selection" << std::endl;
+  //const TopSelectionBDT::Data topData = fTopSelection.analyze(fEvent, jetData, bjetData, true);
+  //bool passPrelimMVACut = cfg_PrelimTopMVACut.passedCut( std::max(topData.getMVAmax1(), topData.getMVAmax2()) ); //fixme?
+  //bool hasFreeBJet      = topData.hasFreeBJet();
+  //if (!hasFreeBJet) return;
+  //if (!passPrelimMVACut) return;
   
   //================================================================================================
   // Standard Selections
@@ -246,7 +247,7 @@ void TestQGLR::process(Long64_t entry) {
   // All Selections
   //================================================================================================
   //if (!topologyData.passedSelection()) return;
-  if (!topData.passedSelection()) return;
+  //if (!topData.passedSelection()) return;
   
   if (0) std::cout << "=== All Selections" << std::endl;
   cSelected.increment();
