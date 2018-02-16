@@ -62,6 +62,7 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
 
 	std::string outputFileName;
         std::string PUInfoInputFileName;
+        std::string PUInfoPSInputFileName;
         std::string TopPtInputFileName;
 	std::string codeVersion;
         std::string dataVersion;

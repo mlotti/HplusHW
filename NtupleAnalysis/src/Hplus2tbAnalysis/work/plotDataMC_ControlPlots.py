@@ -52,6 +52,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.counter as counter
 import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
@@ -74,15 +75,7 @@ def Verbose(msg, printHeader=True, verbose=False):
     Print(msg, printHeader)
     return
 
-def rchop(myString, endString):
-  if myString.endswith(endString):
-    return myString[:-len(endString)]
-  return myString
-
-
 def GetLumi(datasetsMgr):
-    Verbose("Determininig Integrated Luminosity")
-    
     lumi = 0.0
     for d in datasetsMgr.getAllDatasets():
         if d.isMC():
@@ -91,17 +84,6 @@ def GetLumi(datasetsMgr):
             lumi += d.getLuminosity()
     Verbose("Luminosity = %s (pb)" % (lumi), True)
     return lumi
-
-def GetListOfEwkDatasets():
-    Verbose("Getting list of EWK datasets")
-    if 1: # TopSelection
-        return  ["TT", "WJetsToQQ_HT_600ToInf", "SingleTop", "DYJetsToQQHT", "TTZToQQ",  "TTWJetsToQQ", "Diboson", "TTTT"]
-    #else: # TopSelectionBDT
-    #    if opts.afterTop:
-    #        return  ["TT", "SingleTop", "ttX", "noTop"]
-    #    else:
-    #        return  ["TT", "noTop", "SingleTop", "ttX"]
-
 
 def GetDatasetsFromDir(opts):
     Verbose("Getting datasets")
@@ -175,11 +157,10 @@ def main(opts):
         # Custom Filtering of datasets 
         for i, d in enumerate(datasetsToRemove, 0):
             msg = "Removing dataset %s" % d
-            Print(ShellStyles.WarningLabel() + msg + ShellStyles.NormalStyle(), i==0)
-            #datasetsMgr.remove(filter(lambda name: d in name, datasetsMgr.getAllDatasetNames()))
+            Verbose(ShellStyles.WarningLabel() + msg + ShellStyles.NormalStyle(), i==0)
             datasetsMgr.remove(filter(lambda name: d == name, datasetsMgr.getAllDatasetNames()))
 
-        if 1: #opts.verbose:
+        if opts.verbose:
             datasetsMgr.PrintInfo()
 
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
@@ -193,8 +174,8 @@ def main(opts):
             else:
                 newOrder.append(d.getName())
 
-        # Re-arrange dataset order if after top selection!
-        if opts.afterTop:
+        # Re-arrange dataset order?
+        if 0:
             s = newOrder.pop( newOrder.index("noTop") )
             newOrder.insert(len(newOrder), s) #after "Data"
 
@@ -206,7 +187,7 @@ def main(opts):
         
         # Merge EWK samples
         if opts.mergeEWK:
-            datasetsMgr.merge("EWK", GetListOfEwkDatasets())
+            datasetsMgr.merge("EWK", aux.GetListOfEwkDatasets())
             plots._plotStyles["EWK"] = styles.getAltEWKStyle()
 
         # Print dataset information
@@ -223,7 +204,7 @@ def main(opts):
         histoList  = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(folder)        
         histoPaths = [os.path.join(folder, h) for h in histoList]
         ignoreList = ["Aplanarity", "Planarity", "Sphericity", "FoxWolframMoment", "Circularity", "ThirdJetResolution", "Centrality"]
-
+        myHistos   = []
         for h in histoPaths:
             skip = False
 
@@ -234,16 +215,17 @@ def main(opts):
 
             if skip:
                 continue
+            else:
+                myHistos.append(h)
 
-            # Re-arrange dataset order if after top selection!
-            if "AfterAllSelections" in h and opts.afterTop:
-                s = newOrder.pop( newOrder.index("noTop") )
-                newOrder.insert(len(newOrder), s) 
-                datasetsMgr.selectAndReorder(newOrder)
-
+        for i, h in enumerate(myHistos, 1):
             # Plot the histograms!
+            msg   = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % i, "/", "%s:" % (len(myHistos)), h)
+            Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), i==1)
+
             DataMCHistograms(datasetsMgr, h)
-            
+        
+    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)    
     return
 
 def GetHistoKwargs(h, opts):
@@ -527,7 +509,7 @@ def GetHistoKwargs(h, opts):
     if h == "counter":
         xMin = 15.0
         xMax = 20.0
-        kwargs["opts"]   = {"xmin": xMin, "xmax": xMax, "ymin": 1e0, "ymaxfactor": 1.2}
+        kwargs["opts"]   = {"xmin": xMin, "xmax": xMax, "ymin": 1e0, "ymax": 1e10}#"ymaxfactor": 1.2}
         kwargs["cutBox"] = {"cutValue": xMin+2, "fillColor": 16, "box": False, "line": True, "greaterThan": True} #indicate btag SF
 
     if "IsolPt" in h:
@@ -854,27 +836,20 @@ def replaceBinLabels(p, histoName):
         #p.getFrame().GetXaxis().GetBinLabel(i+1).SetTextAngle(90) #not correct
     return
 
-def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
-    Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
-
-    # Check that path exists
+def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     if not os.path.exists(saveDir):
         os.makedirs(saveDir)
 
     # Create the name under which plot will be saved
-    saveName = os.path.join(saveDir, plotName.replace("/", "_").replace(" ", "").replace("(", "").replace(")", "") )
+    saveName = os.path.join(saveDir, plotName.replace("/", "_"))
 
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
         saveNameURL = saveName + ext
-        saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
-        if opts.url:
-            Print(saveNameURL, i==0)
-        else:
-            Print(saveName + ext, i==0)
+        saveNameURL = aux.convertToURL(saveNameURL, opts.url)
+        Verbose(saveNameURL, i==0)
         plot.saveAs(saveName, formats=saveFormats)
     return
-
 
 #================================================================================================ 
 # Main
@@ -913,11 +888,10 @@ if __name__ == "__main__":
     MERGEEWK     = False
     URL          = False
     NOERROR      = True
-    SAVEDIR      = "/publicweb/a/aattikis/"
+    SAVEDIR      = None
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug' 
     FOLDER       = "topbdtSelection_" #jetSelection_
-    AFTERTOP     = False
     
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -979,9 +953,6 @@ if __name__ == "__main__":
     parser.add_option("--folder", dest="folder", type="string", default = FOLDER,
                       help="ROOT file folder under which all histograms to be plotted are located [default: %s]" % (FOLDER) )
 
-    parser.add_option("--afterTop", dest="afterTop", action="store_true", default = AFTERTOP,
-                      help="Are histograms after TopSelection (changes order of adding bkgs in the MC stack) [default: %s]" % (AFTERTOP) )
-
     (opts, parseArgs) = parser.parse_args()
 
     # Require at least two arguments (script-name, path to multicrab)
@@ -994,11 +965,9 @@ if __name__ == "__main__":
         parser.print_help()
         #print __doc__
         sys.exit(1)
-    else:
-        mcrabDir = rchop(opts.mcrab, "/")
-        if len(mcrabDir.split("/")) > 1:
-            mcrabDir = mcrabDir.split("/")[-1]#:]
-        opts.saveDir += mcrabDir + "/DataMC"
+
+    if opts.saveDir == None:
+        opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="DataMC")
 
     # Sanity check
     allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 2000, 3000]

@@ -41,6 +41,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.counter as counter
 import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
@@ -56,13 +57,6 @@ def Print(msg, printHeader=False):
     else:
         print "\t", msg
     return
-
-
-def rchop(myString, endString):
-  if myString.endswith(endString):
-    return myString[:-len(endString)]
-  return myString
-
 
 def Verbose(msg, printHeader=True, verbose=False):
     if not opts.verbose:
@@ -81,15 +75,6 @@ def GetLumi(datasetsMgr):
             lumi += d.getLuminosity()
     Verbose("Luminosity = %s (pb)" % (lumi), True)
     return lumi
-
-
-def GetListOfEwkDatasets(datasetsMgr):
-    Verbose("Getting list of EWK datasets")
-    if "noTop" in datasetsMgr.getAllDatasetNames():
-        return ["TT", "noTop", "SingleTop", "ttX"]
-    else:
-        return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
-
 
 def GetDatasetsFromDir(opts):
     Verbose("Getting datasets")
@@ -179,7 +164,7 @@ def main(opts):
         opts.intLumi = datasetsMgr.getDataset("Data").getLuminosity()
    
         # Merge EWK samples
-        datasetsMgr.merge("EWK", GetListOfEwkDatasets(datasetsMgr))
+        datasetsMgr.merge("EWK", aux.GetListOfEwkDatasets())
         plots._plotStyles["EWK"] = styles.getAltEWKStyle()
 
         # Print dataset information
@@ -248,10 +233,8 @@ def main(opts):
                 continue
             PlotComparison(datasetsMgr, hSR, hCR1, "SRvCR1")
 
-    savePath = opts.saveDir
-    if opts.url:
-        savePath = opts.saveDir.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
-    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + savePath + ShellStyles.NormalStyle()), True)
+
+    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)
     return
 
 def PrintPSet(selection, datasetsMgr):
@@ -572,23 +555,22 @@ def GetHistoKwargs(histoName, ext, opts):
         }
     return _kwargs
         
-def SavePlot(plot, saveName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
-    # Check that path exists
+def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
+    Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
+
+     # Check that path exists
     if not os.path.exists(saveDir):
         os.makedirs(saveDir)
 
     # Create the name under which plot will be saved
-    savePath = os.path.join(saveDir, saveName)
+    saveName = os.path.join(saveDir, plotName.replace("/", "_"))
 
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
-        saveNameURL = savePath + ext
-        saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
-        if opts.url:
-            Verbose(saveNameURL, i==0)
-        else:
-            Verbose(savePath + ext, i==0)
-        plot.saveAs(savePath, formats=saveFormats)
+        saveNameURL = saveName + ext
+        saveNameURL = aux.convertToURL(saveNameURL, opts.url)
+        Verbose(saveNameURL, i==0)
+        plot.saveAs(saveName, formats=saveFormats)
     return
 
 
@@ -621,7 +603,7 @@ if __name__ == "__main__":
     MERGEEWK     = True
     URL          = False
     NOERROR      = True
-    SAVEDIR      = "/publicweb/a/aattikis/" #FakeBMeasurement/"
+    SAVEDIR      = None
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
     NORMALISE    = True
@@ -695,12 +677,9 @@ if __name__ == "__main__":
         parser.print_help()
         #print __doc__
         sys.exit(1)
-    else:
-        mcrabDir = rchop(opts.mcrab, "/")
-        if len(mcrabDir.split("/")) > 1:
-            mcrabDir = mcrabDir.split("/")[-1]
-        opts.saveDir += mcrabDir + "/Closure/"
 
+    if opts.saveDir == None:
+        opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="Closure")
 
     # Sanity check
     if not opts.mergeEWK:
