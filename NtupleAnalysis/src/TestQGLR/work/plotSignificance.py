@@ -208,7 +208,8 @@ def main(opts):
         style.setOptStat(True)
         style.setGridX(opts.gridX)
         style.setGridY(opts.gridY)
-
+        style.setLogY(True)
+        
         # Get histogram list
         folder     = opts.folder
         histoList  = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(folder)
@@ -279,7 +280,7 @@ def PlotSignificance(h, datasetsMgr, intLumi):
     p.setEnergy("13")
     p.getFrame().GetYaxis().SetLabelSize(18)
     p.getFrame().GetXaxis().SetLabelSize(20)
-    
+
     p.getFrame().GetYaxis().SetTitle("S/#sqrt{S+B} / 0.01")
     p.getFrame().GetXaxis().SetTitle("QGLR Cut")
     

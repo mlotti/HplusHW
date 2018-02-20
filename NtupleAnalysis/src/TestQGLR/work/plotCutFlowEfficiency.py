@@ -232,12 +232,14 @@ def PlotCutFlowEfficiency(h, datasetsMgr, intLumi):
     
     efficiencyList = [] 
     
+    signalMass.append("QCD")
+
     for mass in signalMass:
         
         xValues = []
         yValues = []
         
-        hSignal     = getHisto(datasetsMgr, h, mass, intLumi)
+        hSignal = getHisto(datasetsMgr, h, mass, intLumi)
                 
         for i in range (0, hSignal.GetXaxis().GetNbins()):
             
@@ -254,8 +256,11 @@ def PlotCutFlowEfficiency(h, datasetsMgr, intLumi):
         
         # Create the Significance Plot
         tGraph = ROOT.TGraph(len(xValues), array.array("d", xValues), array.array("d", yValues))
-        styles.getSignalStyleHToTB_M(mass.split("_")[-1]).apply(tGraph)
-        
+        if "M_" in mass:
+            styles.getSignalStyleHToTB_M(mass.split("_")[-1]).apply(tGraph)
+        else:
+            styles.getQCDStyle().apply(tGraph)
+      
         drawStyle = "CPE"
         legName   = plots._legendLabels[mass]
         effGraph = histograms.HistoGraph(tGraph, legName, "lp", drawStyle)
@@ -278,7 +283,7 @@ def PlotCutFlowEfficiency(h, datasetsMgr, intLumi):
     # Add Standard Texts to plot
     histograms.addStandardTexts()
     
-    # Customise Legend                                                                                                                                                                                   
+    # Customise Legend
     moveLegend = {"dx": -0.50, "dy": -0.5, "dh": -0.1}
     p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
     p.draw()
@@ -320,8 +325,6 @@ def convert2TGraph(tefficiency):
                                   array.array("d",xerrh),
                                   array.array("d",yerrl),
                                   array.array("d",yerrh))
-
-
 
 
 def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
