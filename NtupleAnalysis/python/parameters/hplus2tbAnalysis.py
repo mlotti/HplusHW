@@ -151,6 +151,15 @@ bjetSelection = PSet(
     numberOfBJetsCutDirection = ">=",               # [default: ">="] (options: ==, !=, <, <=, >, >=)
 )
 
+#================================================================================================
+# Scale Factors
+#================================================================================================
+scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
+                                    btagPayloadFilename    = "CSVv2.csv",
+                                    #btagEfficiencyFilename = "btageff_hybrid_HToTB.json",
+                                    btagEfficiencyFilename = "btageff_HToTB.json",
+                                    direction              = "nominal")
+
 #=================================================================================================
 # QGL selection
 #=================================================================================================
@@ -164,15 +173,6 @@ qglSelection = PSet(
     numberOfBJetsCutValue     = 3,
     numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >= 
 )
-
-#================================================================================================
-# Scale Factors
-#================================================================================================
-scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
-                                    btagPayloadFilename    = "CSVv2.csv",
-                                    #btagEfficiencyFilename = "btageff_hybrid_HToTB.json",
-                                    btagEfficiencyFilename = "btageff_HToTB.json",
-                                    direction              = "nominal")
 
 jsonReader.setupQGLInformation(QGLRPset  = qglSelection,
                                jsonname_Light  = "QGLdiscriminator_QCD_LightJets.json",
@@ -241,35 +241,34 @@ topSelectionBDT = PSet(
 #================================================================================================
 # FakeB Measurement Options
 #================================================================================================
-fakeBMeasurement = PSet(
-    # CSVv2-M (Baseline b-jets)
-    baselineNumberOfBJetsCutValue      = 2,            # [default: 2]
-    baselineNumberOfBJetsCutDirection  = "==",         # [default: "=="]
-    baselineBjetPtCuts                 = [40.0, 30.0], # [default: [40.0, 30.0]]
-    baselineBjetEtaCuts                = [2.4],        # [default: [2.4]]
-    baselineBjetDiscr                  = bjetSelection.bjetDiscr,
-    baselineBjetDiscrWorkingPoint      = bjetSelection.bjetDiscrWorkingPoint,
-    # CSVv2-L (Inverted b-jets)
-    invertedNumberOfBJetsCutValue     = 1,        # [default: 1]
-    invertedNumberOfBJetsCutDirection = ">=",     # [default: ">="]
-    invertedBJetsDiscr                = bjetSelection.bjetDiscr,
-    invertedBJetsDiscrMaxCutValue     = 0.8483,   # [default: 0.8483] (NOTE: CSVv2-L = 0.5426, CSVv2-M = +0.8484, CSVv2-T = 0.9535)
-    invertedBJetsDiscrMaxCutDirection = "<=",     # [default: "<="]
-    invertedBJetsWorkingPoint         = "Loose",  # [default: "Loose"]
-    # Top and Inverted Top
-    LdgTopMVACutValue                 = topSelectionBDT.LdgMVACutValue,
-    LdgTopMVACutDirection             = topSelectionBDT.LdgMVACutDirection, 
-    SubldgTopMVACutValue              = topSelectionBDT.SubldgMVACutValue,
-    SubldgTopMVACutDirection          = "<",   # [default: "<"]
-    minTopMVACutValue                 = 0.65,  # [default: 0.60]
-    minTopMVACutDirection             =  ">=", # [default: ">="]
-    # All bjets (CSVv2-M and CSVv2-L)
-    allBJetsPtCuts        = bjetSelection.jetPtCuts,
-    allBJetsEtaCuts       = bjetSelection.jetEtaCuts,
-    allBJetsNCutValue     = bjetSelection.numberOfBJetsCutValue,
-    allBJetsNCutDirection = bjetSelection.numberOfBJetsCutDirection
+fakeBBjetSelection = PSet(
+    # CSVv2-L b-jets
+    triggerMatchingApply      = bjetSelection.triggerMatchingApply,
+    triggerMatchingCone       = bjetSelection.triggerMatchingCone,
+    jetPtCuts                 = bjetSelection.jetPtCuts,
+    jetEtaCuts                = bjetSelection.jetEtaCuts,
+    bjetDiscr                 = bjetSelection.bjetDiscr,
+    bjetDiscrWorkingPoint     = "Loose",
+    numberOfBJetsCutValue     = bjetSelection.numberOfBJetsCutValue,
+    numberOfBJetsCutDirection = bjetSelection.numberOfBJetsCutDirection,
     )
+scaleFactors.setupBtagSFInformation(btagPset               = fakeBBjetSelection, 
+                                    btagPayloadFilename    = "CSVv2.csv",
+                                    btagEfficiencyFilename = "btageff_HToTB.json",
+                                    direction              = "nominal")
 
+fakeBMeasurement = PSet(
+    # CSVv2-M b-jets
+    baselineBJetsCutValue     = 2,     # [default: 2]
+    baselineBJetsCutDirection = "==",  # [default: "=="]
+    # Top and Inverted Top
+    LdgTopMVACutValue         = topSelectionBDT.LdgMVACutValue,
+    LdgTopMVACutDirection     = topSelectionBDT.LdgMVACutDirection, 
+    SubldgTopMVACutValue      = topSelectionBDT.SubldgMVACutValue,
+    SubldgTopMVACutDirection  = "<",   # [default: "<"]
+    minTopMVACutValue         = 0.60,  # [default: 0.60]
+    minTopMVACutDirection     =  ">=", # [default: ">="]
+    )
 
 #================================================================================================
 # Common plots options
@@ -304,6 +303,7 @@ commonPlotsOptions = PSet(
 allSelections = PSet(
     BJetSelection         = bjetSelection,
     QGLRSelection         = qglSelection,
+    FakeBBJetSelection    = fakeBBjetSelection,
     CommonPlots           = commonPlotsOptions,
     ElectronSelection     = eVeto,
     HistogramAmbientLevel = histogramAmbientLevel,
@@ -317,6 +317,7 @@ allSelections = PSet(
     Trigger               = trigger,
     Verbose               = verbose,
     FakeBMeasurement      = fakeBMeasurement,
+    FakeBBjetSelection    = fakeBBjetSelection,
     FatJetSelection       = fatjetSelection,
     FatJetSoftDropSelection = fatjetSoftDropSelection
 )
