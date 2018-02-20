@@ -391,8 +391,8 @@ signalStyleHToTB500 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.
                                    StyleLine(lineColor=ROOT.kAzure-1, lineStyle=9, lineWidth=3),
                                    StyleFill(fillColor=ROOT.kAzure-1, fillStyle=0)])
 signalStyleHToTB800 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kSpring-4, markerSizes=None, markerStyle=ROOT.kFullCircle),
-                                   StyleLine(lineColor=ROOT.kSpring-4, lineStyle=ROOT.kDashed, lineWidth=4),
-                                   StyleFill(fillColor=ROOT.kSpring-4, fillStyle=0)])
+                                   StyleLine(lineColor=ROOT.kPink, lineStyle=ROOT.kDashed, lineWidth=4),
+                                   StyleFill(fillColor=ROOT.kPink, fillStyle=0)])
 signalStyleHToTB300 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kOrange+7, markerSizes=None, markerStyle=ROOT.kFullCircle),
                                    StyleLine(lineColor=ROOT.kOrange+7, lineStyle=ROOT.kDashed, lineWidth=4),
                                    StyleFill(fillColor=ROOT.kOrange+7, fillStyle=0)])
