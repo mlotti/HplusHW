@@ -18,10 +18,11 @@ EXAMPLES:
 ../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY --yMin 1e-3 --settings Default
 ../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY --yMin 1e-3 --settings NoLumi
 ../../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY --yMin 1e-3 --settings Default --url
+../../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY --yMin 1e-3 --yMax 10 --settings NoLumi
 
 
 LAST USED:
-../../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY --yMin 1e-3 --yMax 10 --settings NoLumi
+../../../plotBRLimit_Hplus2tb.py --excludedArea --gridX --gridY --settings NoLumi --yMin 1e-1
 
 '''
 
