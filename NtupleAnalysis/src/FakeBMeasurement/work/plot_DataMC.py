@@ -852,7 +852,7 @@ if __name__ == "__main__":
     SAVEDIR      = None
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug' 
-    FOLDER       = "ForDataDrivenCtrlPlots" #"FailedBJetGenuineB" #jetSelection_
+    FOLDER       = "counters/weighted" #ForDataDrivenCtrlPlots" #"jetSelection_
     ONLYMC       = False
     RATIO        = False
     NOSTACK      = False
