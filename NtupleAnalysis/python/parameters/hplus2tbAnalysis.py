@@ -243,7 +243,7 @@ fakeBMeasurement = PSet(
     LdgTopMVACutDirection     = topSelectionBDT.LdgMVACutDirection, 
     SubldgTopMVACutValue      = topSelectionBDT.SubldgMVACutValue,
     SubldgTopMVACutDirection  = "<",   # [default: "<"]
-    minTopMVACutValue         = 0.65,  # [default: 0.60]
+    minTopMVACutValue         = 0.60,  # [default: 0.60]
     minTopMVACutDirection     =  ">=", # [default: ">="]
     )
 
