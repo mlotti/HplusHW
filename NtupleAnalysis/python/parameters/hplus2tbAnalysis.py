@@ -149,10 +149,6 @@ bjetSelection = PSet(
     numberOfBJetsCutValue     = 3,                  # [default: 3]
     numberOfBJetsCutDirection = ">=",               # [default: ">="] (options: ==, !=, <, <=, >, >=)
 )
-
-#================================================================================================
-# Scale Factors
-#================================================================================================
 scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
                                     btagPayloadFilename    = "CSVv2.csv",
                                     #btagEfficiencyFilename = "btageff_hybrid_HToTB.json",
@@ -233,6 +229,10 @@ fakeBBjetSelection = PSet(
     numberOfBJetsCutValue     = bjetSelection.numberOfBJetsCutValue,
     numberOfBJetsCutDirection = bjetSelection.numberOfBJetsCutDirection,
     )
+scaleFactors.setupBtagSFInformation(btagPset               = fakeBBjetSelection, 
+                                    btagPayloadFilename    = "CSVv2.csv",
+                                    btagEfficiencyFilename = "btageff_HToTB.json",
+                                    direction              = "nominal")
 
 fakeBMeasurement = PSet(
     # CSVv2-M b-jets
