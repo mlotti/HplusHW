@@ -199,8 +199,8 @@ void SignalAnalysis::process(Long64_t entry) {
 
 //====== Collinear angular cuts
   const AngularCutsCollinear::Data collinearData = fAngularCutsCollinear.analyze(fEvent, tauData.getSelectedTau(), jetData, silentMETData);
-  //  if (!collinearData.passedSelection())
-  //   return;
+  if (!collinearData.passedSelection())
+    return;
 
 //====== Point of standard selections
   fCommonPlots.fillControlPlotsAfterTopologicalSelections(fEvent);

@@ -57,8 +57,8 @@ class FakeBNormalizationManager:
     '''
     Base class for QCD measurement normalization from which specialized algorithm classes inherit
     '''
-    def __init__(self, binLabels, resultDirName, moduleInfoString):
-        self._verbose      = False
+    def __init__(self, binLabels, resultDirName, moduleInfoString, verbose=False):
+        self._verbose      = verbose
         self._templates    = {}
         self._binLabels    = binLabels
         self._sources      = {}
@@ -123,7 +123,7 @@ class FakeBNormalizationManager:
         else:
             raise Exception("Error: _TF dictionary has no key \"%s\"! "% (binLabel) )
     
-    def CalculateTransferFactor(self, binLabel, hFakeB_Baseline, hFakeB_Inverted):
+    def CalculateTransferFactor(self, binLabel, hFakeB_Baseline, hFakeB_Inverted, verbose=False):
         '''
         Calculates the combined normalization and, if specified, 
         varies it up or down by factor (1+variation)
@@ -133,17 +133,19 @@ class FakeBNormalizationManager:
         CR = Control Region
         VR = Verification Region
         '''
+        self.verbose = verbose
+
         # Obtain counts for QCD and EWK fakes
         lines = []
 
         # NOTES: Add EWKGenuineB TF, Add Data TF, add QCD TF, Add EWK TF, add MCONLY TFs
         nSR_Error = ROOT.Double(0.0)
         nCR_Error = ROOT.Double(0.0)
-        # nTotalError    = ROOT.TMath.Sqrt(nSRerror**2 + nCRError**2)
+        # nTotalError = ROOT.TMath.Sqrt(nSRerror**2 + nCRError**2)
         
         nSR = hFakeB_Baseline.IntegralAndError(1, hFakeB_Baseline.GetNbinsX()+1, nSR_Error)
         nCR = hFakeB_Inverted.IntegralAndError(1, hFakeB_Inverted.GetNbinsX()+1, nCR_Error)
-        # nTotal         = nSR + nCR
+        # nTotal = nSR + nCR
 
         # Calculate Transfer Factor (TF) from Control Region (R) to Signal Region (SR): R = N_SR/ N_CR
         TF       = None
@@ -160,7 +162,7 @@ class FakeBNormalizationManager:
             TF_Down = TF - TF_Error
             if TF_Down < 0.0:
                 TF_Down = 0.0
-        lines.append("R = N_SR / N_CR = %f / %f =  %f +- %f" % (nSR, nCR, TF, TF_Error) )
+        lines.append("TF (bin=%s) = N_SR / N_CR = %f / %f =  %f +- %f" % (binLabel, nSR, nCR, TF, TF_Error) )
 
         # Calculate the combined normalization factor (f_fakes = w*f_QCD + (1-w)*f_EWKfakes)
         fakeRate      = None
