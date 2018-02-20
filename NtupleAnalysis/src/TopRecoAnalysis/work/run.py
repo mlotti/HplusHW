@@ -124,7 +124,7 @@ def main():
         Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
         process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=opts.excludeTasks)
     else:
-        #myBlackList = ["QCD_b"]
+        myBlackList = ["TTTT", "TTZToQQ", "TTWJetsToQQ"]
         Print("Adding all datasets from multiCRAB directory %s" % (opts.mcrab))
         Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
         regex =  "|".join(myBlackList)
@@ -143,9 +143,10 @@ def main():
     allSelections.histogramAmbientLevel = opts.histoLevel
     # allSelections.BjetSelection.triggerMatchingApply = True
     # allSelections.TopSelection.ChiSqrCutValue = 100.0
-    #allSelections.TopSelectionBDT.LdgMVACutValue = 0.95
-    #allSelections.TopSelectionBDT.SubldgMVACutValue = 0.95
-    #allSelections.TopSelectionBDT.MVACutValue = 0.95
+    #allSelections.TopSelectionBDT.LdgMVACutValue = 0.2
+    #allSelections.TopSelectionBDT.SubldgMVACutValue = 0.2
+    allSelections.BJetSelection.jetPtCuts = [40, 40, 40]
+    allSelections.JetSelection.jetPtCuts = [40, 40, 40, 40, 40, 40, 40]
     # allSelections.BJetSelection.numberOfBJetsCutValue = 0
     # allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
 
@@ -263,7 +264,7 @@ if __name__ == "__main__":
     # Default Values
     VERBOSE       = False
     NEVTS         = -1
-    HISTOLEVEL    = "Vital" #"Informative" #"Debug"
+    HISTOLEVEL    = "Informative" #"Informative" #"Debug"
     PUREWEIGHT    = True
     TOPPTREWEIGHT = True
     DOSYSTEMATICS = False
