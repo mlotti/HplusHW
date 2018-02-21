@@ -1,6 +1,67 @@
+#================================================================================================ 
+# Imports
+#================================================================================================                                                                                           
 from HiggsAnalysis.LimitCalc.BRdataInterface import *
 from math import sqrt,log
 import crosssection
+
+
+#================================================================================================
+# Function Definitions
+#================================================================================================
+def significance(S, B, sigmaB=0.0, option="Simple"):
+    '''
+    From Glen Cowan lecture:
+    https://www.pp.rhul.ac.uk/~cowan/stat/cowan_berkeley_4jan17.pdf
+
+    Expected discovery significance for counting experiment with 
+    background uncertainty:
+
+    I. Discovery sensitivity for counting experiment with B known (sigmaB=0)
+    "Simple": S / sqrt(B)
+    "Asimov": sqrt(2*[(S+B)*ln(1 + S/B)-S])
+
+    II. Discovery sensitivity with uncertainty in B, sigmaB:
+    "Simple": S/sqrt(B + sigmaB^2) 
+
+    "Asimov": sqrt(2*[(S+B)*ln((S+B)(B + sigmaB^2)/(B^{2} + (S+B)*sigmaB^{2}))- B^{2}/sigmaB^{2}*ln[1 + (sigmaB^{2}*S)/B(B+sigmaB^{2})]])
+    '''
+    # Sanity checks
+    signif = 0.0
+    if B <= 0.0:
+        return signif
+    if S < 0.0:
+        S = 0.0
+    if sigmaB < 0.0:
+        raise Exception("Cannot have background uncertainty smaller than zero! (sigmaB=%.3f)" % (sigmaB))
+
+    allowedOpts = ["Simple", "Asimov"]
+    if option not in allowedOpts:
+        raise Exception("Unknown selected option \"%s\". Please select from:" % (option, ", ".join(allowedOpts)) )
+        
+    if sigmaB == 0.0:
+        if option == "Simple":
+            signif = S/sqrt(B)
+        elif option == "Asimov":
+            signif = sqrt(2*( (S+B)*log(1 + S/B)-S) )
+            # print "delta = ", signif - S/sqrt(B)
+        else:
+            raise Exception("This should never be reached")
+    else:
+        if option == "Simple":
+            signif = S/sqrt(B + pow(sigmaB,2) )
+        elif option == "Asimov":
+            partA   = (S+B)*log( ( (S+B)*(B + pow(sigmaB,2)) )/(pow(B,2) + (S+B)*pow(sigmaB,2)) )
+            partB   = ( pow(B,2)/pow(sigmaB,2) )*log( 1 + (pow(sigmaB,2)*S)/(B*(B+pow(sigmaB,2))) )
+            deltaAB = partA - partB
+            if deltaAB > 0:
+                signif  = sqrt(2*(deltaAB))
+            else:
+                signif  = 0.0
+        else:
+            raise Exception("This should never be reached")
+    return signif
+
 
 def signif(nSignal,nBackgr,sysErrorBackgr):
     if (sysErrorBackgr > 1 or sysErrorBackgr < 0):

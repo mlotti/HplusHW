@@ -13,28 +13,26 @@ histogramAmbientLevel = "Debug"  # Options: Systematics, Vital, Informative, Deb
 # Trigger
 #================================================================================================
 trigger = PSet(
+    # scanned in range _v1--_v100 (=>remove the '_v' suffix)
     triggerOR = [
-        "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056", # scanned in range _v1--_v100 (=>remove the '_v' suffix)
-        "HLT_PFHT450_SixJet40_BTagCSV_p056",       # scanned in range _v1--_v100 (=>remove the '_v' suffix)
-        "HLT_PFJet450", # for trg eff recovery in 2016H
-        #"HLT_PFHT400_SixJet30", #Prescale 110 at inst. lumi 1.35E+34
-        #"HLT_PFHT450_SixJet40", #Prescale 26 at inst. lumi 1.35E+34
+        "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056",
+        "HLT_PFHT450_SixJet40_BTagCSV_p056",       
+        "HLT_PFJet450", #for trg eff recovery in 2016H
         ],
     triggerOR2 = [],
     )
-
 
 #================================================================================================
 # Tau selection (sync with HToTauNu analysis)
 #================================================================================================
 tauSelection = PSet(
-    applyTriggerMatching = False,
-    triggerMatchingCone  =   0.1, # DeltaR for matching offline tau with trigger tau
-    tauPtCut             =  20.0, #
-    tauEtaCut            =   2.1, # HToTauNu have 2.1
-    tauLdgTrkPtCut       =   0.0, #
-    prongs               =  -1,   # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
-    rtau                 =   0.0, # to disable set to 0.0
+    applyTriggerMatching = False, # [default: False]
+    triggerMatchingCone  =   0.1, # [default: False]
+    tauPtCut             =  20.0, # [default: 20.0]
+    tauEtaCut            =   2.1, # [default: 2.1]
+    tauLdgTrkPtCut       =   0.0, # [default: 0.0]
+    prongs               =  -1,   # [default: -1] (options: 1, 2, 3, 12, 13, 23, 123 or -1 (all))
+    rtau                 =   0.0, # [default: 0.0] (to disable set to 0.0)
     againstElectronDiscr = "againstElectronTightMVA6",
     againstMuonDiscr     = "againstMuonLoose3",
     isolationDiscr       = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
@@ -45,7 +43,7 @@ tauSelection = PSet(
 #================================================================================================
 metFilter = PSet(
     discriminators = [
-        "hbheNoiseTokenRun2Loose", # Loose is recommended
+        "hbheNoiseTokenRun2Loose",
         "Flag_HBHENoiseIsoFilter",
         "Flag_EcalDeadCellTriggerPrimitiveFilter",
         "Flag_CSCTightHaloFilter",
@@ -57,47 +55,46 @@ metFilter = PSet(
 # Electron veto
 #================================================================================================
 eVeto = PSet(
-    electronPtCut     = 10.0,   # sync: 10.0
-    electronEtaCut    = 2.1,    # sync:  2.1
-    electronIDType    = "MVA",  # options: "default", "MVA"
+    electronPtCut     = 10.0,    # [default: 10.0]
+    electronEtaCut    = 2.1,     # [default: 2.1]
+    electronIDType    = "MVA",   # [default: "MVA] (options: "default", "MVA")
     electronID        = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
     electronMVA       = "ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values",
-    electronMVACut    = "Loose",
-    electronIsolation = "veto", # options: "veto", "tight"
-    electronIsolType  = "mini", # options: "mini", "default"
+    electronMVACut    = "Loose", # [default: "Loose"]
+    electronIsolation = "veto",  # [default: "veto"] (options: "veto", "tight")
+    electronIsolType  = "mini",  # [default: "mini"] (options: "mini", "default")
     )
 
 #================================================================================================
 # Muon veto
 #================================================================================================
 muVeto = PSet(
-    muonPtCut         = 10.0,        # sync: 10.0
-    muonEtaCut        = 2.4,         # sync:  2.4
-    muonID            = "muIDLoose", # options: "muIDLoose", "muIDMedium", "muIDTight"
-    muonIsolation     = "veto",      # options: "veto", "tight"
-    muonIsolType      = "mini",      # options: "mini", "default"
+    muonPtCut         = 10.0,        # [default: 10.0]
+    muonEtaCut        = 2.4,         # [default: 2.4]
+    muonID            = "muIDLoose", # [default: "muIDLoose"] (options: "muIDLoose", "muIDMedium", "muIDTight")
+    muonIsolation     = "veto",      # [default: "veto"] (options: "veto", "tight")
+    muonIsolType      = "mini",      # [default: "mini"] (options: "mini", "default")
 )
 
 #================================================================================================
 # Jet selection
 #================================================================================================
 jetSelection = PSet(
-    jetType                  = "Jets",    # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
+    jetType                  = "Jets",    # [default: "jets"] (options: "Jets" (AK4PFCHS), "JetsPuppi" (AK4Puppi))
     jetPtCuts                = [40.0, 40.0, 40.0, 40.0, 40.0, 40.0, 30.0],
-    jetEtaCuts               = [2.4],
-    numberOfJetsCutValue     = 7,
-    numberOfJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
-    jetIDDiscr               = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
-    jetPUIDDiscr             = "",        # does not work at the moment 
-    tauMatchingDeltaR        = 0.4,
-    HTCutValue               = 500.0,
-    HTCutDirection           = ">=",
-    JTCutValue               = 0.0,
-    JTCutDirection           = ">=",
-    MHTCutValue              = 0.0,
-    MHTCutDirection          = ">=",
+    jetEtaCuts               = [2.4],     # [default: [2.4]]
+    numberOfJetsCutValue     = 7,         # [default: 7]
+    numberOfJetsCutDirection = ">=",      # [default: ">="] (options: ==, !=, <, <=, >, >=)
+    jetIDDiscr               = "IDloose", # [default: "IDloose"] (options: IDloose, IDtight, IDtightLeptonVeto)
+    jetPUIDDiscr             = "",        # [default: ""]
+    tauMatchingDeltaR        = 0.4,       # [default: 0.4] (does nothing for h2tb)
+    HTCutValue               = 500.0,     # [default: 500.0]
+    HTCutDirection           = ">=",      # [default: ">="]
+    JTCutValue               = 0.0,       # [default: 0.0]
+    JTCutDirection           = ">=",      # [default: ">="]
+    MHTCutValue              = 0.0,       # [default: 0.0]
+    MHTCutDirection          = ">=",      # [default: ">="]
 )
-
 
 #=================================================================================================
 # Fat jet selection
@@ -139,25 +136,19 @@ fatjetSoftDropSelection = PSet(
     MHTCutDirection             = ">=",
 )
 
-
-
 #================================================================================================
 # B-jet selection
 #================================================================================================
 bjetSelection = PSet(
-    triggerMatchingApply      = False,
-    triggerMatchingCone       = 0.1,  # DeltaR for matching offline bjet with trigger::TriggerBjet
-    jetPtCuts                 = [40.0, 40.0, 30.0],
-    jetEtaCuts                = [2.4],
+    triggerMatchingApply      = False,              # [default: False]
+    triggerMatchingCone       = 0.1,                # [default: 0.1 ] (DR for matching offline bjet with trigger::TriggerBjet)
+    jetPtCuts                 = [40.0, 40.0, 30.0], # [default: [40.0, 40.0, 30.0]]
+    jetEtaCuts                = [2.4],              # [default: [2.4]]
     bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
-    bjetDiscrWorkingPoint     = "Medium",
-    numberOfBJetsCutValue     = 3,
-    numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
+    bjetDiscrWorkingPoint     = "Medium",           # [default: "Medium"]
+    numberOfBJetsCutValue     = 3,                  # [default: 3]
+    numberOfBJetsCutDirection = ">=",               # [default: ">="] (options: ==, !=, <, <=, >, >=)
 )
-
-#================================================================================================
-# Scale Factors
-#================================================================================================
 scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
                                     btagPayloadFilename    = "CSVv2.csv",
                                     #btagEfficiencyFilename = "btageff_hybrid_HToTB.json",
@@ -168,12 +159,12 @@ scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection,
 # MET selection
 #================================================================================================
 metSelection = PSet(
-    METCutValue                 = -1000.0,
-    METCutDirection             = ">",         # options: ==, !=, <, <=, >, >=
-    METSignificanceCutValue     = -1000.0,
-    METSignificanceCutDirection = ">",         # options: ==, !=, <, <=, >, >=
-    METType                     = "MET_Type1", # options: MET_Type1, MET_Type1_NoHF, MET_Puppi, GenMET, L1MET, HLTMET, CaloMET
-    applyPhiCorrections          = False
+    METCutValue                 = -1000.0,     #
+    METCutDirection             = ">",         # (options: ==, !=, <, <=, >, >=)
+    METSignificanceCutValue     = -1000.0,     # 
+    METSignificanceCutDirection = ">",         # (options: ==, !=, <, <=, >, >=)
+    METType                     = "MET_Type1", # (options: MET_Type1, MET_Type1_NoHF, MET_Puppi, GenMET, L1MET, HLTMET, CaloMET)
+    applyPhiCorrections          = False       # 
     )
 
 #================================================================================================
@@ -227,31 +218,34 @@ topSelectionBDT = PSet(
 #================================================================================================
 # FakeB Measurement Options
 #================================================================================================
-fakeBMeasurement = PSet(
-    prelimTopMVACutValue              = 0.50,     # [default: 0.60]
-    prelimTopMVACutDirection          =  ">=",    # [default: ">="]
-    # CSVv2-M (Baseline b-jets)
-    numberOfBJetsCutValue             = 2,        # [VR, CR2: 2   , CR3, CR4: 1   ]
-    numberOfBJetsCutDirection         = "==",     # [VR, CR2: "==", CR3, CR4: "=="]
-    # CSVv2-L (Inverted b-jets)
-    numberOfInvertedBJetsCutValue     = 1,        # [VR, CR2: 1   , CR3, CR4: 2   ]
-    numberOfInvertedBJetsCutDirection = ">=",     # [VR, CR2: ">=", CR3, CR4: ">="]
-    invertedBJetsDiscr                = bjetSelection.bjetDiscr,
-    invertedBJetsDiscrMaxCutValue     = 0.85,     # [default: 0.8, CSVv2-L = 0.5426, CSVv2-M = +0.8484, CSVv2-T = 0.9535]
-    invertedBJetsDiscrMaxCutDirection = "<=",     # [default: "<="]
-    invertedBJetsWorkingPoint         = "Loose",  # [default: "Loose"]
-    invertedBJetsSortType             = "Random", # [default: "Random"] # FIXME: Does this make any difference?
-    LdgTopMVACutValue                 = topSelectionBDT.LdgMVACutValue,
-    LdgTopMVACutDirection             = topSelectionBDT.LdgMVACutDirection, 
-    SubldgTopMVACutValue              = topSelectionBDT.SubldgMVACutValue, # [VR CR2: 0.8 , CR3, CR4: 0.8 ]
-    SubldgTopMVACutDirection          = "<",                               # [VR CR2: ">=", CR3, CR4: "<" ]
-    # All bjets (CSVv2-M and CSVv2-L)
-    allBJetsPtCuts        = bjetSelection.jetPtCuts,
-    allBJetsEtaCuts       = bjetSelection.jetEtaCuts,
-    allBJetsNCutValue     = bjetSelection.numberOfBJetsCutValue,
-    allBJetsNCutDirection = bjetSelection.numberOfBJetsCutDirection
+fakeBBjetSelection = PSet(
+    # CSVv2-L b-jets
+    triggerMatchingApply      = bjetSelection.triggerMatchingApply,
+    triggerMatchingCone       = bjetSelection.triggerMatchingCone,
+    jetPtCuts                 = bjetSelection.jetPtCuts,
+    jetEtaCuts                = bjetSelection.jetEtaCuts,
+    bjetDiscr                 = bjetSelection.bjetDiscr,
+    bjetDiscrWorkingPoint     = "Loose",
+    numberOfBJetsCutValue     = bjetSelection.numberOfBJetsCutValue,
+    numberOfBJetsCutDirection = bjetSelection.numberOfBJetsCutDirection,
     )
+scaleFactors.setupBtagSFInformation(btagPset               = fakeBBjetSelection, 
+                                    btagPayloadFilename    = "CSVv2.csv",
+                                    btagEfficiencyFilename = "btageff_HToTB.json",
+                                    direction              = "nominal")
 
+fakeBMeasurement = PSet(
+    # CSVv2-M b-jets
+    baselineBJetsCutValue     = 2,     # [default: 2]
+    baselineBJetsCutDirection = "==",  # [default: "=="]
+    # Top and Inverted Top
+    LdgTopMVACutValue         = topSelectionBDT.LdgMVACutValue,
+    LdgTopMVACutDirection     = topSelectionBDT.LdgMVACutDirection, 
+    SubldgTopMVACutValue      = topSelectionBDT.SubldgMVACutValue,
+    SubldgTopMVACutDirection  = "<",   # [default: "<"]
+    minTopMVACutValue         = 0.60,  # [default: 0.60]
+    minTopMVACutDirection     =  ">=", # [default: ">="]
+    )
 
 #================================================================================================
 # Common plots options
@@ -298,6 +292,7 @@ allSelections = PSet(
     Trigger               = trigger,
     Verbose               = verbose,
     FakeBMeasurement      = fakeBMeasurement,
+    FakeBBjetSelection    = fakeBBjetSelection,
     FatJetSelection       = fatjetSelection,
     FatJetSoftDropSelection = fatjetSoftDropSelection
 )
