@@ -2056,6 +2056,8 @@ void TopRecoAnalysis::process(Long64_t entry) {
   bool isLdgTrijetW_untagged    = true; //max(LdgTrijet.Jet1.bjetDiscriminator(), LdgTrijet.Jet2.bjetDiscriminator()) < 0.5426;
   bool isSubldgTrijetW_untagged = true; //max(SubldgTrijet.Jet1.bjetDiscriminator(), SubldgTrijet.Jet2.bjetDiscriminator()) < 0.5426;
 
+
+  //Match ldgTrijet to fat jets
   for(AK8Jet fatJet: fEvent.ak8jets())
     {
       if (fatJet.pt() < 170) continue;
