@@ -64,13 +64,6 @@ def createBinByBinStatUncertHistograms(hRate, minimumStatUncertainty=0.5, xmin=N
     if myRangeMax == None:
         myRangeMax = hRate.GetXaxis().GetBinUpEdge(hRate.GetNbinsX())
 
-    ### SOME TEST PRINTS
-    print "Contents of hisogram %s"%hRate.GetTitle()
-    for i in range(1, hRate.GetNbinsX()+1):
-        print "bin %d: nominal %f, error %f"%(i,hRate.GetBinContent(i),hRate.GetBinError(i))
-
-    ### END OF TEST PRINTS
-
     nNegativeRate = 0
     nBelowMinStatUncert = 0
     nEmptyDownHistograms = 0
