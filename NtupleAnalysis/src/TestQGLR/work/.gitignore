@@ -1,1 +1,5 @@
-SignalAnalysis*
+*.pdf
+*.png
+*.C
+QCDMeasurement*
+QCDInvertedNormalizationFactors*
