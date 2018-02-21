@@ -630,9 +630,14 @@ void TopSelectionBDT::bookHistograms(TDirectory* dir) {
   hTrijetJets_DeltaRmin            = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TrijetJets_DeltaRmin"            , ";#Delta R"  , nDRBins     , fDRMin     , fDRMax);
   hTrijetJets_DeltaRmin_passBDT    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TrijetJets_DeltaRmin_passBDT"    , ";#Delta R"  , nDRBins     , fDRMin     , fDRMax);
 
+  hTrijetMultiplicityPassBDT = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TrijetMultiplicityPassBDT", ";Trijet mult - After BDT (cross-cleaned)", 15, 0, 15);
+
   // Histograms (2D) 
   hTrijetCountForBDTcuts           = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "TrijetCountVsBDTcuts",             ";BDT cut value;Trijet multiplicity", 
 								20, -1.0,1.0, 125,0,125);
+  hTrijetMult_Vs_BDTcut           = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "TrijetMult_Vs_BDTcut",             ";BDT cut value;Trijet mult (cross-cleaned)", 
+								20, -1.0,1.0, 125,0,125);
+
   hNjetsVsNTrijets_beforeBDT       = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "NjetsVsNTrijets_beforeBDT",        ";Jet Multiplicity;Trijets_beforeBDT multiplicity", 
 								8,6,14, 670, 0, 670);
   hNjetsVsNTrijets_afterBDT        = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "NjetsVsNTrijets_afterBDT",         ";Jet Multiplicity;Trijets_afterBDT multiplicity", 
@@ -883,6 +888,26 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 
   //Sort Top Candidates in MVA value (discending)
   TopCand = SortInMVAvalue(TopCand);
+  
+  cut =0;
+  for (int k=0; k<21; k++)
+    {
+      mva.at(k) = 0;
+      //mvaCut.push_back(cut);
+      //cut = cut + 0.1;
+    }
+  
+  //Find Trijet Multiplicity after MVA cut value (cross-cleaned)
+  double passBDTMult = 0;
+  for (size_t i=0; i<TopCand.MVA.size(); i++)
+    {
+      bool isCrossCleaned = TrijetPassBDT_crossCleaned(i, TopCand, bjets);
+      if (isCrossCleaned)
+	{
+	  if (cfg_MVACut.passedCut(TopCand.MVA.at(i))) passBDTMult++;
+	  for (int m=0; m<21; m++) if (TopCand.MVA.at(i) > mvaCut.at(m)) mva.at(m) ++; 
+	}
+    }
 
   //================================================================================================  
   // Trijet 1: Highest BDT value
@@ -1508,7 +1533,6 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	  // Fill histograms
 	  hDeltaRMinTopTrijet -> Fill(dR_tmin);
 	  
-	  // Find index of trijets In top direction (min DeltaR)
 	  if (genuineTop)
 	    {
 	      hAllTopQuarkPt_Matched-> Fill(top.pt());
@@ -1749,6 +1773,11 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   hTrijetMultiplicity        -> Fill(TopCand.MVA.size());               //Trijet multiplicity
   hNjetsVsNTrijets_beforeBDT -> Fill(jets.size(), TopCand.MVA.size());  //Trijet multiplicity as a function of Jet multiplicity  (Before MVA selection)   <---Constant
   hNjetsVsNTrijets_afterBDT  -> Fill(jets.size(), NpassBDT);            //Trijet multiplicity as a function of Jet multiplicity  (After MVA selection)
+
+  for (size_t m=0; m < mvaCut.size(); m++) hTrijetMult_Vs_BDTcut -> Fill(mvaCut.at(m), mva.at(m));
+  hTrijetMultiplicityPassBDT -> Fill(passBDTMult);
+
+
   if (cfg_MVACut.passedCut(MVAmax1)) hTrijetPt_BDT ->Fill(trijet1.TrijetP4.Pt());
   if (cfg_MVACut.passedCut(MVAmax2)) hTrijetPt_BDT ->Fill(trijet2.TrijetP4.Pt());
 
@@ -1769,6 +1798,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   // All the top quarks have been matched
   if (MCtrue_Bjet.size() == GenTops.size())
     {
+      //Efficiency: Both Trijets Matched && Pass BDT
       hEventTrijetPt2T -> Fill(leadingTrijet.TrijetP4.Pt());              //Trijet.pt -- Inclusive
       if ( realtopBoth )
 	{
@@ -2128,9 +2158,9 @@ bool TopSelectionBDT::isWsubjet(const Jet& jet , const std::vector<Jet>& jets1 ,
 }
 
 bool TopSelectionBDT::isMatchedJet(const Jet& jet, const std::vector<Jet>& jets) {
-  for (auto Jet: jets)
+  for (auto iJet: jets)
     {
-      if (areSameJets(jet, Jet)) return true;
+      if (areSameJets(jet, iJet)) return true;
     }
   return false;
 }
@@ -2224,7 +2254,10 @@ TrijetSelection TopSelectionBDT::SortInMVAvalue(TrijetSelection TopCand){
 }
 
 bool TopSelectionBDT::foundFreeBjet(const Jet& trijet1Jet1, const Jet& trijet1Jet2, const Jet& trijet1BJet, const Jet& trijet2Jet1, const Jet& trijet2Jet2, const Jet& trijet2BJet , const std::vector<Jet>& bjets){
-
+  //Description:
+  //Returns false if two trijet combinations use all the bjets of the event
+  //Used to select the best two top candidates which are not formed by all the bjets off the event
+  //One free bjet is required for the tetrajet reconstruction
   int SumTrijet1 = isBJet(trijet1Jet1, bjets) + isBJet(trijet1Jet2, bjets) + isBJet(trijet1BJet, bjets);
   int SumTrijet2 = isBJet(trijet2Jet1, bjets) + isBJet(trijet2Jet2, bjets) + isBJet(trijet2BJet, bjets);
   if ((size_t)(SumTrijet1 + SumTrijet2) != bjets.size()) return true;
@@ -2343,4 +2376,28 @@ SelectedTrijets TopSelectionBDT::GetSelectedTopCandidate(TrijetSelection TopCand
   trijet.TrijetP4 = TopCand.TrijetP4.at(index);
   trijet.DijetP4 = TopCand.DijetP4.at(index);
   return trijet;
+}
+
+
+
+bool TopSelectionBDT::TrijetPassBDT_crossCleaned(int Index, TrijetSelection TopCand, const std::vector<Jet>& bjets){
+  //Descriptions: Used to find the cross-cleaned trijet multiplicity. The function takes as input the index of a trijet and the total trijet collection and returns 
+  //False: (a) If the trijet uses all the bjets of the event
+  //       (b) If at least one of the subjets of the trijets are used by the trijets with Higher BDT value (Higher BDT value -> smaller index: Trijets sorted in BDT value) 
+  //True: If cross-cleaned trijet 
+
+  if ( (size_t)( isBJet(TopCand.Jet1.at(Index),bjets) + isBJet(TopCand.Jet2.at(Index),bjets) + isBJet(TopCand.BJet.at(Index),bjets)) ==  bjets.size()) return false;
+  if (Index > 0)
+    {
+      for (size_t i=0; i<(size_t)Index; i++)
+	{
+	  //Vector includes the 3 subjets of a trijet
+	  std::vector<Jet> Trijet;
+	  Trijet.push_back(TopCand.Jet1.at(i)); Trijet.push_back(TopCand.Jet2.at(i)); Trijet.push_back(TopCand.BJet.at(i));
+	  // Skip top candidates with same jets as Trijets with higher BDDT value
+	  if (isMatchedJet(TopCand.BJet.at(Index), Trijet) || isMatchedJet(TopCand.Jet1.at(Index), Trijet) || isMatchedJet(TopCand.Jet2.at(Index), Trijet)) return false;
+	}
+    }
+  
+  return true;
 }

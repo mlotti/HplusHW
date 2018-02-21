@@ -166,7 +166,7 @@ def main(opts, signalMass):
         
         # Determine integrated Lumi before removing data
         #intLumi = datasetsMgr.getDataset("Data").getLuminosity()
-        intLumi = 0
+        intLumi = 35800
         
         # Remove datasets
         if 1:
@@ -485,7 +485,7 @@ if __name__ == "__main__":
     '''
     
     # Default Settings
-    ANALYSISNAME = "TopReco"
+    ANALYSISNAME = "TopRecoTree"
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
     OPTMODE      = ""
