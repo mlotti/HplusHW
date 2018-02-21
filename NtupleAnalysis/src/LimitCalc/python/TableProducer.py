@@ -64,6 +64,12 @@ def createBinByBinStatUncertHistograms(hRate, minimumStatUncertainty=0.5, xmin=N
     if myRangeMax == None:
         myRangeMax = hRate.GetXaxis().GetBinUpEdge(hRate.GetNbinsX())
 
+    ### SOME TEST PRINTS
+    print "Contents of hisogram %s"%hRate.GetTitle()
+    for i in range(1, hRate.GetNbinsX()+1):
+        print "bin %d: nominal %f, error %f"%(i,hRate.GetBinContent(i),hRate.GetBinError(i))
+
+    ### END OF TEST PRINTS
 
     nNegativeRate = 0
     nBelowMinStatUncert = 0
@@ -78,6 +84,10 @@ def createBinByBinStatUncertHistograms(hRate, minimumStatUncertainty=0.5, xmin=N
             if hRate.GetBinContent(i) < 0.0:
                 nNegativeRate += 1
 
+            # Make sure that error in hRate is larger than minimum stat. uncertainty
+            if hRate.GetBinError(i) < minimumStatUncertainty:
+                hRate.SetBinError(i, minimumStatUncertainty)
+
             # Clone hRate histogram to hUp and hDown
             hUp   = aux.Clone(hRate, "%s_%s_statBin%dUp"  % (myName, myName,i) )
             hDown = aux.Clone(hRate, "%s_%s_statBin%dDown"% (myName, myName,i) )
@@ -86,9 +96,9 @@ def createBinByBinStatUncertHistograms(hRate, minimumStatUncertainty=0.5, xmin=N
 
             # Set hUp rate
             hUp.SetBinContent(i, hUp.GetBinContent(i) + hUp.GetBinError(i))
-            # Make sure that the hUp rate is larger than the minimum stat. uncertainty
-            if hRate.GetBinContent(i) < minimumStatUncertainty:
-                hUp.SetBinContent(i, minimumStatUncertainty)
+#            # Make sure that the hUp rate is larger than the minimum stat. uncertainty
+#            if hRate.GetBinContent(i) < minimumStatUncertainty:
+#                hUp.SetBinContent(i, minimumStatUncertainty)
 
             # Set hDown rate
             statBinDown = hDown.GetBinContent(i)-hDown.GetBinError(i)
