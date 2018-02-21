@@ -100,7 +100,7 @@ for mass in MassPoints:
     hx.setValidMassPoints(myMassList)
     hx.setNuisances(#myTrgSystematics[:]+myTauIDSystematics[:] #+myTauMisIDSystematics[:]
                     #+myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]+
-                    ["lumi_13TeV"])
+        ["lumi_13TeV"])
     hx.setDatasetDefinition("ChargedHiggs_HplusTB_HplusToTB_M_"+str(mass))
     DataGroups.append(hx)
 

@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 '''
 DESCRIPTION:
-Script for comparing exlusion limits from same channel but different cuts or measurements, or even for comparing exclusion limits of different channels.
-
-
-INSTRUCTIONS:
+Script for comparing exlusion limits from same channel but different cuts or measurements, 
+or even for comparing exclusion limits of different channels.
 
 
 USAGE:
@@ -14,11 +12,13 @@ plotBRLimitCompare_Hplus2tb.py
 
 EXAMPLES:
 ./plotBRLimitCompare_Hplus2tb.py  [opts]
+./plotBRLimitCompare_Hplus2tb.py --url --logY --gridX --gridY --cutLine 500 --yMin 0.01
+./plotBRLimitCompare_Hplus2tb.py --url --logY --gridX --gridY --cutLine 500 --yMin 0.01 --name h2tb
+./plotBRLimitCompare_Hplus2tb.py --url --logY --gridX --gridY --cutLine 500 --yMin 0.3 --yMax 10 --name h2tb 
 
 
 LAST USED:
-./plotBRLimitCompare_Hplus2tb.py --url --logy --gridX --gridY --cutLine 500 --yMin 0.01
-./plotBRLimitCompare_Hplus2tb.py --url --logy --gridX --gridY --cutLine 500 --yMin 0.01 --name h2tb
+./plotBRLimitCompare_Hplus2tb.py --logY --gridX --gridY --relative --cutLine 500 --cutLineY 1
 
 '''
 #================================================================================================
@@ -30,6 +30,7 @@ import sys
 import glob
 import json
 import array
+import copy
 from optparse import OptionParser
 
 import ROOT
@@ -41,6 +42,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.LimitCalc.limit as limit
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 
 #================================================================================================
 # Global definitions
@@ -73,48 +75,50 @@ def Print(msg, printHeader=True):
     print "\t", msg
     return
 
-def main(opts, args):
-
-    # Take care of options
-    if opts.name == None:
-        opts.name = "limitsBr"
-
-    if opts.saveDir =="":
-        opts.saveDir = os.getcwd()
+def main():
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
-    histograms.cmsTextMode = histograms.CMSMode.NONE
-    
-    # Do the plots
-    compareH2tb(opts)
-    return
+    style.setGridX(opts.gridX)
+    style.setGridY(opts.gridY)
+    # style.setGridX(opts.logX)
+    # style.setGridY(opts.logY)
 
-def compareH2tb(opts):
-    
-    # Define list iwth label-path mappings
+    # Set text mode
+    histograms.cmsTextMode = histograms.CMSMode.PRELIMINARY
+    # histograms.cmsTextMode = histograms.CMSMode.NONE
+
+    # Definitions
+    savePath = opts.saveDir
+    if opts.url:
+        savePath = opts.saveDir.replace("/afs/cern.ch/user/a/attikis/public/html", "https://cmsdoc.cern.ch/~%s" % getpass.getuser())
+
+    # Do the Resolved H->tb fully hadronic final state comparison
     myList1 = [
-        ("Nominal"                    , "*datacards_default_170827_075947_noLumi/CombineResults_taujets_*"),
-        ("Nominal (Lumi)"             , "*datacards_default_170827_075947/CombineResults_taujets_*"),
-        ("150 < m_{t} < 210 GeV/c^{2}", "*datacards_TopMass150to210_170914_163638_noLumi/CombineResults_taujets_*"),
-        ("Perfect JER (TopReco)"     , "*_LdgTetrajetMass_Run2016_80to1000_GenJets_noLumi/CombineResults_taujets_*"),
-        # ("Boosted Top (Approx.)"   , "*datacards_combine_MIT_approximate/CombineResults_taujets_*"),
-        # ("Single Lepton (Approx.)" , "*datacards_combine_SingleLepton_approximate/CombineResults_taujets_*"),
+        ("p_{T}^{b3}#geq40, BDT#geq0.85"        , "limits2018/datacards_Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180126_030205/CombineResults*"),
+        ("p_{T}^{b3}#geq40, BDT#geq0.85 (lev1)" , "limits2018/datacards_Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180126_030205_level1/CombineResults*"),
+        ("p_{T}^{b3}#geq40, BDT#geq0.85 (lev2)" , "limits2018/datacards_Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180126_030205_level2/CombineResults*"),
+        ("p_{T}^{b3}#geq40, BDT#geq0.85 (lev3)" , "limits2018/datacards_Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180126_030205_level3/CombineResults*"),
         ]
+    opts.name = "h2tb"
+    doCompare(opts.name, myList1)
 
+    # Do all H->tb fully hadronic final states comparison
     myList2 = [
-        ("Nominal"                    , "*datacards_default_170827_075947_noLumi/CombineResults_taujets_*"),
-        ("Boosted Top (Approx.)"   , "*datacards_combine_MIT_approximate/CombineResults_taujets_*"),
-        ("Single Lepton (Approx.)" , "*datacards_combine_SingleLepton_approximate/CombineResults_taujets_*"),
+        #("H^{+}#rightarrow tb (#chi^{2})", "*limits2017/datacards_default_170827_075947_noLumi/CombineResults_taujets_*"),
+        ("H^{+}#rightarrow tb (Fake-b binned)"  , "limits2018/datacards_Hplus2tbAnalysis_PreSel_3bjets40_SigSel_MVA0p85_180126_030205_level3/CombineResults*"),
+        # ("H^{+}#rightarrow tb (Fake-b)"  , "limits2018/datacards_Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180126_030205_level3/CombineResults*"),
+        ("H^{+}#rightarrow tb (MC)"      , "limits2018/datacards_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900/CombineResults*"),
+        ("H^{+}#rightarrow tb (~boosted)", "limits2017/*datacards_combine_MIT_approximate/CombineResults_taujets_*"),
+        # ("Single Lepton"                 , "limits2017/*datacards_combine_SingleLepton_approximate/CombineResults_taujets_*"),
         ]
 
+    # Do the second list of plots
+    opts.name    = "all"
+    doCompare(opts.name, myList2)
 
-    # Now do the plots
-    doCompare(opts.name, myList1, opts)
-
-    opts.saveDir += "/AllFinalStates"
-    opts.name = opts.name + "2"
-    doCompare(opts.name, myList2, opts)
+    # Inform user and exit
+    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + savePath + ShellStyles.NormalStyle()), True)    
     return
 
 def _ifNotNone(value, default):
@@ -122,7 +126,7 @@ def _ifNotNone(value, default):
         return default
     return value
 
-def doCompare(name, compareList, gOpts, **kwargs):
+def doCompare(name, compareList, **kwargs):
     # Define lists
     legendLabels = []
     limits       = []
@@ -136,100 +140,83 @@ def doCompare(name, compareList, gOpts, **kwargs):
         if len(dirs) == 0:
             raise Exception("No directories for pattern '%s'" % path)
         directory = dirs[-1]
-
-        Print("Picked %s" % directory, True)
+        
+        Verbose("Picked %s" % directory, True)
         limits.append(limit.BRLimits(directory, excludeMassPoints=["155"]))
 
-    # Do the plot
-    doPlotSigmaBands(limits, legendLabels, gOpts.name)
+    # ================================================================================================================
+    # Do the sigma bands
+    # ================================================================================================================
+    Verbose("Creating the sigma-bands plots", True)
+    _opts = copy.deepcopy(opts)
+    doPlotSigmaBands(limits, legendLabels, opts.name + "_sigmaBands", _opts)
 
-    # Define the graph lists
+    # ================================================================================================================
+    # Do expected
+    # ================================================================================================================
+    Verbose("Creating the expected plots", True)
     observedList = [l.observedGraph() for l in limits]
     expectedList = [l.expectedGraph() for l in limits]
-    
-    doPlot(limits, legendLabels, expectedList, gOpts.name + "_expectedMedian", limit.BRlimit, myOpts = gOpts, plotLabel="Expected median")
-    if gOpts.unblinded:
-        doPlot(limits, legendLabels, observedList, gOpts.name + "_observed", limit.BRlimit, myOpts = gOpts, plotLabel="Observed")
 
-    if gOpts.relative:
-        nLimits = len(limits)
-        # For-loop: All limits
-        for i in range(1, nLimits):
-            limits[i].divideByLimit(limits[0])
+    # 1) Expected: Median +/- 1,2 sigma
+    doPlot(limits, legendLabels, expectedList, opts.name + "_median", limit.BRlimit, _opts, yTitle="Expected Sigma Bands")
 
-        # Set reference values to 1
-        for j in range(0, len(limits[0].expectedMedian)):
-            limits[0].expectedMedian[j] = 1.0
-            limits[0].expectedMinus2[j] = 1.0
-            limits[0].expectedMinus1[j] = 1.0
-            limits[0].expectedPlus2[j]  = 1.0
-            limits[0].expectedPlus1[j]  = 1.0
-            limits[0].observed[j]       = 1.0
-
-        # Do the relative plot
-        doPlot(limits, legendLabels, expectedList, gOpts.name + "_expectedMedianRelative", gOpts.relativeYlabel, myOpts = gOpts, plotLabel="Expected median")
-        Print("Skipping +-1 and 2 sigma plots for --relative", True)
-        sys.exit()
-
-    if gOpts.relativePairs:
-        if len(limits) % 2 != 0:
-            Print("Number of limits is not even!", True)
-            sys.exit(1)
-
-        divPoint = len(limits) / 2
-        denoms   = limits[:divPoint]
-        numers   = limits[divPoint:]
-
-        # For-loop: All division points
-        for i in xrange(0, divPoint):
-            numers[i].divideByLimit(denoms[i])
-        
-        expectedNumersList = [l.expectedGraph() for l in numers]
-        doPlot(numers, legendLabels[:divPoint], gexpectedNumersList, gOpts.name + "_expectedMedianRelative", gOpts.relativeYlabel, plotLabel="Expected median")
-        Print("Skipping +-1 and 2 sigma plots for --relativePairs", True)
-        sys.exit()
-
+    # 2) Expected: +/- 1 sigma
+    list1 = [l.expectedGraph(sigma=+1) for l in limits]
+    list2 = [l.expectedGraph(sigma=-1) for l in limits]
+    exp1sigmaList = list1 + list2
     legendLabels2 = legendLabels + [None]*len(legendLabels)
+    doPlot(limits, legendLabels2, exp1sigmaList, opts.name + "_sigma1", "Expected #pm1#sigma", _opts, yTitle="Expected #pm1sigma")
 
-    doPlot(limits, legendLabels2,
-           [limit.divideGraph(l.expectedGraph(sigma=+1), l.expectedGraph()) for l in limits] +
-           [limit.divideGraph(l.expectedGraph(sigma=-1), l.expectedGraph()) for l in limits],
-           gOpts.name + "_expectedSigma1Relative", 
-           "Expected #pm1#sigma / median", 
-           myOpts = gOpts,
-           plotLabel="Expected #pm1#sigma / median")
+    # 3) Expected: +/- 2 sigma
+    list1 = [l.expectedGraph(sigma=+2) for l in limits]
+    list2 = [l.expectedGraph(sigma=-2) for l in limits]
+    exp2sigmaList = list1 + list2
+    doPlot(limits, legendLabels2, exp2sigmaList, opts.name + "_sigma2", "Expected #pm2#sigma", _opts, yTitle="Expected #pm2sigma")
 
-    doPlot(limits, legendLabels2,
-           [limit.divideGraph(l.expectedGraph(sigma=+2), l.expectedGraph()) for l in limits] +
-           [limit.divideGraph(l.expectedGraph(sigma=-2), l.expectedGraph()) for l in limits],
-           gOpts.name + "_expectedSigma2Relative", 
-           "Expected #pm2#sigma / median", 
-           myOpts = gOpts,
-           plotLabel="Expected #pm2#sigma / median")
+    # ================================================================================================================
+    # Do the observed plots
+    # ================================================================================================================
+    Verbose("Creating the observed plots", True)
+    if opts.unblinded:
+        doPlot(limits, legendLabels, observedList, opts.name, limit.BRlimit, _opts, yTitle="Observed")
 
-    doPlot(limits, legendLabels2,
-           [l.expectedGraph(sigma=+1) for l in limits] +
-           [l.expectedGraph(sigma=-1) for l in limits],
-           gOpts.name + "_expectedSigma1", "Expected #pm1#sigma", 
-           myOpts = gOpts,
-           plotLabel="Expexted #pm1sigma")
+    # ================================================================================================================
+    # Do the relative plots
+    # ================================================================================================================
+    Verbose("Creating the relative plots", True)
+    if not opts.relative:
+        return
+    # Overwrite some settings
+    _opts.yMin    = 0.0
+    _opts.yMax    = 2.5
+    _opts.logY    = False
 
-    doPlot(limits, legendLabels2,
-           [l.expectedGraph(sigma=+2) for l in limits] +
-           [l.expectedGraph(sigma=-2) for l in limits],
-           gOpts.name + "_expectedSigma2", "Expected #pm2#sigma", 
-           myOpts = gOpts,
-           plotLabel="Expected #pm2sigma")
+    # 1) Relative: median
+    relLimits    = GetRelativeLimits(limits)
+    expectedList = [l.expectedGraph() for l in relLimits]
+    doPlot(relLimits, legendLabels, expectedList, opts.name + "_medianRelative", opts.relativeYlabel, _opts, yTitle="Expected median")
+
+    # 2) Relative: (expected 1 sigma) / (median)
+    list1 = [limit.divideGraph(l.expectedGraph(sigma=+1), l.expectedGraph()) for l in limits]
+    list2 = [limit.divideGraph(l.expectedGraph(sigma=-1), l.expectedGraph()) for l in limits]
+    sigma1List = list1 + list2
+    doPlot(limits, legendLabels2, sigma1List, opts.name + "_sigma1Relative", "Expected #pm1#sigma / median", _opts, yTitle="Expected #pm1#sigma / median")
+
+    # 3) Relative: (expected 2 sigma) / (median)
+    list1 = [limit.divideGraph(l.expectedGraph(sigma=+2), l.expectedGraph()) for l in limits]
+    list2 = [limit.divideGraph(l.expectedGraph(sigma=-2), l.expectedGraph()) for l in limits]
+    sigma2List = list1 + list2
+    doPlot(limits, legendLabels2, sigma2List, opts.name + "_sigma2Relative", "Expected #pm2#sigma / median", _opts, yTitle="Expected #pm2#sigma / median")
     return
 
-
-def doPlot(limits, legendLabels, graphs, name, ylabel, myOpts={}, plotLabel=None):
+def doPlot(limits, legendLabels, graphs, name, ylabel, _opts={}, yTitle=None):
     
-    # Define lists & dictionaries
+    # Definitions
     hg = []
     ll = {}
-
     nGraphs = len(graphs)
+
     # For-loop: All HistoGraphs
     for i in xrange(nGraphs):
         hg.append(histograms.HistoGraph(graphs[i], "Graph%d"%i, drawStyle="PL", legendStyle="lp"))
@@ -241,7 +228,7 @@ def doPlot(limits, legendLabels, graphs, name, ylabel, myOpts={}, plotLabel=None
     def sty(h):
         r = h.getRootHisto()
         r.SetLineWidth(3)
-        r.SetLineStyle(1)
+        r.SetLineStyle(ROOT.kSolid)
         return
 
     # Apply style and set label
@@ -250,38 +237,37 @@ def doPlot(limits, legendLabels, graphs, name, ylabel, myOpts={}, plotLabel=None
 
     # Create & set legend
     nGraphs = len(graphs)
-    # If sigma bands are drawn each legegend entry is plotted twice. Correct this in the count
+    # If sigma bands are drawn each legend entry is plotted twice. Correct this in the count
     if "Sigma1" in name or "Sigma2" in name:
         nGraphs = nGraphs/2.0
-    legend = getLegend(nGraphs, limit, myOpts, xPosLeg)
+    legend = getLegend(nGraphs, limit, xPosLeg)
     plot.setLegend(legend)
 
     # Determine save name, minimum and maximum of y-axis
-    ymin, ymax, saveName = getYMinMaxAndName(limits, name, myOpts)
-    if myOpts.yMin == -1:
-        myOpts.yMin = ymin
-    if myOpts.yMax == -1:
-        myOpts.yMax = ymax
+    ymin, ymax, saveName = getYMinMaxAndName(limits, name)
+    if _opts.yMin == -1:
+        _opts.yMin = ymin
+    if _opts.yMax == -1:
+        _opts.yMax = ymax
 
     # Create the frame and set axes titles
-    plot.createFrame(saveName, opts={"ymin": myOpts.yMin, "ymax": myOpts.yMax})
+    plot.createFrame(saveName, opts={"ymin": _opts.yMin, "ymax": _opts.yMax})
     
     # Add cut line?
-    if myOpts.cutLine > 0:
+    if opts.cutLine != 999.9:
         kwargs = {"greaterThan": True}
-        plot.addCutBoxAndLine(cutValue=myOpts.cutLine, fillColor=ROOT.kRed, box=False, line=True, **kwargs)
+        plot.addCutBoxAndLine(cutValue=_opts.cutLine, fillColor=ROOT.kRed, box=False, line=True, **kwargs)
+    if opts.cutLineY != 999.9:
+        kwargs = {"greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
+        plot.addCutBoxAndLineY(cutValue=_opts.cutLineY, fillColor=ROOT.kRed, box=False, line=True, **kwargs)
     
     # Set axes titles
     plot.frame.GetXaxis().SetTitle(limit.mHplus())
     plot.frame.GetYaxis().SetTitle(ylabel)
 
     # Enable/Disable logscale for axes 
-    ROOT.gPad.SetLogy(myOpts.logy)
-    ROOT.gPad.SetLogx(myOpts.logx)
-
-    # Enable grids in x and y?
-    plot.getPad().SetGridx(myOpts.gridX)
-    plot.getPad().SetGridy(myOpts.gridY)
+    ROOT.gPad.SetLogy(_opts.logY)
+    ROOT.gPad.SetLogx(_opts.logX)
 
     # Draw and add text
     plot.draw()
@@ -290,9 +276,30 @@ def doPlot(limits, legendLabels, graphs, name, ylabel, myOpts={}, plotLabel=None
     addPhysicsText(histograms, limit, x=xPosText)
 
     # Save plots and return
-    SavePlot(plot, saveName, myOpts)
+    SavePlot(plot, _opts.saveDir, saveName, [".png"])#, ".pdf"])
     return
 
+def GetRelativeLimits(limits):
+    
+    # Create relative limits by copying limits
+    relLimits  = copy.deepcopy(limits)
+    massPoints = len(relLimits[0].expectedMedian)
+
+    # For-loop: All limits
+    for i in range(1, len(relLimits) ):
+        relLimits[i].divideByLimit(relLimits[0])
+        
+    # For-loop: All mass points 
+    for j in range(0, massPoints):
+        relLimits[0].expectedMedian[j] = 1.0
+        relLimits[0].expectedMinus2[j] = 1.0
+        relLimits[0].expectedMinus1[j] = 1.0
+        relLimits[0].expectedPlus2[j]  = 1.0
+        relLimits[0].expectedPlus1[j]  = 1.0
+        relLimits[0].observed[j]       = 1.0
+    return relLimits
+
+        
 def addPhysicsText(histograms, limit, x=0.45, y=0.84, size=20):
     '''
     Add physics-process text on canvas
@@ -307,8 +314,10 @@ def addPhysicsText(histograms, limit, x=0.45, y=0.84, size=20):
         histograms.addText(x, y-0.05, limit.BRassumption, size=size)
     return
 
-def getLegend(nPlots, limit, opts, xLeg1):
-    dy = (nPlots-3)*0.15
+def getLegend(nPlots, limit, xLeg1):
+    if nPlots < 3:
+        nPlots = 3
+    dy = (nPlots-3)*0.03
     # Create customised legend
     xLeg2 = 0.93
     yLeg1 = 0.66 - dy
@@ -323,9 +332,7 @@ def getLegend(nPlots, limit, opts, xLeg1):
         legend.SetFillStyle(1001)
     return legend
 
-def doPlotSigmaBands(limits, legendLabels, saveName):
-    # Adjust save name
-    saveName += "_sigmaBands"
+def doPlotSigmaBands(limits, legendLabels, saveName, _opts={}):
 
     # Define graphs to be used
     graphs = [
@@ -349,6 +356,7 @@ def doPlotSigmaBands(limits, legendLabels, saveName):
 
     stGen   = styles.generator()
     nLimits = len(limits)
+
     # For-loop: All limits
     for i in xrange(1, nLimits):
         name = "Exp%d" % i
@@ -364,38 +372,38 @@ def doPlotSigmaBands(limits, legendLabels, saveName):
 
     # Create & set legend
     nGraphs = len(graphs)
-    # If sigma bands are drawn each legegend entry is plotted twice. Correct this in the count
+
+    # If sigma bands are drawn each legend entry is plotted twice. Correct this in the count
     if "Sigma1" in name or "Sigma2" in name:
         nGraphs = nGraphs/2.0
-    legend = getLegend(nGraphs, limit, gOpts, xPosLeg)
+    legend = getLegend(nGraphs+4, limit, xPosLeg)
     plot.setLegend(legend)
 
     # Determine save name, minimum and maximum of y-axis
-    ymin, ymax, saveName = getYMinMaxAndName(limits, saveName, gOpts)
-    if gOpts.yMin == -1:
-        gOpts.yMin = ymin
-    if gOpts.yMax == -1:
-        gOpts.yMax = ymax
+    ymin, ymax, saveName = getYMinMaxAndName(limits, saveName)
+    if _opts.yMin == -1:
+        _opts.yMin = ymin
+    if _opts.yMax == -1:
+        _opts.yMax = ymax
 
     # Create the frame and set axes titles
-    plot.createFrame(saveName, opts={"ymin": gOpts.yMin, "ymax": gOpts.yMax})
+    plot.createFrame(saveName, opts={"ymin": _opts.yMin, "ymax": _opts.yMax})
 
     # Add cut line?
-    if gOpts.cutLine > 0:
+    if _opts.cutLine != 999.9:
         kwargs = {"greaterThan": True}
-        plot.addCutBoxAndLine(cutValue=gOpts.cutLine, fillColor=ROOT.kRed, box=False, line=True, **kwargs)
-    
+        plot.addCutBoxAndLine(cutValue=_opts.cutLine, fillColor=ROOT.kRed, box=False, line=True, **kwargs)
+    if opts.cutLineY != 999.9:
+        kwargs = {"greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
+        plot.addCutBoxAndLineY(cutValue=_opts.cutLineY, fillColor=ROOT.kRed, box=False, line=True, **kwargs)
+
     # Set axes titles
     plot.frame.GetXaxis().SetTitle(limit.mHplus())
     plot.frame.GetYaxis().SetTitle(limit.BRlimit)
 
     # Enable/Disable logscale for axes 
-    ROOT.gPad.SetLogy(gOpts.logy)
-    ROOT.gPad.SetLogx(gOpts.logx)
-
-    # Enable grids in x and y?
-    plot.getPad().SetGridx(gOpts.gridX)
-    plot.getPad().SetGridy(gOpts.gridY)
+    ROOT.gPad.SetLogy(_opts.logY)
+    ROOT.gPad.SetLogx(_opts.logX)
 
     # Draw the plot with standard texts
     plot.draw()
@@ -404,10 +412,10 @@ def doPlotSigmaBands(limits, legendLabels, saveName):
     addPhysicsText(histograms, limit, x=xPosText)
 
     # Save the plots & return
-    SavePlot(plot, saveName, gOpts, [".png", ".pdf"])
+    SavePlot(plot, _opts.saveDir, saveName, [".png"])#, ".pdf"])
     return
 
-def getYMinMaxAndName(limits, name, opts, minIsMedian=False):
+def getYMinMaxAndName(limits, name, minIsMedian=False):
     ymin = 1e6
     ymax = -1e6
 
@@ -423,36 +431,33 @@ def getYMinMaxAndName(limits, name, opts, minIsMedian=False):
         if _ymax > ymax:
             ymax = _ymax
         
-    if opts.logy:
-        name += "_logy"
+    if opts.logY: #fixme
+        name += "_logY"
         ymax *= 2
     else:
         ymin =  0.0
         ymax *= 1.2
 
-    if opts.logx:
-        name += "_logx"
+    if opts.logX: #fixme
+        name += "_logX"
     return ymin, ymax, name
 
-def SavePlot(plot, plotName, opts, saveFormats = [".png", ".pdf"]):
+def SavePlot(plot, saveDir, plotName, saveFormats = [".png", ".pdf"]):
     # Check that path exists
-    if not os.path.exists(opts.saveDir):
-        os.makedirs(opts.saveDir)
+    if not os.path.exists(saveDir):#fixme
+        os.makedirs(saveDir)
 
     # Create the name under which plot will be saved
-    saveName = os.path.join(opts.saveDir, plotName.replace("/", "_"))
+    saveName = os.path.join(saveDir, plotName.replace("/", "_"))#fixme
 
     # For-loop: All save formats
-    for i, ext in enumerate(saveFormats):
+    for i, ext in enumerate(saveFormats, 1):
         saveNameURL = saveName + ext
         saveNameURL = saveNameURL.replace("/afs/cern.ch/user/a/attikis/public/html", "https://cmsdoc.cern.ch/~%s" % getpass.getuser())
-        if i==0:
-            print "=== plotBRLimitCompare_Hpluts2tb.py:"
-
         if opts.url:
-            print "\t", saveNameURL
+            Verbose(saveNameURL, i==1)
         else:
-            print "\t", saveName + ext
+            Verbose(saveName + ext, i==1)
         plot.saveAs(saveName, formats=saveFormats)
     return
 
@@ -468,11 +473,13 @@ if __name__ == "__main__":
     GRIDY       = False
     MINY        = -1
     MAXY        = -1
-    CUTLINE     = 0
+    CUTLINE     = 999.9
+    CUTLINEY    = 999.9
     RELATIVE    = False
     RELPAIRS    = False
     VERBOSE     = False
     UNBLINDED   = False
+    NAME        = "limitsBr"
 
     parser = OptionParser(usage="Usage: %prog [options]", add_help_option=True, conflict_handler="resolve")
 
@@ -488,8 +495,8 @@ if __name__ == "__main__":
     parser.add_option("--relativePairs", dest="relativePairs", action="store_true", default=RELPAIRS, 
                       help="Do multiple relative comparisons. The list of input directories is halved, the first half is the denominator and the second half is the numerator [default: %s]" % (RELPAIRS) )
 
-    parser.add_option("--name", dest="name", type="string", default=None,
-                      help="Name of the output plot")
+    parser.add_option("--name", dest="name", type="string", default=NAME,
+                      help="Name of the output plot [default = %s]" % (NAME))
 
     parser.add_option("--ymax", dest="ymax", type="float", default=None, 
                       help="Maximum y-axis value for regular plots")
@@ -506,10 +513,10 @@ if __name__ == "__main__":
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR,
                       help="Directory where all plots will be saved [default: %s]" % SAVEDIR)
 
-    parser.add_option("--logx", dest="logx", action="store_true", default=LOGX,
+    parser.add_option("--logX", dest="logX", action="store_true", default=LOGX,
                       help="Plot x-axis (mass) as logarithmic [default: %s]" % (LOGX) )
     
-    parser.add_option("--logy", dest="logy", action="store_true", default=LOGY,
+    parser.add_option("--logY", dest="logY", action="store_true", default=LOGY,
                       help="Plot y-axis (exlusion limit) as logarithmic [default: %s]" % (LOGY) )
     
     parser.add_option("--gridX", dest="gridX", default=GRIDX, action="store_true",
@@ -524,9 +531,16 @@ if __name__ == "__main__":
     parser.add_option("--yMax", dest="yMax", default=MAXY, type="float",
                       help="Overwrite automaticly calculated maximum value of y-axis [default: %s]" % (MAXY) )
 
-    parser.add_option("--cutLine", dest="cutLine", type="int", default=CUTLINE,
-                      help="Number of digits (precision) to print/save limit results [default: %s]" % (CUTLINE) )
+    parser.add_option("--cutLine", dest="cutLine", type="float", default=CUTLINE,
+                      help="Add TLine on the x-axis at this value  [default: %s]" % (CUTLINE) )
 
-    (gOpts, args) = parser.parse_args()
+    parser.add_option("--cutLineY", dest="cutLineY", type="float", default=CUTLINEY,
+                      help="Add TLine on the y-axis at this value  [default: %s]" % (CUTLINEY) )
 
-    main(gOpts, args)
+    (opts, args) = parser.parse_args()
+
+    # Save in current working directory?
+    if opts.saveDir =="":
+        opts.saveDir = os.getcwd()
+
+    main()

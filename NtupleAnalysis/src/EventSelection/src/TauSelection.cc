@@ -113,7 +113,7 @@ TauSelection::TauSelection(const ParameterSet& config, const std::string& postfi
   fTauLdgTrkPtCut(config.getParameter<float>("tauLdgTrkPtCut")),
   fTauNprongs(config.getParameter<int>("prongs")),
   fTauRtauCut(config.getParameter<float>("rtau")),
-  fTauRtauSmallerThanCut(config.getParameter<float>("rtauSmallerThan")),
+  fTauRtauSmallerThanCut(config.getParameter<float>("rtauSmallerThan",999.0)),
   fVetoMode(false),
   // tau misidentification SF
   //fEToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "E")),

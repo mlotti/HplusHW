@@ -375,12 +375,18 @@ signalStyleHToTB  = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kR
 signalFillStyleHToTB  = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kYellow-7, markerSizes=None, markerStyle=4),
                                    StyleLine(lineColor=ROOT.kYellow-7, lineStyle=ROOT.kSolid, lineWidth=1), 
                                    StyleFill(fillColor=ROOT.kYellow-7, fillStyle=10001)])
+signalStyleHToTB180 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kGray, markerSizes=None, markerStyle=4),
+                                   StyleLine(lineColor=ROOT.kGray, lineStyle=ROOT.kDashed, lineWidth=4), 
+                                   StyleFill(fillColor=ROOT.kGray, fillStyle=0)])
 signalStyleHToTB200 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kPink-2, markerSizes=None, markerStyle=4),
                                    StyleLine(lineColor=ROOT.kPink-2, lineStyle=ROOT.kDashed, lineWidth=4), 
                                    StyleFill(fillColor=ROOT.kPink-2, fillStyle=0)])
 signalStyleHToTB300 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kTeal+3, markerSizes=None, markerStyle=4),
                                    StyleLine(lineColor=ROOT.kTeal+3, lineStyle=ROOT.kDashed, lineWidth=4), 
                                    StyleFill(fillColor=ROOT.kTeal+3, fillStyle=0)])
+signalStyleHToTB400 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kOrange-2, markerSizes=None, markerStyle=4),
+                                   StyleLine(lineColor=ROOT.kOrange-2, lineStyle=ROOT.kDashed, lineWidth=4), 
+                                   StyleFill(fillColor=ROOT.kOrange-2, fillStyle=0)])
 signalStyleHToTB500 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kAzure-1, markerSizes=None, markerStyle=4),
                                    StyleLine(lineColor=ROOT.kAzure-1, lineStyle=ROOT.kDashed, lineWidth=4), 
                                    StyleFill(fillColor=ROOT.kAzure-1, fillStyle=0)])
@@ -494,15 +500,15 @@ def getQCDLineStyle():
 def getABCDStyle(region):
     if region == "SR":
         return FakeBStyle1
-    elif region == "CR1":
+    elif region == "CR1" or region == "CRone":
         return FakeBStyle2
     elif region == "VR":
         return FakeBStyle3
-    elif region == "CR2":
+    elif region == "CR2" or region == "CRtwo":
         return FakeBStyle4
-    elif region == "CR3":
+    elif region == "CR3" or region == "CRthree":
         return FakeBStyle5
-    elif region == "CR4":
+    elif region == "CR4" or region == "CRfour":
         return FakeBStyle6
     else:
         print "Invalid region \"%s\". Returning qcd style" % (region)
@@ -544,10 +550,14 @@ def getSignalStyleHToTB():
 def getSignalStyleHToTB_M(myMass):
 
     mass = str(myMass)
-    if mass == "200":
+    if mass == "180":
+        return signalStyleHToTB180
+    elif mass == "200":
         return signalStyleHToTB200
     elif mass == "300":
         return signalStyleHToTB300
+    elif mass == "400":
+        return signalStyleHToTB400
     elif mass == "500":
         return signalStyleHToTB500
     elif mass == "800":
