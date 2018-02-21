@@ -21,7 +21,7 @@ allSelections.CommonPlots.enableGenuineTauHistograms = True
 # Set splitting of phase space (first bin is below first edge value and last bin is above last edge value)
 allSelections.CommonPlots.histogramSplitting = [
     PSet(label="tauPt", binLowEdges=[60.0, 80.0, 100.0], useAbsoluteValues=False),
-    PSet(label="tauEta", binLowEdges=[1.7], useAbsoluteValues=True),
+    PSet(label="tauEta", binLowEdges=[0.6,1.4], useAbsoluteValues=True),
   ]
 #===== Selection customisations
 allSelections.TauSelection.prongs = 1
@@ -31,7 +31,8 @@ allSelections.AngularCutsBackToBack.cutValueJet1 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet2 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet3 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet4 = 40.0
-allSelections.TauSelection.rtau = 0.7
+allSelections.TauSelection.rtau = 0.75
+#allSelections.TauSelection.rtauSmallerThan = 0.75
 allSelections.BJetSelection.bjetDiscrWorkingPoint = "Medium"
 
 #allSelections.AngularCutsCollinear.cutValueJet1 = 80.0

@@ -269,8 +269,8 @@ class BRLimits:
 
        
         # Open configuration json file
-        msg = "Opening file '%s' for input" % (os.path.join(directory, configfile))
-        Print(msg, True)
+        msg = "Open file %s" % (os.path.join(directory, configfile))
+        Verbose(msg, True)
         f = open(os.path.join(directory, configfile), "r")
         config = json.load(f)
         f.close()

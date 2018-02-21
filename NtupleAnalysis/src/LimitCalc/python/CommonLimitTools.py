@@ -618,9 +618,13 @@ class LimitMultiCrabBase:
         msg = "Creating task directory %s" % (self.dirname)
         Print(msg, True)
         self.clsType.setDirectory(self.dirname)
+        return
 
-    ## Copy input files for LandS/Combine (datacards, rootfiles) to the multicrab directory
     def copyInputFiles(self):
+        '''
+        Copy input files for LandS/Combine (datacards, rootfiles) 
+        to the multicrab directory
+        '''
         for d in [self.datacards, self.rootfiles]:
             for mass, files in d.iteritems():
                 for f in files:
