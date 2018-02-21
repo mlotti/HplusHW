@@ -39,10 +39,10 @@ struct TrijetSelections{
 };
 
 
-class TopReco: public BaseSelector {
+class TopRecoTree: public BaseSelector {
 public:
-  explicit TopReco(const ParameterSet& config, const TH1* skimCounters);
-  virtual ~TopReco() {}
+  explicit TopRecoTree(const ParameterSet& config, const TH1* skimCounters);
+  virtual ~TopRecoTree() {}
 
   Jet getLeadingSubleadingJet(const Jet& jet0, const Jet& jet1, string selectedJet);
   std::vector<int> SortInPt(std::vector<int> Vector);
@@ -243,9 +243,9 @@ private:
 };
 
 #include "Framework/interface/SelectorFactory.h"
-REGISTER_SELECTOR(TopReco);
+REGISTER_SELECTOR(TopRecoTree);
 
-TopReco::TopReco(const ParameterSet& config, const TH1* skimCounters)
+TopRecoTree::TopRecoTree(const ParameterSet& config, const TH1* skimCounters)
   : BaseSelector(config, skimCounters),
     cfg_PtBinSetting(config.getParameter<ParameterSet>("CommonPlots.ptBins")),
     cfg_EtaBinSetting(config.getParameter<ParameterSet>("CommonPlots.etaBins")),
@@ -294,7 +294,7 @@ TopReco::TopReco(const ParameterSet& config, const TH1* skimCounters)
 { }
 
 
-void TopReco::book(TDirectory *dir) {
+void TopRecoTree::book(TDirectory *dir) {
   // Book common plots histograms
   fCommonPlots.book(dir, isData());
 
@@ -503,7 +503,7 @@ void TopReco::book(TDirectory *dir) {
 /*                                                                                                                                                                                            
   Get all gen particles by pdgId                                                                                                                
 */
-vector<genParticle> TopReco::GetGenParticles(const vector<genParticle> genParticles, const int pdgId)
+vector<genParticle> TopRecoTree::GetGenParticles(const vector<genParticle> genParticles, const int pdgId)
 {
   std::vector<genParticle> particles;
 
@@ -526,7 +526,7 @@ vector<genParticle> TopReco::GetGenParticles(const vector<genParticle> genPartic
 /*                                                                                                                                                                                                  
   Get the last copy of a particle.                                                                                                                                                                                    
 */
-const genParticle TopReco::GetLastCopy(const vector<genParticle> genParticles, const genParticle &p){
+const genParticle TopRecoTree::GetLastCopy(const vector<genParticle> genParticles, const genParticle &p){
 
   int gen_pdgId = p.pdgId();
 
@@ -542,7 +542,7 @@ const genParticle TopReco::GetLastCopy(const vector<genParticle> genParticles, c
 
 
 
-Jet TopReco::getLeadingSubleadingJet(const Jet& jet0, const Jet& jet1, string selectedJet){
+Jet TopRecoTree::getLeadingSubleadingJet(const Jet& jet0, const Jet& jet1, string selectedJet){
   if (selectedJet != "leading" && selectedJet!="subleading") std::cout<<"WARNING! Unknown option "<<selectedJet<<". Function getLeadingSubleadingJet returns leading Jet"<<std::endl;
   Jet leadingJet, subleadingJet;
   if (jet0.pt() > jet1.pt()){                                                                                                                                                                                         
@@ -558,7 +558,7 @@ Jet TopReco::getLeadingSubleadingJet(const Jet& jet0, const Jet& jet1, string se
   return leadingJet;
 }
 
-std::vector<int> TopReco::SortInPt(std::vector<int> Vector)
+std::vector<int> TopRecoTree::SortInPt(std::vector<int> Vector)
 {
   int size = Vector.size();
   for (int i=0; i<size-1; i++){
@@ -573,7 +573,7 @@ std::vector<int> TopReco::SortInPt(std::vector<int> Vector)
   }
   return Vector;
 }
-std::vector<math::XYZTLorentzVector> TopReco::SortInPt(std::vector<math::XYZTLorentzVector> Vector)
+std::vector<math::XYZTLorentzVector> TopRecoTree::SortInPt(std::vector<math::XYZTLorentzVector> Vector)
 {
   int size = Vector.size();
   for (int i=0; i<size-1; i++){
@@ -589,7 +589,7 @@ std::vector<math::XYZTLorentzVector> TopReco::SortInPt(std::vector<math::XYZTLor
 }
 
 
-genParticle TopReco::findLastCopy(int index){
+genParticle TopRecoTree::findLastCopy(int index){
   genParticle gen_particle = fEvent.genparticles().getGenParticles()[index];
   int gen_pdgId = gen_particle.pdgId();
   for (size_t i=0; i<gen_particle.daughters().size(); i++){
@@ -603,14 +603,14 @@ genParticle TopReco::findLastCopy(int index){
 }
 
 
-bool TopReco::isWsubjet(const Jet& jet , const std::vector<Jet>& jets1 , const std::vector<Jet>& jets2){
+bool TopRecoTree::isWsubjet(const Jet& jet , const std::vector<Jet>& jets1 , const std::vector<Jet>& jets2){
   return  (isMatchedJet(jet,jets1)||isMatchedJet(jet,jets2));
 }
 
 
 
   
-bool TopReco::isBJet(const Jet& jet, const std::vector<Jet>& bjets) {
+bool TopRecoTree::isBJet(const Jet& jet, const std::vector<Jet>& bjets) {
   for (auto bjet: bjets)
     {
       if (areSameJets(jet, bjet)) return true;
@@ -618,7 +618,7 @@ bool TopReco::isBJet(const Jet& jet, const std::vector<Jet>& bjets) {
   return false;
 }
 
-bool TopReco::isMatchedJet(const Jet& jet, const std::vector<Jet>& jets) {
+bool TopRecoTree::isMatchedJet(const Jet& jet, const std::vector<Jet>& jets) {
   for (auto Jet: jets)
     {
       if (areSameJets(jet, Jet)) return true;
@@ -626,20 +626,20 @@ bool TopReco::isMatchedJet(const Jet& jet, const std::vector<Jet>& jets) {
   return false;
 }
 
-bool TopReco::areSameJets(const Jet& jet1, const Jet& jet2) {
+bool TopRecoTree::areSameJets(const Jet& jet1, const Jet& jet2) {
   float dR = ROOT::Math::VectorUtil::DeltaR(jet1.p4(), jet2.p4());
   float dR_match = 0.1;
   if (dR <= dR_match) return true;
   else return false;
 }
 
-void TopReco::setupBranches(BranchManager& branchManager) {
+void TopRecoTree::setupBranches(BranchManager& branchManager) {
   fEvent.setupBranches(branchManager);
   return;
 }
 
 
-void TopReco::process(Long64_t entry) {
+void TopRecoTree::process(Long64_t entry) {
 
   //====== Initialize
   fCommonPlots.initialize();
@@ -1458,7 +1458,9 @@ void TopReco::process(Long64_t entry) {
 
     for (size_t i=0; i<GenCharm.size(); i++){
       double dRmin = 10000.0;
+
       // double dPtOverPtmin = 10000.0;
+
       Jet mcMatched_CJet;
       for (auto& jet: jetData.getSelectedJets()){
 	double dR  = ROOT::Math::VectorUtil::DeltaR( jet.p4(), GenCharm.at(i).p4());

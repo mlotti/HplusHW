@@ -105,8 +105,9 @@ def main():
 
     # Do all H->tb fully hadronic final states comparison
     myList2 = [
-        ("H^{+}#rightarrow tb (#chi^{2})", "*limits2017/datacards_default_170827_075947_noLumi/CombineResults_taujets_*"),
-        ("H^{+}#rightarrow tb (Fake-b)"  , "limits2018/datacards_Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180126_030205_level3/CombineResults*"),
+        #("H^{+}#rightarrow tb (#chi^{2})", "*limits2017/datacards_default_170827_075947_noLumi/CombineResults_taujets_*"),
+        ("H^{+}#rightarrow tb (Fake-b binned)"  , "limits2018/datacards_Hplus2tbAnalysis_PreSel_3bjets40_SigSel_MVA0p85_180126_030205_level3/CombineResults*"),
+        # ("H^{+}#rightarrow tb (Fake-b)"  , "limits2018/datacards_Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180126_030205_level3/CombineResults*"),
         ("H^{+}#rightarrow tb (MC)"      , "limits2018/datacards_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900/CombineResults*"),
         ("H^{+}#rightarrow tb (~boosted)", "limits2017/*datacards_combine_MIT_approximate/CombineResults_taujets_*"),
         # ("Single Lepton"                 , "limits2017/*datacards_combine_SingleLepton_approximate/CombineResults_taujets_*"),

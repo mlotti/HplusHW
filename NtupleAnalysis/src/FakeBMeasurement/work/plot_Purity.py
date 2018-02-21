@@ -43,6 +43,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
@@ -60,19 +61,11 @@ def Print(msg, printHeader=False):
         print "\t", msg
     return
 
-
-def rchop(myString, endString):
-  if myString.endswith(endString):
-    return myString[:-len(endString)]
-  return myString
-
-
 def Verbose(msg, printHeader=True, verbose=False):
     if not opts.verbose:
         return
     Print(msg, printHeader)
     return
-
 
 def GetLumi(datasetsMgr):
     lumi = 0.0
@@ -84,18 +77,7 @@ def GetLumi(datasetsMgr):
     Verbose("Luminosity = %s (pb)" % (lumi), True)
     return lumi
 
-
-def GetListOfEwkDatasets(datasetsMgr):
-    Verbose("Getting list of EWK datasets")
-    if "noTop" in datasetsMgr.getAllDatasetNames():
-        return ["TT", "noTop", "SingleTop", "ttX"]
-    else:
-        # ZJetsToQQ_HT600toInf and DYJetToQQHT are the same?
-        return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
-
-
 def GetDatasetsFromDir(opts):
-    Verbose("Getting datasets")
     
     if (not opts.includeOnlyTasks and not opts.excludeTasks):
         datasets = dataset.getDatasetsFromMulticrabDirs([opts.mcrab],
@@ -195,14 +177,14 @@ def main(opts):
         # Re-order datasets (different for inverted than default=baseline)
         if 0:
             newOrder = ["Data"]
-            newOrder.extend(GetListOfEwkDatasets(datasetsMgr))
+            newOrder.extend(aux.GetListOfEwkDatasets())
             datasetsMgr.selectAndReorder(newOrder)
 
         # Print post-merged data dataset summary
         datasetsMgr.PrintInfo()
 
         # Merge EWK samples
-        datasetsMgr.merge("EWK", GetListOfEwkDatasets(datasetsMgr))
+        datasetsMgr.merge("EWK", aux.GetListOfEwkDatasets())
         plots._plotStyles["EWK"] = styles.getAltEWKStyle()
             
         # Print post EWK-merge dataset summary
@@ -215,8 +197,7 @@ def main(opts):
         # hList.extend([h for h in allHistos if "StandardSelections" in h and "_Vs" not in h])
 
         # Create a list with strings included in the histogram names you want to plot
-        myHistos = ["LdgTrijetPt", "LdgTrijetMass", "LdgTetrajetMass", "MVAmax2", "MVAmax1", "HT", "MET",
-                    "Bjet3Bdisc", "Bjet2Bdisc", "Bjet1Bdisc", "Bjet3Pt", "Bjet2Pt", "Bjet1Pt"]
+        myHistos = ["LdgTrijetPt", "LdgTrijetMass", "LdgTetrajetMass", "MVAmax2", "MVAmax1", "HT", "MET"]
         #myHistos = ["LdgTrijetPt", "LdgTrijetMass", "LdgTetrajetMass", "MVAmax2", "MVAmax1", "Njets", "NBjets", 
         #            "Bjet3Bdisc", "Bjet2Bdisc", "Bjet1Bdisc", "Bjet3Pt", "Bjet2Pt", "Bjet1Pt"]
 
@@ -240,10 +221,7 @@ def main(opts):
             Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), i==1)
             PlotHistoGraphs(hGraphList, kwargs)
     
-    savePath = opts.saveDir
-    if opts.url:
-        savePath = savePath.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
-    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + savePath + ShellStyles.NormalStyle()), True)
+    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)
     return
 
 
@@ -369,7 +347,7 @@ def PlotHistoGraphs(hGraphList, _kwargs):
     histoName = histoName.split("_")[1]
 
     # Overwrite some canvas options
-    _kwargs["opts"]["ymin"] = 0.5
+    _kwargs["opts"]["ymin"] = 0.0
     _kwargs["opts"]["ymax"] = 1.02
 
     # Create & draw the plot    
@@ -464,7 +442,9 @@ def GetHistoKwargs(histoName, opts):
         metBins.append(j)
 
     htBins = []
-    for j in range(400, 2000, 100):
+    for j in range(500, 1000, 100):
+        htBins.append(j)
+    for j in range(1000, 2000, 200):
         htBins.append(j)
     for j in range(2000, 2500, 500):
         htBins.append(j)
@@ -486,7 +466,7 @@ def GetHistoKwargs(histoName, opts):
     if "ht" in h.lower():
         _xlabel  = "H_{T} (GeV"
         myBins   = htBins
-        _cutBox  = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _cutBox  = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
 
     if "met" in h.lower():
         _xlabel  = "E_{T}^{miss} (GeV"
@@ -494,11 +474,11 @@ def GetHistoKwargs(histoName, opts):
         
     if "mvamax1" in h.lower():
         _xlabel = "Leading MVA"
-        _cutBox = {"cutValue": 0.8, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _cutBox = {"cutValue": 0.85, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         myBins  = mvaBins
     if "mvamax2" in h.lower():
         _xlabel = "Subleading MVA"
-        _cutBox = {"cutValue": 0.8, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _cutBox = {"cutValue": 0.85, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         myBins  = mvaBins
     if "trijetm" in h.lower():
         _units  = "GeV/c^{2}" 
@@ -579,27 +559,20 @@ def GetControlRegionLabel(histoName):
         raise Exception("Cannot determine Control Region label. Got unexpeted histogram name \"%s\". " % histoName)
     return
     
-def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".C", ".pdf"]):
-    Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
-
-    # Check that path exists
+def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     if not os.path.exists(saveDir):
         os.makedirs(saveDir)
 
     # Create the name under which plot will be saved
-    saveName = os.path.join(saveDir, plotName.replace("ForDataDrivenCtrlPlots/", ""))
+    saveName = os.path.join(saveDir, plotName.replace("/", "_"))
 
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
         saveNameURL = saveName + ext
-        saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
-        if opts.url:
-            Verbose(saveNameURL, i==0)
-        else:
-            Verbose(saveName + ext, i==0)
+        saveNameURL = aux.convertToURL(saveNameURL, opts.url)
+        Verbose(saveNameURL, i==0)
         plot.saveAs(saveName, formats=saveFormats)
     return
-
 
 def convertHisto2TGraph(histo, printValues=False):
 
@@ -783,7 +756,7 @@ if __name__ == "__main__":
     URL          = False
     NOERROR      = True
     DOEWK        = False
-    SAVEDIR      = "/publicweb/a/aattikis/"
+    SAVEDIR      = None
     VERBOSE      = False
     DOQCD        = False
     FOLDER       = "ForFakeBMeasurement"
@@ -851,11 +824,9 @@ if __name__ == "__main__":
         parser.print_help()
         #print __doc__
         sys.exit(1)
-    else:
-        mcrabDir = rchop(opts.mcrab, "/")
-        if len(mcrabDir.split("/")) > 1:
-            mcrabDir = mcrabDir.split("/")[-1]
-        opts.saveDir += mcrabDir + "/Purity/"
+
+    if opts.saveDir == None:
+        opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="Purity")
         
     # Sanity check
     allowedFolders = ["ForDataDrivenCtrlPlots", "ForFakeBMeasurement"]

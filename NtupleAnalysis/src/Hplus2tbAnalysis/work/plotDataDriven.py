@@ -37,6 +37,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 
@@ -58,11 +59,6 @@ def Verbose(msg, printHeader=True, verbose=False):
     Print(msg, printHeader)
     return
 
-def rchop(myString, endString):
-  if myString.endswith(endString):
-    return myString[:-len(endString)]
-  return myString
-
 def GetLumi(datasetsMgr):
     lumi = 0.0
     for d in datasetsMgr.getAllDatasets():
@@ -72,11 +68,6 @@ def GetLumi(datasetsMgr):
             lumi += d.getLuminosity()
     Verbose("Luminosity = %s (pb)" % (lumi), True)
     return lumi
-
-def GetListOfEwkDatasets():
-    ewkList = ["TT", "SingleTop", "TTZToQQ", "TTTT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "Diboson"]
-    # ewkList = ["TT", "SingleTop", "TTZToQQ", "TTTT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf"] #no "Diboson"
-    return  ewkList
 
 def GetDatasetsFromDir(opts, otherDir=False):
     
@@ -136,9 +127,8 @@ def main(opts):
         optModes = [opts.optMode]
         
     # Inform user of EWK datasets used
-    ewkList = GetListOfEwkDatasets()
     Print("The EWK datasets used are the following:", True)
-    for i,d in enumerate(ewkList, 1):
+    for i,d in enumerate(aux.GetListOfEwkDatasets(), 1):
         Print(ShellStyles.NoteStyle() + d + ShellStyles.NormalStyle(), i==0)
 
     # For-loop: All opt Mode
@@ -228,7 +218,7 @@ def main(opts):
 
             PlotHistogram(dsetMgr1, hName, opts)
 
-    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + opts.saveDir + ShellStyles.NormalStyle()), True)
+    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)    
     return
 
 def GetHistoKwargs(hName, opts):
@@ -238,7 +228,7 @@ def GetHistoKwargs(hName, opts):
     value = kwargs
     '''
     ymaxF  = 1.2
-    ymin   = 1e-1 #if any smaller than 1e-1 legend problems
+    ymin   = 8e-2 #if any smaller than 1e-1 legend problems
     kwargs = {
         "ratioCreateLegend": True,
         "ratioType"        : "errorScale", #"errorScale", #binomial #errorPropagation
@@ -257,7 +247,9 @@ def GetHistoKwargs(hName, opts):
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
         "opts"             : {"ymin": ymin, "ymaxfactor": ymaxF},
-        "opts2"            : {"ymin": 0.0, "ymax": 2.0}, #{"ymin": 0.2, "ymax": 2.0-0.2},
+        #"opts2"            : {"ymin": 0.55, "ymax": 1.55},
+        "opts2"            : {"ymin": 0.30, "ymax": 1.70},
+        #"opts2"            : {"ymin": 0.0, "ymax": 2.0},
         "log"              : opts.logY,
         "moveLegend"       : {"dx": -0.06, "dy": -0.01, "dh": 0.15},
         "cutBoxY"          : {"cutValue": 1.2, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": False, "ratioCanvas": False}
@@ -331,9 +323,9 @@ def GetHistoKwargs(hName, opts):
         kwargs["cutBox"] = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         kwargs["log"]    = True
         myBins = []
-        for j in range(0, 400, 10):
+        for j in range(0, 400, 20):
             myBins.append(j)
-        for k in range(400, 600, 50):
+        for k in range(400, 600, 40):
             myBins.append(k)
         for k in range(600, 900+100, 100):
             myBins.append(k)
@@ -400,8 +392,9 @@ def GetHistoKwargs(hName, opts):
         kwargs["opts"]   = {"xmin": 50.0, "xmax": 350.0, "ymin": ymin, "ymaxfactor": ymaxF}
         kwargs["log"]    = True
         # Blind data
-        kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind)
-        kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.1}
+        if 0:
+            kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind)
+            kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.1}
     if "TrijetBjetPt" in hName: # FIXME: Why do i have values below 40 GeV/c?
         units            = "GeV/c"
         kwargs["xlabel"] = "p_{T} (%s)"  % units
@@ -465,9 +458,9 @@ def GetHistoKwargs(hName, opts):
         # kwargs["ylabel"] = "Events / %.0f " + units
     if "TetrajetMass" in hName:
         ROOT.gStyle.SetNdivisions(8, "X")
-        startBlind       = 150  # 135 v. sensitive to bin-width!
-        endBlind         = 4000 #3000 # v. sensitive to bin-width!
-        myBins           = getBinningForTetrajetMass(binLevel=0)
+        startBlind       =  190 # 150 v. sensitive to bin-width!
+        endBlind         = 3000 #4000 # v. sensitive to bin-width!
+        myBins           = getBinningForTetrajetMass(binLevel=0, endValue=endBlind)
         kwargs["rebinX"] = myBins
         units            = "GeV/c^{2}"
         binWmin, binWmax = GetBinWidthMinMax(myBins)
@@ -489,7 +482,7 @@ def GetHistoKwargs(hName, opts):
 
     return kwargs
     
-def getBinningForTetrajetMass(binLevel=0):
+def getBinningForTetrajetMass(binLevel=0, endValue=4000):
     '''
     Currenty in Combine:
     myBins = [0,50,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,520,540,560,580,600,620,640,660,680,700,720,740,
@@ -504,28 +497,30 @@ def getBinningForTetrajetMass(binLevel=0):
             myBins.append(i)
         for i in range(1000, 2000, 100):
             myBins.append(i)
-        for i in range(2000, 4000+500, 500):
+        for i in range(2000, 3000, 500):
+            myBins.append(i)
+        for i in range(3000, endValue+1000, 1000):
             myBins.append(i)
     elif binLevel == 1: #finer binning
         for i in range(0, 1000, 25):
             myBins.append(i)
         for i in range(1000, 2000, 50):
             myBins.append(i)
-        for i in range(2000, 4000+250, 250):
+        for i in range(2000, endValue+250, 250):
             myBins.append(i)
     elif binLevel == 2:
         for i in range(0, 1000, 20):
             myBins.append(i)
         for i in range(1000, 2000, 40):
             myBins.append(i)
-        for i in range(2000, 4000+200, 200):
+        for i in range(2000, endValue+200, 200):
             myBins.append(i)
     elif binLevel == 3:
         for i in range(0, 1000, 10):
             myBins.append(i)
         for i in range(1000, 2000, 20):
             myBins.append(i)
-        for i in range(2000, 4000+50, 50):
+        for i in range(2000, endValue+50, 50):
             myBins.append(i)
     else:
         raise Exception(ShellStyles.ErrorStyle() + "Please choose bin-level from -1 to 3" + ShellStyles.NormalStyle())
@@ -594,7 +589,7 @@ def PlotHistogram(dsetMgr, histoName, opts):
 
     # Copy dataset manager before changing datasets. Keep only EWK (GenuineB) datasets
     datasetMgr = dsetMgr.deepCopy()
-    datasetMgr.selectAndReorder(GetListOfEwkDatasets())
+    datasetMgr.selectAndReorder(aux.GetListOfEwkDatasets())
         
     # Create the MCPlot for the EWKGenuineB histograms
     if opts.useMC:
@@ -619,10 +614,9 @@ def PlotHistogram(dsetMgr, histoName, opts):
         myStackList.append(hhQCD)
 
     # EWK GenuineB background (Replace all EWK histos with GenuineB histos)
-    ewkNameList  = GetListOfEwkDatasets()
     ewkHistoList = []
     # For-loop: All EWK datasets 
-    for dataset in ewkNameList:
+    for dataset in aux.GetListOfEwkDatasets():
         h = p2.histoMgr.getHisto(dataset).getRootHisto()
         hh = histograms.Histo(h, dataset,  plots._legendLabels[dataset])
         hh.setIsDataMC(isData=False, isMC=True)
@@ -673,7 +667,6 @@ def PrintPSet(selection, dsetMgr):
     return
 
 def getHisto(dsetMgr, datasetName, histoName):
-    Verbose("getHisto()", True)
 
     h1 = dsetMgr.getDataset(datasetName).getDatasetRootHisto(histoName)
     h1.setName(datasetName)
@@ -712,8 +705,7 @@ def replaceQCD(dMgr1, dMgr2, newName, newLabel="FakeB"):
     dMgr1.selectAndReorder(names)
     return
 
-def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
-    # Check that path exists
+def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     if not os.path.exists(saveDir):
         os.makedirs(saveDir)
 
@@ -721,18 +713,12 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
     saveName = os.path.join(saveDir, plotName.replace("/", "_"))
 
     # For-loop: All save formats
-    for i, ext in enumerate(saveFormats, 0):
-        saveNameURL  = saveName + ext
-        saveNameURL  = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
-        if opts.url:
-            Verbose(saveNameURL, False) #i==0)
-            opts.saveDir = os.path.dirname(saveNameURL) + "/"
-        else:
-            Verbose(saveName + ext, False) #i==0)
-            opts.saveDir = os.path.dirname(saveName) + "/"
+    for i, ext in enumerate(saveFormats):
+        saveNameURL = saveName + ext
+        saveNameURL = aux.convertToURL(saveNameURL, opts.url)
+        Verbose(saveNameURL, i==0)
         plot.saveAs(saveName, formats=saveFormats)
     return
-
 
 #================================================================================================ 
 # Main
@@ -765,7 +751,7 @@ if __name__ == "__main__":
     SIGNALMASS   = 800
     SIGNAL       = None
     URL          = False
-    SAVEDIR      = "/publicweb/a/aattikis/"
+    SAVEDIR      = None
     VERBOSE      = False
     GRIDX        = False
     UNBLIND      = False
@@ -853,14 +839,10 @@ if __name__ == "__main__":
         #print __doc__
         sys.exit(1)
     else:
-        mcrabDir1 = rchop(opts.mcrab1, "/")
-        mcrabDir2 = opts.mcrab2.split("/")[0]
-        if len(mcrabDir1.split("/")) > 1:
-            mcrabDir1 = mcrabDir1.split("/")[-1]
-        if len(mcrabDir2.split("/")) > 1:
-            mcrabDir2 = mcrabDir2.split("/")[-1]
-        opts.saveDir += mcrabDir1 + "/" + mcrabDir2 + "/DataDriven/"
+        pass
 
+    if opts.saveDir == None:
+        opts.saveDir = aux.getSaveDirPath(opts.mcrab1, prefix="", postfix="DataDriven", pseudocrabDir2=opts.mcrab2)
 
     # Sanity check
     allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 1500, 2000, 2500, 3000, 5000, 7000]
