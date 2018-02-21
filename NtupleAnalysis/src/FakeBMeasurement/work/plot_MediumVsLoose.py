@@ -1,6 +1,13 @@
 #!/usr/bin/env python
 '''
 DESCRIPTION:
+This script plots  histograms inside the ROOT histogram folder 
+"ForFakeBMediumVsLoose". For all Control Regions (CRs)  and 
+a single dataset of user's choice, it plots on the same canvas 
+b-jet variables of CSVv2-Loose and compares with CSVv2-Medium.
+
+The folder contains histograms for sanity checks and comparison purposes
+of selected CSVv2-loose b-jets and CSVv2-medium bjets.
 
 
 USAGE:
@@ -8,11 +15,12 @@ USAGE:
 
 
 EXAMPLES:
-
+./plot_MediumVsLoose.py -m FakeBMeasurement_PreSel_3CSVv2M_Pt40Pt40Pt30_SigSel_MVA0p85_InvSel_2CSVv2M_3CSVv2L_MVA0p60to0p85_4BinsEta0p4Eta1p2Eta1p8_180220_061759 --dataset EWK --refBdisc Loose
+./plot_MediumVsLoose.py -m FakeBMeasurement_PreSel_3CSVv2M_Pt40Pt40Pt30_SigSel_MVA0p85_InvSel_2CSVv2M_3CSVv2L_MVA0p60to0p85_4BinsEta0p4Eta1p2Eta1p8_180220_061759 --dataset Data --refBdisc Medium
 
 
 LAST USED:
-./plot_MediumVsLoose.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171115_101036 -e "Charged" --url --plotEWK
+./plot_MediumVsLoose.py -m FakeBMeasurement_PreSel_3CSVv2M_Pt40Pt40Pt30_SigSel_MVA0p85_InvSel_2CSVv2M_3CSVv2L_MVA0p60to0p85_4BinsEta0p4Eta1p2Eta1p8_180220_061759 --dataset Data
 
 '''
 
@@ -183,33 +191,28 @@ def main(opts):
         datasetsMgr.PrintInfo()
    
         # Get Luminosity
-        if opts.intLumi < 0:
+        if opts.intLumi < 0.0:
             if "Data" in datasetsMgr.getAllDatasetNames():
                 opts.intLumi = datasetsMgr.getDataset("Data").getLuminosity()
             else:
                 opts.intLumi = 1.0
 
-        # Re-order datasets (different for inverted than default=baseline)
-        if 1:
-            newOrder = ["Data"]
-            newOrder.extend(aux.GetListOfEwkDatasets())
-            datasetsMgr.selectAndReorder(newOrder)
-
         # Merge EWK samples
-        datasetsMgr.merge("EWK", aux.GetListOfEwkDatasets())
-        plots._plotStyles["EWK"] = styles.getAltEWKStyle()
+        if opts.dataset == "EWK":
+            datasetsMgr.merge("EWK", aux.GetListOfEwkDatasets())
+            plots._plotStyles["EWK"] = styles.getAltEWKStyle()
 
         # Print dataset information
         datasetsMgr.PrintInfo()
 
         # Get all histogram names in the given ROOT folder
         histoNames = datasetsMgr.getAllDatasets()[0].getDirectoryContent(opts.folder)
-        histoList  = [os.path.join(opts.folder, h) for h in histoNames if "_SR" in h]
+        # histoList  = [os.path.join(opts.folder, h) for h in histoNames if "_" + opts.region in h and opts.refBdisc in h]
+        histoList  = [os.path.join(opts.folder, h) for h in histoNames if opts.refBdisc in h]
 
-        # For-loop: All histos in SR
+        # For-loop: All histos in CR of interest
         nHistos = len(histoList)
         for i, h in enumerate(histoList, 1):
-
             msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % i,"/", "%s:" % (nHistos), h)
             Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), i==1)
             PlotHistograms(datasetsMgr, h)
@@ -223,39 +226,36 @@ def GetHistoKwargs(h, opts):
 
     # Defaults    
     yMaxF = 1.2
-    _opts = {"ymin": 0.0, "ymaxfactor": yMaxF}
-    if opts.normalizeToLumi:
-        yLabel = "Events"
-        _opts  = {"ymin": 1e-1, "ymaxfactor": yMaxF}
-    elif opts.normalizeByCrossSection:
-        yLabel  = "#sigma (pb)"
-        _opts  = {"ymin": 1e-3, "ymaxfactor": yMaxF}
-    elif opts.normalizeToOne:
+    logY  = True
+    if opts.normalizeToOne:
         yLabel  = "Arbitrary Units"
         _opts  = {"ymin": 1e-4, "ymax": 1.2}
     else:
-        yLabel = "Unknown"
-    cutBox     = {"cutValue": 400.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True} #box = True works
+        yLabel = "Events"
+        if logY:
+            yMaxF = 5
+        _opts  = {"ymin": 8e-1, "ymaxfactor": yMaxF}
+    cutBox     = {"cutValue": 400.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
     cutBoxY    = {"cutValue": 200.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True,
                    "mainCanvas": True, "ratioCanvas": False} # box = True not working
 
     kwargs = {
         #"xlabel"           : xlabel,
         "ylabel"           : yLabel,
-        #"ratioYlabel"      : "Ratio",
+        "ratioYlabel"      : "Ratio",
         "ratio"            : True,
-        #"ratioInvert"      : False,
+        "ratioInvert"      : False,
         "stackMCHistograms": False,
         "addMCUncertainty" : False,
-        "addLuminosityText": opts.normalizeToLumi,
+        "addLuminosityText": opts.intLumi != 1.0,
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
         "opts"             : _opts,
         "opts2"            : {"ymin": 0.3, "ymax": 1.7},
-        "log"              : True,
+        "log"              : logY,
         "cutBox"           : cutBox,
         "cutBoxY"          : cutBoxY,
-        "moveLegend"       : {"dx": 0.02, "dy": -0.01, "dh": -0.12}, #hack to remove legend (tmp)
+        "moveLegend"       : {"dx": -0.04, "dy": -0.01, "dh": -0.12},
         }
 
     if "nbjetsmedium" in h.lower():
@@ -298,6 +298,7 @@ def GetHistoKwargs(h, opts):
         kwargs["rebinX"]  = 1
         kwargs["opts"]["xmin"] = -2.5
         kwargs["opts"]["xmax"] = +2.5
+        # kwargs["opts"]["ymin"] = 1e-3
         #ROOT.gStyle.SetNdivisions(8, "X")
         #ROOT.gStyle.SetNdivisions(8, "Y")
 
@@ -313,73 +314,75 @@ def GetHistoKwargs(h, opts):
 def PlotHistograms(datasetsMgr, histoName):
 
     # Get Histogram name and its kwargs
-    rootHistos  = []
-    regionsList = ["SR", "VR", "CRone", "CRtwo"]
-    hRegion     = histoName.split("_")[-1]
-    saveName    = histoName.rsplit("/")[-1]
-    saveName    = saveName.replace("_" + hRegion, "")
-    kwargs      = GetHistoKwargs(saveName, opts)
-    myRegions   = []
+    rootHistos = []
+    bdiscList  = ["Loose", "Medium"]
+    saveName   = histoName.rsplit("/")[-1]
+    kwargs     = GetHistoKwargs(saveName, opts)
+    myBdiscs   = []
+    histoName  = histoName.replace(opts.folder, "")
+    stylesList = [styles.FakeBStyle1, styles.FakeBStyle3, styles.FakeBStyle2, styles.FakeBStyle4] 
+    #stylesList = [styles.fakeBLineStyle1, styles.FakeBStyle2, styles.FakeBStyle3, styles.FakeBStyle4] 
 
     # For-loop: All histograms in all regions
-    for region in regionsList:
-        hName = histoName.replace(hRegion, region)
+    for bdisc in bdiscList:
+        
+        hName_ = histoName.replace(opts.refBdisc, bdisc)
+        hName = opts.folder + "/" + hName_
+
         if "Data" in datasetsMgr.getAllDatasetNames():
             p = plots.DataMCPlot(datasetsMgr, hName, saveFormats=[])
         else:
-            if opts.normalizeToLumi:
-                p = plots.MCPlot(datasetsMgr, hName, normalizeToLumi=opts.intLumi, saveFormats=[])
-            elif opts.normalizeByCrossSection:
-                p = plots.MCPlot(datasetsMgr, hName, normalizeByCrossSection=True, saveFormats=[], **{})
-            elif opts.normalizeToOne:
-                p = plots.MCPlot(datasetsMgr, hName, normalizeToOne=True, saveFormats=[], **{})
-            else:
-                raise Exception("One of the options --normalizeToOne, --normalizeByCrossSection, --normalizeToLumi must be enabled (set to \"True\").")
+            p = plots.MCPlot(datasetsMgr, hName, normalizeToLumi=opts.intLumi, saveFormats=[])
             
-        # Append (non-emptty) dataset ROOT histos to a list for plotting
-        drh = datasetsMgr.getDataset(opts.dataset).getDatasetRootHisto(hName)
-        if drh._getSumHistogram().getRootHisto().Integral() > 0.0:
-            drh.setName(region)
-            rootHistos.append(drh)
-            myRegions.append(region)
+        # Append (non-empty) dataset ROOT histos to a list for plotting
+        h = p.histoMgr.getHisto(opts.dataset).getRootHisto()
+        if h.GetEntries() > 0:
+            h.SetName(bdisc)
+            rootHistos.append(h)
+            myBdiscs.append(bdisc)
 
     # Create a comparison plot for a given dataset in all CRs
-    if len(rootHistos) == 0:
+    if len(rootHistos) < 2:
+        Print("Cannot plot comparison due to too few non-empty histograms present (=%i)" % (len(rootHistos)), False)
         return
-    else:
-        p = plots.ComparisonManyPlot(rootHistos[0], rootHistos[1:], saveFormats=[])
-        p.setLuminosity(opts.intLumi)
+
+    # Move ref histo to top of rootHisto list
+    for rh in rootHistos:
+        if opts.refBdisc in rh.GetName():
+            s = rootHistos.pop( rootHistos.index(rh) )
+            #rootHistos.insert(0, s)
+            rootHistos.insert(len(rootHistos), s)
+
+    # Draw the comparison plot (first argument the reference histo for ratio purposes)
+    p = plots.ComparisonManyPlot(rootHistos[-1], rootHistos[:-1], saveFormats=[])
+    # p = plots.ComparisonManyPlot(rootHistos[0], rootHistos[1:], saveFormats=[])
+    p.setLuminosity(opts.intLumi)
 
     if opts.normalizeToOne:
         p.histoMgr.forEachHisto(lambda h: h.getRootHisto().Scale(1.0/h.getRootHisto().Integral()))
 
-    # Drawing style
-    p.histoMgr.setHistoDrawStyleAll("AP")
-    p.histoMgr.setHistoLegendStyleAll("LP")
-
-    # Apply styles
-    for h in rootHistos:
-        region = h.getName()
-        if region == "SR":
-            styles.fakeBLineStyle1.apply(p.histoMgr.getHisto(region).getRootHisto())
-            p.histoMgr.setHistoDrawStyle(region, "HIST")
-            p.histoMgr.setHistoLegendStyle(region, "L")
+    # Apply drawing/legend styles
+    for i, bdisc in enumerate(myBdiscs, 0):
+        stylesList[i].apply(p.histoMgr.getHisto(bdisc).getRootHisto())
+        if bdisc == opts.refBdisc:
+            p.histoMgr.setHistoDrawStyle(bdisc, "AP")
+            p.histoMgr.setHistoLegendStyle(bdisc,"LP")
         else:
-            styles.getABCDStyle(region).apply(p.histoMgr.getHisto(region).getRootHisto())
-
+            p.histoMgr.setHistoDrawStyle(bdisc, "AP")
+            p.histoMgr.setHistoLegendStyle(bdisc, "LP")
+            #p.histoMgr.setHistoDrawStyle(bdisc, "HIST")
+            #p.histoMgr.setHistoLegendStyle(bdisc, "F")
+            
     # Add dataset name on canvas
     p.appendPlotObject(histograms.PlotText(0.18, 0.88, plots._legendLabels[opts.dataset], bold=True, size=22))
+    #p.appendPlotObject(histograms.PlotText(0.18, 0.88, plots._legendLabels[opts.dataset + " (%s)" % ], bold=True, size=22))
 
     # Set legend labels
-    if "CRone" in myRegions:
-        p.histoMgr.setHistoLegendLabelMany({
-                "CRone" : "CR1",
-                })
-    if "CRtwo" in myRegions:
-        p.histoMgr.setHistoLegendLabelMany({
-                "CRtwo" : "CR2",
-                })
-
+    p.histoMgr.setHistoLegendLabelMany({
+            "Loose" : "Loose (%s)"  % (GetCRLabel(histoName)),
+            "Medium": "Medium (%s)" % (GetCRLabel(histoName)),
+            })
+    
     # Draw the plot
     plots.drawPlot(p, saveName, **kwargs) #the "**" unpacks the kwargs_ dictionary
 
@@ -387,10 +390,11 @@ def PlotHistograms(datasetsMgr, histoName):
     SavePlot(p, saveName, os.path.join(opts.saveDir), [".png"])#, ".pdf"] )
     return
 
-def GetCRLabel(region):
-    if "CRone":
+def GetCRLabel(histoName):
+    region = histoName.split("_")[-1]
+    if region == "CRone":
         return "CR1"
-    elif "CRtwo":
+    elif region == "CRtwo":
         return "CR2"
     else:
         return region
@@ -435,15 +439,15 @@ if __name__ == "__main__":
     ANALYSISNAME = "FakeBMeasurement"
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
-    DATASET      = "Data"
+    REFBDISC     = "Medium"
+    DATASET      = "Data" #"EWK", "SingleTop", "TT"
+    REGION       = "SR" # SR, VR, CR1, CR2
     OPTMODE      = ""
     BATCHMODE    = True
     INTLUMI      = -1.0
-    NORM2ONE     = False
+    NORM2ONE     = True
     NORM2XSEC    = False
     NORM2LUMI    = False
-    MCONLY       = False
-    PLOTEWK      = True
     URL          = False
     SAVEDIR      = None
     VERBOSE      = False
@@ -458,11 +462,11 @@ if __name__ == "__main__":
     parser.add_option("--normalizeToOne", dest="normalizeToOne", action="store_true", default=NORM2ONE,
                       help="Normalise plot to one [default: %s]" % NORM2ONE)
 
-    parser.add_option("--normalizeByCrossSection", dest="normalizeByCrossSection", action="store_true", default=NORM2XSEC,
-                      help="Normalise plot by cross-section [default: %s]" % NORM2XSEC)
+    #parser.add_option("--normalizeByCrossSection", dest="normalizeByCrossSection", action="store_true", default=NORM2XSEC,
+    #                  help="Normalise plot by cross-section [default: %s]" % NORM2XSEC)
 
-    parser.add_option("--normalizeToLumi", dest="normalizeToLumi", action="store_true", default=NORM2LUMI,
-                      help="Normalise plot to luminosity [default: %s]" % NORM2LUMI)
+    #parser.add_option("--normalizeToLumi", dest="normalizeToLumi", action="store_true", default=NORM2LUMI,
+    #                  help="Normalise plot to luminosity [default: %s]" % NORM2LUMI)
 
     parser.add_option("-o", "--optMode", dest="optMode", type="string", default=OPTMODE, 
                       help="The optimization mode when analysis variation is enabled  [default: %s]" % OPTMODE)
@@ -470,14 +474,17 @@ if __name__ == "__main__":
     parser.add_option("--dataset", dest="dataset", type="string", default=DATASET, 
                       help="Dataset to consider when plotting all 4 Control Regions (CRs) [default: %s]" % DATASET)
 
+    parser.add_option("--refBdisc", dest="refBdisc", type="string", default=REFBDISC, 
+                      help="B-jet discriminator to consider as reference [default: %s]" % REFBDISC)
+
+    parser.add_option("--region", dest="region", type="string", default=REGION, 
+                      help="Region to consider when plotting the histograms [default: %s]" % REGION)
+
     parser.add_option("-b", "--batchMode", dest="batchMode", action="store_false", default=BATCHMODE, 
                       help="Enables batch mode (canvas creation does NOT generate a window) [default: %s]" % BATCHMODE)
 
     parser.add_option("--analysisName", dest="analysisName", type="string", default=ANALYSISNAME,
                       help="Override default analysisName [default: %s]" % ANALYSISNAME)
-
-    parser.add_option("--mcOnly", dest="mcOnly", action="store_true", default=MCONLY,
-                      help="Plot only MC info [default: %s]" % MCONLY)
 
     parser.add_option("--intLumi", dest="intLumi", type=float, default=INTLUMI,
                       help="Override the integrated lumi [default: %s]" % INTLUMI)
@@ -487,9 +494,6 @@ if __name__ == "__main__":
 
     parser.add_option("--dataEra", dest="dataEra", type="string", default=DATAERA, 
                       help="Override default dataEra [default: %s]" % DATAERA)
-
-    parser.add_option("--plotEWK", dest="plotEWK", action="store_true", default=PLOTEWK, 
-                      help="Also plot EWK distribution on canvas [default: %s]" % PLOTEWK)
 
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR, 
                       help="Directory where all pltos will be saved [default: %s]" % SAVEDIR)
@@ -525,9 +529,12 @@ if __name__ == "__main__":
     if opts.saveDir == None:
         opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="MediumVsLoose")
 
+    allowedBdisc = ["Medium", "Loose"]
+    if opts.refBdisc not in allowedBdisc:
+        raise Exception("Unknown reference b-discriminator selected (=\"%s\"). Please selecte on from \"Loose\" and \"Medium\"." % (opts.refBdisc))
         
     # Call the main function
     main(opts)
 
     if not opts.batchMode:
-        raw_input("=== plotQCD_FailedBJet.py: Press any key to quit ROOT ...")
+        raw_input("=== plot_MediumVsLoose.py: Press any key to quit ROOT ...")
