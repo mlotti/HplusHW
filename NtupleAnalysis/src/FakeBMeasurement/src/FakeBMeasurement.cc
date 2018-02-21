@@ -1046,39 +1046,39 @@ void FakeBMeasurement::book(TDirectory *dir) {
 
   // Other histograms
   TDirectory* MvL = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, "ForFakeBMediumVsLoose");
-  hNBJetsMedium_SR        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hNBJetsMedium_SR"       , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax);
-  hNBJetsMedium_VR        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hNBJetsMedium_VR"       , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax); 
-  hNBJetsMedium_CRone     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hNBJetsMedium_CRone"    , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax); 
-  hNBJetsMedium_CRtwo     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hNBJetsMedium_CRtwo"    , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax); 
-  hBJetsPtMedium_SR       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsPtMedium_SR"      , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
-  hBJetsPtMedium_VR       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsPtMedium_VR"      , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
-  hBJetsPtMedium_CRone    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsPtMedium_CRone"   , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
-  hBJetsPtMedium_CRtwo    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsPtMedium_CRtwo"   , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
-  hBJetsEtaMedium_SR      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsEtaMedium_SR"     , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
-  hBJetsEtaMedium_VR      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsEtaMedium_VR"     , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
-  hBJetsEtaMedium_CRone   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsEtaMedium_CRone"  , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
-  hBJetsEtaMedium_CRtwo   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsEtaMedium_CRtwo"  , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
-  hBJetsBdiscMedium_SR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsBdiscMedium_SR"   , ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
-  hBJetsBdiscMedium_VR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsBdiscMedium_VR"   , ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
-  hBJetsBdiscMedium_CRone = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsBdiscMedium_CRone", ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
-  hBJetsBdiscMedium_CRtwo = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsBdiscMedium_CRtwo", ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
+  hNBJetsMedium_SR        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "NBJetsMedium_SR"       , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax);
+  hNBJetsMedium_VR        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "NBJetsMedium_VR"       , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax); 
+  hNBJetsMedium_CRone     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "NBJetsMedium_CRone"    , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax); 
+  hNBJetsMedium_CRtwo     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "NBJetsMedium_CRtwo"    , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax); 
+  hBJetsPtMedium_SR       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsPtMedium_SR"      , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  hBJetsPtMedium_VR       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsPtMedium_VR"      , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  hBJetsPtMedium_CRone    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsPtMedium_CRone"   , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  hBJetsPtMedium_CRtwo    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsPtMedium_CRtwo"   , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  hBJetsEtaMedium_SR      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsEtaMedium_SR"     , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  hBJetsEtaMedium_VR      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsEtaMedium_VR"     , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  hBJetsEtaMedium_CRone   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsEtaMedium_CRone"  , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  hBJetsEtaMedium_CRtwo   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsEtaMedium_CRtwo"  , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  hBJetsBdiscMedium_SR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsBdiscMedium_SR"   , ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
+  hBJetsBdiscMedium_VR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsBdiscMedium_VR"   , ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
+  hBJetsBdiscMedium_CRone = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsBdiscMedium_CRone", ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
+  hBJetsBdiscMedium_CRtwo = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsBdiscMedium_CRtwo", ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
   //
-  hNBJetsLoose_SR        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hNBJetsLoose_SR"       , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax);
-  hNBJetsLoose_VR        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hNBJetsLoose_VR"       , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax); 
-  hNBJetsLoose_CRone     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hNBJetsLoose_CRone"    , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax); 
-  hNBJetsLoose_CRtwo     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hNBJetsLoose_CRtwo"    , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax); 
-  hBJetsPtLoose_SR       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsPtLoose_SR"      , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
-  hBJetsPtLoose_VR       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsPtLoose_VR"      , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
-  hBJetsPtLoose_CRone    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsPtLoose_CRone"   , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
-  hBJetsPtLoose_CRtwo    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsPtLoose_CRtwo"   , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
-  hBJetsEtaLoose_SR      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsEtaLoose_SR"     , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
-  hBJetsEtaLoose_VR      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsEtaLoose_VR"     , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
-  hBJetsEtaLoose_CRone   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsEtaLoose_CRone"  , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
-  hBJetsEtaLoose_CRtwo   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsEtaLoose_CRtwo"  , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
-  hBJetsBdiscLoose_SR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsBdiscLoose_SR"   , ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
-  hBJetsBdiscLoose_VR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsBdiscLoose_VR"   , ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
-  hBJetsBdiscLoose_CRone = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsBdiscLoose_CRone", ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
-  hBJetsBdiscLoose_CRtwo = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsBdiscLoose_CRtwo", ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
+  hNBJetsLoose_SR        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "NBJetsLoose_SR"       , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax);
+  hNBJetsLoose_VR        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "NBJetsLoose_VR"       , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax); 
+  hNBJetsLoose_CRone     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "NBJetsLoose_CRone"    , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax); 
+  hNBJetsLoose_CRtwo     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "NBJetsLoose_CRtwo"    , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax); 
+  hBJetsPtLoose_SR       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsPtLoose_SR"      , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  hBJetsPtLoose_VR       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsPtLoose_VR"      , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  hBJetsPtLoose_CRone    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsPtLoose_CRone"   , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  hBJetsPtLoose_CRtwo    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsPtLoose_CRtwo"   , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  hBJetsEtaLoose_SR      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsEtaLoose_SR"     , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  hBJetsEtaLoose_VR      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsEtaLoose_VR"     , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  hBJetsEtaLoose_CRone   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsEtaLoose_CRone"  , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  hBJetsEtaLoose_CRtwo   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsEtaLoose_CRtwo"  , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  hBJetsBdiscLoose_SR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsBdiscLoose_SR"   , ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
+  hBJetsBdiscLoose_VR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsBdiscLoose_VR"   , ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
+  hBJetsBdiscLoose_CRone = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsBdiscLoose_CRone", ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
+  hBJetsBdiscLoose_CRtwo = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsBdiscLoose_CRtwo", ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
 
   // Other histograms
   myInclusiveLabel = "ForFakeBMeasurement";
@@ -2202,6 +2202,9 @@ bool FakeBMeasurement::areSameJets(const Jet& jet1, const Jet& jet2) {
 void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
                                           const BJetSelection::Data& bjetData,
                                           const int nVertices){
+
+  if (0) std::cout << "\n=== FakeBMeasurement::DoBaselineAnalysis()" << std::endl;
+
   // Increment counter
   cBaselineBTaggingCounter.increment();
 

@@ -279,7 +279,6 @@ commonPlotsOptions = PSet(
 #================================================================================================
 allSelections = PSet(
     BJetSelection         = bjetSelection,
-    FakeBBJetSelection    = fakeBBjetSelection,
     CommonPlots           = commonPlotsOptions,
     ElectronSelection     = eVeto,
     HistogramAmbientLevel = histogramAmbientLevel,
