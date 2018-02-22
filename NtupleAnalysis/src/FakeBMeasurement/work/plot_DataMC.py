@@ -463,7 +463,7 @@ def GetHistoKwargs(h, opts):
             
     if h == "counter":
         ROOT.gStyle.SetLabelSize(16.0, "X")
-        xMin = 17  # 15 = jets selection, 16 = bjets selection, 17 = baseline: bjets selection, 18 = bjets SF
+        xMin = 16  # 15 = jets selection, 16 = bjets selection, 17 = baseline: bjets selection, 18 = bjets SF
         xMax = 29
         kwargs["opts"] = {"xmin": xMin, "ymin": 1e0, "ymax": 5e6}#"ymaxfactor": yMaxF}
         kwargs["moveLegend"] = {"dx": -500.0, "dy": -500.0, "dh": -500.0}
