@@ -19,9 +19,6 @@ FatJetSelection::Data::Data()
 FatJetSelection::Data::~Data() { }
 
 const FatJetSelection::FatjetType FatJetSelection::Data::getFatJetMatchedToTopType() const { 
-  if (!fatjetMatchedToTopFound())
-    throw hplus::Exception("Assert") << "You forgot to check if the fat jet matched to leading trijet exists (fatjetMatchedToTopFound()), this message occurs when none exists!";
-
   return fFatJetMatchedToTopType;
 }
 
@@ -252,7 +249,7 @@ FatJetSelection::Data FatJetSelection::privateAnalyze(const Event& event, const 
       findFatJetMatchedToTop(output.fFatJetMatchedToTop, event, topP);
 
       // Create collection of all AK8 jets that match the top
-      if (output.fatjetMatchedToTopFound()) 
+      if (output.fatjetMatchedToTopFound())
 	{
 	  findFatJetMatchedToTopType(output.fFatJetMatchedToTopType, output.getFatJetMatchedToTop(), topData);
 	}

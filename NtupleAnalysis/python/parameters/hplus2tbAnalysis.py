@@ -23,22 +23,6 @@ trigger = PSet(
     )
 
 #================================================================================================
-# Tau selection (sync with HToTauNu analysis)
-#================================================================================================
-tauSelection = PSet(
-    applyTriggerMatching = False, # [default: False]
-    triggerMatchingCone  =   0.1, # [default: False]
-    tauPtCut             =  20.0, # [default: 20.0]
-    tauEtaCut            =   2.1, # [default: 2.1]
-    tauLdgTrkPtCut       =   0.0, # [default: 0.0]
-    prongs               =  -1,   # [default: -1] (options: 1, 2, 3, 12, 13, 23, 123 or -1 (all))
-    rtau                 =   0.0, # [default: 0.0] (to disable set to 0.0)
-    againstElectronDiscr = "againstElectronTightMVA6",
-    againstMuonDiscr     = "againstMuonLoose3",
-    isolationDiscr       = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
-    )
-
-#================================================================================================
 # MET filter
 #================================================================================================
 metFilter = PSet(
@@ -77,6 +61,22 @@ muVeto = PSet(
 )
 
 #================================================================================================
+# Tau selection (sync with HToTauNu analysis)
+#================================================================================================
+tauVeto = PSet(
+    applyTriggerMatching = False, # [default: False]
+    triggerMatchingCone  =   0.1, # [default: False]
+    tauPtCut             =  20.0, # [default: 20.0]
+    tauEtaCut            =   2.1, # [default: 2.1]
+    tauLdgTrkPtCut       =   0.0, # [default: 0.0]
+    prongs               =  -1,   # [default: -1] (options: 1, 2, 3, 12, 13, 23, 123 or -1 (all))
+    rtau                 =   0.0, # [default: 0.0] (to disable set to 0.0)
+    againstElectronDiscr = "againstElectronTightMVA6",
+    againstMuonDiscr     = "againstMuonLoose3",
+    isolationDiscr       = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
+    )
+
+#================================================================================================
 # Jet selection
 #================================================================================================
 jetSelection = PSet(
@@ -99,42 +99,37 @@ jetSelection = PSet(
 #=================================================================================================
 # Fat jet selection
 #=================================================================================================
-fatjetSelection = PSet(
+fatjetVeto = PSet(
     fatjetType                  = "FatJets",   
-    fatjetPtCuts                = [100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0],
+    fatjetPtCuts                = [450.0],
     fatjetEtaCuts               = [2.4],
-    numberOfFatJetsCutValue     = 0,
+    topMatchingDeltaR           = 0.8,
+    topConstituentMatchingDeltaR= 0.8,
+    numberOfFatJetsCutValue     = 1,
     numberOfFatJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
     fatjetIDDiscr               = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
     fatjetPUIDDiscr             = "",        # does not work at the moment 
-    tauMatchingDeltaR           = 0.4,
-    HTCutValue                  = 0.0,
-    HTCutDirection              = ">=",
-    JTCutValue                  = 0.0,
-    JTCutDirection              = ">=",
-    MHTCutValue                 = 0.0,
-    MHTCutDirection             = ">=",
 )
 
-#=================================================================================================
-# Fat jet selection
-#=================================================================================================
-fatjetSoftDropSelection = PSet(
-    fatjetType                  = "FatJetsSoftDrop",   
-    fatjetPtCuts                = [100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0],
-    fatjetEtaCuts               = [2.4],
-    numberOfFatJetsCutValue     = 0,
-    numberOfFatJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
-    fatjetIDDiscr               = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
-    fatjetPUIDDiscr             = "",        # does not work at the moment 
-    tauMatchingDeltaR           = 0.4,
-    HTCutValue                  = 0.0,
-    HTCutDirection              = ">=",
-    JTCutValue                  = 0.0,
-    JTCutDirection              = ">=",
-    MHTCutValue                 = 0.0,
-    MHTCutDirection             = ">=",
-)
+# #=================================================================================================
+# # Fat jet selection
+# #=================================================================================================
+# fatjetSoftDropSelection = PSet(
+#     fatjetType                  = "FatJetsSoftDrop",   
+#     fatjetPtCuts                = [100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0],
+#     fatjetEtaCuts               = [2.4],
+#     numberOfFatJetsCutValue     = 0,
+#     numberOfFatJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
+#     fatjetIDDiscr               = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
+#     fatjetPUIDDiscr             = "",        # does not work at the moment 
+#     tauMatchingDeltaR           = 0.4,
+#     HTCutValue                  = 0.0,
+#     HTCutDirection              = ">=",
+#     JTCutValue                  = 0.0,
+#     JTCutDirection              = ">=",
+#     MHTCutValue                 = 0.0,
+#     MHTCutDirection             = ">=",
+# )
 
 #================================================================================================
 # B-jet selection
@@ -277,22 +272,20 @@ commonPlotsOptions = PSet(
 # Build all selections group
 #================================================================================================
 allSelections = PSet(
-    BJetSelection         = bjetSelection,
-    CommonPlots           = commonPlotsOptions,
-    ElectronSelection     = eVeto,
-    HistogramAmbientLevel = histogramAmbientLevel,
-    JetSelection          = jetSelection,
-    TauSelection          = tauSelection,
-    METFilter             = metFilter,
-    METSelection          = metSelection,
-    # TopologySelection     = topologySelection,
-    TopSelectionBDT       = topSelectionBDT,
-    MuonSelection         = muVeto,
-    Trigger               = trigger,
     Verbose               = verbose,
+    Trigger               = trigger,
+    METFilter             = metFilter,
+    ElectronSelection     = eVeto,
+    MuonSelection         = muVeto,
+    TauSelection          = tauVeto,
+    JetSelection          = jetSelection,
+    BJetSelection         = bjetSelection,
+    METSelection          = metSelection,
+    TopSelectionBDT       = topSelectionBDT,
+    FatJetSelection       = fatjetVeto,
     FakeBMeasurement      = fakeBMeasurement,
     FakeBBjetSelection    = fakeBBjetSelection,
-    FatJetSelection       = fatjetSelection,
-    FatJetSoftDropSelection = fatjetSoftDropSelection
+    CommonPlots           = commonPlotsOptions,
+    HistogramAmbientLevel = histogramAmbientLevel,
 )
 
