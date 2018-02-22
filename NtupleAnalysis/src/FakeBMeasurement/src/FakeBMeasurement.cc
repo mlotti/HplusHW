@@ -27,6 +27,8 @@ public:
 private:
   // Input parameters (Baseline Bjets)
   const DirectionalCut<int> cfg_BaselineNumberOfBJets;
+  const std::string cfg_BaselineBJetsDiscr;
+  const std::string cfg_BaselineBJetsDiscrWP;
   const DirectionalCut<double> cfg_LdgTopMVACut;
   const DirectionalCut<double> cfg_SubldgTopMVACut;
   const DirectionalCut<double> cfg_MinTopMVACut;
@@ -481,6 +483,8 @@ REGISTER_SELECTOR(FakeBMeasurement);
 FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCounters)
   : BaseSelector(config, skimCounters),
     cfg_BaselineNumberOfBJets(config, "FakeBMeasurement.baselineBJetsCut"),
+    cfg_BaselineBJetsDiscr(config.getParameter<std::string>("FakeBMeasurement.baselineBJetsDiscr")),
+    cfg_BaselineBJetsDiscrWP(config.getParameter<std::string>("FakeBMeasurement.baselineBJetsDiscrWP")),
     cfg_LdgTopMVACut(config, "FakeBMeasurement.LdgTopMVACut"),
     cfg_SubldgTopMVACut(config, "FakeBMeasurement.SubldgTopMVACut"),
     cfg_MinTopMVACut(config, "FakeBMeasurement.minTopMVACut"),
@@ -505,7 +509,7 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
     cBaselineSelectedCR(fEventCounter.addCounter("Baseline: selected CR events")),
     cInvertedBTaggingCounter(fEventCounter.addCounter("Inverted: passed b-jet selection")),
     cInvertedBTaggingSFCounter(fEventCounter.addCounter("Inverted: b tag SF")),
-    fInvertedBJetSelection(config.getParameter<ParameterSet>("FakeBBJetSelection")),//, fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fInvertedBJetSelection(config.getParameter<ParameterSet>("FakeBBjetSelection")),//, fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fInvertedMETSelection(config.getParameter<ParameterSet>("METSelection")),
     fInvertedTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
     cInvertedSelected(fEventCounter.addCounter("Inverted: selected events")),
@@ -2170,12 +2174,6 @@ void FakeBMeasurement::process(Long64_t entry) {
     }
   else
     {
-
-      // CSVv2-Medium
-      bool passMediumCuts = cfg_BaselineNumberOfBJets.passedCut(bjetData.getSelectedBJets().size());
-      if (!passMediumCuts) return;
-
-      // Do inverted if multiplicity requirement on CSVv2-Medium  is met
       DoInvertedAnalysis(jetData, nVertices); 
     }
  
@@ -2706,12 +2704,23 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   if (0) std::cout << "\n=== FakeBMeasurement::DoInvertedAnalysis()" << std::endl;
 
   //================================================================================================  
-  // 8) BJet Selection
+  // 8) BJet Selections
   //================================================================================================
   if (0) std::cout << "=== Inverted: BJet selection" << std::endl;
   const BJetSelection::Data invBjetData = fInvertedBJetSelection.silentAnalyze(fEvent, jetData);
   if (!invBjetData.passedSelection()) return;
 
+   // CSVv2-Medium requirement
+   unsigned int nBaselineBjets = 0;
+   for (auto bjet: invBjetData.getSelectedBJets())
+     {
+        double discWP = fInvertedBJetSelection.getDiscriminatorWP( cfg_BaselineBJetsDiscr, cfg_BaselineBJetsDiscrWP);
+       if (bjet.bjetDiscriminator() < discWP) continue;
+       nBaselineBjets++;
+     }
+   bool passBaselineBjetCuts = cfg_BaselineNumberOfBJets.passedCut(nBaselineBjets); 
+   if (!passBaselineBjetCuts) return;
+  
   // Increment counter
   cInvertedBTaggingCounter.increment();
 

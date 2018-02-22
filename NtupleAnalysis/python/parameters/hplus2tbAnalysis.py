@@ -219,7 +219,6 @@ topSelectionBDT = PSet(
 # FakeB Measurement Options
 #================================================================================================
 fakeBBjetSelection = PSet(
-    # CSVv2-L b-jets
     triggerMatchingApply      = bjetSelection.triggerMatchingApply,
     triggerMatchingCone       = bjetSelection.triggerMatchingCone,
     jetPtCuts                 = bjetSelection.jetPtCuts,
@@ -235,10 +234,10 @@ scaleFactors.setupBtagSFInformation(btagPset               = fakeBBjetSelection,
                                     direction              = "nominal")
 
 fakeBMeasurement = PSet(
-    # CSVv2-M b-jets
     baselineBJetsCutValue     = 2,     # [default: 2]
     baselineBJetsCutDirection = "==",  # [default: "=="]
-    # Top and Inverted Top
+    baselineBJetsDiscr        = bjetSelection.bjetDiscr,
+    baselineBJetsDiscrWP      = bjetSelection.bjetDiscrWorkingPoint,
     LdgTopMVACutValue         = topSelectionBDT.LdgMVACutValue,
     LdgTopMVACutDirection     = topSelectionBDT.LdgMVACutDirection, 
     SubldgTopMVACutValue      = topSelectionBDT.SubldgMVACutValue,
