@@ -29,7 +29,6 @@ FatJetSelection::FatJetSelection(const ParameterSet& config, EventCounter& event
   fFatJetEtaCuts(config.getParameter<std::vector<float>>("fatjetEtaCuts")),
   fTopMatchingDeltaR(config.getParameter<float>("topMatchingDeltaR")),
   fNumberOfFatJetsCut(config, "numberOfFatJetsCut"),
-  // Event counter for passing selection
   cPassedFatJetSelection(fEventCounter.addCounter("passed fat jet selection ("+postfix+")")),
   // Sub counters
   cSubAll(fEventCounter.addSubCounter("fat jet selection ("+postfix+")", "All events")),
@@ -49,7 +48,6 @@ FatJetSelection::FatJetSelection(const ParameterSet& config)
   fFatJetEtaCuts(config.getParameter<std::vector<float>>("fatjetEtaCuts")), 
   fTopMatchingDeltaR(config.getParameter<float>("topMatchingDeltaR")),
   fNumberOfFatJetsCut(config, "numberOfFatJetsCut"),
-  // Event counter for passing selection
   cPassedFatJetSelection(fEventCounter.addCounter("passed fat jet selection")),
   // Sub counters
   cSubAll(fEventCounter.addSubCounter("fat jet selection", "All events")),
@@ -68,37 +66,8 @@ FatJetSelection::~FatJetSelection() {
   
   delete hFatJetPtAll;
   delete hFatJetEtaAll;
-  delete hFatJetPhiAll;
-  delete hFatJetCSVAll;
-  delete hFatJettau1All;
-  delete hFatJettau2All;
-  delete hFatJettau3All;
-  delete hFatJettau4All;
-  delete hFatJettau21All;
-  delete hFatJettau32All;
-  
   delete hFatJetPtPassed;
   delete hFatJetEtaPassed;
-  delete hFatJetPhiPassed;
-  delete hFatJetCSVPassed;
-  delete hFatJettau1Passed;
-  delete hFatJettau2Passed;
-  delete hFatJettau3Passed;
-  delete hFatJettau4Passed;
-  delete hFatJettau21Passed;
-  delete hFatJettau32Passed;
-
-  for (auto p: hSelectedFatJetPt) delete p;
-  for (auto p: hSelectedFatJetEta) delete p;  
-  for (auto p: hSelectedFatJetPhi) delete p;
-  for (auto p: hSelectedFatJetCSV) delete p;
-  for (auto p: hSelectedFatJettau1) delete p;
-  for (auto p: hSelectedFatJettau2) delete p;
-  for (auto p: hSelectedFatJettau3) delete p;
-  for (auto p: hSelectedFatJettau4) delete p;
-  for (auto p: hSelectedFatJettau21) delete p;
-  for (auto p: hSelectedFatJettau32) delete p;
-  
   delete hFatJetMatchingToTopDeltaR;
   delete hFatJetMatchingToTopPtRatio;
   }
@@ -128,66 +97,15 @@ void FatJetSelection::initialize(const ParameterSet& config) {
 
 void FatJetSelection::bookHistograms(TDirectory* dir) {
 
-  TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "fatjetSelection_"+sPostfix);
+  TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "fatjetSelection_" + sPostfix);
 
   // Histograms (1D)
-  
-  hFatJetPtAll     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "fatjetPtAll", "Fat Jet pT, all;p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
-  hFatJetEtaAll    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "fatjetEtaAll", "Fat Jet #eta, all;#eta", nEtaBins, fEtaMin, fEtaMax);
-  /* NEW
-  delete hFatJetPhiAll;
-  delete hFatJetCSVAll;
-  delete hFatJettau1All;
-  delete hFatJettau2All;
-  delete hFatJettau3All;
-  delete hFatJettau4All;
-  delete hFatJettau21All;
-  delete hFatJettau32All;
-  */
-  
-  hFatJetPtPassed  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "fatjetPtPassed", "Fat Jet pT, passed;p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
-  hFatJetEtaPassed = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "fatjetEtaPassed", "Fat Jet Eta, passed", nEtaBins, fEtaMin, fEtaMax);
-  /* NEW
-  delete hFatJetPtPassed;
-  delete hFatJetEtaPassed;
-  delete hFatJetPhiPassed;
-  delete hFatJetCSVPassed;
-  delete hFatJettau1Passed;
-  delete hFatJettau2Passed;
-  delete hFatJettau3Passed;
-  delete hFatJettau4Passed;
-  delete hFatJettau21Passed;
-  delete hFatJettau32Passed;
-  */
-  
-  hSelectedFatJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedFatJetsFirstJetPt"  , "First fat jet pT;p_{T} (GeV/c)"  , nPtBins, fPtMin, fPtMax) );
-  hSelectedFatJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedFatJetsSecondJetPt" , "Second fat jet pT;p_{T} (GeV/c)" , nPtBins, fPtMin, fPtMax) );
-  hSelectedFatJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedFatJetsThirdJetPt"  , "Third fat jet pT;p_{T} (GeV/c)"  , nPtBins, fPtMin, fPtMax) );
-  hSelectedFatJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedFatJetsFourthJetPt" , "Fourth fat jet pT;p_{T} (GeV/c)" , nPtBins, fPtMin, fPtMax) );
-  hSelectedFatJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedFatJetsFifthJetPt"  , "Fifth fat jet pT;p_{T} (GeV/c)"  , nPtBins, fPtMin, fPtMax) );
-  hSelectedFatJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedFatJetsSixthJetPt"  , "Sixth fat jet pT;p_{T} (GeV/c)"  , nPtBins, fPtMin, fPtMax) );
-  hSelectedFatJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedFatJetsSeventhJetPt", "Seventh fat jet pT;p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax) );
-  hSelectedFatJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedFatJetsFirstJetEta"  , "First fat jet #eta;#eta"  , nEtaBins, fEtaMin, fEtaMax) );
-  hSelectedFatJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedFatJetsSecondJetEta" , "Second fat jet #eta;#eta" , nEtaBins, fEtaMin, fEtaMax) );
-  hSelectedFatJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedFatJetsThirdJetEta"  , "Third fat jet #eta;#eta"  , nEtaBins, fEtaMin, fEtaMax) );
-  hSelectedFatJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedFatJetsFourthJetEta" , "Fourth fat jet #eta;#eta" , nEtaBins, fEtaMin, fEtaMax) );
-  hSelectedFatJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedFatJetsFifthJetEta"  , "Fifth fat jet #eta;#eta"  , nEtaBins, fEtaMin, fEtaMax) );
-  hSelectedFatJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedFatJetsSixthJetEta"  , "Sixth fat jet #eta;#eta"  , nEtaBins, fEtaMin, fEtaMax) );
-  hSelectedFatJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedFatJetsSeventhJetEta", "Seventh fat jet #eta;#eta", nEtaBins, fEtaMin, fEtaMax) );
-  /* NEW
-  for (auto p: hSelectedFatJetPt) delete p;
-  for (auto p: hSelectedFatJetEta) delete p;  
-  for (auto p: hSelectedFatJetPhi) delete p;
-  for (auto p: hSelectedFatJetCSV) delete p;
-  for (auto p: hSelectedFatJettau1) delete p;
-  for (auto p: hSelectedFatJettau2) delete p;
-  for (auto p: hSelectedFatJettau3) delete p;
-  for (auto p: hSelectedFatJettau4) delete p;
-  for (auto p: hSelectedFatJettau21) delete p;
-  for (auto p: hSelectedFatJettau32) delete p;
-  */
-  hFatJetMatchingToTopDeltaR  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FatJetMatchingToTopDeltaR" , "#DeltaR(fat jet, top)", 40, 0, 2);
-  hFatJetMatchingToTopPtRatio = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FatJetMatchingToTopPtRatio", "fat jet p{T} / top p_{T}", 40, 0, 2);
+  hFatJetPtAll     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "fatjetPtAll"    , ";p_{T} (GeV/c);Occur / %.0f", nPtBins , fPtMin , fPtMax);
+  hFatJetEtaAll    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "fatjetEtaAll"   , ";#eta;Occur / %.2f"         , nEtaBins, fEtaMin, fEtaMax);
+  hFatJetPtPassed  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "fatjetPtPassed" , ";p_{T} (GeV/c);Occur / %.0f", nPtBins , fPtMin , fPtMax);
+  hFatJetEtaPassed = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "fatjetEtaPassed", ";#eta;Occur / %.2f"         , nEtaBins, fEtaMin, fEtaMax); 
+  hFatJetMatchingToTopDeltaR  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FatJetMatchingToTopDeltaR" , ";#DeltaR(fat jet, top);Occur / %.2f"  , 40, 0.0, 2.0);
+  hFatJetMatchingToTopPtRatio = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FatJetMatchingToTopPtRatio", ";fat jet p{T} / top p_{T}Occur / %.2f", 40, 0.0, 2.0);
 
   return;
 }
@@ -222,7 +140,6 @@ FatJetSelection::Data FatJetSelection::analyze(const Event& event, const TopSele
 
 FatJetSelection::Data FatJetSelection::analyzeWithoutTop(const Event& event) {
   ensureAnalyzeAllowed(event.eventID());
-  math::LorentzVectorT<double> tauP(0.,0.,9999.,0.);
   FatJetSelection::Data data = privateAnalyze(event, TopSelectionBDT::Data());
   // Send data to CommonPlots
   // if (fCommonPlots != nullptr)
@@ -232,7 +149,6 @@ FatJetSelection::Data FatJetSelection::analyzeWithoutTop(const Event& event) {
 }
 
 FatJetSelection::Data FatJetSelection::privateAnalyze(const Event& event, const TopSelectionBDT::Data& topData) {
-  if (1) std::cout << "=== FatJetSelection::privateAnalyze() " << std::endl;
 
   // Increment inclusive counter
   cSubAll.increment();
@@ -279,13 +195,11 @@ FatJetSelection::Data FatJetSelection::privateAnalyze(const Event& event, const 
       
       //=== Apply cut on eta
       const float jetEtaCut = fFatJetEtaCuts.at(etaCut_index);
-      // std::cout << jet_index << ") abs(eta)["<< etaCut_index << "] > " << jetEtaCut << " (" << jet.eta() << ")" << std::endl;
       if (std::fabs(jet.eta()) > jetEtaCut) continue;
       passedEta = true;
       
       //=== Apply cut on pt   
       const float jetPtCut = fFatJetPtCuts.at(ptCut_index);
-      // std::cout << jet_index << ") pT["<< ptCut_index << "] > " << jetPtCut << " GeV/c (" << jet.pt() << ")" << std::endl;
       if (jet.pt() < jetPtCut) continue;
       passedPt = true;
       
@@ -299,25 +213,20 @@ FatJetSelection::Data FatJetSelection::privateAnalyze(const Event& event, const 
       // Increment cut index only. Cannot be bigger than the size of the cut list provided
       if (ptCut_index  < fFatJetPtCuts.size()-1  ) ptCut_index++;
       if (etaCut_index < fFatJetEtaCuts.size()-1 ) etaCut_index++;
-      std::cout << jet_index+1 << ") pT = " << jet.pt() << std::endl;
-      std::cout << jet_index+1 << ") |eta| = " << jet.eta() << std::endl;
     }
   
   // Fill counters so far
-  if (1) std::cout << "=== FatJetSelection::privateAnalyze() Counters" << std::endl;
   if (passedFatJetID) cSubPassedFatJetID.increment();
   if (passedFatJetPUID) cSubPassedFatJetPUID.increment();
   if (passedDeltaRMatchWithTop) cSubPassedDeltaRMatchWithTop.increment();
   if (passedEta) cSubPassedEta.increment();
   if (passedPt)  cSubPassedPt.increment();
-  
+
   //=== Apply cut on number of jets
-  if (1) std::cout << "=== FatJetSelection::privateAnalyze() NJets cut" << std::endl;
   if (!fNumberOfFatJetsCut.passedCut(output.fSelectedFatJets.size())) return output;
   cSubPassedFatJetCount.increment();
   
   // Sort fat jets by pT (descending order)
-  if (1) std::cout << "=== FatJetSelection::privateAnalyze() Sort by pt" << std::endl;
   std::sort(output.fSelectedFatJets.begin(), output.fSelectedFatJets.end());
   
   //=== Passed all fat jet selections
@@ -326,48 +235,43 @@ FatJetSelection::Data FatJetSelection::privateAnalyze(const Event& event, const 
   
 
   // Find jet matched to top
-  if (1) std::cout << "=== FatJetSelection::privateAnalyze() Matching Top" << std::endl;
-  if (topP.pt() > 0.0) {
-    findFatJetMatchingToTop(output.fFatJetMatchedToTop, event, topP);
-    if (output.fatjetMatchedToTopFound())  
-      {
-	hFatJetMatchingToTopPtRatio->Fill(topP.pt() / output.getFatJetMatchedToTop().pt());
-      }
-  }
-  
-  if (1) std::cout << "=== FatJetSelection::privateAnalyze() Auxiliary Histos" << std::endl;
-  // Fill pt and eta of jets
-  size_t i = 0;
-  for (AK8Jet jet: output.fSelectedFatJets) {
-    if (i < 6) {
-      hSelectedFatJetPt[i]->Fill(jet.pt());
-      hSelectedFatJetEta[i]->Fill(jet.eta());
+  if (topP.pt() > 0.0) 
+    {
+      // Create collection of all AK8 jets that match the top
+      findFatJetMatchingToTop(output.fFatJetMatchedToTop, event, topP);
+      
+      // Fill histogram
+      if (output.fatjetMatchedToTopFound())  
+	{
+	  hFatJetMatchingToTopPtRatio->Fill( topP.pt() / output.getFatJetMatchedToTop().pt() );
+	}
     }
-    ++i;
-  }  
   
-
-  if (1) std::cout << "=== FatJetSelection::privateAnalyze() Return" << std::endl;  
-
   // Return data object
   return output;
 }
 
 void FatJetSelection::findFatJetMatchingToTop(std::vector<AK8Jet>& collection, const Event& event, const math::XYZTLorentzVector& topP) {
-//const math::LorentzVectorT<double>& topP) {
-  double myMinDeltaR = 9999;
-  size_t mySelectedIndex = 9999;
+
+  double myMinDeltaR = 9999.9;
+  size_t mySelectedIndex = 9999.9;
   size_t i = 0;
   
   // For-loop: All AK8 jets
   for(AK8Jet jet: event.ak8jets()) {
-    double myDeltaR = ROOT::Math::VectorUtil::DeltaR(topP, jet.p4());
-    if (myDeltaR < myMinDeltaR) {
-      myMinDeltaR = myDeltaR;
-      mySelectedIndex = i;
-    }
+    double dR = ROOT::Math::VectorUtil::DeltaR(topP, jet.p4());
+
+    // Found new minimum distance?
+    if (dR < myMinDeltaR) 
+      {
+	myMinDeltaR = dR;
+	mySelectedIndex = i;
+      }
+
+    // Increment index
     i += 1;
   }
-  if (myMinDeltaR < 0.1)
-    collection.push_back(event.ak8jets()[mySelectedIndex]);
+  
+  // Save matching AK8 into collection of jets matching the top
+  if (myMinDeltaR < 0.1) collection.push_back(event.ak8jets()[mySelectedIndex]);
 }

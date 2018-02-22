@@ -3,8 +3,8 @@
 #define EventSelection_FatJetSelection_h
 
 #include "EventSelection/interface/BaseSelection.h"
-#include "EventSelection/interface/EventSelections.h"
 #include "DataFormat/interface/AK8Jet.h"
+#include "EventSelection/interface/TopSelectionBDT.h"
 #include "Framework/interface/EventCounter.h"
 #include "Tools/interface/DirectionalCut.h"
 #include <boost/concept_check.hpp>
@@ -46,10 +46,8 @@ public:
     bool fatjetMatchedToTopFound() const { return (fFatJetMatchedToTop.size() > 0); }
 
     // Obtain fat jet matching to leading trijet system
-    const AK8Jet& getFatJetMatchedToTop()  const; // { return 
-    // const math::XYZTLorentzVector&  // alex
-    // const AK8Jet& getFatJetMatchedToTau() const;
-
+    const AK8Jet& getFatJetMatchedToTop()  const; 
+    
     friend class FatJetSelection;
 
   private:
@@ -66,8 +64,7 @@ public:
     std::vector<AK8Jet> fFatJetMatchedToTop;
 
   };
-  
-  // Main class
+
   /// Constructor with histogramming
   explicit FatJetSelection(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix = "");
   /// Constructor without histogramming
@@ -112,49 +109,22 @@ private:
   // Histograms (1D)
   WrappedTH1 *hFatJetPtAll;
   WrappedTH1 *hFatJetEtaAll;
-  WrappedTH1 *hFatJetPhiAll;
-  WrappedTH1 *hFatJetCSVAll;
-  WrappedTH1 *hFatJettau1All;
-  WrappedTH1 *hFatJettau2All;
-  WrappedTH1 *hFatJettau3All;
-  WrappedTH1 *hFatJettau4All;
-  WrappedTH1 *hFatJettau21All;
-  WrappedTH1 *hFatJettau32All;  
-  
   WrappedTH1 *hFatJetPtPassed;
   WrappedTH1 *hFatJetEtaPassed;
-  WrappedTH1 *hFatJetPhiPassed;
-  WrappedTH1 *hFatJetCSVPassed;
-  WrappedTH1 *hFatJettau1Passed;
-  WrappedTH1 *hFatJettau2Passed;
-  WrappedTH1 *hFatJettau3Passed;
-  WrappedTH1 *hFatJettau4Passed;
-  WrappedTH1 *hFatJettau21Passed;
-  WrappedTH1 *hFatJettau32Passed;  
-  
-  std::vector<WrappedTH1*> hSelectedFatJetPt;
-  std::vector<WrappedTH1*> hSelectedFatJetEta;
-  std::vector<WrappedTH1*> hSelectedFatJetPhi;
-  std::vector<WrappedTH1*> hSelectedFatJetCSV;
-  std::vector<WrappedTH1*> hSelectedFatJettau1;
-  std::vector<WrappedTH1*> hSelectedFatJettau2;
-  std::vector<WrappedTH1*> hSelectedFatJettau3;
-  std::vector<WrappedTH1*> hSelectedFatJettau4;
-  std::vector<WrappedTH1*> hSelectedFatJettau21;
-  std::vector<WrappedTH1*> hSelectedFatJettau32;
-  
   WrappedTH1 *hFatJetMatchingToTopDeltaR;
   WrappedTH1 *hFatJetMatchingToTopPtRatio;
   
   // Binnings
   int nPtBins;
-  double fPtMin,fPtMax;
+  double fPtMin;
+  double fPtMax;
   int  nEtaBins;
-  float fEtaMin,fEtaMax;
+  double fEtaMin;
+  double fEtaMax;
   int nCSVBins;
-  float fCSVMin, fCSVMax;
-  // int ntauBins;
-  // float ftauMin, ftauMax;
+  double fCSVMin;
+  double fCSVMax;
+
 };
 
 #endif
