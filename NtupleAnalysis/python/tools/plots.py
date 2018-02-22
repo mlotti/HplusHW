@@ -173,7 +173,7 @@ for mass in _lightHplusMasses:
 
 for mass in _intermediateHplusMasses:
     _physicalToLogical[" ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTBNoNeutral_M%d"%mass
-    _physicalToLogical[" ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassWithNeutral_M_%d"%(mass)] = "HplusTBWithNeutral_M%d"%mass
+#    _physicalToLogical[" ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassWithNeutral_M_%d"%(mass)] = "HplusTBWithNeutral_M%d"%mass # NB! Commented out to avoid merging of the WithNeutral samples that have been dropped out of the analysis
 
 for mass in _heavyHplusMasses:
     _physicalToLogical["ChargedHiggs_HplusTB_HplusToTauNu_M_%d"%(mass)] = "HplusTB_M%d"%mass
@@ -387,7 +387,7 @@ _datasetMerge = {
 
 for mass in _intermediateHplusMasses:
     _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTB_M%d"%mass
-    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassWithNeutral_M_%d"%(mass)] = "HplusTB_M%d"%mass
+#    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassWithNeutral_M_%d"%(mass)] = "HplusTB_M%d"%mass # NB! Commented out to avoid merging of the WithNeutral samples that have been dropped out of the analysis
 
 #================================================================================================
 # Dataset ordering (default)
