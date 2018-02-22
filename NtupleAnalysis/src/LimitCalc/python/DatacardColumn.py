@@ -287,9 +287,11 @@ class DatacardColumn():
 ####        elif self._datasetType == MulticrabDirectoryDataType.QCDINVERTED:
 ####            myMsg += "FIXME: QCD inverted not implemented yet\n" # FIXME
         if not self.typeIsEmptyColumn() and not self.typeIsObservation():
-            if self._nuisanceIds == None or len(self._nuisanceIds) == 0:
-                myMsg += "Missing or empty field 'nuisances'! (list of strings) Id's for nuisances to be used for column\n"
-
+            if self._nuisanceIds == None:
+                myMsg += "Missing field 'nuisances'! (list of strings) Id's for nuisances to be used for column\n"
+            if len(self._nuisanceIds) == 0:
+                myWarning = "Empty field 'nuisances'! (list of strings) Id's for nuisances to be used for column\n"
+                print ShellStyles.WarningStyle()+"Warning (data group ='"+self._label+"'):"+ShellStyles.NormalStyle()+"\n"+myWarning
         if myMsg != "":
             print ShellStyles.ErrorStyle()+"Error (data group ='"+self._label+"'):"+ShellStyles.NormalStyle()+"\n"+myMsg
             raise Exception()

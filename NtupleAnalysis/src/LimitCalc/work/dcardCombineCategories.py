@@ -52,10 +52,9 @@ for filename in filenames:
         os.rename(filename, filename.replace(".txt","_b.txt"))
     mass_points_b.append(int(filter(str.isdigit, filename)))
 
-os.chdir("..")
-
 # copy and rename old category C root and txt files
 if options.dir3 != None:
+    os.chdir("..")
     os.system("cp %s/*.root %s"%(options.dir3,dirname))
     os.system("cp %s/*.txt %s"%(options.dir3,dirname))
     filenames = os.listdir(dirname)

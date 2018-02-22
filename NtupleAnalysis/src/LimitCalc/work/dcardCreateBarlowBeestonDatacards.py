@@ -43,10 +43,10 @@ for dcard_name in datacard_names:
     f_in = file("../"+input_path+"/"+dcard_name)
     with open(dcard_name, "w") as f:
         for line in f_in:
-            if not "statBin" in line:
-                f.write(line)
             if "kmax" in line:
-                f.write("kmax * number of nuisance parameters")
+                f.write("kmax     *     number of parameters\n")
+            elif not "statBin" in line:
+                f.write(line)
         f.write("\n\n* autoMCStats 0")
         f.truncate()
         
