@@ -33,7 +33,7 @@ skim = cms.EDFilter("Hplus2tbAnalysisSkim",
     ElectronID           = cms.string("cutBasedElectronID-Spring15-25ns-V1-standalone-veto"),
     ElectronMVA          = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values"),
     ElectronRhoSource    = cms.InputTag("fixedGridRhoFastjetCentralNeutral"),
-    ElectronMiniRelIsoEA = cms.double(1.0), # MIT cut is at 0.40. Allow wiggle room
+    ElectronMiniRelIsoEA = cms.double(0.2), # MIT cut is at 0.40. Allow wiggle room by cutting at LOWER value
     ElectronPtCut        = cms.double(10.0),
     ElectronEtaCut       = cms.double(2.1),
     ElectronNCut         = cms.int32(0),
@@ -41,7 +41,7 @@ skim = cms.EDFilter("Hplus2tbAnalysisSkim",
     # Muons (https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMuonIdRun2)
     MuonCollection   = cms.InputTag("slimmedMuons"),
     MuonID           = cms.string("Loose"),
-    MuonMiniRelIsoEA = cms.double(1.0), # MIT cut is at 0.40. Allow wiggle room
+    MuonMiniRelIsoEA = cms.double(0.2), # MIT cut is at 0.40. Allow wiggle room by cutting at LOWER value
     MuonPtCut        = cms.double(10.0),
     MuonEtaCut       = cms.double(2.4),
     MuonNCut         = cms.int32(0),
