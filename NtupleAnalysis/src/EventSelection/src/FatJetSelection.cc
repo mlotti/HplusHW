@@ -76,8 +76,10 @@ FatJetSelection::FatJetSelection(const ParameterSet& config)
 
 FatJetSelection::~FatJetSelection() { 
   
+  delete hFatJetNAll;
   delete hFatJetPtAll;
   delete hFatJetEtaAll;
+  delete hFatJetNPassed;
   delete hFatJetPtPassed;
   delete hFatJetEtaPassed;
   delete hFatJetMatchingToTopDeltaR;
@@ -87,22 +89,30 @@ FatJetSelection::~FatJetSelection() {
 void FatJetSelection::initialize(const ParameterSet& config) {
   
   if(fCommonPlots){
-    nPtBins    = 2 * fCommonPlots->getPtBinSettings().bins();
-    fPtMin     = 2 * fCommonPlots->getPtBinSettings().min();
-    fPtMax     = 2 * fCommonPlots->getPtBinSettings().max();
+    nNBins   = fCommonPlots->getNjetsBinSettings().bins();
+    fNMin    = fCommonPlots->getNjetsBinSettings().min();
+    fNMax    = fCommonPlots->getNjetsBinSettings().max();
 
-    nEtaBins   = fCommonPlots->getEtaBinSettings().bins();
-    fEtaMin    = fCommonPlots->getEtaBinSettings().min();
-    fEtaMax    = fCommonPlots->getEtaBinSettings().max();
+    nPtBins  = 2 * fCommonPlots->getPtBinSettings().bins();
+    fPtMin   = 2 * fCommonPlots->getPtBinSettings().min();
+    fPtMax   = 2 * fCommonPlots->getPtBinSettings().max();
+
+    nEtaBins = fCommonPlots->getEtaBinSettings().bins();
+    fEtaMin  = fCommonPlots->getEtaBinSettings().min();
+    fEtaMax  = fCommonPlots->getEtaBinSettings().max();
 
   }else{
-    nPtBins  = 50;
-    fPtMin   = 0;
-    fPtMax   = 500;
+    nNBins  = 20;
+    fNMin   =  0.0;
+    fNMax   = 20.0;
+
+    nPtBins  =  50;
+    fPtMin   =   0;
+    fPtMax   = 500.0;
 
     nEtaBins = 50;
     fEtaMin  = -2.5;
-    fEtaMax  = 2.5;
+    fEtaMax  = +2.5;
 
   }
 }
@@ -112,8 +122,10 @@ void FatJetSelection::bookHistograms(TDirectory* dir) {
   TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "fatjetSelection_" + sPostfix);
 
   // Histograms (1D)
+  hFatJetNAll      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "fatjetNAll"     , ";fat-jet multiplicity;Occur / %.0f", nNBins , fNMin , fNMax);
   hFatJetPtAll     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "fatjetPtAll"    , ";p_{T} (GeV/c);Occur / %.0f", nPtBins , fPtMin , fPtMax);
   hFatJetEtaAll    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "fatjetEtaAll"   , ";#eta;Occur / %.2f"         , nEtaBins, fEtaMin, fEtaMax);
+  hFatJetNPassed   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "fatjetNPassed"  , ";fat-jet multiplicity;Occur / %.0f", nNBins , fNMin , fNMax);
   hFatJetPtPassed  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "fatjetPtPassed" , ";p_{T} (GeV/c);Occur / %.0f", nPtBins , fPtMin , fPtMax);
   hFatJetEtaPassed = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "fatjetEtaPassed", ";#eta;Occur / %.2f"         , nEtaBins, fEtaMin, fEtaMax); 
   hFatJetMatchingToTopDeltaR  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FatJetMatchingToTopDeltaR" , ";#DeltaR(fat jet, top);Occur / %.2f"    , 200, 0.0, 2.0);
@@ -173,6 +185,7 @@ FatJetSelection::Data FatJetSelection::privateAnalyze(const Event& event, const 
   bool passedEta = false;
   bool passedDeltaRMatchWithTop = false;
   bool passedTopMatchingType = false;
+
   bool disableMatching = false;
   if (fTopMatchingDeltaR < 0) 
     {
@@ -240,25 +253,36 @@ FatJetSelection::Data FatJetSelection::privateAnalyze(const Event& event, const 
 	  else if (type <= fTopMatchingType) continue;
 	  passedTopMatchingType = true;
 
-	  // Fill histogram
+	  // Save info & Fill histos (after matching)
+	  output.fSelectedFatJets.push_back(jet);
  	  hFatJetMatchingToTopPtRatio->Fill( topP.pt() / output.getFatJetMatchedToTop().pt() );
+	  hFatJetPtPassed->Fill(jet.pt());
+	  hFatJetEtaPassed->Fill(jet.eta());	  
 	}
-      // Save info & Fill histos (after matching)
-      output.fSelectedFatJets.push_back(jet);
-      hFatJetPtPassed->Fill(jet.pt());
-      hFatJetEtaPassed->Fill(jet.eta());
+      else
+	{
+	  // Save info & Fill histos (after matching)
+	  output.fSelectedFatJets.push_back(jet);
+	  hFatJetPtPassed->Fill(jet.pt());
+	  hFatJetEtaPassed->Fill(jet.eta());
+	}
 
       // Increment cut index only. Cannot be bigger than the size of the cut list
       if (ptCut_index  < fFatJetPtCuts.size()-1  ) ptCut_index++;
       if (etaCut_index < fFatJetEtaCuts.size()-1 ) etaCut_index++;
     }
-  
+
+  // Fill histos
+  hFatJetNAll->Fill(output.fAllFatJets.size());
+  hFatJetNPassed->Fill(output.fSelectedFatJets.size());
+
   // Fill counters so far
   if (passedFatJetID) cSubPassedFatJetID.increment();
   if (passedFatJetPUID) cSubPassedFatJetPUID.increment();
   if (passedPt)  cSubPassedPt.increment();
   if (passedEta) cSubPassedEta.increment();
   if (passedDeltaRMatchWithTop) cSubPassedDeltaRMatchWithTop.increment();
+  if (passedTopMatchingType) cSubPassedTopMatchingType.increment();
   if (passedTopMatchingType) cSubPassedTopMatchingType.increment();
 
   //=== Apply cut on number of jets
@@ -326,7 +350,7 @@ const FatJetSelection::FatjetType FatJetSelection::findFatJetMatchedToTopType(AK
 
   // Construct composite booleans
   bool jjb = (match_bjet*match_jet1*match_jet2);
-  bool jj  = (match_jet1*match_jet2);
+  bool jj  = (match_jet1*match_jet2 && !match_bjet);
   bool jb  = (match_bjet*match_jet1 || match_bjet*match_jet2);
   // std::cout << "jjb = " << jjb << ", jj = " << jj << ", jb = " << jb << std::endl;
 

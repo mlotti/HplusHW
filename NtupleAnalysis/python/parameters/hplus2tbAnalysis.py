@@ -107,9 +107,9 @@ fatjetVeto = PSet(
     fatjetPUIDDiscr             = "",        # [default: ""]
     topMatchingDeltaR           = 0.8,       # [default: 0.8] (options: -ve value to disable)
     topConstituentMatchingDeltaR= 0.8,       # [default: 0.8] (options: disable topMatchingDeltaR to disable)
-    topMatchingType             = 1,         # [default: 1]   (options: resolved (jjb) = 1, W (jj) = 2, jb = 3, inclusive < 0)
+    topMatchingType             = 1,         # [default: 1]   (options: jjb = 1, jj = 2, jb = 3, inclusive < 0)
     numberOfFatJetsCutValue     = 0,         # [default: 0]
-    numberOfFatJetsCutDirection = "==",     # [default: "=="] (options: ==, !=, <, <=, >, >=)
+    numberOfFatJetsCutDirection = "==",      # [default: "=="] (options: ==, !=, <, <=, >, >=)
 )
 
 # #=================================================================================================

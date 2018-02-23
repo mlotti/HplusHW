@@ -127,14 +127,20 @@ private:
   Count cSubPassedFatJetCount;
 
   // Histograms (1D)
+  WrappedTH1 *hFatJetNAll;
   WrappedTH1 *hFatJetPtAll;
   WrappedTH1 *hFatJetEtaAll;
+  WrappedTH1 *hFatJetNPassed;
   WrappedTH1 *hFatJetPtPassed;
   WrappedTH1 *hFatJetEtaPassed;
   WrappedTH1 *hFatJetMatchingToTopDeltaR;
   WrappedTH1 *hFatJetMatchingToTopPtRatio;
   
   // Binnings
+  int nNBins;
+  double fNMin;
+  double fNMax;
+
   int nPtBins;
   double fPtMin;
   double fPtMax;
