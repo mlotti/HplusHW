@@ -56,11 +56,13 @@ MuonSelection::MuonSelection(const ParameterSet& config, const std::string& post
 }
 
 MuonSelection::~MuonSelection() {
+  delete hMuonNAll;
   delete hMuonPtAll;
   delete hMuonEtaAll;
   delete hMuonRelIsoAll;
   delete hMuonMiniIsoAll;
   
+  delete hMuonNPassed;
   delete hMuonPtPassed;
   delete hMuonEtaPassed;
   delete hMuonRelIsoPassed;
@@ -115,33 +117,38 @@ void MuonSelection::initialize(const ParameterSet& config, const std::string& po
 
 void MuonSelection::bookHistograms(TDirectory* dir) {
   TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "muSelection_"+sPostfix);
-  hMuonPtAll         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonPtAll"        , ";p_{T} (GeV/c);Occur / %.0f", 50, 0.0, 500.0);
-  hMuonEtaAll        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonEtaAll"       , ";#eta;Occur / %.2f", 50, -2.5, 2.5);
-  hMuonRelIsoAll     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonRelIsoAll"    , ";relative isolation;Occur / %.2f", 30, 0.0, 300.0);
-  hMuonMiniIsoAll    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonMiniIsoAll"   , ";relative isolation;Occur / %.2f", 300, 0.0, 300.0);
-  
-  hMuonPtPassed      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonPtPassed"     , ";p_{T} (GeV/c);Occur / %.0f", 50, 0.0, 500.0);
-  hMuonEtaPassed     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonEtaPassed"    , ";#eta;Occur / %.2f", 50, -2.5, 2.5);
-  hMuonRelIsoPassed  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonRelIsoPassed" , ";relative isolation;Occur / %.2f", 250, 0.0, 5.0);
-  hMuonMiniIsoPassed = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonMiniIsoPassed", ";mini relative isolation;Occur / %.2f", 250, 0.0, 5.0);
+
+  // Muons before any cuts
+  hMuonNAll       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonNAll", ";#mu multiplicity;Occur / %.0f", 20, 0.0, 20.0);
+  hMuonPtAll      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonPtAll", ";p_{T} (GeV/c);Occur / %.0f", 100, 0.0, 1000.0);
+  hMuonEtaAll     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonEtaAll", ";#eta;Occur / %.2f", 50, -2.5, 2.5);
+  hMuonRelIsoAll  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonRelIsoAll", ";relative isolation;Occur / %.0f", 1000, 0.0, 200.0);
+  hMuonMiniIsoAll = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonMiniIsoAll", ";relative mini-isolation;Occur / %.0f", 1000, 0.0, 200.0);
+
+  // Muons after all cuts  
+  hMuonNPassed       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonNPassed", ";#mu multiplicity;Occur / %.0f", 20, 0.0, 20.0);
+  hMuonPtPassed      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonPtPassed", ";p_{T} (GeV/c);Occur / %.0f", 100, 0.0, 1000.0);
+  hMuonEtaPassed     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonEtaPassed", ";#eta;Occur / %.2f", 50, -2.5, 2.5);
+  hMuonRelIsoPassed  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonRelIsoPassed", ";relative isolation;Occur / %.0f", 1000, 0.0, 200.0);
+  hMuonMiniIsoPassed = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonMiniIsoPassed", ";mini relative isolation;Occur / %.0f", 1000, 0.0, 200.0);
   
   // Resolutions
   hPtResolution  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "ptResolution" , ";(p_{T}^{reco} - p_{T}^{gen})/p_{T}^{reco};Occur / %.2f", 200, -1.0, 1.0);
-  hEtaResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "etaResolution", ";(#eta^{reco} - #eta^{gen})/#eta^{reco};Occur / %.2f", 200, -1.0, 1.0);
-  hPhiResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "phiResolution", ";(#phi^{reco} - #phi^{gen})/#phi^{reco};Occur / %.2f", 200, -1.0, 1.0);
+  hEtaResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "etaResolution", ";(#eta^{reco} - #eta^{gen})/#eta^{reco};Occur / %.2f"   , 200, -1.0, 1.0);
+  hPhiResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "phiResolution", ";(#phi^{reco} - #phi^{gen})/#phi^{reco};Occur / %.2f"   , 200, -1.0, 1.0);
 
   // Isolation efficiency
-  hIsolPtBefore      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolPtBefore"     , ";p_{T} (GeV/c);Occur / %.0f", 50, 0.0, 500.0);
-  hIsolEtaBefore     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolEtaBefore"    , ";#eta;Occur / %.2f", 50, -2.5, 2.5);
-  hIsolVtxBefore     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolVtxBefore"    , ";Number of Vertices;Occur / %.0f", 60, 0, 60);
-  hIsolRelIsoBefore  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolRelIsoBefore" , ";relative isolation;Occur / %.2f", 200, 0.0, 10.0);
-  hIsolMiniIsoBefore = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolMiniIsoBefore", ";mini relative isolation;Occur / %.2f", 200, 0.0, 10.0);
+  hIsolPtBefore      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolPtBefore", ";p_{T} (GeV/c);Occur / %.0f", 100, 0.0, 1000.0);
+  hIsolEtaBefore     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolEtaBefore", ";#eta;Occur / %.2f", 50, -2.5, 2.5);
+  hIsolVtxBefore     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolVtxBefore", ";Number of Vertices;Occur / %.0f", 150, 0, 150);
+  hIsolRelIsoBefore  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolRelIsoBefore", ";relative isolation;Occur / %.2f", 1000, 0.0, 200.0);
+  hIsolMiniIsoBefore = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolMiniIsoBefore", ";mini relative isolation;Occur / %.2f", 1000, 0.0, 200.0);
 
-  hIsolPtAfter      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolPtAfter"     , ";p_{T} (GeV/c);Occur / %.0f", 50, 0, 500.0);
-  hIsolEtaAfter     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolEtaAfter"    , ";#eta;Occur / %.2f", 50, -2.5, 2.5);
-  hIsolVtxAfter     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolVtxAfter"    , ";Number of Vertices;Occur / %.0f", 60, 0, 60);
-  hIsolRelIsoAfter  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolRelIsoAfter" , ";relative Isolation;Occur / %.2f", 200, 0.0, 10.0);
-  hIsolMiniIsoAfter = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolMiniIsoAfter", ";mini relative isolation;Occur / %.2f", 200, 0.0, 10.0);
+  hIsolPtAfter      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolPtAfter", ";p_{T} (GeV/c);Occur / %.0f", 100, 0, 1000.0);
+  hIsolEtaAfter     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolEtaAfter", ";#eta;Occur / %.2f", 50, -2.5, 2.5);
+  hIsolVtxAfter     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolVtxAfter", ";Number of Vertices;Occur / %.0f", 150, 0, 150);
+  hIsolRelIsoAfter  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolRelIsoAfter" , ";relative Isolation;Occur / %.2f", 1000, 0.0, 200.0);
+  hIsolMiniIsoAfter = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolMiniIsoAfter", ";mini relative isolation;Occur / %.2f", 1000, 0.0, 200.0);
 }
 
 MuonSelection::Data MuonSelection::silentAnalyze(const Event& event) {
@@ -170,9 +177,11 @@ MuonSelection::Data MuonSelection::privateAnalyze(const Event& event) {
   bool passedEta = false;
   bool passedID = false;
   bool passedIsol = false;
-  // Loop over muons
+
+  // For-loop: All muons
   for(Muon muon: event.muons()) {
 
+    // Fill histograms before any cuts
     hMuonPtAll->Fill(muon.pt());
     hMuonEtaAll->Fill(muon.eta());
     hMuonRelIsoAll->Fill(muon.relIsoDeltaBeta04());
@@ -244,6 +253,11 @@ MuonSelection::Data MuonSelection::privateAnalyze(const Event& event) {
       }
   } //for-loop: muons
   
+  // Fill histos
+  hMuonNAll->Fill(event.muons().size());
+  hMuonNPassed->Fill(output.fSelectedMuons.size());
+
+
   // Fill counters
   if (passedPt) cSubPassedPt.increment();
   if (passedEta) cSubPassedEta.increment();

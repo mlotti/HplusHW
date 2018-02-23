@@ -240,42 +240,44 @@ datasetsQCD_reHLT.append(Dataset('/QCD_Pt_3200toInf_TuneCUETP8M1_13TeV_pythia8/R
 #================================================================================================ 
 datasetsSignalTB = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FChargedHiggs_HplusTB_HplusToTB*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
-# mcsm = https://cms-pdmv.cern.ch/mcm/requests?page=0&status=done&dataset_name=ChargedHiggs_HplusTB_HplusToTB_M-*&prepid=HIG-RunIISummer16MiniAODv2-0*&member_of_chain=HIG-chain_RunIISummer15wmLHEGS_flowRunIISummer16DR80PremixPUMoriond17Nooutput_flowRunIISummer16PremixMiniAODv2-*&shown=3091
-# cmd line: dasgoclient -query="dataset dataset=/ChargedHiggs_HplusTB_HplusToTB_M-*_13TeV_amcatnlo_pythia8*/*/MINIAODSIM release=CMSSW_8_0_21"
 campaign = 'RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6'
-#datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-180_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-180_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
-#datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-200_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-200_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
-#datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-220_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-220_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
-#datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-250_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-250_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v2/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
-#datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-300_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-300_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
-#datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-350_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-350_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
-#datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-400_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-400_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
-#datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-500_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-500_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v2/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-180_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-200_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-220_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-250_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-300_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-350_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-400_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-500_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
 datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-650_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
-#datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-800_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-800_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
-#datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-1000_13TeV_amcatnlo_pythia8/'  + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-1000_13TeV_amcatnlo_pythia8/'  + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
-#datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-1500_13TeV_amcatnlo_pythia8/'  + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-1500_13TeV_amcatnlo_pythia8/'  + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
-#datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-2000_13TeV_amcatnlo_pythia8/'  + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-2000_13TeV_amcatnlo_pythia8/'  + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
-#datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-2500_13TeV_amcatnlo_pythia8/'  + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-2500_13TeV_amcatnlo_pythia8/'  + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
-#datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-3000_13TeV_amcatnlo_pythia8/'  + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-3000_13TeV_amcatnlo_pythia8/'  + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-800_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-1000_13TeV_amcatnlo_pythia8/'  + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-1500_13TeV_amcatnlo_pythia8/'  + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-2000_13TeV_amcatnlo_pythia8/'  + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-2500_13TeV_amcatnlo_pythia8/'  + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-3000_13TeV_amcatnlo_pythia8/'  + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
 datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-5000_13TeV_amcatnlo_pythia8/'  + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
 datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-7000_13TeV_amcatnlo_pythia8/'  + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
 datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-10000_13TeV_amcatnlo_pythia8/' + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
 
+datasetsSignalTB_ext1 = []
+das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FChargedHiggs_HplusTB_HplusToTB*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
+# cmd line: dasgoclient -query="dataset dataset=/ChargedHiggs_HplusTB_HplusToTB_M-*_13TeV_amcatnlo_pythia8*/*/MINIAODSIM release=CMSSW_8_0_21"
+campaign = 'RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6'
+datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-180_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-200_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-220_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-250_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v2/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-300_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-350_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-400_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-500_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v2/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-800_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-1000_13TeV_amcatnlo_pythia8/'  + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-1500_13TeV_amcatnlo_pythia8/'  + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-2000_13TeV_amcatnlo_pythia8/'  + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-2500_13TeV_amcatnlo_pythia8/'  + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-3000_13TeV_amcatnlo_pythia8/'  + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 
 datasetsSignalTauNu = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FChargedHiggs_TTToHplusBWB_HplusToTauNu_M-*%2FRunII*16MiniAODv2-*%2FMINIAODSIM"
@@ -612,6 +614,7 @@ hplus2tbAnalysisDatasets = []
 #hplus2tbAnalysisDatasets.extend(datasetsJetHTData_18Apr2017)
 hplus2tbAnalysisDatasets.extend(datasetsJetHTData_03Feb2017)
 hplus2tbAnalysisDatasets.extend(datasetsSignalTB)
+# hplus2tbAnalysisDatasets.extend(datasetsSignalTB_ext1)
 hplus2tbAnalysisDatasets.extend(datasetsTop)
 hplus2tbAnalysisDatasets.extend(datasetsSingleTop)
 hplus2tbAnalysisDatasets.extend(datasetsDYJetsToQQ)

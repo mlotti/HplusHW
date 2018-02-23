@@ -187,15 +187,17 @@ FatJetSelection::Data FatJetSelection::privateAnalyze(const Event& event, const 
   bool passedTopMatchingType = false;
 
   bool disableMatching = false;
+  const math::XYZTLorentzVector topP = topData.getLdgTrijet();
+  // math::LorentzVectorT<double> topP(0.,0.,9999.,0.);
+
+  // Disable the top-matching? (analyzeWithoutTop, fTopMatchingDeltaR < 0)
+  if (topP.pt() == 0.0) disableMatching = true;
   if (fTopMatchingDeltaR < 0) 
     {
       disableMatching          = true;
       passedDeltaRMatchWithTop = true;
       passedTopMatchingType    = true;
     }
-  
-  const math::XYZTLorentzVector topP = topData.getLdgTrijet();
-  // math::LorentzVectorT<double> topP(0.,0.,9999.,0.);
 
   unsigned int jet_index    = -1;
   unsigned int ptCut_index  = 0;
