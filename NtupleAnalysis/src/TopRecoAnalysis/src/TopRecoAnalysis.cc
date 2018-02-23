@@ -2071,7 +2071,7 @@ void TopRecoAnalysis::process(Long64_t entry) {
       double sldg_dRbfat =  ROOT::Math::VectorUtil::DeltaR( SubldgTrijet.BJet.p4(), fatJet.p4());
       
       // bool isLdgTrijetW_untagged    = max(LdgTrijet.Jet1.bjetDiscriminator(), LdgTrijet.Jet2.bjetDiscriminator()) < 0.5426;
-      // bool isSubldgTrijetW_untagged = max(SubldgTrijet.Jet1.bjetDiscriminator(), SubldgTrijet.Jet2.bjetDiscriminator()) < 0.5426;
+      //bool isSubldgTrijetW_untagged = max(SubldgTrijet.Jet1.bjetDiscriminator(), SubldgTrijet.Jet2.bjetDiscriminator()) < 0.5426;
       
       if (max(ldg_dRbfat, max(ldg_dR1fat, ldg_dR2fat)) < 0.8)
 	{
@@ -2196,44 +2196,44 @@ void TopRecoAnalysis::process(Long64_t entry) {
 	}
     }
   
-  // if (haveSubldgFatTop)
-  // 	{
-      // 	  hFatTop_SubldgTrijet_Pt -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
-      // 	  hFatTop_SubldgTrijet_tau21 -> Fill(isSubldgTrijetW_untagged, tau21);
-      // 	  hFatTop_SubldgTrijet_tau32 -> Fill(isSubldgTrijetW_untagged, tau32);
-      // 	  if (HT_modif > 900)
-      // 	    {
-      // 	      hFatTop_SubldgTrijet_Pt_ht900 -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
-      // 	      hFatTop_SubldgTrijet_tau21_ht900 -> Fill(isSubldgTrijetW_untagged, tau21);
-      // 	      hFatTop_SubldgTrijet_tau32_ht900 -> Fill(isSubldgTrijetW_untagged, tau32);
-      // 	    }
-      // 	}
-      // if (haveSubldgFatW)
-      // 	{
-      // 	  hFatW_SubldgTrijet_Pt   -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
-      // 	  hFatW_SubldgTrijet_tau21   -> Fill(isSubldgTrijetW_untagged, tau21);
-      // 	  hFatW_SubldgTrijet_tau32   -> Fill(isSubldgTrijetW_untagged, tau32);
-      // 	  if (HT_modif > 900)
-      // 	    {
-      // 	      hFatW_SubldgTrijet_Pt_ht900   -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
-      // 	      hFatW_SubldgTrijet_tau21_ht900   -> Fill(isSubldgTrijetW_untagged, tau21);
-      // 	      hFatW_SubldgTrijet_tau32_ht900   -> Fill(isSubldgTrijetW_untagged, tau32);
-      // 	    }
-      // 	}
-      // if (haveSubldgFatBJ)
-      // 	{
-      // 	  hFatJB_SubldgTrijet_Pt  -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
-      // 	  hFatJB_SubldgTrijet_tau21  -> Fill(isSubldgTrijetW_untagged, tau21);
-      // 	  hFatJB_SubldgTrijet_tau32  -> Fill(isSubldgTrijetW_untagged, tau32);
-      // 	  if (HT_modif > 900)
-      // 	    {
-      // 	      hFatJB_SubldgTrijet_Pt_ht900  -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
-      // 	      hFatJB_SubldgTrijet_tau21_ht900  -> Fill(isSubldgTrijetW_untagged, tau21);
-      // 	      hFatJB_SubldgTrijet_tau32_ht900  -> Fill(isSubldgTrijetW_untagged, tau32);
-      // 	    }
-      // 	}
+   if (haveSubldgFatTop)
+   	{
+       	  hFatTop_SubldgTrijet_Pt -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
+       	  // hFatTop_SubldgTrijet_tau21 -> Fill(isSubldgTrijetW_untagged, tau21);
+       	  // hFatTop_SubldgTrijet_tau32 -> Fill(isSubldgTrijetW_untagged, tau32);
+       	  if (HT_modif > 900)
+       	    {
+       	      hFatTop_SubldgTrijet_Pt_ht900 -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
+       	      // hFatTop_SubldgTrijet_tau21_ht900 -> Fill(isSubldgTrijetW_untagged, tau21);
+       	      // hFatTop_SubldgTrijet_tau32_ht900 -> Fill(isSubldgTrijetW_untagged, tau32);
+       	    }
+       	}
+       if (haveSubldgFatW)
+       	{
+       	  hFatW_SubldgTrijet_Pt   -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
+       	  // hFatW_SubldgTrijet_tau21   -> Fill(isSubldgTrijetW_untagged, tau21);
+       	  // hFatW_SubldgTrijet_tau32   -> Fill(isSubldgTrijetW_untagged, tau32);
+       	  if (HT_modif > 900)
+       	    {
+       	      hFatW_SubldgTrijet_Pt_ht900   -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
+       	      // hFatW_SubldgTrijet_tau21_ht900   -> Fill(isSubldgTrijetW_untagged, tau21);
+       	      // hFatW_SubldgTrijet_tau32_ht900   -> Fill(isSubldgTrijetW_untagged, tau32);
+       	    }
+       	}
+       if (haveSubldgFatBJ)
+       	{
+       	  hFatJB_SubldgTrijet_Pt  -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
+       	  // hFatJB_SubldgTrijet_tau21  -> Fill(isSubldgTrijetW_untagged, tau21);
+       	  // hFatJB_SubldgTrijet_tau32  -> Fill(isSubldgTrijetW_untagged, tau32);
+       	  if (HT_modif > 900)
+       	    {
+       	      hFatJB_SubldgTrijet_Pt_ht900  -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
+       	      // hFatJB_SubldgTrijet_tau21_ht900  -> Fill(isSubldgTrijetW_untagged, tau21);
+       	      // hFatJB_SubldgTrijet_tau32_ht900  -> Fill(isSubldgTrijetW_untagged, tau32);
+       	    }
+       	}
 
-      //NjettinessAK8CHStau1
+       //  NjettinessAK8CHStau1
 
   
   //===Definitions

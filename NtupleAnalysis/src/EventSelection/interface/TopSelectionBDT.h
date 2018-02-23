@@ -103,6 +103,16 @@ public:
       if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) return fTrijet1BJet;
       else return fTrijet2BJet;
     }
+    const Jet getLdgTrijetJet1() const 
+    { 
+      if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) return fTrijet1Jet1;
+      else return fTrijet2Jet1;
+    }
+    const Jet getLdgTrijetJet2() const 
+    { 
+            if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) return fTrijet1Jet2;
+            else return fTrijet2Jet2;
+    }
     const math::XYZTLorentzVector getLdgTrijetDijet() const
     { 
       if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) return fTrijet1Dijet_p4;
