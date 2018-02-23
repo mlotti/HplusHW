@@ -216,8 +216,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   if (0) std::cout << "\n=== FatJet veto" << std::endl;
   const FatJetSelection::Data fatjetData = fFatJetSelection.analyze(fEvent, topData);
   // const FatJetSelection::Data fatjetData = fFatJetSelection.analyzeWithoutTop(fEvent);
-  if (fatjetData.fatjetMatchedToTopFound()) return;
-  std::cout << "fatjetData.getFatJetMatchedToTopType() = " << fatjetData.getFatJetMatchedToTopType() << std::endl;
+  if (!fatjetData.fatjetMatchedToTopFound()) return;
 
   // Increment counters & fill histograms
   cSelected.increment();

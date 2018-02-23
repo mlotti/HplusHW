@@ -103,8 +103,9 @@ fatjetVeto = PSet(
     fatjetType                  = "FatJets",   
     fatjetPtCuts                = [450.0],
     fatjetEtaCuts               = [2.4],
-    topMatchingDeltaR           = 0.8,
+    topMatchingDeltaR           = 0.8,       # options: 9999.9 to disable
     topConstituentMatchingDeltaR= 0.8,
+    topMatchingType             = 0,         # options: inclusive = -1, , unknown = 0, jjb = 1, jj = 2, jb = 3
     numberOfFatJetsCutValue     = 1,
     numberOfFatJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
     fatjetIDDiscr               = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto

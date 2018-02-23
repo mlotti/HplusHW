@@ -23,10 +23,10 @@ class WrappedTH2;
 class FatJetSelection: public BaseSelection {
 public:
   enum FatjetType {
-    kUKNOWN,
-    kJJB,
-    kJJ,
-    kJB
+    kUNKNOWN, //0
+    kJJB, //1
+    kJJ, //2
+    kJB //3
   };
 
   class Data {
@@ -108,6 +108,7 @@ private:
   const std::vector<float> fFatJetPtCuts;
   const std::vector<float> fFatJetEtaCuts;
   const float fTopMatchingDeltaR;
+  const int fTopMatchingType;
   const float fTopConstituentMatchingDeltaR;
   const DirectionalCut<int> fNumberOfFatJetsCut;
   
@@ -117,9 +118,10 @@ private:
   Count cSubAll;
   Count cSubPassedFatJetID;
   Count cSubPassedFatJetPUID;
-  Count cSubPassedDeltaRMatchWithTop;
-  Count cSubPassedEta;
   Count cSubPassedPt;
+  Count cSubPassedEta;
+  Count cSubPassedDeltaRMatchWithTop;
+  Count cSubPassedTopMatchingType;
   Count cSubPassedFatJetCount;
 
   // Histograms (1D)

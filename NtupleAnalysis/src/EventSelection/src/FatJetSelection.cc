@@ -13,7 +13,7 @@
 FatJetSelection::Data::Data()
 : bPassedSelection(false),
   fFatJetMatchedToTop(0),
-  fFatJetMatchedToTopType(FatJetSelection::kUKNOWN)
+  fFatJetMatchedToTopType(FatJetSelection::kUNKNOWN)
 { }
 
 FatJetSelection::Data::~Data() { }
@@ -34,6 +34,7 @@ FatJetSelection::FatJetSelection(const ParameterSet& config, EventCounter& event
   fFatJetPtCuts(config.getParameter<std::vector<float>>("fatjetPtCuts")),
   fFatJetEtaCuts(config.getParameter<std::vector<float>>("fatjetEtaCuts")),
   fTopMatchingDeltaR(config.getParameter<float>("topMatchingDeltaR")),
+  fTopMatchingType(config.getParameter<int>("topMatchingType")),
   fTopConstituentMatchingDeltaR(config.getParameter<float>("topConstituentMatchingDeltaR")),
   fNumberOfFatJetsCut(config, "numberOfFatJetsCut"),
   cPassedFatJetSelection(fEventCounter.addCounter("passed fat jet selection ("+postfix+")")),
@@ -41,9 +42,10 @@ FatJetSelection::FatJetSelection(const ParameterSet& config, EventCounter& event
   cSubAll(fEventCounter.addSubCounter("fat jet selection ("+postfix+")", "All events")),
   cSubPassedFatJetID(fEventCounter.addSubCounter("fat jet selection ("+postfix+")", "Passed fat jet ID")),
   cSubPassedFatJetPUID(fEventCounter.addSubCounter("fat jet selection ("+postfix+")", "Passed PU ID")),
-  cSubPassedDeltaRMatchWithTop(fEventCounter.addSubCounter("fat jet selection ("+postfix+")", "Passed top matching")),
-  cSubPassedEta(fEventCounter.addSubCounter("fat jet selection ("+postfix+")", "Passed eta cut")),
   cSubPassedPt(fEventCounter.addSubCounter("fat jet selection ("+postfix+")", "Passed pt cut")),
+  cSubPassedEta(fEventCounter.addSubCounter("fat jet selection ("+postfix+")", "Passed eta cut")),
+  cSubPassedDeltaRMatchWithTop(fEventCounter.addSubCounter("fat jet selection ("+postfix+")", "Passed top matching")),
+  cSubPassedTopMatchingType(fEventCounter.addSubCounter("fat jet selection ("+postfix+")", "Passed top type")),
   cSubPassedFatJetCount(fEventCounter.addSubCounter("fat jet selection ("+postfix+")", "Passed fat jet number cut"))
 { 
   initialize(config);
@@ -54,6 +56,7 @@ FatJetSelection::FatJetSelection(const ParameterSet& config)
   fFatJetPtCuts(config.getParameter<std::vector<float>>("fatjetPtCuts")), 
   fFatJetEtaCuts(config.getParameter<std::vector<float>>("fatjetEtaCuts")), 
   fTopMatchingDeltaR(config.getParameter<float>("topMatchingDeltaR")),
+  fTopMatchingType(config.getParameter<int>("topMatchingType")),
   fTopConstituentMatchingDeltaR(config.getParameter<float>("topConstituentMatchingDeltaR")),
   fNumberOfFatJetsCut(config, "numberOfFatJetsCut"),
   cPassedFatJetSelection(fEventCounter.addCounter("passed fat jet selection")),
@@ -61,9 +64,10 @@ FatJetSelection::FatJetSelection(const ParameterSet& config)
   cSubAll(fEventCounter.addSubCounter("fat jet selection", "All events")),
   cSubPassedFatJetID(fEventCounter.addSubCounter("fat jet selection", "Passed fat jet ID")),
   cSubPassedFatJetPUID(fEventCounter.addSubCounter("fat jet selection", "Passed PU ID")),
-  cSubPassedDeltaRMatchWithTop(fEventCounter.addSubCounter("fat jet selection", "Passed top matching")),
-  cSubPassedEta(fEventCounter.addSubCounter("fat jet selection", "Passed eta cut")),
   cSubPassedPt(fEventCounter.addSubCounter("fat jet selection", "Passed pt cut")),
+  cSubPassedEta(fEventCounter.addSubCounter("fat jet selection", "Passed eta cut")),
+  cSubPassedDeltaRMatchWithTop(fEventCounter.addSubCounter("fat jet selection", "Passed top matching")),
+  cSubPassedTopMatchingType(fEventCounter.addSubCounter("fat jet selection ("+postfix+")", "Passed top type")),
   cSubPassedFatJetCount(fEventCounter.addSubCounter("fat jet selection", "Passed fat jet number cut"))
 { 
   initialize(config);
@@ -165,9 +169,10 @@ FatJetSelection::Data FatJetSelection::privateAnalyze(const Event& event, const 
   Data output;
   bool passedFatJetID = false;
   bool passedFatJetPUID = false;
-  bool passedDeltaRMatchWithTop = false;
-  bool passedEta = false;
   bool passedPt  = false;
+  bool passedEta = false;
+  bool passedDeltaRMatchWithTop = false;
+  bool passedTopMatchingType = false;
 
   const math::XYZTLorentzVector topP = topData.getLdgTrijet();
   unsigned int jet_index    = -1;
@@ -187,38 +192,23 @@ FatJetSelection::Data FatJetSelection::privateAnalyze(const Event& event, const 
       //=== Apply cut on jet PU ID
       if (!jet.jetPUIDDiscriminator())	continue;
       passedFatJetPUID = true;
-      output.fAllFatJets.push_back(jet);   
-      
-      // Fill histos (before pt/eta cuts)
-      hFatJetPtAll->Fill(jet.pt());
-      hFatJetEtaAll->Fill(jet.eta());
             
-      //=== Apply cut on tau radius
-      if (topP.pt() > 0.0) {
-	double myDeltaR = ROOT::Math::VectorUtil::DeltaR(topP, jet.p4());
-	hFatJetMatchingToTopDeltaR->Fill(myDeltaR);
-	if (myDeltaR < fTopMatchingDeltaR) continue;
-	passedDeltaRMatchWithTop = true;
-      }
-      
+      //=== Apply cut on pt   
+      const float jetPtCut = fFatJetPtCuts.at(ptCut_index);
+      if (jet.pt() < jetPtCut) continue;
+      passedPt = true;
+
       //=== Apply cut on eta
       const float jetEtaCut = fFatJetEtaCuts.at(etaCut_index);
       if (std::fabs(jet.eta()) > jetEtaCut) continue;
       passedEta = true;
       
-      //=== Apply cut on pt   
-      const float jetPtCut = fFatJetPtCuts.at(ptCut_index);
-      if (jet.pt() < jetPtCut) continue;
-      passedPt = true;
+      // Save info & Fill histos (before matching)
+      output.fAllFatJets.push_back(jet);
+      hFatJetPtAll->Fill(jet.pt());
+      hFatJetEtaAll->Fill(jet.eta());
       
-      // Fat Jet passed all cuts   
-      output.fSelectedFatJets.push_back(jet);
-
-      // Fill histos (after pt/eta cuts)
-      hFatJetPtPassed->Fill(jet.pt());
-      hFatJetEtaPassed->Fill(jet.eta());
-      
-      // Increment cut index only. Cannot be bigger than the size of the cut list provided
+      // Increment cut index only. Cannot be bigger than the size of the cut list
       if (ptCut_index  < fFatJetPtCuts.size()-1  ) ptCut_index++;
       if (etaCut_index < fFatJetEtaCuts.size()-1 ) etaCut_index++;
     }
@@ -226,26 +216,46 @@ FatJetSelection::Data FatJetSelection::privateAnalyze(const Event& event, const 
   // Fill counters so far
   if (passedFatJetID) cSubPassedFatJetID.increment();
   if (passedFatJetPUID) cSubPassedFatJetPUID.increment();
-  if (passedDeltaRMatchWithTop) cSubPassedDeltaRMatchWithTop.increment();
-  if (passedEta) cSubPassedEta.increment();
   if (passedPt)  cSubPassedPt.increment();
+  if (passedEta) cSubPassedEta.increment();
+
+  // For-loop: All fat jets with fiducial cuts (pT, eta, IDs, etc..)
+  for (auto jet: output.fAllFatJets)
+    {
+
+      //=== Apply cut on top dR-matching
+      if (topP.pt() > 0.0) 
+	{
+	  double myDeltaR = ROOT::Math::VectorUtil::DeltaR(topP, jet.p4());
+	  // Fill histo
+	  hFatJetMatchingToTopDeltaR->Fill(myDeltaR);
+	  
+	  // Check if cut satisfied
+	  if (myDeltaR < fTopMatchingDeltaR) continue;
+	  passedDeltaRMatchWithTop = true;
+	}
+
+      // Save info & Fill histos (after matching)
+      output.fSelectedFatJets.push_back(jet);
+      hFatJetPtPassed->Fill(jet.pt());
+      hFatJetEtaPassed->Fill(jet.eta());
+
+
+  if (passedDeltaRMatchWithTop) cSubPassedDeltaRMatchWithTop.increment();
 
   //=== Apply cut on number of jets
   if (!fNumberOfFatJetsCut.passedCut(output.fSelectedFatJets.size())) return output;
   cSubPassedFatJetCount.increment();
   
+
   // Sort fat jets by pT (descending order)
   std::sort(output.fSelectedFatJets.begin(), output.fSelectedFatJets.end());
-  
-  //=== Passed all fat jet selections
-  output.bPassedSelection = true;
-  cPassedFatJetSelection.increment();
-  
+    
   // Find jet matched to top
   if (topP.pt() > 0.0) 
     {
 
-      // Finf theAK8 jet that best matches the top
+      // Find theAK8 jet that best matches the top
       findFatJetMatchedToTop(output.fFatJetMatchedToTop, event, topP);
 
       // Create collection of all AK8 jets that match the top
@@ -260,6 +270,14 @@ FatJetSelection::Data FatJetSelection::privateAnalyze(const Event& event, const 
 	  hFatJetMatchingToTopPtRatio->Fill( topP.pt() / output.getFatJetMatchedToTop().pt() );
 	}
     }
+
+  //=== Apply top-matching cut - fat jet type (resolved top, Wb, jb)
+  if (passedTopMatchingType) cSubPassedTopMatcingType.increment();
+
+  //=== Passed all fat jet selections
+  output.bPassedSelection = true;
+  cPassedFatJetSelection.increment();
+
   
   // Return data object
   return output;
@@ -293,28 +311,33 @@ void FatJetSelection::findFatJetMatchedToTop(std::vector<AK8Jet>& collection, co
 
 void FatJetSelection::findFatJetMatchedToTopType(FatJetSelection::FatjetType& type, AK8Jet fatJetMatchingToTop, const TopSelectionBDT::Data& topData) {
 
-  // const math::XYZTLorentzVector topP = topData.getLdgTrijet();
+  // Get leading top AK4 jet constituents
   const Jet top_bjet = topData.getLdgTrijetBJet();
   const Jet top_jet1 = topData.getLdgTrijetJet1();
   const Jet top_jet2 = topData.getLdgTrijetJet2();
 
-  // For-loop: All AK8 jets
+  // Caclulate distances
   double dR_bjet = ROOT::Math::VectorUtil::DeltaR(fatJetMatchingToTop.p4(), top_bjet.p4());
   double dR_jet1 = ROOT::Math::VectorUtil::DeltaR(fatJetMatchingToTop.p4(), top_jet1.p4());
   double dR_jet2 = ROOT::Math::VectorUtil::DeltaR(fatJetMatchingToTop.p4(), top_jet2.p4());
+  // std::cout << "dR_bjet = " << dR_bjet << ", dR_jet1 = " << dR_jet1 << ", dR_jet2 = " << dR_jet2 << std::endl;
 
+  // Construct simple booleans
   bool match_bjet = (dR_bjet <= fTopConstituentMatchingDeltaR);
   bool match_jet1 = (dR_jet1 <= fTopConstituentMatchingDeltaR);
   bool match_jet2 = (dR_jet2 <= fTopConstituentMatchingDeltaR);
+  // std::cout << "match_bjet = " << match_bjet << ", match_jet1 = " << match_jet1 << ", match_jet2 = " << match_jet2 << std::endl;
 
-  bool jjb = match_bjet*match_jet1*match_jet2;
-  bool jj  = match_jet1*match_jet2;
+  // Construct composite booleans
+  bool jjb = (match_bjet*match_jet1*match_jet2);
+  bool jj  = (match_jet1*match_jet2);
   bool jb  = (match_bjet*match_jet1 || match_bjet*match_jet2);
+  // std::cout << "jjb = " << jjb << ", jj = " << jj << ", jb = " << jb << std::endl;
 
+  // Fill correct type using composite booleans
   if (jjb) type = FatJetSelection::kJJB;
   else if (jj) type = FatJetSelection::kJJ;
   else if (jb) type = FatJetSelection::kJB;
-  else type = FatJetSelection::kUKNOWN;
-
+  else type = FatJetSelection::kUNKNOWN;
   return;
 }
