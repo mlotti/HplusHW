@@ -79,12 +79,8 @@ QuarkGluonLikelihoodRatio::Data::~Data() { }
 
 QuarkGluonLikelihoodRatio::QuarkGluonLikelihoodRatio(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix)
 : BaseSelection(eventCounter, histoWrapper, commonPlots, postfix),
-  bTriggerMatchingApply(config.getParameter<bool>("triggerMatchingApply")),
-  fTriggerMatchingCone(config.getParameter<float>("triggerMatchingCone")),
-  fJetPtCuts(config.getParameter<std::vector<float>>("jetPtCuts")),
-  fJetEtaCuts(config.getParameter<std::vector<float>>("jetEtaCuts")),
-  fNumberOfJetsCut(config, "numberOfBJetsCut"),
-  fDisriminatorValue(-1.0),
+  fQGLRCut(config, "QGLRCut"),
+  fnumberOfJetsCut(config, "numberOfJetsCut"),
   // Event counter for passing selection
   cPassedQuarkGluonLikelihoodRatio(fEventCounter.addCounter("passed b-jet selection ("+postfix+")")),
   // Sub counters
@@ -96,12 +92,8 @@ QuarkGluonLikelihoodRatio::QuarkGluonLikelihoodRatio(const ParameterSet& config,
 
 QuarkGluonLikelihoodRatio::QuarkGluonLikelihoodRatio(const ParameterSet& config)
 : BaseSelection(),
-  bTriggerMatchingApply(config.getParameter<bool>("triggerMatchingApply")),
-  fTriggerMatchingCone(config.getParameter<float>("triggerMatchingCone")),
-  fJetPtCuts(config.getParameter<std::vector<float>>("jetPtCuts")),
-  fJetEtaCuts(config.getParameter<std::vector<float>>("jetEtaCuts")),
-  fNumberOfJetsCut(config, "numberOfBJetsCut"),
-  fDisriminatorValue(-1.0),
+  fQGLRCut(config, "QGLRCut"),
+  fnumberOfJetsCut(config, "numberOfJetsCut"),
   // Event counter for passing selection
   cPassedQuarkGluonLikelihoodRatio(fEventCounter.addCounter("passed b-jet selection")),
   // Sub counters
@@ -198,7 +190,9 @@ QuarkGluonLikelihoodRatio::Data QuarkGluonLikelihoodRatio::privateAnalyze(const 
   Data output;
   cSubAll.increment();
   
-  // Loop over selected jets
+  // Calculate the QGLR for events with number of jets (non-bjets) less than fnumberOfJetsCut 
+  if (!fnumberOfJetsCut.passedCut( jetData.getSelectedJets().size() - bjetData.getSelectedBJets().size())) return output;
+  
   for(const Jet& jet: jetData.getSelectedJets()) {
     
     // All jets QGL
@@ -207,7 +201,7 @@ QuarkGluonLikelihoodRatio::Data QuarkGluonLikelihoodRatio::privateAnalyze(const 
     // Skip jets identified as b-jets
     if (isBJet(jet, bjetData.getSelectedBJets())) continue;
     
-    // All jets not identifies as b-jets QGL
+    // All jets not identified as b-jets QGL
     hAllJetsNonBJetsQGL -> Fill(jet.QGTaggerAK4PFCHSqgLikelihood());
     
     if (iEvent.isMC())
@@ -243,7 +237,9 @@ QuarkGluonLikelihoodRatio::Data QuarkGluonLikelihoodRatio::privateAnalyze(const 
   }
   
   // Calculate QGLR
-  output.fQGLR = calculateQGLR(iEvent, output.fJetsForQGLR);
+  double QGLR = calculateQGLR(iEvent, output.fJetsForQGLR);
+  output.fQGLR = QGLR;
+  output.bPassedSelection = fQGLRCut.passedCut(QGLR);
   
   // Fill Histograms
   hQGLR          -> Fill(output.fQGLR);
@@ -280,8 +276,6 @@ double QuarkGluonLikelihoodRatio::calculateQGLR(const Event& iEvent, const std::
   return QGLR;
 }
 
-
-
 double QuarkGluonLikelihoodRatio::factorial(const int N)
 {
   if (N > 1)
@@ -289,7 +283,6 @@ double QuarkGluonLikelihoodRatio::factorial(const int N)
   else
     return 1;
 }
-
 
 std::vector<int> QuarkGluonLikelihoodRatio::getJetIndices(const std::vector<Jet> Jets)
 {
@@ -300,7 +293,6 @@ std::vector<int> QuarkGluonLikelihoodRatio::getJetIndices(const std::vector<Jet>
     }
   return v;
 }
-
 
 double QuarkGluonLikelihoodRatio::calculateL(const Event& iEvent, const std::vector<Jet> Jets, const int Nq, const int Ng)
 {

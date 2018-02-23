@@ -161,12 +161,8 @@ private:
   bool isBJet(const Jet& jet1, const std::vector<Jet>& bjets);
   
   // Input parameters
-  const bool bTriggerMatchingApply;
-  const float fTriggerMatchingCone;
-  const std::vector<float> fJetPtCuts;
-  const std::vector<float> fJetEtaCuts;
-  const DirectionalCut<int> fNumberOfJetsCut;
-  float fDisriminatorValue; // not a const because constructor sets it based on input string
+  const DirectionalCut<double> fQGLRCut;
+  const DirectionalCut<int> fnumberOfJetsCut;
 
   // Event counter for passing selection
   Count cPassedQuarkGluonLikelihoodRatio;

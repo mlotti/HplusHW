@@ -160,14 +160,10 @@ scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection,
 # QGL selection
 #=================================================================================================
 qglSelection = PSet(
-    triggerMatchingApply      = False,
-    triggerMatchingCone       = 0.1,  # DeltaR for matching offline bjet with trigger::TriggerBjet
-    jetPtCuts                 = [40.0],
-    jetEtaCuts                = [2.4],
-    bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
-    bjetDiscrWorkingPoint     = "Medium",
-    numberOfBJetsCutValue     = 3,
-    numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >= 
+    QGLRCutValue             = 0.0,
+    QGLRCutDirection         = ">=",
+    numberOfJetsCutValue     = 10,
+    numberOfJetsCutDirection = "<=",
 )
 
 jsonReader.setupQGLInformation(QGLRPset  = qglSelection,

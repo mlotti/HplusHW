@@ -106,7 +106,7 @@ TestQGLR::TestQGLR(const ParameterSet& config, const TH1* skimCounters)
     cBaselineSelectedCR(fEventCounter.addCounter("Baseline: selected CR events")),
     cInvertedBTaggingCounter(fEventCounter.addCounter("Inverted: passed b-jet selection")),
     cInvertedBTaggingSFCounter(fEventCounter.addCounter("Inverted: b tag SF")),
-    fInvertedBJetSelection(config.getParameter<ParameterSet>("FakeBBJetSelection")),//, fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fInvertedBJetSelection(config.getParameter<ParameterSet>("FakeBBjetSelection")),//, fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fInvertedMETSelection(config.getParameter<ParameterSet>("METSelection")),
     fInvertedTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
     cInvertedSelected(fEventCounter.addCounter("Inverted: selected events")),
@@ -352,13 +352,6 @@ void TestQGLR::DoBaselineAnalysis(const JetSelection::Data& jetData,
   cBaselineSelected.increment();
 
   //================================================================================================
-  // Fill final plots
-  //================================================================================================
-  
-  // For QGLR calculation
-  if (jetData.getSelectedJets().size() - bjetData.getSelectedBJets().size() > 10) return;
-  
-  //================================================================================================
   // QGLR Selection
   //================================================================================================
   const QuarkGluonLikelihoodRatio::Data qglData = fQuarkGluonLikelihoodRatio.analyze(fEvent, jetData, bjetData);
@@ -366,6 +359,10 @@ void TestQGLR::DoBaselineAnalysis(const JetSelection::Data& jetData,
   
   // Fill Triplets (Baseline)
   hBaseline_QGLR_AfterStandardSelections -> Fill(isGenuineB, QGLR);
+
+  //================================================================================================
+  // Fill final plots
+  //================================================================================================
   
   // Save selected event ID for pick events
   fEventSaver.save();
@@ -437,9 +434,6 @@ void TestQGLR::DoInvertedAnalysis(const JetSelection::Data& jetData,
   
   if (0) std::cout << "=== Inverted: Verification Region (VR)" << std::endl;
   cInvertedSelected.increment();
-  
-  // For QGLR calculation
-  if (jetData.getSelectedJets().size() - bjetData.getSelectedBJets().size() > 10) return;
   
   //================================================================================================
   // QGLR Selection
