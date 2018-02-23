@@ -141,7 +141,7 @@ def main(opts):
         if "ZJetsToQQ_HT600toInf" in datasetsMgr.getAllDatasetNames() and "DYJetsToQQ_HT180" in datasetsMgr.getAllDatasetNames():
             Print("Cannot use both ZJetsToQQ and DYJetsToQQ due to duplicate events? Investigate. Removing ZJetsToQQ datasets for now ..", True)
             datasetsMgr.remove(filter(lambda name: "ZJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
-            # datasetsMgr.remove(filter(lambda name: "DYJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "DYJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
         
         # Set/Overwrite cross-sections
         for d in datasetsMgr.getAllDatasets():
@@ -154,6 +154,9 @@ def main(opts):
             datasetsMgr.PrintCrossSections()
             datasetsMgr.PrintLuminosities()
 
+        # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
+        plots.mergeRenameReorderForDataMC(datasetsMgr) 
+
         # Custom Filtering of datasets 
         for i, d in enumerate(datasetsToRemove, 0):
             msg = "Removing dataset %s" % d
@@ -162,9 +165,6 @@ def main(opts):
 
         if opts.verbose:
             datasetsMgr.PrintInfo()
-
-        # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
-        plots.mergeRenameReorderForDataMC(datasetsMgr) 
   
         # Re-order datasets (different for inverted than default=baseline)
         newOrder = ["Data"]
@@ -255,10 +255,10 @@ def GetHistoKwargs(h, opts):
         "ylabel"           : _yLabel,
         "rebinX"           : 1,
         "rebinY"           : None,
-        "ratioType"        : "errorScale", #new
-        "ratioErrorOptions": {"numeratorStatSyst": False}, #new
+        "ratioType"        : "errorScale",
+        "ratioErrorOptions": {"numeratorStatSyst": False},
         "ratioYlabel"      : "Data/MC",
-        "ratio"            : True, 
+        "ratio"            : opts.ratio, 
         "stackMCHistograms": True,
         "ratioInvert"      : False, 
         "addMCUncertainty" : True, 
@@ -796,9 +796,10 @@ def DataMCHistograms(datasetsMgr, histoName):
     if opts.signalMass != 0:
         p.histoMgr.forHisto(opts.signal, styles.getSignalStyleHToTB_M(opts.signalMass))
 
-    p.histoMgr.setHistoLegendLabelMany({
-            "QCD": "QCD (MC)",
-            })
+    if "QCD" in datasetsMgr.getAllDatasetNames():
+        p.histoMgr.setHistoLegendLabelMany({
+                "QCD": "QCD (MC)",
+                })
     
     # Apply blinding of signal region
     if "blindingRangeString" in kwargs_:
@@ -879,19 +880,16 @@ if __name__ == "__main__":
     GRIDY        = False
     OPTMODE      = None
     BATCHMODE    = True
-    PRECISION    = 3
     INTLUMI      = -1.0
-    SUBCOUNTERS  = False
-    LATEX        = False
-    MCONLY       = False
     SIGNALMASS   = 500
     MERGEEWK     = False
     URL          = False
-    NOERROR      = True
     SAVEDIR      = None
     VERBOSE      = False
+    RATIO        = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug' 
     FOLDER       = "topbdtSelection_" #jetSelection_
+
     
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -908,8 +906,8 @@ if __name__ == "__main__":
     parser.add_option("--analysisName", dest="analysisName", type="string", default=ANALYSISNAME,
                       help="Override default analysisName [default: %s]" % ANALYSISNAME)
 
-    parser.add_option("--mcOnly", dest="mcOnly", action="store_true", default=MCONLY,
-                      help="Plot only MC info [default: %s]" % MCONLY)
+    parser.add_option("--ratio", dest="ratio", action="store_true", default=RATIO,
+                      help="Enable ratio pad for Data/Bkg comparison [default: %s]" % RATIO)
 
     parser.add_option("--intLumi", dest="intLumi", type=float, default=INTLUMI,
                       help="Override the integrated lumi [default: %s]" % INTLUMI)
@@ -940,9 +938,6 @@ if __name__ == "__main__":
     
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE, 
                       help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
-
-    parser.add_option("--histoLevel", dest="histoLevel", action="store", default = HISTOLEVEL,
-                      help="Histogram ambient level (default: %s)" % (HISTOLEVEL))
 
     parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
                       help="List of datasets in mcrab to include")
@@ -977,6 +972,7 @@ if __name__ == "__main__":
             Print(m, False)
         sys.exit()
     else:
+        #opts.signal = "ChargedHiggs_HplusTB_HplusToTB_M_%i_ext1" % opts.signalMass
         opts.signal = "ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass
 
     # Sanity check
