@@ -75,7 +75,7 @@ public:
     std::vector<AK8Jet> fFatJetMatchedToTop;
 
     // Type of the Fat jet matcjed to leading trijet system (jjb, jj, jb)
-    FatJetSelection::FatjetType fFatJetMatchedToTopType;
+    std::vector<FatJetSelection::FatjetType> fFatJetMatchedToTopType;
 
   };
 
@@ -102,7 +102,9 @@ private:
   
   void findFatJetMatchedToTop(std::vector<AK8Jet>& collection, const Event& event,   const math::XYZTLorentzVector& topP);
 
-  void findFatJetMatchedToTopType(FatJetSelection::FatjetType& type, AK8Jet fatJetMatchedToTop, const TopSelectionBDT::Data& topData);
+  // void findFatJetMatchedToTopType(FatJetSelection::FatjetType& type, AK8Jet fatJetMatchedToTop, const TopSelectionBDT::Data& topData);
+
+  const FatJetSelection::FatjetType findFatJetMatchedToTopType(AK8Jet fatJetMatchedToTop, const TopSelectionBDT::Data& topData);
   
   // Input parameters
   const std::vector<float> fFatJetPtCuts;

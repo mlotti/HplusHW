@@ -18,8 +18,8 @@ FatJetSelection::Data::Data()
 
 FatJetSelection::Data::~Data() { }
 
-const FatJetSelection::FatjetType FatJetSelection::Data::getFatJetMatchedToTopType() const { 
-  return fFatJetMatchedToTopType;
+const FatJetSelection::FatjetType FatJetSelection::Data::getFatJetMatchedToTopType() const {
+  return fFatJetMatchedToTopType[0];
 }
 
 const AK8Jet& FatJetSelection::Data::getFatJetMatchedToTop() const { 
@@ -67,7 +67,7 @@ FatJetSelection::FatJetSelection(const ParameterSet& config)
   cSubPassedPt(fEventCounter.addSubCounter("fat jet selection", "Passed pt cut")),
   cSubPassedEta(fEventCounter.addSubCounter("fat jet selection", "Passed eta cut")),
   cSubPassedDeltaRMatchWithTop(fEventCounter.addSubCounter("fat jet selection", "Passed top matching")),
-  cSubPassedTopMatchingType(fEventCounter.addSubCounter("fat jet selection ("+postfix+")", "Passed top type")),
+  cSubPassedTopMatchingType(fEventCounter.addSubCounter("fat jet selection", "Passed top type")),
   cSubPassedFatJetCount(fEventCounter.addSubCounter("fat jet selection", "Passed fat jet number cut"))
 { 
   initialize(config);
@@ -116,8 +116,8 @@ void FatJetSelection::bookHistograms(TDirectory* dir) {
   hFatJetEtaAll    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "fatjetEtaAll"   , ";#eta;Occur / %.2f"         , nEtaBins, fEtaMin, fEtaMax);
   hFatJetPtPassed  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "fatjetPtPassed" , ";p_{T} (GeV/c);Occur / %.0f", nPtBins , fPtMin , fPtMax);
   hFatJetEtaPassed = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "fatjetEtaPassed", ";#eta;Occur / %.2f"         , nEtaBins, fEtaMin, fEtaMax); 
-  hFatJetMatchingToTopDeltaR  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FatJetMatchingToTopDeltaR" , ";#DeltaR(fat jet, top);Occur / %.2f"  , 40, 0.0, 2.0);
-  hFatJetMatchingToTopPtRatio = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FatJetMatchingToTopPtRatio", ";fat jet p_{T} / top p_{T};Occur / %.2f", 40, 0.0, 2.0);
+  hFatJetMatchingToTopDeltaR  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FatJetMatchingToTopDeltaR" , ";#DeltaR(fat jet, top);Occur / %.2f"    , 200, 0.0, 2.0);
+  hFatJetMatchingToTopPtRatio = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FatJetMatchingToTopPtRatio", ";fat jet p_{T} / top p_{T};Occur / %.2f", 200, 0.0, 2.0);
 
   return;
 }
@@ -173,8 +173,17 @@ FatJetSelection::Data FatJetSelection::privateAnalyze(const Event& event, const 
   bool passedEta = false;
   bool passedDeltaRMatchWithTop = false;
   bool passedTopMatchingType = false;
-
+  bool disableMatching = false;
+  if (fTopMatchingDeltaR < 0) 
+    {
+      disableMatching          = true;
+      passedDeltaRMatchWithTop = true;
+      passedTopMatchingType    = true;
+    }
+  
   const math::XYZTLorentzVector topP = topData.getLdgTrijet();
+  // math::LorentzVectorT<double> topP(0.,0.,9999.,0.);
+
   unsigned int jet_index    = -1;
   unsigned int ptCut_index  = 0;
   unsigned int etaCut_index = 0;
@@ -184,7 +193,7 @@ FatJetSelection::Data FatJetSelection::privateAnalyze(const Event& event, const 
     {
       // Jet index (for pT and eta cuts)
       jet_index++;
-      
+
       //=== Apply cut on jet ID
       if (!jet.jetIDDiscriminator()) continue;
       passedFatJetID = true;
@@ -207,7 +216,38 @@ FatJetSelection::Data FatJetSelection::privateAnalyze(const Event& event, const 
       output.fAllFatJets.push_back(jet);
       hFatJetPtAll->Fill(jet.pt());
       hFatJetEtaAll->Fill(jet.eta());
-      
+
+      //=== Apply cut on top dR-matching
+      if (!disableMatching)  //if (topP.pt() > 0.0)
+	{
+	  // Fill histo
+	  double myDeltaR = ROOT::Math::VectorUtil::DeltaR(topP, jet.p4());
+	  hFatJetMatchingToTopDeltaR->Fill(myDeltaR);
+	  
+	  // Check if cut satisfied
+	  if (myDeltaR > fTopMatchingDeltaR) continue;
+	  passedDeltaRMatchWithTop = true;
+
+	  // Save matched jet to a vector
+	  output.fFatJetMatchedToTop.push_back(jet);
+
+	  // Determine matching type [resolved top (jjb), W(jj), jb]
+	  const FatJetSelection::FatjetType type = findFatJetMatchedToTopType(output.getFatJetMatchedToTop(), topData);
+	  output.fFatJetMatchedToTopType.push_back(type);
+
+	  //=== Apply top-matching cut - fat jet type (resolved top, Wb, jb)
+	  if (fTopMatchingType < 0) passedTopMatchingType = true;
+	  else if (type <= fTopMatchingType) continue;
+	  passedTopMatchingType = true;
+
+	  // Fill histogram
+ 	  hFatJetMatchingToTopPtRatio->Fill( topP.pt() / output.getFatJetMatchedToTop().pt() );
+	}
+      // Save info & Fill histos (after matching)
+      output.fSelectedFatJets.push_back(jet);
+      hFatJetPtPassed->Fill(jet.pt());
+      hFatJetEtaPassed->Fill(jet.eta());
+
       // Increment cut index only. Cannot be bigger than the size of the cut list
       if (ptCut_index  < fFatJetPtCuts.size()-1  ) ptCut_index++;
       if (etaCut_index < fFatJetEtaCuts.size()-1 ) etaCut_index++;
@@ -218,67 +258,20 @@ FatJetSelection::Data FatJetSelection::privateAnalyze(const Event& event, const 
   if (passedFatJetPUID) cSubPassedFatJetPUID.increment();
   if (passedPt)  cSubPassedPt.increment();
   if (passedEta) cSubPassedEta.increment();
-
-  // For-loop: All fat jets with fiducial cuts (pT, eta, IDs, etc..)
-  for (auto jet: output.fAllFatJets)
-    {
-
-      //=== Apply cut on top dR-matching
-      if (topP.pt() > 0.0) 
-	{
-	  double myDeltaR = ROOT::Math::VectorUtil::DeltaR(topP, jet.p4());
-	  // Fill histo
-	  hFatJetMatchingToTopDeltaR->Fill(myDeltaR);
-	  
-	  // Check if cut satisfied
-	  if (myDeltaR < fTopMatchingDeltaR) continue;
-	  passedDeltaRMatchWithTop = true;
-	}
-
-      // Save info & Fill histos (after matching)
-      output.fSelectedFatJets.push_back(jet);
-      hFatJetPtPassed->Fill(jet.pt());
-      hFatJetEtaPassed->Fill(jet.eta());
-
-
   if (passedDeltaRMatchWithTop) cSubPassedDeltaRMatchWithTop.increment();
+  if (passedTopMatchingType) cSubPassedTopMatchingType.increment();
 
   //=== Apply cut on number of jets
   if (!fNumberOfFatJetsCut.passedCut(output.fSelectedFatJets.size())) return output;
-  cSubPassedFatJetCount.increment();
-  
+  cSubPassedFatJetCount.increment();  
 
   // Sort fat jets by pT (descending order)
   std::sort(output.fSelectedFatJets.begin(), output.fSelectedFatJets.end());
     
-  // Find jet matched to top
-  if (topP.pt() > 0.0) 
-    {
-
-      // Find theAK8 jet that best matches the top
-      findFatJetMatchedToTop(output.fFatJetMatchedToTop, event, topP);
-
-      // Create collection of all AK8 jets that match the top
-      if (output.fatjetMatchedToTopFound())
-	{
-	  findFatJetMatchedToTopType(output.fFatJetMatchedToTopType, output.getFatJetMatchedToTop(), topData);
-	}
-      
-      // Fill histogram
-      if (output.fatjetMatchedToTopFound())  
-	{
-	  hFatJetMatchingToTopPtRatio->Fill( topP.pt() / output.getFatJetMatchedToTop().pt() );
-	}
-    }
-
-  //=== Apply top-matching cut - fat jet type (resolved top, Wb, jb)
-  if (passedTopMatchingType) cSubPassedTopMatcingType.increment();
-
   //=== Passed all fat jet selections
   output.bPassedSelection = true;
   cPassedFatJetSelection.increment();
 
-  
   // Return data object
   return output;
 }
@@ -306,9 +299,47 @@ void FatJetSelection::findFatJetMatchedToTop(std::vector<AK8Jet>& collection, co
   
   // Save matching AK8 into collection of jets matching the top (unique matching)
   if (myMinDeltaR < fTopMatchingDeltaR) collection.push_back(event.ak8jets()[mySelectedIndex]);
+
+  return;
 }
 
+const FatJetSelection::FatjetType FatJetSelection::findFatJetMatchedToTopType(AK8Jet fatJetMatchingToTop, const TopSelectionBDT::Data& topData) {
 
+  FatJetSelection::FatjetType type;
+
+  // Get leading top AK4 jet constituents
+  const Jet top_bjet = topData.getLdgTrijetBJet();
+  const Jet top_jet1 = topData.getLdgTrijetJet1();
+  const Jet top_jet2 = topData.getLdgTrijetJet2();
+
+  // Caclulate distances
+  double dR_bjet = ROOT::Math::VectorUtil::DeltaR(fatJetMatchingToTop.p4(), top_bjet.p4());
+  double dR_jet1 = ROOT::Math::VectorUtil::DeltaR(fatJetMatchingToTop.p4(), top_jet1.p4());
+  double dR_jet2 = ROOT::Math::VectorUtil::DeltaR(fatJetMatchingToTop.p4(), top_jet2.p4());
+  // std::cout << "dR_bjet = " << dR_bjet << ", dR_jet1 = " << dR_jet1 << ", dR_jet2 = " << dR_jet2 << std::endl;
+
+  // Construct simple booleans
+  bool match_bjet = (dR_bjet <= fTopConstituentMatchingDeltaR);
+  bool match_jet1 = (dR_jet1 <= fTopConstituentMatchingDeltaR);
+  bool match_jet2 = (dR_jet2 <= fTopConstituentMatchingDeltaR);
+  // std::cout << "match_bjet = " << match_bjet << ", match_jet1 = " << match_jet1 << ", match_jet2 = " << match_jet2 << std::endl;
+
+  // Construct composite booleans
+  bool jjb = (match_bjet*match_jet1*match_jet2);
+  bool jj  = (match_jet1*match_jet2);
+  bool jb  = (match_bjet*match_jet1 || match_bjet*match_jet2);
+  // std::cout << "jjb = " << jjb << ", jj = " << jj << ", jb = " << jb << std::endl;
+
+  // Fill correct type using composite booleans
+  if (jjb) type = FatJetSelection::kJJB;
+  else if (jj) type = FatJetSelection::kJJ;
+  else if (jb) type = FatJetSelection::kJB;
+  else type = FatJetSelection::kUNKNOWN;
+
+  return type;
+}
+
+/*
 void FatJetSelection::findFatJetMatchedToTopType(FatJetSelection::FatjetType& type, AK8Jet fatJetMatchingToTop, const TopSelectionBDT::Data& topData) {
 
   // Get leading top AK4 jet constituents
@@ -341,3 +372,4 @@ void FatJetSelection::findFatJetMatchedToTopType(FatJetSelection::FatjetType& ty
   else type = FatJetSelection::kUNKNOWN;
   return;
 }
+*/
