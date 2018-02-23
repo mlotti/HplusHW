@@ -6,6 +6,7 @@
 #include "EventSelection/interface/EventSelections.h"
 
 #include "DataFormat/interface/AK8Jet.h"
+#include "DataFormat/interface/AK8JetsSoftDrop.h"
 
 #include "TDirectory.h"
 
@@ -1329,26 +1330,26 @@ void TopRecoAnalysis::process(Long64_t entry) {
   if (haveLdgFatJet)
     {
       hLdgFatJetPt_beforeTopSelection     -> Fill(LdgFatJet.pt());
-      hLdgFatJet_tau21_beforeTopSelection -> Fill(LdgFatJet.NjettinessAK8tau2()/LdgFatJet.NjettinessAK8tau1());
-      hLdgFatJet_tau32_beforeTopSelection -> Fill(LdgFatJet.NjettinessAK8tau3()/LdgFatJet.NjettinessAK8tau2());
+      hLdgFatJet_tau21_beforeTopSelection -> Fill(LdgFatJet.NjettinessAK8CHStau2()/LdgFatJet.NjettinessAK8CHStau1());
+      hLdgFatJet_tau32_beforeTopSelection -> Fill(LdgFatJet.NjettinessAK8CHStau3()/LdgFatJet.NjettinessAK8CHStau2());
 
       if (haveSubldgFatJet)
 	{
 	  hSubldgFatJetPt_beforeTopSelection     -> Fill(SubldgFatJet.pt());
-	  hSubldgFatJet_tau21_beforeTopSelection -> Fill(SubldgFatJet.NjettinessAK8tau2()/SubldgFatJet.NjettinessAK8tau1());
-	  hSubldgFatJet_tau32_beforeTopSelection -> Fill(SubldgFatJet.NjettinessAK8tau3()/SubldgFatJet.NjettinessAK8tau2());
+	  hSubldgFatJet_tau21_beforeTopSelection -> Fill(SubldgFatJet.NjettinessAK8CHStau2()/SubldgFatJet.NjettinessAK8CHStau1());
+	  hSubldgFatJet_tau32_beforeTopSelection -> Fill(SubldgFatJet.NjettinessAK8CHStau3()/SubldgFatJet.NjettinessAK8CHStau2());
 	}
       if (HT_modif > 900)
 	{
 	  hLdgFatJetPt_ht900_beforeTopSelection     -> Fill(LdgFatJet.pt());
-	  hLdgFatJet_tau21_ht900_beforeTopSelection -> Fill(LdgFatJet.NjettinessAK8tau2()/LdgFatJet.NjettinessAK8tau1());
-	  hLdgFatJet_tau32_ht900_beforeTopSelection -> Fill(LdgFatJet.NjettinessAK8tau3()/LdgFatJet.NjettinessAK8tau2());
+	  hLdgFatJet_tau21_ht900_beforeTopSelection -> Fill(LdgFatJet.NjettinessAK8CHStau2()/LdgFatJet.NjettinessAK8CHStau1());
+	  hLdgFatJet_tau32_ht900_beforeTopSelection -> Fill(LdgFatJet.NjettinessAK8CHStau3()/LdgFatJet.NjettinessAK8CHStau2());
 	  
 	  if (haveSubldgFatJet)
 	    {
 	      hSubldgFatJetPt_ht900_beforeTopSelection     -> Fill(SubldgFatJet.pt());
-	      hSubldgFatJet_tau21_ht900_beforeTopSelection -> Fill(SubldgFatJet.NjettinessAK8tau2()/SubldgFatJet.NjettinessAK8tau1());
-	      hSubldgFatJet_tau32_ht900_beforeTopSelection -> Fill(SubldgFatJet.NjettinessAK8tau3()/SubldgFatJet.NjettinessAK8tau2());
+	      hSubldgFatJet_tau21_ht900_beforeTopSelection -> Fill(SubldgFatJet.NjettinessAK8CHStau2()/SubldgFatJet.NjettinessAK8CHStau1());
+	      hSubldgFatJet_tau32_ht900_beforeTopSelection -> Fill(SubldgFatJet.NjettinessAK8CHStau3()/SubldgFatJet.NjettinessAK8CHStau2());
 	    }
 	}
     }
@@ -1371,26 +1372,26 @@ void TopRecoAnalysis::process(Long64_t entry) {
   if (haveLdgFatJet)
     {
       hLdgFatJetPt     -> Fill(LdgFatJet.pt());
-      hLdgFatJet_tau21 -> Fill(LdgFatJet.NjettinessAK8tau2()/LdgFatJet.NjettinessAK8tau1());
-      hLdgFatJet_tau32 -> Fill(LdgFatJet.NjettinessAK8tau3()/LdgFatJet.NjettinessAK8tau2());
+      hLdgFatJet_tau21 -> Fill(LdgFatJet.NjettinessAK8CHStau2()/LdgFatJet.NjettinessAK8CHStau1());
+      hLdgFatJet_tau32 -> Fill(LdgFatJet.NjettinessAK8CHStau3()/LdgFatJet.NjettinessAK8CHStau2());
 
       if (haveSubldgFatJet)
 	{
 	  hSubldgFatJetPt     -> Fill(SubldgFatJet.pt());
-	  hSubldgFatJet_tau21 -> Fill(SubldgFatJet.NjettinessAK8tau2()/SubldgFatJet.NjettinessAK8tau1());
-	  hSubldgFatJet_tau32 -> Fill(SubldgFatJet.NjettinessAK8tau3()/SubldgFatJet.NjettinessAK8tau2());
+	  hSubldgFatJet_tau21 -> Fill(SubldgFatJet.NjettinessAK8CHStau2()/SubldgFatJet.NjettinessAK8CHStau1());
+	  hSubldgFatJet_tau32 -> Fill(SubldgFatJet.NjettinessAK8CHStau3()/SubldgFatJet.NjettinessAK8CHStau2());
 	}
       if (HT_modif > 900)
 	{
 	  hLdgFatJetPt_ht900     -> Fill(LdgFatJet.pt());
-	  hLdgFatJet_tau21_ht900 -> Fill(LdgFatJet.NjettinessAK8tau2()/LdgFatJet.NjettinessAK8tau1());
-	  hLdgFatJet_tau32_ht900 -> Fill(LdgFatJet.NjettinessAK8tau3()/LdgFatJet.NjettinessAK8tau2());
+	  hLdgFatJet_tau21_ht900 -> Fill(LdgFatJet.NjettinessAK8CHStau2()/LdgFatJet.NjettinessAK8CHStau1());
+	  hLdgFatJet_tau32_ht900 -> Fill(LdgFatJet.NjettinessAK8CHStau3()/LdgFatJet.NjettinessAK8CHStau2());
 	  
 	  if (haveSubldgFatJet)
 	    {	  
 	      hSubldgFatJetPt_ht900     -> Fill(SubldgFatJet.pt());
-	      hSubldgFatJet_tau21_ht900 -> Fill(SubldgFatJet.NjettinessAK8tau2()/SubldgFatJet.NjettinessAK8tau1());
-	      hSubldgFatJet_tau32_ht900 -> Fill(SubldgFatJet.NjettinessAK8tau3()/SubldgFatJet.NjettinessAK8tau2());
+	      hSubldgFatJet_tau21_ht900 -> Fill(SubldgFatJet.NjettinessAK8CHStau2()/SubldgFatJet.NjettinessAK8CHStau1());
+	      hSubldgFatJet_tau32_ht900 -> Fill(SubldgFatJet.NjettinessAK8CHStau3()/SubldgFatJet.NjettinessAK8CHStau2());
 	    }
 	}
     }
@@ -2070,7 +2071,7 @@ void TopRecoAnalysis::process(Long64_t entry) {
       double sldg_dRbfat =  ROOT::Math::VectorUtil::DeltaR( SubldgTrijet.BJet.p4(), fatJet.p4());
       
       // bool isLdgTrijetW_untagged    = max(LdgTrijet.Jet1.bjetDiscriminator(), LdgTrijet.Jet2.bjetDiscriminator()) < 0.5426;
-      // bool isSubldgTrijetW_untagged = max(SubldgTrijet.Jet1.bjetDiscriminator(), SubldgTrijet.Jet2.bjetDiscriminator()) < 0.5426;
+      //bool isSubldgTrijetW_untagged = max(SubldgTrijet.Jet1.bjetDiscriminator(), SubldgTrijet.Jet2.bjetDiscriminator()) < 0.5426;
       
       if (max(ldg_dRbfat, max(ldg_dR1fat, ldg_dR2fat)) < 0.8)
 	{
@@ -2103,8 +2104,8 @@ void TopRecoAnalysis::process(Long64_t entry) {
   // if (haveLdgFatTop || haveLdgFatW || haveLdgFatJB) Fat_ldgTrijet = fatJet;
   // if (haveSubldgFatTop || haveSubldgFatW || haveSubldgFatBJ) Fat_sldgTrijet = fatJet;
 
-      // double tau21 = fatJet.NjettinessAK8tau2()/fatJet.NjettinessAK8tau1();
-      // double tau32 = fatJet.NjettinessAK8tau3()/fatJet.NjettinessAK8tau2();
+      // double tau21 = fatJet.NjettinessAK8CHStau2()/fatJet.NjettinessAK8CHStau1();
+      // double tau32 = fatJet.NjettinessAK8CHStau3()/fatJet.NjettinessAK8CHStau2();
 
 
   
@@ -2141,8 +2142,8 @@ void TopRecoAnalysis::process(Long64_t entry) {
       else if (SubldgFatJet.index() == FatJet_ldgFatTop.index()) hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Subldg", 1);
       else if ((LdgFatJet.index() != FatJet_ldgFatTop.index()) && (SubldgFatJet.index() != FatJet_ldgFatTop.index())) hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Other", 1);
       
-      double tau21 = FatJet_ldgFatTop.NjettinessAK8tau2()/FatJet_ldgFatTop.NjettinessAK8tau1();
-      double tau32 = FatJet_ldgFatTop.NjettinessAK8tau3()/FatJet_ldgFatTop.NjettinessAK8tau2();
+      double tau21 = FatJet_ldgFatTop.NjettinessAK8CHStau2()/FatJet_ldgFatTop.NjettinessAK8CHStau1();
+      double tau32 = FatJet_ldgFatTop.NjettinessAK8CHStau3()/FatJet_ldgFatTop.NjettinessAK8CHStau2();
       
 
       hFatTop_LdgTrijet_tau21 -> Fill(isLdgTrijetW_untagged, tau21);
@@ -2162,8 +2163,8 @@ void TopRecoAnalysis::process(Long64_t entry) {
       else if (SubldgFatJet.index() == FatJet_ldgFatW.index()) hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Subldg", 1);
       else if ((LdgFatJet.index() != FatJet_ldgFatW.index()) && (SubldgFatJet.index() != FatJet_ldgFatTop.index())) hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Other", 1);
 
-      double tau21 = FatJet_ldgFatW.NjettinessAK8tau2()/FatJet_ldgFatW.NjettinessAK8tau1();
-      double tau32 = FatJet_ldgFatW.NjettinessAK8tau3()/FatJet_ldgFatW.NjettinessAK8tau2();
+      double tau21 = FatJet_ldgFatW.NjettinessAK8CHStau2()/FatJet_ldgFatW.NjettinessAK8CHStau1();
+      double tau32 = FatJet_ldgFatW.NjettinessAK8CHStau3()/FatJet_ldgFatW.NjettinessAK8CHStau2();
        
       hFatW_LdgTrijet_tau21  -> Fill(isLdgTrijetW_untagged, tau21);
       hFatW_LdgTrijet_tau32  -> Fill(isLdgTrijetW_untagged, tau32);
@@ -2182,8 +2183,8 @@ void TopRecoAnalysis::process(Long64_t entry) {
       else if (SubldgFatJet.index() == FatJet_ldgFatJB.index()) hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Subldg", 1);
       else if ((LdgFatJet.index() != FatJet_ldgFatJB.index()) && (SubldgFatJet.index() != FatJet_ldgFatTop.index())) hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Other", 1);
 
-      double tau21 = FatJet_ldgFatJB.NjettinessAK8tau2()/FatJet_ldgFatJB.NjettinessAK8tau1();
-      double tau32 = FatJet_ldgFatJB.NjettinessAK8tau3()/FatJet_ldgFatJB.NjettinessAK8tau2();
+      double tau21 = FatJet_ldgFatJB.NjettinessAK8CHStau2()/FatJet_ldgFatJB.NjettinessAK8CHStau1();
+      double tau32 = FatJet_ldgFatJB.NjettinessAK8CHStau3()/FatJet_ldgFatJB.NjettinessAK8CHStau2();
 
       hFatJB_LdgTrijet_tau21 -> Fill(isLdgTrijetW_untagged, tau21);
       hFatJB_LdgTrijet_tau32 -> Fill(isLdgTrijetW_untagged, tau32);
@@ -2195,44 +2196,44 @@ void TopRecoAnalysis::process(Long64_t entry) {
 	}
     }
   
-  // if (haveSubldgFatTop)
-  // 	{
-      // 	  hFatTop_SubldgTrijet_Pt -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
-      // 	  hFatTop_SubldgTrijet_tau21 -> Fill(isSubldgTrijetW_untagged, tau21);
-      // 	  hFatTop_SubldgTrijet_tau32 -> Fill(isSubldgTrijetW_untagged, tau32);
-      // 	  if (HT_modif > 900)
-      // 	    {
-      // 	      hFatTop_SubldgTrijet_Pt_ht900 -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
-      // 	      hFatTop_SubldgTrijet_tau21_ht900 -> Fill(isSubldgTrijetW_untagged, tau21);
-      // 	      hFatTop_SubldgTrijet_tau32_ht900 -> Fill(isSubldgTrijetW_untagged, tau32);
-      // 	    }
-      // 	}
-      // if (haveSubldgFatW)
-      // 	{
-      // 	  hFatW_SubldgTrijet_Pt   -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
-      // 	  hFatW_SubldgTrijet_tau21   -> Fill(isSubldgTrijetW_untagged, tau21);
-      // 	  hFatW_SubldgTrijet_tau32   -> Fill(isSubldgTrijetW_untagged, tau32);
-      // 	  if (HT_modif > 900)
-      // 	    {
-      // 	      hFatW_SubldgTrijet_Pt_ht900   -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
-      // 	      hFatW_SubldgTrijet_tau21_ht900   -> Fill(isSubldgTrijetW_untagged, tau21);
-      // 	      hFatW_SubldgTrijet_tau32_ht900   -> Fill(isSubldgTrijetW_untagged, tau32);
-      // 	    }
-      // 	}
-      // if (haveSubldgFatBJ)
-      // 	{
-      // 	  hFatJB_SubldgTrijet_Pt  -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
-      // 	  hFatJB_SubldgTrijet_tau21  -> Fill(isSubldgTrijetW_untagged, tau21);
-      // 	  hFatJB_SubldgTrijet_tau32  -> Fill(isSubldgTrijetW_untagged, tau32);
-      // 	  if (HT_modif > 900)
-      // 	    {
-      // 	      hFatJB_SubldgTrijet_Pt_ht900  -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
-      // 	      hFatJB_SubldgTrijet_tau21_ht900  -> Fill(isSubldgTrijetW_untagged, tau21);
-      // 	      hFatJB_SubldgTrijet_tau32_ht900  -> Fill(isSubldgTrijetW_untagged, tau32);
-      // 	    }
-      // 	}
+   if (haveSubldgFatTop)
+   	{
+       	  hFatTop_SubldgTrijet_Pt -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
+       	  // hFatTop_SubldgTrijet_tau21 -> Fill(isSubldgTrijetW_untagged, tau21);
+       	  // hFatTop_SubldgTrijet_tau32 -> Fill(isSubldgTrijetW_untagged, tau32);
+       	  if (HT_modif > 900)
+       	    {
+       	      hFatTop_SubldgTrijet_Pt_ht900 -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
+       	      // hFatTop_SubldgTrijet_tau21_ht900 -> Fill(isSubldgTrijetW_untagged, tau21);
+       	      // hFatTop_SubldgTrijet_tau32_ht900 -> Fill(isSubldgTrijetW_untagged, tau32);
+       	    }
+       	}
+       if (haveSubldgFatW)
+       	{
+       	  hFatW_SubldgTrijet_Pt   -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
+       	  // hFatW_SubldgTrijet_tau21   -> Fill(isSubldgTrijetW_untagged, tau21);
+       	  // hFatW_SubldgTrijet_tau32   -> Fill(isSubldgTrijetW_untagged, tau32);
+       	  if (HT_modif > 900)
+       	    {
+       	      hFatW_SubldgTrijet_Pt_ht900   -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
+       	      // hFatW_SubldgTrijet_tau21_ht900   -> Fill(isSubldgTrijetW_untagged, tau21);
+       	      // hFatW_SubldgTrijet_tau32_ht900   -> Fill(isSubldgTrijetW_untagged, tau32);
+       	    }
+       	}
+       if (haveSubldgFatBJ)
+       	{
+       	  hFatJB_SubldgTrijet_Pt  -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
+       	  // hFatJB_SubldgTrijet_tau21  -> Fill(isSubldgTrijetW_untagged, tau21);
+       	  // hFatJB_SubldgTrijet_tau32  -> Fill(isSubldgTrijetW_untagged, tau32);
+       	  if (HT_modif > 900)
+       	    {
+       	      hFatJB_SubldgTrijet_Pt_ht900  -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
+       	      // hFatJB_SubldgTrijet_tau21_ht900  -> Fill(isSubldgTrijetW_untagged, tau21);
+       	      // hFatJB_SubldgTrijet_tau32_ht900  -> Fill(isSubldgTrijetW_untagged, tau32);
+       	    }
+       	}
 
-      //NjettinessAK8tau1
+       //  NjettinessAK8CHStau1
 
   
   //===Definitions

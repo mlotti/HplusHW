@@ -101,13 +101,15 @@ jetSelection = PSet(
 #=================================================================================================
 fatjetVeto = PSet(
     fatjetType                  = "FatJets",   
-    fatjetPtCuts                = [450.0],
-    fatjetEtaCuts               = [2.4],
-    topMatchingDeltaR           = 0.8,
-    numberOfFatJetsCutValue     = 1,
-    numberOfFatJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
-    fatjetIDDiscr               = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
-    fatjetPUIDDiscr             = "",        # does not work at the moment 
+    fatjetPtCuts                = [450.0],   # [default: [450.0] ]
+    fatjetEtaCuts               = [2.4],     # [default: [2.4] ]
+    fatjetIDDiscr               = "IDloose", # [default: "IDLoose"] (options: IDloose, IDtight, IDtightLeptonVeto)
+    fatjetPUIDDiscr             = "",        # [default: ""]
+    topMatchingDeltaR           = 0.8,       # [default: 0.8] (options: -ve value to disable)
+    topConstituentMatchingDeltaR= 0.8,       # [default: 0.8] (options: disable topMatchingDeltaR to disable)
+    topMatchingType             = 1,         # [default: 1]   (options: jjb = 1, jj = 2, jb = 3, inclusive < 0)
+    numberOfFatJetsCutValue     = 0,         # [default: 0]
+    numberOfFatJetsCutDirection = "==",      # [default: "=="] (options: ==, !=, <, <=, >, >=)
 )
 
 # #=================================================================================================

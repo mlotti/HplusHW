@@ -22,8 +22,16 @@ class WrappedTH2;
 
 class FatJetSelection: public BaseSelection {
 public:
+  enum FatjetType {
+    kUNKNOWN, //0
+    kJJB, //1
+    kJJ, //2
+    kJB //3
+  };
+
   class Data {
   public:
+
     // The reason for pointer instead of reference is that const
     // reference allows temporaries, while const pointer does not.
     // Here the object pointed-to must live longer than this object.
@@ -47,6 +55,9 @@ public:
 
     // Obtain fat jet matching to leading trijet system
     const AK8Jet& getFatJetMatchedToTop()  const; 
+
+    // Obtain fat jet matching to leading trijet system
+    const FatJetSelection::FatjetType getFatJetMatchedToTopType() const;
     
     friend class FatJetSelection;
 
@@ -62,6 +73,9 @@ public:
 
     // Fat Jet matched to leading trijet system
     std::vector<AK8Jet> fFatJetMatchedToTop;
+
+    // Type of the Fat jet matcjed to leading trijet system (jjb, jj, jb)
+    std::vector<FatJetSelection::FatjetType> fFatJetMatchedToTopType;
 
   };
 
@@ -86,13 +100,18 @@ private:
   /// The actual selection
   Data privateAnalyze(const Event& event, const TopSelectionBDT::Data& topData);
   
-  void findFatJetMatchingToTop(std::vector<AK8Jet>& collection, const Event& event,   const math::XYZTLorentzVector& topP);
-  //const math::LorentzVectorT<double>& topP);
+  void findFatJetMatchedToTop(std::vector<AK8Jet>& collection, const Event& event,   const math::XYZTLorentzVector& topP);
+
+  // void findFatJetMatchedToTopType(FatJetSelection::FatjetType& type, AK8Jet fatJetMatchedToTop, const TopSelectionBDT::Data& topData);
+
+  const FatJetSelection::FatjetType findFatJetMatchedToTopType(AK8Jet fatJetMatchedToTop, const TopSelectionBDT::Data& topData);
   
   // Input parameters
   const std::vector<float> fFatJetPtCuts;
   const std::vector<float> fFatJetEtaCuts;
   const float fTopMatchingDeltaR;
+  const int fTopMatchingType;
+  const float fTopConstituentMatchingDeltaR;
   const DirectionalCut<int> fNumberOfFatJetsCut;
   
   // Event counter for passing selection
@@ -101,20 +120,27 @@ private:
   Count cSubAll;
   Count cSubPassedFatJetID;
   Count cSubPassedFatJetPUID;
-  Count cSubPassedDeltaRMatchWithTop;
-  Count cSubPassedEta;
   Count cSubPassedPt;
+  Count cSubPassedEta;
+  Count cSubPassedDeltaRMatchWithTop;
+  Count cSubPassedTopMatchingType;
   Count cSubPassedFatJetCount;
 
   // Histograms (1D)
+  WrappedTH1 *hFatJetNAll;
   WrappedTH1 *hFatJetPtAll;
   WrappedTH1 *hFatJetEtaAll;
+  WrappedTH1 *hFatJetNPassed;
   WrappedTH1 *hFatJetPtPassed;
   WrappedTH1 *hFatJetEtaPassed;
   WrappedTH1 *hFatJetMatchingToTopDeltaR;
   WrappedTH1 *hFatJetMatchingToTopPtRatio;
   
   // Binnings
+  int nNBins;
+  double fNMin;
+  double fNMax;
+
   int nPtBins;
   double fPtMin;
   double fPtMax;
