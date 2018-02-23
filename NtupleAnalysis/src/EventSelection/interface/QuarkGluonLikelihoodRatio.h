@@ -135,7 +135,7 @@ public:
   Data silentAnalyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
   /// analyze does fill histograms and incrementes counters
   Data analyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
- 
+  
 private:
   /// Initialisation called from constructor
   void initialize(const ParameterSet& config);
@@ -159,10 +159,11 @@ private:
   bool areSameJets(const Jet& jet1, const Jet& jet2);
   /// Return true if a selected jet matches a selected bjet
   bool isBJet(const Jet& jet1, const std::vector<Jet>& bjets);
-  
+
   // Input parameters
   const DirectionalCut<double> fQGLRCut;
   const DirectionalCut<int> fnumberOfJetsCut;
+  const double fJetsCut;
 
   // Event counter for passing selection
   Count cPassedQuarkGluonLikelihoodRatio;
@@ -172,7 +173,6 @@ private:
   QGLInputStash fProb;
   
   // Histograms
-  WrappedTH1* hAllJetsQGL;
   WrappedTH1* hAllJetsNonBJetsQGL;
   WrappedTH1* hGluonJetQGL;
   WrappedTH1* hLightJetQGL;

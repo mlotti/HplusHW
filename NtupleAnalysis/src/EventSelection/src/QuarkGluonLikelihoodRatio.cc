@@ -81,6 +81,7 @@ QuarkGluonLikelihoodRatio::QuarkGluonLikelihoodRatio(const ParameterSet& config,
 : BaseSelection(eventCounter, histoWrapper, commonPlots, postfix),
   fQGLRCut(config, "QGLRCut"),
   fnumberOfJetsCut(config, "numberOfJetsCut"),
+  fJetsCut(config.getParameter<float>("numberOfJetsCutValue")),
   // Event counter for passing selection
   cPassedQuarkGluonLikelihoodRatio(fEventCounter.addCounter("passed b-jet selection ("+postfix+")")),
   // Sub counters
@@ -94,6 +95,7 @@ QuarkGluonLikelihoodRatio::QuarkGluonLikelihoodRatio(const ParameterSet& config)
 : BaseSelection(),
   fQGLRCut(config, "QGLRCut"),
   fnumberOfJetsCut(config, "numberOfJetsCut"),
+  fJetsCut(config.getParameter<float>("numberOfJetsCutValue")),
   // Event counter for passing selection
   cPassedQuarkGluonLikelihoodRatio(fEventCounter.addCounter("passed b-jet selection")),
   // Sub counters
@@ -105,7 +107,6 @@ QuarkGluonLikelihoodRatio::QuarkGluonLikelihoodRatio(const ParameterSet& config)
 }
 
 QuarkGluonLikelihoodRatio::~QuarkGluonLikelihoodRatio() {
-  delete hAllJetsQGL;
   delete hAllJetsNonBJetsQGL;
   delete hGluonJetQGL;
   delete hLightJetQGL;
@@ -157,7 +158,6 @@ void QuarkGluonLikelihoodRatio::bookHistograms(TDirectory* dir) {
   float fQGLMin     = 0.0;
   float fQGLMax     = 1.0;
     
-  hAllJetsQGL = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "AllJetsQGL", "Quark-Gluon discriminant for all jets", nQGLBins, fQGLMin, fQGLMax);
   hAllJetsNonBJetsQGL = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "AllJetsNonBJetsQGL", "Quark-Gluon discriminant for all jets bot identified as b-jets", nQGLBins, fQGLMin, fQGLMax);
   hGluonJetQGL = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "GluonJetQGL", "Quark-Gluon discriminant for Gluon Jets", nQGLBins, fQGLMin, fQGLMax);
   hLightJetQGL = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LightJetQGL", "Quark-Gluon discriminant for Light Jets", nQGLBins, fQGLMin, fQGLMax);
@@ -190,16 +190,17 @@ QuarkGluonLikelihoodRatio::Data QuarkGluonLikelihoodRatio::privateAnalyze(const 
   Data output;
   cSubAll.increment();
   
-  // Calculate the QGLR for events with number of jets (non-bjets) less than fnumberOfJetsCut 
-  if (!fnumberOfJetsCut.passedCut( jetData.getSelectedJets().size() - bjetData.getSelectedBJets().size())) return output;
+  std::vector<Jet> selectedJets;
+  // Get all the non-bjets jets
+  for (auto jet: jetData.getSelectedJets())
+    {
+      if (isBJet(jet, bjetData.getSelectedBJets())) continue;
+      selectedJets.push_back(jet);
+    }
+  // Consider only up to Nth jets
+  if (!fnumberOfJetsCut.passedCut(selectedJets.size())) selectedJets.resize(fJetsCut);
   
-  for(const Jet& jet: jetData.getSelectedJets()) {
-    
-    // All jets QGL
-    hAllJetsQGL -> Fill(jet.QGTaggerAK4PFCHSqgLikelihood());
-    
-    // Skip jets identified as b-jets
-    if (isBJet(jet, bjetData.getSelectedBJets())) continue;
+  for(const Jet& jet: selectedJets){
     
     // All jets not identified as b-jets QGL
     hAllJetsNonBJetsQGL -> Fill(jet.QGTaggerAK4PFCHSqgLikelihood());
@@ -244,7 +245,7 @@ QuarkGluonLikelihoodRatio::Data QuarkGluonLikelihoodRatio::privateAnalyze(const 
   // Fill Histograms
   hQGLR          -> Fill(output.fQGLR);
   hQGLR_vs_HT    -> Fill(jetData.HT(), output.fQGLR);
-  hQGLR_vs_NJets -> Fill(jetData.getNumberOfSelectedJets(), output.fQGLR);
+  hQGLR_vs_NJets -> Fill(output.fJetsForQGLR.size(), output.fQGLR);
   
   // Return data object
   return output;
@@ -252,7 +253,6 @@ QuarkGluonLikelihoodRatio::Data QuarkGluonLikelihoodRatio::privateAnalyze(const 
 
 double QuarkGluonLikelihoodRatio::calculateQGLR(const Event& iEvent, const std::vector<Jet> Jets)
 {
-  
   // Quark term
   double LNq0g = calculateL(iEvent, Jets, Jets.size(), 0);
     
