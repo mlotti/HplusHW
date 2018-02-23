@@ -96,11 +96,13 @@ private:
   Count cSubPassedIsolation;
   
   // Histograms
+  WrappedTH1 *hMuonNAll;
   WrappedTH1 *hMuonPtAll;
   WrappedTH1 *hMuonEtaAll;
   WrappedTH1 *hMuonRelIsoAll;
   WrappedTH1 *hMuonMiniIsoAll;
   
+  WrappedTH1 *hMuonNPassed;
   WrappedTH1 *hMuonPtPassed;
   WrappedTH1 *hMuonEtaPassed;
   WrappedTH1 *hMuonRelIsoPassed;
