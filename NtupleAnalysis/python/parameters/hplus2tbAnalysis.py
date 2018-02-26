@@ -158,7 +158,7 @@ scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection,
 #=================================================================================================
 # QGL selection
 #=================================================================================================
-qglSelection = PSet(
+qglrSelection = PSet(
     QGLRCutValue             = 0.0,
     QGLRCutDirection         = ">=",
     numberOfJetsCutValue     = 10,
@@ -306,6 +306,6 @@ allSelections = PSet(
     FakeBBjetSelection    = fakeBBjetSelection,
     CommonPlots           = commonPlotsOptions,
     HistogramAmbientLevel = histogramAmbientLevel,
-    QGLRSelection         = qglSelection,
+    QGLRSelection         = qglrSelection,
 )
 

@@ -387,7 +387,7 @@ def PlotHistograms(datasetsMgr, histoName):
     plots.drawPlot(p, saveName, **kwargs) #the "**" unpacks the kwargs_ dictionary
 
     # Save the plots in custom list of saveFormats
-    SavePlot(p, saveName, os.path.join(opts.saveDir), [".png"])#, ".pdf"] )
+    SavePlot(p, saveName, os.path.join(opts.saveDir), [".png", ".pdf"] )
     return
 
 def GetCRLabel(histoName):
