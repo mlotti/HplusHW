@@ -356,6 +356,15 @@ datasetsTTJets.append(Dataset('/TTJets_HT-600to800_TuneCUETP8M1_13TeV-madgraphML
 datasetsTTJets.append(Dataset('/TTJets_HT-800to1200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 
 
+datasetsTTJets_SingleLeptFromT = []
+das = "https://cmsweb.cern.ch/das/request?view=list&limit=150&instance=prod%2Fglobal&input=dataset%3D%2FTTJets*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
+datasetsTTJets_SingleLeptFromT.append(Dataset('/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsTTJets_SingleLeptFromT.append(Dataset('/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsTTJets_SingleLeptFromT.append(Dataset('/TTJets_SingleLeptFromT_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsTTJets_SingleLeptFromT.append(Dataset('/TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsTTJets_SingleLeptFromT.append(Dataset('/TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsTTJets_SingleLeptFromT.append(Dataset('/TTJets_SingleLeptFromTbar_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+
 datasetsDY = []
 das = "https://cmsweb.cern.ch/das/request?input=dataset%3D%2FDYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8%2FRunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2%2FMINIAODSIM&instance=prod%2Fglobal"
 #datasetsDY.append(Dataset('/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-herwigpp_30M/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das, name="DYJetsToLL_M_50_HERWIGPP"))
@@ -616,6 +625,8 @@ hplus2tbAnalysisDatasets.extend(datasetsJetHTData_03Feb2017)
 hplus2tbAnalysisDatasets.extend(datasetsSignalTB)
 # hplus2tbAnalysisDatasets.extend(datasetsSignalTB_ext1)
 hplus2tbAnalysisDatasets.extend(datasetsTop)
+#hplus2tbAnalysisDatasets.extend(datasetsTTJets) #-ve weights
+hplus2tbAnalysisDatasets.extend(datasetsTTJets_SingleLeptFromT)
 hplus2tbAnalysisDatasets.extend(datasetsSingleTop)
 hplus2tbAnalysisDatasets.extend(datasetsDYJetsToQQ)
 hplus2tbAnalysisDatasets.extend(datasetsWJetsToQQ)
@@ -631,7 +642,6 @@ hplus2tbAnalysisDatasets.extend(datasetsTTZToQQ)
 # hplus2tbAnalysisDatasets.extend(datasetsQCDMuEnriched)
 # hplus2tbAnalysisDatasets.extend(datasetsQCD_HT_BGenFilter) 
 # hplus2tbAnalysisDatasets.extend(datasetsQCD_HT_GenJets5) 
-# hplus2tbAnalysisDatasets.extend(datasetsTTJets) #-ve weights
 
 
 # Trigger Efficiency (h2tb)
