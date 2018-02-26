@@ -100,16 +100,15 @@ jetSelection = PSet(
 # Fat jet selection
 #=================================================================================================
 fatjetVeto = PSet(
-    fatjetType                  = "FatJets",   
-    fatjetPtCuts                = [450.0],   # [default: [450.0] ]
-    fatjetEtaCuts               = [2.4],     # [default: [2.4] ]
-    fatjetIDDiscr               = "IDloose", # [default: "IDLoose"] (options: IDloose, IDtight, IDtightLeptonVeto)
-    fatjetPUIDDiscr             = "",        # [default: ""]
-    topMatchingDeltaR           = 0.8,       # [default: 0.8] (options: -ve value to disable)
-    topConstituentMatchingDeltaR= 0.8,       # [default: 0.8] (options: disable topMatchingDeltaR to disable)
-    topMatchingType             = 1,         # [default: 1]   (options: jjb = 1, jj = 2, jb = 3, inclusive < 0)
-    numberOfFatJetsCutValue     = 0,         # [default: 0]
-    numberOfFatJetsCutDirection = "==",      # [default: "=="] (options: ==, !=, <, <=, >, >=)
+    fatjetType      = "FatJets", # [default: "FatJets"]  
+    fatjetPtCuts    = [450.0],   # [default: [450.0] ]
+    fatjetEtaCuts   = [2.4],     # [default: [2.4] ]
+    fatjetIDDiscr   = "IDloose", # [default: "IDLoose"] (options: IDloose, IDtight, IDtightLeptonVeto)
+    fatjetPUIDDiscr = "",        # [default: ""]
+    topMatchDeltaR  = 0.8,       # [default: 0.8]
+    topMatchTypes   = [1],       # [default: 1]   (options: kJJB=1, kJJ=2, kJB=3, kJJBorJJ=4, kJJBorJB=5, kJJorJB=6, kAll=7, disable = -1)
+    numberOfFatJetsCutValue     = 0,    # [default: 0]
+    numberOfFatJetsCutDirection = "==", # [default: "=="] (options: ==, !=, <, <=, >, >=)
 )
 
 # #=================================================================================================
@@ -256,7 +255,7 @@ commonPlotsOptions = PSet(
     phiBins           = PSet(nBins =  64, axisMin = -3.2, axisMax =    3.2),
     deltaEtaBins      = PSet(nBins = 100, axisMin =  0.0, axisMax =   10.0),
     deltaPhiBins      = PSet(nBins =  32, axisMin =  0.0, axisMax =    3.2),
-    deltaRBins        = PSet(nBins =  50, axisMin =  0.0, axisMax =   10.0),
+    deltaRBins        = PSet(nBins = 100, axisMin =  0.0, axisMax =   10.0),
     rtauBins          = PSet(nBins =  55, axisMin =  0.0, axisMax =    1.1), # HToTauNu
     njetsBins         = PSet(nBins =  18, axisMin =  0.0, axisMax =   18.0),
     metBins           = PSet(nBins =  80, axisMin =  0.0, axisMax =  400.0), #  5 GeV bin width
