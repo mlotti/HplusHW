@@ -2,6 +2,7 @@
 
 from HiggsAnalysis.NtupleAnalysis.main import PSet
 import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
+import HiggsAnalysis.NtupleAnalysis.parameters.jsonReader as jsonReader
 
 #================================================================================================
 # General parameters
@@ -144,11 +145,29 @@ bjetSelection = PSet(
     numberOfBJetsCutValue     = 3,                  # [default: 3]
     numberOfBJetsCutDirection = ">=",               # [default: ">="] (options: ==, !=, <, <=, >, >=)
 )
+
+#================================================================================================
+# Scale Factors
+#================================================================================================
 scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
                                     btagPayloadFilename    = "CSVv2.csv",
                                     #btagEfficiencyFilename = "btageff_hybrid_HToTB.json",
                                     btagEfficiencyFilename = "btageff_HToTB.json",
                                     direction              = "nominal")
+
+#=================================================================================================
+# QGL selection
+#=================================================================================================
+qglSelection = PSet(
+    QGLRCutValue             = 0.0,
+    QGLRCutDirection         = ">=",
+    numberOfJetsCutValue     = 10,
+    numberOfJetsCutDirection = "<=",
+)
+
+jsonReader.setupQGLInformation(QGLRPset  = qglSelection,
+                               jsonname_Light  = "QGLdiscriminator_QCD_LightJets.json",
+                               jsonname_Gluon  = "QGLdiscriminator_QCD_GluonJets.json")
 
 #================================================================================================
 # MET selection
@@ -287,5 +306,6 @@ allSelections = PSet(
     FakeBBjetSelection    = fakeBBjetSelection,
     CommonPlots           = commonPlotsOptions,
     HistogramAmbientLevel = histogramAmbientLevel,
+    QGLRSelection         = qglSelection,
 )
 
