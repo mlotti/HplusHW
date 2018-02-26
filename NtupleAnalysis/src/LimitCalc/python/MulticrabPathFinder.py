@@ -1,14 +1,24 @@
 #! /usr/bin/env python
+'''
+DESCRIPTION:
+This module contains a class to identify multicrab dirs from a given directory. 
+It Identifies separately the signal, ewk QCDfact and QCDinv dirs. If multiple 
+directories are found, the most recent one is taken!
+'''
 
+#================================================================================================    
+# Import modules
+#================================================================================================    
 import sys
 import os
 import re
 
 from HiggsAnalysis.NtupleAnalysis.tools.aux import execute
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 
-# class to identify multicrab dirs from a given directory. Identifies separately the signal, ewk
-# QCDfact and QCDinv dirs. If multiple directories are found, the latest is taken.
-
+#================================================================================================    
+# Class Definition
+#================================================================================================    
 class MulticrabDirectoryDataType:
     UNKNOWN = 0
     OBSERVATION = 1
@@ -21,12 +31,56 @@ class MulticrabDirectoryDataType:
     DATACARDONLY = 8
 
 class MulticrabPathFinder:
-    def __init__(self, path):
-        multicrabpaths = self.scan(path)
-        self._ewk_path     = self.ewkfind(multicrabpaths)
-        self._signal_path  = self.signalfind(multicrabpaths)
-        self._qcdfact_path = self.qcdfactfind(multicrabpaths)
-        self._qcdinv_path  = self.qcdinvfind(multicrabpaths)
+    def __init__(self, path, h2tb=False, verbose=False):
+        self._verbose        = verbose
+        self._h2tb           = h2tb
+        self._multicrabpaths = self.scan(path)
+        self._signal_path    = self.signalfind(self._multicrabpaths)
+        self._ewk_path       = self.ewkfind(self._multicrabpaths)
+        self._qcdfact_path   = self.qcdfactfind(self._multicrabpaths)
+        self._qcdinv_path    = self.qcdinvfind(self._multicrabpaths)
+
+    def Verbose(self, msg, printHeader=True):
+        '''
+        Calls Print() only if verbose options is set to true
+        '''
+        if not self._verbose:
+            return
+        self.Print(msg, printHeader)
+        return
+
+    def Print(self, msg, printHeader=True):
+        '''
+        Simple print function. If verbose option is enabled prints, otherwise does nothing
+        '''
+        fName = __file__.split("/")[-1]
+        fName = fName.replace(".pyc", ".py")
+        if printHeader:
+            print "=== ", fName
+        print "\t", msg
+        return
+
+    def PrintInfo(self):
+        table = []
+        align = "{:>20} {:^1} {:<130}"
+        title = align.format("Variable", "", "Value")
+        hLine = 150*"="
+        table.append(hLine)
+        table.append(title)
+        table.append(hLine)
+        table.append( align.format("Verbose"        , "", self._verbose) )
+        table.append( align.format("h2tb"           , "", self._h2tb) )
+        table.append( align.format("#Multicrab Dirs", "", len(self._multicrabpaths)) )
+        table.append( align.format("Signal Path"    , "", self._signal_path ) )
+        table.append( align.format("EWK Path"       , "", self._ewk_path) )
+        table.append( align.format("QCD Factorised" , "", self._qcdfact_path) )
+        table.append( align.format("QCD Inverted"   , "", self._qcdinv_path ) )
+        table.append(hLine)
+        table.append("")
+        for row in table:
+            self.Print(row, False)
+
+        return
 
     def getQCDFactorisedExists(self):
         return os.path.exists(self.getQCDfacPath())
@@ -55,7 +109,7 @@ class MulticrabPathFinder:
     def getQCDinvPath(self):
         return self._qcdinv_path
 
-    def getSubPaths(self,path,regexp,exclude=False):
+    def getSubPaths(self, path, regexp, exclude=False):
 	retDirs = []
 	dirs = execute("ls %s"%path)
 	path_re = re.compile(regexp)
@@ -74,38 +128,68 @@ class MulticrabPathFinder:
 
     def scan(self,path):
         multicrabdirs = []
-        dirs = execute("ls %s"%path)
-        for dir in dirs:
-            dir = os.path.join(path,dir)
-            if os.path.isdir(dir):
-                filepath = os.path.join(dir,"multicrab.cfg")
-		filepath2 = os.path.join(dir,"inputInfo.txt")
-                if os.path.exists(filepath) or os.path.exists(filepath2):
-                    multicrabdirs.append(dir)
+        dirs = execute("ls %s"% (path) )
+
+        # For-loop: All directories in path
+        for d in dirs:
+            d = os.path.join(path, d)
+            
+            # Skill item if not a directory
+            if not os.path.isdir(d):
+                continue
+
+            self.Verbose("Looking under directory %s" % (d))
+            filepath1 = os.path.join(d, "multicrab.cfg")
+            filepath2 = os.path.join(d, "inputInfo.txt")
+            
+            # If either of the above files exists save the dir for later use
+            if os.path.exists(filepath1) or os.path.exists(filepath2):
+                multicrabdirs.append(d)
+
+        self.Verbose("Found %i directories:\n\t%s" % (len(multicrabdirs), "\n\t".join(multicrabdirs)) )
         return multicrabdirs
 
     def ewkfind(self,dirs):
-        return self.selectLatest(self.grep(dirs,"mbedded",file="multicrab.cfg"))
-        #return self.selectLatest(self.grep(dirs,"mbedding",file="inputInfo.txt"))
+        if self._h2tb:
+            myWord = "Hplus2tbAnalysis"
+            myFile = "multicrab.cfg"
+        else:
+            myWord = "mbedded"
+            myFile = "multicrab.cfg"
+        return self.selectLatest( self.grep(dirs, myWord, myFile) )
 
     def signalfind(self,dirs):
-	return self.selectLatest(self.grep(dirs,"SignalAnalysis",file="multicrab.cfg"))
+        if self._h2tb:
+            myWord = "Hplus2tbAnalysis"
+            myFile = "multicrab.cfg"
+        else:
+            myWord = "SignalAnalysis"
+            myFile = "multicrab.cfg"
+        return self.selectLatest( self.grep(dirs, myWord, myFile) )
 
     def qcdfactfind(self,dirs):
-        myList = []
+        myList  = []
+        keyword = "pseudoMulticrab_QCDfactorised"
+        if self._h2tb:
+            return "" #None
+
         for d in dirs:
-            if "pseudoMulticrab_QCDfactorised" in d:
+            if keyword in d:
                 myList.append(d)
         return self.selectLatest(myList)
 
     def qcdinvfind(self,dirs):
-        myList = []
+        myList  = []
+        keyword = "pseudoMulticrab_QCDfactorised"
+        if self._h2tb:
+            keyword = "FakeBMeasurement_"
+
         for d in dirs:
-            if "pseudoMulticrab_QCDMeasurement" in d:
+            if keyword in d:
                 myList.append(d)
         return self.selectLatest(myList)
 
-    def grep(self,dirs,word,file="multicrab.cfg"):
+    def grep(self, dirs, word, file="multicrab.cfg"):
         command = "grep " + word + " "
         founddirs = []
         for dir in dirs:
@@ -126,13 +210,19 @@ class MulticrabPathFinder:
         if len(dirs) == 0:
             return ""
         if len(dirs) > 1:
-            print "  Warning, more than 1 path found"
+            self.Print("More than 1 path found! Will take the most recent one:")
             latest = dirs[0]
             for dir in dirs:
-                print "    ",dir
                 if os.path.getmtime(dir) > os.path.getmtime(latest):
                     latest = dir
 
-            print "     taking the most recent one",latest
+            # Print all paths found and highlight the latest one
+            for d in dirs:
+                if d == latest:
+                    #self.Print(ShellStyles.NoteStyle() + latest + ShellStyles.NormalStyle(), False)
+                    self.Print(ShellStyles.SuccessStyle() + latest + ShellStyles.NormalStyle(), False)
+                else:
+                    self.Print(d, False)
+
             return latest
         return dirs[0]

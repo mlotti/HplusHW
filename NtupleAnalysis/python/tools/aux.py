@@ -12,6 +12,26 @@ import HiggsAnalysis.NtupleAnalysis.tools.git as git
 import getpass
 import socket
 
+def Verbose(msg, printHeader=True):
+    '''
+    Calls Print() only if verbose options is set to true
+    '''
+    if not opts.verbose:
+        return
+    Print(msg, printHeader)
+    return
+
+
+def Print(msg, printHeader=True):
+    '''
+    Simple print function. If verbose option is enabled prints, otherwise does nothing
+    '''
+    fName = __file__.split("/")[-1]
+    if printHeader:
+        print "=== ", fName
+    print "\t", msg
+    return
+
 def rchop(myString, endString):
     '''
     if myString ends with "/" return it without the "/"
