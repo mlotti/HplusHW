@@ -46,9 +46,7 @@ def Verbose(msg, printHeader=True, verbose=False):
 #================================================================================================  
 Verbose         = True
 DataCardName    = 'Hplus2tb_13TeV'
-LightMassPoints = [] # Inform the datacard generator that light H+ is not considered
-HeavyMassPoints = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 1500, 2000, 2500, 3000] #, 5000, 7000, 10000]
-MassPoints      = LightMassPoints + HeavyMassPoints
+MassPoints      = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 1500, 2000, 2500, 3000] #, 5000, 7000, 10000]
 
 # Combine options
 OptionFakeBMeasurement                 = True  # If False QCD inclusive will be used and EWK inclusive (not just genuine-b) [default: True]
@@ -80,13 +78,8 @@ OptionSqrtS= 13    # sqrt(s)
 SignalRateCounter  = "Selected events"            # fixme: what is this for?
 FakeRateCounter    = "EWKfaketaus:SelectedEvents" # fixme: what is this for?
 histoPathInclusive = "ForDataDrivenCtrlPlots"
-if OptionFakeBMeasurement:
-    # EWK Datasets should only be Genuibe-b (FakeB = QCD inclusive + EWK GenuineB)
-    histoPathGenuineB  = histoPathInclusive + "EWKGenuineB"
-else:
-    # EWK Datasets should be inclusive (Bkg = QCD inclusive + EWK inclusive)
-    histoPathGenuineB  = histoPathInclusive
-
+histoPathFakeB     = "ForDataDrivenCtrlPlots"
+histoPathGenuineB  = histoPathInclusive + "EWKGenuineB"
 ShapeHistogramsDimensions = systematics.getBinningForPlot(OptionMassShape) # Get the new binning for the shape histogram
 
 #================================================================================================  
@@ -173,36 +166,45 @@ for mass in MassPoints:
     DataGroups.append(hx)
 
 
-# FakeB dataset
-# ===============
-if 1:
-    myQCD = DataGroup(label             = labelPrefix + "FakeBmeasurement",
-                      landsProcess      = 2, #fixme: what is it for?
-                      validMassPoints   = MassPoints,
-                      datasetType       = "FakeB", #FakeB
-                      datasetDefinition = "FakeBMeasurementTrijetMass",
-                      nuisances         = myLumiSystematics,
-                      shapeHistoName    = OptionMassShape,
-                      histoPath         = histoPathInclusive)
+myFakeB = DataGroup(label             = labelPrefix + "FakeBmeasurement",
+                    landsProcess      = 2, #fixme: what is it for?
+                    validMassPoints   = MassPoints,
+                    datasetType       = "FakeB", #FakeB
+                    datasetDefinition = "FakeBMeasurementTrijetMass",
+                    nuisances         = myLumiSystematics,
+                    shapeHistoName    = OptionMassShape,
+                    histoPath         = histoPathInclusive)
+
+myQCD = DataGroup(label             = labelPrefix + "QCD",
+                  landsProcess      = 2, #fixme: what is it for?
+                  validMassPoints   = MassPoints,
+                  datasetType       = "QCDMC", #QCDMC
+                  datasetDefinition = "QCD",
+                  nuisances         = myLumiSystematics,
+                  shapeHistoName    = OptionMassShape,
+                  histoPath         = histoPathInclusive)
+
+if OptionFakeBMeasurement:
+    DataGroups.append(myFakeB)
+
+    # EWK Datasets should only be Genuibe-b (FakeB = QCD inclusive + EWK GenuineB)
+    histoPathEWK = histoPathGenuineB
+    dsetTypeEWK  = "GenuineB"
+
 else:
-    myQCD = DataGroup(label             = labelPrefix + "QCD",
-                      landsProcess      = 2, #fixme: what is it for?
-                      validMassPoints   = MassPoints,
-                      datasetType       = "QCDMC", #QCDMC
-                      datasetDefinition = "QCD",
-                      nuisances         = myLumiSystematics,
-                      shapeHistoName    = OptionMassShape,
-                      histoPath         = histoPathInclusive)
-    
-DataGroups.append(myQCD)
+    DataGroups.append(myQCD)
+
+    # EWK Datasets should be inclusive (Bkg = QCD inclusive + EWK inclusive)
+    histoPathEWK = histoPathInclusive
+    dsetTypeEWK  = "EWKMC"
 
 
 # TT
 DataGroups.append(DataGroup(label             = labelPrefix + "TT",
                             landsProcess      = 3,
                             shapeHistoName    = OptionMassShape, 
-                            histoPath         = histoPathGenuineB,
-                            datasetType       = "Embedding", # fixme
+                            histoPath         = histoPathEWK,
+                            datasetType       = dsetTypeEWK,                            
                             datasetDefinition = "TT", 
                             validMassPoints   = MassPoints,
                             nuisances         = myLumiSystematics
@@ -213,8 +215,8 @@ DataGroups.append(DataGroup(label             = labelPrefix + "TT",
 DataGroups.append(DataGroup(label             = labelPrefix + "TTWJetsToQQ", 
                             landsProcess      = 4,
                             shapeHistoName    = OptionMassShape, 
-                            histoPath         = histoPathGenuineB,
-                            datasetType       = "Embedding",  #fixme
+                            histoPath         = histoPathEWK,
+                            datasetType       = dsetTypeEWK,
                             datasetDefinition = "TTWJetsToQQ",
                             validMassPoints   = MassPoints,
                             nuisances         = myLumiSystematics
@@ -225,8 +227,8 @@ DataGroups.append(DataGroup(label             = labelPrefix + "TTWJetsToQQ",
 DataGroups.append(DataGroup(label             = labelPrefix + "TTZToQQ", 
                             landsProcess      = 5,
                             shapeHistoName    = OptionMassShape,
-                            histoPath         = histoPathGenuineB,
-                            datasetType       = "Embedding", 
+                            histoPath         = histoPathEWK,
+                            datasetType       = dsetTypeEWK,
                             datasetDefinition = "TTZToQQ",
                             validMassPoints   = MassPoints,
                             nuisances         = myLumiSystematics
@@ -237,8 +239,8 @@ DataGroups.append(DataGroup(label             = labelPrefix + "TTZToQQ",
 DataGroups.append(DataGroup(label             = labelPrefix + "TTTT",
                             landsProcess      = 6,
                             shapeHistoName    = OptionMassShape,
-                            histoPath         = histoPathGenuineB,
-                            datasetType       = "Embedding", #fixme
+                            histoPath         = histoPathEWK,
+                            datasetType       = dsetTypeEWK,
                             datasetDefinition = "TTTT",
                             validMassPoints   = MassPoints,
                             nuisances         = myLumiSystematics
@@ -249,8 +251,8 @@ DataGroups.append(DataGroup(label             = labelPrefix + "TTTT",
 DataGroups.append(DataGroup(label             = labelPrefix + "SingleTop", 
                             landsProcess      = 7,
                             shapeHistoName    = OptionMassShape,
-                            histoPath         = histoPathGenuineB,
-                            datasetType       = "Embedding", #fixme
+                            histoPath         = histoPathEWK,
+                            datasetType       = dsetTypeEWK,
                             datasetDefinition = "SingleTop",
                             validMassPoints   = MassPoints,
                             nuisances         = myLumiSystematics
@@ -261,8 +263,8 @@ DataGroups.append(DataGroup(label             = labelPrefix + "SingleTop",
 DataGroups.append(DataGroup(label             = labelPrefix + "DYJetsToQQ", 
                             landsProcess      = 8,
                             shapeHistoName    = OptionMassShape,
-                            histoPath         = histoPathGenuineB,
-                            datasetType       = "Embedding", #fixme
+                            histoPath         = histoPathEWK,
+                            datasetType       = dsetTypeEWK,
                             datasetDefinition = "DYJetsToQQHT",
                             validMassPoints   = MassPoints,
                             nuisances         = myLumiSystematics
@@ -273,8 +275,8 @@ DataGroups.append(DataGroup(label             = labelPrefix + "DYJetsToQQ",
 DataGroups.append(DataGroup(label             = labelPrefix + "Diboson",
                             landsProcess      = 9,
                             shapeHistoName    = OptionMassShape,
-                            histoPath         = histoPathGenuineB, 
-                            datasetType       = "Embedding", #fixme
+                            histoPath         = histoPathEWK, 
+                            datasetType       = dsetTypeEWK,
                             datasetDefinition = "Diboson",
                             validMassPoints   = MassPoints,
                             nuisances         = myLumiSystematics

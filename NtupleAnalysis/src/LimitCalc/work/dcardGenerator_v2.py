@@ -354,8 +354,7 @@ def main(opts, moduleSelector, multipleDirs):
 
     # Make tar file
     myTimestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime(time.time()))
-    myLimitCode = None
-    myFilename  = "datacards_%s_archive_%s.tgz"%(myLimitCode,myTimestamp)
+    myFilename  = "datacards_archive_%s.tgz" % (myTimestamp)
     fTar = tarfile.open(myFilename, mode="w:gz")
     
     # For-loop: All output dirs
@@ -365,10 +364,12 @@ def main(opts, moduleSelector, multipleDirs):
 
     msg = "Created archive of results directories to "
     Print(msg + SuccessStyle() + myFilename + NormalStyle())
-
-    #gc.collect()
-    #ROOT.SetMemoryPolicy( ROOT.kMemoryHeuristics)
-    #memoryDump()
+    
+    if 0:
+        gc.collect()
+        ROOT.SetMemoryPolicy( ROOT.kMemoryHeuristics)
+        memoryDump()
+    return
     
 
 if __name__ == "__main__":
