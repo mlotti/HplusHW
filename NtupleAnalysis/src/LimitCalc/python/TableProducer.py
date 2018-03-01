@@ -23,22 +23,24 @@ import sys
 import time
 import ROOT
 
-
 #================================================================================================ 
 # Function definition
 #================================================================================================ 
-#def Verbose(msg, printHeader=False):
-#    if not Verbose:
-#        return
-#    if printHeader:
-#        print "=== dcardHplus2tb2017Datacard_v2.py:"
-#
-#    if msg !="":
-#        print "\t", msg
-#    return
+VERBOSE = False
+
+def Verbose(msg, printHeader=False):
+    if not VERBOSE:
+        return
+    if printHeader:
+        print "=== dcardHplus2tb2017Datacard_v2.py:"
+
+    if msg !="":
+        print "\t", msg
+    return
 
 def Print(msg, printHeader=True):
     fName = __file__.split("/")[-1]
+    fName = fName.replace(".pyc", ".py")
     if printHeader:
         print "=== ", fName
     if msg !="":
@@ -115,13 +117,15 @@ def createBinByBinStatUncertHistograms(hRate, minimumStatUncertainty=0.5, xmin=N
     # Print summarty of warnings/errors (if any)
     if nNegativeRate > 0:
         msg = "Rate value for \"%s\" was negative (hence forced to zero) in %d bins" % (hRate.GetName(), nNegativeRate)
-        Print(ShellStyles.WarningLabel() + msg)
+        Verbose(ShellStyles.WarningLabel() + msg)
+
     if nBelowMinStatUncert > 0:
         msg = "Rate value for \"%s\" was below minimum statistical uncertainty (hence set to default min of %f) in %d bins" % (hRate.GetName(), minimumStatUncertainty, nBelowMinStatUncert)
-        Print(ShellStyles.WarningLabel() + msg, False)
+        Verbose(ShellStyles.WarningLabel() + msg, False)
+
     if nEmptyDownHistograms > 0:
         msg = "Rate value for \"%s\" was negative but it could not be forced to zero (this would lead to empty hDown histogram), so it was set to 0.00001 in %d bins" % (hRate.GetName(), nEmptyDownHistograms)
-        Print(ShellStyles.WarningLabel() + msg)
+        Verbose(ShellStyles.WarningLabel() + msg)
 
     return myList
 
@@ -200,19 +204,23 @@ class TableProducer:
         self._purgeColumnsWithSmallRateDoneStatus = False
         self._extractors = extractors[:]
         self._timestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime(time.time()))
-        if self._opts.lands:
-            self._outputFileStem = "lands_datacard_hplushadronic_m"
-            self._outputRootFileStem = "lands_histograms_hplushadronic_m"
-        elif self._opts.combine:
-            self._outputFileStem = "combine_datacard_hplushadronic_m"
-            self._outputRootFileStem = "combine_histograms_hplushadronic_m"
+        #if self._opts.lands:
+        #    self._outputFileStem = "lands_datacard_hplushadronic_m"
+        #    self._outputRootFileStem = "lands_histograms_hplushadronic_m"
+        #elif self._opts.combine:
+        #    self._outputFileStem = "combine_datacard_hplushadronic_m"
+        #    self._outputRootFileStem = "combine_histograms_hplushadronic_m"
+        self._outputFileStem = "combine_datacard_hplushadronic_m"
+        self._outputRootFileStem = "combine_histograms_hplushadronic_m"
+
         # Calculate number of nuisance parameters
         # Make directory for output
         myLimitCode = None
-        if opts.lands:
-            myLimitCode = "lands"
-        elif opts.combine:
-            myLimitCode = "combine"
+#        if opts.lands:
+#            myLimitCode = "lands"
+#        elif opts.combine:
+#            myLimitCode = "combine"
+        myLimitCode = "combine"
         self._dirname = "datacards_%s_%s_%s_%s"%(myLimitCode,self._timestamp,self._config.DataCardName.replace(" ","_"),self._outputPrefix)
         if hasattr(self._config, "OptionSignalInjection"):
             self._dirname += "_SignalInjection"
@@ -281,7 +289,7 @@ class TableProducer:
             f.close()
             # Inform user of code status txt files
             msg = "Created file " 
-            Print(msg + ShellStyles.SuccessStyle() + theFile + ShellStyles.NormalStyle(), index==1)
+            Verbose(msg + ShellStyles.SuccessStyle() + theFile + ShellStyles.NormalStyle(), index==1)
 
         self._extractors = extractors[:]
         
@@ -331,13 +339,10 @@ class TableProducer:
         self._purgeColumnsWithSmallRate()
 
         # For-loop: All mass points
-        for index, m in enumerate(self._config.MassPoints):
-            
-            # massString = ShellStyles.HighlightAltStyle() + str(m) + ShellStyles.NormalStyle()
-            # outString  = ShellStyles.HighlightAltStyle() + self._outputPrefix + ShellStyles.NormalStyle()
-            # msg = "Generating datacard for mass point %s for %s" % (massString, outString)
-            msg = "Generating datacard %s/%s" % (index+1, len(self._config.MassPoints)) #for mass point %s for %s" % (massString, outString)
-            Print(ShellStyles.HighlightAltStyle() + msg + ShellStyles.NormalStyle() )
+        for index, m in enumerate(self._config.MassPoints, 1):
+            msg = "Datacard %s/%s (mH=%s)" % (index, len(self._config.MassPoints), str(m)) 
+            #Print(ShellStyles.HighlightAltStyle() + msg + ShellStyles.NormalStyle(), index==1)
+            Print(ShellStyles.HighlightStyle() + msg + ShellStyles.NormalStyle(), index==1)
 
             # Open output root file
             myFilename = self._dirname+"/"+self._outputFileStem+"%d.txt"%m
@@ -404,13 +409,13 @@ class TableProducer:
             myFile = open(myFilename, "w")
             myFile.write(myCard)
             myFile.close()
-            Print("Written datacard to %s" % (ShellStyles.SuccessStyle() + myFilename + ShellStyles.NormalStyle() ))
+            Verbose("Written datacard to %s" % (ShellStyles.SuccessStyle() + myFilename + ShellStyles.NormalStyle() ))
 
             # Save & close histograms to root file
             self._saveHistograms(myRootFile,m),
             myRootFile.Write()
             myRootFile.Close()
-            Print("Written shape ROOT file to %s" % (ShellStyles.SuccessStyle() + myRootFilename + ShellStyles.NormalStyle() ))
+            Verbose("Written shape ROOT file to %s" % (ShellStyles.SuccessStyle() + myRootFilename + ShellStyles.NormalStyle() ))
         return
 
     def _purgeColumnsWithSmallRate(self):
@@ -450,10 +455,11 @@ class TableProducer:
     def _generateHeader(self, mass=None):
         myString = ""
         myLimitCode = None
-        if self._opts.lands:
-            myLimitCode = "LandS"
-        elif self._opts.combine:
-            myLimitCode = "Combine"
+        #if self._opts.lands:
+        #    myLimitCode = "LandS"
+        #elif self._opts.combine:
+        #    myLimitCode = "Combine"
+        myLimitCode = "Combine"
         if hasattr(self._config, "OptionSignalInjection"):
             myLimitCode = "SIGNALINJECTION(%s, norm=%f) %s"%(self._config.OptionSignalInjection["sample"], self._config.OptionSignalInjection["normalization"], myLimitCode)
         if mass == None:
@@ -485,9 +491,10 @@ class TableProducer:
         myObsCount = self._observation._rateResult._histograms[0].Integral()
         if self._opts.debugMining:
             print "  Observation is %d"%myObsCount
-        if self._opts.lands:
-            myResult = "Observation    %d\n"%myObsCount
-        elif self._opts.combine:
+        #if self._opts.lands:
+        #    myResult = "Observation    %d\n"%myObsCount
+        #elif self._opts.combine:
+        if 1:
             myResult =  "bin            taunuhadr\n"
             if hasattr(self._config, "OptionSignalInjection") or self._opts.testShapeSensitivity:
                 myResult += "observation    %f\n"%myObsCount
@@ -502,10 +509,12 @@ class TableProducer:
         myRow = ["bin",""]
         for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
             if c.isActiveForMass(mass,self._config):
-                if self._opts.lands:
-                    myRow.append("1")
-                elif self._opts.combine:
-                    myRow.append("taunuhadr")
+                #if self._opts.lands:
+                #    myRow.append("1")
+                #elif self._opts.combine:
+                #    myRow.append("taunuhadr")
+                myRow.append("taunuhadr")
+
         myResult.append(myRow)
         # obtain labels
         myRow = ["process",""]
@@ -611,7 +620,7 @@ class TableProducer:
                     myRow = [myVirtualMergeInformation[n.getId()+"ID"]]
                 else:
                     myRow = ["%s"%(n.getId())]
-                if self._opts.lands:
+                if 0: #self._opts.lands:
                     myRow.append(n.getDistribution())
                 elif self._opts.combine:
                     # Check if there are shapes and scalars on the same row
@@ -667,13 +676,13 @@ class TableProducer:
                             myRow.append(myValueString)
                         else:
                             if n.isShapeNuisance():
-                                if self._opts.lands:
+                                if 0:#self._opts.lands:
                                     myRow.append("0")
                                 elif self._opts.combine:
                                     myRow.append("-")
                             else:
                                 myRow.append("-")
-                if self._opts.lands:
+                if 0: #self._opts.lands:
                     # Add description to end of the row for LandS
                     if n.getId() in myVirtualMergeInformation.keys():
                         myRow.append(myVirtualMergeInformation["%sdescription"%n.getId()])
@@ -846,7 +855,7 @@ class TableProducer:
 
         # Inform the user
         msg = "Shape variation tables written to "
-        Print(msg + ShellStyles.SuccessStyle() + myFilename + ShellStyles.NormalStyle() ) #ShellStyles.HighlightAltStyle()
+        Verbose(msg + ShellStyles.SuccessStyle() + myFilename + ShellStyles.NormalStyle() ) #ShellStyles.HighlightAltStyle()
         return
 
     def makeEventYieldSummary(self):
@@ -888,8 +897,9 @@ class TableProducer:
             return "$%s \\pm %s %s $"%(formatStr%hwu.getRate(),formatStr%hwu.getRateStatUncertainty(),
                 getLatexFormattedUnc(formatStr,myPrecision,*hwu.getRateSystUncertainty()))
 
-        # Loop over mass points
-        for m in self._config.MassPoints:
+        # For-loop: All mass points
+        for i, m in enumerate(self._config.MassPoints, 1):
+            Verbose("Mass point is %d" % (m), i==1)
 
             # Initialize
             HH        = None
@@ -899,11 +909,13 @@ class TableProducer:
             Embedding = None
             EWKFakes  = None
 
-            # Loop over columns to obtain RootHistoWithUncertainties objects
             containsQCDdataset = False
-            for c in self._datasetGroups:
+            # For-loop: All columns t(o obtain RootHistoWithUncertainties objects)
+            for j, c in enumerate(self._datasetGroups, 1):
+                Verbose("Column label is %s" % (c.getLabel()), j==1)
 
-                if c.isActiveForMass(m,self._config) and not c.typeIsEmptyColumn():
+                # FIXME: What a mess!
+                if c.isActiveForMass(m, self._config) and not c.typeIsEmptyColumn():
                     # Find out what type the column is
                     if c.getLabel().startswith("HH") or c.getLabel().startswith("CMS_Hptntj_HH"):
                         HH = c.getCachedShapeRootHistogramWithUncertainties().Clone()
@@ -913,13 +925,14 @@ class TableProducer:
                         HW = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                     elif c.getLabel().startswith("HST") or c.getLabel().startswith("CMS_Hptntj_HST"):
                         HST = c.getCachedShapeRootHistogramWithUncertainties().Clone()
-                    elif c.typeIsQCD():
+                    elif c.typeIsQCD() or c.typeIsFakeB(): #fixme: will this be enough to take care of fake-b?
                         containsQCDdataset = True
                         if QCD == None:
                             try:
                                 QCD = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                             except AttributeError:
-                                raise Exception(ShellStyles.ErrorLabel()+"Did you create the pseudo-Multicrab containing the correctly normalized QCD background? Step 3) in the QCD background measurement instructions.")
+                                msg = "Did you create the pseudo-Multicrab containing the correctly normalized QCD background? Step 3) in the QCD background measurement instructions."
+                                raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
                         else:
                             QCD.Add(c.getCachedShapeRootHistogramWithUncertainties())
                     elif c.typeIsEWK() or (c.typeIsEWKfake() and self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated"):
@@ -934,7 +947,8 @@ class TableProducer:
                             EWKFakes.Add(c.getCachedShapeRootHistogramWithUncertainties())
                     else:
                         msg = "Unknown dataset type for dataset %s!%s" % (c.getLabel(), ShellStyles.NormalStyle())
-                        raise Exception(ShellStyles.ErrorLabel() + msg)
+                        raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
+                    
 
             # Calculate signal yield
             myBr = self._config.OptionBr
@@ -957,9 +971,11 @@ class TableProducer:
                 TotalExpected.Add(Embedding)
             else:
                 TotalExpected = Embedding.Clone()
-            if not self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
-                if EWKFakes != None:
-                    TotalExpected.Add(EWKFakes)
+
+            if hasattr(self._config, 'OptionGenuineTauBackgroundSource'):
+                if not self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
+                    if EWKFakes != None:
+                        TotalExpected.Add(EWKFakes)
 
             # Construct table (FIXME: what a mess!)
             '''
@@ -980,13 +996,16 @@ class TableProducer:
             myOutput += "Backgrounds:\n"
             if containsQCDdataset:
                 myOutput += "                           Multijets: %s"%getResultString(QCD,formatStr,myPrecision)
-            if self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
-                myOutput += "                           MC EWK+tt: %s"%getResultString(Embedding,formatStr,myPrecision)
-            else:
-                myOutput += "                    EWK+tt with taus: %s"%getResultString(Embedding,formatStr,myPrecision)
-                if EWKFakes != None:
-                    myOutput += "               EWK+tt with fake taus: %s"%getResultString(EWKFakes,formatStr,myPrecision)
-            myOutput += "                      Total expected: %s"%getResultString(TotalExpected,formatStr,myPrecision)
+
+            if hasattr(self._config, 'OptionGenuineTauBackgroundSource'):
+                if self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
+                    myOutput += "                           MC EWK+tt: %s"%getResultString(Embedding,formatStr,myPrecision)
+                else:
+                    myOutput += "                    EWK+tt with taus: %s"%getResultString(Embedding,formatStr,myPrecision)
+                    if EWKFakes != None:
+                        myOutput += "               EWK+tt with fake taus: %s"%getResultString(EWKFakes,formatStr,myPrecision)
+                myOutput += "                      Total expected: %s"%getResultString(TotalExpected,formatStr,myPrecision)
+            # FIXME: Add support for config.OptionFakeBMeasurementSource?
 
             #if self._config.BlindAnalysis:
             #    myOutput += "                            Observed: BLINDED\n\n"
@@ -1006,7 +1025,7 @@ class TableProducer:
             # Inform user
             if self._opts.verbose:
                 msg = "Event yield summary written to "
-                Print(msg + ShellStyles.SuccessStyle() + msg + myFilename + ShellStyles.NormalStyle(), True) #HighlightAltStyle
+                Verbose(msg + ShellStyles.SuccessStyle() + msg + myFilename + ShellStyles.NormalStyle(), True) #HighlightAltStyle
             
             myOutputLatex = "% table auto generated by datacard generator on "+self._timestamp+" for "+self._config.DataCardName+" / "+self._outputPrefix+"\n"
             myOutputLatex += "\\renewcommand{\\arraystretch}{1.2}\n"
@@ -1028,12 +1047,17 @@ class TableProducer:
             myOutputLatex += "  \\hline\n"
             if containsQCDdataset:
                 myOutputLatex += "  Multijet background (data-driven)       & %s \\\\ \n"%getLatexResultString(QCD,formatStr,myPrecision)
-            if self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
-                myOutputLatex += "  MC EWK+\\ttbar                           & %s \\\\ \n"%getLatexResultString(Embedding,formatStr,myPrecision)
-            else:
-                myOutputLatex += "  EWK+\\ttbar with $\\tau$ (data-driven)    & %s \\\\ \n"%getLatexResultString(Embedding,formatStr,myPrecision)
-                if EWKFakes != None:
-                    myOutputLatex += "  EWK+\\ttbar with e/\\mu/jet\\to$\\tau$ (MC) & %s \\\\ \n"%getLatexResultString(EWKFakes,formatStr,myPrecision)
+
+
+            if hasattr(self._config, 'OptionGenuineTauBackgroundSource'):
+                if self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
+                    myOutputLatex += "  MC EWK+\\ttbar                           & %s \\\\ \n"%getLatexResultString(Embedding,formatStr,myPrecision)
+                else:
+                    myOutputLatex += "  EWK+\\ttbar with $\\tau$ (data-driven)    & %s \\\\ \n"%getLatexResultString(Embedding,formatStr,myPrecision)
+                    if EWKFakes != None:
+                        myOutputLatex += "  EWK+\\ttbar with e/\\mu/jet\\to$\\tau$ (MC) & %s \\\\ \n"%getLatexResultString(EWKFakes,formatStr,myPrecision)
+            # FIXME: Add support for config.OptionFakeBMeasurementSource?
+
             myOutputLatex += "  \\hline\n"
             myOutputLatex += "  Total expected from the SM              & %s \\\\ \n"%getLatexResultString(TotalExpected,formatStr,myPrecision)
             #if self._config.BlindAnalysis:
@@ -1061,7 +1085,7 @@ class TableProducer:
                 
         # Inform user of where the event yield summaries were saved
         msg = "Event yield summary tables written to " 
-        Print(msg + ShellStyles.SuccessStyle() + self._infoDirname + ShellStyles.NormalStyle(), False) #ShellStyles.HighlightAltStyle() 
+        Verbose(msg + ShellStyles.SuccessStyle() + self._infoDirname + ShellStyles.NormalStyle(), False) #ShellStyles.HighlightAltStyle() 
         return
 
     def _getFormattedSystematicsNumber(self, value):
@@ -1301,7 +1325,7 @@ class TableProducer:
 
         # Inform the user
         msg = "Systematics summary table written to "
-        Print(msg + ShellStyles.SuccessStyle() + myFilename + ShellStyles.NormalStyle(), False) #HighlightAltStyle
+        Verbose(msg + ShellStyles.SuccessStyle() + myFilename + ShellStyles.NormalStyle(), True)
         return
 
     def makeQCDPuritySummary(self):
@@ -1440,8 +1464,9 @@ class TableProducer:
         self._observation._rateResult._histograms = [hOriginalObservationFinalHistogram, hOriginalObservationFineBinningHistogram]
         self._observation._result = hOriginalObservationFinalHistogram.Integral()
         self._extractors = myOriginalExtractors[:]
+
         # Output
-        print "\nCreated datacards with 0 +-1 -> 1 +- 0 shift for each shape nuisance"
+        Print("Created datacards with 0 +-1 -> 1 +- 0 shift for each shape nuisance", True)
         for item in myOutList:
             print item
         

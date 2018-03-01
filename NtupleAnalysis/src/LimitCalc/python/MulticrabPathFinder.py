@@ -20,15 +20,18 @@ import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 # Class Definition
 #================================================================================================    
 class MulticrabDirectoryDataType:
-    UNKNOWN = 0
-    OBSERVATION = 1
-    SIGNAL = 2
-    EWKTAUS = 3
-    EWKFAKETAUS = 4
-    QCDMC = 5
-    QCDINVERTED = 6
-    DUMMY = 7
+    UNKNOWN      = 0
+    OBSERVATION  = 1
+    SIGNAL       = 2
+    EWKTAUS      = 3
+    EWKFAKETAUS  = 4
+    QCDMC        = 5
+    QCDINVERTED  = 6
+    DUMMY        = 7
     DATACARDONLY = 8
+    EWKMC        = 9
+    FAKEB        = 10
+    GENUINEB     = 11
 
 class MulticrabPathFinder:
     def __init__(self, path, h2tb=False, verbose=False):
@@ -40,6 +43,7 @@ class MulticrabPathFinder:
         self._qcdfact_path   = self.qcdfactfind(self._multicrabpaths)
         self._qcdinv_path    = self.qcdinvfind(self._multicrabpaths)
         self._fakeB_path     = self.fakeBfind(self._multicrabpaths)
+        return
 
     def Verbose(self, msg, printHeader=True):
         '''
@@ -73,17 +77,25 @@ class MulticrabPathFinder:
         table.append( align.format("h2tb"           , "", self._h2tb) )
         table.append( align.format("#Multicrab Dirs", "", len(self._multicrabpaths)) )
         table.append( align.format("Signal Path"    , "", self._signal_path ) )
-        table.append( align.format("EWK Path"       , "", self._ewk_path) )
-        table.append( align.format("QCD Factorised" , "", self._qcdfact_path) )
-        table.append( align.format("QCD Inverted"   , "", self._qcdinv_path ) )
+        if self._h2tb:
+            table.append( align.format("Fake-b"         , "", self.getFakeBPath()) )
+            table.append( align.format("Genuine-b"      , "", self.getGenuineBPath()) )
+            table.append( align.format("QCD MC"         , "", self.getQCDMCPath()) )
+            table.append( align.format("EWK MC"         , "", self.getEWKMCPath()) )
+        else:
+            table.append( align.format("EWK Path"       , "", self._ewk_path) )
+            table.append( align.format("QCD Factorised" , "", self._qcdfact_path) )
+            table.append( align.format("QCD Inverted"   , "", self._qcdinv_path ) )
         table.append(hLine)
         table.append("")
-        for row in table:
-            self.Print(row, False)
+
+        # For-loop: All rows in table
+        for i, row in enumerate(table, 1):
+            self.Print(row, i==1)
         return
 
     def getFakeBPath(self):
-        return self.self.getFakeBPath()
+        return self.getFakeBPath()
 
     def getFakeBExists(self):
         return os.path.exists(self.getFakeBPath())
@@ -202,11 +214,31 @@ class MulticrabPathFinder:
         return self.selectLatest(myList)
 
     def fakeBfind(self,dirs):
-        myList  = []
-        keyword = "FakeBMeasurement"
+        myList   = []
+        keyword  = "FakeBMeasurement"
+        mcrabDir = None
+
+        # For-loop: All dirs
         for d in dirs:
             if keyword in d:
-                myList.append(d)
+                mcrabDir = d
+                #myList.append(d)
+
+        # Look inside the directory to find the pseudo-dataset directory
+        subDirs = os.listdir(mcrabDir) 
+        subDirList = [os.path.join(mcrabDir, d) for d in subDirs]
+
+        for i, d in enumerate(subDirList, 1):
+            relDir = d.split("/")[-1]
+
+            if keyword in relDir or keyword == relDir:
+                if os.path.isdir(d):
+                    myList.append(d)
+                    self.Verbose("Found Fake-b dir %s" % d, True)
+                    break
+            else:
+                self.Verbose("Skip dir %s" % relDir, i==1)
+
         return self.selectLatest(myList)
 
     def grep(self, dirs, word, file="multicrab.cfg"):
