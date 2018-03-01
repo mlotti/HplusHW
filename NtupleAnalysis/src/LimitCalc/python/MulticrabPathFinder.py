@@ -39,6 +39,7 @@ class MulticrabPathFinder:
         self._ewk_path       = self.ewkfind(self._multicrabpaths)
         self._qcdfact_path   = self.qcdfactfind(self._multicrabpaths)
         self._qcdinv_path    = self.qcdinvfind(self._multicrabpaths)
+        self._fakeB_path     = self.fakeBfind(self._multicrabpaths)
 
     def Verbose(self, msg, printHeader=True):
         '''
@@ -79,8 +80,13 @@ class MulticrabPathFinder:
         table.append("")
         for row in table:
             self.Print(row, False)
-
         return
+
+    def getFakeBPath(self):
+        return self.self.getFakeBPath()
+
+    def getFakeBExists(self):
+        return os.path.exists(self.getFakeBPath())
 
     def getQCDFactorisedExists(self):
         return os.path.exists(self.getQCDfacPath())
@@ -100,8 +106,20 @@ class MulticrabPathFinder:
     def getSignalPath(self):
         return self._signal_path
 
+    def getEWKMCPath(self):
+        return self._signal_path
+
+    def getQCDMCPath(self):
+        return self._signal_path
+
+    def getGenuineBPath(self):
+        return self._signal_path
+
     def getEWKPath(self):
         return self._ewk_path
+
+    def getFakeBPath(self):
+        return self._fakeB_path
 
     def getQCDfacPath(self):
         return self._qcdfact_path
@@ -170,9 +188,6 @@ class MulticrabPathFinder:
     def qcdfactfind(self,dirs):
         myList  = []
         keyword = "pseudoMulticrab_QCDfactorised"
-        if self._h2tb:
-            return "" #None
-
         for d in dirs:
             if keyword in d:
                 myList.append(d)
@@ -181,9 +196,14 @@ class MulticrabPathFinder:
     def qcdinvfind(self,dirs):
         myList  = []
         keyword = "pseudoMulticrab_QCDfactorised"
-        if self._h2tb:
-            keyword = "FakeBMeasurement_"
+        for d in dirs:
+            if keyword in d:
+                myList.append(d)
+        return self.selectLatest(myList)
 
+    def fakeBfind(self,dirs):
+        myList  = []
+        keyword = "FakeBMeasurement"
         for d in dirs:
             if keyword in d:
                 myList.append(d)
