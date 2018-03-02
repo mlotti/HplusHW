@@ -137,7 +137,7 @@ void FatJetSelection::bookHistograms(TDirectory* dir) {
   hFatJetTopMatchDeltaRJet1 = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FatJetTopMatchDeltaRJet1", ";#DeltaR(fat jet, jet1);Occur / %.2f", nDRBins, fDRMin, fDRMax);
   hFatJetTopMatchDeltaRJet2 = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FatJetTopMatchDeltaRJet2", ";#DeltaR(fat jet, jet2);Occur / %.2f", nDRBins, fDRMin, fDRMax);
   hFatJetTopMatchDeltaRBjet = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FatJetTopMatchDeltaRBjet", ";#DeltaR(fat jet, bjet);Occur / %.2f", nDRBins, fDRMin, fDRMax);
-  hFatJetTopMatchType    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FatJetTopMatchType"   , ";top type;Occur / %.2f", 5, -1.0, 4.0);
+  hFatJetTopMatchType    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FatJetTopMatchType"   , ";top type;Occur / %.2f", 5, 0.0, 5.0);
   hFatJetTopMatchPtRatio = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FatJetTopMatchPtRatio", ";fat jet p_{T} / top p_{T};Occur / %.2f", 40, 0.0, 2.0);
 
   return;
@@ -187,7 +187,7 @@ FatJetSelection::Data FatJetSelection::privateAnalyze(const Event& event, const 
   cSubAll.increment();
   
   // Sanity check
-  std::vector<int> topTypes = {-1, 0, 1, 2, 3}; // C++11 and later
+  std::vector<int> topTypes = {-1, 0, 1, 2, 3, 4}; // C++11 and later
   bool isValidType = false;
   for (auto t: topTypes)
     {
@@ -367,7 +367,7 @@ const FatJetSelection::FatjetType FatJetSelection::findFatJetMatchedToTopType(AK
   if (jjb) type = FatJetSelection::kJJB;
   else if (jj) type = FatJetSelection::kJJ;
   else if (jb) type = FatJetSelection::kJB;
-  else type = FatJetSelection::kJB;
+  else type = FatJetSelection::kResolved;
   return type;
 }
 

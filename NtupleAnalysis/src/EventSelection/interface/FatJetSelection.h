@@ -27,6 +27,7 @@ public:
     kJJB, //1
     kJJ, //2
     kJB, //3
+    kResolved, //4
   };
 
   class Data {
