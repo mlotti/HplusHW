@@ -165,7 +165,7 @@ qglrSelection = PSet(
     numberOfJetsCutDirection = "<=",
 )
 
-jsonReader.setupQGLInformation(QGLRPset  = qglSelection,
+jsonReader.setupQGLInformation(QGLRPset  = qglrSelection,
                                jsonname_Light  = "QGLdiscriminator_QCD_LightJets.json",
                                jsonname_Gluon  = "QGLdiscriminator_QCD_GluonJets.json")
 
