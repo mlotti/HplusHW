@@ -2726,14 +2726,17 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
 
    // CSVv2-Medium requirement
    unsigned int nBaselineBjets = 0;
+   double discWP = fInvertedBJetSelection.getDiscriminatorWP( cfg_BaselineBJetsDiscr, cfg_BaselineBJetsDiscrWP);
+
    for (auto bjet: invBjetData.getSelectedBJets())
      {
-        double discWP = fInvertedBJetSelection.getDiscriminatorWP( cfg_BaselineBJetsDiscr, cfg_BaselineBJetsDiscrWP);
        if (bjet.bjetDiscriminator() < discWP) continue;
        nBaselineBjets++;
      }
    bool passBaselineBjetCuts = cfg_BaselineNumberOfBJets.passedCut(nBaselineBjets); 
-   if (!passBaselineBjetCuts) return;
+   bool bLdgBJetIsMediumWP   = (invBjetData.getSelectedBJets()[0].bjetDiscriminator() >= discWP);
+   // std::cout << "bLdgBJetIsMediumWP = " << bLdgBJetIsMediumWP << std::endl;
+   if (!passBaselineBjetCuts*bLdgBJetIsMediumWP) return;
   
   // Increment counter
   cInvertedBTaggingCounter.increment();
