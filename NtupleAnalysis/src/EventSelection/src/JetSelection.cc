@@ -1,4 +1,4 @@
-S// -*- c++ -*-
+// -*- c++ -*-
 #include "EventSelection/interface/JetSelection.h"
 
 #include "Framework/interface/ParameterSet.h"
