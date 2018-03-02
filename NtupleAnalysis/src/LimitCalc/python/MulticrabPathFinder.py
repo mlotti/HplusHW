@@ -207,13 +207,15 @@ class MulticrabPathFinder:
 
     def qcdinvfind(self,dirs):
         myList  = []
-        keyword = "pseudoMulticrab_QCDfactorised"
+        keyword = "pseudoMulticrab_QCDMeasurement"
         for d in dirs:
             if keyword in d:
                 myList.append(d)
         return self.selectLatest(myList)
 
     def fakeBfind(self,dirs):
+        if not self._h2tb:
+            return None
         myList   = []
         keyword  = "FakeBMeasurement"
         mcrabDir = None

@@ -352,7 +352,7 @@ class DataCardGenerator:
         '''
         if not self.verbose:
             return
-        Print(msg, printHeader)
+        self.Print(msg, printHeader)
         return
 
     def Print(self, msg, printHeader=True):
@@ -616,12 +616,13 @@ class DataCardGenerator:
 
         # Loop over data groups to create datacard columns
         for dg in self._config.DataGroups:
-            myIngoreOtherQCDMeasurementStatus = (dg.datasetType == "QCD factorised" and self._QCDMethod == DatacardQCDMethod.INVERTED) or (dg.datasetType == "QCD inverted" and self._QCDMethod == DatacardQCDMethod.FACTORISED)
+#            myIngoreOtherQCDMeasurementStatus = (dg.datasetType == "QCD factorised" and self._QCDMethod == DatacardQCDMethod.INVERTED) or (dg.datasetType == "QCD inverted" and self._QCDMethod == DatacardQCDMethod.FACTORISED)
             myMassIsConsideredStatus = False
             for validMass in dg.validMassPoints:
                 if validMass in self._config.MassPoints:
                     myMassIsConsideredStatus = True
-            if not myIngoreOtherQCDMeasurementStatus and myMassIsConsideredStatus:
+#            if not myIngoreOtherQCDMeasurementStatus and myMassIsConsideredStatus:
+            if myMassIsConsideredStatus:
                 if self.verbose:
                     print "Constructing datacard column for data group %s%s" % (ShellStyles.NoteStyle() + dg.label, ShellStyles.NormalStyle())
 
