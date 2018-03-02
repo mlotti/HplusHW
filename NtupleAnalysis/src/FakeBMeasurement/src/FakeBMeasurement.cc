@@ -2735,8 +2735,9 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
      }
    bool passBaselineBjetCuts = cfg_BaselineNumberOfBJets.passedCut(nBaselineBjets); 
    bool bLdgBJetIsMediumWP   = (invBjetData.getSelectedBJets()[0].bjetDiscriminator() >= discWP);
-   // std::cout << "bLdgBJetIsMediumWP = " << bLdgBJetIsMediumWP << std::endl;
-   if (!passBaselineBjetCuts*bLdgBJetIsMediumWP) return;
+   // std::cout << "bool = " << (!passBaselineBjetCuts*bLdgBJetIsMediumWP) << ", passBaselineBjetCuts = " << passBaselineBjetCuts << ", bLdgBJetIsMediumWP = " << bLdgBJetIsMediumWP << std::endl;
+   if (!passBaselineBjetCuts) return;
+   if (!bLdgBJetIsMediumWP) return;
   
   // Increment counter
   cInvertedBTaggingCounter.increment();
