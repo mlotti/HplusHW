@@ -71,21 +71,20 @@ def PrintOptions(moduleSelector):
     Verbose(HighlightAltStyle() + msg + NormalStyle())
     return
 
-def PrintDsetInfo(signalDsetCreator, bkg1DsetCreator, bkg2DsetCreator, verbose=False):
+def PrintDsetInfo(dsetCreatorList, verbose=False):
     if not verbose:
         return
-    
-    Print("Signal dataset dir is %s" % (signalDsetCreator.getBaseDirectory()), True)
-    for d in signalDsetCreator.getDatasetNames():
-        Verbose(d, False)
 
-    Print("Bkg1 dataset dir is %s" % (bkg1DsetCreator.getBaseDirectory()), False)
-    for d in bkg1DsetCreator.getDatasetNames():
-        Verbose(d, False)
+    # Shortcuts
+    a = HighlightAltStyle()
+    b = NormalStyle()
 
-    Print("Bkg2 dataset dir is %s" % (bkg2DsetCreator.getBaseDirectory()), False)
-    for d in bkg2DsetCreator.getDatasetNames():
-        Verbose(d, False)
+    # For-loop: All dataset creators
+    for i, dc in enumerate(dsetCreatorList, 1):        
+        Print("Dataset creator %s has dir set to %s" % (a + dc.getLabel() + b, a + dc.getBaseDirectory() + b), i==1)
+        for dset in dc.getDatasetNames():
+            Verbose(dset, False)
+
     return
 
 def SetModuleSelectorSources(moduleSelector, primaryLabel, primaryDsetCreator, secondaryLabel, secondaryDsetCreator, tertiaryLabel, tertiaryDsetCreator, opts):
@@ -192,7 +191,6 @@ def memoryDump():
             cPickle.dump({'id': i, 'class': cls, 'size': size, 'referents': referents}, dump)
     return
 
-
 def getDsetCreator(label, mcrabPath, mcrabInfoOutput, enabledStatus=True):
     if enabledStatus:
         if mcrabPath == "":
@@ -267,11 +265,16 @@ def main(opts, moduleSelector, multipleDirs):
         fakesFromData = (config.OptionGenuineTauBackgroundSource == "DataDriven")
     signalLabel, bkg1Label, bkg2Label = GetDatasetLabels(config, fakesFromData, opts)
 
-    # Create datasets
+    # Create signal/bkg datasets creator
     Verbose("Creating signal & bkg datasets")
     signalDsetCreator = getSignalDsetCreator(multicrabPaths, signalLabel, mcrabInfoOutput)
     bkg1DsetCreator, bkg2DsetCreator = getBkgDsetCreators(multicrabPaths, bkg1Label, bkg2Label, fakesFromData, mcrabInfoOutput)
-    PrintDsetInfo(signalDsetCreator, bkg1DsetCreator, bkg2DsetCreator, opts.verbose) #bkg1 = EWK MC, bkg2 = FakeB if (data-driven==True)
+    # Set signal/bkg datasets creator labels
+    signalDsetCreator.setLabel(signalLabel)
+    bkg1DsetCreator.setLabel(bkg1Label)
+    bkg2DsetCreator.setLabel(bkg2Label)
+
+    PrintDsetInfo([signalDsetCreator, bkg1DsetCreator, bkg2DsetCreator], True)#opts.verbose) #bkg1 = EWK MC, bkg2 = FakeB if (data-driven==True)
 
     # Check options that are affecting the validity of the results
     CheckOptions(config)

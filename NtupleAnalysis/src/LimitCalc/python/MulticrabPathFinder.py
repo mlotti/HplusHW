@@ -274,7 +274,8 @@ class MulticrabPathFinder:
                     #self.Print(ShellStyles.NoteStyle() + latest + ShellStyles.NormalStyle(), False)
                     self.Print(ShellStyles.SuccessStyle() + latest + ShellStyles.NormalStyle(), False)
                 else:
-                    self.Print(d, False)
-
+                    self.Print(d, False)            
             return latest
-        return dirs[0]
+        else:
+            self.Verbose(ShellStyles.SuccessStyle() + "Selecting dir %s" % (dirs[0]) + ShellStyles.NormalStyle(), False)
+            return dirs[0]
