@@ -670,20 +670,23 @@ class DataCardGenerator:
         # Is this data-driven?
         if hasattr(self._config, 'OptionGenuineTauBackgroundSource'):
             isDataDriven = (self._config.OptionGenuineTauBackgroundSource == "DataDriven")
+        if hasattr(self._config, 'OptionFakeTauBackgroundSource'):
+            isDataDriven = (self._config.OptionGenuineTauBackgroundSource == "DataDriven")
         if hasattr(self._config, 'OptionFakeBMeasurementSource'):
             isDataDriven = (self._config.OptionFakeBMeasurementSource == "DataDriven")
 
         # Determine the dataset manager index (manager index is simple bad coding! replace sometime in future)
-        dsetMgrIndex = -1
+#        dsetMgrIndex = -1
+        dsetMgrIndex = 0 #FIXME: should be -1, once the problem with "res. " column is fixed
         if c.typeIsObservation() or c.typeIsSignal() or c.typeIsEWKfake() or c.typeIsQCDMC() or (c.typeIsEWK() and not isDataDriven):
             dsetMgrIndex = 0
         elif c.typeIsEWK() or c.typeIsGenuineB() or c.typeIsEWKMC():
             dsetMgrIndex = 1
         elif c.typeIsQCDinverted() or c.typeIsFakeB() or c.typeIsQCDMC():
             dsetMgrIndex = 2
-        else:
-            msg = "Could not determine which dataset manager to use for column \"%s\"" % (c.getLabel())
-            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle() )
+#        else: #FIXME: res. should not enter here as a column
+#            msg = "Could not determine which dataset manager to use for column \"%s\"" % (c.getLabel())
+#            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle() )
 
         # Construct summary table
         align = "{:<40} {:<10} "
@@ -695,11 +698,14 @@ class DataCardGenerator:
         table.append(align.format("Is Observation", c.typeIsObservation()) )
         table.append(align.format("Is Signal"     , c.typeIsSignal() ) )
         table.append(align.format("Is EWK Fake"   , c.typeIsEWKfake() ) )
+        table.append(align.format("Is QCD"        , c.typeIsQCD() ) )
         table.append(align.format("Is QCD MC"     , c.typeIsQCDMC() ) )
         table.append(align.format("IS EWK MC"     , c.typeIsEWKMC() ) )
         table.append(align.format("IS EWK"        , c.typeIsEWK() ) )
+        table.append(align.format("IS QCD Inverted",c.typeIsQCDinverted() ) )
         table.append(align.format("Is Fake-b"     , c.typeIsFakeB() ) )
         table.append(align.format("Is Genuine-b"  , c.typeIsGenuineB() ) )
+        table.append(align.format("Is empty column",c.typeIsEmptyColumn() ) )
         table.append(align.format("Dset Mgr Index", dsetMgrIndex ) )
         table.append(hLine)
         table.append("")
