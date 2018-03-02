@@ -1,4 +1,4 @@
-// -*- c++ -*-
+S// -*- c++ -*-
 #include "EventSelection/interface/JetSelection.h"
 
 #include "Framework/interface/ParameterSet.h"
@@ -360,7 +360,7 @@ void JetSelection::findJetMatchingToTau(std::vector<Jet>& collection, const Even
     }
     i += 1;
   }
-  if (myMinDeltaR < 0.1)
+  if (myMinDeltaR < fTauMatchingDeltaR)
     collection.push_back(event.jets()[mySelectedIndex]);
 }
 
