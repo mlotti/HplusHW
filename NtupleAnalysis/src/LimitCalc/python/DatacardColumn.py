@@ -787,7 +787,7 @@ class DatacardColumn():
                 error = h.GetBinError(iBin)
                 if error>0 and (error<minimumError or minimumError<0):
                     minimumError=error
-            if minimumError > 0.0:
+            if minimumError > 0.0 and minimumError < config.MinimumStatUncertainty:
                 minStatUncert = minimumError
 
         # For-loop: All histogram bins
