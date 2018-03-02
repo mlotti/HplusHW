@@ -187,7 +187,7 @@ def main(opts):
         folder     = opts.folder
         histoList  = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(folder)
         histoPaths1 = [os.path.join(folder, h) for h in histoList]
-        histoPaths2 = [h for h in histoPaths1 if "jet" not in h.lower()]
+        histoPaths2 = [h for h in histoPaths1]# if "jet" not in h.lower()]
         nHistos     = len(histoPaths2)
 
         # For-loop: All histograms
@@ -238,10 +238,26 @@ def GetHistoKwargs(h, opts):
         units            = "GeV/c"
         kwargs["ylabel"] = _yLabel + units
 
+    if "ptratio" in h.lower():
+        kwargs["ylabel"] = "Events / %.2f "
+        #kwargs["opts"]   = {"xmax": +1.4, "ymin": yMin, "ymaxfactor": yMaxF}
+
     if "eta" in h.lower():
         kwargs["ylabel"] = "Events / %.2f "
         kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": yMin, "ymaxfactor": yMaxF}
+
+
+    if "deltar" in h.lower():
+        kwargs["ylabel"] = "Events / %.2f "
+        kwargs["cutBox"] = {"cutValue": 0.8, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmax": +6.0, "ymin": yMin, "ymaxfactor": yMaxF}
+
+    if "topmatchtype" in h.lower():
+        kwargs["ylabel"] = "Events / %.2f "
+        kwargs["cutBox"] = {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +4.0, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["moveLegend"] = {"dx": -500.0, "dy": -500.0, "dh": -500.0}
 
     if "mvamax" in h.lower():
         units            = ""
@@ -463,7 +479,7 @@ def GetHistoKwargs(h, opts):
             
     if h == "counter":
         ROOT.gStyle.SetLabelSize(16.0, "X")
-        xMin = 17  # 15 = jets selection, 16 = bjets selection, 17 = baseline: bjets selection, 18 = bjets SF
+        xMin = 16  # 15 = jets selection, 16 = bjets selection, 17 = baseline: bjets selection, 18 = bjets SF
         xMax = 29
         kwargs["opts"] = {"xmin": xMin, "ymin": 1e0, "ymax": 5e6}#"ymaxfactor": yMaxF}
         kwargs["moveLegend"] = {"dx": -500.0, "dy": -500.0, "dh": -500.0}
@@ -804,6 +820,9 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
 
     # Create the name under which plot will be saved
     saveName = os.path.join(saveDir, plotName.replace("/", "_"))
+    saveName = saveName.replace("(", "_")
+    saveName = saveName.replace(")", "")
+    saveName = saveName.replace(" ", "")
 
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
@@ -956,8 +975,8 @@ if __name__ == "__main__":
                       "jetSelection_", "bjetSelection_", "metSelection_Baseline",
                       "topologySelection_Baseline", "topbdtSelection_Baseline", 
                       "topbdtSelectionTH2_Baseline", "metSelection_Inverted", 
-                      "topologySelection_Inverted", "topbdtSelection_Inverted",
-                      "topbdtSelectionTH2_Inverted", "ForFakeBNormalization", 
+                      "topologySelection_Inverted", "topbdtSelection_Inverted", "fatjetSelection_Baseline",
+                      "topbdtSelectionTH2_Inverted", "ForFakeBNormalization", "fatjetSelection_Inverted",
                       "ForFakeBNormalizationEWKFakeB", "ForFakeBNormalizationEWKGenuineB",
                       "FailedBJet", "FailedBJetFakeB", "FailedBJetGenuineB", "ForFakeBMeasurement", 
                       "ForFakeBMeasurementEWKFakeB", "ForFakeBMeasurementEWKGenuineB"]

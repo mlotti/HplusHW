@@ -96,7 +96,7 @@ private:
   BJetSelection      fBJetSelection;
   Count              cBTaggingSFCounter;
   METSelection       fMETSelection;
-  TopologySelection  fTopologySelection;
+  //  TopologySelection  fTopologySelection;
   //  TopSelection       fTopSelection;
   //  TopSelectionBDT    fTopSelectionBDT;
   Count              cSelected;
@@ -284,7 +284,7 @@ TopRecoTree::TopRecoTree(const ParameterSet& config, const TH1* skimCounters)
     fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cBTaggingSFCounter(fEventCounter.addCounter("b tag SF")),
     fMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    fTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    //fTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
 
     //    fTopSelection(config.getParameter<ParameterSet>("TopSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     //    fTopSelectionBDT(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
@@ -306,7 +306,7 @@ void TopRecoTree::book(TDirectory *dir) {
   fJetSelection.bookHistograms(dir);
   fBJetSelection.bookHistograms(dir);
   fMETSelection.bookHistograms(dir);
-  fTopologySelection.bookHistograms(dir);
+  //fTopologySelection.bookHistograms(dir);
   //  fTopSelection.bookHistograms(dir);
   //  fTopSelectionBDT.bookHistograms(dir);
 
@@ -744,7 +744,7 @@ void TopRecoTree::process(Long64_t entry) {
   // Standard Selections
   //================================================================================================
   if(0) std::cout << "=== Standard selection" << std::endl;
-  fCommonPlots.fillControlPlotsAfterTopologicalSelections(fEvent, true);
+  //fCommonPlots.fillControlPlotsAfterTopologicalSelections(fEvent, true);
   
 
   //================================================================================================  
@@ -777,9 +777,9 @@ void TopRecoTree::process(Long64_t entry) {
   //================================================================================================
   // 12) Topology selection
   //================================================================================================
-  if(0) std::cout << "=== Topology selection" << std::endl;
-  const TopologySelection::Data TopologyData = fTopologySelection.analyze(fEvent, jetData);
-  if (!TopologyData.passedSelection()) return;
+  // if(0) std::cout << "=== Topology selection" << std::endl;
+  // const TopologySelection::Data TopologyData = fTopologySelection.analyze(fEvent, jetData);
+  // if (!TopologyData.passedSelection()) return;
 
   //================================================================================================
   // 13) Top selection
@@ -892,7 +892,7 @@ void TopRecoTree::process(Long64_t entry) {
   //================================================================================================//
 
   //START
-  const double twoSigma = 0.32;
+  const double twoSigma = 9999.99;
   const double dRcut    = 0.3;
   if (fEvent.isMC()){
 
@@ -964,12 +964,12 @@ void TopRecoTree::process(Long64_t entry) {
 	for (auto& jet: jetData.getSelectedJets())
 	  {
 	    double dR  = ROOT::Math::VectorUtil::DeltaR( jet.p4(), Quark.p4());
-	    if (dR > 0.3)     continue;
+	    if (dR > dRcut)     continue;
 	    if (dR > dRmin)   continue;
 	    dRmin  = dR;
 	    JetClosest = jet;
 	  }
-	if (dRmin > 0.3) continue;
+	if (dRmin > dRcut) continue;
 	double dPtOverPt = (JetClosest.pt() - Quark.pt())/Quark.pt();
 	hQuarkJetMinDr03_DeltaPtOverPt -> Fill (dPtOverPt);   //2sigma = 2*0.16 = 0.32
       }
@@ -1012,10 +1012,10 @@ void TopRecoTree::process(Long64_t entry) {
 	double dPtOverPt = std::abs((bjet.pt() - BQuark.pt())/BQuark.pt());
 	if (dR > dRcut)     continue;
 	if (dR > dRmin)   continue;
-	//if (dPtOverPt > dPtOverPtmin) continue;
+
 	if (dPtOverPt > twoSigma) continue;
 	dRmin  = dR;
-	// dPtOverPtmin = dPtOverPt;
+
 	mcMatched_BJet = bjet;
       }
       dRminB.push_back(dRmin);
@@ -1054,7 +1054,6 @@ void TopRecoTree::process(Long64_t entry) {
 	  {
 	    if (dR1 < dR1min)
 	      {
-		//if(dPtOverPt1 < dPtOverPt1min)
 		if(dPtOverPt1 < twoSigma)
 		  {
 		    dR1min = dR1;
@@ -1064,7 +1063,6 @@ void TopRecoTree::process(Long64_t entry) {
 	      }
 	    else if (dR2 <= dRcut && dR2 < dR2min)
 	      {
-		//if (dPtOverPt2 < dPtOverPt2min)
 		if (dPtOverPt2 < twoSigma)
 		  {
 		    dR2min  = dR2;
@@ -1077,7 +1075,6 @@ void TopRecoTree::process(Long64_t entry) {
 	  {
 	    if (dR2 < dR2min)
 	      {
-		//if(dPtOverPt2 < dPtOverPt2min)
 		if(dPtOverPt2 < twoSigma)
 		  {
 		    dR2min  = dR2;
@@ -1087,7 +1084,6 @@ void TopRecoTree::process(Long64_t entry) {
 	      }
 	    else if (dR1 <= dRcut && dR1 < dR1min)
 	      {
-		//if (dPtOverPt1 < dPtOverPt1min)
 		if (dPtOverPt1 < twoSigma)
 		  {
 		    dR1min  = dR1;
@@ -1122,16 +1118,17 @@ void TopRecoTree::process(Long64_t entry) {
     hNmatchedTop ->Fill(imatched);
     
     
+
+    //Matching criterion: Select events with DeltaR(q,q') > 0.8
+    //Otherwise: Event not used for the training
     size_t nTops = GenTops_BQuark.size();
     for (size_t i=0; i<nTops; i++)
       {
 	double dR12 = ROOT::Math::VectorUtil::DeltaR(GenTops_LdgQuark.at(i).p4(), GenTops_SubldgQuark.at(i).p4());
 	double dR1b = ROOT::Math::VectorUtil::DeltaR(GenTops_LdgQuark.at(i).p4(), GenTops_BQuark.at(i).p4());
 	double dR2b = ROOT::Math::VectorUtil::DeltaR(GenTops_SubldgQuark.at(i).p4(), GenTops_BQuark.at(i).p4());
-	//	std::cout<<dR12<<" "<<dR1b<<" "<<dR12<<std::endl;
 	double dRmin = min(min(dR12, dR1b), dR2b);
 	if (dRmin < 0.8) return;
-	//	std::cout<<dR12<<" "<<dR1b<<" "<<dR12<<std::endl;
       }
     //================================================================================================//                      
     //                                    Top Candidates                                              //
@@ -1255,18 +1252,14 @@ void TopRecoTree::process(Long64_t entry) {
       for (size_t j=0; j<MCtrue_Bjet.size(); j++){
 	bool same1 = areSameJets(TopCandidates.Jet1.at(i), MCtrue_LdgJet.at(j))    && areSameJets(TopCandidates.Jet2.at(i), MCtrue_SubldgJet.at(j)) && areSameJets(TopCandidates.BJet.at(i),  MCtrue_Bjet.at(j));
 	bool same2 = areSameJets(TopCandidates.Jet1.at(i), MCtrue_SubldgJet.at(j)) && areSameJets(TopCandidates.Jet2.at(i), MCtrue_LdgJet.at(j))    && areSameJets(TopCandidates.BJet.at(i),  MCtrue_Bjet.at(j));
-	//	std::cout<<"genuine "<<genuine<<std::endl;
 	if (same1 || same2){
 	  genuine = true;
-	  //	  std::cout<<"genuine "<<genuine<<std::endl;
-	  //	  continue;
 	}
       }
       if (genuine) jmatched++;
       GenuineTop.push_back(genuine);
     }
     hNmatchedTrijets ->Fill(jmatched);
-    //    std::cout<<"trijet cand/Matched trijets "<<TopCandidates.BJet.size()<<" "<<MCtrue_Bjet.size()<<" jmatched "<<jmatched<<std::endl;
 
     //========================================================================================================
     //                           Check Properties of matched objects //Improve me! 

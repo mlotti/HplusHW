@@ -26,50 +26,47 @@ from math import sqrt,pow
 from array import array
 
 _fineBinningSuffix = "_fineBinning"
-debug = False
 
 #================================================================================================
 # Class definition
 #================================================================================================
-def Verbose(msg, printHeader=False):
-    '''
-    Calls Print() only if verbose options is set to true
-    '''
-    #if not opts.verbose:
-    if not debug:
-        return
-    Print(msg, printHeader)
-    return
-
-
-def Print(msg, printHeader=True):
-    '''
-    Simple print function. If verbose option is enabled prints, otherwise does nothing.
-    '''
-    fName = __file__.split("/")[-1]
-    if printHeader:
-        print "=== ", fName
-    print "\t", msg
-    return
-
-
 class ExtractorResult():
     '''
     Helper class to cache the result for each extractor in each datacard column
     '''
-    def __init__(self, exId = "-1", masterId = "-1", result=None, histograms=None, resultIsStat=False, additionalResult=None):
+    def __init__(self, exId = "-1", masterId = "-1", result=None, histograms=None, resultIsStat=False, additionalResult=None, verbose=False):
         ''' 
         Constructor
         '''
+        self._verbose = verbose
         self._exId = exId
         self._masterId = masterId
         self._result = result
         self._additionalResult = additionalResult
         self._resultIsStat = resultIsStat
         self._purityHistogram = None # Only used for QCD
-
         self._histograms = histograms # histograms going into the datacard root file
         self._tempHistos = [] # Needed to make histograms going into root file persistent
+        return
+
+    def Verbose(msg, printHeader=False):
+        '''
+        Calls Print() only if verbose options is set to true
+        '''
+        if not self._verbose:
+            return
+        Print(msg, printHeader)
+        return
+
+    def Print(msg, printHeader=True):
+        '''
+        Simple print function. If verbose option is enabled prints, otherwise does nothing.
+        '''
+        fName = __file__.split("/")[-1]
+        if printHeader:
+            print "=== ", fName
+        print "\t", msg
+        return
 
     def delete(self):
         if self._purityHistogram != None:
@@ -186,30 +183,14 @@ class DatacardColumn():
                  datasetMgrColumn = "",
                  additionalNormalisationFactor = 1.0,
                  histoPath = "",
-                 shapeHistoName = ""):
-        '''
-        Constructor
-        '''
+                 shapeHistoName = "",
+                 verbose=False):
+        self._verbose = verbose
         self._opts = opts
         self._label = label
         self._landsProcess = landsProcess
         self._enabledForMassPoints = enabledForMassPoints
-        if datasetType == "Observation":
-            self._datasetType = MulticrabDirectoryDataType.OBSERVATION
-        elif datasetType == "Signal":
-            self._datasetType = MulticrabDirectoryDataType.SIGNAL
-        elif datasetType == "Embedding":
-            self._datasetType = MulticrabDirectoryDataType.EWKTAUS
-        elif datasetType == "EWKfake":
-            self._datasetType = MulticrabDirectoryDataType.EWKFAKETAUS
-        elif datasetType == "QCD MC":
-            self._datasetType = MulticrabDirectoryDataType.QCDMC
-        elif datasetType == "QCD inverted":
-            self._datasetType = MulticrabDirectoryDataType.QCDINVERTED
-        elif datasetType == "None":
-            self._datasetType = MulticrabDirectoryDataType.DUMMY
-        else:
-            self._datasetType = MulticrabDirectoryDataType.UNKNOWN
+        self._datasetType = self._getDatasetType(datasetType)
         self._rateResult = None
         self._nuisanceIds = nuisanceIds
         self._nuisanceResults = [] # Of type ExtractorResult
@@ -221,6 +202,52 @@ class DatacardColumn():
         self._shapeHistoName = shapeHistoName
         self._isPrintable = True
         self.checkInputValidity()
+        return
+
+    def _getDatasetType(self, datasetType):
+        dsetType = "None"
+        if datasetType == "Observation":
+            dsetType = MulticrabDirectoryDataType.OBSERVATION
+        elif datasetType == "Signal":
+            dsetType = MulticrabDirectoryDataType.SIGNAL
+        elif datasetType == "FakeB":
+            dsetType = MulticrabDirectoryDataType.FAKEB
+        elif datasetType == "GenuineB":
+            dsetType = MulticrabDirectoryDataType.GENUINEB
+        elif datasetType == "Embedding":
+            dsetType = MulticrabDirectoryDataType.EWKTAUS
+        elif datasetType == "EWKfake":
+            dsetType = MulticrabDirectoryDataType.EWKFAKETAUS
+        elif datasetType == "QCD MC":
+            dsetType = MulticrabDirectoryDataType.QCDMC
+        elif datasetType == "EWKMC":
+            dsetType = MulticrabDirectoryDataType.EWKMC
+        elif datasetType == "QCD inverted":
+            dsetType = MulticrabDirectoryDataType.QCDINVERTED
+        elif datasetType == "None":
+            dsetType = MulticrabDirectoryDataType.DUMMY
+        else:
+            dsetType = MulticrabDirectoryDataType.UNKNOWN
+        return dsetType
+
+    def Verbose(self, msg, printHeader=False):
+        '''
+        Calls Print() only if verbose options is set to true
+        '''
+        if not self._verbose:
+            return
+        Print(msg, printHeader)
+        return
+
+    def Print(self, msg, printHeader=True):
+        '''
+        Simple print function. If verbose option is enabled prints, otherwise does nothing.
+        '''
+        fName = __file__.split("/")[-1]
+        if printHeader:
+            print "=== ", fName
+        print "\t", msg
+        return
 
     def delete(self):
         self._rateResult.delete()
@@ -231,70 +258,113 @@ class DatacardColumn():
         self._cachedShapeRootHistogramWithUncertainties = None
         self._datasetMgrColumn = None
 
-    ## Returns true if the column is using the observation data samples
     def typeIsObservation(self):
+        '''
+        Returns true if the column is using the observation data samples
+        '''
         return self._datasetType == MulticrabDirectoryDataType.OBSERVATION
 
-    ## Returns true if the column is using the signal data samples
     def typeIsSignal(self):
+        '''
+        Returns true if the column is using the signal data samples
+        '''
         return self._datasetType == MulticrabDirectoryDataType.SIGNAL
 
-    ## Returns true if the column is using the embedding data samples
     def typeIsEWK(self):
+        '''
+        Returns true if the column is using the embedding data samples
+        '''
         return self._datasetType == MulticrabDirectoryDataType.EWKTAUS
 
-    ## Returns true if the column is using the embedding data samples
     def typeIsEWKfake(self):
+        '''
+        Returns true if the column is using the embedding data samples
+        '''
         return self._datasetType == MulticrabDirectoryDataType.EWKFAKETAUS
 
-    ## Returns true if the column is QCD
+    def typeIsFakeB(self):
+        '''
+        Returns true if the column is using the Fake-b data-driven pseudo-sample
+        '''
+        return self._datasetType == MulticrabDirectoryDataType.FAKEB
+
+    def typeIsGenuineB(self):
+        '''
+        Returns true if the column is using the Genuine-b (EWK MC) samples 
+        (This is used with FakeB)
+        '''
+        return self._datasetType == MulticrabDirectoryDataType.GENUINEB
+
     def typeIsQCD(self):
+        '''
+        Returns true if the column is QCD
+        '''
         return self._datasetType == MulticrabDirectoryDataType.QCDMC or self._datasetType == MulticrabDirectoryDataType.QCDINVERTED
 
-    ## Returns true if the column is QCD MC
     def typeIsQCDMC(self):
+        '''
+        Returns true if the column is QCD MC
+        '''
         return self._datasetType == MulticrabDirectoryDataType.QCDMC
 
-    ## Returns true if the column is QCD inverted
+    def typeIsEWKMC(self):
+        '''
+        Returns true if the column is EWK MC
+        '''
+        return self._datasetType == MulticrabDirectoryDataType.EWKMC
+
     def typeIsQCDinverted(self):
+        '''
+        Returns true if the column is QCD inverted
+        '''
         return self._datasetType == MulticrabDirectoryDataType.QCDINVERTED
 
-    ## Returns true if the column is empty (uses no datasets)
     def typeIsEmptyColumn(self):
+        '''
+        Returns true if the column is empty (uses no datasets)
+        '''
         return self._datasetType == MulticrabDirectoryDataType.DUMMY
 
-    ## Checks that required fields have been supplied
     def checkInputValidity(self):
-        myMsg = ""
+        '''
+        Checks that required fields have been supplied
+
+        FIXME: Should I add options for newly added dataset types? (FakeB, GenuineB)
+        '''
+        msg = ""
         if self._label == "":
-            myMsg += "Missing or empty field 'label'! (string) to be printed on a column in datacard\n"
+            msg += "Missing or empty field 'label'! (string) to be printed on a column in datacard\n"
+
         if not self.typeIsObservation():
             if self._landsProcess == -999:
-                myMsg += "Missing or empty field 'landsProcess'! (integer) to be printed as process in datacard\n"
+                msg += "Missing or empty field 'landsProcess'! (integer) to be printed as process in datacard\n"
+
         if len(self._enabledForMassPoints) == 0:
-            myMsg += "Missing or empty field 'validMassPoints'! (list of integers) specifies for which mass points the column is enabled\n"
+            msg += "Missing or empty field 'validMassPoints'! (list of integers) specifies for which mass points the column is enabled\n"
+
         if self._datasetType == MulticrabDirectoryDataType.UNKNOWN:
-            myMsg += "Wrong 'datasetType' specified! Valid options are 'Signal', 'Embedding', 'QCD MC', 'QCD inverted', and 'None'\n"
+            msg += "Wrong 'datasetType' specified! Valid options are 'Signal', 'Embedding', 'QCD MC', 'QCD inverted', and 'None'\n"
+
         if self._datasetMgrColumn == "" and not self.typeIsEmptyColumn():
-            myMsg += "No dataset names defined!\n"
+            msg += "No dataset names defined!\n"
+
         if self.typeIsSignal() or self.typeIsEWK() or self.typeIsObservation():
             if self._shapeHistoName == "":
-                myMsg += "Missing or empty field 'shapeHistoName'! (string) Name of histogram for shape \n"
+                msg += "Missing or empty field 'shapeHistoName'! (string) Name of histogram for shape \n"
             if self._histoPath == "":
-                myMsg += "Missing or empty field 'histoPath'! (string) Path to histogram(s) \n"
-#        elif self.typeIsQCDfactorised():
-            # rate handled as spedial case, extra datasetMgrColumn are required for EWK MC
-####        elif self._datasetType == MulticrabDirectoryDataType.QCDINVERTED:
-####            myMsg += "FIXME: QCD inverted not implemented yet\n" # FIXME
+                msg += "Missing or empty field 'histoPath'! (string) Path to histogram(s) \n"
+
         if not self.typeIsEmptyColumn() and not self.typeIsObservation():
             if self._nuisanceIds == None:
-                myMsg += "Missing field 'nuisances'! (list of strings) Id's for nuisances to be used for column\n"
+                msg += "Missing field 'nuisances'! (list of strings) Id's for nuisances to be used for column\n"
             if len(self._nuisanceIds) == 0:
                 myWarning = "Empty field 'nuisances'! (list of strings) Id's for nuisances to be used for column\n"
-                print ShellStyles.WarningStyle()+"Warning (data group ='"+self._label+"'):"+ShellStyles.NormalStyle()+"\n"+myWarning
-        if myMsg != "":
-            print ShellStyles.ErrorStyle()+"Error (data group ='"+self._label+"'):"+ShellStyles.NormalStyle()+"\n"+myMsg
-            raise Exception()
+                _msg = "Warning for data group \"%s\": %s" %  (self._label, myWarning)
+                self.Print(ShellStyles.NoteStyle() + _msg + ShellStyles.NormalStyle(), True)
+
+        if msg != "":
+            msg = "Invalid input for data group \"%s\":\n%s" %  (self._label, msg)
+            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
         return
 
 
@@ -391,7 +461,7 @@ class DatacardColumn():
             if title in h.getRootHisto().GetTitle():
                 return h
 
-        print "Available control plot names:"
+        self.Print("Available control plot names:", True)
         for h in self._controlPlots:
             print "  " + h.getRootHisto().GetTitle()
 
@@ -457,42 +527,45 @@ class DatacardColumn():
         '''
         Do data mining and cache results
         '''
-        if self._opts.verbose:
-            print "... processing column: " + ShellStyles.HighlightStyle() + self._label+ShellStyles.NormalStyle()
+        self.Verbose("Processing column %s" % (ShellStyles.HighlightStyle() + self._label + ShellStyles.NormalStyle()), True)
 
-        # beginFilesSize = ROOT.gROOT.GetListOfFiles().GetSize()
-        # beginListSize  = ROOT.gDirectory.GetList().GetSize()
-        # beginKeys        = ROOT.gDirectory.GetListOfKeys()
-        #for i, key in enumerate(beginKeys):
-        #   print "key %d = %s" % (i, key.GetTitle())
-        
-        # Construct list of shape variables used by the column
+        self.Verbose("Construct list of shape variables used by the column")
         myShapeVariationList = []
-        for nid in self._nuisanceIds:
-            for e in extractors:
-                if e.getId() == nid:
+
+        # For-loop: All nuisance IDs
+        for i, nid in enumerate(self._nuisanceIds, 1):
+            self.Verbose("Nuisance id is %s" % (nid), i==1)
+
+            # For-loop: All extractors
+            for e in extractors:                
+                if e.getId() != nid:
+                    continue
+                else:
+                    self.Verbose("Extractor id is %s" % (e.getId()), False)
                     if (e.getDistribution() == "shapeQ" and not isinstance(e, ConstantExtractor)) or isinstance(e, ShapeVariationToConstantExtractor):
                         myShapeVariationList.append(e._systVariation)
 
-        # Obtain root histogram with uncertainties for shape and cache it
+        self.Verbose("Obtain root histogram with uncertainties for shape and cache it")
         hRateWithFineBinning = None
         if not (self.typeIsEmptyColumn() or dsetMgr == None):
-            mySystematics = dataset.Systematics(allShapes=True) #,verbose=True)
+            mySystematics = dataset.Systematics(allShapes=True)
+
             if not dsetMgr.hasDataset(self.getDatasetMgrColumn()):
                 msg = "Cannot find merged dataset by key '%s' in multicrab dir! Did you forget to merge the root files with hplusMergeHistograms.py?" % self.getDatasetMgrColumn()
+                dsetMgr.PrintInfo() #alex                
                 raise Exception(ShellStyles.ErrorLabel() + msg)
+
             myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
 
             if myDatasetRootHisto.isMC():
-                # Set signal xsection
-                # for heavy H+
+                # Set signal xsection for heavy H+
                 if config.OptionLimitOnSigmaBr:
                     if self._landsProcess <= 0:
                         # Set cross section of sample to 1 pb in order to obtain limit on sigma x Br
                         #myDatasetRootHisto.Delete()
                         dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(1)
                         myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
-                        if self._opts.verbose:
+                        if self._verbose:
                             print "..... Assuming this is signal -> set cross section to 1 pb for limit calculation"
                 # for light H+, use 13 TeV ttbar xsect from https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
                 elif (not config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH" or self._label[:2] == "WH")):
@@ -517,7 +590,7 @@ class DatacardColumn():
             # Leave histograms with the original binning at this stage, but do move under/overflow into first/last bin
             self._cachedShapeRootHistogramWithUncertainties.makeFlowBinsVisible()
 	    if not self.typeIsObservation():
-                if self._opts.verbose:
+                if self._verbose:
                     rate = self._cachedShapeRootHistogramWithUncertainties.getRate()
                     statUncert = self._cachedShapeRootHistogramWithUncertainties.getRateStatUncertainty()
                     print "..... event yield: %f +- %f (stat.)" % (rate, statUncert)
@@ -525,7 +598,7 @@ class DatacardColumn():
         # Obtain rate histogram
         myRateHistograms = []
         if self.typeIsEmptyColumn() or dsetMgr == None:
-            if self._opts.verbose:
+            if self._verbose:
                 print "  - Creating empty rate shape"
             #myArray = array("d",config.ShapeHistogramsDimensions)
             #h = TH1F(self.getLabel(),self.getLabel(),len(myArray)-1,myArray)
@@ -534,7 +607,7 @@ class DatacardColumn():
             ROOT.SetOwnership(h, True)
             myRateHistograms.append(h)
         else:
-            if self._opts.verbose:
+            if self._verbose:
                 print "  - Extracting rate histogram"
             myShapeExtractor = None
             if self.typeIsObservation():
@@ -547,7 +620,7 @@ class DatacardColumn():
         self._rateResult = ExtractorResult("rate", "rate",
                                myRateHistograms[0].Integral(), # Take only visible part
                                myRateHistograms)
-        if self._opts.verbose:
+        if self._verbose:
             print "  - Rate: integral = ", myRateHistograms[0].Integral()
             if (self.typeIsEWK()) or self.typeIsEWKfake():
                 if isinstance(dsetMgr.getDataset(self.getDatasetMgrColumn()), dataset.DatasetMerged):
@@ -581,7 +654,7 @@ class DatacardColumn():
         # Obtain results for nuisances
         # Add the scalar uncertainties to the cached RootHistoWithUncertainties object
         for nid in self._nuisanceIds:
-            if self._opts.verbose:
+            if self._verbose:
                 print "  - Extracting nuisance by id=%s"%nid
             myFoundStatus = False
             for e in extractors:
@@ -623,7 +696,7 @@ class DatacardColumn():
                             else:
                                 myResult *= 1.0-myAveragePurity
                         # Add scalar uncertainties
-                        if self._opts.verbose:
+                        if self._verbose:
                             print "Adding scalar uncert. ",e.getId()
                         if isinstance(myResult, ScalarUncertaintyItem):
                             self._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(e.getId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
@@ -649,7 +722,7 @@ class DatacardColumn():
         if config.OptionDoControlPlots:
             for index, c in enumerate(controlPlotExtractors, 1):
                 if dsetMgr != None and not self.typeIsEmptyColumn():
-                    if self._opts.verbose:
+                    if self._verbose:
                         print "  - Extracting data-driven control plot %s"%c._histoTitle
                     myCtrlDsetRootHisto = c.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
 
@@ -687,7 +760,7 @@ class DatacardColumn():
                         # Add to RootHistogramWithUncertainties non-shape uncertainties
                         for n in self._nuisanceResults:
                             if not n.resultIsStatUncertainty() and len(n.getHistograms()) == 0: # systematic uncert., but not shapeQ
-                                if self._opts.verbose:
+                                if self._verbose:
                                     print "    - Adding norm. uncertainty: %s"%n.getMasterId()
                                 myResult = n.getResult()
                                 if self.typeIsQCDinverted():
@@ -707,7 +780,7 @@ class DatacardColumn():
                                         h.addNormalizationUncertaintyRelative(n.getId(), myResult, myResult)
                             elif not n.resultIsStatUncertainty() and len(n.getHistograms()) > 0:
                                 if isinstance(n.getResult(), ScalarUncertaintyItem): # constantToShape
-                                    if self._opts.verbose:
+                                    if self._verbose:
                                         print "    - Adding norm. uncertainty: %s"%n.getId()
                                     if not isinstance(h.getRootHisto(),ROOT.TH2):
                                         h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
@@ -748,7 +821,7 @@ class DatacardColumn():
             self._rateResult._histograms[i].SetTitle(myTitle+_fineBinningSuffix)
 
             msg = "Rebinning %d/%d: %s" % (i+1, nHistos, myTitle)
-            Verbose(ShellStyles.NoteStyle() + msg + ShellStyles.NormalStyle())
+            self.Verbose(ShellStyles.NoteStyle() + msg + ShellStyles.NormalStyle())
 
             # move under/overflow bins to visible bins, store fine binned histogram, and do rebinning
             if self._rateResult._histograms[i].GetNbinsX() > 1:
@@ -767,21 +840,21 @@ class DatacardColumn():
         # For-loop: All histogram bins
         for k in range(1, nBins):
             msg = "Checking bin %d/%d: %s" % (k, nBins, myTitle)
-            Verbose(ShellStyles.NoteStyle() + msg + ShellStyles.NormalStyle(), k==1)
+            self.Verbose(ShellStyles.NoteStyle() + msg + ShellStyles.NormalStyle(), k==1)
             
             binRate = self._rateResult._histograms[0].GetBinContent(k)
             if binRate < config.MinimumStatUncertainty:
                 if binRate >= 0.0 and binRate < config.MinimumStatUncertainty:
                     msg  = "Rate value is zero or below min.stat.uncert. in bin %d for column '%s' (it was %f)! " % (k, self.getLabel(), binRate)
                     msg += "Compensating up stat uncertainty to %f!" % (config.MinimumStatUncertainty)
-                    Verbose(ShellStyles.WarningLabel() + msg)
+                    self.Verbose(ShellStyles.WarningLabel() + msg)
                     self._rateResult._histograms[0].SetBinError(k, config.MinimumStatUncertainty)                   
                     nBelowMinStatUncert += 1
 
                 if binRate < -0.001:
                     msg  = "Rate value is negative in bin %d for column '%s' (it was %f)! " % (k, self.getLabel(), binRate)
                     msg += "This could have large effects to systematics, please fix!"
-                    Verbose(ShellStyles.WarningLabel() + msg)
+                    self.Verbose(ShellStyles.WarningLabel() + msg)
 
                     #FIXME: if one adjusts the bin content, one needs to adjust accordingly the nuisances !!!
                     self._rateResult._histograms[0].SetBinContent(k, 0.0)
@@ -792,11 +865,11 @@ class DatacardColumn():
         # Print summarty of warnings/errors (if any)
         if nNegativeRate >0:
             msg = "Rate value for \"%s\" was negative (hence forced to zero) in %d bins" % (myTitle, nNegativeRate)
-            Print(ShellStyles.WarningLabel() + msg)
+            self.Verbose(ShellStyles.WarningLabel() + msg)
 
         if nBelowMinStatUncert > 0:
             msg = "Rate value for \"%s\" was below minimum statistical uncertainty (hence set to default min of %f) in %d bins" % (myTitle, config.MinimumStatUncertainty, nBelowMinStatUncert)
-            Print(ShellStyles.WarningLabel() + msg, False)
+            self.Verbose(ShellStyles.WarningLabel() + msg, False)
 
         # Convert bin content to integers for signal injection
         if self.typeIsObservation() and hasattr(config, "OptionSignalInjection"):

@@ -103,6 +103,16 @@ public:
       if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) return fTrijet1BJet;
       else return fTrijet2BJet;
     }
+    const Jet getLdgTrijetJet1() const 
+    { 
+      if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) return fTrijet1Jet1;
+      else return fTrijet2Jet1;
+    }
+    const Jet getLdgTrijetJet2() const 
+    { 
+            if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) return fTrijet1Jet2;
+            else return fTrijet2Jet2;
+    }
     const math::XYZTLorentzVector getLdgTrijetDijet() const
     { 
       if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) return fTrijet1Dijet_p4;
@@ -270,6 +280,7 @@ private:
   int GetTrijet2(TrijetSelection TopCand, const std::vector<Jet>& bjets, SelectedTrijets trijet1);
   SelectedTrijets getLeadingSubleadingTrijet(SelectedTrijets trijet1, SelectedTrijets trijet2, string selectedTrijet, float MVAmax1, float MVAmax2);
   SelectedTrijets GetSelectedTopCandidate(TrijetSelection TopCand, int index);
+  bool TrijetPassBDT_crossCleaned(int Index, TrijetSelection TopCand, const std::vector<Jet>& bjets);
   // Input parameters
   const DirectionalCut<double> cfg_LdgMVACut;
   const DirectionalCut<double> cfg_SubldgMVACut;
@@ -481,6 +492,9 @@ private:
   WrappedTH1 *hDeltaR_BDTtrijets_TetrajetBjet;
   WrappedTH1 *hTrijetJets_DeltaRmin;
   WrappedTH1 *hTrijetJets_DeltaRmin_passBDT;
+
+  WrappedTH1 *hTrijetMultiplicityPassBDT;
+
   // WrappedTH1 *hChHiggdBJetPt_passCSV_LdgFreeBjet;
   // WrappedTH1 *hChHiggdBJetPt_passCSV_SubldgFreeBjet;
   //next WrappedTH1
@@ -508,6 +522,8 @@ private:
   WrappedTH2 *hDeltaEta_LdgTrijet_TetrajetBjet_Vs_SubldgTrijet_TetrajetBjet;
   WrappedTH2 *hDeltaPhi_LdgTrijet_TetrajetBjet_Vs_SubldgTrijet_TetrajetBjet;
   WrappedTH2 *hDeltaY_LdgTrijet_TetrajetBjet_Vs_SubldgTrijet_TetrajetBjet;
+
+  WrappedTH2 *hTrijetMult_Vs_BDTcut;  
 
 };
 

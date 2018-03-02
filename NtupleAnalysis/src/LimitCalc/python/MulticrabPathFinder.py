@@ -1,32 +1,104 @@
 #! /usr/bin/env python
+'''
+DESCRIPTION:
+This module contains a class to identify multicrab dirs from a given directory. 
+It Identifies separately the signal, ewk QCDfact and QCDinv dirs. If multiple 
+directories are found, the most recent one is taken!
+'''
 
+#================================================================================================    
+# Import modules
+#================================================================================================    
 import sys
 import os
 import re
 
 from HiggsAnalysis.NtupleAnalysis.tools.aux import execute
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 
-# class to identify multicrab dirs from a given directory. Identifies separately the signal, ewk
-# QCDfact and QCDinv dirs. If multiple directories are found, the latest is taken.
-
+#================================================================================================    
+# Class Definition
+#================================================================================================    
 class MulticrabDirectoryDataType:
-    UNKNOWN = 0
-    OBSERVATION = 1
-    SIGNAL = 2
-    EWKTAUS = 3
-    EWKFAKETAUS = 4
-    QCDMC = 5
-    QCDINVERTED = 6
-    DUMMY = 7
+    UNKNOWN      = 0
+    OBSERVATION  = 1
+    SIGNAL       = 2
+    EWKTAUS      = 3
+    EWKFAKETAUS  = 4
+    QCDMC        = 5
+    QCDINVERTED  = 6
+    DUMMY        = 7
     DATACARDONLY = 8
+    EWKMC        = 9
+    FAKEB        = 10
+    GENUINEB     = 11
 
 class MulticrabPathFinder:
-    def __init__(self, path):
-        multicrabpaths = self.scan(path)
-        self._ewk_path     = self.ewkfind(multicrabpaths)
-        self._signal_path  = self.signalfind(multicrabpaths)
-        self._qcdfact_path = self.qcdfactfind(multicrabpaths)
-        self._qcdinv_path  = self.qcdinvfind(multicrabpaths)
+    def __init__(self, path, h2tb=False, verbose=False):
+        self._verbose        = verbose
+        self._h2tb           = h2tb
+        self._multicrabpaths = self.scan(path)
+        self._signal_path    = self.signalfind(self._multicrabpaths)
+        self._ewk_path       = self.ewkfind(self._multicrabpaths)
+        self._qcdfact_path   = self.qcdfactfind(self._multicrabpaths)
+        self._qcdinv_path    = self.qcdinvfind(self._multicrabpaths)
+        self._fakeB_path     = self.fakeBfind(self._multicrabpaths)
+        return
+
+    def Verbose(self, msg, printHeader=True):
+        '''
+        Calls Print() only if verbose options is set to true
+        '''
+        if not self._verbose:
+            return
+        self.Print(msg, printHeader)
+        return
+
+    def Print(self, msg, printHeader=True):
+        '''
+        Simple print function. If verbose option is enabled prints, otherwise does nothing
+        '''
+        fName = __file__.split("/")[-1]
+        fName = fName.replace(".pyc", ".py")
+        if printHeader:
+            print "=== ", fName
+        print "\t", msg
+        return
+
+    def PrintInfo(self):
+        table = []
+        align = "{:>20} {:^1} {:<130}"
+        title = align.format("Variable", "", "Value")
+        hLine = 150*"="
+        table.append(hLine)
+        table.append(title)
+        table.append(hLine)
+        table.append( align.format("Verbose"        , "", self._verbose) )
+        table.append( align.format("h2tb"           , "", self._h2tb) )
+        table.append( align.format("#Multicrab Dirs", "", len(self._multicrabpaths)) )
+        table.append( align.format("Signal Path"    , "", self._signal_path ) )
+        if self._h2tb:
+            table.append( align.format("Fake-b"         , "", self.getFakeBPath()) )
+            table.append( align.format("Genuine-b"      , "", self.getGenuineBPath()) )
+            table.append( align.format("QCD MC"         , "", self.getQCDMCPath()) )
+            table.append( align.format("EWK MC"         , "", self.getEWKMCPath()) )
+        else:
+            table.append( align.format("EWK Path"       , "", self._ewk_path) )
+            table.append( align.format("QCD Factorised" , "", self._qcdfact_path) )
+            table.append( align.format("QCD Inverted"   , "", self._qcdinv_path ) )
+        table.append(hLine)
+        table.append("")
+
+        # For-loop: All rows in table
+        for i, row in enumerate(table, 1):
+            self.Print(row, i==1)
+        return
+
+    def getFakeBPath(self):
+        return self.getFakeBPath()
+
+    def getFakeBExists(self):
+        return os.path.exists(self.getFakeBPath())
 
     def getQCDFactorisedExists(self):
         return os.path.exists(self.getQCDfacPath())
@@ -46,8 +118,20 @@ class MulticrabPathFinder:
     def getSignalPath(self):
         return self._signal_path
 
+    def getEWKMCPath(self):
+        return self._signal_path
+
+    def getQCDMCPath(self):
+        return self._signal_path
+
+    def getGenuineBPath(self):
+        return self._signal_path
+
     def getEWKPath(self):
         return self._ewk_path
+
+    def getFakeBPath(self):
+        return self._fakeB_path
 
     def getQCDfacPath(self):
         return self._qcdfact_path
@@ -55,7 +139,7 @@ class MulticrabPathFinder:
     def getQCDinvPath(self):
         return self._qcdinv_path
 
-    def getSubPaths(self,path,regexp,exclude=False):
+    def getSubPaths(self, path, regexp, exclude=False):
 	retDirs = []
 	dirs = execute("ls %s"%path)
 	path_re = re.compile(regexp)
@@ -74,38 +158,90 @@ class MulticrabPathFinder:
 
     def scan(self,path):
         multicrabdirs = []
-        dirs = execute("ls %s"%path)
-        for dir in dirs:
-            dir = os.path.join(path,dir)
-            if os.path.isdir(dir):
-                filepath = os.path.join(dir,"multicrab.cfg")
-		filepath2 = os.path.join(dir,"inputInfo.txt")
-                if os.path.exists(filepath) or os.path.exists(filepath2):
-                    multicrabdirs.append(dir)
+        dirs = execute("ls %s"% (path) )
+
+        # For-loop: All directories in path
+        for d in dirs:
+            d = os.path.join(path, d)
+            
+            # Skill item if not a directory
+            if not os.path.isdir(d):
+                continue
+
+            self.Verbose("Looking under directory %s" % (d))
+            filepath1 = os.path.join(d, "multicrab.cfg")
+            filepath2 = os.path.join(d, "inputInfo.txt")
+            
+            # If either of the above files exists save the dir for later use
+            if os.path.exists(filepath1) or os.path.exists(filepath2):
+                multicrabdirs.append(d)
+
+        self.Verbose("Found %i directories:\n\t%s" % (len(multicrabdirs), "\n\t".join(multicrabdirs)) )
         return multicrabdirs
 
     def ewkfind(self,dirs):
-        return self.selectLatest(self.grep(dirs,"mbedded",file="multicrab.cfg"))
-        #return self.selectLatest(self.grep(dirs,"mbedding",file="inputInfo.txt"))
+        if self._h2tb:
+            myWord = "Hplus2tbAnalysis"
+            myFile = "multicrab.cfg"
+        else:
+            myWord = "mbedded"
+            myFile = "multicrab.cfg"
+        return self.selectLatest( self.grep(dirs, myWord, myFile) )
 
     def signalfind(self,dirs):
-	return self.selectLatest(self.grep(dirs,"SignalAnalysis",file="multicrab.cfg"))
+        if self._h2tb:
+            myWord = "Hplus2tbAnalysis"
+            myFile = "multicrab.cfg"
+        else:
+            myWord = "SignalAnalysis"
+            myFile = "multicrab.cfg"
+        return self.selectLatest( self.grep(dirs, myWord, myFile) )
 
     def qcdfactfind(self,dirs):
-        myList = []
+        myList  = []
+        keyword = "pseudoMulticrab_QCDfactorised"
         for d in dirs:
-            if "pseudoMulticrab_QCDfactorised" in d:
+            if keyword in d:
                 myList.append(d)
         return self.selectLatest(myList)
 
     def qcdinvfind(self,dirs):
-        myList = []
+        myList  = []
+        keyword = "pseudoMulticrab_QCDfactorised"
         for d in dirs:
-            if "pseudoMulticrab_QCDMeasurement" in d:
+            if keyword in d:
                 myList.append(d)
         return self.selectLatest(myList)
 
-    def grep(self,dirs,word,file="multicrab.cfg"):
+    def fakeBfind(self,dirs):
+        myList   = []
+        keyword  = "FakeBMeasurement"
+        mcrabDir = None
+
+        # For-loop: All dirs
+        for d in dirs:
+            if keyword in d:
+                mcrabDir = d
+                #myList.append(d)
+
+        # Look inside the directory to find the pseudo-dataset directory
+        subDirs = os.listdir(mcrabDir) 
+        subDirList = [os.path.join(mcrabDir, d) for d in subDirs]
+
+        for i, d in enumerate(subDirList, 1):
+            relDir = d.split("/")[-1]
+
+            if keyword in relDir or keyword == relDir:
+                if os.path.isdir(d):
+                    myList.append(d)
+                    self.Verbose("Found Fake-b dir %s" % d, True)
+                    break
+            else:
+                self.Verbose("Skip dir %s" % relDir, i==1)
+
+        return self.selectLatest(myList)
+
+    def grep(self, dirs, word, file="multicrab.cfg"):
         command = "grep " + word + " "
         founddirs = []
         for dir in dirs:
@@ -126,13 +262,20 @@ class MulticrabPathFinder:
         if len(dirs) == 0:
             return ""
         if len(dirs) > 1:
-            print "  Warning, more than 1 path found"
+            self.Print("More than 1 path found! Will take the most recent one:")
             latest = dirs[0]
             for dir in dirs:
-                print "    ",dir
                 if os.path.getmtime(dir) > os.path.getmtime(latest):
                     latest = dir
 
-            print "     taking the most recent one",latest
+            # Print all paths found and highlight the latest one
+            for d in dirs:
+                if d == latest:
+                    #self.Print(ShellStyles.NoteStyle() + latest + ShellStyles.NormalStyle(), False)
+                    self.Print(ShellStyles.SuccessStyle() + latest + ShellStyles.NormalStyle(), False)
+                else:
+                    self.Print(d, False)            
             return latest
-        return dirs[0]
+        else:
+            self.Verbose(ShellStyles.SuccessStyle() + "Selecting dir %s" % (dirs[0]) + ShellStyles.NormalStyle(), False)
+            return dirs[0]

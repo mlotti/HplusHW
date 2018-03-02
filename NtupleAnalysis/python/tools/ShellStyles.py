@@ -17,7 +17,7 @@ def ErrorStyle():
 
 def HighlightStyle():
     # White text on black background, bold
-    return "\033[0;40m\033[1;37m"
+    return "\033[0;33m"
 
 def CaptionStyle():
     # White text on blue background, bold
@@ -48,18 +48,25 @@ def ErrorLabel():
 def HighlightAltStyle():
     '''
     https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
+    https://gist.github.com/vratiu/9780109
 
     Foreground Code | 30 31 32 33 34 35 36 37
     Background Code | 40 41 42 43 44 45 46 47
     ==========================================
                       B  R  G  Y  B  M  C  W    
-    RED   = "\033[1;31m"  
-    BLUE  = "\033[1;34m"
-    CYAN  = "\033[1;36m"
-    GREEN = "\033[0;32m"
-    RESET = "\033[0;0m"
+    RED     = "\033[1;31m"  
+    BLUE    = "\033[1;34m"
+    CYAN    = "\033[1;36m"
+    GREEN   = "\033[0;32m"
+    RESET   = "\033[0;0m"
     BOLD    = "\033[;1m"
     REVERSE = "\033[;7m"
+    BLACK   = "\[\033[0;30m\]"
+    YELLOW  = "\[\033[0;33m\]"
+    PURPLE  = "\[\033[0;35m\]"
+    CYAN    = "\[\033[0;36m\]"
+    WHITE   = "\[\033[0;37m\]"
+
     '''
     # cyan  text on white backround
     #return "\033[;47m\033[1;36m"

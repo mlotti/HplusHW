@@ -141,7 +141,7 @@ def main(opts):
         if "ZJetsToQQ_HT600toInf" in datasetsMgr.getAllDatasetNames() and "DYJetsToQQ_HT180" in datasetsMgr.getAllDatasetNames():
             Print("Cannot use both ZJetsToQQ and DYJetsToQQ due to duplicate events? Investigate. Removing ZJetsToQQ datasets for now ..", True)
             datasetsMgr.remove(filter(lambda name: "ZJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
-            # datasetsMgr.remove(filter(lambda name: "DYJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "DYJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
         
         # Set/Overwrite cross-sections
         for d in datasetsMgr.getAllDatasets():
@@ -154,6 +154,9 @@ def main(opts):
             datasetsMgr.PrintCrossSections()
             datasetsMgr.PrintLuminosities()
 
+        # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
+        plots.mergeRenameReorderForDataMC(datasetsMgr) 
+
         # Custom Filtering of datasets 
         for i, d in enumerate(datasetsToRemove, 0):
             msg = "Removing dataset %s" % d
@@ -162,9 +165,6 @@ def main(opts):
 
         if opts.verbose:
             datasetsMgr.PrintInfo()
-
-        # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
-        plots.mergeRenameReorderForDataMC(datasetsMgr) 
   
         # Re-order datasets (different for inverted than default=baseline)
         newOrder = ["Data"]
@@ -241,7 +241,7 @@ def GetHistoKwargs(h, opts):
     for i in range(40, 100+bWidth, bWidth):
         vtxBins.append(i)
 
-    _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": 0.1}
+    _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": +0.1}
     if opts.mergeEWK:
         _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": -0.12}    
     logY    = True
@@ -255,10 +255,10 @@ def GetHistoKwargs(h, opts):
         "ylabel"           : _yLabel,
         "rebinX"           : 1,
         "rebinY"           : None,
-        "ratioType"        : "errorScale", #new
-        "ratioErrorOptions": {"numeratorStatSyst": False}, #new
+        "ratioType"        : "errorScale",
+        "ratioErrorOptions": {"numeratorStatSyst": False},
         "ratioYlabel"      : "Data/MC",
-        "ratio"            : True, 
+        "ratio"            : opts.ratio, 
         "stackMCHistograms": True,
         "ratioInvert"      : False, 
         "addMCUncertainty" : True, 
@@ -508,8 +508,9 @@ def GetHistoKwargs(h, opts):
 
     if h == "counter":
         xMin = 15.0
-        xMax = 20.0
-        kwargs["opts"]   = {"xmin": xMin, "xmax": xMax, "ymin": 1e0, "ymax": 1e10}#"ymaxfactor": 1.2}
+        xMax = 21.0
+        # kwargs["opts"]   = {"xmin": xMin, "xmax": xMax, "ymin": 1e0, "ymax": 1e10}
+        kwargs["opts"]   = {"xmin": xMin, "xmax": xMax, "ymin": 1e0, "ymax": 1e8}
         kwargs["cutBox"] = {"cutValue": xMin+2, "fillColor": 16, "box": False, "line": True, "greaterThan": True} #indicate btag SF
 
     if "IsolPt" in h:
@@ -525,10 +526,13 @@ def GetHistoKwargs(h, opts):
         kwargs["opts"]   = {"xmin": 0.0, "xmax": +0.25, "ymin": yMin, "ymaxfactor": yMaxF}
 
     if "IsolMiniIso" in h or "MiniIso" in h:
-        kwargs["ylabel"] = "Events / %.2f "
-        kwargs["xlabel"] = "mini relative isolation"        
+        kwargs["ylabel"] = "Events / %.0f "
+        kwargs["xlabel"] = "mini relative isolation"
+        #kwargs["opts"]   = {"xmin": 0.0, "xmax": +10.0, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["cutBox"] = {"cutValue": 0.4, "fillColor": 16, "box": True, "line": True, "greaterThan": True}
         if "after" in h.lower() or "passed" in h.lower():
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": +1.0, "ymin": yMin, "ymaxfactor": yMaxF}
+            kwargs["ylabel"] = "Events / %.2f "
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": +10.0, "ymin": yMin, "ymaxfactor": yMaxF}
 
     if "vtx" in h.lower():
         kwargs["xlabel"] = "PV multiplicity"
@@ -559,6 +563,7 @@ def GetHistoKwargs(h, opts):
         kwargs["ylabel"] = _yLabel + units
         kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         if "ForDataDrivenCtrlPlots" in opts.folder:
+            kwargs["cutBox"] = {"cutValue": 900.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["opts"]   = {"xmin": 0.0, "xmax": +3500.0, "ymin": yMin, "ymaxfactor": yMaxF}
 
     if "MHT" in h:
@@ -796,9 +801,10 @@ def DataMCHistograms(datasetsMgr, histoName):
     if opts.signalMass != 0:
         p.histoMgr.forHisto(opts.signal, styles.getSignalStyleHToTB_M(opts.signalMass))
 
-    p.histoMgr.setHistoLegendLabelMany({
-            "QCD": "QCD (MC)",
-            })
+    if "QCD" in datasetsMgr.getAllDatasetNames():
+        p.histoMgr.setHistoLegendLabelMany({
+                "QCD": "QCD (MC)",
+                })
     
     # Apply blinding of signal region
     if "blindingRangeString" in kwargs_:
@@ -810,9 +816,10 @@ def DataMCHistograms(datasetsMgr, histoName):
     plots.drawPlot(p, saveName, **kwargs_) #the "**" unpacks the kwargs_ dictionary
 
     # Replace bin labels
-    if "counter" in opts.folder:
+    if "counter" in opts.folder and "counter" in histoName.split("/")[-1]:
         # p.getFrame().GetXaxis().LabelsOption("v") #vertical orientation of bin labels
         replaceBinLabels(p, saveName)
+        #pass
 
     # Save the plots in custom list of saveFormats
     SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode, opts.folder), [".png"])#, ".pdf"] )
@@ -824,7 +831,7 @@ def replaceBinLabels(p, histoName):
     '''
     myBinList = []
     if histoName == "counter" or histoName == "weighted/counter":
-        myBinList = ["#geq 7 jets", "#geq 3 b-jets", "b-jets SF", "#geq 2 tops", "All"]
+        myBinList = ["#geq 7 jets", "#geq 3 b-jets", "b-jets SF", "#geq 2 tops", "fat-jet veto", "All"]
     elif "bjet" in histoName:
         myBinList = ["All", "#eta", "p_{T}", "CSVv2 (M)", "Trg Match", "#geq 3"]
     elif "jet" in histoName:
@@ -879,19 +886,16 @@ if __name__ == "__main__":
     GRIDY        = False
     OPTMODE      = None
     BATCHMODE    = True
-    PRECISION    = 3
     INTLUMI      = -1.0
-    SUBCOUNTERS  = False
-    LATEX        = False
-    MCONLY       = False
     SIGNALMASS   = 500
     MERGEEWK     = False
     URL          = False
-    NOERROR      = True
     SAVEDIR      = None
     VERBOSE      = False
+    RATIO        = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug' 
     FOLDER       = "topbdtSelection_" #jetSelection_
+
     
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -908,8 +912,8 @@ if __name__ == "__main__":
     parser.add_option("--analysisName", dest="analysisName", type="string", default=ANALYSISNAME,
                       help="Override default analysisName [default: %s]" % ANALYSISNAME)
 
-    parser.add_option("--mcOnly", dest="mcOnly", action="store_true", default=MCONLY,
-                      help="Plot only MC info [default: %s]" % MCONLY)
+    parser.add_option("--ratio", dest="ratio", action="store_true", default=RATIO,
+                      help="Enable ratio pad for Data/Bkg comparison [default: %s]" % RATIO)
 
     parser.add_option("--intLumi", dest="intLumi", type=float, default=INTLUMI,
                       help="Override the integrated lumi [default: %s]" % INTLUMI)
@@ -940,9 +944,6 @@ if __name__ == "__main__":
     
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE, 
                       help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
-
-    parser.add_option("--histoLevel", dest="histoLevel", action="store", default = HISTOLEVEL,
-                      help="Histogram ambient level (default: %s)" % (HISTOLEVEL))
 
     parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
                       help="List of datasets in mcrab to include")
@@ -977,13 +978,14 @@ if __name__ == "__main__":
             Print(m, False)
         sys.exit()
     else:
+        #opts.signal = "ChargedHiggs_HplusTB_HplusToTB_M_%i_ext1" % opts.signalMass
         opts.signal = "ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass
 
     # Sanity check
     allowedFolders = ["counters", "counters/weighted", "PUDependency", "Weighting", 
                       "eSelection_Veto", "muSelection_Veto", "tauSelection_Veto",
                       "ForDataDrivenCtrlPlotsEWKFakeB", "ForDataDrivenCtrlPlotsEWKGenuineB",
-                      "jetSelection_", "bjetSelection_", "metSelection_", 
+                      "jetSelection_", "bjetSelection_", "metSelection_", "fatjetSelection_Veto",
                       "topologySelection_", "topbdtSelection_", "ForDataDrivenCtrlPlots"]
 
     if opts.folder not in allowedFolders:

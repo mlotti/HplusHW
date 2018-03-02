@@ -2,6 +2,7 @@
 
 from HiggsAnalysis.NtupleAnalysis.main import PSet
 import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
+import HiggsAnalysis.NtupleAnalysis.parameters.jsonReader as jsonReader
 
 #================================================================================================
 # General parameters
@@ -20,22 +21,6 @@ trigger = PSet(
         "HLT_PFJet450", #for trg eff recovery in 2016H
         ],
     triggerOR2 = [],
-    )
-
-#================================================================================================
-# Tau selection (sync with HToTauNu analysis)
-#================================================================================================
-tauSelection = PSet(
-    applyTriggerMatching = False, # [default: False]
-    triggerMatchingCone  =   0.1, # [default: False]
-    tauPtCut             =  20.0, # [default: 20.0]
-    tauEtaCut            =   2.1, # [default: 2.1]
-    tauLdgTrkPtCut       =   0.0, # [default: 0.0]
-    prongs               =  -1,   # [default: -1] (options: 1, 2, 3, 12, 13, 23, 123 or -1 (all))
-    rtau                 =   0.0, # [default: 0.0] (to disable set to 0.0)
-    againstElectronDiscr = "againstElectronTightMVA6",
-    againstMuonDiscr     = "againstMuonLoose3",
-    isolationDiscr       = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
     )
 
 #================================================================================================
@@ -77,6 +62,22 @@ muVeto = PSet(
 )
 
 #================================================================================================
+# Tau selection (sync with HToTauNu analysis)
+#================================================================================================
+tauVeto = PSet(
+    applyTriggerMatching = False, # [default: False]
+    triggerMatchingCone  =   0.1, # [default: False]
+    tauPtCut             =  20.0, # [default: 20.0]
+    tauEtaCut            =   2.1, # [default: 2.1]
+    tauLdgTrkPtCut       =   0.0, # [default: 0.0]
+    prongs               =  -1,   # [default: -1] (options: 1, 2, 3, 12, 13, 23, 123 or -1 (all))
+    rtau                 =   0.0, # [default: 0.0] (to disable set to 0.0)
+    againstElectronDiscr = "againstElectronTightMVA6",
+    againstMuonDiscr     = "againstMuonLoose3",
+    isolationDiscr       = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
+    )
+
+#================================================================================================
 # Jet selection
 #================================================================================================
 jetSelection = PSet(
@@ -99,42 +100,37 @@ jetSelection = PSet(
 #=================================================================================================
 # Fat jet selection
 #=================================================================================================
-fatjetSelection = PSet(
-    fatjetType                  = "FatJets",   
-    fatjetPtCuts                = [100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0],
-    fatjetEtaCuts               = [2.4],
-    numberOfFatJetsCutValue     = 0,
-    numberOfFatJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
-    fatjetIDDiscr               = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
-    fatjetPUIDDiscr             = "",        # does not work at the moment 
-    tauMatchingDeltaR           = 0.4,
-    HTCutValue                  = 0.0,
-    HTCutDirection              = ">=",
-    JTCutValue                  = 0.0,
-    JTCutDirection              = ">=",
-    MHTCutValue                 = 0.0,
-    MHTCutDirection             = ">=",
+fatjetVeto = PSet(
+    fatjetType      = "FatJets", # [default: "FatJets"]  
+    fatjetPtCuts    = [450.0],   # [default: [450.0] ]
+    fatjetEtaCuts   = [2.4],     # [default: [2.4] ]
+    fatjetIDDiscr   = "IDloose", # [default: "IDLoose"] (options: IDloose, IDtight, IDtightLeptonVeto)
+    fatjetPUIDDiscr = "",        # [default: ""]
+    topMatchDeltaR  = 0.8,       # [default: 0.8]
+    topMatchTypes   = [1],       # [default: 1]   (options: kJJB=1, kJJ=2, kJB=3, kJJBorJJ=4, kJJBorJB=5, kJJorJB=6, kAll=7, disable = -1)
+    numberOfFatJetsCutValue     = 0,    # [default: 0]
+    numberOfFatJetsCutDirection = "==", # [default: "=="] (options: ==, !=, <, <=, >, >=)
 )
 
-#=================================================================================================
-# Fat jet selection
-#=================================================================================================
-fatjetSoftDropSelection = PSet(
-    fatjetType                  = "FatJetsSoftDrop",   
-    fatjetPtCuts                = [100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0],
-    fatjetEtaCuts               = [2.4],
-    numberOfFatJetsCutValue     = 0,
-    numberOfFatJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
-    fatjetIDDiscr               = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
-    fatjetPUIDDiscr             = "",        # does not work at the moment 
-    tauMatchingDeltaR           = 0.4,
-    HTCutValue                  = 0.0,
-    HTCutDirection              = ">=",
-    JTCutValue                  = 0.0,
-    JTCutDirection              = ">=",
-    MHTCutValue                 = 0.0,
-    MHTCutDirection             = ">=",
-)
+# #=================================================================================================
+# # Fat jet selection
+# #=================================================================================================
+# fatjetSoftDropSelection = PSet(
+#     fatjetType                  = "FatJetsSoftDrop",   
+#     fatjetPtCuts                = [100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0],
+#     fatjetEtaCuts               = [2.4],
+#     numberOfFatJetsCutValue     = 0,
+#     numberOfFatJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
+#     fatjetIDDiscr               = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
+#     fatjetPUIDDiscr             = "",        # does not work at the moment 
+#     tauMatchingDeltaR           = 0.4,
+#     HTCutValue                  = 0.0,
+#     HTCutDirection              = ">=",
+#     JTCutValue                  = 0.0,
+#     JTCutDirection              = ">=",
+#     MHTCutValue                 = 0.0,
+#     MHTCutDirection             = ">=",
+# )
 
 #================================================================================================
 # B-jet selection
@@ -149,11 +145,29 @@ bjetSelection = PSet(
     numberOfBJetsCutValue     = 3,                  # [default: 3]
     numberOfBJetsCutDirection = ">=",               # [default: ">="] (options: ==, !=, <, <=, >, >=)
 )
+
+#================================================================================================
+# Scale Factors
+#================================================================================================
 scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
                                     btagPayloadFilename    = "CSVv2.csv",
                                     #btagEfficiencyFilename = "btageff_hybrid_HToTB.json",
                                     btagEfficiencyFilename = "btageff_HToTB.json",
                                     direction              = "nominal")
+
+#=================================================================================================
+# QGL selection
+#=================================================================================================
+qglrSelection = PSet(
+    QGLRCutValue             = 0.0,
+    QGLRCutDirection         = ">=",
+    numberOfJetsCutValue     = 10,
+    numberOfJetsCutDirection = "<=",
+)
+
+jsonReader.setupQGLInformation(QGLRPset  = qglSelection,
+                               jsonname_Light  = "QGLdiscriminator_QCD_LightJets.json",
+                               jsonname_Gluon  = "QGLdiscriminator_QCD_GluonJets.json")
 
 #================================================================================================
 # MET selection
@@ -219,7 +233,6 @@ topSelectionBDT = PSet(
 # FakeB Measurement Options
 #================================================================================================
 fakeBBjetSelection = PSet(
-    # CSVv2-L b-jets
     triggerMatchingApply      = bjetSelection.triggerMatchingApply,
     triggerMatchingCone       = bjetSelection.triggerMatchingCone,
     jetPtCuts                 = bjetSelection.jetPtCuts,
@@ -235,10 +248,10 @@ scaleFactors.setupBtagSFInformation(btagPset               = fakeBBjetSelection,
                                     direction              = "nominal")
 
 fakeBMeasurement = PSet(
-    # CSVv2-M b-jets
     baselineBJetsCutValue     = 2,     # [default: 2]
     baselineBJetsCutDirection = "==",  # [default: "=="]
-    # Top and Inverted Top
+    baselineBJetsDiscr        = bjetSelection.bjetDiscr,
+    baselineBJetsDiscrWP      = bjetSelection.bjetDiscrWorkingPoint,
     LdgTopMVACutValue         = topSelectionBDT.LdgMVACutValue,
     LdgTopMVACutDirection     = topSelectionBDT.LdgMVACutDirection, 
     SubldgTopMVACutValue      = topSelectionBDT.SubldgMVACutValue,
@@ -261,7 +274,7 @@ commonPlotsOptions = PSet(
     phiBins           = PSet(nBins =  64, axisMin = -3.2, axisMax =    3.2),
     deltaEtaBins      = PSet(nBins = 100, axisMin =  0.0, axisMax =   10.0),
     deltaPhiBins      = PSet(nBins =  32, axisMin =  0.0, axisMax =    3.2),
-    deltaRBins        = PSet(nBins =  50, axisMin =  0.0, axisMax =   10.0),
+    deltaRBins        = PSet(nBins = 100, axisMin =  0.0, axisMax =   10.0),
     rtauBins          = PSet(nBins =  55, axisMin =  0.0, axisMax =    1.1), # HToTauNu
     njetsBins         = PSet(nBins =  18, axisMin =  0.0, axisMax =   18.0),
     metBins           = PSet(nBins =  80, axisMin =  0.0, axisMax =  400.0), #  5 GeV bin width
@@ -278,23 +291,21 @@ commonPlotsOptions = PSet(
 # Build all selections group
 #================================================================================================
 allSelections = PSet(
-    BJetSelection         = bjetSelection,
-    FakeBBJetSelection    = fakeBBjetSelection,
-    CommonPlots           = commonPlotsOptions,
-    ElectronSelection     = eVeto,
-    HistogramAmbientLevel = histogramAmbientLevel,
-    JetSelection          = jetSelection,
-    TauSelection          = tauSelection,
-    METFilter             = metFilter,
-    METSelection          = metSelection,
-    # TopologySelection     = topologySelection,
-    TopSelectionBDT       = topSelectionBDT,
-    MuonSelection         = muVeto,
-    Trigger               = trigger,
     Verbose               = verbose,
+    Trigger               = trigger,
+    METFilter             = metFilter,
+    ElectronSelection     = eVeto,
+    MuonSelection         = muVeto,
+    TauSelection          = tauVeto,
+    JetSelection          = jetSelection,
+    BJetSelection         = bjetSelection,
+    METSelection          = metSelection,
+    TopSelectionBDT       = topSelectionBDT,
+    FatJetSelection       = fatjetVeto,
     FakeBMeasurement      = fakeBMeasurement,
     FakeBBjetSelection    = fakeBBjetSelection,
-    FatJetSelection       = fatjetSelection,
-    FatJetSoftDropSelection = fatjetSoftDropSelection
+    CommonPlots           = commonPlotsOptions,
+    HistogramAmbientLevel = histogramAmbientLevel,
+    QGLRSelection         = qglrSelection,
 )
 
