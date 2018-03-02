@@ -24,7 +24,7 @@ USAGE:
 
 
 LAST USED:
-./dcardGenerator_v2.py -x dcardHplus2tb_2016Data.py -d limits2016/ --ht2b
+./dcardGenerator_v2.py -x dcardHplus2tb_2016Data.py -d limits2016/ --h2tb
 
 
 EXAMPLES:
@@ -449,7 +449,7 @@ if __name__ == "__main__":
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE,
                       help="Print more information [default: %s]" % (VERBOSE) )
 
-    parser.add_option("--ht2b", dest="h2tb", action="store_true", default=HToTB,
+    parser.add_option("--h2tb", dest="h2tb", action="store_true", default=HToTB,
                       help="Flag to indicate that settings should reflect h2tb analysis [default: %s]" % (HToTB) )
     
     (opts, args) = parser.parse_args()

@@ -55,9 +55,7 @@ MinimumStatUncertainty                 = 0.5   # Minimum stat. uncertainty to se
 OptionCombineSingleColumnUncertainties = False # Approxmation that makes limit running faster (normally not needed) [default: False]
 OptionConvertFromShapeToConstantList   = []    # Convert these nuisances from shape to constant (Approx. that makes limits run faster & converge more easily) [default: []]
 OptionDisplayEventYieldSummary         = False # Print "Event yield summary" (TableProducer.py) [default: False]
-OptionDoControlPlots                   = False # Produce control plots defined at end of this file [default: False]
-# OptionDoTBbarForHeavy                  = False # Flag related to combination of different channels in 2012 (obsolete) [default: False] OBSOLETE
-#OptionGenuineTauBackgroundSource       = "DataDriven" #deleteme
+OptionDoControlPlots                   = True  # Produce control plots defined at end of this file [default: False]
 OptionFakeBMeasurementSource           = "DataDriven" # [default: "DataDriven"] (options: DataDriven, "MC") # FIXME - NEW 
 OptionIncludeSystematics               = False # Shape systematics (Need pseudo-multicrab produced with doSystematics=True) [default: False]
 OptionLimitOnSigmaBr                   = True  # Set to true for heavy H+ [default: True]
@@ -493,8 +491,10 @@ ControlPlots= []
 EWKPath     = "ForDataDrivenCtrlPlotsEWKGenuineTaus"
 
 h1 = ControlPlotInput(
-    title            = "Hplus2tbAnalysis_80to1000_Run2016/ForDataDrivenCtrlPlots/LdgTrijetMass_AfterAllSelections",
-    histoName        = "Hplus2tbAnalysis_80to1000_Run2016/ForDataDrivenCtrlPlots/LdgTrijetMass_AfterAllSelections",
+    #title            = "Hplus2tbAnalysis_80to1000_Run2016/ForDataDrivenCtrlPlots/LdgTrijetMass_AfterAllSelections", #Fixme
+    #histoName        = "Hplus2tbAnalysis_80to1000_Run2016/ForDataDrivenCtrlPlots/LdgTrijetMass_AfterAllSelections",
+    title            = "LdgTetrajetMass_AfterAllSelections",
+    histoName        = "LdgTetrajetMass_AfterAllSelections",
     details          = { "xlabel"          : "m_{jjb}^{ldg})",
                          #"ylabel"          : "Events / %.1f GeV/c^{2}",
                          "ylabel"          : "Events / %.1f",
