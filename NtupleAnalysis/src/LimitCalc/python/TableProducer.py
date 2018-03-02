@@ -89,6 +89,8 @@ def createBinByBinStatUncertHistograms(hRate, minimumStatUncertainty=0.5, xmin=N
 
             # Set hUp rate
             hUp.SetBinContent(i, hUp.GetBinContent(i) + hUp.GetBinError(i))
+
+# --- COMMENTED OUT BECAUSE THIS IS NOW DONE MORE CAREFULLY IN DatacardColumn.py ---
 #            # Make sure that the hUp rate is larger than the minimum stat. uncertainty
 #            if hRate.GetBinContent(i) < minimumStatUncertainty:
 #                hUp.SetBinContent(i, minimumStatUncertainty)
