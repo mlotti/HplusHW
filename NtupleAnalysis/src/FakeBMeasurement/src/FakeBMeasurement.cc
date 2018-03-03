@@ -2726,18 +2726,18 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
 
    // CSVv2-Medium requirement
    unsigned int nBaselineBjets = 0;
-   double discWP = fInvertedBJetSelection.getDiscriminatorWP( cfg_BaselineBJetsDiscr, cfg_BaselineBJetsDiscrWP);
+   double bdiscWP = fInvertedBJetSelection.getDiscriminatorWP( cfg_BaselineBJetsDiscr, cfg_BaselineBJetsDiscrWP);
 
    for (auto bjet: invBjetData.getSelectedBJets())
      {
-       if (bjet.bjetDiscriminator() < discWP) continue;
+       if (bjet.bjetDiscriminator() < bdiscWP) continue;
        nBaselineBjets++;
      }
-   bool passBaselineBjetCuts = cfg_BaselineNumberOfBJets.passedCut(nBaselineBjets); 
-   bool bLdgBJetIsMediumWP   = (invBjetData.getSelectedBJets()[0].bjetDiscriminator() >= discWP);
+   bool passBaselineBjetCuts   = cfg_BaselineNumberOfBJets.passedCut(nBaselineBjets); 
+   bool bAtLeast1MediumAbove40 = (invBjetData.getSelectedBJets()[0].bjetDiscriminator() >= bdiscWP) || (invBjetData.getSelectedBJets()[1].bjetDiscriminator() >= bdiscWP);
    // std::cout << "bool = " << (!passBaselineBjetCuts*bLdgBJetIsMediumWP) << ", passBaselineBjetCuts = " << passBaselineBjetCuts << ", bLdgBJetIsMediumWP = " << bLdgBJetIsMediumWP << std::endl;
    if (!passBaselineBjetCuts) return;
-   if (!bLdgBJetIsMediumWP) return;
+   if (!bAtLeast1MediumAbove40) return;
   
   // Increment counter
   cInvertedBTaggingCounter.increment();
