@@ -384,7 +384,9 @@ def main(opts, signalMass):
 
 
         hName_tetrajetMass = "AnalysisTriplets/TetrajetMass"
-        for hName in  ["AnalysisTriplets/TetrajetMass_closeJetToTetrajetBjet", "AnalysisTripletsTrue/TetrajetMass_closeJetToTetrajetBjet", "AnalysisTripletsFalse/TetrajetMass_closeJetToTetrajetBjet"]:        
+        for hName in  ["AnalysisTriplets/TetrajetMass_closeJetToTetrajetBjet", 
+                       "AnalysisTripletsTrue/TetrajetMass_closeJetToTetrajetBjet", 
+                       "AnalysisTripletsFalse/TetrajetMass_closeJetToTetrajetBjet"]:        
             bkg_total = backgroundTT_dataset.getDatasetRootHisto(hName_tetrajetMass)
             bkg = backgroundTT_dataset.getDatasetRootHisto(hName)
             bkg.normalizeToLuminosity(intLumi)
