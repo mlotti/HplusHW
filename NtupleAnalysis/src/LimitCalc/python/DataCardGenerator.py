@@ -72,6 +72,7 @@ class DatasetMgrCreatorManager:
         Simple print function. If verbose option is enabled prints, otherwise does nothing
         '''
         fName = __file__.split("/")[-1]
+        fName = fName.replace(".pyc", ".py")
         if printHeader:
             print "=== ", fName
         print "\t", msg

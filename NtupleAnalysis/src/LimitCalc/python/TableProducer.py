@@ -12,6 +12,7 @@ Classes for producing output
 from HiggsAnalysis.LimitCalc.Extractor import ExtractorBase
 from HiggsAnalysis.LimitCalc.DatacardColumn import DatacardColumn
 from HiggsAnalysis.LimitCalc.ControlPlotMaker import ControlPlotMaker
+from HiggsAnalysis.LimitCalc.ControlPlotMakerHToTB import ControlPlotMakerHToTB
 from HiggsAnalysis.NtupleAnalysis.tools.systematics import ScalarUncertaintyItem
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
@@ -234,7 +235,10 @@ class TableProducer:
 
         # Make control plots
         if self._config.OptionDoControlPlots:
-            ControlPlotMaker(self._opts, self._config, self._ctrlPlotDirname, self._luminosity, self._observation, self._datasetGroups)
+            if hasattr(self._config, 'OptionGenuineTauBackgroundSource'):
+                ControlPlotMaker(self._opts, self._config, self._ctrlPlotDirname, self._luminosity, self._observation, self._datasetGroups)
+            if hasattr(self._config, 'OptionFakeBMeasurementSource'):
+                ControlPlotMakerHToTB(self._opts, self._config, self._ctrlPlotDirname, self._luminosity, self._observation, self._datasetGroups)
         else:
             msg = "Skipped making of data-driven control plots. To enable, set OptionDoControlPlots = True in the input datacard."
             if self._opts.verbose:

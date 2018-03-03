@@ -35,6 +35,10 @@ def ResultStyle():
     # green text, bold
     return TestPassedStyle()
 
+def AltStyle():
+    # green text, bold
+    return "\033[1;36m"
+
 def NoteLabel():
     # white text on magenta backround
     return "%sNOTE:%s "% (NoteStyle(), NormalStyle())

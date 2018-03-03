@@ -27,6 +27,8 @@ import sys
 # Function Definition
 #================================================================================================
 def Print(msg, printHeader=False):
+    if not Verbose:
+        return
     fName = __file__.split("/")[-1]
     if printHeader==True:
         print "=== ", fName
@@ -35,22 +37,17 @@ def Print(msg, printHeader=False):
         print "\t", msg
     return
 
-def Verbose(msg, printHeader=True, verbose=False):
-    if not opts.verbose:
-        return
-    Print(msg, printHeader)
-    return
-
 #================================================================================================  
 # Options
 #================================================================================================  
-Verbose         = True
+Verbose         = False
 DataCardName    = 'Hplus2tb_13TeV'
 MassPoints      = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 1500, 2000, 2500, 3000] #, 5000, 7000, 10000]
 
 # Combine options
 OptionFakeBMeasurement                 = True  # If False QCD inclusive will be used and EWK inclusive (not just genuine-b) [default: True]
 BlindAnalysis                          = True  # True, unless you have a green light for unblinding! [default: True]
+OptionBlindThreshold                   = 0.2   # If signal exceeds this fraction of expected events, data is blinded; set to None to disable
 MinimumStatUncertainty                 = 0.5   # Minimum stat. uncertainty to set to bins with zero events [default: 0.5]
 OptionCombineSingleColumnUncertainties = False # Approxmation that makes limit running faster (normally not needed) [default: False]
 OptionConvertFromShapeToConstantList   = []    # Convert these nuisances from shape to constant (Approx. that makes limits run faster & converge more easily) [default: []]
@@ -58,8 +55,8 @@ OptionDisplayEventYieldSummary         = False # Print "Event yield summary" (Ta
 OptionDoControlPlots                   = True  # Produce control plots defined at end of this file [default: False]
 OptionFakeBMeasurementSource           = "DataDriven" # [default: "DataDriven"] (options: DataDriven, "MC") # FIXME - NEW 
 OptionIncludeSystematics               = False # Shape systematics (Need pseudo-multicrab produced with doSystematics=True) [default: False]
-OptionLimitOnSigmaBr                   = True  # Set to true for heavy H+ [default: True]
-OptionMassShape                        = "LdgTetrajetMass_AfterAllSelections"  #  [default: "LdgTetrajetMass_AfterAllSelections"]
+OptionLimitOnSigmaBr                   = True  # Set to true for heavy H+ [default: True] #FIXME
+OptionMassShape                        = "LdgTetrajetMass_AfterAllSelections"
 OptionNumberOfDecimalsInSummaries      = 1      # [default: 1]
 OptionSeparateShapeAndNormalizationFromSystVariationList=[] # Separate in the following shape nuisances the shape and normalization components [default: []]
 ToleranceForLuminosityDifference       = 0.05  # Tolerance for throwing error on luminosity difference ("0.01" means that a 1% is required) [default: 0.05]
@@ -491,18 +488,15 @@ ControlPlots= []
 EWKPath     = "ForDataDrivenCtrlPlotsEWKGenuineTaus"
 
 h1 = ControlPlotInput(
-    #title            = "Hplus2tbAnalysis_80to1000_Run2016/ForDataDrivenCtrlPlots/LdgTrijetMass_AfterAllSelections", #Fixme
-    #histoName        = "Hplus2tbAnalysis_80to1000_Run2016/ForDataDrivenCtrlPlots/LdgTrijetMass_AfterAllSelections",
     title            = "LdgTetrajetMass_AfterAllSelections",
     histoName        = "LdgTetrajetMass_AfterAllSelections",
-    details          = { "xlabel"          : "m_{jjb}^{ldg})",
-                         #"ylabel"          : "Events / %.1f GeV/c^{2}",
-                         "ylabel"          : "Events / %.1f",
+    details          = { "xlabel"          : "m_{jjb}^{ldg}",
+                         "ylabel"          : "Events",
                          "divideByBinWidth": False,
                          "unit"            : "GeV/c^{2}",
                          "log"             : True,
                          "legendPosition"  : "NE",
-                         "opts"            : {"ymin": 1e0, "ymaxfactor": 10, "xmax": 1000.0} }
+                         "opts"            : {"ymin": 1e0, "ymaxfactor": 10, "xmax": 3000.0} }
     )
 
 # Create ControlPlot list (NOTE: Remember to set OptionDoControlPlots to True)
