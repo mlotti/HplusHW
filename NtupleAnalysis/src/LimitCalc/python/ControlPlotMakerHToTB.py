@@ -82,7 +82,6 @@ class ControlPlotMakerHToTB:
 
             # Initialize flow plot
             selectionFlow   = SelectionFlowPlotMaker(self._opts, self._config, m) #fixme
-            myBlindedStatus = False
 
             # For-loop: All control plots
             for i in range(0, nPlots):
@@ -156,44 +155,30 @@ class ControlPlotMakerHToTB:
                 hData = observation.getControlPlotByIndex(i)["shape"].Clone()
                 hDataUnblinded = hData.Clone()
 
-                # Apply blinding
-                myBlindingString = None
-                if self._config.BlindAnalysis:
-                    if len(myCtrlPlot.blindedRange) > 0:
-                        myBlindingString = self._applyBlinding(hData,myCtrlPlot.blindedRange)
-                    if self._config.OptionBlindThreshold != None:
-                        for k in xrange(1, hData.GetNbinsX()+1):
-                            myExpValue = 0.0
-                            for item in myStackList:
-                                myExpValue += item.getRootHisto().GetBinContent(k)
-                            if hSignal.getRootHisto().GetBinContent(k) >= myExpValue * self._config.OptionBlindThreshold:
-                                hData.getRootHisto().SetBinContent(k, -1.0)
-                                hData.getRootHisto().SetBinError(k, 0.0)
+                # Apply blinding & Get blinding string
+                myBlindingString = self._applyBlinding(myCtrlPlot, myStackList, hData, hSignal)
+
                 # Data
                 myDataHisto = histograms.Histo(hData,"Data")
                 myDataHisto.setIsDataMC(isData=True, isMC=False)
                 myStackList.insert(0, myDataHisto)
-                    
+                
                 # Add signal
                 if m > 0:
                     mySignalLabel = "HplusTB_M%d"%m
                     myHisto = histograms.Histo(hSignal,mySignalLabel)
                     myHisto.setIsDataMC(isData=False, isMC=True)
                     myStackList.insert(1, myHisto)
-                        
+                    
                 # Add data to selection flow plot
-                selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,hDataUnblinded,myStackList[1:])
-                if len(myCtrlPlot.blindedRange) > 0:
-                    myBlindedStatus = True
-                else:
-                    myBlindedStatus = False
+                selectionFlow.addColumn(myCtrlPlot.flowPlotCaption, hDataUnblinded, myStackList[1:])
 
                 # Make plot
                 myStackPlot = None
                 myParams = myCtrlPlot.details.copy()
                 myStackPlot = plots.DataMCPlot2(myStackList)
                 myStackPlot.setLuminosity(self._luminosity)
-                myStackPlot.setEnergy("%d"%self._config.OptionSqrtS)
+                myStackPlot.setEnergy("%d" % self._config.OptionSqrtS)
                 myStackPlot.setDefaultStyles()
                 
                 # Tweak paramaters
@@ -203,44 +188,9 @@ class ControlPlotMakerHToTB:
                 if myParams["unit"] != "":
                     myParams["xlabel"] = "%s (%s)"%(myParams["xlabel"],myParams["unit"])
 
-                # ALEX-IRO-START
+                # Apply various settings to my parameters
+                self._setBlingingString(myBlindingString, myParams)
                 self._setYlabelWidthSuffix(hData, myParams)
-#                ylabelBinInfo = True
-#                if "ylabelBinInfo" in myParams:
-#                    ylabelBinInfo = myParams["ylabelBinInfo"]
-#                    del myParams["ylabelBinInfo"]
-#
-#                if ylabelBinInfo:
-#                    self._setYlabelWidthSuffix(hData, myParams)
-#                    minBinWidth, maxBinWidth = self._getMinMaxBinWidth(hData)
-#
-#                    widthSuffix = ""
-#                    minBinWidthString = "%d" % minBinWidth
-#                    maxBinWidthString = "%d" % maxBinWidth
-#
-#                    if minBinWidth < 1.0:
-#                        myFormat = "%%.%df" % (abs(int(log10(minBinWidth)))+1)
-#                        minBinWidthString = myFormat % minBinWidth
-#                    if maxBinWidth < 1.0:
-#                        myFormat = "%%.%df" % (abs(int(log10(maxBinWidth)))+1)
-#                        maxBinWidthString = myFormat % maxBinWidth
-#
-#                    widthSuffix = "%s-%s" % (minBinWidthString, maxBinWidthString)
-#                    if abs(minBinWidth-maxBinWidth) < 0.001:
-#                        widthSuffix = "%s" % (minBinWidthString)
-#
-#                    if (myParams["unit"] == "" and widthSuffix == "1"):
-#                        pass
-#                    else:
-#                        myParams["ylabel"] = "%s / %s %s" % (myParams["ylabel"], widthSuffix, myParams["unit"])
-                # ALEX-IRO-END
-                        
-                if myBlindingString != None:
-                    if myParams["unit"] != "" and myParams["unit"][0] == "^":
-                        myParams["blindingRangeString"] = "%s%s"%(myBlindingString, myParams["unit"])
-                    else:
-                        myParams["blindingRangeString"] = "%s %s"%(myBlindingString, myParams["unit"])
-                                
                 self._setLegendPosition(myParams)
                 self._setRatioLegendPosition(myParams)
 
@@ -260,6 +210,14 @@ class ControlPlotMakerHToTB:
             selectionFlow.makePlot(self._dirname,m,len(self._config.ControlPlots),self._luminosity)
         #myEvaluator.save(dirname)
         sys.exit()
+        return
+    
+    def _setBlingingString(self, myBlindingString, myParams):
+        if myBlindingString != None:
+            if myParams["unit"] != "" and myParams["unit"][0] == "^":
+                myParams["blindingRangeString"] = "%s%s" % (myBlindingString, myParams["unit"])
+            else:
+                myParams["blindingRangeString"] = "%s %s" % (myBlindingString, myParams["unit"])
         return
 
     def _setYlabelWidthSuffix(self, histo, myParams):
@@ -361,14 +319,22 @@ class ControlPlotMakerHToTB:
         print "\t", msg
         return
 
+    def _applyCustomBlinding(self, myObject, blindedRange = []):
+        '''
+        Blind observed (i.e. data) histogram bins for the given 
+        range
 
-    def _applyBlinding(self,myObject,blindedRange = []):
+        Returns blinding string 
+        '''
         myMin = None
         myMax = None
         myHisto = myObject.getRootHisto()
+        
+        # For-loop: All histo bins
         for i in range (1, myHisto.GetNbinsX()+1):
-            myUpEdge = myHisto.GetXaxis().GetBinUpEdge(i)
+            myUpEdge  = myHisto.GetXaxis().GetBinUpEdge(i)
             myLowEdge = myHisto.GetXaxis().GetBinLowEdge(i)
+
             # Blind if any edge of the current bin is inside the blinded range or if bin spans over the blinded range
             if ((myLowEdge >= blindedRange[0] and myLowEdge <= blindedRange[1]) or
                 (myUpEdge >= blindedRange[0] and myUpEdge <= blindedRange[1]) or 
@@ -379,6 +345,7 @@ class ControlPlotMakerHToTB:
                     myMax = myUpEdge
                 myHisto.SetBinContent(i, -1.0)
                 myHisto.SetBinError(i, 0.0)
+
         if myMin == None:
             return None
         myMinFormat = "%"+"d"
@@ -389,6 +356,25 @@ class ControlPlotMakerHToTB:
             myMaxFormat = "%%.%df"%(abs(int(log10(myMax)))+1)
         s = myMinFormat%myMin+"-"+myMaxFormat%myMax
         return s
+
+    def _applyBlinding(self, myCtrlPlot, myStackList, hData, hSignal):
+        myBlindingString = None
+        if self._config.BlindAnalysis:
+            if len(myCtrlPlot.blindedRange) > 0:                        
+                myBlindingString = self._applyCustomBlinding(hData, myCtrlPlot.blindedRange)
+
+        if self._config.OptionBlindThreshold != None:
+            # For-loop: All histogram bins
+            for k in xrange(1, hData.GetNbinsX()+1):
+                myExpValue = 0.0
+                for item in myStackList:
+                    myExpValue += item.getRootHisto().GetBinContent(k)
+                if hSignal.getRootHisto().GetBinContent(k) >= myExpValue * self._config.OptionBlindThreshold:
+                    hData.getRootHisto().SetBinContent(k, -1.0)
+                    hData.getRootHisto().SetBinError(k, 0.0)
+        return myBlindingString
+                        
+
 
 class SignalAreaEvaluator:
     def __init__(self):
