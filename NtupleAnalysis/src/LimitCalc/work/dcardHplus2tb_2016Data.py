@@ -498,7 +498,6 @@ if (nSysShapeComponents>0):
 #================================================================================================ 
 from HiggsAnalysis.LimitCalc.InputClasses import ControlPlotInput
 ControlPlots= []
-EWKPath     = "ForDataDrivenCtrlPlotsEWKGenuineTaus"
 
 hMET = ControlPlotInput(
     title            = "MET_AfterAllSelections",
@@ -526,6 +525,19 @@ hHT = ControlPlotInput(
                          "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 3000.0} }
     )
 
+hTopPt = ControlPlotInput(
+    title            = "LdgTrijetPt_AfterAllSelections",
+    histoName        = "LdgTrijetPt_AfterAllSelections",
+    details          = { "xlabel"             : "p_{T}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "GeV/c",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 900.0} }
+    )
+
 hTopMass = ControlPlotInput(
     title            = "LdgTrijetMass_AfterAllSelections",
     histoName        = "LdgTrijetMass_AfterAllSelections",
@@ -539,7 +551,102 @@ hTopMass = ControlPlotInput(
                          "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 350.0} }
     )
 
-hInvMass = ControlPlotInput(
+hTopBjetPt = ControlPlotInput(
+    title            = "LdgTrijetBjetPt_AfterAllSelections",
+    histoName        = "LdgTrijetBjetPt_AfterAllSelections",
+    details          = { "xlabel"             : "p_{T}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "GeV/c",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 700.0} }
+    )
+
+hTopDijetPt = ControlPlotInput(
+    title            = "LdgTrijetDijetPt_AfterAllSelections",
+    histoName        = "LdgTrijetDijetPt_AfterAllSelections",
+    details          = { "xlabel"             : "p_{T}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "GeV/c",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 700.0} }
+    )
+
+hTopDijetMass = ControlPlotInput(
+    title            = "LdgTrijetDijetMass_AfterAllSelections",
+    histoName        = "LdgTrijetDijetMass_AfterAllSelections",
+    details          = { "xlabel"             : "m_{jj}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "GeV/c^{2}",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 160.0} }
+    )
+
+hTopR32  = ControlPlotInput(
+    title            = "LdgTrijetTopMassWMassRatioAfterAllSelections",
+    histoName        = "LdgTrijetTopMassWMassRatioAfterAllSelections",
+    details          = { "xlabel"             : "R_{32}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 4.0} }
+    )
+
+hTetrajetBjetPt = ControlPlotInput(
+    title            = "TetrajetBjetPt_AfterAllSelections",
+    histoName        = "TetrajetBjetPt_AfterAllSelections",
+    details          = { "xlabel"             : "p_{T}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "GeV/c",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 900.0} },
+    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
+    )
+
+hTetrajetBjetEta = ControlPlotInput(
+    title            = "TetrajetBjetEta_AfterAllSelections",
+    histoName        = "TetrajetBjetEta_AfterAllSelections",
+    details          = { "xlabel"             : "#eta",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmin": -2.5, "xmax": 2.5} },
+    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
+    # flowPlotCaption  = "m_{jjbb}", # Leave blank if you don't want to include the item to the selection flow plot    
+    )
+
+hHiggsPt = ControlPlotInput(
+    title            = "LdgTetrajetPt_AfterAllSelections",
+    histoName        = "LdgTetrajetPt_AfterAllSelections",
+    details          = { "xlabel"             : "p_{T}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "GeV/c",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 900.0} },
+    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
+    )
+
+hHiggsMass = ControlPlotInput(
     title            = "LdgTetrajetMass_AfterAllSelections",
     histoName        = "LdgTetrajetMass_AfterAllSelections",
     details          = { "xlabel"             : "m_{jjbb}",
@@ -549,17 +656,36 @@ hInvMass = ControlPlotInput(
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
-                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 3000.0} }
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 3000.0} },
+    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
+    # flowPlotCaption  = "m_{jjbb}", # Leave blank if you don't want to include the item to the selection flow plot    
+    )
+
+hVertices = ControlPlotInput(
+    title            = "NVertices_AfterAllSelections",
+    histoName        = "NVertices_AfterAllSelections",
+    details          = { "xlabel"             : "vertex multiplicity",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 100.0} },
+    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
     )
 
 # Create ControlPlot list (NOTE: Remember to set OptionDoControlPlots to True)
-#ControlPlots.append(hMET)
-#ControlPlots.append(hHT)
-ControlPlots.append(hInvMass)
-# ControlPlots.append(hTopMass)
-
-# Inform user of plots to be made
-if len(ControlPlots) > 0 and (OptionDoControlPlots==True):
-    Print("Added %s control plots to the plotting list:" % (len(ControlPlots)), True)
-    for h in ControlPlots:
-        Print("\"%s\"" % (h.histoName), False)
+ControlPlots.append(hMET)
+ControlPlots.append(hHT)
+ControlPlots.append(hTopPt)
+ControlPlots.append(hTopMass)
+ControlPlots.append(hTopBjetPt)
+ControlPlots.append(hTopDijetPt)
+ControlPlots.append(hTopDijetMass)
+ControlPlots.append(hTopR32)
+ControlPlots.append(hTetrajetBjetPt)
+ControlPlots.append(hTetrajetBjetEta)
+ControlPlots.append(hHiggsPt)
+ControlPlots.append(hHiggsMass)
+ControlPlots.append(hVertices)
