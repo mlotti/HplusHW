@@ -293,6 +293,7 @@ signal350Style  = signalStyle.clone()
 signal400Style  = signalStyle.clone()   
 signal500Style  = signalStyle.clone()   
 signal600Style  = signalStyle.clone()
+signal650Style  = signalStyle.clone()
 signal700Style  = signalStyle.clone()
 signal750Style  = signalStyle.clone()
 signal800Style  = signalStyle.clone()
@@ -563,6 +564,8 @@ def getSignalStyleHToTB_M(myMass):
         return signalStyleHToTB400
     elif mass == "500":
         return signalStyleHToTB500
+    elif mass == "650":
+        return signalStyleHToTB650
     elif mass == "800":
           return signalStyleHToTB800
     elif mass == "1000":

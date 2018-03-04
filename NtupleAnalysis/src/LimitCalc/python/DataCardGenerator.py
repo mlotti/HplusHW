@@ -24,35 +24,59 @@ import HiggsAnalysis.LimitCalc.MulticrabPathFinder as PathFinder
 import ROOT
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 
-
 #================================================================================================
 # Class definition
 #================================================================================================
-# main class for generating the datacards from a given cfg file
 class DatacardQCDMethod:
+    '''
+    main class for generating the datacards from a given cfg file
+    '''
     UNKNOWN = 0
     FACTORISED = 1
     INVERTED = 2
     MC = 3
 
 class DatacardDatasetMgrSourceType:
-    SIGNALANALYSIS = 0
-    EMBEDDING = 1
-    QCDMEASUREMENT =2
+    SIGNALANALYSIS  = 0
+    BKGMEASUREMENT1 = 1
+    BKGMEASUREMENT2 = 2 #Assumed to be Data-Driven. Must improve this in the future
+    #EMBEDDING      = 1 
+    #QCDMEASUREMENT = 2
 
 class DatasetMgrCreatorManager:
-    def __init__(self, opts, config, signalDsetCreator, embeddingDsetCreator, qcdDsetCreator, qcdMethodType):
-        self._dsetMgrCreators = [signalDsetCreator, embeddingDsetCreator, qcdDsetCreator]
+    def __init__(self, opts, config, signalDsetCreator, bkg1DsetCreator, bkg2DsetCreator, verbose=False):
+        self._verbose = verbose
+        self._dsetMgrCreators = [signalDsetCreator, bkg1DsetCreator, bkg2DsetCreator]
         self._dsetMgrs = []
         self._luminosities = []
         self._mainCounterTables = []
-        self._qcdMethodType = qcdMethodType
         if config.ToleranceForLuminosityDifference == None:
             msg = "Input datacard should contain entry for ToleranceForLuminosityDifference (for example: ToleranceForLuminosityDifference=0.01)!"
             raise Exception(ShellStyles.ErrorLabel() + msg + ShellStyles.NormalStyle())
         self._toleranceForLuminosityDifference = config.ToleranceForLuminosityDifference
         self._optionDebugConfig = opts.debugConfig
         self._config = config
+        return
+
+    def Verbose(self, msg, printHeader=True):
+        '''
+        Calls Print() only if verbose options is set to true
+        '''
+        if not self._verbose:
+            return
+        Print(msg, printHeader)
+        return
+
+    def Print(self, msg, printHeader=True):
+        '''
+        Simple print function. If verbose option is enabled prints, otherwise does nothing
+        '''
+        fName = __file__.split("/")[-1]
+        fName = fName.replace(".pyc", ".py")
+        if printHeader:
+            print "=== ", fName
+        print "\t", msg
+        return
 
     def __del__(self):
         self.closeManagers()
@@ -69,58 +93,104 @@ class DatasetMgrCreatorManager:
             if dMgr != None:
                 dMgr.close()
         self._dsetMgrs = []
-        # print "DatasetManagerCreators closed"
+        self.Verbose("DatasetManagerCreators closed", True)
         return
 
     def obtainDatasetMgrs(self, era, searchMode, optimizationMode, verbose=False):
         if len(self._dsetMgrs) > 0:
-            raise Exception(ShellStyles.ErrorLabel()+"DatasetMgrCreatorManager::obtainDatasetMgrs(...) was already called (dsetMgrs exist)!"+ShellStyles.NormalStyle())
+            msg = "The obtainDatasetMgrs() function has already been called before. The dsetMgrs exist!"
+            raise Exception(ShellStyles.ErrorLabel() + msg + ShellStyles.NormalStyle())
+
+        # For-loop: All dset manager creators
         for i in range(0, len(self._dsetMgrCreators)):
-            if self._dsetMgrCreators[i] != None:
-                # Create DatasetManager object and set pointer to the selected era, searchMode, and optimizationMode
-                myDsetMgr = self._dsetMgrCreators[i].createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
+            self.Verbose(self.getDatasetMgrLabel(i), i==0)
 
-                # Check consistency
-                consistencyCheck.checkConsistencyStandalone(self._dsetMgrCreators[i]._baseDirectory,myDsetMgr,name=self.getDatasetMgrLabel(i))
-
-                # Normalize
-                myDsetMgr.updateNAllEventsToPUWeighted()
-
-                # Obtain luminosity
-                myLuminosity = 0.0
-                if i != DatacardDatasetMgrSourceType.QCDMEASUREMENT and i != DatacardDatasetMgrSourceType.EMBEDDING:
-                    myDsetMgr.loadLuminosities()
-                    myDataDatasets = myDsetMgr.getDataDatasets()
-                    for d in myDataDatasets:
-                        myLuminosity += d.getLuminosity()
-                else:
-                    # Speciality for the QCD measurement
-                    myLuminosity = myDsetMgr.getAllDatasets()[0].getLuminosity()
-                self._luminosities.append(myLuminosity)
-
-                # Merge divided datasets
-                plots.mergeRenameReorderForDataMC(myDsetMgr)
-
-                # Show info of available datasets
-                if verbose:
-                    msg = "Dataset merging structure for %s " % (self.getDatasetMgrLabel(i))
-                    print ShellStyles.NoteStyle() + msg + ShellStyles.NormalStyle()
-                    myDsetMgr.printDatasetTree()
-
-                # Store DatasetManager
-                self._dsetMgrs.append(myDsetMgr)
-
-                # For embedding, check setting on CaloMET
-                if i == DatacardDatasetMgrSourceType.EMBEDDING:
-                    myProperty = myDsetMgr.getAllDatasets()[0].getProperty("analysisName")
-                    if not "CaloMet" in myProperty:
-                        raise Exception(ShellStyles.ErrorLabel()+"Embedding has not been done with CaloMet approximation!")
-            else:
-                # No dsetMgrCreator, append zero pointers to retain list dimension
+            # No dsetMgrCreator, append zero pointers to retain list dimension
+            if self._dsetMgrCreators[i] == None:
                 self._dsetMgrs.append(None)
                 self._luminosities.append(None)
+                continue
+
+            # Create DatasetManager object and set pointer to the selected era, searchMode, and optimizationMode
+            myDsetMgr = self._dsetMgrCreators[i].createDatasetManager(dataEra=era, searchMode=searchMode, optimizationMode=optimizationMode)
+
+            # Check consistency
+            consistencyCheck.checkConsistencyStandalone(self._dsetMgrCreators[i]._baseDirectory,myDsetMgr,name=self.getDatasetMgrLabel(i))
+
+            # Normalize
+            myDsetMgr.updateNAllEventsToPUWeighted()
+
+            # Obtain integrated luminosity
+            self._luminosities.append( self._getIntLumi(i, myDsetMgr) )
+
+            # Merge divided datasets
+            plots.mergeRenameReorderForDataMC(myDsetMgr)
+
+            # Show info of available datasets
+            if verbose:
+                msg = "Dataset merging structure for %s " % (self.getDatasetMgrLabel(i))
+                print ShellStyles.NoteStyle() + msg + ShellStyles.NormalStyle()
+                myDsetMgr.printDatasetTree()
+
+            # Store DatasetManager
+            self._dsetMgrs.append(myDsetMgr)
+
+            # For embedding. fixme: Santeri (is this needed?) #fixme: santeri. Is this needed?
+            #if i == DatacardDatasetMgrSourceType.EMBEDDING:
+            #    myProperty = myDsetMgr.getAllDatasets()[0].getProperty("analysisName")
+
+        # Sanity check for luminosity
         self._checkLuminosityMatching()
         return
+
+    
+    def _getIntLumi(self, index, myDsetMgr):
+        '''
+        Determines the integrated luminosity of the datacard
+        dataset manager according to its type
+        
+        ToDo: Rewrite into something that makes sense
+        and is more fail-safe
+        '''
+        intLumi = 0.0
+        if index == DatacardDatasetMgrSourceType.SIGNALANALYSIS:
+            
+            if 0:
+                myDsetMgr.PrintInfo()
+                self.Print("Base directory = %s" %  (myDsetMgr.getAllDatasets()[0].getBaseDirectory()))
+            myDsetMgr.loadLuminosities()
+
+            # For-loop: All data datasets
+            for d in myDsetMgr.getDataDatasets():
+                intLumi += d.getLuminosity()
+        elif index == DatacardDatasetMgrSourceType.BKGMEASUREMENT2:
+            # For-loop: All datasets looking for the pseudo-dataset (smoking gun for data-driven pseudo-dataset)
+            for d in myDsetMgr.getAllDatasets():
+                if d.isMC() or d.isData():
+                    continue
+                elif d.isPseudo():
+                    baseDir =  d.getBaseDirectory()
+                    intLumi = d.getLuminosity()
+                    self.Verbose("Found pseudo-dataset %s for dataset manager in dir %s. Saving integrated lumi of %.1f" % (d.getName(), baseDir, d.getLuminosity()), True)
+                else:
+                    raise Exception("This should never be reached")
+        else:
+            # For-loop: All datasets looking for the pseudo-dataset (smoking gun for data-driven pseudo-dataset)
+            for d in myDsetMgr.getAllDatasets():
+                if d.isMC() or d.isPseudo():
+                    continue
+                elif d.isData():
+                    intLumi += d.getLuminosity()
+                else:
+                    raise Exception("This should never be reached")
+        
+        # Print only when there's a problem
+        msg = "Integrated lumi for dataset manager with index %d is %.1f" % (index, intLumi)
+        if intLumi == 0:
+            self.Print(ShellStyles.NoteStyle() + msg + ShellStyles.NormalStyle(), True)
+        else:
+            self.Verbose(msg, True)
+        return intLumi
 
     def cacheMainCounterTables(self):
         # Note: needs to be called after all merging operations have been done
@@ -136,45 +206,63 @@ class DatasetMgrCreatorManager:
     def getNmax(self):
         return len(self._dsetMgrs)
 
-    # Returns datasetMgr object, index must conform to DatacardDatasetMgrSourceType. Note: can return also a None object
     def getDatasetMgr(self, i):
+        '''
+        Returns datasetMgr object, index must conform to DatacardDatasetMgrSourceType. 
+
+        Note: can return also a None object
+        '''
         if len(self._dsetMgrs) == 0:
-            raise Exception(ShellStyles.ErrorLabel()+"DatasetMgrCreatorManager::obtainDatasetMgrs(...) needs to be called first!")
+            msg = "The function obtainDatasetMgrs() needs to be called first!"
+            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
+
         if i < 0 or i >= len(self._dsetMgrs):
-            raise Exception(ShellStyles.ErrorLabel()+"DatasetMgrCreatorManager::getDatasetMgr(...) index = %d is out of range!"%i)
+            msg = "DatasetMgrCreatorManager::getDatasetMgr(...) index = %d is out of range!" % i
+            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
         return self._dsetMgrs[i]
 
     def getDatasetMgrLabel(self, i):
-        if i == DatacardDatasetMgrSourceType.SIGNALANALYSIS:
-            return "Signal analysis"
-        elif i == DatacardDatasetMgrSourceType.EMBEDDING:
-            return "Embedding"
-        elif i == DatacardDatasetMgrSourceType.QCDMEASUREMENT:
-            if self._qcdMethodType == DatacardQCDMethod.FACTORISED:
-                return "QCDfactorised"
-            if self._qcdMethodType == DatacardQCDMethod.INVERTED:
-                return "QCDinverted"
+        ''' 
+        WARNING! This is dangerous! FIXME! santeri
+        '''
+        if i == DatacardDatasetMgrSourceType.SIGNALANALYSIS:             
+            return "Signal analysis" 
+        elif i == DatacardDatasetMgrSourceType.BKGMEASUREMENT1: #DatacardDatasetMgrSourceType.EMBEDDING: #fixme
+            #return "Embedding"
+            return "Bkg1"
+        elif i == DatacardDatasetMgrSourceType.BKGMEASUREMENT2: #DatacardDatasetMgrSourceType.QCDMEASUREMENT: #fixme
+            return "Bkg2"
         else:
-            raise Exception(ShellStyles.ErrorLabel()+"DatasetMgrCreatorManager::getDatasetMgrLabel(...) index = %d is out of range!!"%i)
+            msg = "The  index = %d is out of range!" % (i)
+            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
 
     def getLuminosity(self, i):
         if len(self._luminosities) == 0:
-            raise Exception(ShellStyles.ErrorLabel()+"DatasetMgrCreatorManager::obtainDatasetMgrs(...) needs to be called first!")
+            msg =  "The function obtainDatasetMgrs() needs to be called first, before getting luminosity"
+            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
+
         if i < 0 or i >= len(self._dsetMgrs):
-            raise Exception(ShellStyles.ErrorLabel()+"DatasetMgrCreatorManager::getLuminosity(...) index = %d is out of range!"%i)
+            msg =  "The index = %d is out of range!" % (i)
+            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
         return self._luminosities[DatacardDatasetMgrSourceType.SIGNALANALYSIS]
 
     def getMainCounterTable(self, i):
         if len(self._mainCounterTables) == 0:
-            raise Exception(ShellStyles.ErrorLabel()+"DatasetMgrCreatorManager::cacheMainCounterTables(...) needs to be called first!")
+            msg = "The function cacheMainCounterTables(...) needs to be called first!"
+            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
+
         if i < 0 or i >= len(self._dsetMgrs):
-            raise Exception(ShellStyles.ErrorLabel()+"DatasetMgrCreatorManager::getMainCounterTable(...) index = %d is out of range!"%i)
+            msg = "The index = %d is out of range!" % (i)
+            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
         return self._mainCounterTables[i]
 
-    # Merges the list of datasets (if they exist) into one object. The merged group is then used to access counters and histograms
     def mergeDatasets(self, i, mergeGroupLabel, searchNames):
+        '''
+        Merges the list of datasets (if they exist) into one object. The merged group is then used to access counters and histograms
+        '''
         if self.getDatasetMgr(i) == None:
             return
+
         # Obtain all dataset names
         myAllDatasetNames = self.getDatasetMgr(i).getAllDatasetNames()
         # Find datasets matching to search conditions
@@ -213,111 +301,74 @@ class DatasetMgrCreatorManager:
                 print "DatasetMgr contains following datasets for '%s'"%self.getDatasetMgrLabel(i)
                 self.getDatasetMgr(i).printInfo()
 
-    def _checkLuminosityMatching(self, verbose=False):
-
-        # Print info of luminosity?
-        if verbose:
-            print "Luminosity is set to:"
-            for i in range(0, len(self._luminosities)):
-                if self._luminosities[i] != None:
-                    print "%s: %.1f 1/pb"%(self.getDatasetMgrLabel(i), self._luminosities[i])
+    def _checkLuminosityMatching(self):
+        '''
+        Ensures that the integrated luminosity is the 
+        same for all dataset managers
+        '''
+        # For-loop: All lumis
+        for i, lumi in enumerate(self._luminosities, 0):
+            self.Verbose("Lumi for dataset manager \"%s\" is set to %.1f 1/pb" % (self.getDatasetMgrLabel(i), lumi), i==0)
 
         # Compare luminosities to signal analysis
         if len(self._luminosities) == 0:
-            raise Exception(ShellStyles.ErrorLabel() + "DatasetMgrCreatorManager::obtainDatasetMgrs(...) needs to be called first!")
+            msg = "The function obtainDatasetMgrs() needs to be called first!"
+            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
         mySignalLuminosity = self._luminosities[DatacardDatasetMgrSourceType.SIGNALANALYSIS]
+        
+        # For-loop: All stored luminosities
+        for i, lumi in enumerate(self._luminosities, 0):
 
-        for i in range(1,len(self._luminosities)):
-            if self._luminosities[i] != None:
-                myDiff = abs(self._luminosities[i] / mySignalLuminosity - 1.0)
-                if myDiff > self._toleranceForLuminosityDifference:
-                    raise Exception(ShellStyles.ErrorLabel()+"signal and embedding luminosities differ more than 1 %%! (%s vs. %s)"%(self._luminosities[i], mySignalLuminosity))
-                elif myDiff > 0.0001:
-                    signalLabel  = self.getDatasetMgrLabel(DatacardDatasetMgrSourceType.SIGNALANALYSIS)
-                    datasetLabel = self.getDatasetMgrLabel(i)
-                    msg = "%s and %s luminosities differ slightly (%.2f %%)!" % (signalLabel, datasetLabel, myDiff*100.0)
-                    if verbose: 
-                        print ShellStyles.WarningLabel() + msg
+            # Calculate lumi difference wrt signal analysis
+            myDiff = abs(self._luminosities[i] / mySignalLuminosity - 1.0)
+
+            if myDiff > self._toleranceForLuminosityDifference:
+                msg = "Signal and data-driven luminosities differ more than 1 %%! (%s vs. %s)" % (self._luminosities[i], mySignalLuminosity)
+                raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle() )
+            elif myDiff > 0.0001:
+                signalLabel  = self.getDatasetMgrLabel(DatacardDatasetMgrSourceType.SIGNALANALYSIS)
+                datasetLabel = self.getDatasetMgrLabel(i)
+                msg = "%s and %s luminosities differ slightly (%.2f %%)!" % (signalLabel, datasetLabel, myDiff*100.0)
+                self.Verbose(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle() )
         return
 
 class DataCardGenerator:
-    def __init__(self, opts, config, qcdMethod, verbose=True):
+    def __init__(self, opts, config, verbose=True, h2tb=False):
         self.verbose = verbose
         self._opts = opts
+        self._h2tb = h2tb
         self._config = config
-        self._QCDMethod = qcdMethod
-        # Check config file
-        #self._checkCfgFile() #FIXME
-        if self.verbose:
-            print "Input datacard read and passed the tests"
-        # Manager for datasetMgrCreators (DatasetMgrCreatorManager object)
-        self._dsetMgrManager = None
-        # Datacard columns
-        self._observation = None
-        self._columns = []
-        # Extractor objects
-        self._extractors = []
-        # Control plot extractors
-        self._controlPlotExtractors = []
-        # 
-        #self._replaceEmbeddingWithMC = False
-        #self._doSignalAnalysis = True
-        #self._doEmbeddingAnalysis = True
-        #self._doQCDFactorised = False
-        #self._variationPostfix = optimisationVariation
-        #self._dataEra = era
-        #if self._QCDMethod == DatacardQCDMethod.FACTORISED:
-            #self._doQCDFactorised = True
-        #self._doQCDInverted = False
-        #if self._QCDMethod == DatacardQCDMethod.INVERTED:
-            #self._doQCDInverted = True
-        # Override options from command line (not used at the moment)
-        #self.overrideConfigOptionsFromCommandLine()
-        #if self._QCDMethod != DatacardQCDMethod.FACTORISED and self._QCDMethod != DatacardQCDMethod.INVERTED:
-            #raise Exception(ShellStyles.ErrorLabel()+"QCD method was not properly specified when creating DataCardGenerator!")
+        self._dsetMgrManager = None # Manager for datasetMgrCreators (DatasetMgrCreatorManager object)
+        self._observation = None # Datacard column
+        self._columns = [] # Datacard column
+        self._extractors = [] # Extractor objects
+        self._controlPlotExtractors = [] # Control plot extractors
+        self._checkInputDatacard()
+        self._outputPrefix = self._getBasicOutputPrefix()
+        return
 
-        # Check that all necessary parameters have been specified in config file
-        myStatus = self._checkCfgFile()
-        if not myStatus:
-            myMsg = "Datacards will not be created for "
-            if self._QCDMethod != DatacardQCDMethod.FACTORISED:
-                myMsg += " QCD factorised"
-            elif self._QCDMethod != DatacardQCDMethod.INVERTED:
-                myMsg += " QCD inverted"
-            print myMsg + " (if this is not intented, check your config!)\n"
+    def Verbose(self, msg, printHeader=True):
+        '''
+        Calls Print() only if verbose options is set to true
+        '''
+        if not self.verbose:
             return
-        # Construct prefix for output name
-        myPathSplit = self._config.Path.split("/")
-        myOutputPrefix = "%s_"%myPathSplit[len(myPathSplit)-1]
-        if self._QCDMethod == DatacardQCDMethod.FACTORISED:
-            myOutputPrefix += "QCDfact"
-        elif self._QCDMethod == DatacardQCDMethod.INVERTED:
-            myOutputPrefix += "QCDinv"
-        if self._config.OptionDoTBbarForHeavy:
-            myStatus = True
-            for m in self._config.MassPoints:
-                if m < 179:
-                    myStatus = False
-            if myStatus:
-                myOutputPrefix += "_TBbar"
-        myOutputPrefix += "_%s"%self._config.OptionGenuineTauBackgroundSource
+        self.Print(msg, printHeader)
+        return
 
-        self._outputPrefix = myOutputPrefix
-
-        myMassRange = str(self._config.MassPoints[0])
-        if len(self._config.MassPoints) > 0:
-            myMassRange += "-"+str(self._config.MassPoints[len(self._config.MassPoints)-1])
-
-        # Cards will be generated for example4__MC_FakeAndGenuineTauNotSeparated in mass range 180-3000 GeV
-        outputPrefix = ShellStyles.NoteStyle() + myOutputPrefix + ShellStyles.NormalStyle()
-        massRange    = ShellStyles.HighlightStyle() + myMassRange
-        msg = "Cards will be generated for "+ outputPrefix + " in mass range " + massRange + " GeV"
-        if self.verbose:
-            print msg + ShellStyles.NormalStyle()
-
+    def Print(self, msg, printHeader=True):
+        '''
+        Simple print function. If verbose option is enabled prints, otherwise does nothing
+        '''
+        fName = __file__.split("/")[-1]
+        if printHeader:
+            print "=== ", fName
+        print "\t", msg
+        return
+    
     def __del__(self):
         if self.verbose:
-            print "\nDeleting cached objects"
+            self.Print("Deleting cached objects", True)
         self.closeFiles()
         self.opts = None
         self._config = None
@@ -333,14 +384,57 @@ class DataCardGenerator:
         for e in self._controlPlotExtractors:
             del e
         self._controlPlotExtractors = None
+        return
 
-    #def overrideConfigOptionsFromCommandLine(self):
-        # Obtain QCD measurement method
+    def setDsetMgrCreators(self, signalDsetCreator, bkg1DsetCreator, bkg2DsetCreator):
+        self._dsetMgrManager = DatasetMgrCreatorManager(self._opts, self._config, signalDsetCreator, bkg1DsetCreator, bkg2DsetCreator)
 
-    def setDsetMgrCreators(self, signalDsetCreator, embeddingDsetCreator, qcdDsetCreator):
-        self._dsetMgrManager = DatasetMgrCreatorManager(self._opts, self._config, signalDsetCreator, embeddingDsetCreator, qcdDsetCreator, self._QCDMethod)
-        if self.verbose:
-            print "DatasetManagerCreator objects passed"
+
+        dirList = [signalDsetCreator.getBaseDirectory()]
+        if bkg1DsetCreator != None:
+            dirList.append(bkg1DsetCreator.getBaseDirectory())
+
+        if bkg2DsetCreator != None:
+            dirList.append(bkg2DsetCreator.getBaseDirectory())
+
+        self.Verbose("Objects passed using as input the following directories:\n\t%s" % ("\n\t".join(dirList)), True)
+        return
+
+    def _getBasicOutputPrefix(self):
+        '''
+        Construct prefix for output dir name
+        '''
+        prefix = self._config.Path.split("/")[-1]
+
+        if hasattr(self._config, 'OptionGenuineTauBackgroundSource'):
+            prefix += "_%s" % (self._config.OptionGenuineTauBackgroundSource)
+
+        if hasattr(self._config, 'OptionFakeBMeasurementSource'):
+            prefix += "_%s" %  (self._config.OptionFakeBMeasurementSource)
+            
+        # Append mass range in prefix in the form (mH_X_to_Y)
+        massRange = "_mH%s" % (str(self._config.MassPoints[0]))
+        if len(self._config.MassPoints) > 0:
+            massRange += "to%s" % (str(self._config.MassPoints[-1]))
+        prefix += massRange
+
+        self.Verbose("Output dir prefix (basic) is \"%s\"" % (prefix), True)
+        return prefix
+        
+    def _getFinalOutputPrefix(self,era, searchMode, optimizationMode):
+        '''
+        Construct final, prefix for output dir name
+        '''
+        # Construct prefix extension
+        if optimizationMode == "":
+            optMode = "OptNominal"
+        else:
+            optMode = "Opt%s" % optimizationMode
+        s = "%s_%s_%s"%(era, searchMode, optMode)
+
+        # Prepend prefix to output prefix name
+        self._outputPrefix = s + "_" + self._outputPrefix
+        self.Verbose("Output dir prefix (final) is \"%s\"" % (self._outputPrefix), True)
         return
 
     def doDatacard(self, era, searchMode, optimizationMode, mcrabInfoOutput):
@@ -350,29 +444,25 @@ class DataCardGenerator:
                 if myWeightBin < len(myJsonBins)-1:
                     if not h.GetXaxis().GetBinLowEdge(i) + 0.0001 < myJsonBins[myWeightBin+1]["mt"]:
                         myWeightBin += 1
-                #print "hbin edge=",h.GetXaxis().GetBinLowEdge(i),"weight edge=",myJsonBins[myWeightBin]["mt"]
+                self.Print("hbin edge=",h.GetXaxis().GetBinLowEdge(i),"weight edge=",myJsonBins[myWeightBin]["mt"], True)
                 h.SetBinContent(i, h.GetBinContent(i) * myJsonBins[myWeightBin]["efficiency"])
-        
-        # Prepend era, searchMode, and optimizationMode to prefix
-        s = "%s_%s_"%(era, searchMode)
-        if optimizationMode == "":
-            s += "nominal"
-        else:
-            s += "%s"%optimizationMode
-        self._outputPrefix = s + "_" + self._outputPrefix
+            return
 
-        # Get dataset managers for the era / searchMode / optimizationMode combination
+        self.Verbose("Prepend era, searchMode, and optimizationMode to the output dir prefix")
+        self._getFinalOutputPrefix(era, searchMode, optimizationMode)
+
+        self.Verbose("Get dataset managers for the era / searchMode / optimizationMode combination")
         self._dsetMgrManager.obtainDatasetMgrs(era, searchMode, optimizationMode, self.verbose)
 
-        # Create columns (dataset groups)
+        self.Verbose("Create columns (dataset groups)")
         self.createDatacardColumns()
         self.checkDatacardColumns()
 
-        # create extractors and control plot extractors
+        self.Verbose("Create extractors and control plot extractors")
         self.createExtractors()
         self.createControlPlots()
 
-        # do data mining to cache results into datacard column objects
+        self.Verbose("Do data mining to cache results into datacard column objects")
         self.doDataMining()
 
         # Merge columns, if necessary
@@ -389,56 +479,14 @@ class DataCardGenerator:
                 addColumnList      = item["mergeList"][1:]
                 self.separateMCEWKTausAndFakes(targetColumn, targetColumnNewName, addColumnList, mySubtractColumnList)
         
-        #if self._config.OptionGenuineTauBackgroundSource == "MC_FullSystematics" or self._config.OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
-            #if hasattr(self._config, "EWKFakeIdList") and len(self._config.EWKFakeIdList) > 0:
-                ## For realistic embedding, merge MC EWK and subtract fakes from it (use the cached results)
-                #print "\nPerforming merge for MC genuine tau column"
-                #self.separateMCEWKTausAndFakes(targetColumn=self._config.EmbeddingIdList[0],targetColumnNewName="MC_EWKTau",addColumnList=None,subtractColumnList=self._config.EWKFakeIdList)
-        #if self._config.OptionDoMergeFakeTauColumns:
-            #if hasattr(self._config, "EWKFakeIdList") and len(self._config.EWKMergeList) > 0:
-                #if self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
-                    ## For data-driven, merge fake tau columns into one
-                    #print "\nMerging non-top EWK+tt MC columns"
-                    #self.separateMCEWKTausAndFakes(targetColumn=self._config.EWKMergeList[0],targetColumnNewName="MC_non_top_EWK",addColumnList=self._config.EWKMergeList[1:],subtractColumnList=[])
-                #else:
-                    ## For data-driven, merge fake tau columns into one
-                    #print "\nPerforming merge for MC fake tau column"
-                    #self.separateMCEWKTausAndFakes(targetColumn=self._config.EWKFakeIdList[0],targetColumnNewName="MC_faketau",addColumnList=self._config.EWKFakeIdList[1:],subtractColumnList=[])
-
         # Do rebinning of results, store a fine binned copy of all histograms as well
-        for c in self._columns:
-            # print c.getLabel()
-            # print c.getNuisanceIds()
+        for i, c in enumerate(self._columns, 1):
+            self.Verbose("Rebinning cached results for column \"%s\" with %d nuisances" % (c.getLabel(), len(c.getNuisanceIds())), i==1)
             c.doRebinningOfCachedResults(self._config)
 
+        # Rebin cached results for data (observation)
+        self.Verbose("Rebinning cached results observation")
         self._observation.doRebinningOfCachedResults(self._config)
-
-        # Apply embedding reweighting - this here temporarily and should be moved to multicrab generation
-        #if self._config.OptionReweightEmbedding != None:
-            #for c in self._columns:
-                #if c.typeIsEWK():
-                    #print "*** Applying weighting for embedding ***"
-                    #if not os.path.exists(self._config.OptionReweightEmbedding):
-                        #raise Exception(ShellStyles.ErrorLabel()+"Cannot find file '%s'!"%self._config.OptionReweightEmbedding)
-                    #f = open(self._config.OptionReweightEmbedding,"r")
-                    #jsonObj = json.load(f)
-                    #myJsonBins = list(jsonObj["dataParameters"]["Run2012ABCD"]["bins"])
-                    #f.close()
-                    #print "Yield before weighting:", c._rateResult._histograms[0].Integral()
-                    #for l in range(0, len(c._rateResult._histograms)):
-                        #applyWeighting(c._rateResult._histograms[l], myJsonBins)
-                    #c._rateResult._result = c._rateResult._histograms[0].Integral()
-                    #print "Yield after weighting", c._rateResult._histograms[0].Integral()
-                    #for k in range(0, len(c._nuisanceResults)):
-                        #for l in range (0, len(c._nuisanceResults[k]._histograms)):
-                            #applyWeighting(c._nuisanceResults[k]._histograms[l], myJsonBins)
-                    ## Update cache
-                    #applyWeighting(c._cachedShapeRootHistogramWithUncertainties.getRootHisto(), myJsonBins)
-                    #for k in c._cachedShapeRootHistogramWithUncertainties._shapeUncertainties.keys():
-                        #(up, down) = c._cachedShapeRootHistogramWithUncertainties._shapeUncertainties[k]
-                        #applyWeighting(up, myJsonBins)
-                        #applyWeighting(down, myJsonBins)
-                    ##c.getCachedShapeRootHistogramWithUncertainties().Debug()
 
         # Separate nuisances with additional information into an individual nuisance (horror!)
         for c in self._columns:
@@ -475,111 +523,107 @@ class DataCardGenerator:
         # Return name of output directory
         return myProducer.getDirectory()
 
-    def _checkCfgFile(self):
-        mymsg = ""
+    def _checkInputDatacard(self):
+        '''
+        Check that all necessary parameters have been specified in config file
+        '''
+        msg = ""
         if self._config.DataCardName == None:
-            mymsg += "- missing field 'DataCardName' (string, describes the name of the datacard)\n"
-        if self._config.Path == None:
-            mymsg += "- missing field 'Path' (string, path to directory containing all multicrab directories to be used for datacards)\n"
-        elif not os.path.exists(self._config.Path):
-            mymsg += "- 'Path' points to directory that does not exist!\n"
-        if self._config.MassPoints == None:
-            mymsg += "- missing field 'MassPoints' (list of integers, mass points for which datacard is generated)!\n"
-        elif len(self._config.MassPoints) == 0:
-            mymsg += "- field 'MassPoints' needs to have at least one entry! (list of integers, mass points for which datacard is generated)\n"
-        if self._config.BlindAnalysis == None:
-            mymsg += "- field 'BlindAnalysis' needs to be set as True or False!\n"
-        #if self._config.SignalAnalysis == None:
-            #print ShellStyles.WarningLabel()+"The field 'SignalAnalysis' is not specified or empty in the config file, signal analysis will be ignored"+ShellStyles.NormalStyle()
-            #self._doSignalAnalysis = False
-        #if self._config.EmbeddingAnalysis == None:
-            #print ShellStyles.WarningLabel()+"The field 'EmbeddingAnalysis' is not specified or empty in the config file, embedding analysis will be ignored"+ShellStyles.NormalStyle()
-            #self._doEmbeddingAnalysis = False
-            #mymsg += "- missing field 'SignalAnalysis' (string, name of EDFilter/EDAnalyzer process that produced the root files for signal analysis)\n"
-        #if self._QCDMethod == DatacardQCDMethod.FACTORISED and self._config.QCDFactorisedAnalysis == None:
-            #print ShellStyles.WarningLabel()+"The field 'QCDFactorisedAnalysis' is not specified or empty in the config file, QCD factorised analysis will be ignored"+ShellStyles.NormalStyle()
-            #self._doQCDFactorised = False
-            #return False
-        #if self._QCDMethod == DatacardQCDMethod.INVERTED and self._config.QCDInvertedAnalysis == None:
-            #print ShellStyles.WarningLabel()+"The field 'QCDInvertedAnalysis' is not specified or empty in the config file, QCD inverted analysis will be ignored"+ShellStyles.NormalStyle()
-            #self._doQCDInverted = False
-            #return False
-        #if self._QCDMethod == DatacardQCDMethod.UNKNOWN:
-            #mymsg += "- missing field 'QCDMeasurementMethod' (string, name of QCD measurement method, options: 'QCD factorised' or 'QCD inverted')\n"
-        #if self._config.SignalRateCounter == None:
-            #mymsg += "- missing field 'SignalRateCounter' (string, label of counter to be used for rate)\n"
-        #if self._config.FakeRateCounter == None:
-            #mymsg += "- missing field 'FakeRateCounter' (string, label of counter to be used for rate)\n"
-        #if self._config.SignalShapeHisto == None:
-            #mymsg += "- missing field 'SignalShapeHisto' (string, name of histogram for the shape)\n"
-        #if self._config.FakeShapeHisto == None:
-            #mymsg += "- missing field 'FakeShapeHisto' (string, name of histogram for the shape)\n"
-        #if self._config.ShapeHistogramsDimensions == None:
-            #mymsg += "- missing field 'ShapeHistogramsDimensions' (list of number of bins, rangeMin, rangeMax, variableBinSizeLowEdges, xtitle, ytitle)\n"
-        #elif not isinstance(self._config.ShapeHistogramsDimensions, dict):
-            #mymsg += "- field 'ShapeHistogramsDimensions' has to be of type dictionary with keys: bins, rangeMin, rangeMax, variableBinSizeLowEdges, xtitle, ytitle)\n"
-        #else:
-            #if not "bins" in self._config.ShapeHistogramsDimensions.keys():
-                #mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key bins (int)\n"
-            #elif not "rangeMin" in self._config.ShapeHistogramsDimensions.keys():
-                #mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key rangeMin (float)\n"
-            #elif not "rangeMax" in self._config.ShapeHistogramsDimensions.keys():
-                #mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key rangeMax (float)\n"
-            #elif not "variableBinSizeLowEdges" in self._config.ShapeHistogramsDimensions.keys():
-                #mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key variableBinSizeLowEdges (list of floats, can be empty list)\n"
-            #elif not "xtitle" in self._config.ShapeHistogramsDimensions.keys():
-                #mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key xtitle (string)\n"
-            #elif not "ytitle" in self._config.ShapeHistogramsDimensions.keys():
-                #mymsg += "- field 'ShapeHistogramsDimensions' has to contain dictionary key ytitle (string)\n"
-        if self._config.Observation == None:
-            mymsg += "- missing field 'Observation' (ObservationInput object)\n"
-        if self._config.DataGroups == None:
-            mymsg += "- missing field 'DataGroups' (list of DataGroup objects)\n"
-        elif len(self._config.DataGroups) == 0:
-            mymsg += "- need to specify at least one DataGroup to field 'DataGroups' (list of DataGroup objects)\n"
-        if self._config.Nuisances == None:
-            mymsg += "- missing field 'Nuisances' (list of Nuisance objects)\n"
-        elif len(self._config.Nuisances) == 0:
-            mymsg += "- need to specify at least one Nuisance to field 'Nuisances' (list of Nuisance objects)\n"
-        if self._config.ControlPlots == None:
-            print ShellStyles.WarningLabel()+"You did not specify any ControlPlots in the config (ControlPlots is list of ControlPlotInput objects)!"
-            print "  Please check if this was intended."
-        # determine if datacard was ok
-        if mymsg != "":
-            print ShellStyles.ErrorStyle()+"Error in config '"+self._opts.datacard+"'!"+ShellStyles.NormalStyle()
-            print mymsg
-            raise Exception()
-        return True
+            msg += "- missing field 'DataCardName' (string, describes the name of the datacard)\n"
 
-    ## Reads datagroup definitions from columns and initialises datasets
+        if self._config.Path == None:
+            msg += "- missing field 'Path' (string, path to directory containing all multicrab directories to be used for datacards)\n"
+        elif not os.path.exists(self._config.Path):
+            msg += "- 'Path' points to directory that does not exist!\n"
+
+        if self._config.MassPoints == None:
+            msg += "- missing field 'MassPoints' (list of integers, mass points for which datacard is generated)!\n"
+        elif len(self._config.MassPoints) == 0:
+            msg += "- field 'MassPoints' needs to have at least one entry! (list of integers, mass points for which datacard is generated)\n"
+
+        if self._config.BlindAnalysis == None:
+            msg += "- field 'BlindAnalysis' needs to be set as True or False!\n"
+
+        if self._config.Observation == None:
+            msg += "- missing field 'Observation' (ObservationInput object)\n"
+
+        if self._config.DataGroups == None:
+            msg += "- missing field 'DataGroups' (list of DataGroup objects)\n"
+        elif len(self._config.DataGroups) == 0:
+            msg += "- need to specify at least one DataGroup to field 'DataGroups' (list of DataGroup objects)\n"
+
+        if self._config.Nuisances == None:
+            msg += "- missing field 'Nuisances' (list of Nuisance objects)\n"
+        elif len(self._config.Nuisances) == 0:
+            msg += "- need to specify at least one Nuisance to field 'Nuisances' (list of Nuisance objects)\n"
+
+        if self._config.ControlPlots == None:
+            self.Print(ShellStyles.NoteStyle() + "You did not specify any ControlPlots in the config (ControlPlots is list of ControlPlotInput objects)!" + ShellStyles.NormalStyle(), True)
+
+        # Determine whether the input datacard was ok
+        if msg != "":
+            msg += "Please check the input template datacatd provided \"%s\"'" % (self._opts.datacard)
+            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
+
+        # Print a nice table with the above parameters?
+        if self.verbose:
+            self.PrintDatacardOptions()
+        return
+
+    def PrintDatacardOptions(self):
+        '''
+        Print all datacard options
+        '''
+        align = "{:<20} {:<80} "
+        table = []
+        hLine = "="*100
+        table.append(hLine)
+        table.append(align.format("Variable Name", "Variable Value"))
+        table.append(hLine)
+        table.append(align.format("Datacard Name"  , self._config.DataCardName))
+        table.append(align.format("Path"           , self._config.Path))
+        table.append(align.format("Mass Points"    , ", ".join(map(str,self._config.MassPoints))) )
+        table.append(align.format("Blind Analysis" , self._config.BlindAnalysis))
+        table.append(align.format("Observation"    , self._config.Observation))
+        table.append(align.format("# Data Groups"  , len(self._config.DataGroups) ))
+        table.append(align.format("# Nuisances"    , len(self._config.Nuisances) ))
+        table.append(align.format("# Control Plots", len(self._config.ControlPlots) ))
+        table.append(hLine)
+        table.append("")
+
+        for i, row in enumerate(table, 1):
+            self.Print(row, i==1)        
+        return
+
     def createDatacardColumns(self):
+        '''
+        Reads datagroup definitions from columns and initialises datasets
+        '''
+
         # Make datacard column object for observation
         if self._dsetMgrManager.getDatasetMgr(DatacardDatasetMgrSourceType.SIGNALANALYSIS) != None:
-            #self._dsetMgrManager.mergeDatasets(DatacardDatasetMgrSourceType.SIGNALANALYSIS, myObservationName, self._config.Observation.datasetDefinition)
-            #print "Making merged dataset for data group: "+ShellStyles.HighlightStyle()+"observation"+ShellStyles.NormalStyle()
-            #self._dsetMgrManager.getDatasetMgr(DatacardDatasetMgrSourceType.SIGNALANALYSIS).merge(myObservationName, myFoundNames, keepSources=True) # note that mergeMany has already been called at this stage
             self._observation = DatacardColumn.DatacardColumn(opts=self._opts,
-                                               label = "data_obs",
-                                               enabledForMassPoints = self._config.MassPoints,
-                                               datasetType = "Observation",
-                                               datasetMgrColumn = self._config.Observation.datasetDefinition,
-                                               shapeHistoName = self._config.Observation.shapeHistoName,
-                                               histoPath = self._config.Observation.histoPath,
-                                               additionalNormalisationFactor = self._config.Observation.additionalNormalisation)
+                                                              label = "data_obs",
+                                                              enabledForMassPoints = self._config.MassPoints,
+                                                              datasetType = "Observation",
+                                                              datasetMgrColumn = self._config.Observation.datasetDefinition,
+                                                              shapeHistoName = self._config.Observation.shapeHistoName,
+                                                              histoPath = self._config.Observation.histoPath,
+                                                              additionalNormalisationFactor = self._config.Observation.additionalNormalisation)
             if self._opts.debugConfig:
                 self._observation.printDebug()
         else:
-            # Not sure what happens after this warning :)
-            print ShellStyles.WarningLabel()+"No observation will be extracted, because signal analysis is disabled"
+            self.Print(ShellStyles.WarningLabel() + "No observation will be extracted, because signal analysis is disabled", True)
 
         # Loop over data groups to create datacard columns
         for dg in self._config.DataGroups:
-            myIngoreOtherQCDMeasurementStatus = (dg.datasetType == "QCD factorised" and self._QCDMethod == DatacardQCDMethod.INVERTED) or (dg.datasetType == "QCD inverted" and self._QCDMethod == DatacardQCDMethod.FACTORISED)
+#            myIngoreOtherQCDMeasurementStatus = (dg.datasetType == "QCD factorised" and self._QCDMethod == DatacardQCDMethod.INVERTED) or (dg.datasetType == "QCD inverted" and self._QCDMethod == DatacardQCDMethod.FACTORISED)
             myMassIsConsideredStatus = False
             for validMass in dg.validMassPoints:
                 if validMass in self._config.MassPoints:
                     myMassIsConsideredStatus = True
-            if not myIngoreOtherQCDMeasurementStatus and myMassIsConsideredStatus:
+#            if not myIngoreOtherQCDMeasurementStatus and myMassIsConsideredStatus:
+            if myMassIsConsideredStatus:
                 if self.verbose:
                     print "Constructing datacard column for data group %s%s" % (ShellStyles.NoteStyle() + dg.label, ShellStyles.NormalStyle())
 
@@ -620,39 +664,86 @@ class DataCardGenerator:
 
         if self._opts.debugDatasets:
             self._dsetMgrManager.printDatasetMgrContents()
+        return
+    
+    def _getDsetMgrIndexForColumnType(self, c):
+
+        # Is this data-driven?
+        if hasattr(self._config, 'OptionGenuineTauBackgroundSource'):
+            isDataDriven = (self._config.OptionGenuineTauBackgroundSource == "DataDriven")
+        if hasattr(self._config, 'OptionFakeTauBackgroundSource'):
+            isDataDriven = (self._config.OptionGenuineTauBackgroundSource == "DataDriven")
+        if hasattr(self._config, 'OptionFakeBMeasurementSource'):
+            isDataDriven = (self._config.OptionFakeBMeasurementSource == "DataDriven")
+
+        # Determine the dataset manager index (manager index is simple bad coding! replace sometime in future)
+#        dsetMgrIndex = -1
+        dsetMgrIndex = 0 #FIXME: should be -1, once the problem with "res. " column is fixed
+        if c.typeIsObservation() or c.typeIsSignal() or c.typeIsEWKfake() or c.typeIsQCDMC() or (c.typeIsEWK() and not isDataDriven):
+            dsetMgrIndex = 0
+        elif c.typeIsEWK() or c.typeIsGenuineB() or c.typeIsEWKMC():
+            dsetMgrIndex = 1
+        elif c.typeIsQCDinverted() or c.typeIsFakeB() or c.typeIsQCDMC():
+            dsetMgrIndex = 2
+#        else: #FIXME: res. should not enter here as a column
+#            msg = "Could not determine which dataset manager to use for column \"%s\"" % (c.getLabel())
+#            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle() )
+
+        # Construct summary table
+        align = "{:<40} {:<10} "
+        table = []
+        hLine = "="*50
+        table.append(hLine)
+        table.append(align.format("Column Type", "True/False"))
+        table.append(hLine)
+        table.append(align.format("Is Observation", c.typeIsObservation()) )
+        table.append(align.format("Is Signal"     , c.typeIsSignal() ) )
+        table.append(align.format("Is EWK Fake"   , c.typeIsEWKfake() ) )
+        table.append(align.format("Is QCD"        , c.typeIsQCD() ) )
+        table.append(align.format("Is QCD MC"     , c.typeIsQCDMC() ) )
+        table.append(align.format("IS EWK MC"     , c.typeIsEWKMC() ) )
+        table.append(align.format("IS EWK"        , c.typeIsEWK() ) )
+        table.append(align.format("IS QCD Inverted",c.typeIsQCDinverted() ) )
+        table.append(align.format("Is Fake-b"     , c.typeIsFakeB() ) )
+        table.append(align.format("Is Genuine-b"  , c.typeIsGenuineB() ) )
+        table.append(align.format("Is empty column",c.typeIsEmptyColumn() ) )
+        table.append(align.format("Dset Mgr Index", dsetMgrIndex ) )
+        table.append(hLine)
+        table.append("")
+
+        # For-loop: All rows in table
+        for i, row in enumerate(table, 1):
+            self.Verbose(row, i==1)        
+        return dsetMgrIndex
 
     def doDataMining(self):
-        
-        # Do data mining and cache results
-        if self.verbose:
-            print "\nStarting data mining"
+        '''
+        Do data mining and cache the results
+        '''
+        self.Verbose("Starting data mining")
 
         if self._dsetMgrManager.getDatasetMgr(DatacardDatasetMgrSourceType.SIGNALANALYSIS) != None:
             # Handle observation separately
-            myDsetMgr = self._dsetMgrManager.getDatasetMgr(DatacardDatasetMgrSourceType.SIGNALANALYSIS)
+            myDsetMgr    = self._dsetMgrManager.getDatasetMgr(DatacardDatasetMgrSourceType.SIGNALANALYSIS)
             myLuminosity = self._dsetMgrManager.getLuminosity(DatacardDatasetMgrSourceType.SIGNALANALYSIS)
 
             myMainCounterTable = self._dsetMgrManager.getMainCounterTable(DatacardDatasetMgrSourceType.SIGNALANALYSIS)
             self._observation.doDataMining(self._config, myDsetMgr, myLuminosity, myMainCounterTable, self._extractors, self._controlPlotExtractors)
 
-        for c in self._columns:
-            myDsetMgrIndex = 0
-            isDataDriven   = (self._config.OptionGenuineTauBackgroundSource == "DataDriven")
-            if c.typeIsObservation() or c.typeIsSignal() or c.typeIsEWKfake() or c.typeIsQCDMC() or (c.typeIsEWK() and not isDataDriven):
-                myDsetMgrIndex = 0
-            elif c.typeIsEWK():
-                myDsetMgrIndex = 1
-            elif c.typeIsQCDinverted():
-                myDsetMgrIndex = 2
+        # For-loop: All columns
+        for i, c in enumerate(self._columns, 1):
+            self.Verbose("Performing data-mining for column \"%s\"" % (c.getLabel()), i==1)
 
-            # Do mining for datacard columns (separately for EWK fake taus)
-            myDsetMgr = self._dsetMgrManager.getDatasetMgr(myDsetMgrIndex)
-            myLuminosity = self._dsetMgrManager.getLuminosity(myDsetMgrIndex)
-            myMainCounterTable = self._dsetMgrManager.getMainCounterTable(myDsetMgrIndex)
-            c.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractors)
+            # Determine dset manager index for the given column
+            dsetMgrIndex = self._getDsetMgrIndexForColumnType(c)
 
-        if self.verbose:
-            print "\nData mining has been finished, results (and histograms) have been ingeniously cached"
+            # Do mining for datacard columns (separately for data-driven bkgs)
+            myDsetMgr          = self._dsetMgrManager.getDatasetMgr(dsetMgrIndex)
+            myLuminosity       = self._dsetMgrManager.getLuminosity(dsetMgrIndex)
+            myMainCounterTable = self._dsetMgrManager.getMainCounterTable(dsetMgrIndex)
+            c.doDataMining(self._config, myDsetMgr, myLuminosity, myMainCounterTable, self._extractors, self._controlPlotExtractors)
+
+        self.Verbose("Data mining has been finished, results (and histograms) have been ingeniously cached")
         return
 
     def separateMCEWKTausAndFakes(self, targetColumn, targetColumnNewName, addColumnList, subtractColumnList):
@@ -796,21 +887,13 @@ class DataCardGenerator:
         if myFoundNuisancesCount != len(myNuisanceIdList):
             raise Exception("This should not happen")
 
-        # Set type of control plots
-        #for i in range(0, len(myEmbColumn._controlPlots)):
-            #if myEmbColumn._controlPlots[i] != None:
-                #myEmbColumn._controlPlots[i]["typeIsEWKfake"] = False
-                #myEmbColumn._controlPlots[i]["typeIsEWK"] = True
-
-        #print "Final:"
-        #myEmbColumn._cachedShapeRootHistogramWithUncertainties.Debug()
-
-    ## Closes files in dataset managers
     def closeFiles(self):
-        #print "Closing open input files"
+        '''
+        Closes files in dataset managers
+        '''
+        self.Verbose("Closing open input files")
         #self._dsetMgrManager.closeManagers()
-        if self.verbose:
-            print "DatasetManagers closed"
+        self.Verbose("DatasetManagers closed")
         return
 
     ## Check landsProcess in datacard columns
@@ -828,7 +911,6 @@ class DataCardGenerator:
                             myFirstValue = c.getLandsProcess()
                         else:
                             if myFirstValue + i != c.getLandsProcess():
-                                #print ShellStyles.ShellStyles.ErrorLabel()+" cannot find LandS process '"+str(myFirstValue+i)+"' in data groups for mass = %d! (need to have consecutive numbers; add group with such landsProcess or check input file)"%m
                                 print " cannot find LandS process '"+str(myFirstValue+i)+"' in data groups for mass = %d! (need to have consecutive numbers; add group with such landsProcess or check input file)"%m
                                 raise Exception()
                         i += 1
