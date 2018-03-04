@@ -298,9 +298,14 @@ _dataDrivenCtrlPlotBinning = {
     "MinDeltaPhiTauJet_AfterAllSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
     "MaxDeltaPhiTauJet_AfterAllSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
     "NVertices_AfterAllSelections": None,
-    #"LdgTetrajetMass_AfterAllSelections": [0,50,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,520,540,560,580,600,620,640,660,680,700,720,740,760,780,800,820,840,860,880,900,920,940,960,980,1000,1020,1040,1060,1080,1100,1150,1200,1250,1300,1350,1400,1450,1500,1750,2000,2250,2500,2750,3000,3250,3500,3750,4000], # for H+ -> tb analysis    
-    "LdgTetrajetMass_AfterAllSelections": getBinningForTetrajetMass(2)
+    # HToTB
+    "MET_AfterAllSelections": [i for i in range(0, 100, 10)] + [i for i in range(100, 200, 20)] + [i for i in range(200, 300, 50)] + [i for i in range(300, 400+100, 100)],
+    "HT_AfterAllSelections" : [i for i in range(500, 1500, 50)] + [i for i in range(1500, 2000, 100)] + [i for i in range(2000, 3000+500, 500)],
+    "LdgTrijetMass_AfterAllSelections"  : [i for i in range(50, 350, 10)],
+    "LdgTetrajetMass_AfterAllSelections": getBinningForTetrajetMass(0)
 }
+
+
 # Add EWK fake tau shape definitions
 for key in _dataDrivenCtrlPlotBinning.keys():
     if "shape" in key:

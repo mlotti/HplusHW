@@ -265,7 +265,7 @@ def GetHistoKwargs(hName, opts):
             myBins.append(k)
         for k in range(300, 400+100, 100):
             myBins.append(k)
-        units            = "GeV/c"
+        units            = "GeV"
         binWmin, binWmax = GetBinWidthMinMax(myBins)
         kwargs["ylabel"] = "Events / %.0f-%.0f %s" % (binWmin, binWmax, units)
         kwargs["xlabel"] = "E_{T}^{miss} (%s)" % units
