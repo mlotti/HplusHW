@@ -206,13 +206,14 @@ DataGroups.append(DataGroup(label             = labelPrefix + "TT",
                             )
                   )
 
-# WJetsToQQ
-DataGroups.append(DataGroup(label             = labelPrefix + "TTWJetsToQQ", 
+
+# SingleTop
+DataGroups.append(DataGroup(label             = labelPrefix + "SingleTop", 
                             landsProcess      = 4,
-                            shapeHistoName    = OptionMassShape, 
+                            shapeHistoName    = OptionMassShape,
                             histoPath         = histoPathEWK,
                             datasetType       = dsetTypeEWK,
-                            datasetDefinition = "TTWJetsToQQ",
+                            datasetDefinition = "SingleTop",
                             validMassPoints   = MassPoints,
                             nuisances         = myLumiSystematics
                             )
@@ -242,21 +243,9 @@ DataGroups.append(DataGroup(label             = labelPrefix + "TTTT",
                             )
                   )
 
-# SingleTop
-DataGroups.append(DataGroup(label             = labelPrefix + "SingleTop", 
-                            landsProcess      = 7,
-                            shapeHistoName    = OptionMassShape,
-                            histoPath         = histoPathEWK,
-                            datasetType       = dsetTypeEWK,
-                            datasetDefinition = "SingleTop",
-                            validMassPoints   = MassPoints,
-                            nuisances         = myLumiSystematics
-                            )
-                  )
-
 # DYJetsToQQ
 DataGroups.append(DataGroup(label             = labelPrefix + "DYJetsToQQ", 
-                            landsProcess      = 8,
+                            landsProcess      = 7,
                             shapeHistoName    = OptionMassShape,
                             histoPath         = histoPathEWK,
                             datasetType       = dsetTypeEWK,
@@ -266,9 +255,33 @@ DataGroups.append(DataGroup(label             = labelPrefix + "DYJetsToQQ",
                             )
                   )
 
+# tt+W
+DataGroups.append(DataGroup(label             = labelPrefix + "TTWJetsToQQ", 
+                            landsProcess      = 8,
+                            shapeHistoName    = OptionMassShape, 
+                            histoPath         = histoPathEWK,
+                            datasetType       = dsetTypeEWK,
+                            datasetDefinition = "TTWJetsToQQ",
+                            validMassPoints   = MassPoints,
+                            nuisances         = myLumiSystematics
+                            )
+                  )
+
+# W+jets
+DataGroups.append(DataGroup(label             = labelPrefix + "WJetsToQQ_HT_600ToInf",
+                            landsProcess      = 9,
+                            shapeHistoName    = OptionMassShape,
+                            histoPath         = histoPathEWK, 
+                            datasetType       = dsetTypeEWK,
+                            datasetDefinition = "WJetsToQQ_HT_600ToInf",
+                            validMassPoints   = MassPoints,
+                            nuisances         = myLumiSystematics
+                            )
+)
+
 # Diboson
 DataGroups.append(DataGroup(label             = labelPrefix + "Diboson",
-                            landsProcess      = 9,
+                            landsProcess      = 10,
                             shapeHistoName    = OptionMassShape,
                             histoPath         = histoPathEWK, 
                             datasetType       = dsetTypeEWK,
@@ -487,20 +500,63 @@ from HiggsAnalysis.LimitCalc.InputClasses import ControlPlotInput
 ControlPlots= []
 EWKPath     = "ForDataDrivenCtrlPlotsEWKGenuineTaus"
 
-h1 = ControlPlotInput(
+hMET = ControlPlotInput(
+    title            = "MET_AfterAllSelections",
+    histoName        = "MET_AfterAllSelections",
+    details          = { "xlabel"             : "E_{T}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "GeV",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 400.0} }
+    )
+
+hHT = ControlPlotInput(
+    title            = "HT_AfterAllSelections",
+    histoName        = "HT_AfterAllSelections",
+    details          = { "xlabel"             : "H_{T}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "GeV",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 3000.0} }
+    )
+
+hTopMass = ControlPlotInput(
+    title            = "LdgTrijetMass_AfterAllSelections",
+    histoName        = "LdgTrijetMass_AfterAllSelections",
+    details          = { "xlabel"             : "m_{jjb}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "GeV/c^{2}",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 350.0} }
+    )
+
+hInvMass = ControlPlotInput(
     title            = "LdgTetrajetMass_AfterAllSelections",
     histoName        = "LdgTetrajetMass_AfterAllSelections",
-    details          = { "xlabel"          : "m_{jjb}^{ldg}",
-                         "ylabel"          : "Events",
-                         "divideByBinWidth": False,
-                         "unit"            : "GeV/c^{2}",
-                         "log"             : True,
-                         "legendPosition"  : "NE",
-                         "opts"            : {"ymin": 1e0, "ymaxfactor": 10, "xmax": 3000.0} }
+    details          = { "xlabel"             : "m_{jjbb}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "GeV/c^{2}",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 3000.0} }
     )
 
 # Create ControlPlot list (NOTE: Remember to set OptionDoControlPlots to True)
-ControlPlots.append(h1)
+#ControlPlots.append(hMET)
+#ControlPlots.append(hHT)
+ControlPlots.append(hInvMass)
+# ControlPlots.append(hTopMass)
 
 # Inform user of plots to be made
 if len(ControlPlots) > 0 and (OptionDoControlPlots==True):
