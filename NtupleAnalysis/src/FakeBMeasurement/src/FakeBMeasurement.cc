@@ -54,6 +54,7 @@ private:
   BJetSelection fBaselineBJetSelection;
   METSelection fBaselineMETSelection;
   TopSelectionBDT fBaselineTopSelection;
+  FatJetSelection fBaselineFatJetSelection;
   Count cBaselineSelected;
   Count cBaselineSelectedCR;
   // Inverted selection
@@ -62,6 +63,7 @@ private:
   BJetSelection fInvertedBJetSelection;
   METSelection fInvertedMETSelection;
   TopSelectionBDT fInvertedTopSelection;
+  FatJetSelection fInvertedFatJetSelection;
   Count cInvertedSelected;
   Count cInvertedSelectedCR;
 
@@ -505,6 +507,7 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
     fBaselineBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fBaselineMETSelection(config.getParameter<ParameterSet>("METSelection")),
     fBaselineTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
+    fBaselineFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
     cBaselineSelected(fEventCounter.addCounter("Baseline: selected events")),
     cBaselineSelectedCR(fEventCounter.addCounter("Baseline: selected CR events")),
     cInvertedBTaggingCounter(fEventCounter.addCounter("Inverted: passed b-jet selection")),
@@ -512,6 +515,7 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
     fInvertedBJetSelection(config.getParameter<ParameterSet>("FakeBBjetSelection")),//, fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fInvertedMETSelection(config.getParameter<ParameterSet>("METSelection")),
     fInvertedTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
+    fInvertedFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
     cInvertedSelected(fEventCounter.addCounter("Inverted: selected events")),
     cInvertedSelectedCR(fEventCounter.addCounter("Inverted: selected CR events"))
 { }
@@ -977,10 +981,12 @@ void FakeBMeasurement::book(TDirectory *dir) {
   fBaselineBJetSelection.bookHistograms(dir);
   fBaselineMETSelection.bookHistograms(dir);
   fBaselineTopSelection.bookHistograms(dir);
+  fBaselineFatJetSelection.bookHistograms(dir);
   // Inverted selection
   fInvertedBJetSelection.bookHistograms(dir);
   fInvertedMETSelection.bookHistograms(dir);
   fInvertedTopSelection.bookHistograms(dir);
+  fInvertedFatJetSelection.bookHistograms(dir);
   
   // ====== Histogram settings
   HistoSplitter histoSplitter = fCommonPlots.getHistoSplitter();
@@ -2233,6 +2239,14 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   if (!hasFreeBJet) return;
   if (!passMinTopMVACut) return;
 
+  //================================================================================================
+  // *) FatJet veto
+  //================================================================================================
+  if (0) std::cout << "\n=== Baseline: FatJet veto" << std::endl;
+  const FatJetSelection::Data fatjetData = fBaselineFatJetSelection.analyze(fEvent, topData);
+  if (!fatjetData.passedSelection()) return;
+
+
   // Defining the splitting of phase-space as the eta of the Tetrajet b-jet
   std::vector<float> myFactorisationInfo;
   myFactorisationInfo.push_back(topData.getTetrajetBJet().eta() );
@@ -2712,14 +2726,18 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
 
    // CSVv2-Medium requirement
    unsigned int nBaselineBjets = 0;
+   double bdiscWP = fInvertedBJetSelection.getDiscriminatorWP( cfg_BaselineBJetsDiscr, cfg_BaselineBJetsDiscrWP);
+
    for (auto bjet: invBjetData.getSelectedBJets())
      {
-        double discWP = fInvertedBJetSelection.getDiscriminatorWP( cfg_BaselineBJetsDiscr, cfg_BaselineBJetsDiscrWP);
-       if (bjet.bjetDiscriminator() < discWP) continue;
+       if (bjet.bjetDiscriminator() < bdiscWP) continue;
        nBaselineBjets++;
      }
-   bool passBaselineBjetCuts = cfg_BaselineNumberOfBJets.passedCut(nBaselineBjets); 
+   bool passBaselineBjetCuts   = cfg_BaselineNumberOfBJets.passedCut(nBaselineBjets); 
+   bool bAtLeast1MediumAbove40 = (invBjetData.getSelectedBJets()[0].bjetDiscriminator() >= bdiscWP) || (invBjetData.getSelectedBJets()[1].bjetDiscriminator() >= bdiscWP);
+   // std::cout << "bool = " << (!passBaselineBjetCuts*bLdgBJetIsMediumWP) << ", passBaselineBjetCuts = " << passBaselineBjetCuts << ", bLdgBJetIsMediumWP = " << bLdgBJetIsMediumWP << std::endl;
    if (!passBaselineBjetCuts) return;
+   if (!bAtLeast1MediumAbove40) return;
   
   // Increment counter
   cInvertedBTaggingCounter.increment();
@@ -2750,6 +2768,14 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   bool hasFreeBJet      = topData.hasFreeBJet();
   if (!hasFreeBJet) return;
   if (!passMinTopMVACut) return;
+
+  //================================================================================================
+  // *) FatJet veto
+  //================================================================================================
+  if (0) std::cout << "\n=== Inverted: FatJet veto" << std::endl;
+  const FatJetSelection::Data fatjetData = fInvertedFatJetSelection.analyze(fEvent, topData);
+  if (!fatjetData.passedSelection()) return;
+
 
   // Defining the splitting of phase-space as the eta of the Tetrajet b-jet
   std::vector<float> myFactorisationInfo;

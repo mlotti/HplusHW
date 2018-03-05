@@ -23,10 +23,11 @@ class WrappedTH2;
 class FatJetSelection: public BaseSelection {
 public:
   enum FatjetType {
-    kUNKNOWN, //0
+    kNone, //0
     kJJB, //1
     kJJ, //2
-    kJB //3
+    kJB, //3
+    kResolved, //4
   };
 
   class Data {
@@ -100,18 +101,17 @@ private:
   /// The actual selection
   Data privateAnalyze(const Event& event, const TopSelectionBDT::Data& topData);
   
-  void findFatJetMatchedToTop(std::vector<AK8Jet>& collection, const Event& event,   const math::XYZTLorentzVector& topP);
+  void findFatJetMatchedToTop(std::vector<AK8Jet>& collection, const Event& event,  const math::XYZTLorentzVector& topP);
 
-  // void findFatJetMatchedToTopType(FatJetSelection::FatjetType& type, AK8Jet fatJetMatchedToTop, const TopSelectionBDT::Data& topData);
-
-  const FatJetSelection::FatjetType findFatJetMatchedToTopType(AK8Jet fatJetMatchedToTop, const TopSelectionBDT::Data& topData);
+  const FatJetSelection::FatjetType findFatJetMatchedToTopType(AK8Jet fatJetMatchedToTop, const double dR_jet1, const double dR_jet2, const double dR_bjet, const TopSelectionBDT::Data& topData);
+  
+  void findFatJetMatchedToTopDeltaR(AK8Jet fatJetTopMatch, double &dR_jet1, double &dR_jet2, double &dR_bjet, const TopSelectionBDT::Data& topData);
   
   // Input parameters
   const std::vector<float> fFatJetPtCuts;
   const std::vector<float> fFatJetEtaCuts;
-  const float fTopMatchingDeltaR;
-  const int fTopMatchingType;
-  const float fTopConstituentMatchingDeltaR;
+  const float fTopMatchDeltaR;
+  const std::vector<int> fTopMatchTypes;
   const DirectionalCut<int> fNumberOfFatJetsCut;
   
   // Event counter for passing selection
@@ -122,8 +122,7 @@ private:
   Count cSubPassedFatJetPUID;
   Count cSubPassedPt;
   Count cSubPassedEta;
-  Count cSubPassedDeltaRMatchWithTop;
-  Count cSubPassedTopMatchingType;
+  Count cSubPassedTopMatchType;
   Count cSubPassedFatJetCount;
 
   // Histograms (1D)
@@ -133,8 +132,11 @@ private:
   WrappedTH1 *hFatJetNPassed;
   WrappedTH1 *hFatJetPtPassed;
   WrappedTH1 *hFatJetEtaPassed;
-  WrappedTH1 *hFatJetMatchingToTopDeltaR;
-  WrappedTH1 *hFatJetMatchingToTopPtRatio;
+  WrappedTH1 *hFatJetTopMatchDeltaRJet1;
+  WrappedTH1 *hFatJetTopMatchDeltaRJet2;
+  WrappedTH1 *hFatJetTopMatchDeltaRBjet;
+  WrappedTH1 *hFatJetTopMatchType;
+  WrappedTH1 *hFatJetTopMatchPtRatio;
   
   // Binnings
   int nNBins;
@@ -144,13 +146,18 @@ private:
   int nPtBins;
   double fPtMin;
   double fPtMax;
+
   int  nEtaBins;
   double fEtaMin;
   double fEtaMax;
+
   int nCSVBins;
   double fCSVMin;
   double fCSVMax;
 
+  int nDRBins;
+  double fDRMin;
+  double fDRMax;
 };
 
 #endif

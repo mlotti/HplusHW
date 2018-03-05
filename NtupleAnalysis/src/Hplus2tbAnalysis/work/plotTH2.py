@@ -43,6 +43,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.counter as counter
 import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
@@ -84,11 +85,6 @@ def GetLumi(datasetsMgr):
             lumi += d.getLuminosity()
     Verbose("Luminosity = %s (pb)" % (lumi), True)
     return lumi
-
-
-def GetListOfEwkDatasets():
-    Verbose("Getting list of EWK datasets")
-    return  ["TT", "WJetsToQQ_HT_600ToInf", "SingleTop", "DYJetsToQQHT", "TTZToQQ",  "TTWJetsToQQ", "Diboson", "TTTT"]
 
 
 def GetDatasetsFromDir(opts):
@@ -164,7 +160,7 @@ def main(opts):
             
         # Merge EWK samples
         if opts.dataset == "EWK":
-            datasetsMgr.merge("EWK", GetListOfEwkDatasets())
+            datasetsMgr.merge("EWK", aux.GetListOfEwkDatasets())
             plots._plotStyles["EWK"] = styles.getAltEWKStyle()
 
         # Re-order datasets (different for inverted than default=baseline)
@@ -204,6 +200,8 @@ def main(opts):
             if "_Vs_" not in h:
                 continue
             Plot2dHistograms(datasetsMgr, h)
+
+    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)    
     return
 
 def GetHistoKwargs(h, opts):
@@ -340,11 +338,11 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
         saveNameURL = saveName + ext
-        saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
+        saveNameURL = aux.convertToURL(saveNameURL, opts.url)
         if opts.url:
-            Print(saveNameURL, i==0)
+            Verbose(saveNameURL, i==0)
         else:
-            Print(saveName + ext, i==0)
+            Verbose(saveName + ext, i==0)
         plot.saveAs(saveName, formats=saveFormats)
     return
 
@@ -381,7 +379,7 @@ if __name__ == "__main__":
     LOGY         = False
     LOGZ         = False
     URL          = False
-    SAVEDIR      = "/publicweb/a/aattikis/"
+    SAVEDIR      = None
     VERBOSE      = False
     FOLDER       = "ForDataDrivenCtrlPlots" #"topbdtSelection_" #jetSelection_
     DATASET      = "Data"
@@ -471,11 +469,9 @@ if __name__ == "__main__":
         parser.print_help()
         #print __doc__
         sys.exit(1)
-    else:
-        mcrabDir = rchop(opts.mcrab, "/")
-        if len(mcrabDir.split("/")) > 1:
-            mcrabDir = mcrabDir.split("/")[-1]#:]
-        opts.saveDir += mcrabDir + "/TH2"
+
+    if opts.saveDir == None:
+        opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="TH2")
 
     if opts.normalizeToOne == False and opts.normalizeByCrossSection == False and opts.normalizeToLumi == False:
         raise Exception("One of the options --normalizeToOne, --normalizeByCrossSection, --normalizeToLumi must be enabled (set to \"True\").")
@@ -498,4 +494,4 @@ if __name__ == "__main__":
     main(opts)
 
     if not opts.batchMode:
-        raw_input("=== plotDataMC_ControlPlots.py: Press any key to quit ROOT ...")
+        raw_input("=== plotTH2.py: Press any key to quit ROOT ...")

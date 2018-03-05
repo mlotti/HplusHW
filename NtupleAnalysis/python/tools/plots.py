@@ -55,8 +55,9 @@ import aux
 #================================================================================================
 _lightHplusMasses        = [ 80,  90, 100, 120, 140, 150, 155, 160]
 _intermediateHplusMasses = [145,150,155,160,165,170,175,180,190,200]
-_heavyHplusMasses        = [180, 200, 220, 250, 300, 350, 400, 500, 600, 700, 750,  800, 1000, 2000, 3000]
 _heavyHplusToTBbarMasses = [180, 200, 220, 250, 300, 350, 400, 500, 600, 650, 800, 1000, 1500, 2000, 2500, 3000, 5000, 7000]
+_heavyHplusMasses        = _heavyHplusToTBbarMasses # alexandros
+#_heavyHplusMasses        = [180, 200, 220, 250, 300, 350, 400, 500, 600, 700, 750,  800, 1000, 1500, 2000, 3000]
 
 ## These MC datasets must be added together before any
 ## merging/renaming. They are split to two datasets just for more
@@ -148,6 +149,7 @@ _physicalMcAdd = {
     "ChargedHiggs_HplusTB_HplusToTB_M_500_ext1" : "ChargedHiggs_HplusTB_HplusToTB_M_500", 
     "ChargedHiggs_HplusTB_HplusToTB_M_800_ext1" : "ChargedHiggs_HplusTB_HplusToTB_M_800", 
     "ChargedHiggs_HplusTB_HplusToTB_M_1000_ext1": "ChargedHiggs_HplusTB_HplusToTB_M_1000",
+    "ChargedHiggs_HplusTB_HplusToTB_M_1500_ext1": "ChargedHiggs_HplusTB_HplusToTB_M_1500",
     "ChargedHiggs_HplusTB_HplusToTB_M_2000_ext1": "ChargedHiggs_HplusTB_HplusToTB_M_2000",
     "ChargedHiggs_HplusTB_HplusToTB_M_2500_ext1": "ChargedHiggs_HplusTB_HplusToTB_M_2500",
     "ChargedHiggs_HplusTB_HplusToTB_M_3000_ext1": "ChargedHiggs_HplusTB_HplusToTB_M_3000",
@@ -159,8 +161,10 @@ _physicalMcAdd = {
     "ChargedHiggs_HplusTB_HplusToTB_M_350" : "ChargedHiggs_HplusTB_HplusToTB_M_350", 
     "ChargedHiggs_HplusTB_HplusToTB_M_400" : "ChargedHiggs_HplusTB_HplusToTB_M_400", 
     "ChargedHiggs_HplusTB_HplusToTB_M_500" : "ChargedHiggs_HplusTB_HplusToTB_M_500", 
+    "ChargedHiggs_HplusTB_HplusToTB_M_650" : "ChargedHiggs_HplusTB_HplusToTB_M_650", 
     "ChargedHiggs_HplusTB_HplusToTB_M_800" : "ChargedHiggs_HplusTB_HplusToTB_M_800", 
     "ChargedHiggs_HplusTB_HplusToTB_M_1000": "ChargedHiggs_HplusTB_HplusToTB_M_1000",
+    "ChargedHiggs_HplusTB_HplusToTB_M_1500": "ChargedHiggs_HplusTB_HplusToTB_M_1500",
     "ChargedHiggs_HplusTB_HplusToTB_M_2000": "ChargedHiggs_HplusTB_HplusToTB_M_2000",
     "ChargedHiggs_HplusTB_HplusToTB_M_2500": "ChargedHiggs_HplusTB_HplusToTB_M_2500",
     "ChargedHiggs_HplusTB_HplusToTB_M_3000": "ChargedHiggs_HplusTB_HplusToTB_M_3000",
@@ -613,22 +617,23 @@ for mass in _heavyHplusToTBbarMasses:
 
 ## Map the logical dataset names to plot styles
 _plotStyles = {
-    "ChargedHiggs_HplusTB_HplusToTB_M_180" : styles.signal180Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_200" : styles.signal200Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_220" : styles.signal220Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_250" : styles.signal250Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_300" : styles.signal300Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_350" : styles.signal350Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_400" : styles.signal400Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_500" : styles.signal500Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_800" : styles.signal800Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_1000": styles.signal1000Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_1500": styles.signal1500Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_2000": styles.signal2000Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_2500": styles.signal2500Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_3000": styles.signal3000Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_5000": styles.signal5000Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_7000": styles.signal7000Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_180"  : styles.signal180Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_200"  : styles.signal200Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_220"  : styles.signal220Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_250"  : styles.signal250Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_300"  : styles.signal300Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_350"  : styles.signal350Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_400"  : styles.signal400Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_500"  : styles.signal500Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_650"  : styles.signal650Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_800"  : styles.signal800Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_1000" : styles.signal1000Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_1500" : styles.signal1500Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_2000" : styles.signal2000Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_2500" : styles.signal2500Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_3000" : styles.signal3000Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_5000" : styles.signal5000Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_7000" : styles.signal7000Style,
     "ChargedHiggs_HplusTB_HplusToTB_M_10000": styles.signal1000Style,
 
     "DYJetsToLL"    : styles.dyStyle,

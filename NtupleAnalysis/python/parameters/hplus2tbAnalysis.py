@@ -2,6 +2,7 @@
 
 from HiggsAnalysis.NtupleAnalysis.main import PSet
 import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
+import HiggsAnalysis.NtupleAnalysis.parameters.jsonReader as jsonReader
 
 #================================================================================================
 # General parameters
@@ -100,16 +101,15 @@ jetSelection = PSet(
 # Fat jet selection
 #=================================================================================================
 fatjetVeto = PSet(
-    fatjetType                  = "FatJets",   
-    fatjetPtCuts                = [450.0],   # [default: [450.0] ]
-    fatjetEtaCuts               = [2.4],     # [default: [2.4] ]
-    fatjetIDDiscr               = "IDloose", # [default: "IDLoose"] (options: IDloose, IDtight, IDtightLeptonVeto)
-    fatjetPUIDDiscr             = "",        # [default: ""]
-    topMatchingDeltaR           = 0.8,       # [default: 0.8] (options: -ve value to disable)
-    topConstituentMatchingDeltaR= 0.8,       # [default: 0.8] (options: disable topMatchingDeltaR to disable)
-    topMatchingType             = 1,         # [default: 1]   (options: jjb = 1, jj = 2, jb = 3, inclusive < 0)
-    numberOfFatJetsCutValue     = 0,         # [default: 0]
-    numberOfFatJetsCutDirection = "==",      # [default: "=="] (options: ==, !=, <, <=, >, >=)
+    fatjetType      = "FatJets", # [default: "FatJets"]  
+    fatjetPtCuts    = [450.0],   # [default: [450.0] ]
+    fatjetEtaCuts   = [2.4],     # [default: [2.4] ]
+    fatjetIDDiscr   = "IDloose", # [default: "IDLoose"] (options: IDloose, IDtight, IDtightLeptonVeto)
+    fatjetPUIDDiscr = "",        # [default: ""]
+    topMatchDeltaR  = 0.8,       # [default: 0.8]
+    topMatchTypes   = [1],       # [default: 1]   (options: kJJB=1, kJJ=2, kJB=3, kJJBorJJ=4, kJJBorJB=5, kJJorJB=6, kAll=7, disable = -1)
+    numberOfFatJetsCutValue     = 0,    # [default: 0]
+    numberOfFatJetsCutDirection = "==", # [default: "=="] (options: ==, !=, <, <=, >, >=)
 )
 
 # #=================================================================================================
@@ -145,11 +145,29 @@ bjetSelection = PSet(
     numberOfBJetsCutValue     = 3,                  # [default: 3]
     numberOfBJetsCutDirection = ">=",               # [default: ">="] (options: ==, !=, <, <=, >, >=)
 )
+
+#================================================================================================
+# Scale Factors
+#================================================================================================
 scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
                                     btagPayloadFilename    = "CSVv2.csv",
                                     #btagEfficiencyFilename = "btageff_hybrid_HToTB.json",
                                     btagEfficiencyFilename = "btageff_HToTB.json",
                                     direction              = "nominal")
+
+#=================================================================================================
+# QGL selection
+#=================================================================================================
+qglrSelection = PSet(
+    QGLRCutValue             = 0.0,
+    QGLRCutDirection         = ">=",
+    numberOfJetsCutValue     = 10,
+    numberOfJetsCutDirection = "<=",
+)
+
+jsonReader.setupQGLInformation(QGLRPset  = qglrSelection,
+                               jsonname_Light  = "QGLdiscriminator_QCD_LightJets.json",
+                               jsonname_Gluon  = "QGLdiscriminator_QCD_GluonJets.json")
 
 #================================================================================================
 # MET selection
@@ -256,7 +274,7 @@ commonPlotsOptions = PSet(
     phiBins           = PSet(nBins =  64, axisMin = -3.2, axisMax =    3.2),
     deltaEtaBins      = PSet(nBins = 100, axisMin =  0.0, axisMax =   10.0),
     deltaPhiBins      = PSet(nBins =  32, axisMin =  0.0, axisMax =    3.2),
-    deltaRBins        = PSet(nBins =  50, axisMin =  0.0, axisMax =   10.0),
+    deltaRBins        = PSet(nBins = 100, axisMin =  0.0, axisMax =   10.0),
     rtauBins          = PSet(nBins =  55, axisMin =  0.0, axisMax =    1.1), # HToTauNu
     njetsBins         = PSet(nBins =  18, axisMin =  0.0, axisMax =   18.0),
     metBins           = PSet(nBins =  80, axisMin =  0.0, axisMax =  400.0), #  5 GeV bin width
@@ -288,5 +306,6 @@ allSelections = PSet(
     FakeBBjetSelection    = fakeBBjetSelection,
     CommonPlots           = commonPlotsOptions,
     HistogramAmbientLevel = histogramAmbientLevel,
+    QGLRSelection         = qglrSelection,
 )
 
