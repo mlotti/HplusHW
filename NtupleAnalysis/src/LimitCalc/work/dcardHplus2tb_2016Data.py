@@ -40,29 +40,24 @@ def Print(msg, printHeader=False):
 #================================================================================================  
 # Options
 #================================================================================================  
-Verbose         = False
-DataCardName    = 'Hplus2tb_13TeV'
-MassPoints      = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 1500, 2000, 2500, 3000] #, 5000, 7000, 10000]
-
-# Combine options
-OptionFakeBMeasurement                 = True  # If False QCD inclusive will be used and EWK inclusive (not just genuine-b) [default: True]
+DataCardName                           = 'Hplus2tb_13TeV'
+MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
 BlindAnalysis                          = True  # True, unless you have a green light for unblinding! [default: True]
-OptionBlindThreshold                   = 0.2   # If signal exceeds this fraction of expected events, data is blinded; set to None to disable
-MinimumStatUncertainty                 = 0.5   # Minimum stat. uncertainty to set to bins with zero events [default: 0.5]
-OptionCombineSingleColumnUncertainties = False # Approxmation that makes limit running faster (normally not needed) [default: False]
-OptionConvertFromShapeToConstantList   = []    # Convert these nuisances from shape to constant (Approx. that makes limits run faster & converge more easily) [default: []]
-OptionDisplayEventYieldSummary         = False # Print "Event yield summary" (TableProducer.py) [default: False]
-OptionDoControlPlots                   = True  # Produce control plots defined at end of this file [default: False]
-OptionFakeBMeasurementSource           = "DataDriven" # [default: "DataDriven"] (options: DataDriven, "MC") # FIXME - NEW 
-OptionIncludeSystematics               = False # Shape systematics (Need pseudo-multicrab produced with doSystematics=True) [default: False]
-OptionLimitOnSigmaBr                   = True  # Set to true for heavy H+ [default: True] #FIXME
+OptionBlindThreshold                   = 0.2   # [default: 0.2]    (If signal exceeds this fraction of expected events, data is blinded; set to None to disable)
+MinimumStatUncertainty                 = 0.5   # [default: 0.5]    (Minimum stat. uncertainty to set to bins with zero events)
+OptionCombineSingleColumnUncertainties = False # [default: False]  (Approxmation that makes limit running faster)
+OptionConvertFromShapeToConstantList   = []    # [default: []]     (Convert these nuisances from shape to constant; Approx. that makes limits run faster & converge more easily)
+OptionDisplayEventYieldSummary         = False # [default: False]  (Print "Event yield summary", using the TableProducer.py)
+OptionDoControlPlots                   = True  # [default: True]   (Produce control plots defined at end of this file)
+OptionFakeBMeasurementSource           = "DataDriven" # [default: "DataDriven"] (options: "DataDriven", "MC")
+OptionIncludeSystematics               = False # [default: False]  (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
+OptionLimitOnSigmaBr                   = True  # [default: True]   (Set to true for heavy H+)
 OptionMassShape                        = "LdgTetrajetMass_AfterAllSelections"
-OptionNumberOfDecimalsInSummaries      = 1      # [default: 1]
-OptionSeparateShapeAndNormalizationFromSystVariationList=[] # Separate in the following shape nuisances the shape and normalization components [default: []]
-ToleranceForLuminosityDifference       = 0.05  # Tolerance for throwing error on luminosity difference ("0.01" means that a 1% is required) [default: 0.05]
-ToleranceForMinimumRate                = 0.0   # Tolerance for almost zero rate (columns with smaller rate are suppressed) [default: 0.0]
-labelPrefix                            = ""    # Prefix for the labels of datacard columns, e.g. "Hplus2tb_" #fixme: breaks if not empty string [default: ""]
-
+OptionNumberOfDecimalsInSummaries      = 1     # [defaul: 1]       (Self explanatory)
+OptionSeparateShapeAndNormalizationFromSystVariationList=[] # [default: []]  (Separate in the following shape nuisances the shape and normalization components)
+ToleranceForLuminosityDifference       = 0.05  # [default: 0.05]   (Tolerance for throwing error on luminosity difference; "0.01" means that a 1% is required) 
+ToleranceForMinimumRate                = 0.0   # [default: 0.0]    (Tolerance for almost zero rate columns with smaller rate are suppressed) 
+labelPrefix                            = "CMS_H2tb_" # [default: ""] (Prefix for the labels of datacard columns; e.g. labelPrefix="CMS_Hptntj_" )
 # Options for tables, figures etc.
 OptionBr   = 0.01  # Br(t->bH+)
 OptionSqrtS= 13    # sqrt(s)
@@ -179,7 +174,7 @@ myQCD = DataGroup(label             = labelPrefix + "QCD",
                   shapeHistoName    = OptionMassShape,
                   histoPath         = histoPathInclusive)
 
-if OptionFakeBMeasurement:
+if OptionFakeBMeasurementSource == "DataDriven":
     DataGroups.append(myFakeB)
 
     # EWK Datasets should only be Genuibe-b (FakeB = QCD inclusive + EWK GenuineB)
@@ -498,7 +493,6 @@ if (nSysShapeComponents>0):
 #================================================================================================ 
 from HiggsAnalysis.LimitCalc.InputClasses import ControlPlotInput
 ControlPlots= []
-EWKPath     = "ForDataDrivenCtrlPlotsEWKGenuineTaus"
 
 hMET = ControlPlotInput(
     title            = "MET_AfterAllSelections",
@@ -526,6 +520,19 @@ hHT = ControlPlotInput(
                          "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 3000.0} }
     )
 
+hTopPt = ControlPlotInput(
+    title            = "LdgTrijetPt_AfterAllSelections",
+    histoName        = "LdgTrijetPt_AfterAllSelections",
+    details          = { "xlabel"             : "p_{T}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "GeV/c",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 900.0} }
+    )
+
 hTopMass = ControlPlotInput(
     title            = "LdgTrijetMass_AfterAllSelections",
     histoName        = "LdgTrijetMass_AfterAllSelections",
@@ -539,7 +546,102 @@ hTopMass = ControlPlotInput(
                          "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 350.0} }
     )
 
-hInvMass = ControlPlotInput(
+hTopBjetPt = ControlPlotInput(
+    title            = "LdgTrijetBjetPt_AfterAllSelections",
+    histoName        = "LdgTrijetBjetPt_AfterAllSelections",
+    details          = { "xlabel"             : "p_{T}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "GeV/c",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 700.0} }
+    )
+
+hTopDijetPt = ControlPlotInput(
+    title            = "LdgTrijetDijetPt_AfterAllSelections",
+    histoName        = "LdgTrijetDijetPt_AfterAllSelections",
+    details          = { "xlabel"             : "p_{T}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "GeV/c",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 700.0} }
+    )
+
+hTopDijetMass = ControlPlotInput(
+    title            = "LdgTrijetDijetMass_AfterAllSelections",
+    histoName        = "LdgTrijetDijetMass_AfterAllSelections",
+    details          = { "xlabel"             : "m_{jj}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "GeV/c^{2}",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmin": 40.0, "xmax": 160.0} }
+    )
+
+hTopR32  = ControlPlotInput(
+    title            = "LdgTrijetTopMassWMassRatioAfterAllSelections",
+    histoName        = "LdgTrijetTopMassWMassRatioAfterAllSelections",
+    details          = { "xlabel"             : "R_{32}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmin": 0.5, "xmax": 4.0} }
+    )
+
+hTetrajetBjetPt = ControlPlotInput(
+    title            = "TetrajetBjetPt_AfterAllSelections",
+    histoName        = "TetrajetBjetPt_AfterAllSelections",
+    details          = { "xlabel"             : "p_{T}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "GeV/c",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 900.0} },
+    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
+    )
+
+hTetrajetBjetEta = ControlPlotInput(
+    title            = "TetrajetBjetEta_AfterAllSelections",
+    histoName        = "TetrajetBjetEta_AfterAllSelections",
+    details          = { "xlabel"             : "#eta",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmin": -2.5, "xmax": 2.5} },
+    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
+    # flowPlotCaption  = "m_{jjbb}", # Leave blank if you don't want to include the item to the selection flow plot    
+    )
+
+hHiggsPt = ControlPlotInput(
+    title            = "LdgTetrajetPt_AfterAllSelections",
+    histoName        = "LdgTetrajetPt_AfterAllSelections",
+    details          = { "xlabel"             : "p_{T}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "GeV/c",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 900.0} },
+    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
+    )
+
+hHiggsMass = ControlPlotInput(
     title            = "LdgTetrajetMass_AfterAllSelections",
     histoName        = "LdgTetrajetMass_AfterAllSelections",
     details          = { "xlabel"             : "m_{jjbb}",
@@ -549,17 +651,36 @@ hInvMass = ControlPlotInput(
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
-                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 3000.0} }
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 3000.0} },
+    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
+    # flowPlotCaption  = "m_{jjbb}", # Leave blank if you don't want to include the item to the selection flow plot    
+    )
+
+hVertices = ControlPlotInput(
+    title            = "NVertices_AfterAllSelections",
+    histoName        = "NVertices_AfterAllSelections",
+    details          = { "xlabel"             : "vertex multiplicity",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 80.0} },
+    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
     )
 
 # Create ControlPlot list (NOTE: Remember to set OptionDoControlPlots to True)
-#ControlPlots.append(hMET)
-#ControlPlots.append(hHT)
-ControlPlots.append(hInvMass)
-# ControlPlots.append(hTopMass)
-
-# Inform user of plots to be made
-if len(ControlPlots) > 0 and (OptionDoControlPlots==True):
-    Print("Added %s control plots to the plotting list:" % (len(ControlPlots)), True)
-    for h in ControlPlots:
-        Print("\"%s\"" % (h.histoName), False)
+ControlPlots.append(hMET)
+ControlPlots.append(hHT)
+#ControlPlots.append(hTopPt)
+#ControlPlots.append(hTopMass)
+#ControlPlots.append(hTopBjetPt)
+#ControlPlots.append(hTopDijetPt)
+#ControlPlots.append(hTopDijetMass)
+#ControlPlots.append(hTopR32)
+#ControlPlots.append(hTetrajetBjetPt)
+#ControlPlots.append(hTetrajetBjetEta)
+#ControlPlots.append(hHiggsPt)
+#ControlPlots.append(hHiggsMass)
+#ControlPlots.append(hVertices)

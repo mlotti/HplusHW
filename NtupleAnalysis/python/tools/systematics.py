@@ -299,10 +299,19 @@ _dataDrivenCtrlPlotBinning = {
     "MaxDeltaPhiTauJet_AfterAllSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
     "NVertices_AfterAllSelections": None,
     # HToTB
-    "MET_AfterAllSelections": [i for i in range(0, 100, 10)] + [i for i in range(100, 200, 20)] + [i for i in range(200, 300, 50)] + [i for i in range(300, 400+100, 100)],
-    "HT_AfterAllSelections" : [i for i in range(500, 1500, 50)] + [i for i in range(1500, 2000, 100)] + [i for i in range(2000, 3000+500, 500)],
-    "LdgTrijetMass_AfterAllSelections"  : [i for i in range(50, 350, 10)],
-    "LdgTetrajetMass_AfterAllSelections": getBinningForTetrajetMass(0)
+    "MET_AfterAllSelections" : [i for i in range(0, 100, 10)] + [i for i in range(100, 200, 20)] + [i for i in range(200, 300, 50)] + [i for i in range(300, 400+100, 100)],
+    "HT_AfterAllSelections"  : [i for i in range(500, 1500, 50)] + [i for i in range(1500, 2000, 100)] + [i for i in range(2000, 3000+500, 500)],
+    "LdgTrijetPt_AfterAllSelections"     : [j for j in range(0, 500, 20)] + [k for k in range(500, 700, 50)] + [k for k in range(700, 900+100, 100)],
+    "LdgTrijetMass_AfterAllSelections"   : [i for i in range(50, 350, 10)],
+    "LdgTrijetBjetPt_AfterAllSelections" : [j for j in range(0, 300, 10)] + [k for k in range(300, 700+40, 40)],
+    "LdgTrijetDijetPt_AfterAllSelections": [j for j in range(0, 300, 10)] + [k for k in range(300, 700+40, 40)],
+    "LdgTrijetDijetMass_AfterAllSelections": None,
+    "LdgTrijetTopMassWMassRatioAfterAllSelections": None,
+    "TetrajetBjetPt_AfterAllSelections"  : [j for j in range(0, 400, 20)] + [k for k in range(400, 600, 40)] + [k for k in range(600, 900+100, 100)],
+    "TetrajetBjetEta_AfterAllSelections" : None,
+    "LdgTetrajetPt_AfterAllSelections"   : [j for j in range(0, 500, 20)] + [k for k in range(500, 700, 50)] + [k for k in range(700, 900+100, 100)],
+    "LdgTetrajetMass_AfterAllSelections": getBinningForTetrajetMass(0),
+    "NVertices_AfterAllSelections": [j for j in range(0, 40, 2)] + [j for j in range(40, 60, 5)] + [j for j in range(60, 80+10, 10)]   
 }
 
 

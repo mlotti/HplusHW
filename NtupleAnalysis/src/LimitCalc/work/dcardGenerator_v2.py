@@ -23,15 +23,16 @@ USAGE:
 ./dcardGenerator.py -x <input-datacard> -d <pseudo-multicrab-dir> [opts]
 
 
-LAST USED:
+EXAMPLES:
+./dcardGenerator.py -x dcardHplustb2017Datacard_v2.py -d example/
 ./dcardGenerator_v2.py -x dcardHplus2tb_2016Data.py -d limits2016/ --h2tb
 
 
-EXAMPLES:
-./dcardGenerator.py -x dcardHplustb2017Datacard_v2.py -d example/
-(where example contains SignalAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170827_075947)
+LAST USED:
+./dcardGenerator_v2.py -x dcardHplus2tb_2016Data.py -d limits2016/ --h2tb --tarball
 
 '''
+
 #================================================================================================
 # Import modules
 #================================================================================================
@@ -228,6 +229,31 @@ def Print(msg, printHeader=True):
     print "\t", msg
     return
 
+def CreateTarball(myOutputDirectories, opts):
+    '''
+    Creats a tarball with entire output
+    making easier to transfer results other machines
+    '''
+    if not opts.tarball:
+        return
+
+    # Create filename with a time stamp
+    myTimestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime(time.time()))
+    myFilename  = "datacards_archive_%s.tgz" % (myTimestamp)
+    fTarball    = tarfile.open(myFilename, mode="w:gz")
+    
+    # For-loop: All output dirs
+    for d in myOutputDirectories:
+        fTarball.add(d)
+
+    # Close the tarball
+    fTarball.close()
+
+    # Inform user
+    msg = "Created archive of results directories to "
+    Print(msg + SuccessStyle() + myFilename + NormalStyle())
+    return
+
 def main(opts, moduleSelector, multipleDirs):
     
     # Fixme: Is this used/needed?
@@ -313,7 +339,7 @@ def main(opts, moduleSelector, multipleDirs):
                 msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Opt", "%i" % k, "/", "%s:" % (nOpts), optimizationMode)
                 Print(HighlightAltStyle() + msg + NormalStyle(), False)
                 
-                # FIXME: santeri Crashes!
+                # FIXME: Crashes!
                 #if hasattr(ROOT.gROOT, "CloseFiles"):
                 #    ROOT.gROOT.CloseFiles()
                 #ROOT.gROOT.GetListOfCanvases().Delete()
@@ -339,8 +365,6 @@ def main(opts, moduleSelector, multipleDirs):
                         os.system("../dcardTailFitter.py -x ../dcardTailFitSettings.py")
                         os.chdir("..")
 
-    Verbose("Datacard generator is done!")
-
     # Timing calculations
     myEndTime = time.time()
     myTotTime = (myEndTime-myStartTime)
@@ -355,18 +379,13 @@ def main(opts, moduleSelector, multipleDirs):
             os.system("../plotShapes.py")
             os.chdir("..")
 
-    # Make tar file
-    myTimestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime(time.time()))
-    myFilename  = "datacards_archive_%s.tgz" % (myTimestamp)
-    fTar = tarfile.open(myFilename, mode="w:gz")
-    
-    # For-loop: All output dirs
+    # Inform user
     for d in myOutputDirectories:
-        fTar.add(d)
-    fTar.close()
+        msg = "Created results dir %s" % (SuccessStyle() + d + NormalStyle())
+        Print(msg)
 
-    msg = "Created archive of results directories to "
-    Print(msg + SuccessStyle() + myFilename + NormalStyle())
+    # Optionally, create a tarball with all the results
+    CreateTarball(myOutputDirectories, opts)
     
     if 0:
         gc.collect()
@@ -393,6 +412,7 @@ if __name__ == "__main__":
     PROFILERDEBUG = False
     VERBOSE       = False
     HToTB         = False
+    TARBALL       = False
 
     # Object for selecting data eras, search modes, and optimization modes
     myModuleSelector = analysisModuleSelector.AnalysisModuleSelector() 
@@ -409,6 +429,9 @@ if __name__ == "__main__":
 
     parser.add_option("--combine", dest="combine", action="store_true", default=COMBINE,
                       help="Generate datacards for Combine [default=%s]" % (COMBINE) )
+
+    parser.add_option("--tarball", dest="tarball", action="store_true", default=TARBALL,
+                      help="In addition to a dir with all the output, create also a tarball for easy transfer of results to other machines [default=%s]" % (TARBALL) )
 
     parser.add_option("-d", "--dir", dest="directories", action="append", 
                       help="Name of directories for creating datacards for multiple directories")
@@ -486,7 +509,7 @@ if __name__ == "__main__":
             d = aux.rchop(d, "/")
 
             msg   = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Directory", "%i" % i, "/", "%s:" % (nDirs), d)
-            Print(SuccessStyle() + msg + NormalStyle(), i==1)
+            Verbose(msg, i==1)
 
             if not d in myDirs:
                 raise Exception("Error: Could not find directory '%s'!" % (d) )

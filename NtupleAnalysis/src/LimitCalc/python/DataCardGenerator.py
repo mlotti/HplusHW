@@ -515,7 +515,7 @@ class DataCardGenerator:
         datasetGroups   = self._columns
         extractors      = self._extractors
         mcrabInfoOutput = mcrabInfoOutput
-        myProducer = TableProducer.TableProducer(opts, config, outputPrefix, luminosity, observation, datasetGroups, extractors, mcrabInfoOutput)
+        myProducer = TableProducer.TableProducer(opts, config, outputPrefix, luminosity, observation, datasetGroups, extractors, mcrabInfoOutput, self._h2tb)
 
         # Close files
         self.closeFiles()
