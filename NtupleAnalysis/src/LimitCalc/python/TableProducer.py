@@ -39,15 +39,29 @@ def Verbose(msg, printHeader=False):
         print "\t", msg
     return
 
-def Print(msg, printHeader=True):
+def GetFName():
     fName = __file__.split("/")[-1]
     fName = fName.replace(".pyc", ".py")
+    return fName
+
+def Print(msg, printHeader=True):
+    fName = GetName()
     if printHeader:
         print "=== ", fName
     if msg !="":
         print "\t", msg
     return
 
+def PrintFlushed(msg, printHeader=True):
+    '''
+    Useful when printing progress in a loop
+    '''
+    msg = "\r\t" + msg 
+    if printHeader:
+        print "=== ", GetFName()
+    sys.stdout.write(msg)
+    sys.stdout.flush()
+    return
 
 def createBinByBinStatUncertHistograms(hRate, minimumStatUncertainty=0.5, xmin=None, xmax=None):
     '''
@@ -192,7 +206,7 @@ def getTableOutput(widths,table,latexMode=False):
 # Class definition
 #================================================================================================ 
 class TableProducer:
-    def __init__(self, opts, config, outputPrefix, luminosity, observation, datasetGroups, extractors, mcrabInfoOutput):
+    def __init__(self, opts, config, outputPrefix, luminosity, observation, datasetGroups, extractors, mcrabInfoOutput, h2tb):
         '''
         Constructor
         '''
@@ -204,23 +218,14 @@ class TableProducer:
         self._datasetGroups = datasetGroups
         self._purgeColumnsWithSmallRateDoneStatus = False
         self._extractors = extractors[:]
+        self._h2tb = opts
         self._timestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime(time.time()))
-        #if self._opts.lands:
-        #    self._outputFileStem = "lands_datacard_hplushadronic_m"
-        #    self._outputRootFileStem = "lands_histograms_hplushadronic_m"
-        #elif self._opts.combine:
-        #    self._outputFileStem = "combine_datacard_hplushadronic_m"
-        #    self._outputRootFileStem = "combine_histograms_hplushadronic_m"
         self._outputFileStem = "combine_datacard_hplushadronic_m"
         self._outputRootFileStem = "combine_histograms_hplushadronic_m"
 
         # Calculate number of nuisance parameters
         # Make directory for output
         myLimitCode = None
-#        if opts.lands:
-#            myLimitCode = "lands"
-#        elif opts.combine:
-#            myLimitCode = "combine"
         myLimitCode = "combine"
         self._dirname = "datacards_%s_%s_%s_%s"%(myLimitCode,self._timestamp,self._config.DataCardName.replace(" ","_"),self._outputPrefix)
         if hasattr(self._config, "OptionSignalInjection"):
@@ -344,9 +349,12 @@ class TableProducer:
 
         # For-loop: All mass points
         for index, m in enumerate(self._config.MassPoints, 1):
+            
+            # Print progress 
             msg = "Datacard %s/%s (mH=%s)" % (index, len(self._config.MassPoints), str(m)) 
-            #Print(ShellStyles.HighlightAltStyle() + msg + ShellStyles.NormalStyle(), index==1)
-            Print(ShellStyles.HighlightStyle() + msg + ShellStyles.NormalStyle(), index==1)
+            PrintFlushed(ShellStyles.HighlightStyle() + msg + ShellStyles.NormalStyle(), index==1)
+            if index == len(self._config.MassPoints):
+                print 
 
             # Open output root file
             myFilename = self._dirname+"/"+self._outputFileStem+"%d.txt"%m

@@ -311,7 +311,7 @@ _dataDrivenCtrlPlotBinning = {
     "TetrajetBjetEta_AfterAllSelections" : None,
     "LdgTetrajetPt_AfterAllSelections"   : [j for j in range(0, 500, 20)] + [k for k in range(500, 700, 50)] + [k for k in range(700, 900+100, 100)],
     "LdgTetrajetMass_AfterAllSelections": getBinningForTetrajetMass(0),
-    "NVertices_AfterAllSelections": [j for j in range(0, 40, 2)] + [j for j in range(40, 60, 5)] + [j for j in range(60, 100+10, 10)]   
+    "NVertices_AfterAllSelections": [j for j in range(0, 40, 2)] + [j for j in range(40, 60, 5)] + [j for j in range(60, 80+10, 10)]   
 }
 
 

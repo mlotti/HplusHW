@@ -102,7 +102,9 @@ class ControlPlotMakerHToTB:
                     msg = "Control Plot %d/%d (no signal)"  % (counter, nMasses*nPlots)
 
                 # Inform the user of progress
-                self.Print(ShellStyles.AltStyle() + msg + ShellStyles.NormalStyle(), counter==1)
+                self.PrintFlushed(ShellStyles.AltStyle() + msg + ShellStyles.NormalStyle(), counter==1)
+                if counter == len(massPoints)*nPlots:
+                    print
 
                 # Initialize histograms
                 hData   = None
@@ -214,6 +216,11 @@ class ControlPlotMakerHToTB:
 
         return
     
+    def GetFName(self):
+        fName = __file__.split("/")[-1]
+        fName = fName.replace(".pyc", ".py")
+        return fName
+
     def _validateDatacard(self, config):
         if config.ControlPlots == None:
             return
@@ -327,6 +334,17 @@ class ControlPlotMakerHToTB:
         if printHeader:
             print "=== ", fName
         print "\t", msg
+        return
+
+    def PrintFlushed(self, msg, printHeader=True):
+        '''
+        Useful when printing progress in a loop
+        '''
+        msg = "\r\t" + msg
+        if printHeader:
+            print "=== ", self.GetFName()
+        sys.stdout.write(msg)
+        sys.stdout.flush()
         return
 
     def _applyCustomBlinding(self, myObject, blindedRange = []):
@@ -456,14 +474,17 @@ class SelectionFlowPlotMaker:
         Print(msg, printHeader)
         return
 
+    def GetFName(self):
+        fName = __file__.split("/")[-1]
+        fName = fName.replace(".pyc", ".py")
+        return fName
+
     def Print(self, msg, printHeader=True):
         '''
         Simple print function. If verbose option is enabled prints, otherwise does nothing
         '''
-        fName = __file__.split("/")[-1]
-        fName = fName.replace(".pyc", ".py")
         if printHeader:
-            print "=== ", fName
+            print "=== ", self.GetFName()
         print "\t", msg
         return
 
