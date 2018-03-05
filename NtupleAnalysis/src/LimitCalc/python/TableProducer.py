@@ -218,10 +218,15 @@ class TableProducer:
         self._datasetGroups = datasetGroups
         self._purgeColumnsWithSmallRateDoneStatus = False
         self._extractors = extractors[:]
-        self._h2tb = opts
+        self._h2tb = h2tb
         self._timestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime(time.time()))
         self._outputFileStem = "combine_datacard_hplushadronic_m"
         self._outputRootFileStem = "combine_histograms_hplushadronic_m"
+
+        if self._h2tb:
+            self.channelLabel = "tbhadr"
+        else:
+            self.channelLabel = "taunuhadr"
 
         # Calculate number of nuisance parameters
         # Make directory for output
@@ -503,11 +508,9 @@ class TableProducer:
         myObsCount = self._observation._rateResult._histograms[0].Integral()
         if self._opts.debugMining:
             print "  Observation is %d"%myObsCount
-        #if self._opts.lands:
-        #    myResult = "Observation    %d\n"%myObsCount
-        #elif self._opts.combine:
+
         if 1:
-            myResult =  "bin            taunuhadr\n"
+            myResult =  "bin            %s\n" % (self.channelLabel)
             if hasattr(self._config, "OptionSignalInjection") or self._opts.testShapeSensitivity:
                 myResult += "observation    %f\n"%myObsCount
             else:
@@ -525,7 +528,7 @@ class TableProducer:
                 #    myRow.append("1")
                 #elif self._opts.combine:
                 #    myRow.append("taunuhadr")
-                myRow.append("taunuhadr")
+                myRow.append(self.channelLabel)
 
         myResult.append(myRow)
         # obtain labels

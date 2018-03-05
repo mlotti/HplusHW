@@ -41,8 +41,10 @@ def Print(msg, printHeader=False):
 # Options
 #================================================================================================  
 DataCardName                           = 'Hplus2tb_13TeV'
+OptionBr                               = 0.01  # [default: 0.01] (The Br(t->bH+) used in figures and tables)
+OptionSqrtS                            = 13    # [default: 13]   (The sqrt(s) used in figures and tables)
 MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
-BlindAnalysis                          = True  # True, unless you have a green light for unblinding! [default: True]
+BlindAnalysis                          = True  # [default: True]   (True, unless you have a green light for unblinding)
 OptionBlindThreshold                   = 0.2   # [default: 0.2]    (If signal exceeds this fraction of expected events, data is blinded; set to None to disable)
 MinimumStatUncertainty                 = 0.5   # [default: 0.5]    (Minimum stat. uncertainty to set to bins with zero events)
 OptionCombineSingleColumnUncertainties = False # [default: False]  (Approxmation that makes limit running faster)
@@ -57,20 +59,24 @@ OptionNumberOfDecimalsInSummaries      = 1     # [defaul: 1]       (Self explana
 OptionSeparateShapeAndNormalizationFromSystVariationList=[] # [default: []]  (Separate in the following shape nuisances the shape and normalization components)
 ToleranceForLuminosityDifference       = 0.05  # [default: 0.05]   (Tolerance for throwing error on luminosity difference; "0.01" means that a 1% is required) 
 ToleranceForMinimumRate                = 0.0   # [default: 0.0]    (Tolerance for almost zero rate columns with smaller rate are suppressed) 
-labelPrefix                            = "CMS_H2tb_" # [default: ""] (Prefix for the labels of datacard columns; e.g. labelPrefix="CMS_Hptntj_" )
-# Options for tables, figures etc.
-OptionBr   = 0.01  # Br(t->bH+)
-OptionSqrtS= 13    # sqrt(s)
+labelPrefix                            = ""    # [default: ""]     (Prefix for the labels of datacard columns; e.g. "CMS_Hptntj_", "CMS_H2tb_")
 
 #================================================================================================  
 # Counter and histogram path definitions
 #================================================================================================  
-SignalRateCounter  = "Selected events"            # fixme: what is this for?
-FakeRateCounter    = "EWKfaketaus:SelectedEvents" # fixme: what is this for?
-histoPathInclusive = "ForDataDrivenCtrlPlots"
-histoPathFakeB     = "ForDataDrivenCtrlPlots"
-histoPathGenuineB  = histoPathInclusive + "EWKGenuineB"
+histoPathInclusive        = "ForDataDrivenCtrlPlots"
+histoPathGenuineB         = histoPathInclusive + "EWKGenuineB"
+histoPathFakeB            = "ForDataDrivenCtrlPlots"
 ShapeHistogramsDimensions = systematics.getBinningForPlot(OptionMassShape) # Get the new binning for the shape histogram
+
+if OptionFakeBMeasurementSource == "DataDriven":
+    # EWK Datasets should only be Genuibe-b (FakeB = QCD inclusive + EWK GenuineB)
+    histoPathEWK = histoPathGenuineB
+    dsetTypeEWK  = "GenuineB"
+else:
+    # EWK Datasets should be inclusive (Bkg = QCD inclusive + EWK inclusive)
+    histoPathEWK = histoPathInclusive
+    dsetTypeEWK  = "EWKMC"
 
 #================================================================================================  
 # Observation definition (how to retrieve number of observed events)
@@ -132,17 +138,12 @@ if nSystematics>0:
 # DataGroup (i.e. columns in datacard) definitions
 #================================================================================================ 
 from HiggsAnalysis.LimitCalc.InputClasses import DataGroup
-DataGroups         = []
-EWKFakeIdList      = []
-mergeColumnsByLabel= []
 
 # Signal datasets
-# ===============
-signalTemplate  = DataGroup(datasetType="Signal", histoPath=histoPathInclusive, shapeHistoName=OptionMassShape)
-signalNuisances = myLumiSystematics
-
+signalDataGroups =  []
+signalTemplate   = DataGroup(datasetType="Signal", histoPath=histoPathInclusive, shapeHistoName=OptionMassShape)
+signalNuisances  = myLumiSystematics
 # signalNuisances = myLumiSystematics[:] + myPileupSystematics[:] + myTrgSystematics[:] + myLeptonVetoSystematics[:] + myESSystematics[:] + myBtagSystematics[:]
-# signalNuisances+= myTauIDSystematics[:] + myTauMisIDSystematics[:] 
 
 # For-loop: All mass points
 for mass in MassPoints:
@@ -153,139 +154,125 @@ for mass in MassPoints:
     hx.setValidMassPoints(myMassList)
     hx.setNuisances(signalNuisances)
     hx.setDatasetDefinition("ChargedHiggs_HplusTB_HplusToTB_M_%s" % (mass))
-    DataGroups.append(hx)
+    signalDataGroups.append(hx)
 
-
+# Define all the background datasets
 myFakeB = DataGroup(label             = labelPrefix + "FakeBmeasurement",
-                    landsProcess      = 2, #fixme: what is it for?
+                    landsProcess      = 2, # must be SAME index as myFakeB (only of them is used!)
                     validMassPoints   = MassPoints,
-                    datasetType       = "FakeB", #FakeB
+                    datasetType       = "FakeB",
                     datasetDefinition = "FakeBMeasurementTrijetMass",
                     nuisances         = myLumiSystematics,
                     shapeHistoName    = OptionMassShape,
-                    histoPath         = histoPathInclusive)
+                    histoPath         = histoPathInclusive
+                    )
 
 myQCD = DataGroup(label             = labelPrefix + "QCD",
-                  landsProcess      = 2, #fixme: what is it for?
+                  landsProcess      = 2, # must be SAME index as myFakeB (only of them is used!)
                   validMassPoints   = MassPoints,
-                  datasetType       = "QCDMC", #QCDMC
+                  datasetType       = "QCDMC",
                   datasetDefinition = "QCD",
                   nuisances         = myLumiSystematics,
                   shapeHistoName    = OptionMassShape,
-                  histoPath         = histoPathInclusive)
+                  histoPath         = histoPathInclusive
+                  )
 
+TT = DataGroup(label = labelPrefix + "TT",
+               landsProcess      = 3,
+               shapeHistoName    = OptionMassShape, 
+               histoPath         = histoPathEWK,
+               datasetType       = dsetTypeEWK,                            
+               datasetDefinition = "TT", 
+               validMassPoints   = MassPoints,
+               nuisances         = myLumiSystematics
+               )
+
+SingleTop = DataGroup(label             = labelPrefix + "SingleTop", 
+                      landsProcess      = 4,
+                      shapeHistoName    = OptionMassShape,
+                      histoPath         = histoPathEWK,
+                      datasetType       = dsetTypeEWK,
+                      datasetDefinition = "SingleTop",
+                      validMassPoints   = MassPoints,
+                      nuisances         = myLumiSystematics
+                      )
+
+TTZ = DataGroup(label             = labelPrefix + "TTZToQQ", 
+                landsProcess      = 5,
+                shapeHistoName    = OptionMassShape,
+                histoPath         = histoPathEWK,
+                datasetType       = dsetTypeEWK,
+                datasetDefinition = "TTZToQQ",
+                validMassPoints   = MassPoints,
+                nuisances         = myLumiSystematics
+                )
+
+TTTT = DataGroup(label             = labelPrefix + "TTTT",
+                 landsProcess      = 6,
+                 shapeHistoName    = OptionMassShape,
+                 histoPath         = histoPathEWK,
+                 datasetType       = dsetTypeEWK,
+                 datasetDefinition = "TTTT",
+                 validMassPoints   = MassPoints,
+                 nuisances         = myLumiSystematics
+                 )
+
+DYJets = DataGroup(label             = labelPrefix + "DYJetsToQQ", 
+                   landsProcess      = 7,
+                   shapeHistoName    = OptionMassShape,
+                   histoPath         = histoPathEWK,
+                   datasetType       = dsetTypeEWK,
+                   datasetDefinition = "DYJetsToQQHT",
+                   validMassPoints   = MassPoints,
+                   nuisances         = myLumiSystematics
+                   )
+
+TTW = DataGroup(label             = labelPrefix + "TTWJetsToQQ", 
+                landsProcess      = 8,
+                shapeHistoName    = OptionMassShape, 
+                histoPath         = histoPathEWK,
+                datasetType       = dsetTypeEWK,
+                datasetDefinition = "TTWJetsToQQ",
+                validMassPoints   = MassPoints,
+                nuisances         = myLumiSystematics
+                )
+
+WJets = DataGroup(label             = labelPrefix + "WJetsToQQ_HT_600ToInf",
+                  landsProcess      = 9,
+                  shapeHistoName    = OptionMassShape,
+                  histoPath         = histoPathEWK, 
+                  datasetType       = dsetTypeEWK,
+                  datasetDefinition = "WJetsToQQ_HT_600ToInf",
+                  validMassPoints   = MassPoints,
+                  nuisances         = myLumiSystematics
+                  )
+
+Diboson = DataGroup(label             = labelPrefix + "Diboson",
+                    landsProcess      = 10,
+                    shapeHistoName    = OptionMassShape,
+                    histoPath         = histoPathEWK, 
+                    datasetType       = dsetTypeEWK,
+                    datasetDefinition = "Diboson",
+                    validMassPoints   = MassPoints,
+                    nuisances         = myLumiSystematics
+                    )
+
+
+# Append datasets in order you want them to appear in the data-driven control plot stack
+DataGroups = []
+DataGroups.extend(signalDataGroups)
 if OptionFakeBMeasurementSource == "DataDriven":
     DataGroups.append(myFakeB)
-
-    # EWK Datasets should only be Genuibe-b (FakeB = QCD inclusive + EWK GenuineB)
-    histoPathEWK = histoPathGenuineB
-    dsetTypeEWK  = "GenuineB"
-
 else:
     DataGroups.append(myQCD)
-
-    # EWK Datasets should be inclusive (Bkg = QCD inclusive + EWK inclusive)
-    histoPathEWK = histoPathInclusive
-    dsetTypeEWK  = "EWKMC"
-
-
-# TT
-DataGroups.append(DataGroup(label             = labelPrefix + "TT",
-                            landsProcess      = 3,
-                            shapeHistoName    = OptionMassShape, 
-                            histoPath         = histoPathEWK,
-                            datasetType       = dsetTypeEWK,                            
-                            datasetDefinition = "TT", 
-                            validMassPoints   = MassPoints,
-                            nuisances         = myLumiSystematics
-                            )
-                  )
-
-
-# SingleTop
-DataGroups.append(DataGroup(label             = labelPrefix + "SingleTop", 
-                            landsProcess      = 4,
-                            shapeHistoName    = OptionMassShape,
-                            histoPath         = histoPathEWK,
-                            datasetType       = dsetTypeEWK,
-                            datasetDefinition = "SingleTop",
-                            validMassPoints   = MassPoints,
-                            nuisances         = myLumiSystematics
-                            )
-                  )
-
-# TTZToQQ
-DataGroups.append(DataGroup(label             = labelPrefix + "TTZToQQ", 
-                            landsProcess      = 5,
-                            shapeHistoName    = OptionMassShape,
-                            histoPath         = histoPathEWK,
-                            datasetType       = dsetTypeEWK,
-                            datasetDefinition = "TTZToQQ",
-                            validMassPoints   = MassPoints,
-                            nuisances         = myLumiSystematics
-                            )
-                  )
-
-# TTTT
-DataGroups.append(DataGroup(label             = labelPrefix + "TTTT",
-                            landsProcess      = 6,
-                            shapeHistoName    = OptionMassShape,
-                            histoPath         = histoPathEWK,
-                            datasetType       = dsetTypeEWK,
-                            datasetDefinition = "TTTT",
-                            validMassPoints   = MassPoints,
-                            nuisances         = myLumiSystematics
-                            )
-                  )
-
-# DYJetsToQQ
-DataGroups.append(DataGroup(label             = labelPrefix + "DYJetsToQQ", 
-                            landsProcess      = 7,
-                            shapeHistoName    = OptionMassShape,
-                            histoPath         = histoPathEWK,
-                            datasetType       = dsetTypeEWK,
-                            datasetDefinition = "DYJetsToQQHT",
-                            validMassPoints   = MassPoints,
-                            nuisances         = myLumiSystematics
-                            )
-                  )
-
-# tt+W
-DataGroups.append(DataGroup(label             = labelPrefix + "TTWJetsToQQ", 
-                            landsProcess      = 8,
-                            shapeHistoName    = OptionMassShape, 
-                            histoPath         = histoPathEWK,
-                            datasetType       = dsetTypeEWK,
-                            datasetDefinition = "TTWJetsToQQ",
-                            validMassPoints   = MassPoints,
-                            nuisances         = myLumiSystematics
-                            )
-                  )
-
-# W+jets
-DataGroups.append(DataGroup(label             = labelPrefix + "WJetsToQQ_HT_600ToInf",
-                            landsProcess      = 9,
-                            shapeHistoName    = OptionMassShape,
-                            histoPath         = histoPathEWK, 
-                            datasetType       = dsetTypeEWK,
-                            datasetDefinition = "WJetsToQQ_HT_600ToInf",
-                            validMassPoints   = MassPoints,
-                            nuisances         = myLumiSystematics
-                            )
-)
-
-# Diboson
-DataGroups.append(DataGroup(label             = labelPrefix + "Diboson",
-                            landsProcess      = 10,
-                            shapeHistoName    = OptionMassShape,
-                            histoPath         = histoPathEWK, 
-                            datasetType       = dsetTypeEWK,
-                            datasetDefinition = "Diboson",
-                            validMassPoints   = MassPoints,
-                            nuisances         = myLumiSystematics
-                            )
-                  )
-
+DataGroups.append(TT)
+DataGroups.append(SingleTop)
+DataGroups.append(TTZ)
+DataGroups.append(TTTT)
+DataGroups.append(DYJets)
+DataGroups.append(TTW)
+DataGroups.append(WJets)
+DataGroups.append(Diboson)
 
 #================================================================================================ 
 # Definition of nuisance parameters
@@ -317,9 +304,9 @@ diboson_pdf_up       = systematics.getCrossSectionUncertainty("Diboson_pdf").get
 lumi_2016            = systematics.getLuminosityUncertainty("2016")
 
 # Define all individual nuisances that can be potentially used
-tauID_N         = Nuisance(id="CMS_eff_t"       , label="tau-jet ID (no Rtau) uncer, genuine taus" , distr="lnN"   , function="Constant"      , value=0.10)
-tauIDQCD_N      = Nuisance(id="CMS_eff_t_forQCD", label="tau-jet ID uncert, genuine taus"          , distr="lnN"   , function="ConstantForQCD", value=0.10)
-tauIDPt_N       = Nuisance(id="CMS_eff_t_highpt", label="tau-jet ID uncert, genuine taus (high-pt)", distr="shapeQ", function="ShapeVariation", systVariation="TauIDSyst")
+#tauID_N         = Nuisance(id="CMS_eff_t"       , label="tau-jet ID (no Rtau) uncer, genuine taus" , distr="lnN"   , function="Constant"      , value=0.10)
+#tauIDQCD_N      = Nuisance(id="CMS_eff_t_forQCD", label="tau-jet ID uncert, genuine taus"          , distr="lnN"   , function="ConstantForQCD", value=0.10)
+#tauIDPt_N       = Nuisance(id="CMS_eff_t_highpt", label="tau-jet ID uncert, genuine taus (high-pt)", distr="shapeQ", function="ShapeVariation", systVariation="TauIDSyst")
 trg_N           = Nuisance(id="CMS_eff_trg_data", label="Trigger data efficiency"                  , distr="shapeQ", function="ShapeVariation", systVariation="TrgEffData")
 trgApprox_N     = Nuisance(id="CMS_eff_trg_data", label="Trigger data efficiency (Approximation)"  , distr="lnN"   , function="Constant"      , value=0.03)
 trgMC_N         = Nuisance(id="CMS_eff_trg_MC"  , label="Trigger MC efficiency"                    , distr="shapeQ", function="ShapeVariation", systVariation="TrgEffMC")
@@ -364,10 +351,10 @@ qcd_metShape_N   = Nuisance(id="CMS_Hptntj_QCDkbg_metshape"      , label="Data-d
 #================================================================================================ 
 # Construct list of nuisance parameters
 #================================================================================================ 
-Nuisances.append(tauID_N)
-Nuisances.append(tauIDQCD_N)
-if "CMS_eff_t_highpt" in myShapeSystematics:
-    Nuisances.append(tauIDPt_N)
+#Nuisances.append(tauID_N)
+#Nuisances.append(tauIDQCD_N)
+#if "CMS_eff_t_highpt" in myShapeSystematics:
+#    Nuisances.append(tauIDPt_N)
 
 if "CMS_eff_trg_data" in myShapeSystematics:
     Nuisances.append(trg_N)

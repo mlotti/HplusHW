@@ -219,19 +219,19 @@ def main(opts):
         # For-loop: All histogram pairs
         for hSR, hVR in zip(path_SR, path_VR):
             break
-            Print("UNBLINDING SR! Are you nuts ? BREAK!" % hSR, False)
+            Print("UNBLINDING SR! Are you nuts ? BREAK!", False)
             if "IsGenuineB" in hSR:
                 continue
             PlotComparison(datasetsMgr, hSR, hVR, "SRvVR")
 
-        # For-loop: All histogram pairs
-        for hSR, hCR1 in zip(path_SR, path_CR1):
-            break
-            Print("UNBLINDING SR! Are you nuts ? BREAK!" % hSR, False)
-            raw_input("Press any key to continue")
-            if "IsGenuineB" in hSR:
-                continue
-            PlotComparison(datasetsMgr, hSR, hCR1, "SRvCR1")
+#        # For-loop: All histogram pairs
+#        for hSR, hCR1 in zip(path_SR, path_CR1):
+#            #break
+#            Print("UNBLINDING SR! Are you nuts ? BREAK!", False)
+#            raw_input("Press any key to continue")
+#            if "IsGenuineB" in hSR:
+#                continue
+#            PlotComparison(datasetsMgr, hSR, hCR1, "SRvCR1")
 
 
     Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)
