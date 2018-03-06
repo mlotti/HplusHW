@@ -30,6 +30,7 @@ setenv PATH ${PATH}:$HOME/.local/bin:/afs/cern.ch/cms/lumi/brilconda-1.0.3/bin: 
 hplusLumicalc.py
 or
 hplusLumiCalc.py -i 2016 --transferToEOS --collisions 2016 --offsite
+hplusLumiCalc.py --ignore-logs --trigger="HLT_LooseIsoPFTau50_Trk30_eta2p1_v*"
 
 2) LPC (or outside LXPLUS in general):
 open two terminals
