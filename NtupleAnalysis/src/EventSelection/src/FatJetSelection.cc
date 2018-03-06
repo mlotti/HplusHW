@@ -139,6 +139,11 @@ void FatJetSelection::bookHistograms(TDirectory* dir) {
   hFatJetTopMatchDeltaRBjet = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FatJetTopMatchDeltaRBjet", ";#DeltaR(fat jet, bjet);Occur / %.2f", nDRBins, fDRMin, fDRMax);
   hFatJetTopMatchType    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FatJetTopMatchType"   , ";top type;Occur / %.2f", 5, 0.0, 5.0);
   hFatJetTopMatchPtRatio = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FatJetTopMatchPtRatio", ";fat jet p_{T} / top p_{T};Occur / %.2f", 40, 0.0, 2.0);
+  hFatJetTopMatchTypeNone_GenMatch     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FatJetTopMatchTypeNone_GenMatch"    , ";matched top;Occur / %.0f", 4, -2.0, 2.0);
+  hFatJetTopMatchTypeJJB_GenMatch      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FatJetTopMatchTypeJJB_GenMatch"     , ";matched top;Occur / %.0f", 4, -2.0, 2.0);
+  hFatJetTopMatchTypeJJ_GenMatch       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FatJetTopMatchTypeJJ_GenMatch"      , ";matched top;Occur / %.0f", 4, -2.0, 2.0);
+  hFatJetTopMatchTypeJB_GenMatch       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FatJetTopMatchTypeJB_GenMatch"      , ";matched top;Occur / %.0f", 4, -2.0, 2.0);
+  hFatJetTopMatchTypeResolved_GenMatch = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FatJetTopMatchTypeResolved_GenMatch", ";matched top;Occur / %.0f", 4, -2.0, 2.0);
 
   return;
 }
@@ -263,6 +268,17 @@ FatJetSelection::Data FatJetSelection::privateAnalyze(const Event& event, const 
 	  const FatJetSelection::FatjetType type = findFatJetMatchedToTopType(jet, dR_bjet, dR_jet1, dR_jet2, topData);
 	  output.fFatJetMatchedToTopType.push_back(type);
 	  hFatJetTopMatchType->Fill(type);
+	  
+	  // Fill histos
+	  if (event.isMC()) 
+	    {	  
+	      int genTopMatch = findGenTopMatchedToFatJetType(event, jet);
+	      if (type == FatjetType::kNone)     hFatJetTopMatchTypeNone_GenMatch->Fill(genTopMatch);
+	      if (type == FatjetType::kJJB)      hFatJetTopMatchTypeJJB_GenMatch->Fill(genTopMatch);
+	      if (type == FatjetType::kJJ)       hFatJetTopMatchTypeJJ_GenMatch->Fill(genTopMatch);
+	      if (type == FatjetType::kJB)       hFatJetTopMatchTypeJB_GenMatch->Fill(genTopMatch);
+	      if (type == FatjetType::kResolved) hFatJetTopMatchTypeResolved_GenMatch->Fill(genTopMatch);
+	    }
 
 	  //=== Apply top-matching type cut
 	  if (std::find(fTopMatchTypes.begin(), fTopMatchTypes.end(), type) == fTopMatchTypes.end()) continue;
@@ -342,6 +358,78 @@ void FatJetSelection::findFatJetMatchedToTop(std::vector<AK8Jet>& collection, co
 
   return;
 }
+
+int FatJetSelection::findGenTopMatchedToFatJetType(const Event& event, 
+						   AK8Jet& fatjet){
+
+  if (!event.isMC()) return -1;
+  
+  // Definitions
+  int matchType  = -1;
+  int matchId    =  0;
+  double dRMin   = 9999.9;
+  bool bIsFromHPlus = false;
+  unsigned int nMatches = 0;
+
+  // For-loop: All genParticles
+  for (auto& p: event.genparticles().getGenParticles()) 
+    {
+      
+      // Consider only top quarks
+      if (std::abs(p.pdgId()) != 6) continue;
+
+      // Find last copy of a given particle
+      if (!p.isLastCopy()) continue;
+      
+      // Delta-R matching (eta-phi space)
+      double dR = ROOT::Math::VectorUtil::DeltaR(fatjet.p4(), p.p4());
+      if (dR > fTopMatchDeltaR) continue;
+      
+      // Store minimum dR 
+      if (dR < dRMin) 
+	{
+	  dRMin = dR;      
+	  matchId  = p.pdgId();
+	  nMatches+=1;
+	  bIsFromHPlus = hasMother(event, p, 37);
+	  // std::cout << "\tdR = " << dR << ", bIsFromHPlus    = " << bIsFromHPlus  << ", matchId = " << matchId << std::endl;
+	}
+    }
+
+  if (abs(matchId) == 0) matchType = -1;
+  else if (abs(matchId) == 6) 
+    {
+      if (!bIsFromHPlus) matchType = 0;
+      else matchType = 1;
+    }
+  else matchType = -2; // should never be reached
+
+  // std::cout << "matchType = " << matchType << ", matchId = " << matchId << ", dRMin = " << dRMin << ", nMatches = " << nMatches << std::endl;
+  
+  return matchType;
+}
+
+
+bool FatJetSelection::hasMother(const Event& event, 
+				const genParticle &p, 
+				const int mom_pdgId){
+  
+  if (p.mothers().size() < 1) return false;
+  
+  // For-loop: All mothers
+  for (size_t iMom = 0; iMom < p.mothers().size(); iMom++)
+    {
+      int mom_index =  p.mothers().at(iMom);
+      const genParticle m = event.genparticles().getGenParticles()[mom_index];
+      int motherID = m.pdgId();
+      int particleID = p.pdgId();
+      if (std::abs(motherID) == mom_pdgId) return true;
+      if (std::abs(motherID) == std::abs(particleID)) return hasMother(event, m, mom_pdgId);
+    }
+  
+  return false;
+}
+  
 
 const FatJetSelection::FatjetType FatJetSelection::findFatJetMatchedToTopType(AK8Jet fatJetTopMatch, 
 									      const double dR_bjet, 
