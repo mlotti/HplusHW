@@ -764,7 +764,7 @@ class DatacardColumn():
             if minimumError > 0.0:
                 minStatUncert = minimumError
 
-        print "DEBUG: Setting the minimum stat. uncertainty for histogram %s to be %f"%(myTitle,minStatUncert)
+        Verbose("Setting the minimum stat. uncertainty for histogram %s to be %f"%(myTitle,minStatUncert))
 
         # For-loop: All histogram bins
         for k in range(1, nBins):
@@ -775,7 +775,7 @@ class DatacardColumn():
             binError = self._rateResult._histograms[0].GetBinError(k)
             if binRate < minStatUncert: # FIXME: is this correct?
                 # Treat zero or sightly positive rates
-                if binRate == 0.0 or binError < minStatUncert
+                if binRate == 0.0 or binError < minStatUncert:
                     msg  = "Rate value is zero or below min.stat.uncert. in bin %d for column '%s' (it was %f)! " % (k, self.getLabel(), binRate)
                     msg += "Compensating up stat uncertainty to %f!" % (minStatUncert)
                     Verbose(ShellStyles.WarningLabel() + msg)
@@ -796,7 +796,7 @@ class DatacardColumn():
             Print(ShellStyles.WarningLabel() + msg)
 
         if nBelowMinStatUncert > 0:
-            msg = "Rate value for \"%s\" was below minimum statistical uncertainty (hence set to default min of %f) in %d bins" % (myTitle, config.MinimumStatUncertainty, nBelowMinStatUncert)
+            msg = "Rate value for \"%s\" was below minimum statistical uncertainty (hence set to default min of %f) in %d bins" % (myTitle, minStatUncert, nBelowMinStatUncert)
             Print(ShellStyles.WarningLabel() + msg, False)
 
         # Convert bin content to integers for signal injection
