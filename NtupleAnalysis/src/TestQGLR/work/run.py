@@ -49,7 +49,7 @@ import ROOT
 #================================================================================================
 # Options
 #================================================================================================
-prefix      = "FakeBMeasurement"
+prefix      = "TestQGLR"
 postfix     = ""
 dataEras    = ["2016"]
 searchModes = ["80to1000"]
@@ -158,9 +158,7 @@ def main():
         Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
         process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=opts.excludeTasks)
     else:
-        myBlackList = ["M_180", "M_200" , "M_220" , "M_250" , "M_300" , "M_350" , "M_400" , "M_500" , "M_650"  ,
-                       #"M_800", 
-                       "M_1000", "M_1500", "M_2000", "M_2500", "M_3000", "M_5000", "M_7000", "M_10000", "QCD"]
+        myBlackList = ["M_180", "M_2500", "M_3000", "M_5000", "M_7000", "M_10000", "QCD"]
         Print("Adding all datasets from multiCRAB directory %s except %s" % (opts.mcrab, (",".join(myBlackList))) )
         Print("Vertex reweighting is done according to the chosen data era (%s)" % (",".join(dataEras)) )
         # process.addDatasetsFromMulticrab(opts.mcrab, blacklist=myBlackList)
@@ -211,17 +209,17 @@ def main():
 
     # Add variations (e.g. for optimisation)
     # builder.addVariation("BJetSelection.triggerMatchingApply", [True, False]) # At least 1 trg b-jet dR-matched to offline b-jets
-    # builder.addVariation("FakeBMeasurement.prelimTopFitChiSqrCutValue", [100, 20])
-    # builder.addVariation("FakeBMeasurement.prelimTopFitChiSqrCutDirection", ["<=", "==", ">="])
-    # builder.addVariation("FakeBMeasurement.numberOfBJetsCutValue", [0, 1])
-    # builder.addVariation("FakeBMeasurement.numberOfBJetsCutDirection", ["=="])
-    # builder.addVariation("FakeBMeasurement.numberOfBJetsCutDirection", ["<=", "==", ">="])
-    # builder.addVariation("FakeBMeasurement.numberOfInvertedBJetsCutValue", [0, 1])
-    # builder.addVariation("FakeBMeasurement.numberOfInvertedBJetsCutDirection", [">="])
-    # builder.addVariation("FakeBMeasurement.invertedBJetDiscr", "")
-    # builder.addVariation("FakeBMeasurement.invertedBJetDiscrWorkingPoint", "Loose")
-    # builder.addVariation("FakeBMeasurement.invertedBJetsSortType", ["Random", "DescendingBDiscriminator"])
-    # builder.addVariation("FakeBMeasurement.invertedBJetsDiscrMaxCutValue", [0.82, 0.80, 0.75, 0.70])
+    # builder.addVariation("TestQGLR.prelimTopFitChiSqrCutValue", [100, 20])
+    # builder.addVariation("TestQGLR.prelimTopFitChiSqrCutDirection", ["<=", "==", ">="])
+    # builder.addVariation("TestQGLR.numberOfBJetsCutValue", [0, 1])
+    # builder.addVariation("TestQGLR.numberOfBJetsCutDirection", ["=="])
+    # builder.addVariation("TestQGLR.numberOfBJetsCutDirection", ["<=", "==", ">="])
+    # builder.addVariation("TestQGLR.numberOfInvertedBJetsCutValue", [0, 1])
+    # builder.addVariation("TestQGLR.numberOfInvertedBJetsCutDirection", [">="])
+    # builder.addVariation("TestQGLR.invertedBJetDiscr", "")
+    # builder.addVariation("TestQGLR.invertedBJetDiscrWorkingPoint", "Loose")
+    # builder.addVariation("TestQGLR.invertedBJetsSortType", ["Random", "DescendingBDiscriminator"])
+    # builder.addVariation("TestQGLR.invertedBJetsDiscrMaxCutValue", [0.82, 0.80, 0.75, 0.70])
     # builder.addVariation("TopSelection.ChiSqrCutValue", [100])
     # builder.addVariation("Trigger.triggerOR", [["HLT_PFHT450_SixJet40"], ["HLT_PFHT400_SixJet30"]])
     # builder.addVariation("TopologySelection.FoxWolframMomentCutValue", [0.5, 0.7])

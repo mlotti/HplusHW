@@ -4505,6 +4505,7 @@ class DatasetManagerCreator:
         Creates DatasetPrecursor objects for each ROOT file, reads the
         contents of first MC file to get list of available analyses.
         '''
+        self._label = None
         self._precursors = [DatasetPrecursor(name, filenames) for name, filenames in rootFileList]
         self._baseDirectory = kwargs.get("baseDirectory", "")
         
@@ -4532,6 +4533,11 @@ class DatasetManagerCreator:
         self._dataDataEras.sort()
         return
 
+    def setLabel(self, label):
+        self._label = label
+
+    def getLabel(self):
+        return self._label
 
     def _readAnalysisContent(self, precursor):
         Verbose("_readAnalysisContent()", True)

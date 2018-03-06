@@ -305,7 +305,9 @@ def GetHistoKwargs(h, opts):
         kwargs["ylabel"] += " / %.0f " + units
         kwargs["cutBox"]  = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         kwargs["cutBoxY"] = cutBoxY
-        kwargs["rebinX"]  = [b for b in range(0, 600, 20)]
+        ptBins = [b for b in range(0, 100, 10)]
+        ptBins.extend([b for b in range(100, 500, 20)])
+        kwargs["rebinX"]  = ptBins #[b for b in range(0, 600, 20)]
     return kwargs
 
 
@@ -376,7 +378,7 @@ def PlotHistograms(datasetsMgr, histoName):
     plots.drawPlot(p, saveName, **kwargs) #the "**" unpacks the kwargs_ dictionary
 
     # Save the plots in custom list of saveFormats
-    SavePlot(p, saveName, os.path.join(opts.saveDir), [".png"])#, ".pdf"] )
+    SavePlot(p, saveName, os.path.join(opts.saveDir), [".png", ".pdf"] )
     return
 
 def GetCRLabel(region):

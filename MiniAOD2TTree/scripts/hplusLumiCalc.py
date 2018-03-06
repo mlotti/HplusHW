@@ -30,6 +30,7 @@ setenv PATH ${PATH}:$HOME/.local/bin:/afs/cern.ch/cms/lumi/brilconda-1.0.3/bin: 
 hplusLumicalc.py
 or
 hplusLumiCalc.py -i 2016 --transferToEOS --collisions 2016 --offsite
+hplusLumiCalc.py --ignore-logs --trigger="HLT_LooseIsoPFTau50_Trk30_eta2p1_v*"
 
 2) LPC (or outside LXPLUS in general):
 open two terminals
@@ -773,6 +774,8 @@ def main(opts, args):
     allowedColl = ["2015", "2016"]
     if opts.collisions == "2016":
         PileUpJSON = PileUpJSON_2016
+        if opts.offsite:
+            PileUpJSON = "pileup_latest.txt"
     elif opts.collisions == "2015":
         PileUpJSON = PileUpJSON_2015
     else:
@@ -876,6 +879,14 @@ def main(opts, args):
         fOUT     = os.path.join(task, "results", "PileUp.root")
         hName = "pileup"
         PrintProgressBar(task + ", PileupCalc ", index, len(files), "[" + os.path.basename(jsonfile) + "]")
+
+        if opts.offsite:
+            puJsonFile = os.path.join(os.getcwd(), PileUpJSON.split("/")[-1])
+            if not os.path.isfile(puJsonFile):
+                msg =  "\nOn LPC, the AFS is not mounted anymore (after 20-Feb-2018). So you must copy this file locally with scp!"
+                raise Exception("Could not find pileup json file \"%s\".%s" % (puJsonFile, msg) )
+            else:
+                PileUpJSON = puJsonFile
         ret, output = CallPileupCalc(task, fOUT, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="100", numPileupBins="100", pileupHistName=hName, trigger=opts.trigger)
 
             
