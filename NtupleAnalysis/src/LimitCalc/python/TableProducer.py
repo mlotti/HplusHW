@@ -77,28 +77,21 @@ def createBinByBinStatUncertHistograms(hRate, minimumStatUncertainty=0.5, xmin=N
             if hRate.GetBinContent(i) < 0.0:
                 nNegativeRate += 1
 
-            # Make sure that error in hRate is larger than minimum stat. uncertainty
-            if hRate.GetBinError(i) < minimumStatUncertainty:
-                hRate.SetBinError(i, minimumStatUncertainty)
-
             # Clone hRate histogram to hUp and hDown
             hUp   = aux.Clone(hRate, "%s_%s_statBin%dUp"  % (myName, myName,i) )
             hDown = aux.Clone(hRate, "%s_%s_statBin%dDown"% (myName, myName,i) )
             hUp.SetTitle(hUp.GetName())
             hDown.SetTitle(hDown.GetName())
 
+            # The stat. uncerntainties are set and stored as errors to the nominal histogram in DatacardColumn.py
+
             # Set hUp rate
             hUp.SetBinContent(i, hUp.GetBinContent(i) + hUp.GetBinError(i))
-
-# --- COMMENTED OUT BECAUSE THIS IS NOW DONE MORE CAREFULLY IN DatacardColumn.py ---
-#            # Make sure that the hUp rate is larger than the minimum stat. uncertainty
-#            if hRate.GetBinContent(i) < minimumStatUncertainty:
-#                hUp.SetBinContent(i, minimumStatUncertainty)
-
             # Set hDown rate
             statBinDown = hDown.GetBinContent(i)-hDown.GetBinError(i)
             # hDown.SetBinContent(i, statBinDown) # Bug fix (8Nov2017)
             hDown.SetBinContent(i, max(0.0, statBinDown)) # make sure hDown rate is not negative
+
             # Varying dowards can in rare cases lead to a completely empty hDown histo, not accepted as input by Combine
             # To prevent this from happening, we do as follows:
             if hDown.Integral() <= 0:
