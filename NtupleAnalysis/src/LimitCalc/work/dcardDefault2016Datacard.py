@@ -9,7 +9,7 @@ HeavyMassPoints=[]
 if LightAnalysis:
     LightMassPoints=[80,90,100,120,140,150,155,160]
 else:
-    HeavyMassPoints=[145,175,180,200,220,250,300,400,500,750,1000,2000,3000]
+    HeavyMassPoints=[180,200,220,250,300,400,500,750,1000,2000,3000]
 
 #LightMassPoints=[120] # for control plots
 #HeavyMassPoints=[175] # for control plots
