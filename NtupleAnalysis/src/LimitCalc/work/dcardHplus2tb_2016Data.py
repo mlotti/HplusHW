@@ -45,6 +45,7 @@ MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500
 BlindAnalysis                          = True  # True, unless you have a green light for unblinding! [default: True]
 OptionBlindThreshold                   = 0.2   # [default: 0.2]    (If signal exceeds this fraction of expected events, data is blinded; set to None to disable)
 MinimumStatUncertainty                 = 0.5   # [default: 0.5]    (Minimum stat. uncertainty to set to bins with zero events)
+UseAutomaticMinimumStatUncertainty     = False # Option to NOT use the MinimumStatUncertainty value above for ~empty bins, but instead determine the value from the lowest non-zero bin for each column
 OptionCombineSingleColumnUncertainties = False # [default: False]  (Approxmation that makes limit running faster)
 OptionConvertFromShapeToConstantList   = []    # [default: []]     (Convert these nuisances from shape to constant; Approx. that makes limits run faster & converge more easily)
 OptionDisplayEventYieldSummary         = False # [default: False]  (Print "Event yield summary", using the TableProducer.py)
