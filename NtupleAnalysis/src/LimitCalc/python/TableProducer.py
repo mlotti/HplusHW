@@ -63,7 +63,7 @@ def PrintFlushed(msg, printHeader=True):
     sys.stdout.flush()
     return
 
-def createBinByBinStatUncertHistograms(hRate, minimumStatUncertainty=0.5, xmin=None, xmax=None):
+def createBinByBinStatUncertHistograms(hRate, xmin=None, xmax=None):
     '''
     Creates and returns a list of bin-by-bin stat. uncert. histograms
     Inputs:
@@ -94,26 +94,21 @@ def createBinByBinStatUncertHistograms(hRate, minimumStatUncertainty=0.5, xmin=N
             if hRate.GetBinContent(i) < 0.0:
                 nNegativeRate += 1
 
-            # Make sure that error in hRate is larger than minimum stat. uncertainty
-            if hRate.GetBinError(i) < minimumStatUncertainty:
-                hRate.SetBinError(i, minimumStatUncertainty)
-
             # Clone hRate histogram to hUp and hDown
             hUp   = aux.Clone(hRate, "%s_%s_statBin%dUp"  % (myName, myName,i) )
             hDown = aux.Clone(hRate, "%s_%s_statBin%dDown"% (myName, myName,i) )
             hUp.SetTitle(hUp.GetName())
             hDown.SetTitle(hDown.GetName())
 
+            # The stat. uncerntainties are set and stored as errors to the nominal histogram in DatacardColumn.py
+
             # Set hUp rate
             hUp.SetBinContent(i, hUp.GetBinContent(i) + hUp.GetBinError(i))
-#            # Make sure that the hUp rate is larger than the minimum stat. uncertainty
-#            if hRate.GetBinContent(i) < minimumStatUncertainty:
-#                hUp.SetBinContent(i, minimumStatUncertainty)
-
             # Set hDown rate
             statBinDown = hDown.GetBinContent(i)-hDown.GetBinError(i)
             # hDown.SetBinContent(i, statBinDown) # Bug fix (8Nov2017)
             hDown.SetBinContent(i, max(0.0, statBinDown)) # make sure hDown rate is not negative
+
             # Varying dowards can in rare cases lead to a completely empty hDown histo, not accepted as input by Combine
             # To prevent this from happening, we do as follows:
             if hDown.Integral() <= 0:
@@ -135,7 +130,7 @@ def createBinByBinStatUncertHistograms(hRate, minimumStatUncertainty=0.5, xmin=N
         Verbose(ShellStyles.WarningLabel() + msg)
 
     if nBelowMinStatUncert > 0:
-        msg = "Rate value for \"%s\" was below minimum statistical uncertainty (hence set to default min of %f) in %d bins" % (hRate.GetName(), minimumStatUncertainty, nBelowMinStatUncert)
+        msg = "Rate value for \"%s\" was below minimum statistical uncertainty" % (hRate.GetName(), nBelowMinStatUncert)
         Verbose(ShellStyles.WarningLabel() + msg, False)
 
     if nEmptyDownHistograms > 0:
@@ -438,9 +433,9 @@ class TableProducer:
             return
         myLastUntouchableLandsProcessNumber = 0 # For sigma x br
         if not self._config.OptionLimitOnSigmaBr and (self._datasetGroups[0].getLabel()[:2] == "HW" or self._datasetGroups[1].getLabel()[:2] == "HW"):
-            if self._opts.lands:
-                myLastUntouchableLandsProcessNumber = 2 # For light H+ physics model
-            elif self._opts.combine:
+#            if self._opts.lands:
+#                myLastUntouchableLandsProcessNumber = 2 # For light H+ physics model
+            if self._opts.combine:
                 myLastUntouchableLandsProcessNumber = 1 # For light H+ physics model
         myIdsForRemoval = []
         for c in self._datasetGroups:
@@ -825,7 +820,7 @@ class TableProducer:
                 c.setResultHistogramsToRootFile(rootFile)
                 # Add bin-by-bin stat.uncert.
                 hRate = c._rateResult.getHistograms()[0]
-                myHistos = createBinByBinStatUncertHistograms(hRate, self._config.MinimumStatUncertainty)
+                myHistos = createBinByBinStatUncertHistograms(hRate)
                 for h in myHistos:
                     h.SetDirectory(rootFile)
                 c._rateResult._tempHistos.extend(myHistos)
@@ -894,8 +889,10 @@ class TableProducer:
                 return "+%s -%s"%(formatStr%uncUp,formatStr%uncDown)
 
         def getResultString(hwu,formatStr,myPrecision):
-            return "%s +- %s (stat.) %s (syst.)\n"%(formatStr%hwu.getRate(),formatStr%hwu.getRateStatUncertainty(),
+            if not hwu==None:
+                return "%s +- %s (stat.) %s (syst.)\n"%(formatStr%hwu.getRate(),formatStr%hwu.getRateStatUncertainty(),
                 getFormattedUnc(formatStr,myPrecision,*hwu.getRateSystUncertainty()))
+            else: return ""
 
         def getLatexFormattedUnc(formatStr,myPrecision,uncUp,uncDown):
             if abs(round(uncDown,myPrecision)-round(uncUp,myPrecision)) < pow(0.1,myPrecision)-pow(0.1,myPrecision+2): # last term needed because of float point fluctuations
@@ -906,8 +903,10 @@ class TableProducer:
                 return "~^{+%s}){-%s}"%(formatStr%uncUp, formatStr%uncDown)
 
         def getLatexResultString(hwu,formatStr,myPrecision):
-            return "$%s \\pm %s %s $"%(formatStr%hwu.getRate(),formatStr%hwu.getRateStatUncertainty(),
+            if not hwu==None:
+                return "$%s \\pm %s %s $"%(formatStr%hwu.getRate(),formatStr%hwu.getRateStatUncertainty(),
                 getLatexFormattedUnc(formatStr,myPrecision,*hwu.getRateSystUncertainty()))
+            else: return ""
 
         # For-loop: All mass points
         for i, m in enumerate(self._config.MassPoints, 1):
@@ -965,7 +964,7 @@ class TableProducer:
 
             # Calculate signal yield
             myBr = self._config.OptionBr
-            if not (self._config.OptionLimitOnSigmaBr or m > 179):
+            if not (self._config.OptionLimitOnSigmaBr or m > 161 or HW==None):
                 if self._config.OptionBr == None:
                     print ShellStyles.WarningLabel()+"Br(t->bH+) has not been specified in config file, using default 0.01! To specify, add OptionBr=0.05 to the config file."+ShellStyles.NormalStyle()
                     myBr = 0.01
