@@ -25,7 +25,7 @@ set PSEUDO_MCRAB_DIR = ${1}
 ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --folder jetSelection_ --url
 ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --folder bjetSelection_ --url
 ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --folder topbdtSelection_ --url
-./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --folder fatjetSelction_Veto --url
+./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --folder fatjetSelection_Veto --url
 ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --folder ForDataDrivenCtrlPlots --url
 
 ./plotTH2.py -m $PSEUDO_MCRAB_DIR --folder ForDataDrivenCtrlPlots --dataset ChargedHiggs_HplusTB_HplusToTB_M_650 --normalizeToLumi --logZ --gridX --gridY  --url
