@@ -45,7 +45,7 @@ def GetFName():
     return fName
 
 def Print(msg, printHeader=True):
-    fName = GetName()
+    fName = GetFName()
     if printHeader:
         print "=== ", fName
     if msg !="":
