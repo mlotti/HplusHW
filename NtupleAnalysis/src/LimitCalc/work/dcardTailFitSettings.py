@@ -30,7 +30,8 @@ function = "FitFuncExpTailExoAlternate"
 fitSettings = [
     # Fit settings for ttbar
     {
-        "id": "CMS_Hptntj_ttbar_t_genuine",
+#        "id": "CMS_Hptntj_ttbar_t_genuine",
+        "id": "ttbar_t_genuine",
         "fitfunc": function,
         "fitmin": fitstart,
         "fitmax": fitstop,
@@ -38,7 +39,8 @@ fitSettings = [
     },
     # Fit settings for single top
     {
-        "id": "CMS_Hptntj_singleTop_t_genuine",
+#        "id": "CMS_Hptntj_singleTop_t_genuine",
+        "id": "singleTop_t_genuine",
         "fitfunc": function,
         "fitmin": fitstart, 
         "fitmax": fitstop,
@@ -59,5 +61,7 @@ fitSettings = [
 
 # List of backgrounds, for which no fit is done
 Blacklist = [
-    "CMS_Hptntj_W_t_genuine","CMS_Hptntj_DY_t_genuine","CMS_Hptntj_VV_t_genuine", #FIXME: temporarily blacklisted to get rid of errors
+#    "CMS_Hptntj_W_t_genuine","CMS_Hptntj_DY_t_genuine","CMS_Hptntj_VV_t_genuine", #FIXME: temporarily blacklisted to get rid of errors
+    "W_t_genuine","DY_t_genuine","VV_t_genuine", #FIXME: temporarily blacklisted to get rid of errors
+
 ]
