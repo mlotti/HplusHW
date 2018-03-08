@@ -138,6 +138,9 @@ def main():
                        "ChargedHiggs_HplusTB_HplusToTB_M_250_ext1", 
                        "ChargedHiggs_HplusTB_HplusToTB_M_2500_ext1", 
                        "ChargedHiggs_HplusTB_HplusToTB_M_2000_ext1"
+                       "ChargedHiggs_HplusTB_HplusToTB_M_5000",
+                       "ChargedHiggs_HplusTB_HplusToTB_M_7000",
+                       "ChargedHiggs_HplusTB_HplusToTB_M_10000",
                        ]
 
         Print("Adding all datasets from multiCRAB directory %s" % (opts.mcrab))

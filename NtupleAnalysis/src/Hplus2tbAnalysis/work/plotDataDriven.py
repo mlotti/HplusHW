@@ -323,7 +323,9 @@ def GetHistoKwargs(hName, opts):
         kwargs["cutBox"] = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         kwargs["log"]    = True
         myBins = []
-        for j in range(0, 400, 20):
+        for j in range(0, 100, 10):
+            myBins.append(j)
+        for j in range(100, 400, 20):
             myBins.append(j)
         for k in range(400, 600, 40):
             myBins.append(k)

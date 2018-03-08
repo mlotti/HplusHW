@@ -169,6 +169,8 @@ private:
   Count cPassedQuarkGluonLikelihoodRatio;
   // Sub counters
   Count cSubAll;
+  Count cSubRequiredJetsResize;
+  Count cSubNoJetsResize;
   
   QGLInputStash fProb;
   

@@ -53,6 +53,7 @@ private:
   Count cBaselineBTaggingSFCounter;
   BJetSelection fBaselineBJetSelection;
   METSelection fBaselineMETSelection;
+  QuarkGluonLikelihoodRatio fBaselineQGLRSelection;
   TopSelectionBDT fBaselineTopSelection;
   FatJetSelection fBaselineFatJetSelection;
   Count cBaselineSelected;
@@ -62,6 +63,7 @@ private:
   Count cInvertedBTaggingSFCounter;
   BJetSelection fInvertedBJetSelection;
   METSelection fInvertedMETSelection;
+  QuarkGluonLikelihoodRatio fInvertedQGLRSelection;
   TopSelectionBDT fInvertedTopSelection;
   FatJetSelection fInvertedFatJetSelection;
   Count cInvertedSelected;
@@ -506,6 +508,7 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
     cBaselineBTaggingSFCounter(fEventCounter.addCounter("Baseline: b tag SF")),
     fBaselineBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fBaselineMETSelection(config.getParameter<ParameterSet>("METSelection")),
+    fBaselineQGLRSelection(config.getParameter<ParameterSet>("QGLRSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
     fBaselineTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
     fBaselineFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
     cBaselineSelected(fEventCounter.addCounter("Baseline: selected events")),
@@ -514,6 +517,7 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
     cInvertedBTaggingSFCounter(fEventCounter.addCounter("Inverted: b tag SF")),
     fInvertedBJetSelection(config.getParameter<ParameterSet>("FakeBBjetSelection")),//, fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fInvertedMETSelection(config.getParameter<ParameterSet>("METSelection")),
+    fInvertedQGLRSelection(config.getParameter<ParameterSet>("QGLRSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
     fInvertedTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
     fInvertedFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
     cInvertedSelected(fEventCounter.addCounter("Inverted: selected events")),
@@ -980,11 +984,13 @@ void FakeBMeasurement::book(TDirectory *dir) {
   // Baseline selection
   fBaselineBJetSelection.bookHistograms(dir);
   fBaselineMETSelection.bookHistograms(dir);
+  fBaselineQGLRSelection.bookHistograms(dir);
   fBaselineTopSelection.bookHistograms(dir);
   fBaselineFatJetSelection.bookHistograms(dir);
   // Inverted selection
   fInvertedBJetSelection.bookHistograms(dir);
   fInvertedMETSelection.bookHistograms(dir);
+  fInvertedQGLRSelection.bookHistograms(dir);
   fInvertedTopSelection.bookHistograms(dir);
   fInvertedFatJetSelection.bookHistograms(dir);
   
@@ -2223,12 +2229,19 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   cBaselineBTaggingSFCounter.increment();
 
   //================================================================================================
-  // 10) MET selection
+  // - MET selection
   //================================================================================================
   if (0) std::cout << "=== Baseline: MET selection" << std::endl;
   const METSelection::Data METData = fBaselineMETSelection.silentAnalyze(fEvent, nVertices);
   // if (!METData.passedSelection()) return;
- 
+
+  //================================================================================================
+  // 10) Quark-Gluon Likelihood Ratio Selection
+  //================================================================================================
+  if (0) std::cout << "=== Baseline: QGLR selection" << std::endl;
+  const QuarkGluonLikelihoodRatio::Data QGLRData = fBaselineQGLRSelection.analyze(fEvent, jetData, bjetData);
+  if (!QGLRData.passedSelection()) return;
+
   //================================================================================================
   // 11) Top selection
   //================================================================================================
@@ -2734,10 +2747,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
        nBaselineBjets++;
      }
    bool passBaselineBjetCuts   = cfg_BaselineNumberOfBJets.passedCut(nBaselineBjets); 
-   // std::cout << "bool = " << (!passBaselineBjetCuts*bLdgBJetIsMediumWP) << ", passBaselineBjetCuts = " << passBaselineBjetCuts << ", bLdgBJetIsMediumWP = " << bLdgBJetIsMediumWP << std::endl;
    if (!passBaselineBjetCuts) return;
-   // bool bAtLeast1MediumAbove40 = (invBjetData.getSelectedBJets()[0].bjetDiscriminator() >= bdiscWP) || (invBjetData.getSelectedBJets()[1].bjetDiscriminator() >= bdiscWP);
-   // if (!bAtLeast1MediumAbove40) return;
   
   // Increment counter
   cInvertedBTaggingCounter.increment();
@@ -2753,11 +2763,18 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   cInvertedBTaggingSFCounter.increment();
 
   //================================================================================================
-  // 10) MET selection
+  // - MET selection
   //================================================================================================
   if (0) std::cout << "=== Inverted: MET selection" << std::endl;
   const METSelection::Data METData = fInvertedMETSelection.silentAnalyze(fEvent, nVertices);
   // if (!METData.passedSelection()) return;
+
+  //================================================================================================
+  // 10) Quark-Gluon Likelihood Ratio Selection
+  //================================================================================================
+  if (0) std::cout << "=== Inverted: QGLR selection" << std::endl;
+  const QuarkGluonLikelihoodRatio::Data QGLRData = fInvertedQGLRSelection.analyze(fEvent, jetData, invBjetData);
+  if (!QGLRData.passedSelection()) return;
 
   //================================================================================================
   // 11) Top selection
@@ -2792,7 +2809,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   // Preselections (aka Standard Selections)
   //================================================================================================
   if (0) std::cout << "=== Inverted: Preselections" << std::endl;
-  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, invBjetData, METData, TopologySelection::Data(), topData, isGenuineB);
+  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, invBjetData, METData, QGLRData, topData, isGenuineB);
 
   // Fill Triplets  (Inverted)
   hInverted_Njets_AfterStandardSelections->Fill(isGenuineB, jetData.getSelectedJets().size());
