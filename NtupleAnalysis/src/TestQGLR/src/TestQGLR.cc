@@ -425,7 +425,8 @@ void TestQGLR::DoInvertedAnalysis(const JetSelection::Data& jetData,
   // Preselections (aka Standard Selections)
   //================================================================================================
   if (0) std::cout << "=== Inverted: Preselections" << std::endl;
-  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, invBjetData, METData, TopologySelection::Data(), topData, isGenuineB);
+  // fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, invBjetData, METData, TopologySelection::Data(), topData, isGenuineB);
+  // fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, invBjetData, qglData, topData, isGenuineB);
   
   //================================================================================================
   // All Selections 
