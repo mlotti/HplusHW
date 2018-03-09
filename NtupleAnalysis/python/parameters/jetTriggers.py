@@ -3,7 +3,7 @@
 from HiggsAnalysis.NtupleAnalysis.main import PSet
 import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
 import HiggsAnalysis.NtupleAnalysis.parameters.jsonReader as jsonReader
-import HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters as signalAnalysis
+import HiggsAnalysis.NtupleAnalysis.parameters.hplus2tbAnalysis as hplus2tbAnalysis
 
 #================================================================================================
 # General parameters
@@ -14,46 +14,45 @@ histogramAmbientLevel = "Debug"  # Options: Systematics, Vital, Informative, Deb
 #================================================================================================
 # Trigger
 #================================================================================================
-trigger = signalAnalysis.trigger
-trigger.triggerOR.extend("HLT_IsoMu24") 
+trigger = hplus2tbAnalysis.allSelections.Trigger
+trigger.triggerOR.append("HLT_IsoMu24") 
 
 #================================================================================================
 # MET filter
 #================================================================================================
-metFilter = signalAnalysis.metFilter
+metFilter = hplus2tbAnalysis.metFilter
 
 #================================================================================================
 # Electron veto
 #================================================================================================
-eVeto = signalAnalysis.eVeto
+eVeto = hplus2tbAnalysis.eVeto
 
 #================================================================================================
 # Muon selection
 #================================================================================================
-muSelection = signalAnalysis.muVeto
+muSelection = hplus2tbAnalysis.muVeto
 muSelection.muonPtCut = 26.0  # Higher than HLT threshold    
-# muSelection.muonID = "muIDMedium"
 
 #================================================================================================
 # Tau selection (sync with HToTauNu analysis)
 #================================================================================================
-tauSelection = signalAnalysis.tauSelection
+tauVeto = hplus2tbAnalysis.tauVeto
 
 #================================================================================================
 # Jet selection
 #================================================================================================
-jetSelection = signalAnalysis.jetSelection
+jetSelection = hplus2tbAnalysis.jetSelection
 jetSelection.HTCutValue = 0.0
 
 #================================================================================================= 
 # Fat jet selection
 #=================================================================================================
-fatjetVeto = signalAnalysis.fatjetVeto
+fatjetVeto = hplus2tbAnalysis.fatjetVeto
 
 #================================================================================================
 # B-jet selection
 #================================================================================================
-bjetSelection = signalAnalysis.bjetSelection
+bjetSelection = hplus2tbAnalysis.bjetSelection
 bjetSelection.jetPtCuts = [40.0, 30.0]
 bjetSelection.numberOfBJetsCutValue = 2
 
@@ -68,7 +67,7 @@ scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection,
 #=================================================================================================
 # QGL selection
 #================================================================================================= 
-qglrSelection = signalAnalysis.qglrSelection
+qglrSelection = hplus2tbAnalysis.qglrSelection
 
 jsonReader.setupQGLInformation(QGLRPset  = qglrSelection,
                                jsonname_Light  = "QGLdiscriminator_QCD_LightJets.json",
@@ -77,33 +76,33 @@ jsonReader.setupQGLInformation(QGLRPset  = qglrSelection,
 #================================================================================================
 # Topology selection
 #================================================================================================
-topologySelection = signalAnalysis.topologySelection
+topologySelection = hplus2tbAnalysis.topologySelection
 
 #================================================================================================
 # Top selection BDT
 #================================================================================================
-topSelectionBDT = signalAnalysis.topSelectionBDT
+topSelectionBDT = hplus2tbAnalysis.topSelectionBDT
 
 
 #================================================================================================
 # MET selection
 #================================================================================================
-metSelection = signalAnalysis.metSelection
+metSelection = hplus2tbAnalysis.metSelection
 
 #================================================================================================
 # FakeB Measurement Options
 #================================================================================================
-fakeBBjetSelection = signalAnalysis.fakeBBjetSelection
+fakeBBjetSelection = hplus2tbAnalysis.fakeBBjetSelection
 scaleFactors.setupBtagSFInformation(btagPset               = fakeBBjetSelection,
                                     btagPayloadFilename    = "CSVv2.csv",
                                     btagEfficiencyFilename = "btageff_HToTB.json",
                                     direction              = "nominal")
-fakeBMeasurement = signalAnalysis.fakeBMeasurement
+fakeBMeasurement = hplus2tbAnalysis.fakeBMeasurement
 
 #================================================================================================
 # Common plots options
 #================================================================================================
-commonPlotsOptions = signalAnalysis.commonPlotsOptions
+commonPlotsOptions = hplus2tbAnalysis.commonPlotsOptions
 
 
 #================================================================================================
@@ -114,7 +113,7 @@ allSelections = PSet(
     Trigger               = trigger,
     METFilter             = metFilter,
     ElectronSelection     = eVeto,
-    MuonSelection         = muVeto,
+    MuonSelection         = muSelection,
     TauSelection          = tauVeto,
     JetSelection          = jetSelection,
     BJetSelection         = bjetSelection,
