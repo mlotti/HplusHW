@@ -155,7 +155,7 @@ void QuarkGluonLikelihoodRatio::handleQGLInput(const ParameterSet& config, std::
 
 
 void QuarkGluonLikelihoodRatio::bookHistograms(TDirectory* dir) {
-  TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "QuarkGluonLikelihoodRatio_" + sPostfix);
+  TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "QGLRSelection_" + sPostfix);
   
   // Histogram binning options
   int nQGLBins      = 100;
@@ -207,6 +207,7 @@ QuarkGluonLikelihoodRatio::Data QuarkGluonLikelihoodRatio::privateAnalyze(const 
   if (!fnumberOfJetsCut.passedCut(selectedJets.size())) 
     {
       doJetsResize = true;
+      // std::cout << "selectedJets.size() = " << selectedJets.size() << ", doJetsResize = " << doJetsResize << std::endl;
       selectedJets.resize(fJetsCut);
     }
   
@@ -255,7 +256,7 @@ QuarkGluonLikelihoodRatio::Data QuarkGluonLikelihoodRatio::privateAnalyze(const 
   
   // Fill counters and sub-counters
   if (doJetsResize) cSubRequiredJetsResize.increment();
-  else cSubNoJetsResize.increment();
+  else cSubNoJetsResize.increment();    
   if (fQGLRCut.passedCut(QGLR)) cPassedQuarkGluonLikelihoodRatio.increment();
 
   // Fill Histograms
