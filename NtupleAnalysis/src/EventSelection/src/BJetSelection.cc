@@ -96,13 +96,13 @@ void BJetSelection::initialize(const ParameterSet& config) {
   // Medium to reduce both b and light jets
   // Tight to reduce light jets
   fDisriminatorValue = getDiscriminatorWP(sAlgorithm, sWorkingPoint);
-  
-  if (fDisriminatorValue < 0.0)
+  std::cout << "Discriminator value for WP " << sWorkingPoint << ": " << fDisriminatorValue << std::endl;
+
+  if (fDisriminatorValue < -1.0)
     {
       throw hplus::Exception("config") << "No discriminator value implemented in BJetSelection.cc constructor for algorithm '" 
 				       << sAlgorithm << "' and working point '" << sWorkingPoint << "'!";
     }
-
   return;
 }
 
@@ -396,7 +396,7 @@ const double BJetSelection::getDiscriminatorWP(const std::string sAlgorithm, con
       else if (sWorkingPoint == "Medium") return +0.8484;
       else if (sWorkingPoint == "Tight") return +0.9535;
     } 
-  else if (sAlgorithm == "pfCombinedMVA2BJetTags") 
+  else if (sAlgorithm == "pfCombinedMVAV2BJetTags") 
     {
       if (sWorkingPoint == "Loose") return -0.5884;
       else if (sWorkingPoint == "Medium") return +0.4432;
@@ -404,7 +404,7 @@ const double BJetSelection::getDiscriminatorWP(const std::string sAlgorithm, con
     }
   else if (sAlgorithm == "pfCombinedCvsLJetTags") 
     {
-      if (sWorkingPoint == "Loose") return-0.48;
+      if (sWorkingPoint == "Loose") return -0.48;
       else if (sWorkingPoint == "Medium") return -0.1;
       else if (sWorkingPoint == "Tight") return +0.69;    
     } 
@@ -421,7 +421,7 @@ const double BJetSelection::getDiscriminatorWP(const std::string sAlgorithm, con
 
   throw hplus::Exception("logic") << "Invalid b-tagging algorithm  '" << sAlgorithm << "' with working point (WP) '" << sWorkingPoint << "'."
 				  << "\nValid WP values are: Loose, Medium, Tight." 
-				  << "\nValid algorithms are: pfCombinedInclusiveSecondaryVertexV2BJetTags, pfCombinedMVA2BJetTags, pfCombinedCvsLJetTags, pfCombinedCvsBJetTags";
+				  << "\nValid algorithms are: pfCombinedInclusiveSecondaryVertexV2BJetTags, pfCombinedMVAV2BJetTags, pfCombinedCvsLJetTags, pfCombinedCvsBJetTags";
   return -1e6;
 }
 
