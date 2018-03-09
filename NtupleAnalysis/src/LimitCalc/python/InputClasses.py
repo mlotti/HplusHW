@@ -239,6 +239,12 @@ class Nuisance:
 
     def getLabel(self):
 	return self.label
+    
+    def getKwarg(self, key):
+        if key not in self.kwargs:
+            #raise Exception("Unknown key %s no present in kewyword arguments" % (key))
+            return "N/A"
+        return self.kwargs[key]
 
     def PrintInfo(self):
         '''
