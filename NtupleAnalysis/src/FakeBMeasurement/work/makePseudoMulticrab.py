@@ -733,7 +733,7 @@ if __name__ == "__main__":
             msg = "Using pseudo-multicrab directory %s" % (ShellStyles.NoteStyle() + opts.mcrab + ShellStyles.NormalStyle())
             Print(msg , True)
 
-    # Sanity check - iro - fixme -alex
+    # Sanity check: fixme
     if len(opts.shape) == 0:
         msg = "Provide a shape identifier with --shape (e.g.: TrijetMass)!"
         raise Exception(ShellStyles.ErrorLabel() + msg + ShellStyles.NormalStyle())
