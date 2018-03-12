@@ -13,13 +13,16 @@ class ObservationInput:
         self.histoPath = histoPath
         self.shapeHistoName = shapeHistoName
         self.additionalNormalisation = additionalNormalisation
+        return
 
     def getShapeHisto(self):
         return self.shapeHistoName
 
     def Print(self):
 	print "ObservationInput :"
-	print "    shapeHisto  ",self.shapeHisto
+	print "    shapeHisto  ", self.shapeHisto
+        return
+
 
 class DataGroup:
     def __init__(self, 
@@ -43,6 +46,7 @@ class DataGroup:
         self.datasetDefinition = datasetDefinition
         self.QCDfactorisedInfo = QCDfactorisedInfo
         self.additionalNormalisation = additionalNormalisation
+        return
 
     def getId(self):
 	return self.label
@@ -61,12 +65,15 @@ class DataGroup:
 
     def setLandSProcess(self,landsProcess):
 	self.landsProcess = landsProcess
+        return
 
     def setValidMassPoints(self,validMassPoints):
 	self.validMassPoints = list(validMassPoints)
+        return
 
     def setLabel(self, label):
 	self.label = label
+        return
 
     def setNuisances(self, nuisances):
         if nuisances:
@@ -76,18 +83,23 @@ class DataGroup:
     def setShapeHisto(self,path,histo):
 	self.histoPath = path
 	self.shapeHisto = histo
+        return
 
     def setDatasetType(self,datasetType):
         self.datasetType = datasetType
+        return
 
     def setDatasetDefinition(self,datasetDefinition):
         self.datasetDefinition = datasetDefinition
+        return
 
     def setQCDfactorisedInfo(self,QCDfactorisedInfo):
         self.QCDfactorisedInfo = QCDfactorisedInfo
+        return
 
     def setAdditionalNormalisation(self,value):
 	self.additionaNormalisation = value
+        return
 
     def Print(self):
 	print "    Label        ",self.label
@@ -98,27 +110,12 @@ class DataGroup:
 	print "    Additional normalisation",self.additionalNormalisation
 	print "    Nuisances    ",self.nuisances
         print
+        return
 
-#class DataGroupInput:
-#    def __init__(self):
-#	self.datagroups = {}
-#
-#    def add(self,datagroup):
-#	if datagroup.exists():
-#	    self.datagroups[datagroup.getId()] = datagroup
-#
-#    def get(self,key):
-#	return self.datagroups[key]
-#
-#    def Print(self):
-#	print "DataGroups"
-#        print "NuisanceTable"
-#        for key in sorted(self.datagroups.keys()):
-#            self.datagroups[key].Print()
-#        print
-
-## Converts a single or a bunch of nuisances by ID from syst. variation to norm. uncertainty
 def convertFromSystVariationToConstant(nuisanceList, name):
+    '''
+    Converts a single or a bunch of nuisances by ID from syst. variation to norm. uncertainty
+    '''
     myList = []
     if isinstance(name, str):
         myList.append(name)
@@ -148,7 +145,7 @@ def convertFromSystVariationToConstant(nuisanceList, name):
     for item in nuisanceList:
         if item.distr == "shapeQ":
             print "... %s"%item.id
-    #print ""
+    return
 
 def separateShapeAndNormalizationFromSystVariation(nuisanceList, name):
     myList = []
@@ -177,32 +174,54 @@ def separateShapeAndNormalizationFromSystVariation(nuisanceList, name):
         if item.distr == "shapeQ" and item.function == "ShapeVariationSeparateShapeAndNormalization":
             print "... %s"%item.id
     print ""
-    
+    return
+
 
 class Nuisance:
-    def __init__(self,
-		id="",
-		label="",
-		distr="",
-		function = "",
-		**kwargs):
+    def __init__(self, id="", label="", distr="", function = "", **kwargs):
 	self.setId(id)
 	self.setLabel(label)
 	self.setDistribution(distr)
 	self.setFunction(function)
 	self.kwargs = kwargs
+        # self.PrintInfo()
+        return
+
+    def Verbose(self, msg, printHeader=False):
+        '''
+        Calls Print() only if verbose options is set to true
+        '''
+        if not opts.verbose:
+            return
+        Print(msg, printHeader)
+        return
+
+    def Print(self, msg, printHeader=True):
+        '''
+        Simple print function. If verbose option is enabled prints, otherwise does nothing.
+        '''
+        fName = __file__.split("/")[-1]
+        fName = fName.replace(".pyc", ".py")
+        if printHeader:
+            print "=== ", fName
+        print "\t", msg
+        return
 
     def setId(self,id):
 	self.id = id
+        return
 
     def setLabel(self,label):
 	self.label = label
+        return
 
     def setDistribution(self,distr):
 	self.distr = distr
+        return
 
     def setFunction(self, function):
 	self.function = function
+        return
 
     def getArg(self, keyword):
         if keyword in self.kwargs.keys():
@@ -211,57 +230,51 @@ class Nuisance:
 	
     def getId(self):
 	return self.id
+	
+    def getDistribution(self):
+	return self.distr
+	
+    def getFunction(self):
+	return self.function
 
-    def Print(self):
-	print "    ID            =",self.id
-	print "    Label         =",self.label
-        print "    Distribution  =",self.distr
-        print "    Function      =",self.function
-        #if self.value > 0:
-            #print "    Value         =",self.value
-        #if len(self.counter) > 0:
-            #print "    Counter       =",self.counter
-        #if len(self.paths) > 0:
-            #print "    Paths         =",self.paths
-        #if len(self.histo) > 0:
-            #print "    Histograms    =",self.histo
-        #if len(self.norm) > 0:
-            #print "    Normalisation =",self.norm
-	print
+    def getLabel(self):
+	return self.label
+    
+    def getKwarg(self, key):
+        if key not in self.kwargs:
+            #raise Exception("Unknown key %s no present in kewyword arguments" % (key))
+            return "N/A"
+        return self.kwargs[key]
 
-#class NuisanceTable:
-    #def __init__(self):
-	#self.nuisances = {}
+    def PrintInfo(self):
+        '''
+        Print a summary of all variables
+        (id, label, distr, funct.)
+        that define this nuisance parameter
+        '''
+        table  = []
+        align  = "{:<15} {:<35}"
+        hLine  = "*"*50
+        header = align.format("Variable", "Value")
+        hLine  = "="*40
+        table.append(hLine)        
+        table.append(header)
+        table.append(hLine)
+        table.append(align.format("ID", self.getId()))
+        table.append(align.format("Label", self.getLabel()))
+        table.append(align.format("Distribution", self.getDistribution()))
+        table.append(align.format("Function", self.getFunction()))
+        # For-loop: All keywords arguments
+        for key in self.kwargs:
+            table.append(align.format(key, self.kwargs[key]))
+        table.append(hLine)
+        table.append("")
 
-    #def add(self,n):
-	#if not self.exists(n):
-	    #self.nuisances[n.getId()] = n
-	#else:
-	    #print "\nWarning, key",n.getId(),"already reserved to Nuisance"
-	    #self.nuisances[n.getId()].Print()
-	    #print "Exiting.."
-	    #sys.exit()
+        # For-loop: All rows of the table
+        for i, r in enumerate(table, 1):
+            self.Print(r, i==1)
+        return
 
-    #def get(self,key):
-        #return self.nuisances[key]
-
-    #def merge(self,n1,n2):
-	#print "merging nuisances is not yet implemented"
-
-    #def reserve(self, ids, comment):
-	#for id in ids:
-	    #self.add(Nuisance(id=id,label=comment,distr= "lnN",function="Constant",value=0,reserved=True))
-
-    #def exists(self, n):
-	#if n.getId() in self.nuisances:
-	    #return True
-	#return False
-
-    #def Print(self):
-	#print "NuisanceTable"
-	#for key in sort(self.nuisances.keys()):
-	    #self.nuisances[key].Print()
-	#print
 
 class ControlPlotInput:
     def __init__(self,
@@ -277,3 +290,4 @@ class ControlPlotInput:
         self.blindedRange = blindedRange
         self.evaluationRange = evaluationRange
         self.flowPlotCaption = flowPlotCaption
+        return

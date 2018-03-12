@@ -26,21 +26,29 @@ import ROOT
 #================================================================================================ 
 # Definitions
 #================================================================================================ 
-_legendLabelQCDMC    = "QCD (MC)" 
-_legendLabelEWKMC    = "QCD (MC)" 
-_legendLabelFakeB    = "Fake-b (data)" 
+_legendLabelQCDMC = "QCD (MC)" 
+_legendLabelEWKMC = "EWK (MC)" 
+_legendLabelFakeB = "Fake-b (data)" 
 
-drawPlot = plots.PlotDrawer(ratio=True, ratioYlabel="Data/Bkg. ", ratioCreateLegend=True,
-                            ratioType="errorScale", ratioErrorOptions={"numeratorStatSyst": False},
-                            stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True,
+drawPlot = plots.PlotDrawer(ratio             = True, 
+                            ratioYlabel       = "Data/Bkg. ",
+                            ratioCreateLegend = True,
+                            ratioType         = "errorScale",
+                            ratioErrorOptions = {"numeratorStatSyst": False},
+                            stackMCHistograms = True, 
+                            addMCUncertainty  = True, 
+                            addLuminosityText = True,
                             cmsTextPosition="outframe")
 
 drawPlot2D = plots.PlotDrawer(opts2={"ymin": 0.5, "ymax": 1.5},
-                            ratio=False, #ratioYlabel="Data/Bkg.", ratioCreateLegend=True,
-                            #ratioType="errorScale", ratioErrorOptions={"numeratorStatSyst": False},
-                            #stackMCHistograms=True, addMCUncertainty=True, 
-                            addLuminosityText=True,
-                            cmsTextPosition="outframe")
+                              ratio=False, 
+                              # ratioYlabel="Data/Bkg.", 
+                              # ratioCreateLegend=True,
+                              # ratioType="errorScale", 
+                              # ratioErrorOptions={"numeratorStatSyst": False},
+                              # stackMCHistograms=True, addMCUncertainty=True, 
+                              addLuminosityText=True,
+                              cmsTextPosition="outframe")
 
 
 #================================================================================================ 
@@ -71,7 +79,8 @@ class ControlPlotMakerHToTB:
         # Definitions
         massPoints = []
         massPoints.extend(self._config.MassPoints)
-        massPoints.append(-1) # for plotting with no signal
+        if self._config.OptionDoWithoutSignal:
+            massPoints.append(-1) # for plotting with no signal
         nMasses = len(massPoints)
         nPlots  = len(self._config.ControlPlots)
         counter = 0
@@ -124,8 +133,11 @@ class ControlPlotMakerHToTB:
 
                     # Clone histo
                     h = c.getControlPlotByIndex(i)["shape"].Clone()
-                    
+
                     if c.typeIsSignal():
+                        self.Verbose("Scaling histogram labelled \"%s\" with BR=%.2f" % (c.getLabel(), self._config.OptionBr), False)
+                        h.Scale(self._config.OptionBr)
+
                         if hSignal == None:
                             hSignal = h.Clone()
                         else:
@@ -172,8 +184,8 @@ class ControlPlotMakerHToTB:
                 
                 # Add signal
                 if m > 0:
-                    mySignalLabel = "HplusTB_M%d"%m
-                    myHisto = histograms.Histo(hSignal,mySignalLabel)
+                    mySignalLabel = "HplusTB_M%d" % m
+                    myHisto = histograms.Histo(hSignal, mySignalLabel)
                     myHisto.setIsDataMC(isData=False, isMC=True)
                     myStackList.insert(1, myHisto)
                     
@@ -193,7 +205,7 @@ class ControlPlotMakerHToTB:
                     myParams["unit"] = ""
 
                 if myParams["unit"] != "":
-                    myParams["xlabel"] = "%s (%s)"%(myParams["xlabel"], myParams["unit"])
+                    myParams["xlabel"] = "%s (%s)" % (myParams["xlabel"], myParams["unit"])
 
                 # Apply various settings to my parameters
                 self._setBlingingString(myBlindingString, myParams)
@@ -207,6 +219,13 @@ class ControlPlotMakerHToTB:
                 # Ratio axis
                 if not "opts2" in myParams.keys():
                     myParams["opts2"] = {"ymin": 0.3, "ymax": 1.7}
+
+                # Make sure BR is indicated if anyting else but BR=1.0
+                if m > 0 and self._config.OptionBr != 1.0:
+                    myStackPlot.histoMgr.setHistoLegendLabelMany({
+                            #mySignalLabel: "H^{+} m_{H^{+}}=%d GeV (x %s)" % (m, self._config.OptionBr)
+                            mySignalLabel: "m_{H^{+}}=%d GeV (x %s)" % (m, self._config.OptionBr)
+                            })
 
                 # Do plotting
                 drawPlot(myStackPlot, saveName, **myParams)
@@ -301,14 +320,18 @@ class ControlPlotMakerHToTB:
     def _setLegendPosition(self, myParams):
         if "legendPosition" in myParams.keys():
             self.Verbose("Setting the legend position to \"%s\"" % ( myParams["legendPosition"] ) )
+            if self._config.OptionBr == 1.0:
+                dx = -0.10
+            else:
+                dx = -0.12
             if myParams["legendPosition"] == "NE":
-                myParams["moveLegend"] = {"dx": -0.10, "dy": -0.02, "dh": 0.1}
+                myParams["moveLegend"] = {"dx": dx, "dy": -0.02, "dh": 0.14}
             elif myParams["legendPosition"] == "SE":
-                myParams["moveLegend"] = {"dx": -0.10, "dy": -0.56, "dh": 0.1}
+                myParams["moveLegend"] = {"dx": dx, "dy": -0.56, "dh": 0.14}
             elif myParams["legendPosition"] == "SW":
-                myParams["moveLegend"] = {"dx": -0.53, "dy": -0.56, "dh": 0.1}
+                myParams["moveLegend"] = {"dx": -0.53, "dy": -0.56, "dh": 0.14}
             elif myParams["legendPosition"] == "NW":
-                myParams["moveLegend"] = {"dx": -0.53, "dy": -0.02, "dh": 0.1}
+                myParams["moveLegend"] = {"dx": -0.53, "dy": -0.02, "dh": 0.14}
             else:
                 raise Exception("Unknown value for option legendPosition: %s!", myParams["legendPosition"])
             del myParams["legendPosition"]
@@ -622,8 +645,6 @@ class SelectionFlowPlotMaker:
         myParams["cmsTextPosition"] = "right"
         myParams["opts"] = {"ymin": 0.9}
         myParams["opts2"] = {"ymin": 0.3, "ymax":1.7}
-        #myParams["moveLegend"] = {"dx": -0.08, "dy": -0.12, "dh": 0.1} # for MC EWK+tt
-        #myParams["moveLegend"] = {"dx": -0.15, "dy": -0.12, "dh":0.05} # for data-driven
         myParams["moveLegend"] = {"dx": -0.53, "dy": -0.52, "dh":0.05} # for data-driven
         myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
         drawPlot(myStackPlot, "%s/DataDrivenCtrlPlot_M%d_%02d_SelectionFlow"%(dirname,m,index), **myParams)

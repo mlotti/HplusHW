@@ -257,7 +257,7 @@ class ConstantExtractorForDataDrivenQCD(ExtractorBase):
             else:
                 self._constantValue = ScalarUncertaintyItem(exid,constantValue*self._scaleFactor)
         # Flip sign
-        self._constantValue.scale(-1.0)
+        self._constantValue.scale(-1.0) # if EWK fluctuates up, QCD fluctutes down, and vice versa (anti-correlated)
 
     ## Method for extracking information
     def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
