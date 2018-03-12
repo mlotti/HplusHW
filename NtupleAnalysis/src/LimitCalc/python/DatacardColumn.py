@@ -63,6 +63,7 @@ class ExtractorResult():
         Simple print function. If verbose option is enabled prints, otherwise does nothing.
         '''
         fName = __file__.split("/")[-1]
+        fName = fName.replace(".pyc", "py")
         if printHeader:
             print "=== ", fName
         print "\t", msg
@@ -360,7 +361,7 @@ class DatacardColumn():
             if len(self._nuisanceIds) == 0:
                 myWarning = "Empty field 'nuisances'! (list of strings) Id's for nuisances to be used for column\n"
                 _msg = "Warning for data group \"%s\": %s" %  (self._label, myWarning)
-                self.Print(ShellStyles.NoteStyle() + _msg + ShellStyles.NormalStyle(), True)
+                self.Verbose(ShellStyles.NoteStyle() + _msg + ShellStyles.NormalStyle(), True)
 
         if msg != "":
             msg = "Invalid input for data group \"%s\":\n%s" %  (self._label, msg)
