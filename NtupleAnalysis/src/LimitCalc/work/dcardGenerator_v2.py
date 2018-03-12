@@ -24,12 +24,12 @@ USAGE:
 
 
 EXAMPLES:
-./dcardGenerator.py -x dcardHplustb2017Datacard_v2.py -d example/
-./dcardGenerator_v2.py -x dcardHplus2tb_2016Data.py -d limits2016/ --h2tb
+./dcardGenerator.py -x <datacard-config-file> -d <dir-with-results>
+./dcardGenerator_v2.py -x dcardDefault_h2tb_2016.py -d limits2016/ --h2tb
 
 
 LAST USED:
-./dcardGenerator_v2.py -x dcardHplus2tb_2016Data.py -d limits2016/ --h2tb --tarball
+./dcardGenerator_v2.py -x dcardDefault_h2tb_2016.py -d limits2016/ --h2tb --tarball
 
 '''
 
