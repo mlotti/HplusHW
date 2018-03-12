@@ -184,7 +184,7 @@ def getBinningForTetrajetMass(binLevel=0):
     tetrajet object = ldg (in pT) trijet  + ldg (in ) free bjet 
     '''
     myBins = []
-    if binLevel == -1: #default binning
+    if binLevel == -1: #1 bin (counting experiment)
         myBins = [0.0, 4000.0] 
     elif binLevel == 0: #default binning
         for i in range(0, 1000, 50):
