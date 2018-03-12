@@ -59,7 +59,7 @@ class ExtractorMode:
     NUISANCE = 3
     ASYMMETRICNUISANCE = 4
     SHAPENUISANCE = 5
-    QCDNUISANCE = 6
+    QCDNUISANCE = 6 # also Fake-b
     CONTROLPLOT = 7
 
 class ExtractorBase:
@@ -147,6 +147,12 @@ class ExtractorBase:
         Returns true if extractable mode is QCD nuisance
         '''
         return self._mode == ExtractorMode.QCDNUISANCE
+
+    def getMode(self):
+        '''
+        Returns the mode
+        '''
+        return self._mode
 
     def getScaleFactor(self):
         '''
@@ -246,14 +252,30 @@ class ExtractorBase:
         '''
         Virtual method for printing debug information
         '''
-        print "- mode = ", self._mode
-        print "- extractable ID = ", self._exid
+        myDict = {}
+        myDict["Mode"]           = self.getMode()
+        myDict["Extractable ID"] = self.getId()
+        myDict["Is Nuisance"]    = self.isAnyNuisance()
         if self.isAnyNuisance():
-            print "- distribution = ", self._distribution
-            print "- description = ", self._description
-            print "- scale factor = ", self._scaleFactor
-            if not self.isPrintable():
-                print "- is slave of extractable with ID = ", self._masterExID
+            myDict["Distribution"] = self.getDistribution()
+            myDict["Description"]  = self.getDescription()
+            myDict["Scale Factor"] = self.getScaleFactor()
+            myDict["Is Printable"] = self.isPrintable()
+            myDict["Master Extractor (ID)"] = self.getMasterId()
+                
+        # Constrcut table
+        table = []
+        align = "{:<40} {:<40} "
+        hLine = "="*80
+        table.append(hLine)
+        table.append(align.format("Variable Name", "Variable Value"))
+        table.append(hLine)
+        for k in sorted(myDict):
+            table.append(align.format(k, myDict[k]))
+        table.append(hLine)
+        table.append("")
+        for i, row in enumerate(table, 1):
+            self.Print(row, i==1)
         return
 
     # obsolete methods ?
@@ -274,11 +296,16 @@ class ExtractorBase:
     ## \var _masterExID
     # the ID of the master extractable (i.e. specifies line on which this extractable output is printed)
 
-## ConstantExtractor class
-# Returns a fixed constant number
 class ConstantExtractor(ExtractorBase):
-    ## Constructor
+    '''
+    ConstantExtractor class
+
+    Returns a fixed constant number
+    '''    
     def __init__(self, constantValue, mode, exid = "", distribution = "lnN", description = "", constantUpperValue = 0.0, opts=None, scaleFactor=1.0):
+        '''
+        Constructor
+        '''
         ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts, scaleFactor=scaleFactor)
         self._constantValue = None
         if isinstance(constantValue, ScalarUncertaintyItem):
@@ -289,13 +316,18 @@ class ConstantExtractor(ExtractorBase):
                 self._constantValue = ScalarUncertaintyItem(exid,plus=constantUpperValue*self._scaleFactor,minus=constantValue*self._scaleFactor)
             else:
                 self._constantValue = ScalarUncertaintyItem(exid,constantValue*self._scaleFactor)
+        return
 
-    ## Method for extracking information
     def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        '''
+        Method for extracking information
+        '''
         return self._constantValue
 
-    ## Virtual method for printing debug information
     def printDebugInfo(self):
+        '''
+        Virtual method for printing debug information
+        '''
         print "ConstantExtractor"
         print "- value = + %f - %f"%(self._constantValue.getUncertaintyUp,self._constantValue.getUncertaintyDown)
         ExtractorBase.printDebugInfo(self)
@@ -319,13 +351,13 @@ class ConstantExtractorForDataDrivenQCD(ExtractorBase):
             self._constantValue.scale(self._scaleFactor)
         else:
             if self.isAsymmetricNuisance() or constantUpperValue != None:
-                self._constantValue = ScalarUncertaintyItem(exid,plus=constantUpperValue*self._scaleFactor,minus=constantValue*self._scaleFactor)
+                self._constantValue = ScalarUncertaintyItem(exid,plus=constantUpperValue*self._scaleFactor, minus=constantValue*self._scaleFactor)
             else:
                 self._constantValue = ScalarUncertaintyItem(exid,constantValue*self._scaleFactor)
         # Flip sign (if EWK fluctuates up, QCD fluctutes down, and vice versa; anti-correlated)
         self._constantValue.scale(-1.0) 
         self._verbose = False
-        self.printDebugInfo()
+        # self.printDebugInfo()
         return
 
     def Verbose(self, msg, printHeader=True):
@@ -766,16 +798,26 @@ class ShapeExtractor(ExtractorBase):
         # Return result
         return myHistograms
 
-    ## QCD specific method for extracting purity histogram
     def extractQCDPurityHistogram(self, datasetColumn, dsetMgr, shapeHistoName):
+        '''
+        QCD/FakeB specific method for extracting purity histogram
+        '''
         # Do not apply here additional normalization, it is not needed
         if not datasetColumn.typeIsQCD:
-            raise Exception(ShellStyles.ErrorLabel()+"extractQCDPurityHistogram() called for non-QCD datacolumn '%s'!"%datasetColumn.getLabel())
+            msg = "extractQCDPurityHistogram() called for non-QCD datacolumn '%s'!" % (datasetColumn.getLabel())
+            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
+
         if not self.isRate():
-            raise Exception(ShellStyles.ErrorLabel()+"extractQCDPurityHistogram() called for nuisance! (only valid for rate)")
-        # Obtain purity histogram
+            msg = "extractQCDPurityHistogram() called for nuisance! (only valid for rate)"
+            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
+
         if not dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).hasRootHisto(shapeHistoName+"_Purity"):
-            raise Exception(ShellStyles.ErrorLabel()+"T1he pseudo-multicrab directory for QCD is outdated! Please regenerate it (with the proper normalization!!!)")
+            msg = "The pseudo-multicrab directory for QCD is outdated! Please regenerate it (with the proper normalization!)"
+            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
+
+        # Obtain purity histogram 
+        hName = shapeHistoName + "_Purity"
+        self.Print("Obtaining purity hisrogram %s from dataset \"%s\"" % (hName, datasetColumn.getDatasetMgrColumn()), True)
         h = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(shapeHistoName+"_Purity")
         return h
 
@@ -904,17 +946,23 @@ class ShapeVariationSeparateShapeAndNormalization(ExtractorBase):
         # Obsolete
         raise Exception("obsolete")
 
-    ## Virtual method for printing debug information
     def printDebugInfo(self):
+        '''
+        Virtual method for printing debug information
+        '''
         print "ShapeVariationExtractor"
         ExtractorBase.printDebugInfo(self)
 
 
-## ShapeVariationToConstantExtractor class
-# Converts up and down variation histograms to asymmetric normalization uncertainty
 class ShapeVariationToConstantExtractor(ExtractorBase):
-    ## Constructor
+    '''
+    ShapeVariationToConstantExtractor class
+    Converts up and down variation histograms to asymmetric normalization uncertainty
+    '''
     def __init__(self, systVariation, mode = ExtractorMode.SHAPENUISANCE, exid = "", distribution = "shapeQ", description = "", opts=None, scaleFactor=1.0):
+        '''
+        Constructor
+        '''
         ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts, scaleFactor=scaleFactor)
         self._systVariation = systVariation
         if not "SystVar" in self._systVariation:

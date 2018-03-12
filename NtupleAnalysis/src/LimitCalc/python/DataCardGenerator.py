@@ -940,7 +940,7 @@ class DataCardGenerator:
                                                          mode = myMode,
                                                          opts = self._opts,
                                                          scaleFactor = n.getArg("scaleFactor")))
-            elif n.function == "ConstantForQCD":
+            elif n.function == "ConstantForQCD" or  n.function == "ConstantForFakeB":
                 myMode = Extractor.ExtractorMode.QCDNUISANCE
                 self._extractors.append(Extractor.ConstantExtractorForDataDrivenQCD(exid = n.id,
                                                          constantValue = n.getArg("value"),
