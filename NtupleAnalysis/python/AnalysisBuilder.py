@@ -109,11 +109,7 @@ class AnalysisConfig:
                     elif value.startswith("BMistagSF"):
                         variationType = "mistag"
                     direction = value.replace("BTagSF","").replace("BMistagSF","").replace("Minus","down").replace("Plus","up")
-                    scaleFactors.setupBtagSFInformation(self._config.BJetSelection,
-                                                        btagPayloadFilename="CSVv2.csv",
-                                                        btagEfficiencyFilename="btageff_hybrid.json",
-                                                        direction=direction,
-                                                        variationInfo=variationType)
+
 		# top quarks
 		elif value.startswith("TopPt"):
                     self._config.topPtSystematicVariation = value.replace("TopPt","").replace("Plus","plus").replace("Minus","minus")

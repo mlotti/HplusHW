@@ -108,34 +108,28 @@ _crossSectionUncertainty = {
     # Single top, based on http://arxiv.org/abs/1311.0283 and https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SingleTopRefXsec#Single_top_Wt_channel_cross_sect
     "SingleTop_scale":  ScalarUncertaintyItem("xsect", 1.80/71.7),
     "SingleTop_pdf":  ScalarUncertaintyItem("xsect", 3.40/71.7), 
-    "SingleTop": ScalarUncertaintyItem("xsect", 0.062), # scale and pdf combined (quadratically)
 
     # W+jets, based on "Total W" on https://twiki.cern.ch/twiki/bin/view/CMS/StandardModelCrossSectionsat13TeVInclusive
     "WJets_scale":  ScalarUncertaintyItem("xsect", plus=165.7/20508.9, minus=88.2/20508.9), 
     "WJets_pdf":  ScalarUncertaintyItem("xsect", 770.9/20508.9),
-    "WJets":  ScalarUncertaintyItem("xsect", 0.050), # scale and pdf combined (quadratically)
     
     # DY, based on "Z/a* (50) on https://twiki.cern.ch/twiki/bin/view/CMS/StandardModelCrossSectionsat13TeVInclusive
     "DYJetsToLL_scale": ScalarUncertaintyItem("xsect", plus=13.2/2008.4, minus=7.5/2008.4),
     "DYJetsToLL_pdf": ScalarUncertaintyItem("xsect", 75.0/2008.4), 
-    "DYJetsToLL": ScalarUncertaintyItem("xsect", 0.043), # scale and pdf combined (quadratically)
     
     # Diboson, values from MIT PAS AN-16-194 (see also https://twiki.cern.ch/twiki/bin/view/CMS/StandardModelCrossSectionsat13TeVInclusive)
     "Diboson_scale": ScalarUncertaintyItem("xsect", 0.032), 
     "Diboson_pdf": ScalarUncertaintyItem("xsect", 0.044),
-    "Diboson": ScalarUncertaintyItem("xsect", 0.054), # scale and pdf combined (quadratically)
 
     # ttW, values from HIG-17-022 which shows consistency with all other systematics defined here (TTJets, SingleTop, WJets, DY, Diboson, ..)
     "TTW_scale": ScalarUncertaintyItem("xsect", plus=0.13, minus=0.12), 
     "TTW_pdf"  : ScalarUncertaintyItem("xsect", 0.02),  # 2%
-    "TTW"      : ScalarUncertaintyItem("xsect", 0.13), # scale and pdf combined (quadratically)
 
     # ttZ, values from HIG-17-022 which shows consistency with all other systematics defined here (TTJets, SingleTop, WJets, DY, Diboson, ..)
     "TTZ_scale": ScalarUncertaintyItem("xsect", plus=0.10, minus=0.12), 
     "TTZ_pdf"  : ScalarUncertaintyItem("xsect", 0.03),  # 2%
-    "TTZ"      : ScalarUncertaintyItem("xsect", 0.12), # scale and pdf combined (quadratically)
 
-#    # tttt, ?
+    # tttt
 #    "TTTT_scale": ScalarUncertaintyItem("xsect", plus=0.10, minus=0.12), 
 #    "TTTT_pdf"  : ScalarUncertaintyItem("xsect", 0.03),  # 2%
 #    "TTTT"      : ScalarUncertaintyItem("xsect", 0.12), # scale and pdf combined (quadratically)

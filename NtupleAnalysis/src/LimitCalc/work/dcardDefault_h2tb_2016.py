@@ -308,12 +308,14 @@ DataGroups.append(Diboson)
 from HiggsAnalysis.LimitCalc.InputClasses import Nuisance
 
 # Define all individual nuisances that can be potentially used (ShapeVariations require running with systematics flag! Defined in AnalysisBuilder.py)
-# trgMC_Shape     = Nuisance(id="CMS_eff_trg_MC"   , label="Trigger MC efficiency", distr="shapeQ", function="ShapeVariation", systVariation="TrgEffMC")
-# PU_Shape        = Nuisance(id="CMS_pileup"       , label="Pileup", distr="shapeQ", function="ShapeVariation", systVariation="PUWeight")
-# bTag_Shape      = Nuisance(id="CMS_eff_b"        , label="b tagging", distr="shapeQ", function="ShapeVariation", systVariation="BTagSF")
-# TopPt_Shape     = Nuisance(id="CMS_topPtReweight", label="Top pT reweighting", distr="shapeQ", function="ShapeVariation", systVariation="TopPt")
-# JES_Shape       = Nuisance(id="CMS_scale_j"      , label="Jet Energy Scale (JES)"                   , distr="shapeQ", function="ShapeVariation", systVariation="JES")
-# JER_Shape       = Nuisance(id="CMS_res_j"        , label="Jet Energy Resolution (JER)"              , distr="shapeQ", function="ShapeVariation", systVariation="JER")
+JES_Shape    = Nuisance(id="CMS_scale_j"      , label="Jet Energy Scale (JES)", distr="shapeQ", function="ShapeVariation", systVariation="JES")
+JER_Shape    = Nuisance(id="CMS_res_j"        , label="Jet Energy Resolution (JER)", distr="shapeQ", function="ShapeVariation", systVariation="JER")
+bTag_Shape   = Nuisance(id="CMS_eff_b"        , label="b tagging", distr="shapeQ", function="ShapeVariation", systVariation="BTagSF")
+TopPt_Shape  = Nuisance(id="CMS_topPtReweight", label="Top pT reweighting", distr="shapeQ", function="ShapeVariation", systVariation="TopPt")
+PU_Shape     = Nuisance(id="CMS_pileup"       , label="Pileup", distr="shapeQ", function="ShapeVariation", systVariation="PUWeight")
+topTag_Shape = Nuisance(id="CMS_topTagging"   , label="Top tagging (Approx.)", distr="shapeQ", function="ShapeVariation", systVariation="PUWeight")  #fixme
+# NOTE: systVariation key is first declared in HiggsAnalysis/NtupleAnalysis/python/AnalysisBuilder.py
+
 
 #================================================================================================  
 # Constant Nuisance Parameters (aka Systematics)  (= rows in datacard) 
@@ -373,15 +375,15 @@ wjets_pdf_Const      = Nuisance(id="CMS_pdf_Wjets"      , label="W+jets XSection
 singleTop_scale_Const= Nuisance(id="CMS_scale_singleTop", label="Single top XSection sale uncertainty", distr="lnN", function="Constant", value=singleTop_scale_down)
 singleTop_pdf_Const  = Nuisance(id="CMS_pdf_singleTop"  , label="Single top XSection pdf ucnertainty", distr="lnN", function="Constant", value=singleTop_pdf_down)
 DY_scale_Const       = Nuisance(id="CMS_scale_DY"       , label="DYJets XSection scale uncertainty", distr="lnN", function="Constant", value=DY_scale_down, upperValue=DY_scale_up)
-DY_pdf_Const         = Nuisance(id="CMS_pdf_DY"         , label="DYJets XSection pdf uncertainty", distr="lnN" , function="Constant", value=DY_pdf_down) #fixme, upperValue?
-diboson_scale_Const  = Nuisance(id="CMS_scale_VV"       , label="Diboson XSection scale uncertainty", distr="lnN", function="Constant", value=diboson_scale_down)#fixme, upperValue?
-diboson_pdf_Const    = Nuisance(id="CMS_pdf_VV"         , label="Diboson XSection pdf uncertainty", distr="lnN", function="Constant", value=diboson_pdf_down)#fixme, upperValue?
-ttW_pdf_Const        = Nuisance(id="CMS_pdf_ttW"        , label="TTW XSection pdf uncertainty", distr="lnN", function="Constant", value=ttW_pdf_down)#fixme, upperValue?
-ttW_scale_Const      = Nuisance(id="CMS_scale_ttW"      , label="TTW XSection scale uncertainty", distr="lnN", function="Constant", value=ttW_scale_down)#fixme, upperValue?
-ttZ_pdf_Const        = Nuisance(id="CMS_pdf_ttZ"        , label="TTZ XSection pdf uncertainty", distr="lnN", function="Constant", value=ttZ_pdf_down)#fixme, upperValue?
-ttZ_scale_Const      = Nuisance(id="CMS_scale_ttZ"      , label="TTZ XSection scale uncertainty", distr="lnN", function="Constant", value=ttZ_scale_down)#fixme, upperValue?
-#tttt_pdf_Const       = Nuisance(id="CMS_pdf_tttt"       , label="TTTT XSection pdf uncertainty", distr="lnN", function="Constant", value=tttt_pdf_down)
-#tttt_scale_Const     = Nuisance(id="CMS_scale_tttt"     , label="TTTT XSection scale uncertainty", distr="lnN", function="Constant", value=tttt_scale_down)
+DY_pdf_Const         = Nuisance(id="CMS_pdf_DY"         , label="DYJets XSection pdf uncertainty", distr="lnN", function="Constant", value=DY_pdf_down)
+diboson_scale_Const  = Nuisance(id="CMS_scale_VV"       , label="Diboson XSection scale uncertainty", distr="lnN", function="Constant", value=diboson_scale_down)
+diboson_pdf_Const    = Nuisance(id="CMS_pdf_VV"         , label="Diboson XSection pdf uncertainty", distr="lnN", function="Constant", value=diboson_pdf_down)
+ttW_pdf_Const        = Nuisance(id="CMS_pdf_ttW"        , label="TTW XSection pdf uncertainty", distr="lnN", function="Constant", value=ttW_pdf_down)
+ttW_scale_Const      = Nuisance(id="CMS_scale_ttW"      , label="TTW XSection scale uncertainty", distr="lnN", function="Constant", value=ttW_scale_down, upperValue=ttW_scale_up)
+ttZ_pdf_Const        = Nuisance(id="CMS_pdf_ttZ"        , label="TTZ XSection pdf uncertainty", distr="lnN", function="Constant", value=ttZ_pdf_down)
+ttZ_scale_Const      = Nuisance(id="CMS_scale_ttZ"      , label="TTZ XSection scale uncertainty", distr="lnN", function="Constant", value=ttZ_scale_down, upperValue=ttZ_scale_up)
+# tttt_pdf_Const       = Nuisance(id="CMS_pdf_tttt"       , label="TTTT XSection pdf uncertainty", distr="lnN", function="Constant", value=tttt_pdf_down)
+# tttt_scale_Const     = Nuisance(id="CMS_scale_tttt"     , label="TTTT XSection scale uncertainty", distr="lnN", function="Constant", value=tttt_scale_down)
 
 # Fake-b nuisances
 fakeB_TF_Const          = Nuisance(id="CMS_FakeB_transferFactor"  , label="Transfer Factor uncertainty", distr="lnN", function="Constant", value=0.10)
@@ -468,9 +470,8 @@ if 0:
     MergeNuisances.append(["CMS_scale_ttbar", "CMS_scale_singleTop"]) #resultant name will be "CMS_scale_ttbar"
     MergeNuisances.append(["CMS_pdf_ttbar"  , "CMS_pdf_singleTop"])
 else:
-    MergeNuisances.append(["CMS_scale_ttbar", "CMS_scale_singleTop", "CMS_scale_ttbar_forFakeB"])
-    MergeNuisances.append(["CMS_pdf_ttbar"  , "CMS_pdf_singleTop"  , "CMS_pdf_ttbar_forFakeB"])
-    # fixme: merge ttW, ttZ, tttt with ttbar and singleTop?
+    MergeNuisances.append(["CMS_scale_ttbar", "CMS_scale_singleTop", "CMS_scale_ttbar_forFakeB", "CMS_scale_ttW", "CMS_scale_ttZ"]
+    MergeNuisances.append(["CMS_pdf_ttbar"  , "CMS_pdf_singleTop"  , "CMS_pdf_ttbar_forFakeB"  , "CMS_pdf_ttW"  , "CMS_pdf_ttZ"]
     
 # Correlate FakeB and GenuineB uncerainties
 MergeNuisances.append(["lumi_13TeV"       , "lumi_13TeV_forFakeB"])
