@@ -375,15 +375,15 @@ wjets_pdf_Const      = Nuisance(id="CMS_pdf_Wjets"      , label="W+jets XSection
 singleTop_scale_Const= Nuisance(id="CMS_scale_singleTop", label="Single top XSection sale uncertainty", distr="lnN", function="Constant", value=singleTop_scale_down)
 singleTop_pdf_Const  = Nuisance(id="CMS_pdf_singleTop"  , label="Single top XSection pdf ucnertainty", distr="lnN", function="Constant", value=singleTop_pdf_down)
 DY_scale_Const       = Nuisance(id="CMS_scale_DY"       , label="DYJets XSection scale uncertainty", distr="lnN", function="Constant", value=DY_scale_down, upperValue=DY_scale_up)
-DY_pdf_Const         = Nuisance(id="CMS_pdf_DY"         , label="DYJets XSection pdf uncertainty", distr="lnN" , function="Constant", value=DY_pdf_down) #fixme, upperValue?
-diboson_scale_Const  = Nuisance(id="CMS_scale_VV"       , label="Diboson XSection scale uncertainty", distr="lnN", function="Constant", value=diboson_scale_down)#fixme, upperValue?
-diboson_pdf_Const    = Nuisance(id="CMS_pdf_VV"         , label="Diboson XSection pdf uncertainty", distr="lnN", function="Constant", value=diboson_pdf_down)#fixme, upperValue?
-ttW_pdf_Const        = Nuisance(id="CMS_pdf_ttW"        , label="TTW XSection pdf uncertainty", distr="lnN", function="Constant", value=ttW_pdf_down)#fixme, upperValue?
-ttW_scale_Const      = Nuisance(id="CMS_scale_ttW"      , label="TTW XSection scale uncertainty", distr="lnN", function="Constant", value=ttW_scale_down)#fixme, upperValue?
-ttZ_pdf_Const        = Nuisance(id="CMS_pdf_ttZ"        , label="TTZ XSection pdf uncertainty", distr="lnN", function="Constant", value=ttZ_pdf_down)#fixme, upperValue?
-ttZ_scale_Const      = Nuisance(id="CMS_scale_ttZ"      , label="TTZ XSection scale uncertainty", distr="lnN", function="Constant", value=ttZ_scale_down)#fixme, upperValue?
-#tttt_pdf_Const       = Nuisance(id="CMS_pdf_tttt"       , label="TTTT XSection pdf uncertainty", distr="lnN", function="Constant", value=tttt_pdf_down)
-#tttt_scale_Const     = Nuisance(id="CMS_scale_tttt"     , label="TTTT XSection scale uncertainty", distr="lnN", function="Constant", value=tttt_scale_down)
+DY_pdf_Const         = Nuisance(id="CMS_pdf_DY"         , label="DYJets XSection pdf uncertainty", distr="lnN", function="Constant", value=DY_pdf_down)
+diboson_scale_Const  = Nuisance(id="CMS_scale_VV"       , label="Diboson XSection scale uncertainty", distr="lnN", function="Constant", value=diboson_scale_down)
+diboson_pdf_Const    = Nuisance(id="CMS_pdf_VV"         , label="Diboson XSection pdf uncertainty", distr="lnN", function="Constant", value=diboson_pdf_down)
+ttW_pdf_Const        = Nuisance(id="CMS_pdf_ttW"        , label="TTW XSection pdf uncertainty", distr="lnN", function="Constant", value=ttW_pdf_down)
+ttW_scale_Const      = Nuisance(id="CMS_scale_ttW"      , label="TTW XSection scale uncertainty", distr="lnN", function="Constant", value=ttW_scale_down, upperValue=ttW_scale_up)
+ttZ_pdf_Const        = Nuisance(id="CMS_pdf_ttZ"        , label="TTZ XSection pdf uncertainty", distr="lnN", function="Constant", value=ttZ_pdf_down)
+ttZ_scale_Const      = Nuisance(id="CMS_scale_ttZ"      , label="TTZ XSection scale uncertainty", distr="lnN", function="Constant", value=ttZ_scale_down, upperValue=ttZ_scale_up)
+# tttt_pdf_Const       = Nuisance(id="CMS_pdf_tttt"       , label="TTTT XSection pdf uncertainty", distr="lnN", function="Constant", value=tttt_pdf_down)
+# tttt_scale_Const     = Nuisance(id="CMS_scale_tttt"     , label="TTTT XSection scale uncertainty", distr="lnN", function="Constant", value=tttt_scale_down)
 
 # Fake-b nuisances
 fakeB_TF_Const          = Nuisance(id="CMS_FakeB_transferFactor"  , label="Transfer Factor uncertainty", distr="lnN", function="Constant", value=0.10)
