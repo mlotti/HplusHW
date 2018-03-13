@@ -159,10 +159,10 @@ scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection,
 # QGL selection
 #=================================================================================================
 qglrSelection = PSet(
-    QGLRCutValue             = 0.0,
-    QGLRCutDirection         = ">=",
-    numberOfJetsCutValue     = 10,
-    numberOfJetsCutDirection = "<=",
+    QGLRCutValue             = -1.0, # [default: -1.0] (to disable choose ">=" than -ve value)
+    QGLRCutDirection         = ">=", # [default: ">="] 
+    numberOfJetsCutValue     = 8,   # [default: 10]   (needed to suppress combinatorics => run time)
+    numberOfJetsCutDirection = "<=", # [default: "<="] 
 )
 
 jsonReader.setupQGLInformation(QGLRPset  = qglrSelection,
@@ -211,22 +211,21 @@ topologySelection = PSet(
 # Top selection BDT                                               
 #================================================================================================        
 topSelectionBDT = PSet(
-    LdgMVACutValue         = 0.85,    # [default: 0.85]
+    LdgMVACutValue         = 0.30,    # [default: 0.85]
     LdgMVACutDirection     =  ">=",   # [default: ">="]
-    SubldgMVACutValue      = 0.85,    # [default: 0.85]
+    SubldgMVACutValue      = 0.30,    # [default: 0.85]
     SubldgMVACutDirection  =  ">=",   # [default: ">="]
     NjetsMax               = 999,     # [default: 999]
     NBjetsMax              = 999,     # [default: 999]
     # Speed-up calculation by skipping top candidates failing some criteria
     CSV_bDiscCutValue      = 0.8484,  # [default: 0.8484] #Do not evaluate top candidate if b-jet assigned as b from top fails this cut
     CSV_bDiscCutDirection  = ">=",    # [default: ">="]
-    MassCutValue           = 600.0,   # [default: 400.0]
+    MassCutValue           = 400.0,   # [default: 400.0]
     MassCutDirection       = "<=",    # [default: "<"]
     # FIXME: Phase this out (currently only used in plots)
-    MVACutValue            = 0.85,    # [default: 0.85]
+    MVACutValue            = 0.30,    # [default: 0.85]
     MVACutDirection        =  ">=",   # [default: ">="]
-    WeightFile             = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/EventSelection/interface/weights/TMVAClassification_BDTG_default.weights.xml",
-#    WeightFile             = "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TMVA_BDT/test/weights_DeltaRminQuarks08/TMVAClassification_BDTG.weights.xml",
+    WeightFile             = "TMVAClassification_BDTG_default.weights.xml", # (located in data/TopTaggerWeights/)
 )
 
 #================================================================================================
@@ -256,7 +255,7 @@ fakeBMeasurement = PSet(
     LdgTopMVACutDirection     = topSelectionBDT.LdgMVACutDirection, 
     SubldgTopMVACutValue      = topSelectionBDT.SubldgMVACutValue,
     SubldgTopMVACutDirection  = "<",   # [default: "<"]
-    minTopMVACutValue         = 0.60,  # [default: 0.60]
+    minTopMVACutValue         = 0.00,  # [default: 0.60]
     minTopMVACutDirection     =  ">=", # [default: ">="]
     )
 

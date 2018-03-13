@@ -75,10 +75,16 @@ class DataGroup:
 	self.label = label
         return
 
+    def getLabel(self):
+	return self.label
+
     def setNuisances(self, nuisances):
         if nuisances:
             self.nuisances = nuisances[:]
         return
+
+    def getNuisances(self):
+        return self.nuisances
 
     def setShapeHisto(self,path,histo):
 	self.histoPath = path
@@ -239,7 +245,7 @@ class Nuisance:
 
     def getLabel(self):
 	return self.label
-
+    
     def PrintInfo(self):
         '''
         Print a summary of all variables
