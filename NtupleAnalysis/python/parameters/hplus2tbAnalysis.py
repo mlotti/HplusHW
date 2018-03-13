@@ -138,7 +138,7 @@ fatjetVeto = PSet(
 bjetSelection = PSet(
     triggerMatchingApply      = False,              # [default: False]
     triggerMatchingCone       = 0.1,                # [default: 0.1 ] (DR for matching offline bjet with trigger::TriggerBjet)
-    jetPtCuts                 = [40.0, 40.0, 30.0], # [default: [40.0, 40.0, 30.0]]
+    jetPtCuts                 = [40.0, 40.0, 40.0], # [default: [40.0, 40.0, 30.0]]
     jetEtaCuts                = [2.4],              # [default: [2.4]]
     bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
     bjetDiscrWorkingPoint     = "Medium",           # [default: "Medium"]
@@ -211,9 +211,9 @@ topologySelection = PSet(
 # Top selection BDT                                               
 #================================================================================================        
 topSelectionBDT = PSet(
-    LdgMVACutValue         = 0.30,    # [default: 0.85]
+    LdgMVACutValue         = 0.40,    # [default: 0.85]
     LdgMVACutDirection     =  ">=",   # [default: ">="]
-    SubldgMVACutValue      = 0.30,    # [default: 0.85]
+    SubldgMVACutValue      = 0.40,    # [default: 0.85]
     SubldgMVACutDirection  =  ">=",   # [default: ">="]
     NjetsMax               = 999,     # [default: 999]
     NBjetsMax              = 999,     # [default: 999]
@@ -223,7 +223,7 @@ topSelectionBDT = PSet(
     MassCutValue           = 400.0,   # [default: 400.0]
     MassCutDirection       = "<=",    # [default: "<"]
     # FIXME: Phase this out (currently only used in plots)
-    MVACutValue            = 0.30,    # [default: 0.85]
+    MVACutValue            = 0.40,    # [default: 0.85]
     MVACutDirection        =  ">=",   # [default: ">="]
     WeightFile             = "TMVAClassification_BDTG_default.weights.xml", # (located in data/TopTaggerWeights/)
 )
@@ -255,7 +255,7 @@ fakeBMeasurement = PSet(
     LdgTopMVACutDirection     = topSelectionBDT.LdgMVACutDirection, 
     SubldgTopMVACutValue      = topSelectionBDT.SubldgMVACutValue,
     SubldgTopMVACutDirection  = "<",   # [default: "<"]
-    minTopMVACutValue         = 0.00,  # [default: 0.60]
+    minTopMVACutValue         = 0.0,  # [default: 0.60]
     minTopMVACutDirection     =  ">=", # [default: ">="]
     )
 

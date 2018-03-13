@@ -133,7 +133,7 @@ def main():
                        "ChargedHiggs_HplusTB_HplusToTB_M_350_ext1", 
                        "ChargedHiggs_HplusTB_HplusToTB_M_400_ext1", 
                        "ChargedHiggs_HplusTB_HplusToTB_M_500_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_650",  #10M events!
+                       #"ChargedHiggs_HplusTB_HplusToTB_M_650",  #10M events!
                        "ChargedHiggs_HplusTB_HplusToTB_M_800_ext1", 
                        "ChargedHiggs_HplusTB_HplusToTB_M_1000_ext1", 
                        "ChargedHiggs_HplusTB_HplusToTB_M_2000_ext1"
@@ -189,7 +189,8 @@ def main():
                               searchModes,
                               usePUreweighting       = opts.usePUreweighting,
                               useTopPtReweighting    = opts.useTopPtReweighting,
-                              doSystematicVariations = opts.doSystematics)
+                              doSystematicVariations = opts.doSystematics,
+                              analysisType="HToTB")
 
     # Add variations (e.g. for optimisation)
     # builder.addVariation("METSelection.METCutValue", [100,120,140])
@@ -282,7 +283,7 @@ if __name__ == "__main__":
     HISTOLEVEL    = "Debug" #"Informative" #"Debug"
     PUREWEIGHT    = True
     TOPPTREWEIGHT = True
-    DOSYSTEMATICS = False
+    DOSYSTEMATICS = True
 
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
     parser.add_option("-m", "--mcrab", dest="mcrab", action="store", 

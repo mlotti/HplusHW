@@ -75,10 +75,16 @@ class DataGroup:
 	self.label = label
         return
 
+    def getLabel(self):
+	return self.label
+
     def setNuisances(self, nuisances):
         if nuisances:
             self.nuisances = nuisances[:]
         return
+
+    def getNuisances(self):
+        return self.nuisances
 
     def setShapeHisto(self,path,histo):
 	self.histoPath = path
@@ -240,12 +246,6 @@ class Nuisance:
     def getLabel(self):
 	return self.label
     
-    def getKwarg(self, key):
-        if key not in self.kwargs:
-            #raise Exception("Unknown key %s no present in kewyword arguments" % (key))
-            return "N/A"
-        return self.kwargs[key]
-
     def PrintInfo(self):
         '''
         Print a summary of all variables
