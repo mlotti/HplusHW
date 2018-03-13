@@ -308,12 +308,14 @@ DataGroups.append(Diboson)
 from HiggsAnalysis.LimitCalc.InputClasses import Nuisance
 
 # Define all individual nuisances that can be potentially used (ShapeVariations require running with systematics flag! Defined in AnalysisBuilder.py)
-# trgMC_Shape     = Nuisance(id="CMS_eff_trg_MC"   , label="Trigger MC efficiency", distr="shapeQ", function="ShapeVariation", systVariation="TrgEffMC")
-# PU_Shape        = Nuisance(id="CMS_pileup"       , label="Pileup", distr="shapeQ", function="ShapeVariation", systVariation="PUWeight")
-# bTag_Shape      = Nuisance(id="CMS_eff_b"        , label="b tagging", distr="shapeQ", function="ShapeVariation", systVariation="BTagSF")
-# TopPt_Shape     = Nuisance(id="CMS_topPtReweight", label="Top pT reweighting", distr="shapeQ", function="ShapeVariation", systVariation="TopPt")
-# JES_Shape       = Nuisance(id="CMS_scale_j"      , label="Jet Energy Scale (JES)"                   , distr="shapeQ", function="ShapeVariation", systVariation="JES")
-# JER_Shape       = Nuisance(id="CMS_res_j"        , label="Jet Energy Resolution (JER)"              , distr="shapeQ", function="ShapeVariation", systVariation="JER")
+JES_Shape    = Nuisance(id="CMS_scale_j"      , label="Jet Energy Scale (JES)", distr="shapeQ", function="ShapeVariation", systVariation="JES")
+JER_Shape    = Nuisance(id="CMS_res_j"        , label="Jet Energy Resolution (JER)", distr="shapeQ", function="ShapeVariation", systVariation="JER")
+bTag_Shape   = Nuisance(id="CMS_eff_b"        , label="b tagging", distr="shapeQ", function="ShapeVariation", systVariation="BTagSF")
+TopPt_Shape  = Nuisance(id="CMS_topPtReweight", label="Top pT reweighting", distr="shapeQ", function="ShapeVariation", systVariation="TopPt")
+PU_Shape     = Nuisance(id="CMS_pileup"       , label="Pileup", distr="shapeQ", function="ShapeVariation", systVariation="PUWeight")
+topTag_Shape = Nuisance(id="CMS_topTagging"   , label="Top tagging (Approx.)", distr="shapeQ", function="ShapeVariation", systVariation="PUWeight")  #fixme
+# NOTE: systVariation key is first declared in HiggsAnalysis/NtupleAnalysis/python/AnalysisBuilder.py
+
 
 #================================================================================================  
 # Constant Nuisance Parameters (aka Systematics)  (= rows in datacard) 
@@ -468,9 +470,8 @@ if 0:
     MergeNuisances.append(["CMS_scale_ttbar", "CMS_scale_singleTop"]) #resultant name will be "CMS_scale_ttbar"
     MergeNuisances.append(["CMS_pdf_ttbar"  , "CMS_pdf_singleTop"])
 else:
-    MergeNuisances.append(["CMS_scale_ttbar", "CMS_scale_singleTop", "CMS_scale_ttbar_forFakeB"])
-    MergeNuisances.append(["CMS_pdf_ttbar"  , "CMS_pdf_singleTop"  , "CMS_pdf_ttbar_forFakeB"])
-    # fixme: merge ttW, ttZ, tttt with ttbar and singleTop?
+    MergeNuisances.append(["CMS_scale_ttbar", "CMS_scale_singleTop", "CMS_scale_ttbar_forFakeB", "CMS_scale_ttW", "CMS_scale_ttZ"]
+    MergeNuisances.append(["CMS_pdf_ttbar"  , "CMS_pdf_singleTop"  , "CMS_pdf_ttbar_forFakeB"  , "CMS_pdf_ttW"  , "CMS_pdf_ttZ"]
     
 # Correlate FakeB and GenuineB uncerainties
 MergeNuisances.append(["lumi_13TeV"       , "lumi_13TeV_forFakeB"])
