@@ -129,7 +129,7 @@ _crossSectionUncertainty = {
     "TTZ_scale": ScalarUncertaintyItem("xsect", plus=0.10, minus=0.12), 
     "TTZ_pdf"  : ScalarUncertaintyItem("xsect", 0.03),  # 2%
 
-#    # tttt, ?
+    # tttt
 #    "TTTT_scale": ScalarUncertaintyItem("xsect", plus=0.10, minus=0.12), 
 #    "TTTT_pdf"  : ScalarUncertaintyItem("xsect", 0.03),  # 2%
 #    "TTTT"      : ScalarUncertaintyItem("xsect", 0.12), # scale and pdf combined (quadratically)
