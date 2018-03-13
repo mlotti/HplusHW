@@ -189,7 +189,8 @@ def main():
                               searchModes,
                               usePUreweighting       = opts.usePUreweighting,
                               useTopPtReweighting    = opts.useTopPtReweighting,
-                              doSystematicVariations = opts.doSystematics)
+                              doSystematicVariations = opts.doSystematics,
+                              analysisType="HToTB")
 
     # Add variations (e.g. for optimisation)
     # builder.addVariation("METSelection.METCutValue", [100,120,140])
@@ -282,7 +283,7 @@ if __name__ == "__main__":
     HISTOLEVEL    = "Debug" #"Informative" #"Debug"
     PUREWEIGHT    = True
     TOPPTREWEIGHT = True
-    DOSYSTEMATICS = False
+    DOSYSTEMATICS = True
 
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
     parser.add_option("-m", "--mcrab", dest="mcrab", action="store", 

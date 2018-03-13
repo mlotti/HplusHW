@@ -418,22 +418,24 @@ class DataCardGenerator:
             massRange += "to%s" % (str(self._config.MassPoints[-1]))
         prefix += massRange
 
+        if not self._config.OptionIncludeSystematics:
+            prefix += "_StatOnly"
+
         self.Verbose("Output dir prefix (basic) is \"%s\"" % (prefix), True)
         return prefix
         
-    def _getFinalOutputPrefix(self,era, searchMode, optimizationMode):
+    def _getFinalOutputPrefix(self, era, searchMode, optimizationMode):
         '''
         Construct final, prefix for output dir name
         '''
         # Construct prefix extension
         if optimizationMode == "":
-            optMode = "OptNominal"
-        else:
-            optMode = "Opt%s" % optimizationMode
-        s = "%s_%s_%s"%(era, searchMode, optMode)
+            optMode = "Nominal"
+        s = "Era%s_Search%s_Opt%s"%(era, searchMode, optMode)
 
         # Prepend prefix to output prefix name
         self._outputPrefix = s + "_" + self._outputPrefix
+
         self.Verbose("Output dir prefix (final) is \"%s\"" % (self._outputPrefix), True)
         return
 

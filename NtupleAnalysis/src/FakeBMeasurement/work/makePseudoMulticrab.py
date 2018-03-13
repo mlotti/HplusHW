@@ -209,7 +209,6 @@ class ModuleBuilder:
                                                                          opts.normDataSrc,
                                                                          opts.normEwkSrc,
                                                                          self._opts.useInclusiveNorm,
-                                                                         # keyList = ["Inverted", "AllSelections"], #FIXME:  works with "ForFakeBMeasurement" folder
                                                                          keyList = ["AllSelections"],
                                                                          verbose=opts.verbose)
 
