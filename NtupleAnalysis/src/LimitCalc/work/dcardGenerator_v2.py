@@ -239,7 +239,8 @@ def CreateTarball(myOutputDirectories, opts):
 
     # Create filename with a time stamp
     myTimestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime(time.time()))
-    myFilename  = "datacards_archive_%s.tgz" % (myTimestamp)
+    # myFilename  = "datacards_archive_%s.tgz" % (myTimestamp) # Adopt directory name instead!
+    myFilename  = myOutputDirectories[0] + ".tgz"
     fTarball    = tarfile.open(myFilename, mode="w:gz")
     
     # For-loop: All output dirs
@@ -251,7 +252,7 @@ def CreateTarball(myOutputDirectories, opts):
 
     # Inform user
     msg = "Created archive of results directories to "
-    Print(msg + SuccessStyle() + myFilename + NormalStyle())
+    Print(msg + SuccessStyle() + myFilename + NormalStyle(), False)
     return
 
 def main(opts, moduleSelector, multipleDirs):

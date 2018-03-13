@@ -124,6 +124,21 @@ _crossSectionUncertainty = {
     "Diboson_scale": ScalarUncertaintyItem("xsect", 0.032), 
     "Diboson_pdf": ScalarUncertaintyItem("xsect", 0.044),
     "Diboson": ScalarUncertaintyItem("xsect", 0.054), # scale and pdf combined (quadratically)
+
+    # ttW, values from HIG-17-022 which shows consistency with all other systematics defined here (TTJets, SingleTop, WJets, DY, Diboson, ..)
+    "TTW_scale": ScalarUncertaintyItem("xsect", plus=0.13, minus=0.12), 
+    "TTW_pdf"  : ScalarUncertaintyItem("xsect", 0.02),  # 2%
+    "TTW"      : ScalarUncertaintyItem("xsect", 0.13), # scale and pdf combined (quadratically)
+
+    # ttZ, values from HIG-17-022 which shows consistency with all other systematics defined here (TTJets, SingleTop, WJets, DY, Diboson, ..)
+    "TTZ_scale": ScalarUncertaintyItem("xsect", plus=0.10, minus=0.12), 
+    "TTZ_pdf"  : ScalarUncertaintyItem("xsect", 0.03),  # 2%
+    "TTZ"      : ScalarUncertaintyItem("xsect", 0.12), # scale and pdf combined (quadratically)
+
+#    # tttt, ?
+#    "TTTT_scale": ScalarUncertaintyItem("xsect", plus=0.10, minus=0.12), 
+#    "TTTT_pdf"  : ScalarUncertaintyItem("xsect", 0.03),  # 2%
+#    "TTTT"      : ScalarUncertaintyItem("xsect", 0.12), # scale and pdf combined (quadratically)
     
     # MC QCD: we do not trust the MC QCD, therefore 100 % uncertainty
     "QCD": ScalarUncertaintyItem("xsect", 1.00),
@@ -299,11 +314,14 @@ _dataDrivenCtrlPlotBinning = {
     "MaxDeltaPhiTauJet_AfterAllSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
     "NVertices_AfterAllSelections": None,
     # HToTB
-    "MET_AfterAllSelections" : [i for i in range(0, 100, 10)] + [i for i in range(100, 200, 20)] + [i for i in range(200, 300, 50)] + [i for i in range(300, 400+100, 100)],
-    "HT_AfterAllSelections"  : [i for i in range(500, 1500, 50)] + [i for i in range(1500, 2000, 100)] + [i for i in range(2000, 3000+500, 500)],
+    "MET_AfterAllSelections"  : [i for i in range(0, 100, 10)] + [i for i in range(100, 200, 20)] + [i for i in range(200, 300, 50)] + [i for i in range(300, 400+100, 100)],
+    "HT_AfterAllSelections"   : [i for i in range(500, 1500, 50)] + [i for i in range(1500, 2000, 100)] + [i for i in range(2000, 3000+500, 500)],
+    "MHT_AfterAllSelections"  : [i for i in range(0, 140, 10)] + [i for i in range(140, 240, 20)] + [i for i in range(240, 400, 50)],
+    "QGLR_AfterAllSelections" : [float(i)/100.0 for i in range(0, 105, 5)],
     "LdgTrijetPt_AfterAllSelections"     : [j for j in range(0, 500, 20)] + [k for k in range(500, 700, 50)] + [k for k in range(700, 900+100, 100)],
     "LdgTrijetMass_AfterAllSelections"   : [i for i in range(50, 350, 10)],
     "LdgTrijetBjetPt_AfterAllSelections" : [j for j in range(0, 300, 10)] + [k for k in range(300, 700+40, 40)],
+    "LdgTrijetBjetEta_AfterAllSelections" : None,
     "LdgTrijetDijetPt_AfterAllSelections": [j for j in range(0, 300, 10)] + [k for k in range(300, 700+40, 40)],
     "LdgTrijetDijetMass_AfterAllSelections": None,
     "LdgTrijetTopMassWMassRatioAfterAllSelections": None,

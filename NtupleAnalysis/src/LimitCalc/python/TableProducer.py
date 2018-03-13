@@ -206,7 +206,7 @@ def getTableOutput(widths,table,latexMode=False):
 # Class definition
 #================================================================================================ 
 class TableProducer:
-    def __init__(self, opts, config, outputPrefix, luminosity, observation, datasetGroups, extractors, mcrabInfoOutput, h2tb):
+    def __init__(self, opts, config, outputPrefix, luminosity, observation, datasetGroups, extractors, mcrabInfoOutput, h2tb, verbose=False):
         '''
         Constructor
         '''
@@ -222,27 +222,13 @@ class TableProducer:
         self._timestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime(time.time()))
         self._outputFileStem = "combine_datacard_hplushadronic_m"
         self._outputRootFileStem = "combine_histograms_hplushadronic_m"
-
         if self._h2tb:
             self.channelLabel = "tbhadr"
         else:
             self.channelLabel = "taunuhadr"
-
-        # Calculate number of nuisance parameters
-        # Make directory for output
-        myLimitCode = None
-        myLimitCode = "combine"
-        self._dirname = "datacards_%s_%s_%s_%s"%(myLimitCode,self._timestamp,self._config.DataCardName.replace(" ","_"),self._outputPrefix)
-        if hasattr(self._config, "OptionSignalInjection"):
-            self._dirname += "_SignalInjection"
-        os.mkdir(self._dirname)
-        self._infoDirname = self._dirname + "/info"
-        os.mkdir(self._infoDirname)
-        self._ctrlPlotDirname = self._dirname + "/controlPlots"
-        os.mkdir(self._ctrlPlotDirname)
-        # Copy datacard to directory
-        os.system("cp %s %s/inputDatacardForDatacardGenerator.py"%(opts.datacard, self._dirname))
-
+        self._verbose = verbose
+        self.makeDirectory()
+            
         # Make control plots
         if self._config.OptionDoControlPlots:
             if hasattr(self._config, 'OptionGenuineTauBackgroundSource'):
@@ -310,6 +296,61 @@ class TableProducer:
         # Create for each shape nuisance a variation 
         if opts.testShapeSensitivity:
             self._createDatacardsForShapeSensitivityTest()
+        return
+
+
+    def Verbose(self, msg, printHeader=False):
+        if not self._verbose:
+            return
+        if printHeader:
+            print "=== %s:" % self.GetFName()
+        if msg !="":
+            print "\t", msg
+        return
+
+    def GetFName(self):
+        fName = __file__.split("/")[-1]
+        fName = fName.replace(".pyc", ".py")
+        return fName
+    
+    def Print(self, msg, printHeader=True):
+        fName = GetName()
+        if printHeader:
+            print "=== ", fName
+        if msg !="":
+            print "\t", msg
+        return
+
+    def makeDirectory(self):
+        '''
+        The original code is now obsolete since LandS is not used. 
+        All results are with combine => implied
+
+        myLimitCode  = "combine"
+        self._dirname = "datacards_%s_%s_%s_%s" % (myLimitCode,self._timestamp,self._config.DataCardName.replace(" ","_"),self._outputPrefix)
+        '''
+
+        # Make directory for output
+        self._dirname = "datacards_%s_%s_%s" % (self._config.DataCardName.replace(" ","_"), self._outputPrefix, self._timestamp)
+        if hasattr(self._config, "OptionSignalInjection"):
+            self._dirname += "_SignalInjection"
+        self.Verbose("Creating main directory %s" % (self._dirname), True)
+        os.mkdir(self._dirname)
+
+        # Create sub directory for informative files
+        self._infoDirname = self._dirname + "/info"
+        self.Verbose("Creating sub-directory %s" % (self._infoDirname), False)
+        os.mkdir(self._infoDirname)
+
+        # Create sub directory for control plots
+        self._ctrlPlotDirname = self._dirname + "/controlPlots"
+        self.Verbose("Creating sub-directory %s" % (self._ctrlPlotDirname), False)
+        os.mkdir(self._ctrlPlotDirname)
+
+        # Copy the datacards for future reference
+        dcardName = "inputDatacardForDatacardGenerator.py"
+        self.Verbose("Copying datacard %s to main directory %s as %s" % (self._opts.datacard, self._dirname, dcardName), False)
+        os.system("cp %s %s/%s" % (self._opts.datacard, self._dirname, dcardName))
         return
 
     def getDirectory(self):
