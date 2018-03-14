@@ -96,7 +96,7 @@ void BJetSelection::initialize(const ParameterSet& config) {
   // Medium to reduce both b and light jets
   // Tight to reduce light jets
   fDisriminatorValue = getDiscriminatorWP(sAlgorithm, sWorkingPoint);
-  std::cout << "Discriminator value for WP " << sWorkingPoint << ": " << fDisriminatorValue << std::endl;
+  //std::cout << "Discriminator value for WP " << sWorkingPoint << ": " << fDisriminatorValue << std::endl;
 
   if (fDisriminatorValue < -1.0)
     {
