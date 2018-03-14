@@ -18,6 +18,12 @@ import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
 import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
 
+'''
+Usage:
+    ./plotBTagEfficiency.py -m BTagEfficiencyAnalysis_160114_124705 -b TT -f WJets -e 0.10
+   The -e parameter is the maximum allowed uncertainty in a pt bin 
+   (the bin width is automatically widened to meet this requirement)
+'''
 
 def findModuleNames(multicrabdir, prefix):
     items = os.listdir(multicrabdir)
@@ -213,7 +219,8 @@ def main():
     parser = OptionParser(usage="Usage: %prog [options]",add_help_option=True,conflict_handler="resolve")
     myModuleSelector.addParserOptions(parser)
     parser.add_option("-m", "--mcrab", dest="mcrab", action="store", help="Path to the multicrab directory for input")
-    parser.add_option("-d", "--dataset", dest="dataset", action="store", help="Name of the dataset to be plotted")
+    parser.add_option("-b", "--bjets", dest="bjets", action="store", help="Name of the dataset to be used for b->b efficency")
+    parser.add_option("-f", "--fakes", dest="fakes", action="store", help="Name of the dataset to be used for non-b -> b efficiencies")
     parser.add_option("-e", "--error", dest="errorlevel", default=0.10, action="store", help="Maximum relative uncertainty per bin (default=10%%)")
     (opts, args) = parser.parse_args()
 
@@ -252,9 +259,9 @@ def main():
                 for dset in dsetMgr.getMCDatasets():
                     print ("THE dset is", dset.name)
                     print dset.name
-                    if dset.name.startswith("TT"):
+                    if dset.name.startswith(opts.bjets):
                         dset1 = dset
-                    if dset.name.startswith("QCD"): #if dset.name.startswith(opts.dataset):
+                    if dset.name.startswith(opts.fakes):
                         dset2 = dset
                 print "The datasets are .....................", dset1.name, dset2.name
                 results.extend(doPlot("btageff_%s_%s_%s"%(era, searchMode, optimizationMode), dset1, dset2, opts.errorlevel, optimizationMode, lumi))
@@ -265,7 +272,7 @@ def main():
         print item
     
     # Write results to a json file
-    filename = "btageff_HybridQCD.json"
+    filename = "btageff_Hybrid_%s+%s.json"%(opts.bjets,opts.fakes)
     with open(filename, 'w') as outfile:
         json.dump(results, outfile)
     print "Written results to %s"%filename
