@@ -400,7 +400,7 @@ topPt_FakeB_Const       = Nuisance(id="CMS_topPtReweight_forFakeB", label="Top p
 topTag_FakeB_Const      = Nuisance(id="CMS_topTagging_forFakeB"   , label="Top tagging (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.20)
 ttbar_scale_FakeB_Const = Nuisance(id="CMS_scale_ttbar_forFakeB"  , label="TTbar XSection scale uncertainty", distr="lnN", function="ConstantForFakeB", value=tt_scale_down, upperValue=tt_scale_up)
 ttbar_pdf_FakeB_Const   = Nuisance(id="CMS_pdf_ttbar_forFakeB"    , label="TTbar XSection pdf uncertainty", distr="lnN", function="ConstantForFakeB", value=tt_pdf_down, upperValue=tt_pdf_up)
-ttbar_mass_FakeB_Const  = Nuisance(id="CMS_mass_ttbar_forFakeB"   , label="ttbar XSection top mass uncertainty", distr="lnN", function="ConstantForFakeB", value=tt_mass_down, upperValue=tt_mass_up) 
+ttbar_mass_FakeB_Const  = Nuisance(id="CMS_mass_ttbar_forFakeB"   , label="TTbar XSection top mass uncertainty", distr="lnN", function="ConstantForFakeB", value=tt_mass_down, upperValue=tt_mass_up) 
 
 #================================================================================================ 
 # Nuisance List (If a given nuisance "name" is used in any of the DataGroups it must be appended)
@@ -470,8 +470,8 @@ if 0:
     MergeNuisances.append(["CMS_scale_ttbar", "CMS_scale_singleTop"]) #resultant name will be "CMS_scale_ttbar"
     MergeNuisances.append(["CMS_pdf_ttbar"  , "CMS_pdf_singleTop"])
 else:
-    MergeNuisances.append(["CMS_scale_ttbar", "CMS_scale_singleTop", "CMS_scale_ttbar_forFakeB", "CMS_scale_ttW", "CMS_scale_ttZ"]
-    MergeNuisances.append(["CMS_pdf_ttbar"  , "CMS_pdf_singleTop"  , "CMS_pdf_ttbar_forFakeB"  , "CMS_pdf_ttW"  , "CMS_pdf_ttZ"]
+    MergeNuisances.append(["CMS_scale_ttbar", "CMS_scale_singleTop", "CMS_scale_ttbar_forFakeB", "CMS_scale_ttW", "CMS_scale_ttZ"])
+    MergeNuisances.append(["CMS_pdf_ttbar"  , "CMS_pdf_singleTop"  , "CMS_pdf_ttbar_forFakeB"  , "CMS_pdf_ttW"  , "CMS_pdf_ttZ"])
     
 # Correlate FakeB and GenuineB uncerainties
 MergeNuisances.append(["lumi_13TeV"       , "lumi_13TeV_forFakeB"])
