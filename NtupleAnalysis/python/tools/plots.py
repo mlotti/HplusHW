@@ -417,7 +417,7 @@ _datasetMerge = {
     }
 
 for mass in _intermediateHplusMasses:
-    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTB_M%d"%mass
+    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTBintermediate_M%d"%mass
 #    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassWithNeutral_M_%d"%(mass)] = "HplusTB_M%d"%mass # NB! Commented out to avoid merging of the WithNeutral samples that have been dropped out of the analysis
 
 #================================================================================================
@@ -1839,9 +1839,9 @@ class PlotBase:
     # \param kwargs             Keyword arguments, forwarded to histograms.addStandardTexts()
     def addStandardTexts(self, addLuminosityText=False, **kwargs):
         lumi = None
-        if hasattr(self, "luminosity"):
+        if hasattr(self, "luminosity") and addLuminosityText:
             lumi = self.luminosity
-        elif self.histoMgr.hasLuminosity():
+        elif self.histoMgr.hasLuminosity() and addLuminosityText:
             lumi = self.histoMgr.getLuminosity()
         elif addLuminosityText:
             raise Exception("addLuminosityText=True, but the Plot object does not have luminosity set, and plot.histoMgr has not been normalized by or to luminosity")
