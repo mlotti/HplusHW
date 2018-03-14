@@ -124,8 +124,8 @@ bjetSelection = PSet(
     triggerMatchingCone = 0.1,  # DeltaR for matching offline bjet with trigger::TriggerBjet 
               jetPtCuts = [30.0],
              jetEtaCuts = [2.5],
-             #bjetDiscr = "combinedInclusiveSecondaryVertexV2BJetTags",
              bjetDiscr  = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
+#             bjetDiscr  = "pfCombinedMVAV2BJetTags", # use this for MVA b-tagging
  bjetDiscrWorkingPoint  = "Medium",
  numberOfBJetsCutValue  = 1,
  numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
@@ -133,10 +133,12 @@ bjetSelection = PSet(
 
 scaleFactors.setupBtagSFInformation(btagPset=bjetSelection, 
                                     btagPayloadFilename="CSVv2.csv",
+                                    #btagPayloadFilename="cMVAv2_Moriond17_B_H.csv", # use this for MVA b-tagging
                                     #btagEfficiencyFilename="btageff_TTJets.json",
                                     #btagEfficiencyFilename="btageff_WJetsHT.json",
                                     #btagEfficiencyFilename="btageff_hybrid.json",
                                     btagEfficiencyFilename="btageff_hybrid_HToTB.json",
+                                    #btagEfficiencyFilename="btageff_Hybrid_TT+WJets.json", # use for MVA b-tagging
                                     direction="nominal")
 
 #====== MET selection
