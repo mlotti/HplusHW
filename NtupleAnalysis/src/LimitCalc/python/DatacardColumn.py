@@ -821,7 +821,7 @@ class DatacardColumn():
                 # The first one is assumed to be the one with the final binning elsewhere
                 self._rateResult._histograms.insert(0,h)
 
-        # Treat the negative and low-occupancy bins in the rebinned rate histogram, no inserted to be self._rateResult._histograms[0]
+        # Treat the negative and low-occupancy bins in the rebinned rate histogram, now inserted to be self._rateResult._histograms[0]
         nBins = self._rateResult._histograms[0].GetNbinsX()+1       
         nBelowMinStatUncert = 0
         nNegativeRate = 0
