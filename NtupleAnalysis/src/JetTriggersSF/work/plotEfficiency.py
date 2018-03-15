@@ -589,7 +589,7 @@ def main(opts):
             hNumerator   = "hNum_%s_RefTrg_OfflineSel_Signal%s" % (xVar, trg)
             hDenominator = "hDen_%s_RefTrg_OfflineSel" % (xVar)
             plotName     = "Eff_%s_%s" % (xVar, trg)
-            print plotName
+
             # Get Efficiency Plots
             _kwargs  = GetHistoKwargs(xVar, opts)
             eff_Data = GetEfficiency(datasetsMgr, dataset_Data, hNumerator, hDenominator , **_kwargs)
