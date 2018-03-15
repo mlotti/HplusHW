@@ -510,6 +510,9 @@ class DatacardColumn():
         myHistograms.append(hUp)
         myHistograms.append(hDown)
 
+        # NB! These histograms contain the absolute uncertainty, need to add nominal histogram so that ombine accepts the histograms
+        for h in myHistograms:
+            h.Add(rhwu.getRootHisto())
         return myHistograms
 
     def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors, controlPlotExtractors):
