@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+si#!/usr/bin/env python
 
 from HiggsAnalysis.NtupleAnalysis.main import PSet
 import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
@@ -66,7 +66,7 @@ eVeto = PSet(
     electronEtaCut = 2.5,
 #            electronID = "mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90", # highest (wp90) for vetoing (2012: wp95)
     electronID = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
-    electronIDType    = "default",  # options: "default", "MVA"
+    electronIDType    = "MVA",  # options: "default", "MVA"
     electronMVA       = "ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values",
     electronMVACut    = "Loose",
     electronIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
