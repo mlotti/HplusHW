@@ -211,20 +211,12 @@ topologySelection = PSet(
 # Top selection BDT                                               
 #================================================================================================        
 topSelectionBDT = PSet(
-    LdgMVACutValue         = 0.40,    # [default: 0.85]
-    LdgMVACutDirection     =  ">=",   # [default: ">="]
-    SubldgMVACutValue      = 0.40,    # [default: 0.85]
-    SubldgMVACutDirection  =  ">=",   # [default: ">="]
-    NjetsMax               = 999,     # [default: 999]
-    NBjetsMax              = 999,     # [default: 999]
-    # Speed-up calculation by skipping top candidates failing some criteria
-    CSV_bDiscCutValue      = 0.8484,  # [default: 0.8484] #Do not evaluate top candidate if b-jet assigned as b from top fails this cut
-    CSV_bDiscCutDirection  = ">=",    # [default: ">="]
-    MassCutValue           = 400.0,   # [default: 400.0]
-    MassCutDirection       = "<=",    # [default: "<"]
-    # FIXME: Phase this out (currently only used in plots)
     MVACutValue            = 0.40,    # [default: 0.85]
     MVACutDirection        =  ">=",   # [default: ">="]
+    MassCutValue           = 400.0,   # [default: 400.0]
+    MassCutDirection       = "<=",    # [default: "<"]
+    CSV_bDiscCutValue      = 0.8484,  # [default: 0.8484] #Do not evaluate top candidate if b-jet assigned as b from top fails this cut
+    CSV_bDiscCutDirection  = ">=",    # [default: ">="]
     WeightFile             = "TMVAClassification_BDTG_default.weights.xml", # (located in data/TopTaggerWeights/)
 )
 
@@ -247,16 +239,16 @@ scaleFactors.setupBtagSFInformation(btagPset               = fakeBBjetSelection,
                                     direction              = "nominal")
 
 fakeBMeasurement = PSet(
-    baselineBJetsCutValue     = 2,     # [default: 2]
-    baselineBJetsCutDirection = "==",  # [default: "=="]
+    baselineBJetsCutValue     = 2,      # [default: 2]
+    baselineBJetsCutDirection = "==",   # [default: "=="]
     baselineBJetsDiscr        = bjetSelection.bjetDiscr,
     baselineBJetsDiscrWP      = bjetSelection.bjetDiscrWorkingPoint,
-    LdgTopMVACutValue         = topSelectionBDT.LdgMVACutValue,
-    LdgTopMVACutDirection     = topSelectionBDT.LdgMVACutDirection, 
-    SubldgTopMVACutValue      = topSelectionBDT.SubldgMVACutValue,
-    SubldgTopMVACutDirection  = "<",   # [default: "<"]
-    minTopMVACutValue         = 0.0,  # [default: 0.60]
-    minTopMVACutDirection     =  ">=", # [default: ">="]
+    LdgTopMVACutValue         = topSelectionBDT.MVACutValue,
+    LdgTopMVACutDirection     = topSelectionBDT.MVACutDirection, 
+    SubldgTopMVACutValue      = topSelectionBDT.MVACutValue,
+    SubldgTopMVACutDirection  = "<",    # [default: "<"]
+    minTopMVACutValue         = 0.0,    # [default: 0.60]
+    minTopMVACutDirection     = ">=",   # [default: ">="]
     )
 
 #================================================================================================
@@ -280,7 +272,7 @@ commonPlotsOptions = PSet(
     htBins            = PSet(nBins = 500, axisMin =  0.0, axisMax = 5000.0), # 10 GeV bin width 
     bjetDiscrBins     = PSet(nBins = 120, axisMin =  0.0, axisMax =    1.2),
     angularCuts1DBins = PSet(nBins =  52, axisMin =  0.0, axisMax =  260.0), 
-    topMassBins       = PSet(nBins = 300, axisMin =  0.0, axisMax = 1500.0), #  5 GeV bin width 
+    topMassBins       = PSet(nBins = 200, axisMin =  0.0, axisMax = 1000.0), #  5 GeV bin width 
     wMassBins         = PSet(nBins = 200, axisMin =  0.0, axisMax = 1000.0), #  5 GeV bin width 
     mtBins            = PSet(nBins = 800, axisMin =  0.0, axisMax = 4000.0), #  5 GeV bin width
     invMassBins       = PSet(nBins = 200, axisMin =  0.0, axisMax = 4000.0), # 20 GeV bin width    

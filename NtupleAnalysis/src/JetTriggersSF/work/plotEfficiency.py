@@ -12,10 +12,12 @@ USAGE:
 EXAMPLES:
 ./plotEfficiency.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/Trigger/JetTriggersSF_170921_053850_FinalWithCut/ --url
 ./plotEfficiency.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/Trigger/JetTriggersSF_170921_053850_FinalWithCut/ --url -e ext
+./plotEfficiency.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/JetTriggersSF/multicrab_Hplus2tbAnalysis_v8030_20180223T0905/JetTriggersSF_180308_194450/ -e "MuEnriched" --url
 
 
 LAST USED:
-./plotEfficiency.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/JetTriggersSF/JetTriggersSF_180308_194450/ -e "MuEnriched" --url
+./plotEfficiency.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/JetTriggersSF/multicrab_Hplus2tbAnalysis_v8030_20180223T0905/JetTriggersSF_LepVeto_TauVeto_7JetPt30_2BjetsPt40Pt30_180308_194450/ -e "MuEnriched" --url
+
 
 '''
 #================================================================================================

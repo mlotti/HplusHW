@@ -143,6 +143,8 @@ def main():
                        "ChargedHiggs_HplusTB_HplusToTB_M_7000",
                        "ChargedHiggs_HplusTB_HplusToTB_M_10000",
                        ]
+        if opts.doSystematics:
+            myBlackList.append("QCD")
 
         Print("Adding all datasets from multiCRAB directory %s" % (opts.mcrab))
         Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
@@ -283,7 +285,7 @@ if __name__ == "__main__":
     HISTOLEVEL    = "Debug" #"Informative" #"Debug"
     PUREWEIGHT    = True
     TOPPTREWEIGHT = True
-    DOSYSTEMATICS = True
+    DOSYSTEMATICS = False
 
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
     parser.add_option("-m", "--mcrab", dest="mcrab", action="store", 
