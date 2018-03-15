@@ -2403,7 +2403,7 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   if (!topData.passedSelection()) 
     {
       // If top fails fill determine if it qualifies for Control Region 1 (CRone)
-      bool passLdgTopMVA    = cfg_LdgTopMVACut.passedCut( topData.getMVAmax1() );
+      bool passLdgTopMVA    = cfg_LdgTopMVACut.passedCut( topData.getMVAmax1() ); //fixme: 
       bool passSubldgTopMVA = cfg_SubldgTopMVACut.passedCut( topData.getMVAmax2() );
       bool passInvertedTop  = passLdgTopMVA * passSubldgTopMVA;
       if (!passInvertedTop) return;
@@ -2781,7 +2781,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   // 11) Top selection
   //================================================================================================
   if (0) std::cout << "=== Inverted: Top selection" << std::endl;
-  const TopSelectionBDT::Data topData = fInvertedTopSelection.analyzeWithoutBJets(fEvent, jetData.getSelectedJets(), invBjetData.getSelectedBJets(), true);
+  const TopSelectionBDT::Data topData = fInvertedTopSelection.analyze(fEvent, jetData, invBjetData);
   bool passMinTopMVACut = cfg_MinTopMVACut.passedCut( std::min(topData.getMVAmax1(), topData.getMVAmax2()) );
   bool hasFreeBJet      = topData.hasFreeBJet();
   if (!hasFreeBJet) return;
