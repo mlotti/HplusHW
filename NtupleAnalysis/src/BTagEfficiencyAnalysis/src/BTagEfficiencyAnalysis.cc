@@ -190,6 +190,7 @@ void BTagEfficiencyAnalysis::process(Long64_t entry) {
     }
   else // "HToTB"
     {
+      const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
       if (tauData.hasIdentifiedTaus()) return;
     }
   
