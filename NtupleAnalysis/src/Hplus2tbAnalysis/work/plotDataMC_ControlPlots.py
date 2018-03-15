@@ -203,7 +203,7 @@ def main(opts):
         folder     = opts.folder
         histoList  = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(folder)        
         histoPaths = [os.path.join(folder, h) for h in histoList]
-        ignoreList = ["Aplanarity", "Planarity", "Sphericity", "FoxWolframMoment", "Circularity", "ThirdJetResolution", "Centrality"]
+        ignoreList = ["Aplanarity", "Planarity", "Sphericity", "FoxWolframMoment", "Circularity", "ThirdJetResolution", "Centrality", "_Vs_"]
         myHistos   = []
         for h in histoPaths:
             skip = False
@@ -985,18 +985,18 @@ if __name__ == "__main__":
         opts.signal = "ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass
 
     # Sanity check
-    allowedFolders = ["counters", "counters/weighted", "PUDependency", "Weighting", 
-                      "eSelection_Veto", "muSelection_Veto", "tauSelection_Veto",
-                      "ForDataDrivenCtrlPlotsEWKFakeB", "ForDataDrivenCtrlPlotsEWKGenuineB",
-                      "QuarkGluonLikelihoodRatio_", "QGLRSelection_", 
-                      "jetSelection_", "bjetSelection_", "metSelection_", "fatjetSelection_Veto",
-                      "topologySelection_", "topbdtSelection_", "ForDataDrivenCtrlPlots"]
-
-    if opts.folder not in allowedFolders:
-        Print("Invalid folder \"%s\"! Please select one of the following:" % (opts.folder), True)
-        for m in allowedFolders:
-            Print(m, False)
-        sys.exit()
+#     allowedFolders = ["counters", "counters/weighted", "PUDependency", "Weighting", 
+#                       "eSelection_Veto", "muSelection_Veto", "tauSelection_Veto",
+#                       "ForDataDrivenCtrlPlotsEWKFakeB", "ForDataDrivenCtrlPlotsEWKGenuineB",
+#                       "QuarkGluonLikelihoodRatio_", "QGLRSelection_", 
+#                       "jetSelection_", "bjetSelection_", "metSelection_", "fatjetSelection_Veto",
+#                       "topologySelection_", "topbdtSelection_", "ForDataDrivenCtrlPlots"]
+# 
+#     if opts.folder not in allowedFolders:
+#         Print("Invalid folder \"%s\"! Please select one of the following:" % (opts.folder), True)
+#         for m in allowedFolders:
+#             Print(m, False)
+#         sys.exit()
 
 
     # Call the main function
