@@ -508,25 +508,6 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
         plot.saveAs(saveName, formats=saveFormats)
     return
 
-def getDatasetsToExclude():
-    '''
-    Remove some QCD samples (which may or may not be required!)
-
-    For the time being they are removed because their
-    cross sections of these samples are not available (yet)
-    '''
-    myDsetList = []
-    myDsetList.append("QCD_Pt_1000toInf_MuEnrichedPt5")
-    myDsetList.append("QCD_Pt_15to20_MuEnrichedPt5")
-    myDsetList.append("QCD_Pt_20to30_MuEnrichedPt5")
-    myDsetList.append("QCD_Pt_30to50_MuEnrichedPt5")
-    myDsetList.append("QCD_Pt_600to800_MuEnrichedPt5")
-    myDsetList.append("QCD_Pt_600to800_MuEnrichedPt5_ext1")
-    myDsetList.append("QCD_Pt_800to1000_MuEnrichedPt5")
-    myDsetList.append("QCD_Pt_800to1000_MuEnrichedPt5_ext1")
-    myDsetList.append("QCD_Pt_800to1000_MuEnrichedPt5_ext2")
-    return myDsetList
-
 def main(opts):
     
     # Suppress warnings about weight being re-applied
@@ -566,13 +547,6 @@ def main(opts):
     # Setup & configure the dataset manager
     datasetsMgr = GetDatasetsFromDir(opts)
 
-    # Remove some QCD samples (the cross sections of these samples are not calculated)
-    msg = "Removing QCD samples for which cross--sections are not available yet:"
-    Print(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle(), True)
-    for d in getDatasetsToExclude():
-        Print(d, False)
-        datasetsMgr.remove(d)
-
     # Get run-range 
     minRunRange, maxRunRange, runRange = GetRunRange(datasetsMgr)
 
@@ -611,12 +585,11 @@ def main(opts):
             msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % counter, "/", "%s:" % (nPlots), "%s Vs %s" % (trg, xVar))
             Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), counter==1)
 
-
             # Define names
             hNumerator   = "hNum_%s_RefTrg_OfflineSel_Signal%s" % (xVar, trg)
             hDenominator = "hDen_%s_RefTrg_OfflineSel" % (xVar)
             plotName     = "Eff_%s_%s" % (xVar, trg)
-            
+            print plotName
             # Get Efficiency Plots
             _kwargs  = GetHistoKwargs(xVar, opts)
             eff_Data = GetEfficiency(datasetsMgr, dataset_Data, hNumerator, hDenominator , **_kwargs)
