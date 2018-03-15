@@ -169,11 +169,11 @@ class AnalysisBuilder:
     def __init__(self,
                  name,                  # The module name (beware, the downstream python code has assumptions on this)
                  # Required options
-                 dataEras=["2015"],        # Data era (see python/tools/dataset.py::_dataEras)
+                 dataEras=["2016"],        # Data era (see python/tools/dataset.py::_dataEras)
                  searchModes=["m80to160"], # Search mode (see python/parameters/signalAnalysisParameters.py)
                  # Optional options
                  usePUreweighting=True,    # enable/disable vertex reweighting
-                 useTopPtReweighting=True, # enable/disable top pt reweighting for ttbar
+                 useTopPtReweighting=False,# enable/disable top pt reweighting for ttbar
                  # Systematics options
                  doSystematicVariations=False, # Enable/disable adding modules for systematic uncertainty variation
                 ):
