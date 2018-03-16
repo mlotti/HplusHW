@@ -87,7 +87,9 @@ def Print(msg, printHeader=True):
 #================================================================================================
 def main():
 
-    Print("Started @ " + str(datetime.datetime.now()), True)
+    # Print start time
+    tStart = datetime.datetime.now()
+    Print("Started @ " + str(tStart), True)
 
     # Require at least two arguments (script-name, path to multicrab)     
     if len(sys.argv) < 2:
@@ -265,7 +267,15 @@ def main():
         Print("Running process (no PROOF)")
         process.run()
 
+    # Print total time elapsed
+    tFinish   = datetime.datetime.now()
+    dt        = tFinish - tStart
+    days      = dt.days
+    hours     = divmod(dt.days * (60*60) + dt.seconds, 60*60) # (a, b) = (hours, minutes)
+    minutes   = divmod(dt.days * (60*60*24) + dt.seconds, 60) # (a, b) = (minutes, seconds)
+    seconds   = dt.seconds
     Print("Finished @ " + str(datetime.datetime.now()), True)
+    Print("Elapsed time is %s h, %s min" % (hours[0], hours[1]), False)
     return
 
 #================================================================================================
