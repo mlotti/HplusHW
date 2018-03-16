@@ -102,14 +102,14 @@ jetSelection = PSet(
 #=================================================================================================
 fatjetVeto = PSet(
     fatjetType      = "FatJets", # [default: "FatJets"]  
-    fatjetPtCuts    = [450.0],   # [default: [450.0] ]
+    fatjetPtCuts    = [500.0],   # [default: [450.0] ]
     fatjetEtaCuts   = [2.4],     # [default: [2.4] ]
     fatjetIDDiscr   = "IDloose", # [default: "IDLoose"] (options: IDloose, IDtight, IDtightLeptonVeto)
     fatjetPUIDDiscr = "",        # [default: ""]
     topMatchDeltaR  = 0.8,       # [default: 0.8]
-    topMatchTypes   = [1],       # [default: 1]   (options: kJJB=1, kJJ=2, kJB=3, kJJBorJJ=4, kJJBorJB=5, kJJorJB=6, kAll=7, disable = -1)
+    topMatchTypes   = [1],       # [default: 1]   (options: kJJB=1, kJJ=2, kJB=3, kJJBorJJ=4, kJJBorJB=5, kJJorJB=6, kAll=7, any = -1)
     numberOfFatJetsCutValue     = 0,    # [default: 0]
-    numberOfFatJetsCutDirection = "==", # [default: "=="] (options: ==, !=, <, <=, >, >=)
+    numberOfFatJetsCutDirection = "==", # [default: "=="] (TO DISABLE: >=0)
 )
 
 # #=================================================================================================
@@ -217,7 +217,10 @@ topSelectionBDT = PSet(
     MassCutDirection       = "<=",    # [default: "<"]
     CSV_bDiscCutValue      = 0.8484,  # [default: 0.8484] #Do not evaluate top candidate if b-jet assigned as b from top fails this cut
     CSV_bDiscCutDirection  = ">=",    # [default: ">="]
-    WeightFile             = "TMVAClassification_BDTG_default.weights.xml", # (located in data/TopTaggerWeights/)
+    # XML files located in data/TopTaggerWeights/
+    WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32.weights.xml", # latest
+    # WeightFile             = "BDTG_DeltaR0p3.weights.xml", # do not use!
+    # WeightFile             = "TMVAClassification_BDTG_default.weights.xml",  # old (old lepton veto and b-jet thresholds)
 )
 
 #================================================================================================
@@ -228,8 +231,8 @@ fakeBBjetSelection = PSet(
     triggerMatchingCone       = bjetSelection.triggerMatchingCone,
     jetPtCuts                 = bjetSelection.jetPtCuts,
     jetEtaCuts                = bjetSelection.jetEtaCuts,
-    bjetDiscr                 = bjetSelection.bjetDiscr,
-    bjetDiscrWorkingPoint     = "Loose",
+    bjetDiscr                 = bjetSelection.bjetDiscr,    
+    bjetDiscrWorkingPoint     = "Loose", # defines SR, VR, CR1, and CR2 (in combination with inverted top)
     numberOfBJetsCutValue     = bjetSelection.numberOfBJetsCutValue,
     numberOfBJetsCutDirection = bjetSelection.numberOfBJetsCutDirection,
     )
@@ -238,17 +241,26 @@ scaleFactors.setupBtagSFInformation(btagPset               = fakeBBjetSelection,
                                     btagEfficiencyFilename = "btageff_HToTB.json",
                                     direction              = "nominal")
 
+fakeBTopSelectionBDT = PSet(
+    MVACutValue            = 0.00,  # [default: 0.00] # defines SR, VR, CR1, and CR2 (in combination with inverted b-jets)
+    MVACutDirection        = ">=",
+    LdgTopDefinition       = "MVA", # [default: "MVA"] (options: "MVA", "Pt")
+    MassCutValue           = topSelectionBDT.MassCutValue,
+    MassCutDirection       = topSelectionBDT.MassCutDirection,
+    CSV_bDiscCutValue      = topSelectionBDT.CSV_bDiscCutValue,
+    CSV_bDiscCutDirection  = topSelectionBDT.CSV_bDiscCutDirection,
+    WeightFile             = topSelectionBDT.WeightFile,
+)
+
 fakeBMeasurement = PSet(
-    baselineBJetsCutValue     = 2,      # [default: 2]
-    baselineBJetsCutDirection = "==",   # [default: "=="]
+    baselineBJetsCutValue     = 2,
+    baselineBJetsCutDirection = "==",
     baselineBJetsDiscr        = bjetSelection.bjetDiscr,
     baselineBJetsDiscrWP      = bjetSelection.bjetDiscrWorkingPoint,
     LdgTopMVACutValue         = topSelectionBDT.MVACutValue,
     LdgTopMVACutDirection     = topSelectionBDT.MVACutDirection, 
     SubldgTopMVACutValue      = topSelectionBDT.MVACutValue,
-    SubldgTopMVACutDirection  = "<",    # [default: "<"]
-    minTopMVACutValue         = 0.0,    # [default: 0.60]
-    minTopMVACutDirection     = ">=",   # [default: ">="]
+    SubldgTopMVACutDirection  = "<",
     )
 
 #================================================================================================
@@ -295,6 +307,7 @@ allSelections = PSet(
     FatJetSelection       = fatjetVeto,
     FakeBMeasurement      = fakeBMeasurement,
     FakeBBjetSelection    = fakeBBjetSelection,
+    FakeBTopSelectionBDT  = fakeBTopSelectionBDT,
     CommonPlots           = commonPlotsOptions,
     HistogramAmbientLevel = histogramAmbientLevel,
     QGLRSelection         = qglrSelection,

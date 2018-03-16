@@ -14,6 +14,9 @@
 TopSelectionBDT::Data::Data()
 :
   bPassedSelection(false),
+  bPassedBothMVA(false),
+  bPassedLdgMVA(false),
+  bPassedSubldgMVA(false),
   bHasFreeBJet(false),
   fMVAmax1(-1.0),
   fTrijet1Jet1(),
@@ -46,7 +49,8 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config, EventCounter& event
     // Sub counters
     cSubAll(fEventCounter.addSubCounter("top selection ("+postfix+")", "All events")),
     cSubPassedBjetsCut(fEventCounter.addSubCounter("top selection ("+postfix+")", "Passed b-jets cut")),
-    cSubPassedBDTCut(fEventCounter.addSubCounter("top selection ("+postfix+")", "Passed BDT cut")),
+    cSubPassedLdgMVACut(fEventCounter.addSubCounter("top selection ("+postfix+")", "Passed MVA cut (ldg)")),
+    cSubPassedSubldgMVACut(fEventCounter.addSubCounter("top selection ("+postfix+")", "Passed MVA cut (subldg)")),
     cSubPassedFreeBjetCut(fEventCounter.addSubCounter("top selection ("+postfix+")", "Passed free b-jet cut")),
     // Top candidates
     cTopsAll(fEventCounter.addSubCounter("top candidates ("+postfix+")", "All candidates")),
@@ -69,7 +73,8 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config)
   // Sub counters
   cSubAll(fEventCounter.addSubCounter("top selection", "All events")),
   cSubPassedBjetsCut(fEventCounter.addSubCounter("top selection", "Passed b-jets cut")),
-  cSubPassedBDTCut(fEventCounter.addSubCounter("top selection", "Passed BDT cut")),
+  cSubPassedLdgMVACut(fEventCounter.addSubCounter("top selection", "Passed MVA cut (ldg)")),
+  cSubPassedSubldgMVACut(fEventCounter.addSubCounter("top selection", "Passed MVA cut (subldg)")),
   cSubPassedFreeBjetCut(fEventCounter.addSubCounter("top selection", "Passed Free Bjet cut")),
   // Top candidates
   cTopsAll(fEventCounter.addSubCounter("top candidates", "All candidates")),
@@ -310,10 +315,10 @@ void TopSelectionBDT::bookHistograms(TDirectory* dir) {
   hSubldgTrijetDiJetMass   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetDiJetMass",";M (GeV/c^{2})", nWMassBins  , fWMassMin  , fWMassMax);
   hSubldgTrijetDijetDeltaR = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SbldgTrijetDijetDR"  , ";#Delta R(j_{1},j_{2})"  , nDRBins     , fDRMin     , fDRMax);
   hSubldgTrijetTopMassWMassRatio = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetTopMassWMassRatio",";R_{32}", 100 , 0.0, 10.0);
-  hSubldgTrijet_DeltaR_Trijet_TetrajetBjet   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijet_DeltaR_Trijet_TetrajetBjet"  , ";#Delta R(top, b_{free})"  , nDRBins, fDRMin, fDRMax);
-  hSubldgTrijet_DeltaEta_Trijet_TetrajetBjet = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijet_DeltaEta_Trijet_TetrajetBjet"  , ";#Delta Eta(top, b_{free})", nDEtaBins, fDEtaMin, fDEtaMax);
-  hSubldgTrijet_DeltaPhi_Trijet_TetrajetBjet = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijet_DeltaPhi_Trijet_TetrajetBjet"  , ";#Delta Phi(top, b_{free})", nDPhiBins, fDPhiMin, fDPhiMax);
-  hSubldgTrijet_DeltaY_Trijet_TetrajetBjet   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijet_DeltaY_Trijet_TetrajetBjet"  , ";#Delta Y(top, b_{free})", nDRBins, fDRMin, fDRMax);
+  hSubldgTrijet_DeltaR_Trijet_TetrajetBjet   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijet_DeltaR_Trijet_TetrajetBjet", ";#Delta R(top, b_{free})", nDRBins, fDRMin, fDRMax);
+  hSubldgTrijet_DeltaEta_Trijet_TetrajetBjet = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijet_DeltaEta_Trijet_TetrajetBjet", ";#Delta#eta(top, b_{free})", nDEtaBins, fDEtaMin, fDEtaMax);
+  hSubldgTrijet_DeltaPhi_Trijet_TetrajetBjet = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijet_DeltaPhi_Trijet_TetrajetBjet", ";#Delta#phi(top, b_{free})", nDPhiBins, fDPhiMin, fDPhiMax);
+  hSubldgTrijet_DeltaY_Trijet_TetrajetBjet   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijet_DeltaY_Trijet_TetrajetBjet", ";#Delta Y(top, b_{free})", nDRBins, fDRMin, fDRMax);
 
   // Histograms (2D) 
   hDeltaR_LdgTrijet_TetrajetBjet_Vs_SubldgTrijet_TetrajetBjet   = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdir, "DeltaR_LdgTrijet_TetrajetBjet_Vs_SubldgTrijet_TetrajetBjet", 
@@ -457,10 +462,12 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	      fAllTops.Jet1.push_back(getLeadingSubleadingJet(jet1, jet2, "leading"));
 	      fAllTops.Jet2.push_back(getLeadingSubleadingJet(jet1, jet2, "subleading"));
 	      fAllTops.BJet.push_back(bjet);
+	      // std::cout << "MVAoutput = " << MVAoutput << " " << cfg_MVACut.getCutDirectionString() << " " << cfg_MVACut.getCutValue() << "?" <<  std::endl;
 
 	      // Get top candidates above MVA cut
 	      if (cfg_MVACut.passedCut(MVAoutput))
 		{
+		  // std::cout << "\tMVAoutput = " << MVAoutput << " " << cfg_MVACut.getCutDirectionString() << " " << cfg_MVACut.getCutValue() << " ?" <<  std::endl;
 		  cTopsPassBDTCut.increment();
 		  fSelectedTops.MVA.push_back(MVAoutput);
 		  fSelectedTops.TrijetP4.push_back(top_p4);
@@ -512,16 +519,9 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   hTopMultiplicity_SelectedCleanedCandidates->Fill(fSelectedCleanedTops.MVA.size());
 
   //================================================================================================  
-  // Apply multiplicity cut on number of selected top candidates
+  // Determine the ldg-in-pt free b-jet (tetrajet b-jet)
   //================================================================================================  
-  if (0) std::cout << "=== TopSelectionBDT:: Apply multiplicity cut" << std::endl;
-  if (fSelectedCleanedTops.MVA.size() < 2) return output;
-  cSubPassedBDTCut.increment();
-
-  //================================================================================================  
-  // Apply cut on ldg-in-pt free b-jet (tetrajet b-jet)
-  //================================================================================================  
-  if (0) std::cout << "=== TopSelectionBDT:: Apply tetrajet b-jet cut" << std::endl;
+  if (0) std::cout << "=== TopSelectionBDT:: Find the tetrajet b-jet" << std::endl;
   Jet tetrajetBjet;
   double tetrajetBjetPt_max = -999.99;
   math::XYZTLorentzVector ldgTetrajet_P4;
@@ -529,66 +529,100 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   SelectedTrijets top_ldgInPt    = getLdgOrSubldgTop(fSelectedCleanedTops, "leading");
   SelectedTrijets top_subLdgInPt = getLdgOrSubldgTop(fSelectedCleanedTops, "subleading");
 
+  if (0) std::cout << "=== TopSelectionBDT:: Tetrajet bjet loop" << std::endl;
   // For-loop: All selected b-jets
   for (auto& bjet: bjets)
     {
       // Skip if tetrajet bjet pT is greater that this pt
       if (tetrajetBjetPt_max > bjet.pt()) continue;
+
+      // Check if this bjet is matched with one of the jets assigned to the two tops (if the tops exist, else match is false)
       if (isMatchedJet(bjet, fSelectedCleanedTops, 0) || isMatchedJet(bjet, fSelectedCleanedTops, 1)) continue;
 
       // Save variables
       tetrajetBjetPt_max = bjet.pt();
       tetrajetBjet       = bjet;
     }
-  // Assign the tetrajet b-jet
   if (tetrajetBjetPt_max > 0)
     {
       ldgTetrajet_P4    = top_ldgInPt.TrijetP4    + tetrajetBjet.p4();
       subLdgTetrajet_P4 = top_subLdgInPt.TrijetP4 + tetrajetBjet.p4();
     }
+
   //================================================================================================
   // Fill output data
   //================================================================================================
-  float ldgMVA       = fSelectedCleanedTops.MVA.at(0);
-  float subLdgMVA    = fSelectedCleanedTops.MVA.at(1);
-  bool passLdgMVA    = cfg_MVACut.passedCut(ldgMVA);
-  bool passSubldgMVA = cfg_MVACut.passedCut(subLdgMVA);
-  bool passBDTboth   = passLdgMVA * passSubldgMVA;
+  if (0) std::cout << "=== TopSelectionBDT:: Fill output" << std::endl;
+  bool bPass_LdgMVA     = false;
+  bool bPass_SubldgMVA  = false;
+  if (fSelectedCleanedTops.MVA.size() < 1) 
+    {
+      bPass_LdgMVA    = false;
+      bPass_SubldgMVA = false;
+    }
+  else if (fSelectedCleanedTops.MVA.size() == 1)
+    {
+      bPass_LdgMVA    = cfg_MVACut.passedCut( fSelectedCleanedTops.MVA.at(0) );
+      bPass_SubldgMVA = false;
+      // Leading-in-MVA top
+      output.fMVAmax1           = fSelectedCleanedTops.MVA.at(0);
+      output.fTrijet1Jet1       = fSelectedCleanedTops.Jet1.at(0);
+      output.fTrijet1Jet2       = fSelectedCleanedTops.Jet2.at(0);
+      output.fTrijet1BJet       = fSelectedCleanedTops.BJet.at(0);
+      output.fTrijet1Dijet_p4   = fSelectedCleanedTops.Jet1.at(0).p4() + fSelectedCleanedTops.Jet2.at(0).p4();
+      output.fTrijet1_p4        = fSelectedCleanedTops.TrijetP4.at(0);      
+    }
+  else // size > 1
+    {
+      bPass_LdgMVA    = cfg_MVACut.passedCut( fSelectedCleanedTops.MVA.at(0) );
+      bPass_SubldgMVA = cfg_MVACut.passedCut( fSelectedCleanedTops.MVA.at(1) );
 
-  // Fill data
-  output.bPassedSelection   = (passBDTboth && tetrajetBjetPt_max > 0);
-  // Leading-in-MVA top
-  output.fMVAmax1           = fSelectedCleanedTops.MVA.at(0);
-  output.fTrijet1Jet1       = fSelectedCleanedTops.Jet1.at(0);
-  output.fTrijet1Jet2       = fSelectedCleanedTops.Jet2.at(0);
-  output.fTrijet1BJet       = fSelectedCleanedTops.BJet.at(0);
-  output.fTrijet1Dijet_p4   = fSelectedCleanedTops.Jet1.at(0).p4() + fSelectedCleanedTops.Jet2.at(0).p4();
-  output.fTrijet1_p4        = fSelectedCleanedTops.TrijetP4.at(0);
-
-  // Subleading-in-MVA top
-  output.fMVAmax2           = fSelectedCleanedTops.MVA.at(1);
-  output.fTrijet2Jet1       = fSelectedCleanedTops.Jet1.at(1);
-  output.fTrijet2Jet2       = fSelectedCleanedTops.Jet2.at(1);
-  output.fTrijet2BJet       = fSelectedCleanedTops.BJet.at(1);
-  output.fTrijet2Dijet_p4   = fSelectedCleanedTops.Jet1.at(1).p4() + fSelectedCleanedTops.Jet2.at(1).p4();
-  output.fTrijet2_p4        = fSelectedCleanedTops.TrijetP4.at(1);
-  // Tetrajet b-jet
-  output.bHasFreeBJet       = (tetrajetBjetPt_max > 0);
+      // Leading-in-MVA top
+      output.fMVAmax1           = fSelectedCleanedTops.MVA.at(0);
+      output.fTrijet1Jet1       = fSelectedCleanedTops.Jet1.at(0);
+      output.fTrijet1Jet2       = fSelectedCleanedTops.Jet2.at(0);
+      output.fTrijet1BJet       = fSelectedCleanedTops.BJet.at(0);
+      output.fTrijet1Dijet_p4   = fSelectedCleanedTops.Jet1.at(0).p4() + fSelectedCleanedTops.Jet2.at(0).p4();
+      output.fTrijet1_p4        = fSelectedCleanedTops.TrijetP4.at(0);
+      // Subleading-in-MVA top
+      output.fMVAmax2           = fSelectedCleanedTops.MVA.at(1);
+      output.fTrijet2Jet1       = fSelectedCleanedTops.Jet1.at(1);
+      output.fTrijet2Jet2       = fSelectedCleanedTops.Jet2.at(1);
+      output.fTrijet2BJet       = fSelectedCleanedTops.BJet.at(1);
+      output.fTrijet2Dijet_p4   = fSelectedCleanedTops.Jet1.at(1).p4() + fSelectedCleanedTops.Jet2.at(1).p4();
+      output.fTrijet2_p4        = fSelectedCleanedTops.TrijetP4.at(1);
+    }
+  bool bPass_FreeBjet   = (tetrajetBjetPt_max > 0);
+  bool bPass_BothMVA    = bPass_LdgMVA * bPass_SubldgMVA;
+  bool bPass_Selection  = bPass_FreeBjet * bPass_BothMVA;
+  
+  // Fill in remaining data
+  output.bPassedLdgMVA      = bPass_LdgMVA;
+  output.bPassedSubldgMVA   = bPass_SubldgMVA;
+  output.bPassedBothMVA     = bPass_BothMVA;
+  output.bHasFreeBJet       = bPass_FreeBjet;
+  output.bPassedSelection   = bPass_Selection;
   output.fTetrajetBJet      = tetrajetBjet;
-  // Tetrajets
   output.fLdgTetrajet_p4    = ldgTetrajet_P4;
   output.fSubldgTetrajet_p4 = subLdgTetrajet_P4;
 
   //================================================================================================
-  // Apply ldg-in-pt free b-jet cut (tetrajet b-jet)
+  // Increment counters
   //================================================================================================
-  if (0) std::cout << "=== TopSelectionBDT:: Apply tetrajet b-jet cut" << std::endl;
-  if ( !output.hasFreeBJet() ) return output; 
-  cSubPassedFreeBjetCut.increment();
+  if (0) std::cout << "=== TopSelectionBDT:: Increment counters" << std::endl;
+  // Sub-counters
+  if (bPass_LdgMVA) cSubPassedLdgMVACut.increment();
+  if (bPass_SubldgMVA) cSubPassedSubldgMVACut.increment();
+  if (bPass_Selection) cSubPassedFreeBjetCut.increment();
+  // Main counter
+  if (bPass_Selection) cPassedTopSelectionBDT.increment();
    
   //================================================================================================
-  // Fill histograms
+  // Fill histograms (only if all selectios passed)
   //================================================================================================
+  if (0) std::cout << "=== TopSelectionBDT:: Filling histograms" << std::endl;
+  if (!bPass_Selection) return output;
+
   // Leading in pt top
   double dijetMass = (top_ldgInPt.Jet1.p4() +  top_ldgInPt.Jet2.p4()).M();
   hLdgTrijetPt          -> Fill(top_ldgInPt.TrijetP4.Pt());
@@ -660,9 +694,6 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   double LdgTrijet_DeltaPhi = std::abs(ROOT::Math::VectorUtil::DeltaPhi(top_ldgInPt.TrijetP4, output.fTetrajetBJet.p4()));
   double SubldgTrijet_DeltaPhi = std::abs(ROOT::Math::VectorUtil::DeltaPhi(top_subLdgInPt.TrijetP4, output.fTetrajetBJet.p4()));
   hDeltaPhi_LdgTrijet_TetrajetBjet_Vs_SubldgTrijet_TetrajetBjet -> Fill(LdgTrijet_DeltaPhi, SubldgTrijet_DeltaPhi);
-  
-  // Passed all top selection cuts
-  cPassedTopSelectionBDT.increment();
 
   return output;
 }
@@ -698,6 +729,9 @@ Jet TopSelectionBDT::getLeadingSubleadingJet(const Jet& jet0, const Jet& jet1, s
 }
 
 bool TopSelectionBDT::isMatchedJet(const Jet& jet, const TrijetSelection& myTops, const unsigned int index) {
+  // Sanity check: If index is bigger than the number of tops that top does not exist => not possible to be matched
+  if ( index+1 > myTops.MVA.size()) return false;
+
   std::vector<Jet> jets;
   jets.push_back(myTops.Jet1.at(index));
   jets.push_back(myTops.Jet2.at(index));
@@ -772,8 +806,23 @@ SelectedTrijets TopSelectionBDT::getLdgOrSubldgTop(TrijetSelection myTops, strin
     {
       std::cout<<"WARNING! Unknown option "<< selectedTrijet << ". Function returns leading top"<<std::endl;
     }
-
-  SelectedTrijets top_ldgInPt, top_subLdgInPt;
+  
+  // Declarations
+  SelectedTrijets top_ldgInPt;
+  SelectedTrijets top_subLdgInPt;
+ 
+  // Sanity check: If  the number of tops if less than 2 (1) return the only top (empty object)
+  if ( myTops.MVA.size() == 0) return top_ldgInPt;
+  if ( myTops.MVA.size() == 1) 
+    {
+      top_ldgInPt.Jet1     = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "leading");
+      top_ldgInPt.Jet2     = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "subleading");
+      top_ldgInPt.BJet     = myTops.BJet.at(0);
+      top_ldgInPt.DijetP4  = myTops.DijetP4.at(0);
+      top_ldgInPt.TrijetP4 = myTops.TrijetP4.at(0);
+      top_ldgInPt.MVA      = myTops.MVA.at(0);
+      return top_ldgInPt;
+    }
 
   // Assuming myTops are selected and cross-cleaned
   if(myTops.TrijetP4.at(0).Pt() > myTops.TrijetP4.at(1).Pt())
