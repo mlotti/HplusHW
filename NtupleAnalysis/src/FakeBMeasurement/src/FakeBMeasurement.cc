@@ -31,7 +31,7 @@ private:
   const std::string cfg_BaselineBJetsDiscrWP;
   const DirectionalCut<double> cfg_LdgTopMVACut;
   const DirectionalCut<double> cfg_SubldgTopMVACut;
-  const DirectionalCut<double> cfg_MinTopMVACut;
+  const std::string cfg_LdgTopDefinition;
   const std::string cfg_BjetDiscr;
 
   // Common plots
@@ -491,7 +491,7 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
     cfg_BaselineBJetsDiscrWP(config.getParameter<std::string>("FakeBMeasurement.baselineBJetsDiscrWP")),
     cfg_LdgTopMVACut(config, "FakeBMeasurement.LdgTopMVACut"),
     cfg_SubldgTopMVACut(config, "FakeBMeasurement.SubldgTopMVACut"),
-    cfg_MinTopMVACut(config, "FakeBMeasurement.minTopMVACut"),
+    cfg_LdgTopDefinition(config.getParameter<std::string>("FakeBTopSelectionBDT.LdgTopDefinition")),
     cfg_BjetDiscr(config.getParameter<std::string>("FakeBBjetSelection.bjetDiscr")),
     fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kFakeBMeasurement, fHistoWrapper),
     // fNormalizationSystematicsSignalRegion(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kQCDNormalizationSystematicsSignalRegion, fHistoWrapper), // fixme
@@ -506,10 +506,10 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
     fJetSelection(config.getParameter<ParameterSet>("JetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cBaselineBTaggingCounter(fEventCounter.addCounter("Baseline: passed b-jet selection")),
     cBaselineBTaggingSFCounter(fEventCounter.addCounter("Baseline: b tag SF")),
-    fBaselineBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fBaselineBJetSelection(config.getParameter<ParameterSet>("BJetSelection")),// fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fBaselineMETSelection(config.getParameter<ParameterSet>("METSelection")),
     fBaselineQGLRSelection(config.getParameter<ParameterSet>("QGLRSelection")),// fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
-    fBaselineTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
+    fBaselineTopSelection(config.getParameter<ParameterSet>("FakeBTopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
     fBaselineFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
     cBaselineSelected(fEventCounter.addCounter("Baseline: selected events")),
     cBaselineSelectedCR(fEventCounter.addCounter("Baseline: selected CR events")),
@@ -518,7 +518,7 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
     fInvertedBJetSelection(config.getParameter<ParameterSet>("FakeBBjetSelection")),//, fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fInvertedMETSelection(config.getParameter<ParameterSet>("METSelection")),
     fInvertedQGLRSelection(config.getParameter<ParameterSet>("QGLRSelection")),// fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
-    fInvertedTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
+    fInvertedTopSelection(config.getParameter<ParameterSet>("FakeBTopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
     fInvertedFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
     cInvertedSelected(fEventCounter.addCounter("Inverted: selected events")),
     cInvertedSelectedCR(fEventCounter.addCounter("Inverted: selected CR events"))
@@ -2109,6 +2109,12 @@ void FakeBMeasurement::setupBranches(BranchManager& branchManager) {
 
 void FakeBMeasurement::process(Long64_t entry) {
 
+  // Sanity check
+  if (cfg_LdgTopDefinition != "MVA" &&  cfg_LdgTopDefinition != "Pt") 
+    {
+      throw hplus::Exception("config") << "Unsupported method of defining the leading top (=" << cfg_LdgTopDefinition << "). Please select from \"MVA\" and \"Pt\".";
+    }
+
   //====== Initialize
   fCommonPlots.initialize();
   // fNormalizationSystematicsSignalRegion.initialize();  // fixme
@@ -2246,11 +2252,8 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   // 11) Top selection
   //================================================================================================
   if (0) std::cout << "=== Baseline: Top selection" << std::endl;
-  const TopSelectionBDT::Data topData = fBaselineTopSelection.analyze(fEvent, jetData, bjetData);
-  bool passMinTopMVACut = cfg_MinTopMVACut.passedCut( std::min(topData.getMVAmax1(), topData.getMVAmax2()) );
-  bool hasFreeBJet      = topData.hasFreeBJet();
-  if (!hasFreeBJet) return;
-  if (!passMinTopMVACut) return;
+  const TopSelectionBDT::Data topData = fBaselineTopSelection.analyze(fEvent, jetData, bjetData); 
+  if (!topData.passedSelection()) return; // preliminary cut!
 
   //================================================================================================
   // *) FatJet veto
@@ -2258,7 +2261,6 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   if (0) std::cout << "\n=== Baseline: FatJet veto" << std::endl;
   const FatJetSelection::Data fatjetData = fBaselineFatJetSelection.analyze(fEvent, topData);
   if (!fatjetData.passedSelection()) return;
-
 
   // Defining the splitting of phase-space as the eta of the Tetrajet b-jet
   std::vector<float> myFactorisationInfo;
@@ -2372,7 +2374,7 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
 
   hBaseline_MET_AfterStandardSelections ->Fill(isGenuineB, METData.getMET().R());
   hBaseline_HT_AfterStandardSelections ->Fill(isGenuineB, jetData.HT());
-  hBaseline_MVAmax1_AfterStandardSelections ->Fill(isGenuineB, topData.getMVAmax1());
+  hBaseline_MVAmax1_AfterStandardSelections ->Fill(isGenuineB, topData.getMVAmax1()); //iro
   hBaseline_MVAmax2_AfterStandardSelections ->Fill(isGenuineB, topData.getMVAmax2());
   hBaseline_LdgTetrajetPt_AfterStandardSelections->Fill(isGenuineB, topData.getLdgTetrajet().pt() );
   hBaseline_LdgTetrajetM_AfterStandardSelections->Fill(isGenuineB, topData.getLdgTetrajet().M() );
@@ -2396,17 +2398,32 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   hBaseline_SubLdgDijetPt_AfterStandardSelections->Fill(isGenuineB, topData.getSubldgDijet().pt() );
   hBaseline_SubLdgDijetM_AfterStandardSelections ->Fill(isGenuineB, topData.getSubldgDijet().M() );
 
-
   //================================================================================================
   // All Selections
   //================================================================================================  
-  if (!topData.passedSelection()) 
+  float ldgMVA;
+  float subldgMVA;
+  if (cfg_LdgTopDefinition == "MVA")
     {
-      // If top fails fill determine if it qualifies for Control Region 1 (CRone)
-      bool passLdgTopMVA    = cfg_LdgTopMVACut.passedCut( topData.getMVAmax1() ); //fixme: 
-      bool passSubldgTopMVA = cfg_SubldgTopMVACut.passedCut( topData.getMVAmax2() );
-      bool passInvertedTop  = passLdgTopMVA * passSubldgTopMVA;
-      if (!passInvertedTop) return;
+      ldgMVA    = topData.getMVAmax1();
+      subldgMVA = topData.getMVAmax2();
+    }
+  else
+    {
+      ldgMVA    = topData.getMVALdgInPt();
+      subldgMVA = topData.getMVASubldgInPt();
+    }
+  bool bPass_LdgTopMVA    = cfg_LdgTopMVACut.passedCut(ldgMVA);
+  bool bPass_SubldgTopMVA = cfg_LdgTopMVACut.passedCut(subldgMVA);
+  bool bPass_BothMVA      = bPass_LdgTopMVA * bPass_SubldgTopMVA;
+  bool bPass_InvertedTop  = bPass_LdgTopMVA * cfg_SubldgTopMVACut.passedCut(subldgMVA);
+  if (!bPass_BothMVA) 
+    {
+      // If top fails determine if event falls into  Control Region 2 (CR2)
+      if (!bPass_InvertedTop) return;
+      // std::cout << "\nbPass_LdgTopMVA = " << bPass_LdgTopMVA << ", bPass_SubldgTopMVA = " << bPass_SubldgTopMVA << ", bPass_BothMVA = " << bPass_BothMVA << ", bPass_InvertedTop = " << bPass_InvertedTop << std::endl;
+      // std::cout << "ldgMVA    = " << ldgMVA    << " " << cfg_LdgTopMVACut.getCutDirectionString()    << " " << cfg_LdgTopMVACut.getCutValue()    << "?" <<  std::endl; 
+      // std::cout << "subldgMVA = " << subldgMVA << " " << cfg_SubldgTopMVACut.getCutDirectionString() << " " << cfg_SubldgTopMVACut.getCutValue() << "?" <<  std::endl; 
 
       if (0) std::cout << "=== Baseline: Control Region 1 (CRone)" << std::endl;
       cBaselineSelectedCR.increment();
@@ -2734,7 +2751,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   //================================================================================================  
   // 8) BJet Selections
   //================================================================================================
-  if (0) std::cout << "=== Inverted: BJet selection" << std::endl;
+  if (0) std::cout << "=== Inverted BJet: BJet selection" << std::endl;
   const BJetSelection::Data invBjetData = fInvertedBJetSelection.silentAnalyze(fEvent, jetData);
   if (!invBjetData.passedSelection()) return;
 
@@ -2756,7 +2773,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   //================================================================================================  
   // 9) BJet SF  
   //================================================================================================
-  if (0) std::cout << "=== Inverted: BJet SF" << std::endl;
+  if (0) std::cout << "=== Inverted BJet: BJet SF" << std::endl;
   if (fEvent.isMC()) 
     { 
       fEventWeight.multiplyWeight(invBjetData.getBTaggingScaleFactorEventWeight());
@@ -2766,31 +2783,28 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   // - MET selection
   //================================================================================================
-  if (0) std::cout << "=== Inverted: MET selection" << std::endl;
+  if (0) std::cout << "=== Inverted BJet: MET selection" << std::endl;
   const METSelection::Data METData = fInvertedMETSelection.silentAnalyze(fEvent, nVertices);
   // if (!METData.passedSelection()) return;
 
   //================================================================================================
   // 10) Quark-Gluon Likelihood Ratio Selection
   //================================================================================================
-  if (0) std::cout << "=== Inverted: QGLR selection" << std::endl;
+  if (0) std::cout << "=== Inverted BJet: QGLR selection" << std::endl;
   const QuarkGluonLikelihoodRatio::Data QGLRData = fInvertedQGLRSelection.analyze(fEvent, jetData, invBjetData);
   if (!QGLRData.passedSelection()) return;
 
   //================================================================================================
   // 11) Top selection
   //================================================================================================
-  if (0) std::cout << "=== Inverted: Top selection" << std::endl;
+  if (0) std::cout << "=== Inverted BJet: Top selection" << std::endl;
   const TopSelectionBDT::Data topData = fInvertedTopSelection.analyze(fEvent, jetData, invBjetData);
-  bool passMinTopMVACut = cfg_MinTopMVACut.passedCut( std::min(topData.getMVAmax1(), topData.getMVAmax2()) );
-  bool hasFreeBJet      = topData.hasFreeBJet();
-  if (!hasFreeBJet) return;
-  if (!passMinTopMVACut) return;
+  if (!topData.passedSelection()) return; // preliminary cut!
 
   //================================================================================================
   // *) FatJet veto
   //================================================================================================
-  if (0) std::cout << "\n=== Inverted: FatJet veto" << std::endl;
+  if (0) std::cout << "\n=== Inverted BJet: FatJet veto" << std::endl;
   const FatJetSelection::Data fatjetData = fInvertedFatJetSelection.analyze(fEvent, topData);
   if (!fatjetData.passedSelection()) return;
 
@@ -2810,7 +2824,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   // Preselections (aka Standard Selections)
   //================================================================================================
-  if (0) std::cout << "=== Inverted: Preselections" << std::endl;
+  if (0) std::cout << "=== Inverted BJet: Preselections" << std::endl;
   fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, invBjetData, METData, QGLRData, topData, isGenuineB);
 
   // Fill Triplets  (Inverted)
@@ -2937,15 +2951,28 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   // All Selections
   //================================================================================================
-  if (!topData.passedSelection()) 
+  float ldgMVA;
+  float subldgMVA;
+  if (cfg_LdgTopDefinition == "MVA")
     {
-      // If top fails determine if event fall into  Control Region 2 (CR2)
-      bool passLdgTopMVA    = cfg_LdgTopMVACut.passedCut( topData.getMVAmax1() );
-      bool passSubldgTopMVA = cfg_SubldgTopMVACut.passedCut( topData.getMVAmax2() );
-      bool passInvertedTop  = passLdgTopMVA * passSubldgTopMVA;
-      if (!passInvertedTop) return;
+      ldgMVA    = topData.getMVAmax1();
+      subldgMVA = topData.getMVAmax2();
+    }
+  else
+    {
+      ldgMVA    = topData.getMVALdgInPt();
+      subldgMVA = topData.getMVASubldgInPt();
+    }
+  bool bPass_LdgTopMVA    = cfg_LdgTopMVACut.passedCut(ldgMVA);
+  bool bPass_SubldgTopMVA = cfg_SubldgTopMVACut.passedCut(subldgMVA);
+  bool bPass_BothMVA      = bPass_LdgTopMVA * bPass_SubldgTopMVA;
+  bool bPass_InvertedTop  = bPass_LdgTopMVA * !bPass_SubldgTopMVA;
+  if (!bPass_BothMVA) 
+    {
+      // If top fails determine if event falls into  Control Region 2 (CR2)
+      if (!bPass_InvertedTop) return;
 
-      if (0) std::cout << "=== Inverted: Control Region 2 (CR2)" << std::endl;
+      if (0) std::cout << "=== Inverted BJet: Control Region 2 (CR2)" << std::endl;
       cInvertedSelectedCR.increment();
 
       // Fill plots (CR2)
@@ -3103,7 +3130,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
       return;
     }
 
-  if (0) std::cout << "=== Inverted: Verification Region (VR)" << std::endl;
+  if (0) std::cout << "=== Inverted BJet: Verification Region (VR)" << std::endl;
   cInvertedSelected.increment();
 
   //================================================================================================
