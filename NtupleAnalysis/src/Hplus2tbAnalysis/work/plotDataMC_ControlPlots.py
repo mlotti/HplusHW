@@ -283,6 +283,19 @@ def GetHistoKwargs(h, opts):
         kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": yMin, "ymaxfactor": yMaxF}
 
+    if "DeltaEta" in h:
+        kwargs["ylabel"] = "Events / %.2f "
+        kwargs["opts"]   = {"xmax": +6.0, "ymin": yMin, "ymaxfactor": yMaxF}
+
+    if "BDT" in h:
+        kwargs["ylabel"] = "Events / %.2f "
+        kwargs["cutBox"] = {"cutValue": 0.4, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": +0.4, "ymin": yMin, "ymaxfactor": yMaxF}
+
+    if "DeltaR" in h or "DeltaY" in h or "DR" in h:
+        kwargs["ylabel"] = "Events / %.2f "
+        kwargs["opts"]   = {"xmax": +8.0, "ymin": yMin, "ymaxfactor": yMaxF}
+
     if h == "TrijetBDT_Mass": # before BDT cut
         units            = "GeV/c^{2}"
         kwargs["rebinX"] = 2
@@ -479,7 +492,7 @@ def GetHistoKwargs(h, opts):
 
     if  h == "TetrajetBJetEta":
         kwargs["rebinX"] = 1
-        kwargs["xlabel"] = "#eta"
+        kwargs["xlabel"] = "#eta_{b_{free}}"
         kwargs["ylabel"] = "Events / %.2f "
         kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": yMin, "ymaxfactor": yMaxF}
@@ -488,7 +501,7 @@ def GetHistoKwargs(h, opts):
         ROOT.gStyle.SetNdivisions(8, "X")
         units            = "GeV/c"
         kwargs["rebinX"] = 1
-        kwargs["xlabel"] = "p_{T,jjbb} (%s)" % units
+        kwargs["xlabel"] = "p_{T, b_{free}} (%s)" % units
         kwargs["ylabel"] = _yLabel + units
         kwargs["cutBox"] = {"cutValue": 30.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
 

@@ -40,6 +40,7 @@ Setting histogramAmbientLevel=kSystematics will include kSystematics AND kNever.
 #================================================================================================
 import sys
 from optparse import OptionParser
+import datetime
 
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
 from HiggsAnalysis.NtupleAnalysis.AnalysisBuilder import AnalysisBuilder    
@@ -85,6 +86,8 @@ def Print(msg, printHeader=True):
 # Setup the main function
 #================================================================================================
 def main():
+
+    Print("Started @ " + str(datetime.datetime.now()), True)
 
     # Require at least two arguments (script-name, path to multicrab)     
     if len(sys.argv) < 2:
@@ -262,6 +265,7 @@ def main():
         Print("Running process (no PROOF)")
         process.run()
 
+    Print("Finished @ " + str(datetime.datetime.now()), True)
     return
 
 #================================================================================================
