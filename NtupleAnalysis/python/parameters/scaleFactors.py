@@ -138,6 +138,16 @@ def setupBtagSFInformation(btagPset, btagPayloadFilename, btagEfficiencyFilename
         btagPset.btagSFVariationInfo = variationInfo
     #print btagPset
 
+# A helper function to update b-tag SF information in AnalysisBuilder for syst. variations
+def updateBtagSFInformationForVariations(btagPset, direction, variationInfo=None):
+    # Set syst. uncert. variation information
+    btagPset.btagSFVariationDirection = direction
+    if variationInfo == None:
+        btagPset.btagSFVariationInfo = "None"
+    else:
+        btagPset.btagSFVariationInfo = variationInfo
+
+
 ## Helper function accessed through setupBtagSFInformation
 def _setupBtagSFDatabase(btagPset, btagPayloadFilename, direction, variationInfo):
     fullname = os.path.join(os.getenv("HIGGSANALYSIS_BASE"), "NtupleAnalysis", "data", btagPayloadFilename)

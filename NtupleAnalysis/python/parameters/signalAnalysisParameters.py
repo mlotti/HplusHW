@@ -1,4 +1,4 @@
-si#!/usr/bin/env python
+#!/usr/bin/env python
 
 from HiggsAnalysis.NtupleAnalysis.main import PSet
 import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
