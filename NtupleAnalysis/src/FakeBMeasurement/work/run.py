@@ -275,7 +275,7 @@ def main():
     minutes   = divmod(dt.days * (60*60*24) + dt.seconds, 60) # (a, b) = (minutes, seconds)
     seconds   = dt.seconds
     Print("Finished @ " + str(datetime.datetime.now()), True)
-    Print("Elapsed time is %s h, %s min" % (hours[0], hours[1]), False)
+    Print("Total elapsed time is %s h, %s min, %s sec" % (hours[0], minutes[0], minutes[1]), True)
     return
 
 #================================================================================================
