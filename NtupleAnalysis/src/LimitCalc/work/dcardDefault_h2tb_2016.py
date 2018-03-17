@@ -94,6 +94,7 @@ OptionNumberOfDecimalsInSummaries      = 1     # [defaul: 1]       (Self explana
 ToleranceForLuminosityDifference       = 0.05  # [default: 0.05]   (Tolerance for throwing error on luminosity difference; "0.01" means that a 1% is required) 
 ToleranceForMinimumRate                = 0.0   # [default: 0.0]    (Tolerance for almost zero rate columns with smaller rate are suppressed) 
 labelPrefix                            = ""    # [default: ""]     (Prefix for the labels of datacard columns; e.g. "CMS_Hptntj_", "CMS_H2tb_")
+labelPostfix                           = "_GenuineB"
 OptionIncludeSystematics               = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionConvertFromShapeToConstantList   = []    # [default: []]     (Convert these nuisances from shape to constant; Makes limits run faster & converge more easily)
 OptionSeparateShapeAndNormalizationFromSystVariationList=[] # [default: []]  (Separate in the following shape nuisances the shape and normalization components)
@@ -135,22 +136,22 @@ myBtagSystematics       = ["CMS_eff_b"]
 
 # Define systematics dictionary (easy access)
 mySystematics = {}
-mySystematics["MC"]        = myLumiSystematics + myPileupSystematics + myTrgEffSystematics + myLeptonVetoSystematics + myJetSystematics + myBtagSystematics + myTopTagSystematics
-mySystematics["Signal"]    = mySystematics["MC"]
-mySystematics["FakeB"]     = []
-mySystematics["QCD"]       = mySystematics["MC"]
-mySystematics["TT"]        = mySystematics["MC"] + ["CMS_scale_ttbar", "CMS_pdf_ttbar", "CMS_mass_ttbar"] #, "CMS_topPtReweight"] #not recommented as of Jan 2018
-mySystematics["SingleTop"] = mySystematics["MC"] + ["CMS_scale_singleTop", "CMS_pdf_singleTop"]
-mySystematics["TTZ"]       = mySystematics["MC"] + ["CMS_pdf_ttZ", "CMS_scale_ttZ"]
-mySystematics["TTTT"]      = mySystematics["MC"]
-mySystematics["DYJets"]    = mySystematics["MC"] + ["CMS_scale_DY", "CMS_pdf_DY"]
-mySystematics["TTW"]       = mySystematics["MC"] + ["CMS_pdf_ttW", "CMS_scale_ttW"]
-mySystematics["WJets"]     = mySystematics["MC"] + ["CMS_scale_Wjets", "CMS_pdf_Wjets"]
-mySystematics["Diboson"]   = mySystematics["MC"] + ["CMS_scale_VV", "CMS_pdf_VV"]
+mySystematics["MC"]          =  myLumiSystematics + myPileupSystematics + myTrgEffSystematics + myLeptonVetoSystematics + myJetSystematics + myBtagSystematics + myTopTagSystematics
+mySystematics["Signal"]      = mySystematics["MC"]
+mySystematics["FakeB"]       = []
+mySystematics["QCD"]         = mySystematics["MC"]
+mySystematics["TT"]          = mySystematics["MC"] + ["CMS_scale_ttbar", "CMS_pdf_ttbar", "CMS_mass_ttbar"] #, "CMS_topPtReweight"] #not recommented as of Jan 2018
+mySystematics["SingleTop"]   = mySystematics["MC"] + ["CMS_scale_singleTop", "CMS_pdf_singleTop"]
+mySystematics["TTZToQQ"]     = mySystematics["MC"] + ["CMS_pdf_ttZ", "CMS_scale_ttZ"]
+mySystematics["TTTT"]        = mySystematics["MC"]
+mySystematics["DYJets"]      = mySystematics["MC"] + ["CMS_scale_DY", "CMS_pdf_DY"]
+mySystematics["TTWJetsToQQ"] = mySystematics["MC"] + ["CMS_pdf_ttW", "CMS_scale_ttW"]
+mySystematics["WJetsToQQ_HT_600ToInf"]  = mySystematics["MC"] + ["CMS_scale_Wjets", "CMS_pdf_Wjets"]
+mySystematics["Diboson"] = mySystematics["MC"] + ["CMS_scale_VV", "CMS_pdf_VV"]
 
 # Construct Fake-b systematics 
 # NOTE: Only ttbar XSection uncertinty applied to FakeB, as ttbar
-#  dominates the EWK sample but uncertainty is scaled according to 1-purity
+# dominates the EWK sample but uncertainty is scaled according to 1-purity
 for syst in mySystematics["TT"]:
     newSyst = syst + "_forFakeB"
     if "veto" in syst.lower(): #fixme: how should I treat this?
@@ -185,7 +186,7 @@ for mass in MassPoints:
     signalDataGroups.append(hx)
 
 # Define all the background datasets
-myFakeB = DataGroup(label             = labelPrefix + "FakeBmeasurement",
+myFakeB = DataGroup(label             = labelPrefix + "FakeB", #"FakeBmeasurement",
                     landsProcess      = 2, # must be SAME index as myFakeB (only of them is used!)
                     validMassPoints   = MassPoints,
                     datasetType       = "FakeB",
@@ -205,7 +206,7 @@ myQCD = DataGroup(label             = labelPrefix + "QCD",
                   histoPath         = histoPathInclusive
                   )
 
-TT = DataGroup(label             = labelPrefix + "TT",
+TT = DataGroup(label             = labelPrefix + "TT" + labelPostfix, #
                landsProcess      = 3,
                shapeHistoName    = OptionMassShape, 
                histoPath         = histoPathEWK,
@@ -215,7 +216,7 @@ TT = DataGroup(label             = labelPrefix + "TT",
                nuisances         = mySystematics["TT"]
                )
 
-SingleTop = DataGroup(label             = labelPrefix + "SingleTop", 
+SingleTop = DataGroup(label             = labelPrefix + "SingleTop" + labelPostfix,
                       landsProcess      = 4,
                       shapeHistoName    = OptionMassShape,
                       histoPath         = histoPathEWK,
@@ -225,17 +226,17 @@ SingleTop = DataGroup(label             = labelPrefix + "SingleTop",
                       nuisances         = mySystematics["SingleTop"]
                       )
 
-TTZ = DataGroup(label             = labelPrefix + "TTZToQQ", 
+TTZ = DataGroup(label             = labelPrefix + "TTZToQQ" + labelPostfix, 
                 landsProcess      = 5,
                 shapeHistoName    = OptionMassShape,
                 histoPath         = histoPathEWK,
                 datasetType       = dsetTypeEWK,
                 datasetDefinition = "TTZToQQ",
                 validMassPoints   = MassPoints,
-                nuisances         = mySystematics["TTZ"]
+                nuisances         = mySystematics["TTZToQQ"]
                 )
 
-TTTT = DataGroup(label             = labelPrefix + "TTTT",
+TTTT = DataGroup(label             = labelPrefix + "TTTT" + labelPostfix,
                  landsProcess      = 6,
                  shapeHistoName    = OptionMassShape,
                  histoPath         = histoPathEWK,
@@ -245,7 +246,7 @@ TTTT = DataGroup(label             = labelPrefix + "TTTT",
                  nuisances         = mySystematics["TTTT"]
                  )
 
-DYJets = DataGroup(label             = labelPrefix + "DYJetsToQQ", 
+DYJets = DataGroup(label             = labelPrefix + "DYJetsToQQ" + labelPostfix, 
                    landsProcess      = 7,
                    shapeHistoName    = OptionMassShape,
                    histoPath         = histoPathEWK,
@@ -255,27 +256,27 @@ DYJets = DataGroup(label             = labelPrefix + "DYJetsToQQ",
                    nuisances         = mySystematics["DYJets"]
                    )
 
-TTW = DataGroup(label             = labelPrefix + "TTWJetsToQQ", 
-                landsProcess      = 8,
-                shapeHistoName    = OptionMassShape, 
-                histoPath         = histoPathEWK,
-                datasetType       = dsetTypeEWK,
-                datasetDefinition = "TTWJetsToQQ",
-                validMassPoints   = MassPoints,
-                nuisances         = mySystematics["TTW"]
-                )
+TTWJets = DataGroup(label             = labelPrefix + "TTWJetsToQQ" + labelPostfix, 
+                    landsProcess      = 8,
+                    shapeHistoName    = OptionMassShape, 
+                    histoPath         = histoPathEWK,
+                    datasetType       = dsetTypeEWK,
+                    datasetDefinition = "TTWJetsToQQ",
+                    validMassPoints   = MassPoints,
+                    nuisances         = mySystematics["TTWJetsToQQ"]
+                    )
 
-WJets = DataGroup(label             = labelPrefix + "WJetsToQQ_HT_600ToInf",
+WJets = DataGroup(label             = labelPrefix + "WJetsToQQ_HT_600ToInf" + labelPostfix,
                   landsProcess      = 9,
                   shapeHistoName    = OptionMassShape,
                   histoPath         = histoPathEWK, 
                   datasetType       = dsetTypeEWK,
                   datasetDefinition = "WJetsToQQ_HT_600ToInf",
                   validMassPoints   = MassPoints,
-                  nuisances         = mySystematics["WJets"]
+                  nuisances         = mySystematics["WJetsToQQ_HT_600ToInf"]
                   )
 
-Diboson = DataGroup(label             = labelPrefix + "Diboson",
+Diboson = DataGroup(label             = labelPrefix + "Diboson" + labelPostfix,
                     landsProcess      = 10,
                     shapeHistoName    = OptionMassShape,
                     histoPath         = histoPathEWK, 
@@ -298,7 +299,7 @@ DataGroups.append(SingleTop)
 DataGroups.append(TTZ)
 DataGroups.append(TTTT)
 DataGroups.append(DYJets)
-DataGroups.append(TTW)
+DataGroups.append(TTWJets)
 DataGroups.append(WJets)
 DataGroups.append(Diboson)
 
@@ -656,7 +657,7 @@ hTetrajetBjetPt = ControlPlotInput(
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
                          "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 900.0} },
-    blindedRange=[400.0, 900.0], # specify range min,max if blinding applies to this control plot
+    blindedRange=[420.0, 900.0], # specify range min,max if blinding applies to this control plot
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
     )
 
@@ -733,24 +734,23 @@ hQGLR  = ControlPlotInput(
                          "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 1.0} },
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
     )
-#QGLRNJets_AfterAllSelections
-#QGLRNLightJets_AfterAllSelections
-#QGLRNGLuonJets_AfterAllSelections
 
+#================================================================================================ 
 # Create ControlPlot list (NOTE: Remember to set OptionDoControlPlots to True)
-ControlPlots.append(hMET)
-ControlPlots.append(hHT)
-ControlPlots.append(hMHT)
-ControlPlots.append(hQGLR)
-ControlPlots.append(hTopPt)
-ControlPlots.append(hTopMass)
-ControlPlots.append(hTopBjetPt)
-ControlPlots.append(hTopBjetEta)
-ControlPlots.append(hTopDijetPt)
-ControlPlots.append(hTopDijetMass)
-# ControlPlots.append(hTopR32)
-ControlPlots.append(hTetrajetBjetPt)
-ControlPlots.append(hTetrajetBjetEta)
-ControlPlots.append(hHiggsPt)
+#================================================================================================ 
+# ControlPlots.append(hMET)
+# ControlPlots.append(hHT)
+# ControlPlots.append(hMHT)
+# ControlPlots.append(hQGLR)
+# ControlPlots.append(hTopPt)
+# ControlPlots.append(hTopMass)
+# ControlPlots.append(hTopBjetPt)
+# ControlPlots.append(hTopBjetEta)
+# ControlPlots.append(hTopDijetPt)
+# ControlPlots.append(hTopDijetMass)
+# # ControlPlots.append(hTopR32)
+# ControlPlots.append(hTetrajetBjetPt)
+# ControlPlots.append(hTetrajetBjetEta)
+# ControlPlots.append(hHiggsPt)
 ControlPlots.append(hHiggsMass)
-# ControlPlots.append(hVertices)
+# # ControlPlots.append(hVertices)
