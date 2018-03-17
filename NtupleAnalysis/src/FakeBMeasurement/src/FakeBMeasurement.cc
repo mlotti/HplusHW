@@ -2964,9 +2964,9 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
       subldgMVA = topData.getMVASubldgInPt();
     }
   bool bPass_LdgTopMVA    = cfg_LdgTopMVACut.passedCut(ldgMVA);
-  bool bPass_SubldgTopMVA = cfg_SubldgTopMVACut.passedCut(subldgMVA);
+  bool bPass_SubldgTopMVA = cfg_LdgTopMVACut.passedCut(subldgMVA);
   bool bPass_BothMVA      = bPass_LdgTopMVA * bPass_SubldgTopMVA;
-  bool bPass_InvertedTop  = bPass_LdgTopMVA * !bPass_SubldgTopMVA;
+  bool bPass_InvertedTop  = bPass_LdgTopMVA * cfg_SubldgTopMVACut.passedCut(subldgMVA);
   if (!bPass_BothMVA) 
     {
       // If top fails determine if event falls into  Control Region 2 (CR2)
