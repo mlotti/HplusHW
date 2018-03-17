@@ -636,6 +636,9 @@ def GetHistoKwargs(h, opts):
         kwargs["opts"]   = {"xmin": 0.0, "xmax": 800.0, "ymin": yMin, "ymaxfactor": yMaxF}
         if "METFilter" in h:
             kwargs["rebinX"] = 1
+            kwargs["xlabel"] = ""
+            kwargs["ylabel"] = "Events / %.0f "
+            kwargs["opts"]   = {"xmin": 0.0, "ymin": yMin, "ymaxfactor": yMaxF}
         if "Selections" in h:
             kwargs["opts"]   = {"xmin": 0.0, "xmax": 400.0, "ymin": yMin, "ymaxfactor": yMaxF}
             

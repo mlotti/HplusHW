@@ -402,8 +402,8 @@ def GetHistoKwargs(histoName, ext, opts):
         _format = "%0.2f " + _units
         #_xlabel = "BDTG discriminant"
         _xlabel = "top-tag discriminant"
-        _opts["xmin"] =  0.45
-        _cutBox = {"cutValue": 0.85, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _opts["xmin"] =  0.0 #0.45
+        _cutBox = {"cutValue": 0.40, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
     if "nbjets" in hName:
         _units  = ""
         _format = "%0.0f " + _units
