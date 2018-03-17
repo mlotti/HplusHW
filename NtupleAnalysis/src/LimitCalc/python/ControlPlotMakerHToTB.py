@@ -420,6 +420,7 @@ class ControlPlotMakerHToTB:
                 myExpValue = 0.0
                 for item in myStackList:
                     myExpValue += item.getRootHisto().GetBinContent(k)
+                # Fixme: Loop over ALL mass points and do this check! Not just the current one
                 if hSignal.getRootHisto().GetBinContent(k) >= myExpValue * self._config.OptionBlindThreshold:
                     hData.getRootHisto().SetBinContent(k, -1.0)
                     hData.getRootHisto().SetBinError(k, 0.0)

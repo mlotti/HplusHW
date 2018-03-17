@@ -522,7 +522,8 @@ hMET = ControlPlotInput(
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
-                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 400.0} }
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 400.0} }#,
+    #blindedRange=[100.0, 400.0], # specify range min,max if blinding applies to this control plot      
     )
 
 hHT = ControlPlotInput(
@@ -535,7 +536,8 @@ hHT = ControlPlotInput(
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
-                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 3000.0} }
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 3000.0} },
+    #blindedRange=[800.0, 3000.0], # specify range min,max if blinding applies to this control plot      
     )
 
 hMHT = ControlPlotInput(
@@ -654,6 +656,7 @@ hTetrajetBjetPt = ControlPlotInput(
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
                          "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 900.0} },
+    blindedRange=[400.0, 900.0], # specify range min,max if blinding applies to this control plot
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
     )
 
@@ -683,6 +686,7 @@ hHiggsPt = ControlPlotInput(
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
                          "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 900.0} },
+    blindedRange=[300.0, 900.0], # specify range min,max if blinding applies to this control plot      
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
     )
 
@@ -697,7 +701,7 @@ hHiggsMass = ControlPlotInput(
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
                          "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 3000.0} },
-    blindedRange=[200.0, 3000.0], # specify range min,max if blinding applies to this control plot      
+    blindedRange=[200.0, 3000.0], # specify range min,max if blinding applies to this control plot
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
     # flowPlotCaption  = "m_{jjbb}", # Leave blank if you don't want to include the item to the selection flow plot    
     )
