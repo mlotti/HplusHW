@@ -56,8 +56,7 @@ import aux
 _lightHplusMasses        = [ 80,  90, 100, 120, 140, 150, 155, 160]
 _intermediateHplusMasses = [145,150,155,160,165,170,175,180,190,200]
 _heavyHplusToTBbarMasses = [180, 200, 220, 250, 300, 350, 400, 500, 600, 650, 800, 1000, 1500, 2000, 2500, 3000, 5000, 7000]
-#_heavyHplusMasses        = _heavyHplusToTBbarMasses # alexandros
-_heavyHplusMasses        = [180, 200, 220, 250, 300, 350, 400, 500, 600, 700, 750,  800, 1000, 1500, 2000, 3000]
+_heavyHplusMasses        = [180, 200, 220, 250, 300, 350, 400, 500, 600, 700, 750,  800, 1000, 1500, 2000, 3000] #HToTauNu
 
 ## These MC datasets must be added together before any
 ## merging/renaming. They are split to two datasets just for more
@@ -171,21 +170,6 @@ _physicalMcAdd = {
     "ChargedHiggs_HplusTB_HplusToTB_M_3000": "ChargedHiggs_HplusTB_HplusToTB_M_3000",
 }
 
-#for mass in _lightHplusMasses:
-    #_physicalMcAdd["TTToHplusBWB_M%d_Summer12"%mass] = "TTToHplusBWB_M%d_Summer12"%mass
-    #_physicalMcAdd["TTToHplusBWB_M%d_ext_Summer12"%mass] = "TTToHplusBWB_M%d_Summer12"%mass
-    #if mass != 90:
-        #_physicalMcAdd["TTToHplusBHminusB_M%d_Summer12"%mass] = "TTToHplusBHminusB_M%d_Summer12"%mass
-        #_physicalMcAdd["TTToHplusBHminusB_M%d_ext_Summer12"%mass] = "TTToHplusBHminusB_M%d_Summer12"%mass
-#for mass in [180, 190, 200, 220, 250, 300]:
-    #_physicalMcAdd["HplusTB_M%d_Summer12"%mass] = "HplusTB_M%d_Summer12"%mass
-    #_physicalMcAdd["HplusTB_M%d_ext_Summer12"%mass] = "HplusTB_M%d_Summer12"%mass
-#for bquark in [0, 1, 2, 3, 4]:
-    #_physicalMcAdd["WJets_%dbquark_TuneZ2star_v1_Summer12"%bquark] = "WJets_%dbquark_TuneZ2star_Summer12"%bquark
-    #_physicalMcAdd["WJets_%dbquark_TuneZ2star_v2_Summer12"%bquark] = "WJets_%dbquark_TuneZ2star_Summer12"%bquark
-#for mass in _heavyHplusToTBbarMasses:
-    #_physicalMcAdd["HplusToTBbar_M%d_Summer12"%mass] = "HplusToTBbar_M%d_Summer12"%mass
-
 ## Map the physical dataset names to logical names
 #
 # Map the physical dataset names (in multicrab.cfg) to logical names
@@ -205,14 +189,13 @@ for mass in _lightHplusMasses:
 
 for mass in _intermediateHplusMasses:
     _physicalToLogical[" ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTBNoNeutral_M%d"%mass
-#    _physicalToLogical[" ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassWithNeutral_M_%d"%(mass)] = "HplusTBWithNeutral_M%d"%mass # NB! Commented out to avoid merging of the WithNeutral samples that have been dropped out of the analysis
 
 for mass in _heavyHplusMasses:
     _physicalToLogical["ChargedHiggs_HplusTB_HplusToTauNu_M_%d"%(mass)] = "HplusTB_M%d"%mass
     _physicalToLogical["ChargedHiggs_HplusTB_HplusToTauNu_HeavyMass_M_%d"%(mass)] = "HplusTB_M%d"%mass
 
 for mass in _heavyHplusToTBbarMasses:
-    _physicalToLogical["ChargedHiggs_HplusTB_HplusToTB_M%d"%(mass)] = "HplusToTBbar_M%d" % mass
+    _physicalToLogical["ChargedHiggs_HplusTB_HplusToTB_M%d"%(mass)] = "HplusTB_M%d"%mass
 
 _physicalToLogical.update({
         "TTJets"         : "TTJets",
@@ -302,14 +285,10 @@ _physicalToLogical.update({
 
         })
 
-## Map the datasets to be merged to the name of the merged dataset.
+# Map the datasets to be merged to the name of the merged dataset.
 _ttSignalMerge    = {}
 _tSignalMerge     = {}
 _lightSignalMerge = {}
-
-#for mass in _lightHplusMasses:
-    #_lightSignalMerge["TTToHplus_M%d"%mass] = "TTOrTToHplus_M%d"%mass
-    #_lightSignalMerge["Hplus_taunu_M%d" % mass] = "TTOrTToHplus_M%d"%mass
 
 _datasetMerge = {
     "QCD_Pt_15to30"    : "QCD",
@@ -401,9 +380,6 @@ _datasetMerge = {
 
     "ttbb_4FS2_ckm_amcatnlo_madspin_pythia8"     : "TTBB",
 
-    #"ChargedHiggs_HplusTB_HplusToTauNu_M_200": "ChargedHiggs_HplusTB_HplusToTauNu_M_200",
-    #"ChargedHiggs_HplusTB_HplusToTauB_M_200": "ChargedHiggs_HplusTB_HplusToTauNu_M_200",
-
     # Htb
     # "TTWJetsToQQ"          : "ttX",
     # "TTZToQQ"              : "ttX",
@@ -438,6 +414,9 @@ for mass in _intermediateHplusMasses:
     _datasetOrder.append("HplusTB_M%d"%mass)
 for mass in _heavyHplusMasses:
     _datasetOrder.append("HplusTB_M%d"%mass)
+for mass in _heavyHplusToTBbarMasses:
+    _datasetOrder.append("ChargedHiggs_HplusTB_HplusToTB_M_%d"%mass)
+
 _datasetOrder.extend([
     "FakeB", #Htb
     "QCD",
@@ -479,7 +458,7 @@ _datasetOrder.extend([
     "TTTT",        # Htb
     ]) 
 
-## Map the logical dataset names to legend labels
+# Map the logical dataset names to legend labels
 _legendLabels = {
     "Data"     : "Data",
     "EWK"      : "EWK",
@@ -620,7 +599,6 @@ for mass in _heavyHplusMasses:
 for mass in _heavyHplusToTBbarMasses:
     _legendLabels["ChargedHiggs_HplusTB_HplusToTB_M_%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
     _legendLabels["HplusToTBbar_M%d"%mass] = "H^{+}#rightarrowtb m_{H^{+}}=%d GeV" % mass
-    
 
 ## Map the logical dataset names to plot styles
 _plotStyles = {
@@ -715,16 +693,29 @@ for mass in _intermediateHplusMasses:
 for mass in _heavyHplusMasses:
     _plotStyles["HplusTB_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
 
+for mass in _heavyHplusToTBbarMasses:
+    _plotStyles["HplusTB_M%d"%mass] = getattr(styles, "signal%dStyle"%mass)
 
-## Return True if name is from a signal dataset
+
+#================================================================================================
+# Function definition
+#================================================================================================
 def isSignal(name):
+    '''
+    Return True if name is from a signal dataset
+    '''
     return "TTToHplus" in name or "Hplus_taunu" in name or "TTOrTToHplus" in name or "HplusTB" in name
 
-
-## Update the default legend labels
 def updateLegendLabel(datasetName, legendLabel):
+    '''
+    Update the default legend labels
+    '''
     _legendLabels[datasetName] = legendLabel
 
+
+#================================================================================================
+# Class definition
+#================================================================================================
 class SetProperty:
     '''
     Helper class for setting properties

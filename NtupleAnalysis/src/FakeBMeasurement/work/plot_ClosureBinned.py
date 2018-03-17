@@ -310,18 +310,19 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     return
 
 def GetBinText(bin):
-    if bin == "0":
-        return "|eta| < 0.4"
-    elif bin == "1":
-        return "0.4 < |eta| < 1.2"
-    elif bin == "2":
-        return "1.2 < |eta| < 1.8"
-    elif bin == "3":
-        return "|eta| > 1.8"
-    elif bin == "Inclusive":
-        return bin
-    else:
-        raise Exception(ShellStyles.ErrorStyle() + "Unexpected bin %s" % (bin)  + ShellStyles.NormalStyle())
+    return "bin-" + str(bin)
+#    if bin == "0":
+#        return "|eta| < 0.4"
+#    elif bin == "1":
+#        return "0.4 < |eta| < 1.2"
+#    elif bin == "2":
+#        return "1.2 < |eta| < 1.8"
+#    elif bin == "3":
+#        return "|eta| > 1.8"
+#    elif bin == "Inclusive":
+#        return bin
+#    else:
+#        raise Exception(ShellStyles.ErrorStyle() + "Unexpected bin %s" % (bin)  + ShellStyles.NormalStyle())
 
 #================================================================================================ 
 # Main

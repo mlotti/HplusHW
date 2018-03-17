@@ -63,6 +63,7 @@ class ExtractorResult():
         Simple print function. If verbose option is enabled prints, otherwise does nothing.
         '''
         fName = __file__.split("/")[-1]
+        fName = fName.replace(".pyc", "py")
         if printHeader:
             print "=== ", fName
         print "\t", msg
@@ -141,20 +142,25 @@ class ExtractorResult():
         return myList
 
     def linkHistogramsToRootFile(self,rootfile):
-        # Note: Do not call destructor for the tempHistos.
-        #       Closing the root file to which they have been assigned to destructs them.
-        #       i.e. it is enough to just clear the list.
+        '''
+        Note: 
+        Do not call destructor for the tempHistos.
+        Closing the root file to which they have been assigned to destructs them.
+        i.e. it is enough to just clear the list.
+        '''
         #self._tempHistos = []
         for h in self._histograms:
             htemp = aux.Clone(h, h.GetTitle())
             htemp.SetDirectory(rootfile)
             self._tempHistos.append(htemp)
+        return
 
     def debug(self):
-        print "Cached results:"
-        print "- shape histos:",len(self._histograms)
-        print "- purity histos (QCD):",self._purityHistogram
-        print "- tmp histos:",len(self._tempHistos)
+        self.Print("Cached results:", True)
+        self.Print("Shape histos: %d" % len(self._histograms), False)
+        self.Print("Purity histos (QCD): %s" % (self._purityHistogram), False)
+        self.Print("Tmp histos: %d" % (len(self._tempHistos)), False)
+        return
 
     def getContractedShapeUncertainty(self,hNominal):
         if len(self._histograms) == 0:
@@ -360,7 +366,7 @@ class DatacardColumn():
             if len(self._nuisanceIds) == 0:
                 myWarning = "Empty field 'nuisances'! (list of strings) Id's for nuisances to be used for column\n"
                 _msg = "Warning for data group \"%s\": %s" %  (self._label, myWarning)
-                self.Print(ShellStyles.NoteStyle() + _msg + ShellStyles.NormalStyle(), True)
+                self.Verbose(ShellStyles.NoteStyle() + _msg + ShellStyles.NormalStyle(), True)
 
         if msg != "":
             msg = "Invalid input for data group \"%s\":\n%s" %  (self._label, msg)
@@ -544,8 +550,8 @@ class DatacardColumn():
 
             if not dsetMgr.hasDataset(self.getDatasetMgrColumn()):
                 msg = "Cannot find merged dataset by key '%s' in multicrab dir! Did you forget to merge the root files with hplusMergeHistograms.py?" % self.getDatasetMgrColumn()
-                dsetMgr.PrintInfo() #alex                
-                raise Exception(ShellStyles.ErrorLabel() + msg)
+                dsetMgr.PrintInfo()
+                raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
 
             myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
 
@@ -590,17 +596,12 @@ class DatacardColumn():
         # Obtain rate histogram
         myRateHistograms = []
         if self.typeIsEmptyColumn() or dsetMgr == None:
-            if self._verbose:
-                print "  - Creating empty rate shape"
-            #myArray = array("d",config.ShapeHistogramsDimensions)
-            #h = TH1F(self.getLabel(),self.getLabel(),len(myArray)-1,myArray)
-            # Use here just one bin to speed up LandS (yes, one needs a histogram for the empty columns even if ShapeStat is off)
-            h = ROOT.TH1F(self.getLabel(),self.getLabel(),1,0,1)
+            self.Verbose("Creating empty rate shape", True)
+            h = ROOT.TH1F(self.getLabel(), self.getLabel(), 1, 0, 1)
             ROOT.SetOwnership(h, True)
             myRateHistograms.append(h)
         else:
-            if self._verbose:
-                print "  - Extracting rate histogram"
+            self.Verbose("Extracting rate histogram", True)
             myShapeExtractor = None
             if self.typeIsObservation():
                 myShapeExtractor = ShapeExtractor(ExtractorMode.OBSERVATION)
@@ -608,10 +609,9 @@ class DatacardColumn():
                 myShapeExtractor = ShapeExtractor(ExtractorMode.RATE)
             myShapeHistograms = myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
             myRateHistograms.extend(myShapeHistograms)
-        # Cache result
-        self._rateResult = ExtractorResult("rate", "rate",
-                               myRateHistograms[0].Integral(), # Take only visible part
-                               myRateHistograms)
+
+        # Cache result (Take only visible part)
+        self._rateResult = ExtractorResult("rate", "rate", myRateHistograms[0].Integral(), myRateHistograms)
         if self._verbose:
             print "  - Rate: integral = ", myRateHistograms[0].Integral()
             if (self.typeIsEWK()) or self.typeIsEWKfake():
@@ -630,17 +630,19 @@ class DatacardColumn():
         if self.typeIsEmptyColumn() or dsetMgr == None:
             return
 
-        # Obtain overall purity for QCD
+        # Obtain overall purity for QCD or FakeB
         self._purityForFinalShape = None
         myAveragePurity = None
         try:
-            if self.typeIsQCDinverted():
+            #  Check DatacardColumn type
+            if self.typeIsQCDinverted() or self.typeIsFakeB():
                 myDsetRootHisto = myShapeExtractor.extractQCDPurityHistogram(self, dsetMgr, self.getFullShapeHistoName())
-                self._rateResult.setPurityHistogram(myDsetRootHisto.getHistogram())
-                myAveragePurity = myShapeExtractor.extractQCDPurityAsValue(myRateHistograms[0], self.getPurityHistogram())
-                #print "*** Average QCD purity", myAveragePurity
+                self._rateResult.setPurityHistogram(myDsetRootHisto.getHistogram()) 
+                myAveragePurity = myShapeExtractor.extractQCDPurityAsValue(myRateHistograms[0], self.getPurityHistogram()) #iro
+                self.Print("Average QCD purity is %s" % (myAveragePurity), True)
+                #sys.exit()
         except:
-            print "ERROR: It looks like the purity histogram does not exist!"
+            self.Print("It looks like the purity histogram does not exist!", True)
             raise
 
         # Obtain results for nuisances
@@ -679,14 +681,16 @@ class DatacardColumn():
                                 myHistograms.extend(self._getShapeNuisanceHistogramsFromRHWU(self._cachedShapeRootHistogramWithUncertainties, e._systVariation, e.getMasterId()))
                     else:
                         # For QCD, scale the QCD type constants by the purity
-                        if self.typeIsQCDinverted() and e.isQCDNuisance():
+                        if self.typeIsQCDinverted() and e.isQCDNuisance() or self.typeIsFakeB() and e.isQCDNuisance():
                             if isinstance(myResult, ScalarUncertaintyItem):
                                 myResult.scale(1.0-myAveragePurity)
                             elif isinstance(myResult, list):
                                 for i in range(0,len(myResult)):
                                     myResult[i] *= 1.0-myAveragePurity
                             else:
-                                myResult *= 1.0-myAveragePurity
+                                myResult *= 1.0-myAveragePurity #iro
+                                
+                                
                         # Add scalar uncertainties
                         if self._verbose:
                             print "Adding scalar uncert. ",e.getId()
@@ -958,25 +962,35 @@ class DatacardColumn():
         Returns rate for column
         '''
         if self._rateResult == None:
-            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+ShellStyles.NormalStyle()+" Rate value has not been cached! (did you forget to call doDataMining()?)")
+            msg = "Error (data group = \"%s\"): Rate value has not been cached! Did you forget to call doDataMining()?" % (self._label)
+            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
         if self._rateResult.getResult() == None:
-            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+ShellStyles.NormalStyle()+" Rate value has not been cached! (did you forget to call doDataMining()?)")
+            msg = "Error (data group =\"%s\"): Rate value has not been cached! Did you forget to call doDataMining()?" % (self._label)
+            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
         return self._rateResult.getResult()
 
-    ## Returns rate histogram for column
     def getRateHistogram(self):
+        '''
+        Returns rate histogram for column
+        '''
         if self._rateResult == None:
-            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+ShellStyles.NormalStyle()+" Rate value has not been cached! (did you forget to call doDataMining()?)")
+            msg = "Error (data group = \"%s\"): Rate value has not been cached! Did you forget to call doDataMining()?" % (self._label)
+            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
         if self._rateResult.getHistograms() == None:
-            raise Exception(ErrorStyle()+"Error (data group ='"+self._label+"'):"+ShellStyles.NormalStyle()+" Rate histograms have not been cached! (did you forget to call doDataMining()?)")
+            msg = "Error (data group =\"%s\"): Rate histograms have not been cached! Did you forget to call doDataMining()?" % (self._label)
+            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
         return self._rateResult.getHistograms()[0]
 
-    ## Returns purity histogram (only relevant for QCD)
     def getPurityHistogram(self):
+        '''
+        Returns purity histogram (only relevant for QCD or FakeB)
+        '''
         return self._rateResult.getPurityHistogram()
 
-    ## Returns true if column has a nuisance Id
     def hasNuisanceByMasterId(self, id):
+        '''
+        Returns true if column has a nuisance Id
+        '''
         for result in self._nuisanceResults:
             if id == result.getMasterId():
                 return True

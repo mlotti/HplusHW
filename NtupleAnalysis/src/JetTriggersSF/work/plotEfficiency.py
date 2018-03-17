@@ -11,11 +11,11 @@ USAGE:
 
 EXAMPLES:
 ./plotEfficiency.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/Trigger/JetTriggersSF_170921_053850_FinalWithCut/ --url
+./plotEfficiency.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/Trigger/JetTriggersSF_170921_053850_FinalWithCut/ --url -e ext
 
 
 LAST USED:
-./plotEfficiency.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/Trigger/JetTriggersSF_170921_053850_FinalWithCut/ --url -e ext
-
+./plotEfficiency.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/JetTriggersSF/JetTriggersSF_180308_194450/ -e "MuEnriched" --url
 
 '''
 #================================================================================================
@@ -32,8 +32,8 @@ import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 
-from HiggsAnalysis.NtupleAnalysis.tools.ShellStyles import *
 from optparse import OptionParser
 import getpass
 import socket
@@ -454,8 +454,6 @@ def convert2TGraph(tefficiency):
 
 
 def RemoveNegatives(histo):
-    '''
-    '''
     for binX in range(histo.GetNbinsX()+1):
         if histo.GetBinContent(binX) < 0:
             histo.SetBinContent(binX, 0.0)
@@ -493,9 +491,8 @@ def CheckNegatives(n, d, verbose=False):
     return
 
 def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
-    '''
-    '''
-
+    Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
+    
      # Check that path exists
     if not os.path.exists(saveDir):
         os.makedirs(saveDir)
@@ -506,16 +503,34 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
         saveNameURL = saveName + ext
-        saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
-        if opts.url:
-            Print(saveNameURL, i==0)
-        else:
-            Print(saveName + ext, i==0)
+        saveNameURL = aux.convertToURL(saveNameURL, opts.url)
+        Verbose(saveNameURL, i==0)
         plot.saveAs(saveName, formats=saveFormats)
     return
 
+def getDatasetsToExclude():
+    '''
+    Remove some QCD samples (which may or may not be required!)
+
+    For the time being they are removed because their
+    cross sections of these samples are not available (yet)
+    '''
+    myDsetList = []
+    myDsetList.append("QCD_Pt_1000toInf_MuEnrichedPt5")
+    myDsetList.append("QCD_Pt_15to20_MuEnrichedPt5")
+    myDsetList.append("QCD_Pt_20to30_MuEnrichedPt5")
+    myDsetList.append("QCD_Pt_30to50_MuEnrichedPt5")
+    myDsetList.append("QCD_Pt_600to800_MuEnrichedPt5")
+    myDsetList.append("QCD_Pt_600to800_MuEnrichedPt5_ext1")
+    myDsetList.append("QCD_Pt_800to1000_MuEnrichedPt5")
+    myDsetList.append("QCD_Pt_800to1000_MuEnrichedPt5_ext1")
+    myDsetList.append("QCD_Pt_800to1000_MuEnrichedPt5_ext2")
+    return myDsetList
 
 def main(opts):
+    
+    # Suppress warnings about weight being re-applied
+    ROOT.gErrorIgnoreLevel = ROOT.kError 
 
     # Obtain dsetMgrCreator and register it to module selector
     dsetMgrCreator = dataset.readFromMulticrabCfg(directory=opts.mcrab)
@@ -536,16 +551,10 @@ def main(opts):
         optModes = optList
     else:
         optModes = [opts.optMode]
-    
-    # For-loop: All opt Mode
-    #for opt in optModes:
-     #   opts.optMode = opt
 
-    opts.optMode = "" #fixme
-
-    # fixme
-    mcrabName = opts.mcrab
-    RunEra    = mcrabName.split("_")[1]
+    opts.optMode = ""
+    mcrabName    = opts.mcrab
+    RunEra       = mcrabName.split("_")[1]
 
     # Setup ROOT and style
     ROOT.gROOT.SetBatch(opts.batchMode)
@@ -556,6 +565,13 @@ def main(opts):
     
     # Setup & configure the dataset manager
     datasetsMgr = GetDatasetsFromDir(opts)
+
+    # Remove some QCD samples (the cross sections of these samples are not calculated)
+    msg = "Removing QCD samples for which cross--sections are not available yet:"
+    Print(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle(), True)
+    for d in getDatasetsToExclude():
+        Print(d, False)
+        datasetsMgr.remove(d)
 
     # Get run-range 
     minRunRange, maxRunRange, runRange = GetRunRange(datasetsMgr)
@@ -581,19 +597,25 @@ def main(opts):
     dataset_MC   = datasetsMgr.getMCDatasets()
 
     # Define lists of Triggers to be plotted and Variables 
-    trgOR  = ["OR_PFJet450"] # ["1BTag", "2BTag", "OR", "OR_PFJet450"]
-    xVars  = ["pt6thJet", "Ht", "nBTagJets"]    # ["pt6thJet", "eta6thJet", "phi6thJet", "Ht", "nBTagJets", "pu", "JetMulti", "BJetMulti"]
+    trgList = ["1BTag", "2BTag", "OR", "OR_PFJet450"]
+    xVars   = ["pt6thJet", "eta6thJet", "phi6thJet", "Ht", "nBTagJets", "pu", "JetMulti", "BJetMulti"]
+    nPlots  = len(trgList)*len(xVars)
+    counter =  0
 
     # For-loop: All signal triggers
-    for s in trgOR:
+    for i, trg in enumerate(trgList, 1):
         
         # For-loop: All x-variables
-        for xVar in xVars:
+        for j, xVar in enumerate(xVars, 1):
+            counter+=1
+            msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % counter, "/", "%s:" % (nPlots), "%s Vs %s" % (trg, xVar))
+            Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), counter==1)
+
 
             # Define names
-            hNumerator   = "hNum_%s_RefTrg_OfflineSel_Signal%s" % (xVar, s)
+            hNumerator   = "hNum_%s_RefTrg_OfflineSel_Signal%s" % (xVar, trg)
             hDenominator = "hDen_%s_RefTrg_OfflineSel" % (xVar)
-            plotName     = "Eff_%s_%s" % (xVar, s)
+            plotName     = "Eff_%s_%s" % (xVar, trg)
             
             # Get Efficiency Plots
             _kwargs  = GetHistoKwargs(xVar, opts)
@@ -620,26 +642,7 @@ def main(opts):
             # Draw and save the plot
             p.setLuminosity(intLumi)
             plots.drawPlot(p, plotName, **_kwargs)
-
-#            # FIXME - xenios - ior
-#            if xVar == "pt6thJet" and s == "OR_PFJet450":
-#                plist = [0.7, 0.99, 1000, 0.16, 28.0]
-#                Fit_Richards(30.0, 120.0, p, eff_Data, plist)
-#                plist = [0.72, 0.91, 0.212, 0.15, 50.0]
-#                Fit_Richards(30.0, 120.0, p, eff_MC, plist)
-            #elif xVar == "Ht" and s == "OR":
-            #    plist = [0.00005, 0.988, 0.000000109, 0.15, 29.0]
-            #    Fit_Richards(350.0, 2000.0, p, eff_Data, plist)
-                #plist = [0.0003, 0.97, 0.45, 0.24, 43.0]
-                #Fit_Richards(500.0, 2000.0, p, eff_MC, plist)
-            #elif xVar == "nBTagJets":
-                #plist = [0.07, 0.984, 0.45, 0.24, 43.0]
-                #Fit_Richards(30.0, 120.0, p, eff_Data, plist)
-            #elif xVar == "pu":
-                #plist = [0.07, 0.984, 0.45, 0.24, 43.0]
-                #Fit_Richards(30.0, 120.0, p, eff_Data, plist)
-            
-                            
+                                                   
             # Draw
             histograms.addText(0.65, 0.06, "Runs "+ runRange, 17)
             histograms.addText(0.65, 0.10, "2016", 17)
@@ -647,126 +650,7 @@ def main(opts):
             # Save the canvas to a file
             SavePlot(p, plotName, os.path.join(opts.saveDir, opts.optMode), saveFormats=[".pdf", ".png", ".C"] )
 
-            '''
-            # IN SLICES OF HT
-    HTSlices = ["450ht600","600ht800","800ht1000", "1000ht1250", "1250ht1500", "1500ht2000"]
-    for s in SigSel:
-        for hsl in HTSlices:
-            hNumerator = "Num_pt6thJet_Vs_"+hsl+"_RefTrg_OfflineSel_"+s
-            hDenominator = "Den_pt6thJet_Vs_"+hsl+"_RefTrg_OfflineSel"
-            # Get the save path and name        
-            plotName = "Eff_pt6thJet_Vs_"+hsl+"_"+s
-            savePath, saveName = GetSavePathAndName(plotName, **kwargs)
-        
-            # Get Efficiency Plots
-            eff_Data     = getEfficiency(datasetsMgr, dataset_Data, hNumerator, hDenominator , **kwargs)
-            eff_MC       = getEfficiency(datasetsMgr, dataset_MC, hNumerator, hDenominator, **kwargs) 
-            
-            xMin = 29.0
-            xMax = 125.0
-                
-            # Apply Styles
-            styles.dataStyle.apply(eff_Data)
-            styles.mcStyle.apply(eff_MC)
-        
-            # Marker Style
-            eff_Data.SetMarkerSize(1)
-                
-            # Create Comparison Plot
-            p = plots.ComparisonPlot(histograms.HistoGraph(eff_Data, "eff_Data","p","P"),
-                                     histograms.HistoGraph(eff_MC,   "eff_MC", "p", "P"))
-                
-            opts       = {"ymin": 0  , "ymax": 1.1, "xmin":xMin, "xMax":xMax}
-            opts2      = {"ymin": 0.7, "ymax": 1.3}
-            moveLegend = {"dx": -0.44, "dy": -0.57, "dh": -0.2 }
-            
-            p.histoMgr.setHistoLegendLabelMany({"eff_Data": "Data", "eff_MC": "Simulation"})
-            createRatio = True #kwargs.get("ratio")
-            p.createFrame(saveName, createRatio=createRatio, opts=opts, opts2=opts2)
-                    
-            # Set Legend
-            p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
-        
-            # Set Log & Grid
-            SetLogAndGrid(p, **kwargs)
-    
-            # Set Titles
-            p.getFrame().GetYaxis().SetTitle(kwargs.get("ylabel"))
-            p.getFrame().GetXaxis().SetTitle("p_{T} (Gev/c)")
-                    
-            if createRatio:
-                p.getFrame2().GetYaxis().SetTitle("Ratio")
-                p.getFrame2().GetYaxis().SetTitleOffset(1.6)
-                            
-            # Draw
-            histograms.addText(0.30, 0.10, "Runs "+runRange, 17)
-            histograms.addText(0.30, 0.15, "2016", 17)
-            histograms.addStandardTexts(lumi=lumi)
-            p.draw()
-        
-            # Save the canvas to a file
-            SaveAs(p, kwargs.get("savePath"), saveName, kwargs.get("saveFormats"), True)
-
-    
-    PTSlices = ["40pt50","50pt60", "60pt70", "70pt90", "90pt120"]
-    for s in SigSel:
-        for psl in PTSlices:
-            hNumerator = "Num_ht_Vs_"+psl+"_HLT_PFHT350_"+s
-            hDenominator = "Den_ht_Vs_"+psl+"_HLT_PFHT350"
-            # Get the save path and name        
-            plotName = "Eff_ht_Vs_"+psl+"_"+s
-            savePath, saveName = GetSavePathAndName(plotName, **kwargs)
-        
-            # Get Efficiency Plots
-            eff_Data     = getEfficiency(datasetsMgr, dataset_Data, hNumerator, hDenominator , **kwargs)
-            eff_MC       = getEfficiency(datasetsMgr, dataset_MC, hNumerator, hDenominator, **kwargs) 
-
-            xMin = 450
-            xMax = 2000
-                
-            # Apply Styles
-            styles.dataStyle.apply(eff_Data)
-            styles.mcStyle.apply(eff_MC)
-        
-            # Marker Style
-            eff_Data.SetMarkerSize(1)
-                
-            # Create Comparison Plot
-            p = plots.ComparisonPlot(histograms.HistoGraph(eff_Data, "eff_Data","p","P"),
-                                     histograms.HistoGraph(eff_MC,   "eff_MC", "p", "P"))
-                
-            opts       = {"ymin": 0  , "ymax": 1.1, "xmin":xMin, "xMax":xMax}
-            opts2      = {"ymin": 0.7, "ymax": 1.3}
-            moveLegend = {"dx": -0.44, "dy": -0.57, "dh": -0.2 }
-                
-            p.histoMgr.setHistoLegendLabelMany({"eff_Data": "Data", "eff_MC": "Simulation"})
-            createRatio = True #kwargs.get("ratio")
-            #if eff_Data != None and eff_MC != None:
-            p.createFrame(saveName, createRatio=createRatio, opts=opts, opts2=opts2)
-                    
-            # Set Legend
-            p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
-        
-            # Set Log & Grid
-            SetLogAndGrid(p, **kwargs)
-    
-            # Set Titles
-            p.getFrame().GetYaxis().SetTitle(kwargs.get("ylabel"))
-            p.getFrame().GetXaxis().SetTitle("H_{T} (Gev/c)")
-                    
-            if createRatio:
-                p.getFrame2().GetYaxis().SetTitle("Ratio")
-                p.getFrame2().GetYaxis().SetTitleOffset(1.6)
-                            
-            # Draw
-            histograms.addText(0.30, 0.10, "Runs "+runRange, 17)
-            histograms.addText(0.30, 0.15, "2016", 17)
-            histograms.addStandardTexts(lumi=lumi)
-            p.draw()
-        
-            # Save the canvas to a file
-            SaveAs(p, kwargs.get("savePath"), saveName, kwargs.get("saveFormats"), True)
-            '''
+    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)
     return
 
 
@@ -796,19 +680,10 @@ if __name__ == "__main__":
     DATAERA      = "Run2016"
     VERBOSE      = False
     BATCHMODE    = True
-    SAVEDIR      = "/publicweb/a/aattikis/Trigger/"
+    SAVEDIR      = None
     OPTMODE      = None
     ANALYSISNAME = "JetTriggersSF"
-    # PRECISION    = 3
-    # INTLUMI      = -1.0
-    # SUBCOUNTERS  = False
-    # LATEX        = False
-    # MCONLY       = False
-    # MERGEEWK     = True
     URL          = False
-    # NOERROR      = True
-    # HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'            
-
 
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
     
@@ -853,6 +728,9 @@ if __name__ == "__main__":
         parser.print_help()
         #print __doc__
         sys.exit(1)
+
+    if opts.saveDir == None:
+        opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="Efficiency")
 
     # Program execution
     main(opts)

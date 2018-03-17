@@ -24,12 +24,12 @@ USAGE:
 
 
 EXAMPLES:
-./dcardGenerator.py -x dcardHplustb2017Datacard_v2.py -d example/
-./dcardGenerator_v2.py -x dcardHplus2tb_2016Data.py -d limits2016/ --h2tb
+./dcardGenerator.py -x <datacard-config-file> -d <dir-with-results>
+./dcardGenerator_v2.py -x dcardDefault_h2tb_2016.py -d limits2016/ --h2tb
 
 
 LAST USED:
-./dcardGenerator_v2.py -x dcardHplus2tb_2016Data.py -d limits2016/ --h2tb --tarball
+./dcardGenerator_v2.py -x dcardDefault_h2tb_2016.py -d limits2016/ --h2tb --tarball
 
 '''
 
@@ -239,7 +239,8 @@ def CreateTarball(myOutputDirectories, opts):
 
     # Create filename with a time stamp
     myTimestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime(time.time()))
-    myFilename  = "datacards_archive_%s.tgz" % (myTimestamp)
+    # myFilename  = "datacards_archive_%s.tgz" % (myTimestamp) # Adopt directory name instead!
+    myFilename  = myOutputDirectories[0] + ".tgz"
     fTarball    = tarfile.open(myFilename, mode="w:gz")
     
     # For-loop: All output dirs
@@ -251,7 +252,7 @@ def CreateTarball(myOutputDirectories, opts):
 
     # Inform user
     msg = "Created archive of results directories to "
-    Print(msg + SuccessStyle() + myFilename + NormalStyle())
+    Print(msg + SuccessStyle() + myFilename + NormalStyle(), False)
     return
 
 def main(opts, moduleSelector, multipleDirs):
@@ -263,9 +264,10 @@ def main(opts, moduleSelector, multipleDirs):
         ROOT.SetMemoryPolicy(ROOT.kMemoryStrict)
         gc.set_debug(gc.DEBUG_STATS)
 
-    # Catch any errors in the input datacard
-    Verbose("Validating datacard \"%s\"" % (opts.datacard) )
-    os.system("python %s" % opts.datacard)
+    # Catch any errors in the input datacard (options added to avoid double printouts from the template card; if there are any!)
+    if opts.pyValidate:
+        Verbose("Validating datacard \"%s\"" % (opts.datacard) )
+        os.system("python %s" % opts.datacard)
 
     # Load the datacard
     Verbose("Loading datacard \"%s\"" % (opts.datacard) )
@@ -413,6 +415,7 @@ if __name__ == "__main__":
     VERBOSE       = False
     HToTB         = False
     TARBALL       = False
+    PYVALIDATE    = False
 
     # Object for selecting data eras, search modes, and optimization modes
     myModuleSelector = analysisModuleSelector.AnalysisModuleSelector() 
@@ -421,6 +424,9 @@ if __name__ == "__main__":
 
     parser.add_option("-h", "--help", dest="helpStatus", action="store_true", default=HELP, 
                       help="Show this help message and exit [default: %s]" % HELP)
+
+    parser.add_option("--pyValidate", dest="pyValidate", action="store_true", 
+                      help="Validate the template datacard used as input by calling python [default: %s]" % (PYVALIDATE))
 
     parser.add_option("-x", "--datacard", dest="datacard", action="store", 
                       help="Name (incl. path) of the datacard to be used as an input")

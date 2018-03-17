@@ -103,6 +103,10 @@ private:
   
   void findFatJetMatchedToTop(std::vector<AK8Jet>& collection, const Event& event,  const math::XYZTLorentzVector& topP);
 
+  int findGenTopMatchedToFatJetType(const Event& event, AK8Jet& fatjet);
+  
+  bool hasMother(const Event& event,const genParticle &p, const int mom_pdgId);
+
   const FatJetSelection::FatjetType findFatJetMatchedToTopType(AK8Jet fatJetMatchedToTop, const double dR_jet1, const double dR_jet2, const double dR_bjet, const TopSelectionBDT::Data& topData);
   
   void findFatJetMatchedToTopDeltaR(AK8Jet fatJetTopMatch, double &dR_jet1, double &dR_jet2, double &dR_bjet, const TopSelectionBDT::Data& topData);
@@ -137,6 +141,11 @@ private:
   WrappedTH1 *hFatJetTopMatchDeltaRBjet;
   WrappedTH1 *hFatJetTopMatchType;
   WrappedTH1 *hFatJetTopMatchPtRatio;
+  WrappedTH1 *hFatJetTopMatchTypeNone_GenMatch;
+  WrappedTH1 *hFatJetTopMatchTypeJJB_GenMatch;
+  WrappedTH1 *hFatJetTopMatchTypeJJ_GenMatch;
+  WrappedTH1 *hFatJetTopMatchTypeJB_GenMatch;
+  WrappedTH1 *hFatJetTopMatchTypeResolved_GenMatch;
   
   // Binnings
   int nNBins;

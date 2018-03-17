@@ -158,8 +158,8 @@ def main():
         Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
         process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=opts.excludeTasks)
     else:
-        myBlackList = ["M_180", "M_200" , "M_220" , "M_250" , "M_300" , "M_350" , "M_400" , "M_500" , "M_650"  ,
-                       #"M_800", 
+        myBlackList = ["M_180", "M_200" , "M_220" , "M_250" , "M_300" , "M_350" , "M_400" , "M_500" , "M_650",
+                       "M_800", 
                        "M_1000", "M_1500", "M_2000", "M_2500", "M_3000", "M_5000", "M_7000", "M_10000", "QCD"]
         Print("Adding all datasets from multiCRAB directory %s except %s" % (opts.mcrab, (",".join(myBlackList))) )
         Print("Vertex reweighting is done according to the chosen data era (%s)" % (",".join(dataEras)) )
@@ -180,7 +180,9 @@ def main():
 
     # Set splitting of phase-space (first bin is below first edge value and last bin is above last edge value)
     allSelections.CommonPlots.histogramSplitting = [
-        PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 1.2, 1.8], useAbsoluteValues=True),
+        #PSet(label="TetrajetBjetPt" , binLowEdges=[40, 60, 100, 200, 300], useAbsoluteValues=False), # pT < 40, pT=40-60, pT=60-100, pT=100-200, pT > 200
+        PSet(label="TetrajetBjetEta", binLowEdges=[-1.8, -1.2, -0.4, 0.0, 0.4, 1.2, 1.8], useAbsoluteValues=False), 
+        #PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 1.2, 1.8], useAbsoluteValues=True), #|eta| < 0.4,  0.4 < |eta| < 1.2, 1.2 < |eta| < 1.8, |eta| > 1.8, 
         #PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 1.2], useAbsoluteValues=True),
         #PSet(label="TetrajetBjetEta", binLowEdges=[1.2], useAbsoluteValues=True),
         #PSet(label="TetrajetBjetEta", binLowEdges=[1.3], useAbsoluteValues=True), # good but perhaps limit to 1.2

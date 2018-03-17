@@ -11,6 +11,7 @@ and other variations based on the config.
 #================================================================================================  
 from HiggsAnalysis.NtupleAnalysis.main import Analyzer
 import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 
 #================================================================================================
 # Global Definitions
@@ -109,6 +110,7 @@ class AnalysisConfig:
                         variationType = "mistag"
                     direction = value.replace("BTagSF","").replace("BMistagSF","").replace("Minus","down").replace("Plus","up")
                     scaleFactors.updateBtagSFInformationForVariations(self._config.BJetSelection, direction=direction, variationInfo=variationType)
+
 		# top quarks
 		elif value.startswith("TopPt"):
                     self._config.topPtSystematicVariation = value.replace("TopPt","").replace("Plus","plus").replace("Minus","minus")
@@ -176,48 +178,96 @@ class AnalysisBuilder:
                  useTopPtReweighting=False,# enable/disable top pt reweighting for ttbar
                  # Systematics options
                  doSystematicVariations=False, # Enable/disable adding modules for systematic uncertainty variation
+                 analysisType="HToTauNu",      # Define the analsysi to allow a handle of changing variables accordingly
                 ):
-          self._name = name
-          self._dataEras = []
-          if isinstance(dataEras, list):
-              self._dataEras = dataEras[:]
-          else:
-              self._dataEras.append(dataEras)
-          self._searchModes = []
-          if isinstance(searchModes, list):
-              self._searchModes = searchModes[:]
-          else:
-              self._searchModes.append(searchModes)
-          
-          self._usePUreweighting = usePUreweighting
-          self._useTopPtReweighting = useTopPtReweighting
-          self._variations={}
-          # Process systematic uncertainty variations
-          if doSystematicVariations:
-              items = []
-              # Trigger systematics
-              items.extend(["TauTrgEffData", "TauTrgEffMC"]) 
-              #items.extend(["L1ETMDataEff", "L1ETMMCEff"])
-              items.extend(["METTrgEffData", "METTrgEffMC"])
-              # Tau ID variation systematics
-              items.extend(["FakeTauElectron", "FakeTauMuon", "FakeTauJet", "TauIDSyst"])
-              # Energy scales and JER systematics
-              items.extend(["TauES", "JES", "JER", "UES"])
-              # b quark systematics
-              items.extend(["BTagSF", "BMistagSF"])
-              # top quark systematics
-              if self._useTopPtReweighting:
-                  items.append("TopPt") 
-              # PU weight systematics
-              items.extend(["PUWeight"])
-              # Create configs
-              self._variations["systematics"] = []
-              for item in items:
-                  self._variations["systematics"].append("%sPlus"%item)
-                  self._variations["systematics"].append("%sMinus"%item)
-	  #self.addVariation("TauSelection.tauPtCut", [50,60])
-	  #self.addVariation("TauSelection.tauEtaCut", [0.5,1.5])
-          return
+        self._name = name
+        self._dataEras = []
+        if isinstance(dataEras, list):
+            self._dataEras = dataEras[:]
+        else:
+            self._dataEras.append(dataEras)
+        self._searchModes = []
+        if isinstance(searchModes, list):
+            self._searchModes = searchModes[:]
+        else:
+            self._searchModes.append(searchModes)
+        self._usePUreweighting = usePUreweighting
+        self._useTopPtReweighting = useTopPtReweighting
+        self._variations={}
+        self._doSystematics = doSystematicVariations    
+        self._analysisType  = self._getAnalysisType(analysisType)
+        self._processSystematicsVariations()
+        return
+
+    def _getAnalysisType(self, analysis):
+        myAnalyses = ["HToTauNu", "HToTB"]
+        if analysis not in myAnalyses:
+            msg = "Unsupported analysis \"%s\". Please select one of the following: %s" % (analysis, ", ".join(myAnalyses))
+            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle() )
+        else:
+            return analysis
+
+    def getListOfSystematics(self):
+        if self._analysisType == "HToTauNu":
+            return self.getSystematicsForHToTauNu()
+        elif  self._analysisType == "HToTB":
+            return self.getSystematicsForHToTB()
+        else:
+            raise Exception(ShellStyles.ErrorStyle() + "This should never be reached" + ShellStyles.NormalStyle() )
+
+    def getSystematicsForHToTauNu(self):
+        items = []
+        # Trigger systematics
+        items.extend(["TauTrgEffData", "TauTrgEffMC"]) 
+
+        #items.extend(["L1ETMDataEff", "L1ETMMCEff"])
+        items.extend(["METTrgEffData", "METTrgEffMC"])
+
+        # Tau ID variation systematics
+        items.extend(["FakeTauElectron", "FakeTauMuon", "FakeTauJet", "TauIDSyst"])
+
+        # Energy scales and JER systematics
+        items.extend(["TauES", "JES", "JER", "UES"])
+
+        # b quark systematics
+        items.extend(["BTagSF", "BMistagSF"])
+
+        # top quark systematics
+        if self._useTopPtReweighting:
+            items.append("TopPt") 
+
+        # PU weight systematics
+        items.extend(["PUWeight"])
+        return items
+
+    def getSystematicsForHToTB(self):
+        items = []
+        # Energy scales and JER systematics
+        items.extend(["JES", "JER"])
+
+        # b quark systematics
+        items.extend(["BTagSF"])
+
+        # top quark systematics
+        if self._useTopPtReweighting:
+            items.append("TopPt") 
+
+        # PU weight systematics
+        items.extend(["PUWeight"])        
+        return items
+
+    def _processSystematicsVariations(self):
+        if not self._doSystematics:
+            return
+
+        # Process systematic uncertainty variations
+        items = self.getListOfSystematics()
+        # Create configs
+        self._variations["systematics"] = []
+        for item in items:
+            self._variations["systematics"].append("%sPlus" % item)
+            self._variations["systematics"].append("%sMinus"% item)
+        return
 
     def addVariation(self, configItemString, listOfValues):
         Verbose("addVariation()", True)

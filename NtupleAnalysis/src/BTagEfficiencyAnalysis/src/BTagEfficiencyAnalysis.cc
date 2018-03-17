@@ -68,36 +68,36 @@ private:
 REGISTER_SELECTOR(BTagEfficiencyAnalysis);
 
 BTagEfficiencyAnalysis::BTagEfficiencyAnalysis(const ParameterSet& config, const TH1* skimCounters)
-: BaseSelector(config, skimCounters),
-  fJetPtCutMin(config.getParameter<double>("jetPtCutMin")),
-  fJetPtCutMax(config.getParameter<double>("jetPtCutMax")),
-  fJetEtaCutMin(config.getParameter<double>("jetEtaCutMin")),
-  fJetEtaCutMax(config.getParameter<double>("jetEtaCutMax")),
-  fAnalysisType(config.getParameter<std::string>("AnalysisType")),
-  fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kBTagEfficiencyAnalysis, fHistoWrapper),
-  cAllEvents(fEventCounter.addCounter("All events")),
-  cTrigger(fEventCounter.addCounter("Passed trigger")),
-  fMETFilterSelection(config.getParameter<ParameterSet>("METFilter"),
-                fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-  cVertexSelection(fEventCounter.addCounter("Primary vertex selection")),
-  fTauSelection(config.getParameter<ParameterSet>("TauSelection"),
-                fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-  cFakeTauSFCounter(fEventCounter.addCounter("Fake tau SF")),
-  cTauTriggerSFCounter(fEventCounter.addCounter("Tau trigger SF")),
-  cMetTriggerSFCounter(fEventCounter.addCounter("Met trigger SF")),
-  fElectronSelection(config.getParameter<ParameterSet>("ElectronSelection"),
-                fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
-  fMuonSelection(config.getParameter<ParameterSet>("MuonSelection"),
-                fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
-  fJetSelection(config.getParameter<ParameterSet>("JetSelection"),
-                fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-  // fAngularCutsCollinear(config.getParameter<ParameterSet>("AngularCutsCollinear"),
-  // fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-  fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"),
-                fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-  fMETSelection(config.getParameter<ParameterSet>("METSelection"),
-                fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-  cSelected(fEventCounter.addCounter("Selected events"))
+  : BaseSelector(config, skimCounters),
+    fJetPtCutMin(config.getParameter<double>("jetPtCutMin")),
+    fJetPtCutMax(config.getParameter<double>("jetPtCutMax")),
+    fJetEtaCutMin(config.getParameter<double>("jetEtaCutMin")),
+    fJetEtaCutMax(config.getParameter<double>("jetEtaCutMax")),
+    fAnalysisType(config.getParameter<std::string>("AnalysisType")),
+    fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kBTagEfficiencyAnalysis, fHistoWrapper),
+    cAllEvents(fEventCounter.addCounter("All events")),
+    cTrigger(fEventCounter.addCounter("Passed trigger")),
+    fMETFilterSelection(config.getParameter<ParameterSet>("METFilter"),
+			fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    cVertexSelection(fEventCounter.addCounter("Primary vertex selection")),
+    fTauSelection(config.getParameter<ParameterSet>("TauSelection"),
+		  fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    cFakeTauSFCounter(fEventCounter.addCounter("Fake tau SF")),
+    cTauTriggerSFCounter(fEventCounter.addCounter("Tau trigger SF")),
+    cMetTriggerSFCounter(fEventCounter.addCounter("Met trigger SF")),
+    fElectronSelection(config.getParameter<ParameterSet>("ElectronSelection"),
+		       fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
+    fMuonSelection(config.getParameter<ParameterSet>("MuonSelection"),
+		   fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
+    fJetSelection(config.getParameter<ParameterSet>("JetSelection"),
+		  fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    // fAngularCutsCollinear(config.getParameter<ParameterSet>("AngularCutsCollinear"),
+    // fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"),
+		   fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fMETSelection(config.getParameter<ParameterSet>("METSelection"),
+		  fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    cSelected(fEventCounter.addCounter("Selected events"))
 { }
 
 void BTagEfficiencyAnalysis::book(TDirectory *dir) {
@@ -128,28 +128,22 @@ void BTagEfficiencyAnalysis::setupBranches(BranchManager& branchManager) {
 
 void BTagEfficiencyAnalysis::process(Long64_t entry) {
 
-//====== Initialize
+  //====== Initialize
   cAllEvents.increment();
   fCommonPlots.initialize();
   fCommonPlots.setFactorisationBinForEvent(std::vector<float> {});
 
-//====== Apply trigger
-  if (!(fEvent.passTriggerDecision()))
-    return;
+  //====== Apply trigger
+  if (!(fEvent.passTriggerDecision())) return;
   cTrigger.increment();
 
-//====== MET filters to remove events with spurious sources of fake MET
+  //====== MET filters to remove events with spurious sources of fake MET
   const METFilterSelection::Data metFilterData = fMETFilterSelection.analyze(fEvent);
-  if (!metFilterData.passedSelection())
-    return;
+  if (!metFilterData.passedSelection()) return;
   
-//====== GenParticle analysis
-  // if needed
-  
-//====== Check that primary vertex exists
+  //====== Check that primary vertex exists
   int nVertices = fEvent.vertexInfo().value();
-  if (nVertices < 1)
-    return;
+  if (nVertices < 1) return;
   cVertexSelection.increment();
 
   //====== Tau selection or Tau veto
@@ -194,43 +188,33 @@ void BTagEfficiencyAnalysis::process(Long64_t entry) {
       if (tauData.hasIdentifiedTaus()) return;
     }
   
-//====== Electron veto
+  //====== Electron veto
   const ElectronSelection::Data eData = fElectronSelection.analyze(fEvent);
   if (eData.hasIdentifiedElectrons())
     return;
 
-//====== Muon veto
+  //====== Muon veto
   const MuonSelection::Data muData = fMuonSelection.analyze(fEvent);
   if (muData.hasIdentifiedMuons())
     return;
 
-//====== Jet selection
+  //====== Jet selection
   JetSelection::Data jetData;
   if (fAnalysisType.compare("HToTauNu") == 0 )  
     {
-      // const JetSelection::Data jetData = fJetSelection.analyze(fEvent, tauData.getSelectedTau());
-      // jetData = fJetSelection.analyze(fEvent, tauData.getSelectedTau());
       jetData = fJetSelection.analyzeWithoutTau(fEvent);
+
       if (!jetData.passedSelection())
 	return;
     }
   else // "tb"
-   {
-     // const JetSelection::Data jetData = fJetSelection.analyzeWithoutTau(fEvent);
-     jetData = fJetSelection.analyzeWithoutTau(fEvent);
-     if (!jetData.passedSelection())
-       return;
-   }
+    {
+      jetData = fJetSelection.analyzeWithoutTau(fEvent);
+      if (!jetData.passedSelection()) return; 
+    }
 
-//====== Collinear angular cuts
-  /*
-  const AngularCutsCollinear::Data collinearData = fAngularCutsCollinear.analyze(fEvent, tauData.getSelectedTau(), jetData, silentMETData);
-  if (!collinearData.passedSelection())
-    return;
-  */
-  
-//====== Point of standard selections
-  // Loop over selected jets
+  //====== Point of standard selections
+  // For-loop: All selected jets
   for (auto& p: jetData.getSelectedJets()) {
     // Filter by jet pt and eta
     if (p.pt() < fJetPtCutMin) continue;
@@ -244,14 +228,11 @@ void BTagEfficiencyAnalysis::process(Long64_t entry) {
       hAllBjets->Fill(p.pt());
     } else if (id == 4) {
       hAllCjets->Fill(p.pt());
-    }// else if (id == 21) {
-    //  hAllGjets->Fill(p.pt());
-    // } else if (id == 1 || id == 2 || id == 3) {
-    //  hAllLightjets->Fill(p.pt());
-    // }
+    }
     else hAllLightjets->Fill(p.pt()); 
   }
-  // Loop over selected b jets
+
+  // For-loop: All selected b jets
   const BJetSelection::Data bjetData = fBJetSelection.silentAnalyze(fEvent, jetData);
   for (auto& p: bjetData.getSelectedBJets()) {
     // Filter by jet pt and eta
@@ -259,28 +240,19 @@ void BTagEfficiencyAnalysis::process(Long64_t entry) {
     if (p.pt() > fJetPtCutMax) continue;
     if (p.eta() < fJetEtaCutMin) continue;
     if (p.eta() > fJetEtaCutMax) continue;
-
+    
     // Look for hadron flavour (See: https://hypernews.cern.ch/HyperNews/CMS/get/btag/1482.html)
     int id = std::abs(p.hadronFlavour());
     if (id == 5) {
       hPassedBjets->Fill(p.pt());
     } else if (id == 4) {
       hPassedCjets->Fill(p.pt());
-    }// else if (id == 21) {
-     // hPassedGjets->Fill(p.pt());
-    // } else if (id == 1 || id == 2 || id == 3) {
-    //  hPassedLightjets->Fill(p.pt());
-    //  }
+    }
     else hPassedLightjets->Fill(p.pt());
   }
   
-//====== All cuts passed
+  // ====== All cuts passed
   cSelected.increment();
-  // Fill final plots
 
-//====== Experimental selection code
-  // if necessary
-  
-//====== Finalize
-
+  return;
 }

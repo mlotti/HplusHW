@@ -509,9 +509,8 @@ def GetHistoKwargs(h, opts):
     if h == "counter":
         xMin = 15.0
         xMax = 21.0
-        # kwargs["opts"]   = {"xmin": xMin, "xmax": xMax, "ymin": 1e0, "ymax": 1e10}
-        kwargs["opts"]   = {"xmin": xMin, "xmax": xMax, "ymin": 1e0, "ymax": 1e8}
-        kwargs["cutBox"] = {"cutValue": xMin+2, "fillColor": 16, "box": False, "line": False, "greaterThan": True} #indicate btag SF
+        kwargs["opts"]   = {"xmin": xMin, "ymin": 1e0, "ymax": 1e8}
+        # kwargs["cutBox"] = {"cutValue": xMin+2, "fillColor": 16, "box": False, "line": False, "greaterThan": True} #indicate btag SF
 
     if "IsolPt" in h:
         ROOT.gStyle.SetNdivisions(8, "X")
@@ -831,6 +830,7 @@ def replaceBinLabels(p, histoName):
     '''
     myBinList = []
     if histoName == "counter" or histoName == "weighted/counter":
+        # myBinList = ["#geq 7 jets", "#geq 3 b-jets", "b-jets SF", "QGLR", "#geq 2 tops", "fat-jet veto", "All"]
         myBinList = ["#geq 7 jets", "#geq 3 b-jets", "b-jets SF", "#geq 2 tops", "fat-jet veto", "All"]
     elif "bjet" in histoName:
         myBinList = ["All", "#eta", "p_{T}", "CSVv2 (M)", "Trg Match", "#geq 3"]
@@ -988,6 +988,7 @@ if __name__ == "__main__":
     allowedFolders = ["counters", "counters/weighted", "PUDependency", "Weighting", 
                       "eSelection_Veto", "muSelection_Veto", "tauSelection_Veto",
                       "ForDataDrivenCtrlPlotsEWKFakeB", "ForDataDrivenCtrlPlotsEWKGenuineB",
+                      "QuarkGluonLikelihoodRatio_", "QGLRSelection_", 
                       "jetSelection_", "bjetSelection_", "metSelection_", "fatjetSelection_Veto",
                       "topologySelection_", "topbdtSelection_", "ForDataDrivenCtrlPlots"]
 

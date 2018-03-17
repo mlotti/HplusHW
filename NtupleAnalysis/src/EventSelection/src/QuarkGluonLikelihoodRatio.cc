@@ -83,9 +83,11 @@ QuarkGluonLikelihoodRatio::QuarkGluonLikelihoodRatio(const ParameterSet& config,
   fnumberOfJetsCut(config, "numberOfJetsCut"),
   fJetsCut(config.getParameter<float>("numberOfJetsCutValue")),
   // Event counter for passing selection
-  cPassedQuarkGluonLikelihoodRatio(fEventCounter.addCounter("passed b-jet selection ("+postfix+")")),
+  cPassedQuarkGluonLikelihoodRatio(fEventCounter.addCounter("passed QGLR selection ("+postfix+")")),
   // Sub counters
-  cSubAll(fEventCounter.addSubCounter("bjet selection ("+postfix+")", "All events")),
+  cSubAll(fEventCounter.addSubCounter("QGLR selection ("+postfix+")", "All events")),
+  cSubRequiredJetsResize(fEventCounter.addSubCounter("QGLR selection ("+postfix+")", "Required jets resizing")),
+  cSubNoJetsResize(fEventCounter.addSubCounter("QGLR selection ("+postfix+")", "No jets resizing")),
   fProb()
 {
   initialize(config);
@@ -97,9 +99,11 @@ QuarkGluonLikelihoodRatio::QuarkGluonLikelihoodRatio(const ParameterSet& config)
   fnumberOfJetsCut(config, "numberOfJetsCut"),
   fJetsCut(config.getParameter<float>("numberOfJetsCutValue")),
   // Event counter for passing selection
-  cPassedQuarkGluonLikelihoodRatio(fEventCounter.addCounter("passed b-jet selection")),
+  cPassedQuarkGluonLikelihoodRatio(fEventCounter.addCounter("passed QGLR selection")),
   // Sub counters
-  cSubAll(fEventCounter.addSubCounter("bjet selection", "All events")),
+  cSubAll(fEventCounter.addSubCounter("QGLR selection", "All events")),
+  cSubRequiredJetsResize(fEventCounter.addSubCounter("QGLR selection", "Required jets resizing")),
+  cSubNoJetsResize(fEventCounter.addSubCounter("QGLR selection", "No jets resizing")),
   fProb()
 {
   initialize(config);
@@ -151,7 +155,7 @@ void QuarkGluonLikelihoodRatio::handleQGLInput(const ParameterSet& config, std::
 
 
 void QuarkGluonLikelihoodRatio::bookHistograms(TDirectory* dir) {
-  TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "QuarkGluonLikelihoodRatio_" + sPostfix);
+  TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "QGLRSelection_" + sPostfix);
   
   // Histogram binning options
   int nQGLBins      = 100;
@@ -189,17 +193,25 @@ QuarkGluonLikelihoodRatio::Data QuarkGluonLikelihoodRatio::analyze(const Event& 
 QuarkGluonLikelihoodRatio::Data QuarkGluonLikelihoodRatio::privateAnalyze(const Event& iEvent, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData) {
   Data output;
   cSubAll.increment();
-  
+  bool doJetsResize = false;
   std::vector<Jet> selectedJets;
+
   // Get all the non-bjets jets
   for (auto jet: jetData.getSelectedJets())
     {
       if (isBJet(jet, bjetData.getSelectedBJets())) continue;
       selectedJets.push_back(jet);
     }
-  // Consider only up to Nth jets
-  if (!fnumberOfJetsCut.passedCut(selectedJets.size())) selectedJets.resize(fJetsCut);
+
+  // Impose restrition to max number of jet multiplicities to consider
+  if (!fnumberOfJetsCut.passedCut(selectedJets.size())) 
+    {
+      doJetsResize = true;
+      // std::cout << "selectedJets.size() = " << selectedJets.size() << ", doJetsResize = " << doJetsResize << std::endl;
+      selectedJets.resize(fJetsCut);
+    }
   
+  // For-loop: All seleted jets (multiplicities up to "fJetsCut")
   for(const Jet& jet: selectedJets){
     
     // All jets not identified as b-jets QGL
@@ -242,6 +254,11 @@ QuarkGluonLikelihoodRatio::Data QuarkGluonLikelihoodRatio::privateAnalyze(const 
   output.fQGLR = QGLR;
   output.bPassedSelection = fQGLRCut.passedCut(QGLR);
   
+  // Fill counters and sub-counters
+  if (doJetsResize) cSubRequiredJetsResize.increment();
+  else cSubNoJetsResize.increment();    
+  if (fQGLRCut.passedCut(QGLR)) cPassedQuarkGluonLikelihoodRatio.increment();
+
   // Fill Histograms
   hQGLR          -> Fill(output.fQGLR);
   hQGLR_vs_HT    -> Fill(jetData.HT(), output.fQGLR);

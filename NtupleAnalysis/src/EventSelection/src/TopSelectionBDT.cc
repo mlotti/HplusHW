@@ -314,10 +314,7 @@ void TopSelectionBDT::initialize(const ParameterSet& config) {
   
   // Load TMVA library
   TMVA::Tools::Instance();
-  
-  //Insert xml weight file
-  std::string sWeightFile = config.getParameter<std::string>("WeightFile");
-
+    
   // Create the reader
   reader = new TMVA::Reader( "!Color:Silent" );
   
@@ -342,12 +339,14 @@ void TopSelectionBDT::initialize(const ParameterSet& config) {
   reader->AddVariable( "TrijetLdgJetMult",        &TrijetLdgJetMult        );
   reader->AddVariable( "TrijetSubldgJetMult",     &TrijetSubldgJetMult     );
 
-  // Read the xml file
-  reader->BookMVA("BTDG method", sWeightFile);
-  //reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/EventSelection/interface/weights/TMVAClassification_BDTG_default.weights.xml");
-  //reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TMVA_BDT/test/weights_DeltaRminQuarks08/TMVAClassification_BDTG.weights.xml");
-  //reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TMVA_BDT/test/weights_NewTrainingFP/TMVAClassification_BDTG.weights.xml");
-  //reader->BookMVA("BTDG method", "/uscms_data/d3/skonstan/CMSSW_8_0_28/src/HiggsAnalysis/NtupleAnalysis/src/TopReco/work/TMVA_BDT/test/weights_topPtle500/TMVAClassification_BDTG.weights.xml");
+  // Construct the relative path toe the xml file with the BDT weights
+  std::string relPath  = "../../../data/TopTaggerWeights/";
+  std::string fileName = config.getParameter<std::string>("WeightFile");
+  std::string fullPath = relPath + fileName;
+  // std::cout << "Opening BDT weight file " << fullPath << std::endl;
+  reader->BookMVA("BTDG method", fullPath);
+
+  return;
 }
 
 void TopSelectionBDT::bookHistograms(TDirectory* dir) {

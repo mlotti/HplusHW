@@ -128,5 +128,4 @@ void Event::setupBranches(BranchManager& mgr) {
   fL1extraMET.setupBranches(mgr);
   fPFCandidates.setupBranches(mgr);
   fAK8JetCollection.setupBranches(mgr);
-  fAK8JetsSoftDropCollection.setupBranches(mgr);
 }
