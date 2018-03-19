@@ -102,7 +102,7 @@ public:
     }
     float getMVASubldgInPt() const 
     { 
-      if (fTrijet2_p4.pt() > fTrijet1_p4.pt()) return fMVAmax2;
+      if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) return fMVAmax2;
       else return fMVAmax1;
     }
 
