@@ -2421,9 +2421,6 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
     {
       // If top fails determine if event falls into  Control Region 2 (CR2)
       if (!bPass_InvertedTop) return;
-      // std::cout << "\nbPass_LdgTopMVA = " << bPass_LdgTopMVA << ", bPass_SubldgTopMVA = " << bPass_SubldgTopMVA << ", bPass_BothMVA = " << bPass_BothMVA << ", bPass_InvertedTop = " << bPass_InvertedTop << std::endl;
-      // std::cout << "ldgMVA    = " << ldgMVA    << " " << cfg_LdgTopMVACut.getCutDirectionString()    << " " << cfg_LdgTopMVACut.getCutValue()    << "?" <<  std::endl; 
-      // std::cout << "subldgMVA = " << subldgMVA << " " << cfg_SubldgTopMVACut.getCutDirectionString() << " " << cfg_SubldgTopMVACut.getCutValue() << "?" <<  std::endl; 
 
       if (0) std::cout << "=== Baseline: Control Region 1 (CRone)" << std::endl;
       cBaselineSelectedCR.increment();

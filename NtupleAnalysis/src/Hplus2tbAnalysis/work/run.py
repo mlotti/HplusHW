@@ -50,7 +50,7 @@ Setting histogramAmbientLevel=kSystematics will include kSystematics AND kNever.
 #================================================================================================
 import sys
 from optparse import OptionParser
-import datetime
+import time
 
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
 from HiggsAnalysis.NtupleAnalysis.AnalysisBuilder import AnalysisBuilder
@@ -98,9 +98,9 @@ def Print(msg, printHeader=True):
 #================================================================================================
 def main():
 
-    # Print start time
-    tStart = datetime.datetime.now()
-    Print("Started @ " + str(tStart), True)
+    # Save start time (epoch seconds)
+    tStart = time.time()
+    Verbose("Started @ " + str(tStart), True)
 
     # Require at least two arguments (script-name, path to multicrab)      
     if len(sys.argv) < 2:
@@ -144,9 +144,14 @@ def main():
                        "ChargedHiggs_HplusTB_HplusToTB_M_2000_ext1"
                        "ChargedHiggs_HplusTB_HplusToTB_M_2500_ext1", 
                        "ChargedHiggs_HplusTB_HplusToTB_M_3000_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_5000",
-                       "ChargedHiggs_HplusTB_HplusToTB_M_7000",
-                       "ChargedHiggs_HplusTB_HplusToTB_M_10000",
+                       # "ChargedHiggs_HplusTB_HplusToTB_M_1000",
+                       "ChargedHiggs_HplusTB_HplusToTB_M_1500",   # Speeed things up
+                       "ChargedHiggs_HplusTB_HplusToTB_M_2000",   # Speeed things up
+                       "ChargedHiggs_HplusTB_HplusToTB_M_2500",   # Speeed things up
+                       "ChargedHiggs_HplusTB_HplusToTB_M_3000",   # Speeed things up
+                       "ChargedHiggs_HplusTB_HplusToTB_M_5000",   # Speeed things up
+                       "ChargedHiggs_HplusTB_HplusToTB_M_7000",   # Speeed things up  
+                       "ChargedHiggs_HplusTB_HplusToTB_M_10000",  # Speeed things up
                        ]
         if opts.doSystematics:
             myBlackList.append("QCD")
@@ -237,14 +242,13 @@ def main():
         process.run()
 
     # Print total time elapsed
-    tFinish   = datetime.datetime.now()
-    dt        = tFinish - tStart
-    days      = dt.days
-    hours     = divmod(dt.days * (60*60) + dt.seconds, 60*60) # (a, b) = (hours, minutes)
-    minutes   = divmod(dt.days * (60*60*24) + dt.seconds, 60) # (a, b) = (minutes, seconds)
-    seconds   = dt.seconds
-    Print("Finished @ " + str(datetime.datetime.now()), True)
-    Print("Total elapsed time is %s h, %s min, %s sec" % (hours[0], minutes[0], minutes[1]), True)
+    tFinish = time.time()
+    dt      = int(tFinish) - int(tStart)
+    days    = divmod(dt,86400)      # days
+    hours   = divmod(days[1],3600)  # hours
+    mins    = divmod(hours[1],60)   # minutes
+    secs    = mins[1]               # seconds
+    Print("Total elapsed time is %s days, %s hours, %s mins, %s secs" % (days[0], hours[0], mins[0], secs), True)
     return
 
 #================================================================================================

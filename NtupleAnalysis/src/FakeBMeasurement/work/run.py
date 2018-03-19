@@ -40,7 +40,7 @@ Setting histogramAmbientLevel=kSystematics will include kSystematics AND kNever.
 #================================================================================================
 import sys
 from optparse import OptionParser
-import datetime
+import time
 
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
 from HiggsAnalysis.NtupleAnalysis.AnalysisBuilder import AnalysisBuilder    
@@ -87,9 +87,9 @@ def Print(msg, printHeader=True):
 #================================================================================================
 def main():
 
-    # Print start time
-    tStart = datetime.datetime.now()
-    Print("Started @ " + str(tStart), True)
+    # Save start time (epoch seconds)
+    tStart = time.time()
+    Verbose("Started @ " + str(tStart), True)
 
     # Require at least two arguments (script-name, path to multicrab)     
     if len(sys.argv) < 2:
@@ -185,14 +185,11 @@ def main():
 
     # Set splitting of phase-space (first bin is below first edge value and last bin is above last edge value)
     allSelections.CommonPlots.histogramSplitting = [
-        PSet(label="TetrajetBjetEta", binLowEdges=[0.2, 0.4, 0.8, 1.2, 1.6, 2.0, 2.2], useAbsoluteValues=True),
+        PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True),
         #PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 1.2, 1.8], useAbsoluteValues=True), #|eta| < 0.4,  0.4 < |eta| < 1.2, 1.2 < |eta| < 1.8, |eta| > 1.8, 
-        #PSet(label="TetrajetBjetPt" , binLowEdges=[40, 60, 100, 200, 300], useAbsoluteValues=False), # pT < 40, pT=40-60, pT=60-100, pT=100-200, pT > 200
-        #PSet(label="TetrajetBjetEta", binLowEdges=[-1.8, -1.2, -0.4, 0.0, 0.4, 1.2, 1.8], useAbsoluteValues=False), 
-        #PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 1.2], useAbsoluteValues=True),
-        #PSet(label="TetrajetBjetEta", binLowEdges=[1.2], useAbsoluteValues=True),
-        #PSet(label="TetrajetBjetEta", binLowEdges=[1.3], useAbsoluteValues=True), # good but perhaps limit to 1.2
-        #PSet(label="TetrajetBjetEta", binLowEdges=[0.6, 1.4], useAbsoluteValues=True), #middle bin is bad
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.2, 0.4, 0.8, 1.2, 1.6, 2.0, 2.2], useAbsoluteValues=True),
+        # PSet(label="TetrajetBjetEta", binLowEdges=[-1.8, -1.2, -0.4, 0.0, 0.4, 1.2, 1.8], useAbsoluteValues=False), 
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[40, 60, 100, 200, 300], useAbsoluteValues=False), # pT < 40, pT=40-60, pT=60-100, pT=100-200, pT > 200
         ]
     
     # allSelections.BJetSelection.triggerMatchingApply = True # at least 1 trg b-jet matched to offline b-jets
@@ -268,14 +265,13 @@ def main():
         process.run()
 
     # Print total time elapsed
-    tFinish   = datetime.datetime.now()
-    dt        = tFinish - tStart
-    days      = dt.days
-    hours     = divmod(dt.days * (60*60) + dt.seconds, 60*60) # (a, b) = (hours, minutes)
-    minutes   = divmod(dt.days * (60*60*24) + dt.seconds, 60) # (a, b) = (minutes, seconds)
-    seconds   = dt.seconds
-    Print("Finished @ " + str(datetime.datetime.now()), True)
-    Print("Total elapsed time is %s h, %s min, %s sec" % (hours[0], minutes[0], minutes[1]), True)
+    tFinish = time.time()
+    dt      = int(tFinish) - int(tStart)
+    days    = divmod(dt,86400)      # days
+    hours   = divmod(days[1],3600)  # hours
+    mins    = divmod(hours[1],60)   # minutes
+    secs    = mins[1]               # seconds
+    Print("Total elapsed time is %s days, %s hours, %s mins, %s secs" % (days[0], hours[0], mins[0], secs), True)
     return
 
 #================================================================================================
