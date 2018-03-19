@@ -24,7 +24,7 @@ set PSEUDO_MCRAB_DIR = ${1}
 ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --folder tauSelection_Veto --url
 ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --folder jetSelection_ --url
 ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --folder bjetSelection_ --url
-./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --folder topbdtSelection_ --url
+./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --folder topSelectionBDT_ --url
 ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --folder fatjetSelection_Veto --url
 ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --folder ForDataDrivenCtrlPlots --url
 ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --folder QuarkGluonLikelihoodRatio_ --url

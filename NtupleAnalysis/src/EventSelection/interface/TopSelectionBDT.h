@@ -68,6 +68,13 @@ public:
 
     // Status of passing event selection
     bool passedSelection() const { return bPassedSelection; }    
+    // Status of passing both MVA cuts
+    bool passedBothMVA() const { return bPassedBothMVA; }
+    // Status of passing MVA cut on ldg MVA top
+    bool passedLdgMVA() const { return bPassedLdgMVA; }
+    // Status of passing MVA cut on subldg MVA top
+    bool passedSubldgMVA() const { return bPassedSubldgMVA; }
+
     /// Status of GenuineB event (if false event is FakeB)
     bool hasFreeBJet() const { return bHasFreeBJet; }
     // Trijet-1
@@ -88,6 +95,17 @@ public:
     const math::XYZTLorentzVector getLdgTetrajet() const {return fLdgTetrajet_p4;} // uses ldg-trijet and tetrajetBjet (NOT the tetrajet with largest pt)
     const math::XYZTLorentzVector getSubldgTetrajet() const {return fSubldgTetrajet_p4;}
     const Jet getTetrajetBJet() const {return fTetrajetBJet;}
+    float getMVALdgInPt() const 
+    { 
+      if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) return fMVAmax1;
+      else return fMVAmax2;
+    }
+    float getMVASubldgInPt() const 
+    { 
+      if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) return fMVAmax2;
+      else return fMVAmax1;
+    }
+
     // Leading/Subleading Trijet
     const math::XYZTLorentzVector getLdgTrijet() const 
     { 
@@ -174,6 +192,9 @@ public:
   private:
     /// Boolean for passing selection
     bool bPassedSelection;
+    bool bPassedBothMVA;
+    bool bPassedLdgMVA;
+    bool bPassedSubldgMVA;
     std::vector<Jet> fJetsUsedAsBJets;
     std::vector<Jet> fFailedBJetsUsedAsBJets;
     bool bHasFreeBJet; // ldg in pt (free) bjet  for invariant mass reco
@@ -268,7 +289,8 @@ private:
   // Sub counters
   Count cSubAll;
   Count cSubPassedBjetsCut;
-  Count cSubPassedBDTCut;
+  Count cSubPassedLdgMVACut;
+  Count cSubPassedSubldgMVACut;
   Count cSubPassedFreeBjetCut;
   //
   Count cTopsAll;

@@ -140,10 +140,11 @@ def GetHistoKwargs(histoName):
         if "trijet" in histoName.lower():
             _opts["xmax"] = 800
             _rebinX = 2 #getBinningForPt(0)
-            if "tetrajetbjet" in histoName.lower():
-                _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
-        if "tetrajet" in histoName.lower():
+        if "tetrajetbjet" in histoName.lower():
+            _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
             _rebinX = systematics._dataDrivenCtrlPlotBinning["TetrajetBjetPt_AfterAllSelections"] #2 #getBinningForPt(0)
+        if "tetrajet" in histoName.lower():
+            _rebinX = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetPt_AfterAllSelections"] #2 #getBinningForPt(0)
             _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
             if "tetrajetbjet" in histoName.lower():
                 _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
@@ -178,19 +179,12 @@ def GetHistoKwargs(histoName):
         _cutBox       = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         _opts["xmin"] =   0
         _opts["xmax"] = 400
-        myBins = []
-        for j in range(0, 100, 10):
-            myBins.append(j)
-        for k in range(100, 200, 20):
-            myBins.append(k)
-        for k in range(200, 300, 50):
-            myBins.append(k)
-        for k in range(300, 400+100, 100):
-            myBins.append(k)
-        _rebinX  = myBins #1
-        # _ylabel      += " " + _units
+        _rebinX = systematics._dataDrivenCtrlPlotBinning["MET_AfterAllSelections"]
         binWmin, binWmax = GetBinWidthMinMax(myBins)
         _ylabel = "Events / %.0f-%.0f %s" % (binWmin, binWmax, _units)
+
+    if "ht" in histoName.lower():
+        _rebinX = systematics._dataDrivenCtrlPlotBinning["MET_AfterAllSelections"]
 
     if "tetrajetbjeteta" in histoName.lower():
         _units   = ""
@@ -311,19 +305,23 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     return
 
 def GetBinText(bin):
-    return "bin-" + str(bin)
-#    if bin == "0":
-#        return "|eta| < 0.4"
-#    elif bin == "1":
-#        return "0.4 < |eta| < 1.2"
-#    elif bin == "2":
-#        return "1.2 < |eta| < 1.8"
-#    elif bin == "3":
-#        return "|eta| > 1.8"
-#    elif bin == "Inclusive":
-#        return bin
-#    else:
-#        raise Exception(ShellStyles.ErrorStyle() + "Unexpected bin %s" % (bin)  + ShellStyles.NormalStyle())
+    #return "bin-" + str(bin)
+    if bin == "0":
+        return "|#eta| < 0.4"
+    elif bin == "1":
+        return "0.4 < |#eta| < 0.8"
+    elif bin == "2":
+        return "0.8 < |#eta| < 1.6"
+    elif bin == "3":
+        return "1.6 < |#eta| < 2.0"
+    elif bin == "4":
+        return "2.0 < |#eta| < 2.2"
+    elif bin == "5":
+        return "|#eta| > 2.2"
+    elif bin == "Inclusive":
+        return bin
+    else:
+        raise Exception(ShellStyles.ErrorStyle() + "Unexpected bin %s" % (bin)  + ShellStyles.NormalStyle())
 
 #================================================================================================ 
 # Main
@@ -697,7 +695,7 @@ if __name__ == "__main__":
     SAVEDIR      = None
     VERBOSE      = False
     USEMC        = False
-    RATIO        = True
+    RATIO        = False
     FOLDER       = "ForFakeBMeasurement"
     NORMALISE    = False
 

@@ -817,7 +817,7 @@ class ShapeExtractor(ExtractorBase):
 
         # Obtain purity histogram 
         hName = shapeHistoName + "_Purity"
-        self.Print("Obtaining purity hisrogram %s from dataset \"%s\"" % (hName, datasetColumn.getDatasetMgrColumn()), True)
+        self.Verbose("Obtaining purity hisrogram %s from dataset \"%s\"" % (hName, datasetColumn.getDatasetMgrColumn()), True)
         h = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(shapeHistoName+"_Purity")
         return h
 

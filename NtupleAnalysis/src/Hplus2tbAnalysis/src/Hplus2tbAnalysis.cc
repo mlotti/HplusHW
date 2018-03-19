@@ -22,6 +22,7 @@ public:
 private:
   // Input parameters
   const DirectionalCut<double> cfg_PrelimTopMVACut;
+  const std::string cfg_LdgTopDefinition;
 
   // Common plots
   CommonPlots fCommonPlots;
@@ -53,7 +54,8 @@ REGISTER_SELECTOR(Hplus2tbAnalysis);
 
 Hplus2tbAnalysis::Hplus2tbAnalysis(const ParameterSet& config, const TH1* skimCounters)
   : BaseSelector(config, skimCounters),
-    cfg_PrelimTopMVACut(config, "FakeBMeasurement.minTopMVACut"),
+    cfg_PrelimTopMVACut(config, "FakeBTopSelectionBDT.MVACut"),
+    cfg_LdgTopDefinition(config.getParameter<std::string>("FakeBTopSelectionBDT.LdgTopDefinition")),
     fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kHplus2tbAnalysis, fHistoWrapper),
     cAllEvents(fEventCounter.addCounter("all events")),
     cTrigger(fEventCounter.addCounter("passed trigger")),
@@ -105,6 +107,13 @@ void Hplus2tbAnalysis::setupBranches(BranchManager& branchManager) {
 
 
 void Hplus2tbAnalysis::process(Long64_t entry) {
+
+  // Sanity check
+  if (cfg_LdgTopDefinition != "MVA" &&  cfg_LdgTopDefinition != "Pt")
+    {
+      throw hplus::Exception("config") << "Unsupported method of defining the leading top (=" << cfg_LdgTopDefinition << "). Please select from \"MVA\" and \"Pt\".";
+    }
+
   //====== Initialize
   fCommonPlots.initialize();
   fCommonPlots.setFactorisationBinForEvent(std::vector<float> {});
@@ -203,7 +212,18 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   //================================================================================================
   if (0) std::cout << "=== Top (BDT) selection" << std::endl;
   const TopSelectionBDT::Data topData = fTopSelection.analyze(fEvent, jetData, bjetData);
-  bool passPrelimMVACut = cfg_PrelimTopMVACut.passedCut( std::max(topData.getMVAmax1(), topData.getMVAmax2()) );
+  bool passPrelimMVACut = false;  
+  if (cfg_LdgTopDefinition == "MVA")
+    {
+      passPrelimMVACut = cfg_PrelimTopMVACut.passedCut( std::min(topData.getMVAmax1(), topData.getMVAmax2()) );
+    }
+  else
+    {
+      passPrelimMVACut = cfg_PrelimTopMVACut.passedCut( std::min(topData.getMVALdgInPt(), topData.getMVASubldgInPt()) );
+    }
+  if (!passPrelimMVACut) return;
+  // NOTE: The two iffs below if removed will cause fillControlPlotsAfterStandardSelections() to crash. 
+  // Need to make necessary changes to fillControlPlots..()
   if (!topData.hasFreeBJet()) return;
   if (!passPrelimMVACut) return;
 
