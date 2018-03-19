@@ -129,6 +129,10 @@ def main(opts):
         datasetsMgr.updateNAllEventsToPUWeighted()
         datasetsMgr.loadLuminosities() # from lumi.json
 
+        if 0:
+            datasetsMgr.printSelections()
+            sys.exit()
+
         # Define datasets to remove by default
         QCD_list = ["QCD_HT700to1000", "QCD_HT50to100", "QCD_HT500to700", "QCD_HT300to500", 
                     "QCD_HT200to300", "QCD_HT2000toInf", "QCD_HT1500to2000", "QCD_HT100to200", "QCD_HT1000to1500"]

@@ -516,7 +516,7 @@ ControlPlots= []
 hMET = ControlPlotInput(
     title            = "MET_AfterAllSelections",
     histoName        = "MET_AfterAllSelections",
-    details          = { "xlabel"             : "E_{T}",
+    details          = { "xlabel"             : "E_{T}^{miss}",
                          "ylabel"             : "Events",
                          "divideByBinWidth"   : False,
                          "unit"               : "GeV",
@@ -657,7 +657,7 @@ hTetrajetBjetPt = ControlPlotInput(
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
                          "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 900.0} },
-    blindedRange=[420.0, 900.0], # specify range min,max if blinding applies to this control plot
+    # blindedRange=[420.0, 900.0], # specify range min,max if blinding applies to this control plot
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
     )
 
@@ -687,7 +687,8 @@ hHiggsPt = ControlPlotInput(
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
                          "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 900.0} },
-    blindedRange=[300.0, 900.0], # specify range min,max if blinding applies to this control plot      
+    blindedRange=[0.0, 900.0], # specify range min,max if blinding applies to this control plot      
+    #blindedRange=[420.0, 900.0], # specify range min,max if blinding applies to this control plot      
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
     )
 
@@ -738,19 +739,19 @@ hQGLR  = ControlPlotInput(
 #================================================================================================ 
 # Create ControlPlot list (NOTE: Remember to set OptionDoControlPlots to True)
 #================================================================================================ 
-# ControlPlots.append(hMET)
-# ControlPlots.append(hHT)
-# ControlPlots.append(hMHT)
-# ControlPlots.append(hQGLR)
-# ControlPlots.append(hTopPt)
-# ControlPlots.append(hTopMass)
-# ControlPlots.append(hTopBjetPt)
-# ControlPlots.append(hTopBjetEta)
-# ControlPlots.append(hTopDijetPt)
-# ControlPlots.append(hTopDijetMass)
-# # ControlPlots.append(hTopR32)
-# ControlPlots.append(hTetrajetBjetPt)
-# ControlPlots.append(hTetrajetBjetEta)
-# ControlPlots.append(hHiggsPt)
+ControlPlots.append(hMET)
+ControlPlots.append(hHT)
+ControlPlots.append(hMHT)
+ControlPlots.append(hQGLR)
+ControlPlots.append(hTopPt)
+ControlPlots.append(hTopMass)
+ControlPlots.append(hTopBjetPt)
+ControlPlots.append(hTopBjetEta)
+ControlPlots.append(hTopDijetPt)
+ControlPlots.append(hTopDijetMass)
+ControlPlots.append(hTetrajetBjetPt)
+ControlPlots.append(hTetrajetBjetEta)
+ControlPlots.append(hHiggsPt)
 ControlPlots.append(hHiggsMass)
-# # ControlPlots.append(hVertices)
+ControlPlots.append(hVertices)
+# ControlPlots.append(hTopR32)
