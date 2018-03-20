@@ -31,10 +31,10 @@ analysis = "QCDMeasurement"
 #==== Set rebin factor for normalization plots 
 #     Histograms are generated with 1 GeV bin width, so 
 #     10 here means that the fit is done on 10 GeV bins
-_rebinFactor = 20
+_rebinFactor = 10
 
 #=== Set to true if you want to use HT binned WJets samples instead of inclusive
-useWJetsHT = False
+useWJetsHT = True
 
 #=== Set tau pT bins to be used
 selectOnlyBins = [] #["1"] # use all bins
