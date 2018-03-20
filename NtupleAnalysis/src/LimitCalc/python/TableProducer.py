@@ -84,6 +84,13 @@ def createBinByBinStatUncertHistograms(hRate, xmin=None, xmax=None):
     nNegativeRate = 0
     nBelowMinStatUncert = 0
     nEmptyDownHistograms = 0
+
+#   TEST PRINT
+#    print "Contents of histogram %s:"%hRate.GetTitle()
+#    for i in range(1, hRate.GetNbinsX()+1):
+#        print "bin %d (from %f to %f): %f +- %f"%(i,hRate.GetXaxis().GetBinLowEdge(i),hRate.GetXaxis().GetBinUpEdge(i),hRate.GetBinContent(i),hRate.GetBinError(i))
+         
+
     # For-loop: All histogram bins
     for i in range(1, hRate.GetNbinsX()+1):
         #print hRate.GetXaxis().GetBinLowEdge(i), xmin, hRate.GetXaxis().GetBinUpEdge(i), xmax
