@@ -12,10 +12,12 @@ USAGE:
 EXAMPLES:
 ./plotEfficiency.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/Trigger/JetTriggersSF_170921_053850_FinalWithCut/ --url
 ./plotEfficiency.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/Trigger/JetTriggersSF_170921_053850_FinalWithCut/ --url -e ext
+./plotEfficiency.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/JetTriggersSF/multicrab_Hplus2tbAnalysis_v8030_20180223T0905/JetTriggersSF_180308_194450/ -e "MuEnriched" --url
 
 
 LAST USED:
-./plotEfficiency.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/JetTriggersSF/JetTriggersSF_180308_194450/ -e "MuEnriched" --url
+./plotEfficiency.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/JetTriggersSF/multicrab_Hplus2tbAnalysis_v8030_20180223T0905/JetTriggersSF_LepVeto_TauVeto_7JetPt30_2BjetsPt40Pt30_180308_194450/ -e "MuEnriched" --url
+
 
 '''
 #================================================================================================
@@ -567,11 +569,12 @@ def main(opts):
     datasetsMgr = GetDatasetsFromDir(opts)
 
     # Remove some QCD samples (the cross sections of these samples are not calculated)
-    msg = "Removing QCD samples for which cross--sections are not available yet:"
-    Print(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle(), True)
-    for d in getDatasetsToExclude():
-        Print(d, False)
-        datasetsMgr.remove(d)
+    if 0:
+        msg = "Removing following samples:"
+        Print(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle(), True)
+        for d in getDatasetsToExclude():
+            Print(d, False)
+            datasetsMgr.remove(d)
 
     # Get run-range 
     minRunRange, maxRunRange, runRange = GetRunRange(datasetsMgr)
@@ -597,8 +600,11 @@ def main(opts):
     dataset_MC   = datasetsMgr.getMCDatasets()
 
     # Define lists of Triggers to be plotted and Variables 
-    trgList = ["1BTag", "2BTag", "OR", "OR_PFJet450"]
     xVars   = ["pt6thJet", "eta6thJet", "phi6thJet", "Ht", "nBTagJets", "pu", "JetMulti", "BJetMulti"]
+    trgList = ["1BTag", "2BTag", "OR", "OR_PFJet450"]
+    if opts.fast:
+        trgList = ["OR_PFJet450"]
+        xVars   = ["pt6thJet", "Ht"]
     nPlots  = len(trgList)*len(xVars)
     counter =  0
 
@@ -682,6 +688,7 @@ if __name__ == "__main__":
     BATCHMODE    = True
     SAVEDIR      = None
     OPTMODE      = None
+    FAST         = False
     ANALYSISNAME = "JetTriggersSF"
     URL          = False
 
@@ -719,6 +726,9 @@ if __name__ == "__main__":
 
     parser.add_option("-o", "--optMode", dest="optMode", type="string", default=OPTMODE,
                       help="The optimization mode when analysis variation is enabled  [default: %s]" % OPTMODE)
+
+    parser.add_option("--fast", dest="fast", action="store_true", default=FAST,
+                      help="Only plots the OR trigger for 2 variables (testing purposes)  [default: %s]" % FAST)
     
     (opts, parseArgs) = parser.parse_args()
 

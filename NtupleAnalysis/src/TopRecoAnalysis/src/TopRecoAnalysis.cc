@@ -1256,7 +1256,7 @@ void TopRecoAnalysis::process(Long64_t entry) {
   */
 
   if (0) std::cout << "=== Top (BDT) selection" << std::endl;
-  const TopSelectionBDT::Data topData = fTopSelection.analyze(fEvent, jetData, bjetData, true);
+  const TopSelectionBDT::Data topData = fTopSelection.analyze(fEvent, jetData, bjetData);
   // bool passPrelimMVACut = cfg_PrelimTopMVACut.passedCut( std::max(topData.getMVAmax1(), topData.getMVAmax2()) ); //fixme?
   // bool hasFreeBJet      = topData.hasFreeBJet();
   // if (!hasFreeBJet) return;

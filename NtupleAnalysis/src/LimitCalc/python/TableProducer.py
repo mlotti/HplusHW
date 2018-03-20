@@ -239,13 +239,13 @@ class TableProducer:
         if self._opts.verbose:
             Print(ShellStyles.HighlightStyle() + "Generating reports" + ShellStyles.NormalStyle())
 
-        # Print table of shape variation for shapeQ nuisances
+        # Create table of shape variation for shapeQ nuisances
         self.makeShapeVariationTable()
 
-        # Print event yield summary table
+        # Create event yield summary table
         self.makeEventYieldSummary()
 
-        # Print systematics summary table
+        # Create systematics summary table
         self.makeSystematicsSummary(light=True)
         self.makeSystematicsSummary(light=False)        
 
@@ -309,7 +309,7 @@ class TableProducer:
         return fName
     
     def Print(self, msg, printHeader=True):
-        fName = GetName()
+        fName = self.GetFName()
         if printHeader:
             print "=== ", fName
         if msg !="":
@@ -1159,15 +1159,8 @@ class TableProducer:
         '''
         Prints systematics summary table
         '''
-#        myColumnOrder = ["HH",
-#                         "HW",
-#                         "QCD",
-#                         "EWK_Tau",
-#                         "EWK_DY",
-#                         "EWK_VV",
-#                         "EWK_tt_faketau",
-#                         "EWK_W_faketau",
-#                         "EWK_t_faketau"]
+        if self._h2tb and light==True:
+            return
         signalColumn="CMS_Hptntj_Hp"
         if light:
             signalColumn="HW"
@@ -1179,74 +1172,93 @@ class TableProducer:
                          "DY_t_genuine",
                          "VV_t_genuine"]
 
-# Old list:
-#        myNuisanceOrder = [["01","$\\tau - p_T^{miss}$ trigger"], # trg
-#                           ["03", "$\\tau$ jet ID (excl. $R_\\tau$"], # tau ID
-#                           ["04", "jet, $\\mathcal{l}\\to\\tau$ mis-ID"], # tau mis-ID
-#                           ["45", "TES"], # energy scale
-#                           ["46", "JES"], # energy scale
-#                           ["47", "Unclustered MET ES"], # energy scale
-#                           ["09", "lepton veto"], # lepton veto
-#                           ["10", "b-jet tagging"], # b tagging
-#                           ["11", "jet$\\to$b mis-ID"], # b mis-tagging
-#                           ["12", "multi-jet stat."], # QCD stat.
-#                           ["13", "multi-jet syst."], # QCD syst.
-#                           ["19", "EWK+$t\\bar{t}$ $\\tau$ stat."], # embedding stat.
-#                           ["14", "multi-jet contam."], # QCD contamination in embedding
-#                           ["15", "$f_{W\\to\\tau\\to\\mu}"], # tau decays to muons in embedding
-#                           ["16", "muon selections"], # muon selections in embedding
-#                           ["34", "pile-up"], # pile-up
-#                           [["17","18","19","22","24","25","26","27"], "simulation stat."], # MC statistics
-#                           [["28","29","30","31","32"], "cross section"], # cross section
-#                           ["33", "luminosity"]] # luminosity
-        myNuisanceOrder = [["CMS_eff_t","tau ID"], # first ID, then the text that goes to the table
-                           ["CMS_eff_t_highpt","high-$p_{T}$ tau ID"],        
-                           ["CMS_eff_t_trg_data","trigger tau leg eff. for data"],
-                           ["CMS_eff_t_trg_MC","trigger tau leg eff. for MC"],
-                           ["CMS_eff_met_trg_data","trigger MET leg eff. for data"],
-                           ["CMS_eff_met_trg_MC","trigger MET leg eff. for MC"],
-                           ["CMS_eff_e_veto","electron veto eff."],
-                           ["CMS_eff_m_veto","muon veto eff."],
-#                           ["CMS_fake_eToTau","CMS fake eToTau"],
-#                           ["CMS_fake_muToTau","CMS fake muToTau"],
-#                           ["CMS_fake_jetToTau","CMS fake jetToTau"],
-                           ["CMS_eff_b","b-tagging eff."],
-                           ["CMS_fake_b","b-mistagging eff."],
-                           ["CMS_scale_t","tau energy scale"],
-                           ["CMS_scale_j","jet energy scale"],
-                           ["CMS_scale_met","MET unclustered energy scale"],
-                           ["CMS_res_j","jet energy resolution"],
-                           ["CMS_Hptntj_topPtReweight","top $p_T$ reweighting"],
-                           ["CMS_pileup","pileup reweighting"],
-                           ["CMS_scale_ttbar", "ttbar scale"],
-                           ["CMS_pdf_ttbar", "ttbar pdf"],
-                           ["CMS_mass_ttbar", "ttbar mass"],
-                           ["CMS_scale_Wjets", "W+jets scale"],
-                           ["CMS_pdf_Wjets", "W+jets pdf"],
-                           ["CMS_scale_DY", "DY scale"],
-                           ["CMS_pdf_DY", "DY pdf"],
-                           ["CMS_scale_VV", "diboson scale"],
-                           ["CMS_pdf_VV", "diboson pdf"],
-                           ["lumi_13TeV","luminosity (13 TeV)"],
-                           ["CMS_Hptntj_QCDbkg_templateFit","Fake tau template fit"],
-                           ["CMS_Hptntj_QCDkbg_metshape","Fake tau MET shape"]
-                       ]
-        # Make table
+
+        if self._h2tb:
+            myColumnOrder = ["Hp",  "FakeB", "TT_GenuineB", "SingleTop_GenuineB", "TTZToQQ_GenuineB",
+                             "TTTT_GenuineB", "DYJetsToQQ_GenuineB",  "TTWJetsToQQ_GenuineB", 
+                             "WJetsToQQ_HT_600ToInf_GenuineB", "Diboson_GenuineB"]
+
+            myNuisanceOrder = [["CMS_eff_trg_MC", "trigger efficiency"],
+                               ["CMS_eff_e_veto", "electron veto eff."],
+                               ["CMS_eff_m_veto", "muon veto eff."],
+                               ["CMS_eff_tau_veto", "tau veto eff."],
+                               ["CMS_eff_b", "b-tagging eff."],
+                               ["CMS_scale_j", "jet energy scale"],
+                               ["CMS_res_j", "jet energy resolution"],
+                               # ["CMS_topPtReweight","top $p_T$ reweighting"],
+                               ["CMS_pileup", "pileup reweighting"],
+                               ["CMS_topTagging", "top tagging"],
+                               ["CMS_scale_ttbar", "$t\\bar{t}$ scale"],
+                               ["CMS_pdf_ttbar", "$t\\bar{t}$ pdf"],
+                               ["CMS_mass_ttbar", "$t\\bar{t}$ mass"],
+                               ["CMS_scale_Wjets", "W+jets scale"],
+                               ["CMS_pdf_Wjets", "W+jets pdf"],
+                               ["CMS_scale_DY",  "DY scale"],
+                               ["CMS_pdf_DY", "DY pdf"],
+                               ["CMS_scale_VV", "Diboson scale"],
+                               ["CMS_pdf_VV", "Diboson pdf"],
+                               ["lumi_13TeV", "luminosity (13 TeV)"],
+                               ["CMS_FakeB_transferFactor", "Fake $b$ transfer factors"]
+                               ]
+        else:
+            myNuisanceOrder = [["CMS_eff_t","tau ID"], # first ID, then the text that goes to the table
+                               ["CMS_eff_t_highpt","high-$p_{T}$ tau ID"],        
+                               ["CMS_eff_t_trg_data","trigger tau leg eff. for data"],
+                               ["CMS_eff_t_trg_MC","trigger tau leg eff. for MC"],
+                               ["CMS_eff_met_trg_data","trigger MET leg eff. for data"],
+                               ["CMS_eff_met_trg_MC","trigger MET leg eff. for MC"],
+                               ["CMS_eff_e_veto","electron veto eff."],
+                               ["CMS_eff_m_veto","muon veto eff."],
+                               # ["CMS_fake_eToTau","CMS fake eToTau"],
+                               # ["CMS_fake_muToTau","CMS fake muToTau"],
+                               # ["CMS_fake_jetToTau","CMS fake jetToTau"],
+                               ["CMS_eff_b","b-tagging eff."],
+                               ["CMS_fake_b","b-mistagging eff."],
+                               ["CMS_scale_t","tau energy scale"],
+                               ["CMS_scale_j","jet energy scale"],
+                               ["CMS_scale_met","MET unclustered energy scale"],
+                               ["CMS_res_j","jet energy resolution"],
+                               ["CMS_Hptntj_topPtReweight","top $p_T$ reweighting"],
+                               ["CMS_pileup","pileup reweighting"],
+                               ["CMS_scale_ttbar", "ttbar scale"],
+                               ["CMS_pdf_ttbar", "ttbar pdf"],
+                               ["CMS_mass_ttbar", "ttbar mass"],
+                               ["CMS_scale_Wjets", "W+jets scale"],
+                               ["CMS_pdf_Wjets", "W+jets pdf"],
+                               ["CMS_scale_DY", "DY scale"],
+                               ["CMS_pdf_DY", "DY pdf"],
+                               ["CMS_scale_VV", "diboson scale"],
+                               ["CMS_pdf_VV", "diboson pdf"],
+                               ["lumi_13TeV","luminosity (13 TeV)"],
+                               ["CMS_Hptntj_QCDbkg_templateFit","Fake tau template fit"],
+                               ["CMS_Hptntj_QCDkbg_metshape","Fake tau MET shape"]
+                               ]
+            
+        # Make table - The horror!
         myTable = []
         for n in myNuisanceOrder: # for each nuisance
             resultFound=False
             myRow = [n[1]]
             isShape=False
+            # For-loop: All columns (in pre-defined order)
             for columnName in myColumnOrder:
-                myMinErrorUp = 9999.0
+                myMinErrorUp   = 9999.0
                 myMinErrorDown = 9999.0
-                myMaxErrorUp = -9999.0
+                myMaxErrorUp   = -9999.0
                 myMaxErrorDown = -9999.0
-                myErrorUp = 0.0
-                myErrorDown = 0.0
+                myErrorUp      = 0.0
+                myErrorDown    = 0.0
+                
+                # For-loop: All datasets
                 for c in self._datasetGroups: 
-                    if columnName in c.getLabel(): # if column name matches to dataset group label
-                        if isinstance(n[0], list): # if this column+nuisance combination matches to a list, loop over the list
+
+                    # if column name matches to dataset group label
+                    foundMatch = columnName in c.getLabel()
+                    if self._h2tb and not "Hp": # dirty but works (for now)
+                        foundMatch = (columnName == c.getLabel()) # exact match needed
+                    if foundMatch: 
+                        # if this column+nuisance combination matches to a list, loop over the list
+                        if isinstance(n[0], list): 
                             for nid in n[0]:
                                 if c.hasNuisanceByMasterId(nid):
                                     # find error up and error down
@@ -1275,6 +1287,7 @@ class TableProducer:
                         else: # if this column+nuisance does not match to a list, but just one entry
                             if c.hasNuisanceByMasterId(n[0]): 
                                 myResult = c.getFullNuisanceResultByMasterId(n[0])
+
                                 if isinstance(myResult.getResult(), ScalarUncertaintyItem):
                                     myErrorDown = myResult.getResult().getUncertaintyDown()
                                     myErrorUp = myResult.getResult().getUncertaintyUp()
@@ -1335,7 +1348,19 @@ class TableProducer:
                 myRow[0]+=" (S)"
             myTable.append(myRow)
 
-        # Make table
+        # Make systematics table & save to file
+        myOutput = self.getSystematicTable(myTable)
+        fileName = self.getSystematicsFileName(light)
+        myFile   = open(fileName, "w")
+        myFile.write(myOutput)
+        myFile.close()
+        msg = "Created systematics LaTeX table %s" % (ShellStyles.SuccessStyle() + fileName + ShellStyles.NormalStyle())
+        self.Verbose(msg, True)
+        return
+
+    def getSystematicTable(self, myTable):
+        if self._h2tb:
+            return self.getSystematicTableHToTB(myTable)
         myOutput = "% table auto generated by datacard generator on "+self._timestamp+" for "+self._config.DataCardName+" / "+self._outputPrefix+"\n\n"
         myOutput += "\\documentclass{article}\n"
         myOutput += "\\begin{document}\n\n"
@@ -1367,23 +1392,50 @@ class TableProducer:
         myOutput += "\\end{table}\n"
         myOutput += "\\renewcommand{\\arraystretch}{1}\n"
         myOutput += "\\end{document}"
-        # Save output to file
-        mySignalText="heavy"
+        return myOutput 
+
+    def getSystematicTableHToTB(self, myTable):
+        myOutput  = "\\renewcommand{\\arraystretch}{1.2}\n"
+        myOutput += "\\begin{table}%%[h]\n"
+        myOutput += "\\begin{center}\n"
+        myOutput += "\\caption{The systematic uncertainties (in \\%) for signal and the backgrounds. The uncertainties, which depend on the final distribution bin, are marked with (S) and for them the maximum contracted value of the negative or positive variation is displayed.}"
+        myOutput += "\\label{tab:summary:systematics}\n"
+        myOutput += "\\vskip 0.1 in\n"
+        myOutput += "\\noindent\\makebox[\\textwidth]{\n"
+        myOutput += "\\begin{tabular}{l|c|c|cccccccc}\n"
+        myOutput += "\\hline\n"
+        myOutput += "& Signal & Fake b & \multicolumn{8}{c}{Genuine b}"
+        myOutput += "\n \\\\"
+        myCaptionLine = [["","","","$t\\bar{t}$", "Single top", "$t\\bar{t}$+Z", "$t\\bar{t}t\\bar{t}$", "$Z/\gamma^{*}$+jets", "$t\\bar{t}$+Z", "W+jets", "Diboson"]] 
+        # Calculate dimensions of tables
+        myWidths = []
+        myWidths = calculateCellWidths(myWidths, myTable)
+        myWidths = calculateCellWidths(myWidths, myCaptionLine)
+        mySeparatorLine = getSeparatorLine(myWidths)
+        # Add caption and table
+        myOutput += getTableOutput(myWidths,myCaptionLine,True)
+        myOutput += "\n \\hline\n"
+        myOutput += getTableOutput(myWidths,myTable,True)
+        myOutput += "\\hline\n"
+        myOutput += "\\end{tabular}\n"
+        myOutput += "}\n"
+        myOutput += "\\end{center}\n"
+        myOutput += "\\end{table}\n"
+        myOutput += "\\renewcommand{\\arraystretch}{1}\n"
+        #myOutput += "\\end{document}"
+        return myOutput 
+
+    def getSystematicsFileName(self, light):
+        postFix = "_heavy.tex"
         if light:
-           mySignalText="light"
+            postFix = "_light.tex"
+        if self._h2tb:
+            postFix = ".tex"
 
-        myFilename = self._infoDirname+"/SystematicsSummary_"+mySignalText
-#        myFilename += "_"+self._timestamp+"_"+self._outputPrefix+"_"+self._config.DataCardName.replace(" ","_")
-        myFilename+=".tex"
-        myFile = open(myFilename, "w")
-        myFile.write(myOutput)
-        myFile.close()
-
-        # Inform the user
-        msg = "Systematics summary table written to "
-        Verbose(msg + ShellStyles.SuccessStyle() + myFilename + ShellStyles.NormalStyle(), True)
-        return
-
+        filePath = os.path.join(self._infoDirname, "SystematicsSummary")
+        fileName = filePath + postFix
+        return fileName
+             
     def makeQCDPuritySummary(self):
         '''
         Prints QCD purity information
