@@ -137,8 +137,8 @@ scaleFactors.setupBtagSFInformation(btagPset=bjetSelection,
                                     #btagEfficiencyFilename="btageff_TTJets.json",
                                     #btagEfficiencyFilename="btageff_WJetsHT.json",
                                     #btagEfficiencyFilename="btageff_hybrid.json",
-                                    btagEfficiencyFilename="btageff_hybrid_HToTB.json",
-                                    #btagEfficiencyFilename="btageff_Hybrid_TT+WJets.json", # use for MVA b-tagging
+                                    #btagEfficiencyFilename="btageff_hybrid_HToTB.json",
+                                    btagEfficiencyFilename="btageff_Hybrid_TT+WJetsHT.json", # use with taunu analysis and WJetsHT samples
                                     direction="nominal")
 
 #====== MET selection
@@ -219,7 +219,7 @@ commonPlotsOptions = PSet(
    angularCuts1DBins = PSet(nBins=52, axisMin=0., axisMax=260.),
          topMassBins = PSet(nBins=60, axisMin=0., axisMax=600.),
            wMassBins = PSet(nBins=60, axisMin=0., axisMax=300.),
-              mtBins = PSet(nBins=1000, axisMin=0., axisMax=5000.), # 5 GeV bin width for tail fitter
+              mtBins = PSet(nBins=2000, axisMin=0., axisMax=10000.), # 5 GeV bin width for tail fitter
          invMassBins = PSet(nBins=500, axisMin=0., axisMax=5000.),
   # Enable/Disable some debug-level plots
        enablePUDependencyPlots = True,
