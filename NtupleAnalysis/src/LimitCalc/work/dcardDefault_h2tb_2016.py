@@ -736,22 +736,98 @@ hQGLR  = ControlPlotInput(
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
     )
 
+hNjets = ControlPlotInput(
+    title            = "Njets_AfterAllSelections",
+    histoName        = "Njets_AfterAllSelections",
+    details          = { "xlabel"             : "jets multiplicity",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmin": 7.0,"xmax": 20.0} }#,
+    #blindedRange=[100.0, 400.0], # specify range min,max if blinding applies to this control plot      
+    )
+
+
+hNBjets = ControlPlotInput(
+    title            = "NBjets_AfterAllSelections",
+    histoName        = "NBjets_AfterAllSelections",
+    details          = { "xlabel"             : "b-jets multiplicity",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmin": 3.0,"xmax": 10.0} }#,
+    #blindedRange=[100.0, 400.0], # specify range min,max if blinding applies to this control plot      
+    )
+
+hBJetPt = ControlPlotInput(
+    title            = "BJetPt_AfterAllSelections",
+    histoName        = "BJetPt_AfterAllSelections",
+    details          = { "xlabel"             : "p_{T}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "GeV/c",
+                         "log"                : True,
+                         "legendPosition"     : "SE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10}}#,
+    #blindedRange=[100.0, 400.0], # specify range min,max if blinding applies to this control plot      
+    )
+
+hBJetEta = ControlPlotInput(
+    title            = "BJetEta_AfterAllSelections",
+    histoName        = "BJetEta_AfterAllSelections",
+    details          = { "xlabel"             : "#eta",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "",
+                         "log"                : True,
+                         "legendPosition"     : "SE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10}}#,
+    #blindedRange=[100.0, 400.0], # specify range min,max if blinding applies to this control plot      
+    )
+
+hBtagDiscriminator = ControlPlotInput(
+    title            = "BtagDiscriminator_AfterAllSelections",
+    histoName        = "BtagDiscriminator_AfterAllSelections",
+    details          = { "xlabel"             : "CSVv2 discriminator",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10}}#,
+    #blindedRange=[100.0, 400.0], # specify range min,max if blinding applies to this control plot      
+    )
+
 #================================================================================================ 
 # Create ControlPlot list (NOTE: Remember to set OptionDoControlPlots to True)
 #================================================================================================ 
-ControlPlots.append(hMET)
-ControlPlots.append(hHT)
-ControlPlots.append(hMHT)
-ControlPlots.append(hQGLR)
-ControlPlots.append(hTopPt)
-ControlPlots.append(hTopMass)
-ControlPlots.append(hTopBjetPt)
-ControlPlots.append(hTopBjetEta)
-ControlPlots.append(hTopDijetPt)
-ControlPlots.append(hTopDijetMass)
-ControlPlots.append(hTetrajetBjetPt)
-ControlPlots.append(hTetrajetBjetEta)
-ControlPlots.append(hHiggsPt)
-ControlPlots.append(hHiggsMass)
-ControlPlots.append(hVertices)
-# ControlPlots.append(hTopR32)
+# ControlPlots.append(hMET)
+# ControlPlots.append(hHT)
+# ControlPlots.append(hMHT)
+# ControlPlots.append(hQGLR)
+# ControlPlots.append(hTopPt)
+# ControlPlots.append(hTopMass)
+# ControlPlots.append(hTopBjetPt)
+# ControlPlots.append(hTopBjetEta)
+# ControlPlots.append(hTopDijetPt)
+# ControlPlots.append(hTopDijetMass)
+# ControlPlots.append(hTetrajetBjetPt)
+# ControlPlots.append(hTetrajetBjetEta)
+# ControlPlots.append(hHiggsPt)
+# ControlPlots.append(hHiggsMass)
+# ControlPlots.append(hVertices)
+# # ControlPlots.append(hTopR32)
+# ControlPlots.append(hNjets)
+# ControlPlots.append(hNBjets) #no agreement expected
+# ControlPlots.append(hBJetPt)
+# ControlPlots.append(hBJetEta)
+# ControlPlots.append(hBtagDiscriminator) #no agreement expected

@@ -53,6 +53,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
+import HiggsAnalysis.NtupleAnalysis.tools.systematics as systematics
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
@@ -236,15 +237,9 @@ def GetHistoKwargs(h, opts):
 
     # Common bin settings
     myBins  = []
-    vtxBins = []
     ptBins  = []
     bWidth  = 2    
-    for i in range(0, 40, bWidth):
-        vtxBins.append(i)
     bWidth  = 10 #25
-    for i in range(40, 100+bWidth, bWidth):
-        vtxBins.append(i)
-
     _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": +0.1}
     if opts.mergeEWK:
         _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": -0.12}    
@@ -283,8 +278,9 @@ def GetHistoKwargs(h, opts):
         kwargs["ylabel"] = _yLabel + units
 
     if "eta" in h.lower():
+        kwargs["rebinX"] = 2
         kwargs["ylabel"] = "Events / %.2f "
-        kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        # kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": yMin, "ymaxfactor": yMaxF}
 
     if "DeltaEta" in h:
@@ -542,17 +538,23 @@ def GetHistoKwargs(h, opts):
         kwargs["opts"]   = {"xmin": 0.0, "xmax": +0.25, "ymin": yMin, "ymaxfactor": yMaxF}
 
     if "IsolMiniIso" in h or "MiniIso" in h:
-        kwargs["ylabel"] = "Events / %.0f "
-        kwargs["xlabel"] = "mini relative isolation"
+        kwargs["rebinX"] = 10
+        kwargs["ylabel"] = "Events / %.2f "
+        kwargs["xlabel"] = "relative mini-isolation"
         #kwargs["opts"]   = {"xmin": 0.0, "xmax": +10.0, "ymin": yMin, "ymaxfactor": yMaxF}
         kwargs["cutBox"] = {"cutValue": 0.4, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         if "after" in h.lower() or "passed" in h.lower():
+            kwargs["rebinX"] = 2
             kwargs["ylabel"] = "Events / %.2f "
             kwargs["opts"]   = {"xmin": 0.0, "xmax": +1.0, "ymin": yMin, "ymaxfactor": yMaxF}
 
     if "vtx" in h.lower():
-        kwargs["xlabel"] = "PV multiplicity"
-        kwargs["cutBox"] = {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["xlabel"] = "vertex multiplicity"
+        #kwargs["cutBox"] = {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["rebinX"] = systematics._dataDrivenCtrlPlotBinning["NVertices_AfterAllSelections"]
+        binWmin, binWmax = GetBinWidthMinMax(kwargs["rebinX"])
+        kwargs["ylabel"] = "Events / %.0f-%.0f (%s)" % (binWmin, binWmax, units)
+        kwargs["opts"]   = {"xmax": 80.0, "ymin": yMin, "ymaxfactor": yMaxF}
 
     if "electronPt" in h:
         units            = "GeV/c"
@@ -565,22 +567,23 @@ def GetHistoKwargs(h, opts):
         kwargs["opts"]   = {"xmin": 0.0, "xmax": 7.0, "ymin": yMin, "ymaxfactor": yMaxF}
         kwargs["cutBox"] = {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": False}
 
-    if "HT" in h or "JT" in h:
+    if "HT" in h:
         ROOT.gStyle.SetNdivisions(8, "X")
         if opts.folder == "topologySelection_":
             kwargs["rebinX"] = 1
         else:
             kwargs["rebinX"] = 5
         units = "GeV"
-        if "HT" in h:
-            kwargs["xlabel"] = "H_{T} (%s)" % units
-        else:
-            kwargs["xlabel"] = "J_{T} (%s)" % units
         kwargs["ylabel"] = _yLabel + units
+        kwargs["xlabel"] = "H_{T} (%s)" % (units)
         kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         if "ForDataDrivenCtrlPlots" in opts.folder:
-            kwargs["cutBox"] = {"cutValue": 900.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": +3500.0, "ymin": yMin, "ymaxfactor": yMaxF}
+            kwargs["rebinX"] = systematics._dataDrivenCtrlPlotBinning["HT_AfterAllSelections"]
+            binWmin, binWmax = GetBinWidthMinMax(kwargs["rebinX"])
+            kwargs["ylabel"] = "Events / %.0f-%.0f (%s)" % (binWmin, binWmax, units)
+            kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+            kwargs["opts"]   = {"xmin": 500.0, "xmax": +3500.0, "ymin": yMin, "ymaxfactor": yMaxF}
+
 
     if "MHT" in h:
         kwargs["rebinX"] = 2
@@ -719,23 +722,23 @@ def GetHistoKwargs(h, opts):
 
     if "NBjets" in h:
         kwargs["xlabel"] = "b-jet multiplicity"
-        kwargs["opts"]   = {"xmin": 2.0, "xmax": 10.0, "ymin": yMin, "ymaxfactor": yMaxF}
-        kwargs["cutBox"] = {"cutValue": 3, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": 3.0, "xmax": 10.0, "ymin": yMin, "ymaxfactor": yMaxF}
+        # kwargs["cutBox"] = {"cutValue": 3, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
 
     if "Njets" in h:
         kwargs["xlabel"] = "jet multiplicity"
-        kwargs["opts"]   = {"xmin": 0.0, "xmax": 18.0, "ymin": yMin, "ymaxfactor": yMaxF}
-        kwargs["cutBox"] = {"cutValue": 7, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": 7.0, "xmax": 20.0, "ymin": yMin, "ymaxfactor": yMaxF}
+        # kwargs["cutBox"] = {"cutValue": 7, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         if "Selections" in h:
-            kwargs["opts"]   = {"xmin": 6.0, "xmax": 18.0, "ymin": yMin, "ymaxfactor": yMaxF}
+            kwargs["opts"]   = {"xmin": 7.0, "xmax": 14.0, "ymin": yMin, "ymaxfactor": yMaxF}
             #kwargs["moveLegend"] = {"dx": -0.52, "dy": -0.0, "dh": 0.0}
 
     if "NVertices" in h:
-        kwargs["rebinX"] = vtxBins
-        binWmin, binWmax = GetBinWidthMinMax(vtxBins)
+        kwargs["rebinX"] = systematics._dataDrivenCtrlPlotBinning["NVertices_AfterAllSelections"] #2 #getBinningForPt(0)  
+        binWmin, binWmax = GetBinWidthMinMax(kwargs["rebinX"])
         kwargs["ylabel"] = "Events / %.0f-%.0f" % (binWmin, binWmax)
-        kwargs["xlabel"] = "PV multiplicity"
-        kwargs["cutBox"] = {"cutValue": 20.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["xlabel"] = "vertex multiplicity"
+        # kwargs["cutBox"] = {"cutValue": 20.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
 
     if "SubldgTrijetBjetPt" in h:
         if "AllSelections" in h:
@@ -816,9 +819,10 @@ def DataMCHistograms(datasetsMgr, histoName):
     # Create the plotting object
     p = plots.DataMCPlot(datasetsMgr, histoName, saveFormats=[])
 
-    # Apply style
-    if opts.signalMass != 0:
-        p.histoMgr.forHisto(opts.signal, styles.getSignalStyleHToTB_M(opts.signalMass))
+    # Overwite signal style?
+    if 0:
+        if opts.signalMass != 0:
+            p.histoMgr.forHisto(opts.signal, styles.getSignalStyleHToTB_M(opts.signalMass))
 
     if "QCD" in datasetsMgr.getAllDatasetNames():
         p.histoMgr.setHistoLegendLabelMany({
