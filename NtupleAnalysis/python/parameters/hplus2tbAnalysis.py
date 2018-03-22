@@ -105,7 +105,8 @@ bjetSelection = PSet(
     triggerMatchingCone       = 0.1,      # [default: 0.1 ] (DR for matching offline bjet with trigger::TriggerBjet)
     jetPtCuts                 = [40.0],   # [default: [40.0, 40.0, 30.0]]
     jetEtaCuts                = [2.4],    # [default: [2.4]]
-    bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
+    bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags", # default
+    #bjetDiscr                 = "pfCombinedMVAV2BJetTags", # MVA b-tagging (not default)
     bjetDiscrWorkingPoint     = "Medium", # [default: "Medium"] (options: "Medium", "Tight")
     numberOfBJetsCutValue     = 3,        # [default: 3]
     numberOfBJetsCutDirection = ">=",     # [default: ">="] (options: ==, !=, <, <=, >, >=)
@@ -114,11 +115,20 @@ bjetSelection = PSet(
 #================================================================================================
 # Scale Factors
 #================================================================================================
-scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
-                                    btagPayloadFilename    = "CSVv2.csv",
-                                    #btagEfficiencyFilename = "btageff_hybrid_HToTB.json",
-                                    btagEfficiencyFilename = "btageff_HToTB.json",
-                                    direction              = "nominal")
+if bjetSelection.bjetDiscr == "pfCombinedInclusiveSecondaryVertexV2BJetTags":
+    scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
+                                        btagPayloadFilename    = "CSVv2.csv",
+                                        #btagEfficiencyFilename = "btageff_hybrid_HToTB.json",
+                                        btagEfficiencyFilename = "btageff_HToTB.json",
+                                        direction              = "nominal")
+elif bjetSelection.bjetDiscr == "pfCombinedMVAV2BJetTags":
+    print "--> "*10
+    scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
+                                        btagPayloadFilename    = "cMVAv2_Moriond17_B_H.csv", # use this for MVA b-tagging
+                                        btagEfficiencyFilename = "btageff_Hybrid_TT+WJetsHT.json", # use with taunu analysis and WJetsHT samples
+                                        direction              = "nominal")
+else:
+    pass
 
 #=================================================================================================
 # QGL selection
