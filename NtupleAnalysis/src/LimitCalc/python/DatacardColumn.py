@@ -516,17 +516,9 @@ class DatacardColumn():
         myHistograms.append(hUp)
         myHistograms.append(hDown)
 
-        # These histograms contain abs uncertainty, need to add nominal histogram so that Lands/Combine accepts the histograms
+        # NB! These histograms contain the absolute uncertainty, need to add nominal histogram so that ombine accepts the histograms
         for h in myHistograms:
             h.Add(rhwu.getRootHisto())
-            # Check for negative bins and correct if necessary
-            #for k in range(1, h.GetNbinsX()+1):
-            #    if h.GetBinContent(k) < 0.000001:
-            #        if h.GetBinContent(k) < -0.001:
-            #            #print ShellStyles.WarningLabel()+"Up/down nuisance %s value in bin %d is negative for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(e._exid, k, self.getLabel(), h.GetBinContent(k))
-            #            #h.SetBinContent(k, 0.0)
-            #            #h.SetBinError(k, config.MinimumStatUncertainty)
-        # Return result
         return myHistograms
 
     def doDataMining(self, config, dsetMgr, luminosity, mainCounterTable, extractors, controlPlotExtractors):
@@ -827,7 +819,7 @@ class DatacardColumn():
             msg = "Rebinning %d/%d: %s" % (i+1, nHistos, myTitle)
             self.Verbose(ShellStyles.NoteStyle() + msg + ShellStyles.NormalStyle())
 
-            # move under/overflow bins to visible bins, store fine binned histogram, and do rebinning
+            # Move under/overflow bins to visible bins, store fine binned histogram, and do rebinning
             if self._rateResult._histograms[i].GetNbinsX() > 1:
                 # Note that Rebin() does a clone operation in this case
                 h = self._rateResult._histograms[i].Rebin(len(config.ShapeHistogramsDimensions)-1,myTitle,myArray)
@@ -836,35 +828,50 @@ class DatacardColumn():
                 # The first one is assumed to be the one with the final binning elsewhere
                 self._rateResult._histograms.insert(0,h)
 
-        # Look for negative bins in rate histogram
-        nBins = self._rateResult._histograms[0].GetNbinsX()+1
-        
+        # Treat the negative and low-occupancy bins in the rebinned rate histogram, now inserted to be self._rateResult._histograms[0]
+        nBins = self._rateResult._histograms[0].GetNbinsX()+1       
         nBelowMinStatUncert = 0
         nNegativeRate = 0
+
+        # Determine the minimum statistical uncertainty 
+        minStatUncert = config.MinimumStatUncertainty
+        if config.UseAutomaticMinimumStatUncertainty and len(self._rateResult._histograms) > 1:
+            # Determine the min. stat. uncert. automatically, from the fine-binned histogram, now stored at self._rateResult._histograms[1]
+            h = self._rateResult._histograms[1]
+            minimumError = -1.0
+            for iBin in range(0,h.GetNbinsX()+1):
+                content = h.GetBinContent(iBin)
+                if content<=0: continue
+                error = h.GetBinError(iBin)
+                if error>0 and (error<minimumError or minimumError<0):
+                    minimumError=error
+            if minimumError > 0.0:
+                minStatUncert = minimumError
+
+        self.Verbose("Setting the minimum stat. uncertainty for histogram %s to be %f"%(myTitle,minStatUncert))
+
         # For-loop: All histogram bins
         for k in range(1, nBins):
             msg = "Checking bin %d/%d: %s" % (k, nBins, myTitle)
-            self.Verbose(ShellStyles.NoteStyle() + msg + ShellStyles.NormalStyle(), k==1)
-            
+            self.Verbose(ShellStyles.NoteStyle() + msg + ShellStyles.NormalStyle(), k==1)           
             binRate = self._rateResult._histograms[0].GetBinContent(k)
-            if binRate < config.MinimumStatUncertainty:
-                if binRate >= 0.0 and binRate < config.MinimumStatUncertainty:
+            binError = self._rateResult._histograms[0].GetBinError(k)
+            if binRate < minStatUncert: # FIXME: is this correct?
+                # Treat zero or sightly positive rates
+                if binRate == 0.0 or binError < minStatUncert:
                     msg  = "Rate value is zero or below min.stat.uncert. in bin %d for column '%s' (it was %f)! " % (k, self.getLabel(), binRate)
                     msg += "Compensating up stat uncertainty to %f!" % (config.MinimumStatUncertainty)
                     self.Verbose(ShellStyles.WarningLabel() + msg)
                     self._rateResult._histograms[0].SetBinError(k, config.MinimumStatUncertainty)                   
                     nBelowMinStatUncert += 1
-
-                if binRate < -0.001:
+                # Treat negative rates
+                if binRate < -0.00001:
                     msg  = "Rate value is negative in bin %d for column '%s' (it was %f)! " % (k, self.getLabel(), binRate)
                     msg += "This could have large effects to systematics, please fix!"
                     self.Verbose(ShellStyles.WarningLabel() + msg)
-
-                    #FIXME: if one adjusts the bin content, one needs to adjust accordingly the nuisances !!!
                     self._rateResult._histograms[0].SetBinContent(k, 0.0)
-                    self._rateResult._histograms[0].SetBinError(k, config.MinimumStatUncertainty)
+                    self._rateResult._histograms[0].SetBinError(k, minStatUncert)
                     nNegativeRate += 1
-
         
         # Print summarty of warnings/errors (if any)
         if nNegativeRate >0:

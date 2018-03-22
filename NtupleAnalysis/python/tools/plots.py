@@ -74,7 +74,8 @@ _physicalMcAdd = {
     "WZ_ext1": "WZ",
     "ZZ"     : "ZZ",
     "ZZ_ext1": "ZZ",
-
+    "WWTo2L2Nu" : "WWTo2L2Nu",
+    "WWToLNuQQ" : "WWToLNuQQ",
     "ST_tW_antitop_5f_inclusiveDecays"     : "ST_tW_antitop_5f_inclusiveDecays",
     "ST_tW_antitop_5f_inclusiveDecays_ext" : "ST_tW_antitop_5f_inclusiveDecays",
     "ST_tW_antitop_5f_inclusiveDecays_ext1": "ST_tW_antitop_5f_inclusiveDecays",
@@ -306,6 +307,9 @@ _physicalToLogical.update({
         "ST_t_channel_antitop_4f_inclusiveDecays"  : "ST_t_channel_antitop_4f_inclusiveDecays",
         "ST_t_channel_top_4f_inclusiveDecays"         : "ST_t_channel_top_4f_inclusiveDecays",
 
+        "WWTo2L2Nu" : "WWTo2L2Nu",
+        "WWToLNuQQ" : "WWToLNuQQ",
+
         "WW": "WW",
         "WZ": "WZ",
         "ZZ": "ZZ",
@@ -404,6 +408,8 @@ _datasetMerge = {
     "DYJetsToQQ_HT180"           : "DYJetsToQQHT",
 
     # Diboson merge, comment this away to keep WW, WZ, ZZ samples separate
+    "WWTo2L2Nu" : "Diboson",
+    "WWToLNuQQ" : "Diboson",
     "WWTo4Q": "Diboson",
     "ZZTo4Q": "Diboson",
     "WW"    : "Diboson",
@@ -432,6 +438,7 @@ _datasetMerge = {
 
 for mass in _intermediateHplusMasses:
     _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTB_M%d"%mass
+#    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTBintermediate_M%d"%mass
 #    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassWithNeutral_M_%d"%(mass)] = "HplusTB_M%d"%mass # NB! Commented out to avoid merging of the WithNeutral samples that have been dropped out of the analysis
 
 #================================================================================================
@@ -1884,9 +1891,9 @@ class PlotBase:
     # \param kwargs             Keyword arguments, forwarded to histograms.addStandardTexts()
     def addStandardTexts(self, addLuminosityText=False, **kwargs):
         lumi = None
-        if hasattr(self, "luminosity"):
+        if hasattr(self, "luminosity") and addLuminosityText:
             lumi = self.luminosity
-        elif self.histoMgr.hasLuminosity():
+        elif self.histoMgr.hasLuminosity() and addLuminosityText:
             lumi = self.histoMgr.getLuminosity()
         elif addLuminosityText:
             raise Exception("addLuminosityText=True, but the Plot object does not have luminosity set, and plot.histoMgr has not been normalized by or to luminosity")

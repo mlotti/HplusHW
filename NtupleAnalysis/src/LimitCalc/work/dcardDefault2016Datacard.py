@@ -1,20 +1,33 @@
 import HiggsAnalysis.NtupleAnalysis.tools.systematics as systematics
 
-DataCardName ='Default_13TeV'
-LightAnalysis = not True # FIXME set to True for light H+
+DataCardName ='HplusToTauNu_13TeV'
+
+###########################
+### SET MASS RANGE HERE ###
+LightAnalysis = True 
+IntermediateAnalysis = True
+HeavyAnalysis = True
+###########################
+
+# Set mass points according to the chosen ranges
+LightMassPoints=[80,90,100,120,140,150,155,160]
+IntermediateMassPoints=[165,170,175]
+IntermediateMassPointsAll=[145,150,155,160,156,170,175,180,190,200]
+HeavyMassPoints=[180,200,220,250,300,400,500,750,1000,2000,3000]
+ControlPlotMassPoints = [500]
 
 # Set mass points
-LightMassPoints=[]
-HeavyMassPoints=[]
+MassPoints = []
 if LightAnalysis:
-    LightMassPoints=[80,90,100,120,140,150,155,160]
-else:
-    HeavyMassPoints=[145,175,180,200,220,250,300,400,500,750,1000,2000,3000]
+    MassPoints+=LightMassPoints[:]
+if IntermediateAnalysis:
+    MassPoints+=IntermediateMassPoints[:]    
+if HeavyAnalysis:
+    MassPoints+=LightMassPoints[:]+HeavyMassPoints[:]
 
-#LightMassPoints=[120] # for control plots
-#HeavyMassPoints=[175] # for control plots
-
-MassPoints=LightMassPoints[:]+HeavyMassPoints[:]
+# For intermediate-only generation, use all intermediate samples (also overlapping)
+if not LightAnalysis and not HeavyAnalysis and IntermediateAnalysis:
+    MassPoints+=IntermediateMassPointsAll[:]    
 
 ##############################################################################
 # Options
@@ -40,6 +53,10 @@ OptionCtrlPlotsAtMt=True # Produce control plots after all selections (all selec
 OptionDisplayEventYieldSummary=True
 OptionNumberOfDecimalsInSummaries=1
 OptionLimitOnSigmaBr=False # Is automatically set to true for heavy H+
+ToleranceForLuminosityDifference=0.05 # Tolerance for throwing error on luminosity difference (0.01=1 percent agreement is required)
+ToleranceForMinimumRate=0.0 # Tolerance for almost zero rate (columns with smaller rate are suppressed)
+MinimumStatUncertainty=0.5 # Minimum stat. uncertainty to set to bins with zero events
+UseAutomaticMinimumStatUncertainty = True # Do NOT use the MinimumStatUncertainty value above for ~empty bins, but determine the value from the lowest non-zero rate for each dataset
 
 # Deprecated:
 OptionDoTBbarForHeavy=False # NOTE: usable only for 2012
@@ -75,12 +92,9 @@ CMS_eff_met_trg_dataScaleFactor=None # Default is None, i.e. 1.0
 OptionBr=0.01  # Br(t->bH+)
 OptionSqrtS=13 # sqrt(s)
 
-# Tolerance for throwing error on luminosity difference (0.01=1 percent agreement is required)
-ToleranceForLuminosityDifference=0.05
-# Tolerance for almost zero rate (columns with smaller rate are suppressed)
-ToleranceForMinimumRate=0.0 # 1.5
-# Minimum stat. uncertainty to set to bins with zero events
-MinimumStatUncertainty=0.5
+# Set mass points for control plots:
+if OptionDoControlPlots:
+    MassPoints=ControlPlotMassPointsAll[:]    
 
 ##############################################################################
 # Counter and histogram path definitions
