@@ -103,10 +103,10 @@ jetSelection = PSet(
 bjetSelection = PSet(
     triggerMatchingApply      = False,    # [default: False]
     triggerMatchingCone       = 0.1,      # [default: 0.1 ] (DR for matching offline bjet with trigger::TriggerBjet)
-    jetPtCuts                 = [40.0, 40.0, 30.0],   # [default: [40.0, 40.0, 30.0]]
+    jetPtCuts                 = [40.0],   # [default: [40.0, 40.0, 30.0]]
     jetEtaCuts                = [2.4],    # [default: [2.4]]
     bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
-    bjetDiscrWorkingPoint     = "Medium", # [default: "Medium"]
+    bjetDiscrWorkingPoint     = "Medium", # [default: "Medium"] (options: "Medium", "Tight")
     numberOfBJetsCutValue     = 3,        # [default: 3]
     numberOfBJetsCutDirection = ">=",     # [default: ">="] (options: ==, !=, <, <=, >, >=)
 )
@@ -179,7 +179,7 @@ if 0:
 topSelectionBDT = PSet(
     MVACutValue            = 0.40,    # [default: 0.40, 0.85]
     MVACutDirection        =  ">=",   # [default: ">="]
-    MassCutValue           = 400.0,   # [default: 400.0]
+    MassCutValue           = 500.0,   # [default: 400.0]
     MassCutDirection       = "<=",    # [default: "<"]
     CSV_bDiscCutValue      = 0.8484,  # [default: 0.8484] #Do not evaluate top candidate if b-jet assigned as b from top fails this cut
     CSV_bDiscCutDirection  = ">=",    # [default: ">="]
@@ -212,7 +212,7 @@ fakeBBjetSelection = PSet(
     jetPtCuts                 = bjetSelection.jetPtCuts,
     jetEtaCuts                = bjetSelection.jetEtaCuts,
     bjetDiscr                 = bjetSelection.bjetDiscr,    
-    bjetDiscrWorkingPoint     = "Loose", # defines SR, VR, CR1, and CR2 (in combination with inverted top)
+    bjetDiscrWorkingPoint     = "Loose", # [default: "Loose"] (options: "Loose", "Medium") NOTE: defines SR, VR, CR1, and CR2
     numberOfBJetsCutValue     = bjetSelection.numberOfBJetsCutValue,
     numberOfBJetsCutDirection = bjetSelection.numberOfBJetsCutDirection,
     )
@@ -222,7 +222,7 @@ scaleFactors.setupBtagSFInformation(btagPset               = fakeBBjetSelection,
                                     direction              = "nominal")
 
 fakeBTopSelectionBDT = PSet(
-    MVACutValue            = -0.4, # [default: -0.2, 0.6] # defines SR, VR, CR1, and CR2 (in combination with inverted b-jets)
+    MVACutValue            = -0.4, # [default: 0.0, 0.6] NOTE: defines SR, VR, CR1, and CR2
     MVACutDirection        = ">=",
     LdgTopDefinition       = "MVA",  # [default: "MVA"] (options: "MVA", "Pt")
     MassCutValue           = topSelectionBDT.MassCutValue,
@@ -292,4 +292,3 @@ allSelections = PSet(
     HistogramAmbientLevel = histogramAmbientLevel,
     QGLRSelection         = qglrSelection,
 )
-
