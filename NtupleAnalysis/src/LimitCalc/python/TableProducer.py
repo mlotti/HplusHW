@@ -960,6 +960,8 @@ class TableProducer:
         self.formatStr += "f"
         
         # For-loop: All mass points
+        global HW 
+        global containsQCDdataset
         for i, m in enumerate(self._config.MassPoints, 1):
             Verbose("Mass point is %d" % (m), i==1)
 
