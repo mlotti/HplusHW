@@ -124,9 +124,10 @@ bjetSelection = PSet(
     triggerMatchingCone = 0.1,  # DeltaR for matching offline bjet with trigger::TriggerBjet 
               jetPtCuts = [30.0],
              jetEtaCuts = [2.5],
-             bjetDiscr  = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
+             bjetDiscr  = "pfCombinedInclusiveSecondaryVertexV2BJetTags", # default
 #             bjetDiscr  = "pfCombinedMVAV2BJetTags", # use this for MVA b-tagging
- bjetDiscrWorkingPoint  = "Medium",
+ bjetDiscrWorkingPoint  = "Medium", #optimal for CSVv2
+# bjetDiscrWorkingPoint  = "Tight", #optimal for CMVAv2
  numberOfBJetsCutValue  = 1,
  numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
 )

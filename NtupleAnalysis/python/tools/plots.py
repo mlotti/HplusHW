@@ -619,7 +619,7 @@ _plotStyles = {
     "ChargedHiggs_HplusTB_HplusToTB_M_3000" : styles.signal3000Style,
     "ChargedHiggs_HplusTB_HplusToTB_M_5000" : styles.signal5000Style,
     "ChargedHiggs_HplusTB_HplusToTB_M_7000" : styles.signal7000Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_10000": styles.signal1000Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_10000": styles.signal10000Style,
 
     "DYJetsToLL"    : styles.dyStyle,
     "DYJetsToLLHT"  : styles.dyStyle,
