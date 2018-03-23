@@ -14,15 +14,12 @@ cd datacards_test4b/CombineResults_taujets_170913_192047
 
 EXAMPLES:
 ../../plotBRLimit_Hplus2tb.py [opts]
-../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY
-../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY --yMin 1e-3 --settings Default
-../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY --yMin 1e-3 --settings NoLumi
-../../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY --yMin 1e-3 --settings Default --url
-../../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY --yMin 1e-3 --yMax 10 --settings NoLumi
-
+../../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY --yMin 1e-3 --yMax 10 --subdir StatOnly --url
+../../../plotBRLimit_Hplus2tb.py --excludedArea --gridX --gridY --subdir  --yMin 1e-1
+../../../plotBRLimit_Hplus2tb.py --excludedArea --gridX --gridY --yMin 1e-1
 
 LAST USED:
-../../../plotBRLimit_Hplus2tb.py --excludedArea --gridX --gridY --settings NoLumi --yMin 1e-1
+../../../plotBRLimit_Hplus2tb.py --excludedArea --gridX --gridY --yMin 1e-1 --subdir StatOnly --url
 
 '''
 
@@ -208,7 +205,7 @@ def doBRlimit(limits, unblindedStatus, opts, logy=False):
     plot.save()
 
     # Save the plots
-    SavePlot(plot, saveName, os.path.join(opts.saveDir, opts.settings) )
+    SavePlot(plot, saveName, os.path.join(opts.saveDir, opts.subdir) )
 
     return
 
@@ -392,7 +389,7 @@ if __name__ == "__main__":
     GRIDY       = False
     MINY        = -1
     MAXY        = -1
-    SETTINGS    = ""
+    SUBDIR      = ""
     SAVEDIR     = "/afs/cern.ch/user/%s/%s/public/html/Combine" % (getpass.getuser()[0], getpass.getuser())
     URL         = False
 
@@ -440,8 +437,8 @@ if __name__ == "__main__":
     parser.add_option("--yMax", dest="yMax", default=MAXY, type="float",
                       help="Overwrite automaticly calculated maximum value of y-axis [default: %s]" % (MAXY) )
 
-    parser.add_option("--settings", dest="settings", type="string", default=SETTINGS,
-                      help="Sub-directory describing additional settings used when creating the limits (e.g. no lumi) [default: %s]" % SETTINGS) 
+    parser.add_option("--subdir", dest="subdir", type="string", default=SUBDIR,
+                      help="Sub-directory describing additional settings used when creating the limits (e.g. no lumi) [default: %s]" % SUBDIR) 
 
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR,
                       help="Directory where all plots will be saved [default: %s]" % SAVEDIR)

@@ -16,10 +16,11 @@ EXAMPLES:
 ./plotBRLimitCompare_Hplus2tb.py --url --logY --gridX --gridY --cutLine 500 --yMin 0.01 --name h2tb
 ./plotBRLimitCompare_Hplus2tb.py --url --logY --gridX --gridY --cutLine 500 --yMin 0.3 --yMax 10 --name h2tb 
 ./plotBRLimitCompare_Hplus2tb.py --logY --gridX --gridY --relative --cutLine 500 --cutLineY 1
-
+./plotBRLimitCompare_Hplus2tb.py --logY --gridX --gridY --relative --url
+./plotBRLimitCompare_Hplus2tb.py --logY --gridX --gridY --relative --url --yMax 10
 
 LAST USED:
-./plotBRLimitCompare_Hplus2tb.py --logY --gridX --gridY --relative --url
+./plotBRLimitCompare_Hplus2tb.py --logY --gridX --gridY --relative --url --xMax 1000
 
 '''
 #================================================================================================
@@ -95,38 +96,120 @@ def main():
         savePath = opts.saveDir.replace("/afs/cern.ch/user/a/attikis/public/html", "https://cmsdoc.cern.ch/~%s" % getpass.getuser())
 
     # Do the Resolved H->tb fully hadronic final state comparison
-    myList1 = [
-        ("H^{+}#rightarrow tb (#chi^{2})", "*limits2017/datacards_default_170827_075947_noLumi/CombineResults_taujets_*"),
-        #("p_{T}^{b3}#geq40, BDT#geq0.85"        , "limits2018/datacards_Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180126_030205/CombineResults*"),
-        #("p_{T}^{b3}#geq40, BDT#geq0.85 (lev1)" , "limits2018/datacards_Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180126_030205_level1/CombineResults*"),
-        ("p_{T}^{b3}#geq40, BDT#geq0.85 (lev2)" , "limits2018/datacards_Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180126_030205_level2/CombineResults*"),
-        #("p_{T}^{b3}#geq40, BDT#geq0.85 (lev3)"         , "limits2018/datacards_Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180126_030205_level3/CombineResults*"),
-        #("p_{T}^{b3}#geq40, BDT#geq0.85 (lev2, BugFix)" , "limits2018/datacards_Hplus2tbAnalysis_PreSel_3CSVv2M_Pt40_SigSel_MVA0p85_180214_074442_level2_MajorBugFix/CombineResults*"),
-        ("p_{T}^{b3}#geq40, BDT#geq0.85 (lev2, BugFix)" , "limits2018/datacards_Hplus2tbAnalysis_PreSel_3CSVv2M_Pt40_SigSel_MVA0p85_180214_074442_level2_MajorBugFix_StatOnly/CombineResults*"),
-        ]
-    opts.name = "h2tb"
-    doCompare(opts.name, myList1)
+    if 1:
+        opts.name = "stat"
+        # myList1   = GetHexoListStat19Mar2018()
+        myList1   = GetStatOnlyListMar2018()
+        doCompare(opts.name, myList1)
+
+    if 0:
+        opts.name = "syst"
+        myList1   = GetHexoListSyst19Mar2018()
+        doCompare(opts.name, myList1)
 
     # Do all H->tb fully hadronic final states comparison
-    myList2 = [
-        ("H^{+}#rightarrow tb (#chi^{2})", "*limits2017/datacards_default_170827_075947_noLumi/CombineResults_taujets_*"),
-        #("H^{+}#rightarrow tb (Fake-b binned)", "limits2018/datacards_Hplus2tbAnalysis_PreSel_3bjets40_SigSel_MVA0p85_180126_030205_level3/CombineResults*"),
-        #("H^{+}#rightarrow tb (MC)"           , "limits2018/datacards_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900/CombineResults*"),
-        #("H^{+}#rightarrow tb"                , "limits2018/datacards_Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180126_030205_level3/CombineResults*"),
-        ("H^{+}#rightarrow tb"                , "limits2018/datacards_Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180126_030205_level3/CombineResults*"),
-        ("H^{+}#rightarrow tb (BugFix)"       , "limits2018/datacards_Hplus2tbAnalysis_PreSel_3CSVv2M_Pt40_SigSel_MVA0p85_180214_074442_level2_MajorBugFix_StatOnly/CombineResults*"),
-        #("H^{+}#rightarrow tb (BugFix, Lumi)" , "limits2018/datacards_Hplus2tbAnalysis_PreSel_3CSVv2M_Pt40_SigSel_MVA0p85_180214_074442_level2_MajorBugFix/CombineResults*"),
-        ("H^{+}#rightarrow tb (~boosted)"     , "limits2017/*datacards_combine_MIT_approximate/CombineResults_taujets_*"),
-        # ("Single Lepton"                 , "limits2017/*datacards_combine_SingleLepton_approximate/CombineResults_taujets_*"),
-        ]
-
-    # Do the second list of plots
-    opts.name    = "all"
-    doCompare(opts.name, myList2)
+    if 0:
+        opts.name = "all"
+        myList2   = GetAllFinalStatesList()
+        myList2.extend(GetHexoListStat19Mar2018())
+        doCompare(opts.name, myList2)
 
     # Inform user and exit
     Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + savePath + ShellStyles.NormalStyle()), True)    
     return
+
+def GetBoostedStatOnly():
+    myList = [
+        # Other final states
+        ("H^{+}#rightarrow tb (boosted, 19-Dec-17)" , "limits2018/datacards_combine_MIT_approximate_19Dec2017/CombineResults_taujets_*"),
+        ("H^{+}#rightarrow tb (boosted, 19-Mar-18)" , "limits2018/datacards_combine_MIT_approximate_19Mar2018/CombineResults_taujets_*"),
+        ]
+    return myList
+
+def GetStatOnlyListMar2018():
+    myDirs = {}
+    myDirs["b3Pt30_MVAm0p40to0p40_QGLR0p5_NoFatJetVeto_StatOnly"]  = "mH180to1000_b3Pt30_MVAm0p40to0p40_QGLRGE0p5_NoFatJetVeto_StatOnly_180321_133930/"
+    myDirs["b3Pt30_MVAm0p40to0p40_NoFatJetVeto_StatOnly"]  = "mH180to1000_b3Pt30_MVAm0p40to0p40_NoFatJetVeto_StatOnly_180320_130704/"
+    myDirs["b3Pt30_MVA0p00to0p60_NoFatJetVeto_StatOnly"]   = "mH180to1000_b3Pt30_MVA0p00to0p60_NoFatJetVeto_StatOnly_180321_103154/"
+    myDirs["b3Pt30_MVA0p50to0p80_NoFatJetVeto_StatOnly"]   = "mH180to1000_b3Pt30_MVA0p50to0p80_StatOnly_180321_103541/"
+    myDirs["b3Pt40_MVA0p40_NoFatJetVeto_StatOnly"]         = "mH180to3000_b3Pt40_MVA0p40_NoFatJetVeto_StatOnly_180319_051408/"
+    myDirs["b3Pt40_MVA0p40_FatJetVeto450_StatOnly"]        = "mH180to3000_b3Pt40_MVA0p40_FatJetVeto450_StatOnly_180319_052727/"
+    myDirs["b3Pt40_MVA0p40_FatJetVeto500_StatOnly"]        = "mH180to3000_b3Pt40_MVA0p40_FatJetVeto500_StatOnly_180319_052958/"
+    for k in myDirs:
+        myDirs[k] = "limits2018/datacards_Hplus2tb_13TeV_EraRun2016_Search80to1000_OptNominal_limits2016_DataDriven_" + myDirs[k]
+
+    myList = [
+        # Kolosova
+        ("b30, BDT > 0.40 (QGLR #geq 0.5)", myDirs["b3Pt30_MVAm0p40to0p40_QGLR0p5_NoFatJetVeto_StatOnly"] + "CombineResults*"),
+        ("b30, BDT > 0.40", myDirs["b3Pt30_MVAm0p40to0p40_NoFatJetVeto_StatOnly"] + "CombineResults*"),
+        ("b30, BDT > 0.60", myDirs["b3Pt30_MVA0p00to0p60_NoFatJetVeto_StatOnly"] + "CombineResults*"),
+        ("b30, BDT > 0.80", myDirs["b3Pt30_MVA0p50to0p80_NoFatJetVeto_StatOnly"] + "CombineResults*"),
+        #
+        ("BDT > 0.40", myDirs["b3Pt40_MVA0p40_NoFatJetVeto_StatOnly"] + "CombineResults*"),
+        #("BDT > 0.40 (Fatjet < 450 GeV)", myDirs["b3Pt40_MVA0p40_FatJetVeto450_StatOnly"] + "CombineResults*"),
+        #("BDT > 0.40 (Fatjet < 500 GeV)", myDirs["b3Pt40_MVA0p40_FatJetVeto500_StatOnly"] + "CombineResults*"),
+        ]
+    myList.extend(GetBoostedStatOnly())
+    return myList
+
+
+def GetHexoListStat19Mar2018():
+    '''
+    3 bjets 40, 40, 40
+    BDT >= 0.40
+    '''
+    myDirs = {}
+    myDirs["b3Pt40_MVA0p40_NoFatJetVeto_StatOnly"]  = "b3Pt40_MVA0p40_NoFatJetVeto_StatOnly_180319_051408/"
+    myDirs["b3Pt40_MVA0p40_NoFatJetVeto"]           = "b3Pt40_MVA0p40_NoFatJetVeto_180319_052022/"
+    myDirs["b3Pt40_MVA0p40_FatJetVeto450_StatOnly"] = "b3Pt40_MVA0p40_FatJetVeto450_StatOnly_180319_052727/"
+    myDirs["b3Pt40_MVA0p40_FatJetVeto450"]          = "b3Pt40_MVA0p40_FatJetVeto450_180319_052456/"
+    myDirs["b3Pt40_MVA0p40_FatJetVeto500_StatOnly"] = "b3Pt40_MVA0p40_FatJetVeto500_StatOnly_180319_052958/"
+    myDirs["b3Pt40_MVA0p40_FatJetVeto500"]          = "b3Pt40_MVA0p40_FatJetVeto500_180319_053111/"
+    for k in myDirs:
+        myDirs[k] = "limits2018/datacards_Hplus2tb_13TeV_EraRun2016_Search80to1000_OptNominal_limits2016_DataDriven_mH180to3000_" + myDirs[k]
+
+    myList = [
+        ("BDT > 0.40", myDirs["b3Pt40_MVA0p40_NoFatJetVeto_StatOnly"] + "CombineResults*"),
+        #("BDT > 0.40 (Syst.)", myDirs["b3Pt40_MVA0p40_NoFatJetVeto"] + "CombineResults*"),
+        ("BDT > 0.40 (Fatjet < 450 GeV)", myDirs["b3Pt40_MVA0p40_FatJetVeto450_StatOnly"] + "CombineResults*"),
+        #("BDT > 0.40 (Syst., Fatjet > 450 GeV)", myDirs["b3Pt40_MVA0p40_FatJetVeto450"] + "CombineResults*"),
+        ("BDT > 0.40 (Fatjet < 500 GeV)", myDirs["b3Pt40_MVA0p40_FatJetVeto500_StatOnly"] + "CombineResults*"),
+        #("BDT > 0.40 (Syst., Fatjet < 500 GeV)", myDirs["b3Pt40_MVA0p40_FatJetVeto500"] + "CombineResults*"),
+        #("H^{+}#rightarrow tb (~boosted)"     , "limits2017/*datacards_combine_MIT_approximate/CombineResults_taujets_*"),
+        ]
+    return myList
+
+def GetHexoListSyst19Mar2018():
+    '''
+    3 bjets 40, 40, 40
+    BDT >= 0.40
+    '''
+    myDirs = {}
+    myDirs["b3Pt40_MVA0p40_NoFatJetVeto_StatOnly"]  = "b3Pt40_MVA0p40_NoFatJetVeto_StatOnly_180319_051408/"
+    myDirs["b3Pt40_MVA0p40_NoFatJetVeto"]           = "b3Pt40_MVA0p40_NoFatJetVeto_180319_052022/"
+    myDirs["b3Pt40_MVA0p40_FatJetVeto450_StatOnly"] = "b3Pt40_MVA0p40_FatJetVeto450_StatOnly_180319_052727/"
+    myDirs["b3Pt40_MVA0p40_FatJetVeto450"]          = "b3Pt40_MVA0p40_FatJetVeto450_180319_052456/"
+    myDirs["b3Pt40_MVA0p40_FatJetVeto500_StatOnly"] = "b3Pt40_MVA0p40_FatJetVeto500_StatOnly_180319_052958/"
+    myDirs["b3Pt40_MVA0p40_FatJetVeto500"]          = "b3Pt40_MVA0p40_FatJetVeto500_180319_053111/"
+    for k in myDirs:
+        myDirs[k] = "limits2018/datacards_Hplus2tb_13TeV_EraRun2016_Search80to1000_OptNominal_limits2016_DataDriven_mH180to3000_" + myDirs[k]
+    myDirs["b3Pt40T_MVA0p50_NoFatJetVeto"]          = "limits2018/datacards_Hplus2tb_13TeV_EraRun2016_Search80to1000_OptNominal_limits2016_DataDriven_mH180to3000_180321_101617/"
+
+    # Stat. #oplus Syst.
+    myList = [
+        #("BDT > 0.40", myDirs["b3Pt40_MVA0p40_NoFatJetVeto_StatOnly"] + "CombineResults*"),
+        ("BDT > 0.50 (CSVv2-Tight, Syst.)", myDirs["b3Pt40T_MVA0p50_NoFatJetVeto"] + "CombineResults*"),
+        #("BDT > 0.40", myDirs["b3Pt40_MVA0p40_NoFatJetVeto_StatOnly"] + "CombineResults*"),
+        ("BDT > 0.40 (Syst.)", myDirs["b3Pt40_MVA0p40_NoFatJetVeto"] + "CombineResults*"),
+        #("BDT > 0.40 (Fatjet < 450 GeV)", myDirs["b3Pt40_MVA0p40_FatJetVeto450_StatOnly"] + "CombineResults*"),
+        ("BDT > 0.40 (Syst., Fatjet < 450 GeV)", myDirs["b3Pt40_MVA0p40_FatJetVeto450"] + "CombineResults*"),
+        #("BDT > 0.40 (Fatjet < 500 GeV)", myDirs["b3Pt40_MVA0p40_FatJetVeto500_StatOnly"] + "CombineResults*"),
+        ("BDT > 0.40 (Syst., Fatjet < 500 GeV)", myDirs["b3Pt40_MVA0p40_FatJetVeto500"] + "CombineResults*"),
+        #
+        #("H^{+}#rightarrow tb (~boosted)"     , "limits2017/*datacards_combine_MIT_approximate/CombineResults_taujets_*"),
+        ]
+    return myList
+
 
 def _ifNotNone(value, default):
     if value is None:
@@ -195,8 +278,8 @@ def doCompare(name, compareList, **kwargs):
     if not opts.relative:
         return
     # Overwrite some settings
-    _opts.yMin    = 0.0
-    _opts.yMax    = 2.5
+    _opts.yMin    = +0.5 #0.0
+    _opts.yMax    = -1.0 #2.5
     _opts.logY    = False
 
     # 1) Relative: median
@@ -247,7 +330,8 @@ def doPlot(limits, legendLabels, graphs, name, ylabel, _opts={}, yTitle=None):
     # If sigma bands are drawn each legend entry is plotted twice. Correct this in the count
     if "Sigma1" in name or "Sigma2" in name:
         nGraphs = nGraphs/2.0
-    legend = getLegend(nGraphs, limit, xPosLeg)
+    #legend = getLegend(nGraphs, limit, xPosLeg)
+    legend = getLegend(nGraphs, limit, 0.35) #iro
     plot.setLegend(legend)
 
     # Determine save name, minimum and maximum of y-axis
@@ -258,7 +342,12 @@ def doPlot(limits, legendLabels, graphs, name, ylabel, _opts={}, yTitle=None):
         _opts.yMax = ymax
 
     # Create the frame and set axes titles
-    plot.createFrame(saveName, opts={"ymin": _opts.yMin, "ymax": _opts.yMax})
+    if _opts.xMax != -1:
+        plot.createFrame(saveName, opts={"xmax": _opts.xMax, "ymin": _opts.yMin, "ymax": _opts.yMax})
+        if _opts.xMin != -1:
+            plot.createFrame(saveName, opts={"xmin": _opts.xMin, "xmax": _opts.xMax, "ymin": _opts.yMin, "ymax": _opts.yMax})
+    else:
+        plot.createFrame(saveName, opts={"ymin": _opts.yMin, "ymax": _opts.yMax})
     
     # Add cut line?
     if opts.cutLine != 999.9:
@@ -478,6 +567,8 @@ if __name__ == "__main__":
     LOGY        = False
     GRIDX       = False
     GRIDY       = False
+    MINX        = -1
+    MAXX        = -1
     MINY        = -1
     MAXY        = -1
     CUTLINE     = 999.9
@@ -504,9 +595,6 @@ if __name__ == "__main__":
 
     parser.add_option("--name", dest="name", type="string", default=NAME,
                       help="Name of the output plot [default = %s]" % (NAME))
-
-    parser.add_option("--ymax", dest="ymax", type="float", default=None, 
-                      help="Maximum y-axis value for regular plots")
 
     parser.add_option("--relativeYmax", dest="relativeYmax", type="float", default=None, 
                       help="Maximum y-value for relative plots")
@@ -537,6 +625,12 @@ if __name__ == "__main__":
     
     parser.add_option("--yMax", dest="yMax", default=MAXY, type="float",
                       help="Overwrite automaticly calculated maximum value of y-axis [default: %s]" % (MAXY) )
+
+    parser.add_option("--xMin", dest="xMin", default=MINX, type="float",
+                      help="Overwrite minimum value of x-axis [default: %s]" % (MINX) )
+    
+    parser.add_option("--xMax", dest="xMax", default=MAXX, type="float",
+                      help="Overwrite maximum value of x-axis [default: %s]" % (MAXX) )
 
     parser.add_option("--cutLine", dest="cutLine", type="float", default=CUTLINE,
                       help="Add TLine on the x-axis at this value  [default: %s]" % (CUTLINE) )
