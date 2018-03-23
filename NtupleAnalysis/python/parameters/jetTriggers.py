@@ -76,7 +76,7 @@ jsonReader.setupQGLInformation(QGLRPset  = qglrSelection,
 #================================================================================================
 # Topology selection
 #================================================================================================
-topologySelection = hplus2tbAnalysis.topologySelection
+#topologySelection = hplus2tbAnalysis.topologySelection
 
 #================================================================================================
 # Top selection BDT
@@ -97,6 +97,9 @@ scaleFactors.setupBtagSFInformation(btagPset               = fakeBBjetSelection,
                                     btagPayloadFilename    = "CSVv2.csv",
                                     btagEfficiencyFilename = "btageff_HToTB.json",
                                     direction              = "nominal")
+
+fakeBTopSelectionBDT = hplus2tbAnalysis.fakeBTopSelectionBDT
+
 fakeBMeasurement = hplus2tbAnalysis.fakeBMeasurement
 
 #================================================================================================
@@ -122,6 +125,7 @@ allSelections = PSet(
     FatJetSelection       = fatjetVeto,
     FakeBMeasurement      = fakeBMeasurement,
     FakeBBjetSelection    = fakeBBjetSelection,
+    FakeBTopSelectionBDT  = fakeBTopSelectionBDT,
     CommonPlots           = commonPlotsOptions,
     HistogramAmbientLevel = histogramAmbientLevel,
     QGLRSelection         = qglrSelection,
