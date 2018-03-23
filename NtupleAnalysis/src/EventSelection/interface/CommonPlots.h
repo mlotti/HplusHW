@@ -111,6 +111,7 @@ public:
   //void fillControlPlotsAfterMuonSelection(const Event& event);
   void fillControlPlotsAfterMETTriggerScaleFactor(const Event& event);
   void fillControlPlotsAfterBjetSelection(const Event& event, const BJetSelection::Data& data);
+  void fillControlPlotsAfterBtagSF(const Event& event,const JetSelection::Data& jetData ,const BJetSelection::Data& bjetData);
   void fillControlPlotsAfterStandardSelections(const Event& event, 
 					       const JetSelection::Data& jetData, 
 					       const BJetSelection::Data& bjetData, 
@@ -270,6 +271,11 @@ private:
   HistoSplitter::SplittedTripletTH1s hCtrlBJetPt;
   HistoSplitter::SplittedTripletTH1s hCtrlBJetEta;
   HistoSplitter::SplittedTripletTH1s hCtrlBDiscriminator;
+
+  // after b-tag SF
+  HistoSplitter::SplittedTripletTH1s hCtrlNJetsAfterBtagSF;
+  HistoSplitter::SplittedTripletTH1s hCtrlJetPtAfterBtagSF;
+  HistoSplitter::SplittedTripletTH1s hCtrlBJetPtAfterBtagSF;
   
   // back-to-back angular cuts
   HistoSplitter::SplittedTripletTH1s hCtrlBackToBackAngularCutsMinimum;

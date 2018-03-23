@@ -224,6 +224,7 @@ void SignalAnalysis::process(Long64_t entry) {
     fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
   }
   cBTaggingSFCounter.increment();
+  fCommonPlots.fillControlPlotsAfterBtagSF(fEvent,jetData,bjetData);
 
 
 //====== MET selection
