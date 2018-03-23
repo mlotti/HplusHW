@@ -304,7 +304,7 @@ signal2500Style = signalStyle.clone()
 signal3000Style = signalStyle.clone()
 signal5000Style = signalStyle.clone()
 signal7000Style = signalStyle.clone()
-signal1000Style = signalStyle.clone()
+signal10000Style= signalStyle.clone()
 
 dibStyle          = Style(ROOT.kMultiply, ROOT.kBlue-4)
 dyStyle           = Style(ROOT.kStar, ROOT.kTeal-9)

@@ -13,8 +13,16 @@ import os
 # Tau ID efficiency scale factor
 # https://twiki.cern.ch/twiki/bin/view/CMS/TauIDRecommendation13TeV
 def assignTauIdentificationSF(tauSelectionPset):
-    tauSelectionPset.tauIdentificationSF = 0.9 # for Run-2 2016
-
+    SF = 1.0
+    if tauSelectionPset.isolationDiscr=="byLooseCombinedIsolationDeltaBetaCorr3Hits":    SF = 0.93
+    elif tauSelectionPset.isolationDiscr=="byMediumCombinedIsolationDeltaBetaCorr3Hits": SF = 0.91
+    elif tauSelectionPset.isolationDiscr=="byTightCombinedIsolationDeltaBetaCorr3Hits":  SF = 0.89
+    elif tauSelectionPset.isolationDiscr=="byLooseIsolationMVA3oldDMwLT":                SF = 0.99
+    elif tauSelectionPset.isolationDiscr=="byMediumIsolationMVA3oldDMwLT":               SF = 0.97
+    elif tauSelectionPset.isolationDiscr=="byTightIsolationMVA3oldDMwLT":                SF = 0.95
+    else:
+        raise Exception("Error: tau ID scale factor not defined for discriminator"%isolationDiscr)
+    tauSelectionPset.tauIdentificationSF = SF
 
 ##===== Tau misidentification (simple SF)
 # \param tauSelectionPset  the tau config PSet
