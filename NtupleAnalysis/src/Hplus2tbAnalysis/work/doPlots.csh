@@ -18,7 +18,7 @@ endif
 set PSEUDO_MCRAB_DIR = ${1}
 
 ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --ratio --folder  PUDependency --url
-./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --ratio --folder  counters/weighted --url
+./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR  --folder  counters/weighted --url
 ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --ratio --folder  eSelection_Veto --url 
 ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --ratio --folder  muSelection_Veto --url
 ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --ratio --folder  tauSelection_Veto --url
@@ -29,7 +29,6 @@ set PSEUDO_MCRAB_DIR = ${1}
 ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --ratio --folder  ForDataDrivenCtrlPlots --url
 ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --ratio --folder  QGLRSelection_ --url
 
-
-./plotTH2.py -m $PSEUDO_MCRAB_DIR --ratio --folder  ForDataDrivenCtrlPlots --dataset ChargedHiggs_HplusTB_HplusToTB_M_650 --normalizeToLumi --logZ --gridX --gridY  --url
-./plotTH2.py -m $PSEUDO_MCRAB_DIR --ratio --folder  ForDataDrivenCtrlPlots --dataset ChargedHiggs_HplusTB_HplusToTB_M_800 --normalizeToLumi --logZ --gridX --gridY  --url
-./plotTH2.py -m $PSEUDO_MCRAB_DIR --ratio --folder  ForDataDrivenCtrlPlots --dataset ChargedHiggs_HplusTB_HplusToTB_M_1000 --normalizeToLumi --logZ --gridX --gridY  --url
+./plotTH2.py -m $PSEUDO_MCRAB_DIR --folder  ForDataDrivenCtrlPlots --dataset ChargedHiggs_HplusTB_HplusToTB_M_650 --normalizeToLumi --logZ --gridX --gridY  --url
+./plotTH2.py -m $PSEUDO_MCRAB_DIR --folder  ForDataDrivenCtrlPlots --dataset ChargedHiggs_HplusTB_HplusToTB_M_800 --normalizeToLumi --logZ --gridX --gridY  --url
+./plotTH2.py -m $PSEUDO_MCRAB_DIR --folder  ForDataDrivenCtrlPlots --dataset ChargedHiggs_HplusTB_HplusToTB_M_1000 --normalizeToLumi --logZ --gridX --gridY  --url
