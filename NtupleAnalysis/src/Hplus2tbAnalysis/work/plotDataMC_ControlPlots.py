@@ -519,10 +519,29 @@ def GetHistoKwargs(h, opts):
         kwargs["opts2"]      = {"ymin": 0.6, "ymax": 2.0-0.6}
         # kwargs["moveLegend"] = {"dx": -0.52, "dy": -0.55, "dh": 0.0}
 
+    if "fatjetNPassed" in h:
+        kwargs["opts"]   = {"xmax": 4.0, "ymin": yMin, "ymaxfactor": yMaxF}
+        #kwargs["cutBox"] = {"cutValue": opts.signalMass, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+
+    if "fatjetPt" in h:
+        units            = "GeV/c"
+        kwargs["rebinX"] = 5
+        kwargs["xlabel"] = "p_{T} (%s)" % units
+        #kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": 450.0, "ymin": yMin, "ymaxfactor": yMaxF}
+
+    if "FatJetTopMatchPtRatio" in h:
+        units            = ""
+        kwargs["rebinX"] = 1
+        # kwargs["xlabel"] = "p_{T} (%s)" % units
+        kwargs["ylabel"] = "Events / %.2f"
+        kwargs["opts"]   = {"xmax": 1.2, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["moveLegend"] = {"dx": -0.49, "dy": -0.00, "dh": 0.1}        
+
     if h == "counter":
         xMin = 15.0
-        xMax = 21.0
-        kwargs["opts"]   = {"xmin": xMin, "ymin": 1e0, "ymax": 1e8}
+        xMax = 20.0 #21.0
+        kwargs["opts"]   = {"xmin": xMin, "xmax": xMax, "ymin": 1e0, "ymax": 1e8}
         # kwargs["cutBox"] = {"cutValue": xMin+2, "fillColor": 16, "box": False, "line": False, "greaterThan": True} #indicate btag SF
 
     if "IsolPt" in h:
@@ -553,7 +572,7 @@ def GetHistoKwargs(h, opts):
         #kwargs["cutBox"] = {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         kwargs["rebinX"] = systematics._dataDrivenCtrlPlotBinning["NVertices_AfterAllSelections"]
         binWmin, binWmax = GetBinWidthMinMax(kwargs["rebinX"])
-        kwargs["ylabel"] = "Events / %.0f-%.0f (%s)" % (binWmin, binWmax, units)
+        kwargs["ylabel"] = "Events / %.0f-%.0f (%s)" % (binWmin, binWmax, "")
         kwargs["opts"]   = {"xmax": 80.0, "ymin": yMin, "ymaxfactor": yMaxF}
 
     if "electronPt" in h:
@@ -854,7 +873,7 @@ def replaceBinLabels(p, histoName):
     '''
     myBinList = []
     if histoName == "counter" or histoName == "weighted/counter":
-        # myBinList = ["#geq 7 jets", "#geq 3 b-jets", "b-jets SF", "QGLR", "#geq 2 tops", "fat-jet veto", "All"]
+        #myBinList = ["#geq 7 jets", "#geq 3 b-jets", "b-jets SF", "#geq 2 tops", "fat-jet veto", "All"]
         myBinList = ["#geq 7 jets", "#geq 3 b-jets", "b-jets SF", "#geq 2 tops", "fat-jet veto", "All"]
     elif "bjet" in histoName:
         myBinList = ["All", "#eta", "p_{T}", "CSVv2 (M)", "Trg Match", "#geq 3"]
