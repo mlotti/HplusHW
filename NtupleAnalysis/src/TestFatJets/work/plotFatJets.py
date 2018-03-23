@@ -3,17 +3,19 @@
 Description:
 
 Usage:
-./plotMC_Folder.py -m <pseudo_mcrab> [opts]
+./plotFatJets.py -m <pseudo_mcrab> [opts]
 
 Examples:
-./plotMC_Folder.py -m <peudo_mcrab> -o "" --url --normaliseToOne
-./plotMC_Folder.py -m <peudo_mcrab> --folder topologySelection_ --url --normaliseToOne
-./plotMC_Folder.py -m <peudo_mcrab> --normaliseToOne --url
+./plotFatJets.py -m <peudo_mcrab> -o "" --url --nomaliseToOne
+./plotFatJets.py -m <peudo_mcrab> --folder topologySelection_ --url --normaliseToOne
+./plotFatJets.py -m <peudo_mcrab> --normaliseToOne --url
+./plotFatJets.py -m <peudo_mcrab> --normaliseToOne --url --signalMass 500
+./plotFatJets.py -m <peudo_mcrab> --normaliseToOne --url --signalMass 500
 
 Last Used:
-./plotMC_Folder.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --normaliseToOne --url --mergeEWK
-./plotMC_Folder.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --normaliseToOne --folder ""
-./plotMC_Folder.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --folder topSelection_ --url --normaliseToOne
+./plotFatJets.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --normaliseToOne --url --mergeEWK
+./plotFatJets.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --normaliseToOne --folder ""
+./plotFatJets.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --folder topSelection_ --url --normaliseToOne
 
 '''
 
@@ -102,8 +104,10 @@ def GetDatasetsFromDir(opts):
         raise Exception("This should never be reached")
     return datasets
     
-
-def main(opts):
+# ===========================================
+#             Main Function
+# ===========================================
+def main(opts, signalMass):
 
     optModes = ["OptChiSqrCutValue100"]                                                                                                                             
 
@@ -114,6 +118,7 @@ def main(opts):
     for opt in optModes:
         opts.optMode = opt
 
+        
         # Setup & configure the dataset manager 
         datasetsMgr = GetDatasetsFromDir(opts)
         datasetsMgr.updateNAllEventsToPUWeighted()
@@ -126,32 +131,52 @@ def main(opts):
         for d in datasetsMgr.getAllDatasets():
             if "ChargedHiggs" in d.getName():
                 datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
-               
-        # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
-        plots.mergeRenameReorderForDataMC(datasetsMgr) 
+                       
         
         # Determine integrated Lumi before removing data
-        intLumi = datasetsMgr.getDataset("Data").getLuminosity()
+        #        intLumi = datasetsMgr.getDataset("Data").getLuminosity()
+        intLumi = 35800
 
         # Remove datasets
-        if 0:
-            datasetsMgr.remove(filter(lambda name: "Data" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "QCD-b" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "QCD" in name, datasetsMgr.getAllDatasetNames()))
+        if 1:
+            #datasetsMgr.remove(filter(lambda name: "Data" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr.remove(filter(lambda name: "QCD_b" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "QCD_HT" in name, datasetsMgr.getAllDatasetNames()))
             #datasetsMgr.remove(filter(lambda name: "SingleTop" in name, datasetsMgr.getAllDatasetNames()))
             #datasetsMgr.remove(filter(lambda name: "DYJetsToQQHT" in name, datasetsMgr.getAllDatasetNames()))
-            #datasetsMgr.remove(filter(lambda name: "TTZToQQ" in name, datasetsMgr.getAllDatasetNames()))
-            #datasetsMgr.remove(filter(lambda name: "TTWJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr.remove(filter(lambda name: "TTZToQQ" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr.remove(filter(lambda name: "TTWJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
             #datasetsMgr.remove(filter(lambda name: "WJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
             #datasetsMgr.remove(filter(lambda name: "Diboson" in name, datasetsMgr.getAllDatasetNames()))
-            #datasetsMgr.remove(filter(lambda name: "TTTT" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "FakeBMeasurementTrijetMass" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr.remove(filter(lambda name: "TTTT" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "FakeBMeasurementTrijetMass" in name, datasetsMgr.getAllDatasetNames()))
             #datasetsMgr.remove(filter(lambda name: "M_" in name and "M_" + str(opts.signalMass) not in name, datasetsMgr.getAllDatasetNames()))
+        
+        if opts.noQCD:
+            datasetsMgr.remove(filter(lambda name: "QCD_b" in name, datasetsMgr.getAllDatasetNames()))  
+            datasetsMgr.remove(filter(lambda name: "QCD_HT" in name, datasetsMgr.getAllDatasetNames()))
+
+        # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
+        plots.mergeRenameReorderForDataMC(datasetsMgr) 
 
         # Merge EWK samples
         if opts.mergeEWK:
             datasetsMgr.merge("EWK", GetListOfEwkDatasets())
             plots._plotStyles["EWK"] = styles.getAltEWKStyle()
+
+        # Re-order datasets
+        datasetOrder = []
+        for d in datasetsMgr.getAllDatasets():
+            if "M_" in d.getName():
+                if d not in signalMass:
+                    continue
+            datasetOrder.append(d.getName())
+            
+        for m in signalMass:
+            #newOrder.insert(0, m)
+            datasetOrder.insert(0, m)
+            #datasetsMgr.selectAndReorder(newOrder)
+        datasetsMgr.selectAndReorder(datasetOrder)
 
         # Print dataset information
         datasetsMgr.PrintInfo()
@@ -162,20 +187,59 @@ def main(opts):
         style.setGridX(True)
         style.setGridY(False)
 
-        # Do the topSelection histos
-        folder      = opts.folder 
-        histoPaths1 = []
-        if folder != "":
-            histoList  = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(folder)
-            histoPaths1 = [os.path.join(folder, h) for h in histoList]
+                
+        folder     = ""
+        histoList  = datasetsMgr.getDataset(datasetOrder[0]).getDirectoryContent(folder)
+        hList0     = [x for x in histoList if "FatJets" in x]
+        hList1     = [x for x in histoList if "LdgFatJet" in x]
+        hList2     = [x for x in histoList if "SubldgFatJet" in x]
+        histoPaths = [os.path.join(folder, h) for h in (hList0+hList1+hList2)]
 
-        histoPaths = histoPaths1 #+ histoPaths2
         for h in histoPaths:
             if "Vs" in h: # Skip TH2D
                 continue
             PlotMC(datasetsMgr, h, intLumi)
+
+
+        
     return
 
+def getHistos(datasetsMgr, histoName):
+
+    h1 = datasetsMgr.getDataset("Data").getDatasetRootHisto(histoName)
+    h1.setName("Data")
+
+    h2 = datasetsMgr.getDataset("EWK").getDatasetRootHisto(histoName)
+    h2.setName("EWK")
+    return [h1, h2]
+
+
+
+def SavePlot(plot, saveName, saveDir, saveFormats = [".pdf"]):
+    Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
+    
+    # Check that path exists
+    if not os.path.exists(saveDir):
+        os.makedirs(saveDir)
+        
+    savePath = os.path.join(saveDir, saveName)
+
+    # For-loop: All save formats
+    for i, ext in enumerate(saveFormats):
+        saveNameURL = savePath + ext
+        saveNameURL = saveNameURL.replace("/publicweb/m/mkolosov/", "http://home.fnal.gov/~mkolosov/")
+        if opts.url:
+            Print(saveNameURL, i==0)
+        else:
+            Print(savePath + ext, i==0)
+        plot.saveAs(savePath, formats=saveFormats)
+    return
+
+
+
+
+
+#PlotMC(datasetsMgr, h, intLumi)
 def PlotMC(datasetsMgr, histo, intLumi):
 
     kwargs = {}
@@ -189,41 +253,119 @@ def PlotMC(datasetsMgr, histo, intLumi):
     _rebinX = 1
     _format = "%0.0f"
     _xlabel = None
-    logY    = False
-    _opts   = {"ymin": 1e-3, "ymaxfactor": 1.0}
 
-    if "trijetmass" in histo.lower():
-        _rebinX = 4
-        logY    = False
-        _units  = "GeV/c^{2}"
-        _format = "%0.0f " + _units
-        _xlabel = "m_{jjb} (%s)" % _units
-        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 805 #1005
-    elif "tetrajetmass" in histo.lower():
-        _rebinX = 5 #5 #10 #4
-        logY    = False
-        _units  = "GeV/c^{2}"
-        _format = "%0.0f " + _units
-        _xlabel = "m_{jjbb} (%s)" % (_units)
-        _format = "%0.0f " + _units
-        _cutBox = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 1500 #3500.0
-        #_rebinX = 10
-        #_opts["xmax"] = 3500
-    elif "tetrajetbjetpt" in histo.lower():
+    _opts   = {"ymin": 1e-3, "ymaxfactor": 1.0}
+    
+    logY = True
+
+    if "_Pt" in histo: 
+        _opts["xmax"] = 1000
+        _rebinX = 1
+        logY = False
+        _xlabel = "p_{T} (GeV)"
+
+    elif "Eta" in histo:
+        _xlabel = "#eta"
+        logY = False
+        _opts["xmin"] = -3.0
+        _opts["xmax"] = +3.0
         _rebinX = 2
-        logY    = False
-        _units  = "GeV/c"
-        _format = "%0.0f " + _units
-        _xlabel = "p_{T}  (%s)" % (_units)
-        _format = "%0.0f " + _units
-        _opts["xmax"] = 600
-    elif "foxwolframmoment" in histo.lower():
-        _format = "%0.1f"
-        _cutBox = {"cutValue": 0.5, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _format = "%0.2f"
+        
+    elif "_E" in histo: 
+        _opts["xmax"] = 2000
+        _rebinX = 1
+        logY = False
+        _xlabel = "E (GeV)"
+        
+    elif "Phi" in histo:
+        _rebinX = 2
+        _format = "%0.2f"
+        _xlabel = "#phi"
+        logY = False
+        _opts["xmin"] = -4.0
+        _opts["xmax"] = 4.0
+
+    
+    elif "tau21" in histo:
+         _rebinX = 2
+        _format = "%0.2f"
+        logY = False
+        _xlabel = "#tau_{2}/#tau_{1}"
+    
+    elif "tau32" in histo:
+        _rebinX = 2
+        _format = "%0.2f"
+        logY = False
+        _xlabel = "#tau_{3}/#tau_{2}"
+
+    elif "NjettinessAK8tau" in histo:
+        _rebinX = 2
+        _format = "%0.2f"
+        logY = False
+        if "1" in histo:
+            _xlabel = "#tau_{1}"
+        elif "2" in histo:
+            _xlabel = "#tau_{2}"
+        elif "3" in histo:
+            _xlabel = "#tau_{3}"
+        elif "4" in histo:
+            _xlabel = "#tau_{4}"
+        
+    elif "NSubjets" in histo:
+        _xlabel = "Subjets Multiplicity"
+        
+    elif "N" in histo:
+        _xlabel = "Multiplicity"
+        
+    elif "PrunedMassCorr" in histo:
+        _xlabel = "Corrected pruned mass (GeV/c^{2})"
+        
+    elif "SoftDropMass" in histo:
+        _xlabel = "Soft Drop mass"
+    
+    elif "PrunedMass" in histo:
+        _xlabel = "Pruned mass (GeV/c^{2})"
+    
+    elif "SDsubjet1" in histo:
+        if "pt"   in histo: _xlabel = "SD subjet 1 p_{T} (GeV/c)"
+        if "eta"  in histo: _xlabel = "SD subjet 1 #eta"
+        if "phi"  in histo: _xlabel = "SD subjet 1 #phi"
+        if "mass" in histo: _xlabel = "SD subjet 1 mass (GeV/c^{2})"
+        if "csv"  in histo: _xlabel = "SD subjet 1 csv"
+    elif "SDsubjet2" in histo:
+        if "pt"   in histo: _xlabel = "SD subjet 2 p_{T} (GeV/c)"
+        if "eta"  in histo: _xlabel = "SD subjet 2 #eta"
+        if "phi"  in histo: _xlabel = "SD subjet 2 #phi"
+        if "mass" in histo: _xlabel = "SD subjet 2 mass (GeV/c^{2})"
+        if "csv"  in histo: _xlabel = "SD subjet 2 csv"
+    
+    elif "CSV" in histo:
+        _rebinX =2
+        logY = False
+        _xlabel = "CSV"
+        _units  = ""
+        _format = "%0.02f " + _units
+
+
+    if "ChiSqr" in histo:
+        _rebinX = 1
+#        logY    = True
+        _units  = ""
+        _format = "%0.1f " + _units
+        _xlabel = "#chi^{2}"
+        _cutBox = {"cutValue": 10.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _opts["xmax"] = 100
+
+
     else:
         pass
+
+
+    if opts.normaliseToOne:
+        Ylabel  = "Arbitrary Units / %s" % (_format)
+    else:
+        Ylabel  = "Events / %s" % (_format)
 
     if logY:
         yMaxFactor = 2.0
@@ -247,17 +389,29 @@ def PlotMC(datasetsMgr, histo, intLumi):
         p.histoMgr.setHistoDrawStyle("QCD", "HIST")
         p.histoMgr.setHistoLegendStyle("QCD", "F")
 
-    if "TT" in datasetsMgr.getAllDatasets():
-        p.histoMgr.setHistoDrawStyle("TT", "AP")
-        p.histoMgr.setHistoLegendStyle("TT", "LP")
+    for d in datasetsMgr.getAllDatasets():
+        if "TT" in d.getName():
+            p.histoMgr.forHisto("TT", styles.getTTFillStyle() )
+            #p.histoMgr.setHistoDrawStyle("TT", "AP")
+            p.histoMgr.setHistoLegendStyle("TT", "F")
+            
+
+    # Customise style
+    signalM = []
+    for m in signalMass:
+        signalM.append(m.rsplit("M_")[-1])
+    for m in signalM:
+        p.histoMgr.forHisto("ChargedHiggs_HplusTB_HplusToTB_M_%s" %m, styles.getSignalStyleHToTB_M(m))
+        
 
     plots.drawPlot(p, 
                    histo,  
                    xlabel       = _xlabel,
-                   ylabel       = "Arbitrary Units / %s" % (_format),
+                   ylabel       = Ylabel,#"Arbitrary Units / %s" % (_format), #"Events / %s" % (_format), #"Arbitrary Units / %s" % (_format),
                    log          = logY,
                    rebinX       = _rebinX, cmsExtraText = "Preliminary", 
                    createLegend = {"x1": 0.58, "y1": 0.65, "x2": 0.92, "y2": 0.92},
+#                   createLegend = {"x1": 0.73, "y1": 0.85, "x2": 0.97, "y2": 0.77},
                    opts         = _opts,
                    opts2        = {"ymin": 0.6, "ymax": 1.4},
                    cutBox       = _cutBox,
@@ -265,13 +419,14 @@ def PlotMC(datasetsMgr, histo, intLumi):
 
     # Save plot in all formats    
     saveName = histo.split("/")[-1]
-    #savePath = os.path.join(opts.saveDir, opts.folder, histo.split("/")[0], opts.optMode)
-    savePath = os.path.join(opts.saveDir, histo.split("/")[0], opts.optMode)
+    savePath = os.path.join(opts.saveDir, "", histo.split("/")[0], opts.optMode)
+
     SavePlot(p, saveName, savePath) 
+    
     return
 
 
-def SavePlot(plot, saveName, saveDir, saveFormats = [".png", ".pdf"]):
+def SavePlot(plot, saveName, saveDir, saveFormats = [".pdf"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
     
     # Check that path exists
@@ -283,7 +438,7 @@ def SavePlot(plot, saveName, saveDir, saveFormats = [".png", ".pdf"]):
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
         saveNameURL = savePath + ext
-        saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
+        saveNameURL = saveNameURL.replace("/publicweb/m/mkolosov/", "http://home.fnal.gov/~mkolosov/")
         if opts.url:
             Print(saveNameURL, i==0)
         else:
@@ -313,19 +468,36 @@ if __name__ == "__main__":
     '''
     
     # Default Settings
-    ANALYSISNAME = "Hplus2tbAnalysis"
+    ANALYSISNAME = "TestFatJets"
+    MVACUT       = "MVA"
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
     OPTMODE      = ""
     BATCHMODE    = True
     PRECISION    = 3
+    #SIGNALMASS   = [200, 500, 800, 2000]
+    SIGNALMASS   = []
+    SIGNALMASS   = [ 300, 800, 1000, 3000]
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False
     MERGEEWK     = False
     URL          = False
     NOERROR      = True
-    SAVEDIR      = "/publicweb/a/aattikis/" + ANALYSISNAME
+    NOQCD        = False
+#    if (1): #opts.normaliseToOne:
+#        DIR = MVACUT
+#    else:
+#        DIR = MVACUT+ "/normToLumi/"
+
+    SAVEDIR = "/publicweb/m/mkolosov/" + ANALYSISNAME
+#    SAVEDIR      = "/publicweb/s/skonstan/" + ANALYSISNAME + "/TT/"   #save TT plots
+#    SAVEDIR      = "/publicweb/s/skonstan/" + ANALYSISNAME + "/"+ MVACUT+ "/noQCD/"   #save noQCD plots
+#    SAVEDIR      = "/publicweb/s/skonstan/" + ANALYSISNAME + "/"+ MVACUT+ "/normToLumi/"   #save lumi plots
+#    SAVEDIR      = "/publicweb/s/skonstan/" + ANALYSISNAME + "/"+ MVACUT 
+#    SAVEDIR      = "/publicweb/s/skonstan/" + ANALYSISNAME + "/normToLumi/"   #save Lumi plots
+#    SAVEDIR      = "/publicweb/s/skonstan/" + ANALYSISNAME + "/test/"   #save test plots
+#    SAVEDIR      = "/publicweb/s/skonstan/" + ANALYSISNAME 
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
     NORMALISE    = False
@@ -358,6 +530,9 @@ if __name__ == "__main__":
     parser.add_option("--mergeEWK", dest="mergeEWK", action="store_true", default=MERGEEWK, 
                       help="Merge all EWK samples into a single sample called \"EWK\" [default: %s]" % MERGEEWK)
 
+    #parser.add_option("--signalMass", dest="signalMass", type=float, default=SIGNALMASS, 
+                      #help="Mass value of signal to use [default: %s]" % SIGNALMASS)
+
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR, 
                       help="Directory where all pltos will be saved [default: %s]" % SAVEDIR)
 
@@ -382,6 +557,13 @@ if __name__ == "__main__":
     parser.add_option("--folder", dest="folder", type="string", default = FOLDER,
                       help="ROOT file folder under which all histograms to be plotted are located [default: %s]" % (FOLDER) )
 
+    parser.add_option("--MVAcut", dest="MVAcut", type="string", default = MVACUT,
+                      help="Save plots to directory in respect of the MVA cut value [default: %s]" % (MVACUT) )
+
+    parser.add_option("--noQCD", dest="noQCD", action="store_true", default = NOQCD,
+                      help="Exclude QCD samples [default: %s]" % (NOQCD) )
+
+
     (opts, parseArgs) = parser.parse_args()
 
     # Require at least two arguments (script-name, path to multicrab)
@@ -399,8 +581,14 @@ if __name__ == "__main__":
     if opts.mergeEWK:
         Print("Merging EWK samples into a single Datasets \"EWK\"", True)
 
+    # Sanity check
+    allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 2000, 3000]
+    signalMass = []
+    for m in sorted(SIGNALMASS, reverse=True):
+        signalMass.append("ChargedHiggs_HplusTB_HplusToTB_M_%.f" % m)
+
     # Call the main function
-    main(opts)
+    main(opts, signalMass)
 
     if not opts.batchMode:
-        raw_input("=== plotMC_Folder.py: Press any key to quit ROOT ...")
+        raw_input("=== plotFatJets.py: Press any key to quit ROOT ...")

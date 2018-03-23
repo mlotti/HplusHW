@@ -1190,25 +1190,30 @@ def _indexNameHelper(index, name, names):
             raise Exception("Name '%s' does not exist in list '%s'" %(name, ",".join(names)))
     return ind
 
-## Class representing a column in counter.CounterTable.
-#
-# The columns in counter.CounterTable are not stored as CounterColumn
-# objects, but can be exported/imported as CounterColumn objects.
 class CounterColumn:
-    ## Constructor
-    #
-    # \param name      Name of the column
-    # \param rowNames  List of names of the rows
-    # \param values    Values for rows (dataset.Count objects)
-    #
-    # Lengths of rowNames and values should be equal. 
+    '''
+    Class representing a column in counter.CounterTable.
+    
+    The columns in counter.CounterTable are not stored as CounterColumn
+    objects, but can be exported/imported as CounterColumn objects.
+    '''
     def __init__(self, name, rowNames, values):
+        '''
+        Constructor
+        
+        \param name      Name of the column
+        \param rowNames  List of names of the rows
+        \param values    Values for rows (dataset.Count objects)
+        
+        Lengths of rowNames and values should be equal. 
+        '''
         self.name = name
         self.rowNames = rowNames
         self.values = values
 
         if len(rowNames) != len(values):
             raise Exception("len(rowNames) != len(values) (%d != %d)" % (len(rowNames), len(values)))
+        return
 
     ## Clone a column
     def clone(self):
@@ -1230,47 +1235,62 @@ class CounterColumn:
     def getNrows(self):
         return len(self.values)
 
-    ## Get row name with row index
-    #
-    # \param irow   Index of a row
     def getRowName(self, irow):
+        '''
+        Get row name with row index
+        
+        \param irow   Index of a row
+        '''
         return self.rowNames[irow]
 
-    ## Get all row names
     def getRowNames(self):
+        '''
+        Get all row names
+        '''
         return self.rowNames
 
-    ## Get count with row index or row name
-    #
-    # \param index   Row index (forwarded to counter._indexNameHelper())
-    # \param name    Row name (forwarded to counter._indexNameHelper())
     def getCount(self, index=None, name=None):
+        '''
+        Get count with row index or row name
+        
+        \param index   Row index (forwarded to counter._indexNameHelper())
+        \param name    Row name (forwarded to counter._indexNameHelper())
+        '''
         return self.values[_indexNameHelper(index, name, self.rowNames)]
 
-    ## Set count to a row
-    #
-    # \param irow   Row index
-    # \param count  New count
     def setCount(self, irow, count):
+        '''
+        Set count to a row
+        
+        \param irow   Row index
+        \param count  New count
+        '''
         self.values[irow] = count
+        return
 
-    ## Remove row
-    #
-    # \param irow   Row index
     def removeRow(self, irow):
+        '''
+        Remove row
+        
+        \param irow   Row index    
+        '''
         del self.values[irow]
         del self.rowNames[irow]
+        return
 
-    ## Multiply column with a value (possibly with uncertainty)
-    #
-    # \param value        Value to multiply with
-    # \param uncertainty  Uncertainty of the value
-    #
-    # Uncertainty is propagated with error propagation
     def multiply(self, value, uncertainty=0):
+        '''
+        Multiply column with a value (possibly with uncertainty)
+        
+        \param value        Value to multiply with
+        \param uncertainty  Uncertainty of the value
+        
+        Uncertainty is propagated with error propagation        
+        '''
         count = dataset.Count(value, uncertainty)
         for v in self.values:
             v.multiply(count)
+        return
 
     ## \var name
     # Name of the column
@@ -1347,34 +1367,46 @@ class CounterRow:
     # List of column values (dataset.Count objects, or None for non-existing value)
 
 
-## Class to represent a table of counts.
-# 
-# It is separated from Counter class in order to contain only the
-# table and to have certain table operations.
-#
-# Table is stored as 2D list of [row][column]. Rows and columns can be
-# exported/imported as counter.CounterRow and counter.CounterColumn
-# objects, respectively. Table values are dataset.Count objects, or
-# None's if a count doesn't exist for some row/column.
 class CounterTable:
-    ## Constructor
-    #
-    # Table is constructed as empty
+    '''
+    Class to represent a table of counts.
+    
+    It is separated from Counter class in order to contain only the
+    table and to have certain table operations.
+    
+    Table is stored as 2D list of [row][column]. Rows and columns can be
+    exported/imported as counter.CounterRow and counter.CounterColumn
+    objects, respectively. Table values are dataset.Count objects, or
+    None's if a count doesn't exist for some row/column.
+    '''
     def __init__(self):
+        '''
+        Constructor
+        
+        Table is constructed as empty
+        '''
         self.rowNames = []
         self.columnNames = []
         self.table = [] # table[row][column]
+        return
 
-    ## Clone the table
     def deepCopy(self):
+        '''
+        Clone the table
+        '''
         return copy.deepcopy(self)
 
-    ## Clone the table
+
     def clone(self):
+        '''
+        Clone the table
+        '''
         return self.deepCopy()
 
-    ## Transpose the table
     def transpose(self):
+        '''
+        Transpose the table
+        '''
         colNames = self.rowNames
         rowNames = self.columnNames
 
@@ -1406,87 +1438,110 @@ class CounterTable:
             return 0
         return len(self.table[0])
 
-    ## Get count with row and column index or name
-    #
-    # \param irow      Row index (forwarded to counter._indexNameHelper)
-    # \param icol      Column index (forwarded to counter._indexNameHelper)
-    # \param rowName   Row name (forwarded to counter._indexNameHelper)
-    # \param colName   Column name (forwarded to counter._indexNameHelper)
     def getCount(self, irow=None, icol=None, rowName=None, colName=None):
+        '''
+        Get count with row and column index or name
+        
+        \param irow      Row index (forwarded to counter._indexNameHelper)
+        \param icol      Column index (forwarded to counter._indexNameHelper)
+        \param rowName   Row name (forwarded to counter._indexNameHelper)
+        \param colName   Column name (forwarded to counter._indexNameHelper)
+        '''
         ir = _indexNameHelper(irow, rowName, self.rowNames)
         ic = _indexNameHelper(icol, colName, self.columnNames)
-
         return self.table[ir][ic]
 
-    ## Set count with row and column index
-    #
-    # \param irow   Row index
-    # \param icol   Column index
-    # \param value  Value to insert (dataset.Count object)
     def setCount(self, irow, icol, value):
+        '''
+         Set count with row and column index
+        
+        \param irow   Row index
+        \param icol   Column index
+        \param value  Value to insert (dataset.Count object)
+        '''
         self.table[irow][icol] = value
 
-    ## Set count with row and column index or name
-    #
-    # \param value  Value to insert (dataset.Count object)
-    # \param irow      Row index (forwarded to counter._indexNameHelper)
-    # \param icol      Column index (forwarded to counter._indexNameHelper)
-    # \param rowName   Row name (forwarded to counter._indexNameHelper)
-    # \param colName   Column name (forwarded to counter._indexNameHelper)
     def setCount2(self, value, irow=None, icol=None, rowName=None, colName=None):
+        '''
+         Set count with row and column index or name
+        
+        \param value  Value to insert (dataset.Count object)
+        \param irow      Row index (forwarded to counter._indexNameHelper)
+        \param icol      Column index (forwarded to counter._indexNameHelper)
+        \param rowName   Row name (forwarded to counter._indexNameHelper)
+        \param colName   Column name (forwarded to counter._indexNameHelper)
+        '''
         ir = _indexNameHelper(irow, rowName, self.rowNames)
         ic = _indexNameHelper(icol, colName, self.columnNames)
         self.table[ir][ic] = value
 
-    ## Get row names
     def getRowNames(self):
+        '''
+        Get row names
+        '''
         return self.rowNames
 
-    ## Rename rows
-    #
-    # \param mapping   Dictionary providing old name -> new name mapping
     def renameRows(self, mapping):
+        '''
+        Rename rows
+        
+        \param mapping   Dictionary providing old name -> new name mapping
+        '''
         for irow, row in enumerate(self.rowNames):
             if row in mapping:
                 self.rowNames[irow] = mapping[row]
+        return
 
-    ## Get column names
     def getColumnNames(self):
+        '''
+        Get column names
+        '''
         return self.columnNames
 
-    ## Rename columns
-    #
-    # \param mapping   Dictionary providing old name -> new name mapping
     def renameColumns(self, mapping):
+        '''
+        Rename columns
+        
+        \param mapping   Dictionary providing old name -> new name mapping
+        '''
         for icol, col in enumerate(self.columnNames):
             if col in mapping:
                 self.columnNames[icol] = mapping[col]
+        return
 
-    ## Get column index from column name
+
     def indexColumn(self, name):
+        '''
+        Get column index from column name
+        '''
         try:
             return self.columnNames.index(name)
         except ValueError:
             raise Exception("Column '%s' not found" % name)
 
-    ## Append a column
-    #
-    # \param column  counter.CounterColumn or counter.Counter object
-    #
-    # New column is inserted as the last column in the table
     def appendColumn(self, column):
+        '''
+        Append a column
+        
+        \param column  counter.CounterColumn or counter.Counter object
+        
+        New column is inserted as the last column in the table
+        '''
         self.insertColumn(self.getNcolumns(), column)
+        return
 
-    ## Insert a column
-    #
-    # \param icol    Index where to insert the new column
-    # \param column  counter.CounterColumn or counter.Counter object
-    #
-    # If the new column contains rows which don't already exist in the
-    # table, these rows are added in the proper places in the table,
-    # and the existing columns get None values. The row matching is
-    # done with the row names.
     def insertColumn(self, icol, column):
+        '''
+        Insert a column
+
+        \param icol    Index where to insert the new column
+        \param column  counter.CounterColumn or counter.Counter object
+        
+        If the new column contains rows which don't already exist in the
+        table, these rows are added in the proper places in the table,
+        and the existing columns get None values. The row matching is
+        done with the row names.
+        '''
         beginColumns = 0
         if len(self.table) > 0:
             beginColumns = len(self.table[0])
@@ -1550,15 +1605,17 @@ class CounterTable:
                 raise Exception("Internal error at row %d: len(row) = %d, beginColumns = %d" % (irow, len(row), beginColumns))
 
         self.columnNames.insert(icol, column.getName())
+        return
 
-
-    ## Get column by index or by name.
-    #
-    # \param index   Column index (forwarded to counter._indexNameHelper)
-    # \param name    Column name (forwarded to counter._indexNameHelper)
-    #
-    # \return counter.CounterColumn object
     def getColumn(self, index=None, name=None):
+        '''
+        Get column by index or by name.
+        
+        \param index   Column index (forwarded to counter._indexNameHelper)
+        \param name    Column name (forwarded to counter._indexNameHelper)
+        
+        \return counter.CounterColumn object
+        '''
         icol = _indexNameHelper(index, name, self.columnNames)
         
         # Extract the data for the column

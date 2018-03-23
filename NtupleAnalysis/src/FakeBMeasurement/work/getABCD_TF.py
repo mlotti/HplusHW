@@ -293,7 +293,7 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     for i, ext in enumerate(saveFormats):
         saveNameURL = saveName + ext
         saveNameURL = aux.convertToURL(saveNameURL, opts.url)
-        Verbose(saveNameURL, i==0)
+        Print(saveNameURL, i==0)
         plot.saveAs(saveName, formats=saveFormats)
     return
 

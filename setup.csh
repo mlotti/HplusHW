@@ -186,11 +186,15 @@ setenv PATH "${HIGGSANALYSIS_BASE}/NtupleAnalysis/scripts:${PATH}"
 #echo "\n=== Install externals (if necessary)"
 sh +x installexternals.sh
 
+# Condor fix (LCP batch system)
+setenv ROOT_INCLUDE_PATH -I/$ROOTSYS/include:$HIGGSANALYSIS_BASE/NtupleAnalysis/src:$HIGGSANALYSIS_BASE/NtupleAnalysis/external:$HIGGSANALYSIS_BASE/NtupleAnalysis/
+
 echo "\n=== The environment variables set are:"
 echo "LOCATION is $LOCATION"
 echo "HIGGSANALYSIS_BASE is $HIGGSANALYSIS_BASE"
 echo "PATHPREFIX is $PATHPREFIX"
 echo "ROOTSYS is $ROOTSYS"
 echo "LD_LIBRARY_PATH is $LD_LIBRARY_PATH"
+echo "ROOT_INCLUDE_PATH is $ROOT_INCLUDE_PATH"
 echo "PYTHONPATH is $PYTHONPATH"
 echo "PATH is $PATH"
