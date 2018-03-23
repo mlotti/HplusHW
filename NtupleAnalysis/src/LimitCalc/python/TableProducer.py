@@ -929,7 +929,7 @@ class TableProducer:
                 return "\\pm %s"%(formatStr%uncDown)
         else:
             # asymmetric
-            return "~^{+%s}{-%s}"%(formatStr%uncUp, formatStr%uncDown)
+            return "~^{+%s}_{-%s}"%(formatStr%uncUp, formatStr%uncDown)
 
     def getLatexResultString(self, hwu,formatStr,myPrecision):
         if not hwu==None:
@@ -1115,30 +1115,30 @@ class TableProducer:
     def getEventYieldTableHToTB(self, m, QCD, Embedding, TotalExpected):
         myOutputLatex = "% table auto gene rated by datacard generator on "+self._timestamp+" for "+self._config.DataCardName+" / "+self._outputPrefix+"\n"
         myOutputLatex += "\\renewcommand{\\arraystretch}{1.2}\n"
-        myOutputLatex += "\\begin{table}\n"
-        myOutputLatex += "\\centering\n"
+        #myOutputLatex += "\\begin{table}\n"
+        #myOutputLatex += "\\centering\n"
         myOutputLatex += "\\caption{Summary of the number of events from the signal with mass point $\\mHpm=%d\\GeVcc$,\n"%(m)
         myOutputLatex += "           from the background measurements, and the observed event yield. Luminosity uncertainty is not included in the numbers.}\n"
-        myOutputLatex += "\\label{tab:summary:yields}\n"
-        myOutputLatex += "\\vskip 0.1 in\n"
-        myOutputLatex += "\\hspace*{-.8cm}\n"
+        #myOutputLatex += "\\label{tab:summary:yields}\n"
+        #myOutputLatex += "\\vskip 0.1 in\n"
+        #myOutputLatex += "\\hspace*{-.8cm}\n"
         myOutputLatex += "\\begin{tabular}{ l c }\n"
         myOutputLatex += "\\hline\n"
-        myOutputLatex += "\\multicolumn{1}{ c }{Source}  & Events $\\pm \\text{stat.} \\pm \\text{syst.}$  \\\\ \n"
+        myOutputLatex += "\\multicolumn{1}{ c }{Source}  & Events $\\pm$ stat. $\\pm$ syst.  \\\\ \n"
         myOutputLatex += "\\hline\n"
         # myOutputLatex += "HH+HW, $\\mHplus = %3d\\GeVcc             & %s \\\\ \n"%(m,getLatexResultString(HW, self.formatStr, self.myPrecision))
         # myOutputLatex += "\\hline\n"
         if self._config.OptionFakeBMeasurementSource:
             myOutputLatex += "\\FakeB background (data-driven)   & %s \\\\ \n" % self.getLatexResultString(QCD, self.formatStr, self.myPrecision)
             myOutputLatex += "\\GenuineB background              & %s \\\\ \n" % self.getLatexResultString(Embedding, self.formatStr, self.myPrecision)
-        #myOutputLatex += "  \\hline\n"
+        myOutputLatex += "  \\hline\n"
         myOutputLatex += "  Total expected from the SM              & %s \\\\ \n" % self.getLatexResultString(TotalExpected, self.formatStr, self.myPrecision)
         if self._config.BlindAnalysis*0:
             myOutputLatex += "  Observed: & BLINDED \\\\ \n"
         myOutputLatex += "  Observed & %5d \\\\ \n"%self._observation.getCachedShapeRootHistogramWithUncertainties().getRate()
         myOutputLatex += "  \\hline\n"
         myOutputLatex += "  \\end{tabular}\n"
-        myOutputLatex += "\\end{table}\n"
+        #myOutputLatex += "\\end{table}\n"
         myOutputLatex += "\\renewcommand{\\arraystretch}{1}\n"
         return myOutputLatex
 
