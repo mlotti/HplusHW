@@ -327,9 +327,9 @@ class ControlPlotMakerHToTB:
             if myParams["legendPosition"] == "NE":
                 myParams["moveLegend"] = {"dx": dx, "dy": -0.02, "dh": 0.14}
             elif myParams["legendPosition"] == "SE":
-                myParams["moveLegend"] = {"dx": dx, "dy": -0.56, "dh": 0.14}
+                myParams["moveLegend"] = {"dx": dx, "dy": -0.40, "dh": 0.14}
             elif myParams["legendPosition"] == "SW":
-                myParams["moveLegend"] = {"dx": -0.53, "dy": -0.56, "dh": 0.14}
+                myParams["moveLegend"] = {"dx": -0.53, "dy": -0.40, "dh": 0.14}
             elif myParams["legendPosition"] == "NW":
                 myParams["moveLegend"] = {"dx": -0.53, "dy": -0.02, "dh": 0.14}
             else:
@@ -420,6 +420,7 @@ class ControlPlotMakerHToTB:
                 myExpValue = 0.0
                 for item in myStackList:
                     myExpValue += item.getRootHisto().GetBinContent(k)
+                # Fixme: Loop over ALL mass points and do this check! Not just the current one
                 if hSignal.getRootHisto().GetBinContent(k) >= myExpValue * self._config.OptionBlindThreshold:
                     hData.getRootHisto().SetBinContent(k, -1.0)
                     hData.getRootHisto().SetBinError(k, 0.0)

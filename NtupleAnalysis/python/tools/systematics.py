@@ -317,7 +317,7 @@ _dataDrivenCtrlPlotBinning = {
     "LdgTrijetMass_AfterAllSelections"   : [i for i in range(50, 350, 10)],
     "LdgTrijetBjetPt_AfterAllSelections" : [j for j in range(0, 300, 10)] + [k for k in range(300, 700+40, 40)],
     "LdgTrijetBjetEta_AfterAllSelections" : None,
-    "LdgTrijetDijetPt_AfterAllSelections": [j for j in range(0, 300, 10)] + [k for k in range(300, 700+40, 40)],
+    "LdgTrijetDijetPt_AfterAllSelections": [j for j in range(0, 400, 10)] + [k for k in range(400, 700+25, 25)],
     "LdgTrijetDijetMass_AfterAllSelections": None,
     "LdgTrijetTopMassWMassRatioAfterAllSelections": None,
     "TetrajetBjetPt_AfterAllSelections"  : [j for j in range(0, 400, 20)] + [k for k in range(400, 600, 40)] + [k for k in range(600, 900+100, 100)],

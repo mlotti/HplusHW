@@ -42,6 +42,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
+import HiggsAnalysis.NtupleAnalysis.tools.systematics as systematics
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
@@ -370,6 +371,7 @@ def GetHistoKwargs(histoName, ext, opts):
     hName   = histoName.lower()
     _cutBox = None
     _rebinX = 1
+    _ylabel = None
     if opts.normaliseToOne:
         #_opts   = {"ymin": 3e-4, "ymaxfactor": 2.0}
         _opts   = {"ymin": 0.7e-4, "ymaxfactor": 2.0}
@@ -388,22 +390,27 @@ def GetHistoKwargs(histoName, ext, opts):
         _opts["xmax"] = 200.0
     if "met" in hName:
         _units  = "GeV"
-        _rebinX = 2 #2
+        _rebinX = systematics._dataDrivenCtrlPlotBinning["MET_AfterAllSelections"]  #2
         _opts["xmax"] = 300.0
+        binWmin, binWmax = GetBinWidthMinMax(_rebinX)
+        _ylabel = "Events / %.0f-%.0f %s" % (binWmin, binWmax, _units)
     if "ht_" in hName:
         _units  = "GeV"
-        _rebinX = 5 #2
+        #_rebinX = 5 #2
+        _rebinX = systematics._dataDrivenCtrlPlotBinning["HT_AfterAllSelections"]  #2
         _opts["xmin"] =  400.0
         _opts["xmax"] = 3000.0
         _cutBox       = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        binWmin, binWmax = GetBinWidthMinMax(_rebinX)
+        _ylabel = "Events / %.0f-%.0f %s" % (binWmin, binWmax, _units)
     if "mvamax" in hName:
         _rebinX = 1
         _units  = ""
         _format = "%0.2f " + _units
         #_xlabel = "BDTG discriminant"
         _xlabel = "top-tag discriminant"
-        _opts["xmin"] =  0.45
-        _cutBox = {"cutValue": 0.85, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _opts["xmin"] =  0.0 #0.45
+        _cutBox = {"cutValue": 0.40, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
     if "nbjets" in hName:
         _units  = ""
         _format = "%0.0f " + _units
@@ -477,6 +484,8 @@ def GetHistoKwargs(histoName, ext, opts):
             ROOT.gStyle.SetNdivisions(8, "X")
         elif "dijet" in hName:
             _cutBox = {"cutValue": 200.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        elif "trijet" in hName:
+            _opts["xmax"] = 800.0
         else:
             _opts["xmax"] = 600.0
         #ROOT.gStyle.SetNdivisions(8, "X")
@@ -519,15 +528,17 @@ def GetHistoKwargs(histoName, ext, opts):
         if "trijet" in hName:
             _opts["xmin"] = 0.7
     if "tetrajetm" in hName:
-        _rebinX = 4
-        if opts.useMC:
-            _rebinX = 10
+        #_rebinX = 4
         _units  = "GeV/c^{2}"
-        _format = "%0.0f " + _units
+        _rebinX = systematics.getBinningForTetrajetMass(0)
+        binWmin, binWmax = GetBinWidthMinMax(_rebinX)
+        _ylabel = "Events / %.0f-%.0f %s" % (binWmin, binWmax, _units)
         _xlabel = "m_{jjbb} (%s)" % (_units)
-        _opts["xmax"] = 3000.0
-        #_opts["xmax"] = 3500.0
-        
+        #_opts["xmax"] = 3000.0
+
+    if _ylabel == None:
+        _ylabel = "Arbitrary Units/ %s" % (_format)
+
     _kwargs = {
         "ratioCreateLegend": True,
         "ratioType"        : None, #"errorScale", #"errorScale", #binomial #errorPropagation
@@ -535,7 +546,7 @@ def GetHistoKwargs(histoName, ext, opts):
         "ratioMoveLegend"  : {"dx": -0.51, "dy": 0.03, "dh": -0.05},
         "errorBarsX"       : True,
         "xlabel"           : _xlabel,
-        "ylabel"           : "Arbitrary Units / %s" % (_format),
+        "ylabel"           : _ylabel,
         "rebinX"           : _rebinX, 
         "rebinY"           : None,
         "ratioYlabel"      : ext.split("v")[0] + "/" + ext.split("v")[1],
@@ -555,6 +566,25 @@ def GetHistoKwargs(histoName, ext, opts):
         }
     return _kwargs
         
+def GetBinWidthMinMax(binList):
+    if not isinstance(binList, list):
+        raise Exception("Argument is not a list instance!")
+
+    minWidth = +1e6
+    maxWidth = -1e6
+    # For-loop: All bin values (centre)
+    for i in range(0, len(binList)-1):
+        j = i + 1
+        iBin = binList[i]
+        jBin = binList[j]
+        wBin = jBin-iBin
+        if wBin < minWidth:
+            minWidth = wBin
+
+        if wBin > maxWidth:
+            maxWidth = wBin
+    return minWidth, maxWidth
+
 def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
 

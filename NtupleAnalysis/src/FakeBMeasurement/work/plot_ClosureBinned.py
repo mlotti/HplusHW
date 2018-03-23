@@ -78,6 +78,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
+import HiggsAnalysis.NtupleAnalysis.tools.systematics as systematics
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 import HiggsAnalysis.FakeBMeasurement.FakeBNormalization as FakeBNormalization
 import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
@@ -139,10 +140,11 @@ def GetHistoKwargs(histoName):
         if "trijet" in histoName.lower():
             _opts["xmax"] = 800
             _rebinX = 2 #getBinningForPt(0)
-            if "tetrajetbjet" in histoName.lower():
-                _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        if "tetrajetbjet" in histoName.lower():
+            _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+            _rebinX = systematics._dataDrivenCtrlPlotBinning["TetrajetBjetPt_AfterAllSelections"] #2 #getBinningForPt(0)
         if "tetrajet" in histoName.lower():
-            _rebinX = 2 #getBinningForPt(0)
+            _rebinX = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetPt_AfterAllSelections"] #2 #getBinningForPt(0)
             _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
             if "tetrajetbjet" in histoName.lower():
                 _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
@@ -165,7 +167,7 @@ def GetHistoKwargs(histoName):
             _xlabel       = "m_{jjbb} (%s)" % (_units)
             _opts["xmin"] =    0
             _opts["xmax"] = 3000
-            _rebinX       = 2 #getBinningForTetrajetMass()
+            _rebinX       = systematics.getBinningForTetrajetMass(0)
             _cutBox       = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         if isinstance(_rebinX, list):
             binWmin, binWmax = GetBinWidthMinMax(_rebinX)
@@ -177,19 +179,12 @@ def GetHistoKwargs(histoName):
         _cutBox       = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         _opts["xmin"] =   0
         _opts["xmax"] = 400
-        myBins = []
-        for j in range(0, 100, 10):
-            myBins.append(j)
-        for k in range(100, 200, 20):
-            myBins.append(k)
-        for k in range(200, 300, 50):
-            myBins.append(k)
-        for k in range(300, 400+100, 100):
-            myBins.append(k)
-        _rebinX  = myBins #1
-        # _ylabel      += " " + _units
+        _rebinX = systematics._dataDrivenCtrlPlotBinning["MET_AfterAllSelections"]
         binWmin, binWmax = GetBinWidthMinMax(myBins)
         _ylabel = "Events / %.0f-%.0f %s" % (binWmin, binWmax, _units)
+
+    if "ht" in histoName.lower():
+        _rebinX = systematics._dataDrivenCtrlPlotBinning["MET_AfterAllSelections"]
 
     if "tetrajetbjeteta" in histoName.lower():
         _units   = ""
@@ -310,19 +305,25 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     return
 
 def GetBinText(bin):
-    return "bin-" + str(bin)
-#    if bin == "0":
-#        return "|eta| < 0.4"
-#    elif bin == "1":
-#        return "0.4 < |eta| < 1.2"
-#    elif bin == "2":
-#        return "1.2 < |eta| < 1.8"
-#    elif bin == "3":
-#        return "|eta| > 1.8"
-#    elif bin == "Inclusive":
-#        return bin
-#    else:
-#        raise Exception(ShellStyles.ErrorStyle() + "Unexpected bin %s" % (bin)  + ShellStyles.NormalStyle())
+    #return "bin-" + str(bin)
+    if bin == "0":
+        return "|#eta| < 0.4"
+    elif bin == "1":
+        return "0.4 < |#eta| < 0.8"
+    elif bin == "2":
+        return "0.8 < |#eta| < 1.6"
+    elif bin == "3":
+        return "1.6 < |#eta| < 1.8"
+    elif bin == "4":
+        return "1.8 < |#eta| < 2.0"
+    elif bin == "5":
+        return "2.0 < |#eta| < 2.2"
+    elif bin == "6":
+        return "|#eta| > 2.2"
+    elif bin == "Inclusive":
+        return bin
+    else:
+        raise Exception(ShellStyles.ErrorStyle() + "Unexpected bin %s" % (bin)  + ShellStyles.NormalStyle())
 
 #================================================================================================ 
 # Main
@@ -470,49 +471,6 @@ def getBinningForPt(binLevel=0):
             myBins.append(i)
     else:
         raise Exception(ShellStyles.ErrorStyle() + "Please choose bin-level from 0 to 1" + ShellStyles.NormalStyle())
-    return myBins
-
-def getBinningForTetrajetMass(binLevel=0):
-    '''
-    Currenty in Combine:
-    myBins = [0,50,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,520,540,560,580,600,620,640,660,680,700,720,740,
-              760,780,800,820,840,860,880,900,920,940,960,980,1000,1020,1040,1060,1080,1100,1150,1200,1250,1300,1350,1400,1450,1500,1750,2000,2250,2500,
-              2750,3000,3250,3500,3750,4000]
-    '''
-    myBins = []
-    if binLevel == -1:
-        myBins = [0.0, 4000.0]
-    elif binLevel == 0: #default binning
-        for i in range(0, 1000, 50):
-            myBins.append(i)
-        for i in range(1000, 2000, 100):
-            myBins.append(i)
-        for i in range(2000, 4000+500, 500):
-            myBins.append(i)
-    elif binLevel == 1: #finer binning
-        for i in range(0, 1000, 25):
-            myBins.append(i)
-        for i in range(1000, 2000, 50):
-            myBins.append(i)
-        for i in range(2000, 4000+250, 250):
-            myBins.append(i)
-    elif binLevel == 2:
-        for i in range(0, 1000, 20):
-            myBins.append(i)
-        for i in range(1000, 2000, 40):
-            myBins.append(i)
-        for i in range(2000, 4000+200, 200):
-            myBins.append(i)
-    elif binLevel == 3:
-        for i in range(0, 1000, 10):
-            myBins.append(i)
-        for i in range(1000, 2000, 20):
-            myBins.append(i)
-        for i in range(2000, 4000+50, 50):
-            myBins.append(i)
-    else:
-        raise Exception(ShellStyles.ErrorStyle() + "Please choose bin-level from -1 to 3" + ShellStyles.NormalStyle())
-
     return myBins
 
 def GetHistoPathDict(histoList, printList=False):
@@ -739,7 +697,7 @@ if __name__ == "__main__":
     SAVEDIR      = None
     VERBOSE      = False
     USEMC        = False
-    RATIO        = True
+    RATIO        = False
     FOLDER       = "ForFakeBMeasurement"
     NORMALISE    = False
 

@@ -50,6 +50,7 @@ Setting histogramAmbientLevel=kSystematics will include kSystematics AND kNever.
 #================================================================================================
 import sys
 from optparse import OptionParser
+import time
 
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
 from HiggsAnalysis.NtupleAnalysis.AnalysisBuilder import AnalysisBuilder
@@ -97,6 +98,10 @@ def Print(msg, printHeader=True):
 #================================================================================================
 def main():
 
+    # Save start time (epoch seconds)
+    tStart = time.time()
+    Verbose("Started @ " + str(tStart), True)
+
     # Require at least two arguments (script-name, path to multicrab)      
     if len(sys.argv) < 2:
         Print("Not enough arguments passed to script execution. Printing docstring & EXIT.")
@@ -139,10 +144,17 @@ def main():
                        "ChargedHiggs_HplusTB_HplusToTB_M_2000_ext1"
                        "ChargedHiggs_HplusTB_HplusToTB_M_2500_ext1", 
                        "ChargedHiggs_HplusTB_HplusToTB_M_3000_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_5000",
-                       "ChargedHiggs_HplusTB_HplusToTB_M_7000",
-                       "ChargedHiggs_HplusTB_HplusToTB_M_10000",
+                       # "ChargedHiggs_HplusTB_HplusToTB_M_1000",
+                       # "ChargedHiggs_HplusTB_HplusToTB_M_1500",   # Speeed things up
+                       # "ChargedHiggs_HplusTB_HplusToTB_M_2000",   # Speeed things up
+                       # "ChargedHiggs_HplusTB_HplusToTB_M_2500",   # Speeed things up
+                       # "ChargedHiggs_HplusTB_HplusToTB_M_3000",   # Speeed things up
+                       "ChargedHiggs_HplusTB_HplusToTB_M_5000",   # Speeed things up
+                       "ChargedHiggs_HplusTB_HplusToTB_M_7000",   # Speeed things up  
+                       "ChargedHiggs_HplusTB_HplusToTB_M_10000",  # Speeed things up
                        ]
+        if opts.doSystematics:
+            myBlackList.append("QCD")
 
         Print("Adding all datasets from multiCRAB directory %s" % (opts.mcrab))
         Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
@@ -229,6 +241,15 @@ def main():
         Print("Running process")
         process.run()
 
+    # Print total time elapsed
+    tFinish = time.time()
+    dt      = int(tFinish) - int(tStart)
+    days    = divmod(dt,86400)      # days
+    hours   = divmod(days[1],3600)  # hours
+    mins    = divmod(hours[1],60)   # minutes
+    secs    = mins[1]               # seconds
+    Print("Total elapsed time is %s days, %s hours, %s mins, %s secs" % (days[0], hours[0], mins[0], secs), True)
+    return
 
 #================================================================================================
 def PrintOptions(opts):
@@ -256,6 +277,7 @@ def PrintOptions(opts):
     # Print("Will run on multicrab directory %s" % (opts.mcrab), True)     
     for i, line in enumerate(table):
         Print(line, i==0)
+
     return
 
 
@@ -282,8 +304,8 @@ if __name__ == "__main__":
     NEVTS         = -1
     HISTOLEVEL    = "Debug" #"Informative" #"Debug"
     PUREWEIGHT    = True
-    TOPPTREWEIGHT = True
-    DOSYSTEMATICS = True
+    TOPPTREWEIGHT = False
+    DOSYSTEMATICS = False
 
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
     parser.add_option("-m", "--mcrab", dest="mcrab", action="store", 

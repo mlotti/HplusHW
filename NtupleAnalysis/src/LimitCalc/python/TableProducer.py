@@ -246,13 +246,13 @@ class TableProducer:
         if self._opts.verbose:
             Print(ShellStyles.HighlightStyle() + "Generating reports" + ShellStyles.NormalStyle())
 
-        # Print table of shape variation for shapeQ nuisances
+        # Create table of shape variation for shapeQ nuisances
         self.makeShapeVariationTable()
 
-        # Print event yield summary table
+        # Create event yield summary table
         self.makeEventYieldSummary()
 
-        # Print systematics summary table
+        # Create systematics summary table
         self.makeSystematicsSummary(light=True)
         self.makeSystematicsSummary(light=False)        
 
@@ -316,7 +316,7 @@ class TableProducer:
         return fName
     
     def Print(self, msg, printHeader=True):
-        fName = GetName()
+        fName = self.GetFName()
         if printHeader:
             print "=== ", fName
         if msg !="":
@@ -916,49 +916,49 @@ class TableProducer:
         Verbose(msg + ShellStyles.SuccessStyle() + myFilename + ShellStyles.NormalStyle() ) #ShellStyles.HighlightAltStyle()
         return
 
+    def getFormattedUnc(self, formatStr,myPrecision,uncUp,uncDown):
+        if abs(round(uncDown,myPrecision)-round(uncUp,myPrecision)) < pow(0.1,myPrecision)-pow(0.1,myPrecision+2): # last term needed because of float point fluctuations
+            # symmetric
+            return "+- %s"%(formatStr%uncDown)
+        else:
+            # asymmetric
+            return "+%s -%s"%(formatStr%uncUp,formatStr%uncDown)
+
+    def getResultString(self, hwu,formatStr,myPrecision):
+        if not hwu==None:
+            return "%s +- %s (stat.) %s (syst.)\n"%(formatStr%hwu.getRate(),formatStr%hwu.getRateStatUncertainty(),
+                                                    self.getFormattedUnc(formatStr,myPrecision,*hwu.getRateSystUncertainty()))
+        else: return ""
+
+    def getLatexFormattedUnc(self, formatStr,myPrecision,uncUp,uncDown):
+        if abs(round(uncDown,myPrecision)-round(uncUp,myPrecision)) < pow(0.1,myPrecision)-pow(0.1,myPrecision+2): # last term needed because of float point fluctuations
+            # symmetric
+                return "\\pm %s"%(formatStr%uncDown)
+        else:
+            # asymmetric
+            return "~^{+%s}_{-%s}"%(formatStr%uncUp, formatStr%uncDown)
+
+    def getLatexResultString(self, hwu,formatStr,myPrecision):
+        if not hwu==None:
+            return "$%s \\pm %s %s $"%(formatStr%hwu.getRate(),formatStr%hwu.getRateStatUncertainty(),
+                                       self.getLatexFormattedUnc(formatStr,myPrecision,*hwu.getRateSystUncertainty()))
+        else: return ""
+
     def makeEventYieldSummary(self):
         '''
         Prints event yield summary table
         '''
-        formatStr = "%6."
-        myPrecision = None
+        self.formatStr = "%6."
+        self.myPrecision = None
         if self._config.OptionNumberOfDecimalsInSummaries == None:
             print ShellStyles.WarningLabel()+"Using default value for number of decimals in summaries. To change, set OptionNumberOfDecimalsInSummaries in your config."+ShellStyles.NormalStyle()
-            formatStr += "1"
-            myPrecision = 1
+            self.formatStr += "1"
+            self.myPrecision = 1
         else:
-            formatStr += "%d"%self._config.OptionNumberOfDecimalsInSummaries
-            myPrecision = self._config.OptionNumberOfDecimalsInSummaries
-        formatStr += "f"
-
-        def getFormattedUnc(formatStr,myPrecision,uncUp,uncDown):
-            if abs(round(uncDown,myPrecision)-round(uncUp,myPrecision)) < pow(0.1,myPrecision)-pow(0.1,myPrecision+2): # last term needed because of float point fluctuations
-                # symmetric
-                return "+- %s"%(formatStr%uncDown)
-            else:
-                # asymmetric
-                return "+%s -%s"%(formatStr%uncUp,formatStr%uncDown)
-
-        def getResultString(hwu,formatStr,myPrecision):
-            if not hwu==None:
-                return "%s +- %s (stat.) %s (syst.)\n"%(formatStr%hwu.getRate(),formatStr%hwu.getRateStatUncertainty(),
-                getFormattedUnc(formatStr,myPrecision,*hwu.getRateSystUncertainty()))
-            else: return ""
-
-        def getLatexFormattedUnc(formatStr,myPrecision,uncUp,uncDown):
-            if abs(round(uncDown,myPrecision)-round(uncUp,myPrecision)) < pow(0.1,myPrecision)-pow(0.1,myPrecision+2): # last term needed because of float point fluctuations
-                # symmetric
-                return "\\pm %s"%(formatStr%uncDown)
-            else:
-                # asymmetric
-                return "~^{+%s}){-%s}"%(formatStr%uncUp, formatStr%uncDown)
-
-        def getLatexResultString(hwu,formatStr,myPrecision):
-            if not hwu==None:
-                return "$%s \\pm %s %s $"%(formatStr%hwu.getRate(),formatStr%hwu.getRateStatUncertainty(),
-                getLatexFormattedUnc(formatStr,myPrecision,*hwu.getRateSystUncertainty()))
-            else: return ""
-
+            self.formatStr += "%d"%self._config.OptionNumberOfDecimalsInSummaries
+            self.myPrecision = self._config.OptionNumberOfDecimalsInSummaries
+        self.formatStr += "f"
+        
         # For-loop: All mass points
         for i, m in enumerate(self._config.MassPoints, 1):
             Verbose("Mass point is %d" % (m), i==1)
@@ -1053,21 +1053,21 @@ class TableProducer:
             myOutput += "\n"
             myOutput += "Number of events\n"
             if not (self._config.OptionLimitOnSigmaBr or m > 179):
-                myOutput += "Signal, mH+=%3d GeV, Br(t->bH+)=%.2f: %s"%(m,myBr,getResultString(HW,formatStr,myPrecision))
+                myOutput += "Signal, mH+=%3d GeV, Br(t->bH+)=%.2f: %s"%(m,myBr,self.getResultString(HW, self.formatStr, self.myPrecision))
             else:
-                myOutput += "Signal, mH+=%3d GeV, sigma x Br=1 pb: %s"%(m,getResultString(HW,formatStr,myPrecision))
+                myOutput += "Signal, mH+=%3d GeV, sigma x Br=1 pb: %s"%(m,self.getResultString(HW, self.formatStr, self.myPrecision))
             myOutput += "Backgrounds:\n"
             if containsQCDdataset:
-                myOutput += "                           Multijets: %s"%getResultString(QCD,formatStr,myPrecision)
+                myOutput += "                           Multijets: %s"%self.getResultString(QCD, self.formatStr, self.myPrecision)
 
             if hasattr(self._config, 'OptionGenuineTauBackgroundSource'):
                 if self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
-                    myOutput += "                           MC EWK+tt: %s"%getResultString(Embedding,formatStr,myPrecision)
+                    myOutput += "                           MC EWK+tt: %s"%self.getResultString(Embedding, self.formatStr, self.myPrecision)
                 else:
-                    myOutput += "                    EWK+tt with taus: %s"%getResultString(Embedding,formatStr,myPrecision)
+                    myOutput += "                    EWK+tt with taus: %s"%self.getResultString(Embedding, self.formatStr, self.myPrecision)
                     if EWKFakes != None:
-                        myOutput += "               EWK+tt with fake taus: %s"%getResultString(EWKFakes,formatStr,myPrecision)
-                myOutput += "                      Total expected: %s"%getResultString(TotalExpected,formatStr,myPrecision)
+                        myOutput += "               EWK+tt with fake taus: %s"%self.getResultString(EWKFakes, self.formatStr, self.myPrecision)
+                myOutput += "                      Total expected: %s"%self.getResultString(TotalExpected, self.formatStr, self.myPrecision)
             # FIXME: Add support for config.OptionFakeBMeasurementSource?
 
             #if self._config.BlindAnalysis:
@@ -1079,77 +1079,118 @@ class TableProducer:
             if self._config.OptionDisplayEventYieldSummary:
                Print(myOutput)
 
-            # Save output to file
-            myFilename = self._infoDirname + "/EventYieldSummary_m%d.txt" % m #fixme: Ridiculously big name!
+            # Save output to file & infor user
+            myFilename = self._infoDirname + "/EventYieldSummary_m%d.txt" % m
             myFile = open(myFilename, "w")
             myFile.write(myOutput)
             myFile.close()
-            
-            # Inform user
-            if self._opts.verbose:
-                msg = "Event yield summary written to "
-                Verbose(msg + ShellStyles.SuccessStyle() + msg + myFilename + ShellStyles.NormalStyle(), True) #HighlightAltStyle
-            
-            myOutputLatex = "% table auto generated by datacard generator on "+self._timestamp+" for "+self._config.DataCardName+" / "+self._outputPrefix+"\n"
-            myOutputLatex += "\\renewcommand{\\arraystretch}{1.2}\n"
-            myOutputLatex += "\\begin{table}\n"
-            myOutputLatex += "  \\centering\n"
-            if not (self._config.OptionLimitOnSigmaBr or m > 179):
-                myOutputLatex += "  \\caption{Summary of the number of events from the signal with mass point $\\mHpm=%d\\GeVcc$ with $\\BRtH=%.2f$,\n"%(m,myBr)
-            else:
-                myOutputLatex += "  \\caption{Summary of the number of events from the signal with mass point $\\mHpm=%d\\GeVcc$,\n"%(m)
-            myOutputLatex += "           from the background measurements, and the observed event yield. Luminosity uncertainty is not included in the numbers.}\n"
-            myOutputLatex += "  \\label{tab:summary:yields}\n"
-            myOutputLatex += "  \\vskip 0.1 in\n"
-            myOutputLatex += "  \\hspace*{-.8cm}\n"
-            myOutputLatex += "  \\begin{tabular}{ l c }\n"
-            myOutputLatex += "  \\hline\n"
-            myOutputLatex += "  \\multicolumn{1}{ c }{Source}  & $N_{\\text{events}} \\pm \\text{stat.} \\pm \\text{syst.}$  \\\\ \n"
-            myOutputLatex += "  \\hline\n"
-            myOutputLatex += "  HH+HW, $\\mHplus = %3d\\GeVcc             & %s \\\\ \n"%(m,getLatexResultString(HW,formatStr,myPrecision))
-            myOutputLatex += "  \\hline\n"
-            if containsQCDdataset:
-                myOutputLatex += "  Multijet background (data-driven)       & %s \\\\ \n"%getLatexResultString(QCD,formatStr,myPrecision)
+            msg = "Event yield summary written to "
+            self.Verbose(msg + ShellStyles.SuccessStyle() + msg + myFilename + ShellStyles.NormalStyle(), True) #HighlightAltStyle
 
-
-            if hasattr(self._config, 'OptionGenuineTauBackgroundSource'):
-                if self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
-                    myOutputLatex += "  MC EWK+\\ttbar                           & %s \\\\ \n"%getLatexResultString(Embedding,formatStr,myPrecision)
-                else:
-                    myOutputLatex += "  EWK+\\ttbar with $\\tau$ (data-driven)    & %s \\\\ \n"%getLatexResultString(Embedding,formatStr,myPrecision)
-                    if EWKFakes != None:
-                        myOutputLatex += "  EWK+\\ttbar with e/\\mu/jet\\to$\\tau$ (MC) & %s \\\\ \n"%getLatexResultString(EWKFakes,formatStr,myPrecision)
-            # FIXME: Add support for config.OptionFakeBMeasurementSource?
-
-            myOutputLatex += "  \\hline\n"
-            myOutputLatex += "  Total expected from the SM              & %s \\\\ \n"%getLatexResultString(TotalExpected,formatStr,myPrecision)
-            #if self._config.BlindAnalysis:
-            #    myOutputLatex += "  Observed: & BLINDED \\\\ \n"
-            #else:
-	    myOutputLatex += "  Observed: & %5d \\\\ \n"%self._observation.getCachedShapeRootHistogramWithUncertainties().getRate()
-            myOutputLatex += "  \\hline\n"
-            myOutputLatex += "  \\end{tabular}\n"
-            myOutputLatex += "\\end{table}\n"
-            myOutputLatex += "\\renewcommand{\\arraystretch}{1}\n"
-
-            # Save output to file 
-            myFilename = self._infoDirname + "/EventYieldSummary_m%d_" % (m) 
-            myFilename+= self._timestamp + "_" + self._outputPrefix + "_" + self._config.DataCardName.replace(" ","_")
-            myFilename+= ".tex" #fixme: Ridiculously big name!
-            myFile = open(myFilename, "w")
-            myFile.write(myOutputLatex)
-            myFile.close()
-            
-            # Inform user
-            if self._opts.verbose:
-                # msg = "Latex table of event yield summary for mass %d written to \"%s\"" % (m, myFilename)
-                msg = "Event yield summary (LaTeX) written to "
-                Print(msg + ShellStyles.SuccessStyle() + myFilename + ShellStyles.NormalStyle() ) #ShellStyles.HighlightAltStyle()
-                
-        # Inform user of where the event yield summaries were saved
-        msg = "Event yield summary tables written to " 
-        Verbose(msg + ShellStyles.SuccessStyle() + self._infoDirname + ShellStyles.NormalStyle(), False) #ShellStyles.HighlightAltStyle() 
+            # Save the event yield to a file (LaTeX table)
+            self.saveEventYieldsToFile(m, QCD, Embedding, TotalExpected)
         return
+
+    def saveEventYieldsToFile(self, m, QCD, Embedding, TotalExpected):
+        # First construct the file name
+        baseName = "EventYieldSummary_m%d_" % (m)
+        fileName  = os.path.join(self._infoDirname, baseName)
+        if self._h2tb:
+            fileName += self._outputPrefix + "_" + self._config.DataCardName.replace(" ","_")
+        else:
+            fileName += self._timestamp + "_" + self._outputPrefix + "_" + self._config.DataCardName.replace(" ","_")
+        fileName += ".tex"
+        # Get the contents of the table
+        myOutputLatex = self.getEventYieldTable(m, QCD, Embedding, TotalExpected)
+
+        # Now save the file
+        myFile = open(fileName, "w")
+        myFile.write(myOutputLatex)
+        myFile.close()
+
+        # Inform user before returning
+        msg = "Event yield summary (LaTeX) written to %s" % (ShellStyles.SuccessStyle() + os.path.basename(fileName) + ShellStyles.NormalStyle())
+        self.Verbose(msg, True)
+        return
+    
+    def getEventYieldTable(self, mass, QCD, Embedding, TotalExpected):
+        if self._h2tb:
+            return self.getEventYieldTableHToTB(mass, QCD, Embedding, TotalExpected)
+        else:
+            return self.getEventYieldTableHToTauNu(mass, QCD, Embedding, TotalExpected)
+
+    def getEventYieldTableHToTB(self, m, QCD, Embedding, TotalExpected):
+        myOutputLatex = "% table auto gene rated by datacard generator on "+self._timestamp+" for "+self._config.DataCardName+" / "+self._outputPrefix+"\n"
+        myOutputLatex += "\\renewcommand{\\arraystretch}{1.2}\n"
+        #myOutputLatex += "\\begin{table}\n"
+        #myOutputLatex += "\\centering\n"
+        myOutputLatex += "\\caption{Summary of the number of events from the signal with mass point $\\mHpm=%d\\GeVcc$,\n"%(m)
+        myOutputLatex += "           from the background measurements, and the observed event yield. Luminosity uncertainty is not included in the numbers.}\n"
+        #myOutputLatex += "\\label{tab:summary:yields}\n"
+        #myOutputLatex += "\\vskip 0.1 in\n"
+        #myOutputLatex += "\\hspace*{-.8cm}\n"
+        myOutputLatex += "\\begin{tabular}{ l c }\n"
+        myOutputLatex += "\\hline\n"
+        myOutputLatex += "\\multicolumn{1}{ c }{Source}  & Events $\\pm$ stat. $\\pm$ syst.  \\\\ \n"
+        myOutputLatex += "\\hline\n"
+        # myOutputLatex += "HH+HW, $\\mHplus = %3d\\GeVcc             & %s \\\\ \n"%(m,getLatexResultString(HW, self.formatStr, self.myPrecision))
+        # myOutputLatex += "\\hline\n"
+        if self._config.OptionFakeBMeasurementSource:
+            myOutputLatex += "\\FakeB background (data-driven)   & %s \\\\ \n" % self.getLatexResultString(QCD, self.formatStr, self.myPrecision)
+            myOutputLatex += "\\GenuineB background              & %s \\\\ \n" % self.getLatexResultString(Embedding, self.formatStr, self.myPrecision)
+        myOutputLatex += "  \\hline\n"
+        myOutputLatex += "  Total expected from the SM              & %s \\\\ \n" % self.getLatexResultString(TotalExpected, self.formatStr, self.myPrecision)
+        if self._config.BlindAnalysis*0:
+            myOutputLatex += "  Observed: & BLINDED \\\\ \n"
+        myOutputLatex += "  Observed & %5d \\\\ \n"%self._observation.getCachedShapeRootHistogramWithUncertainties().getRate()
+        myOutputLatex += "  \\hline\n"
+        myOutputLatex += "  \\end{tabular}\n"
+        #myOutputLatex += "\\end{table}\n"
+        myOutputLatex += "\\renewcommand{\\arraystretch}{1}\n"
+        return myOutputLatex
+
+    def getEventYieldTableHToTauNu(self, m, QCD, Embedding, TotalExpected):
+        myOutputLatex = "% table auto generated by datacard generator on "+self._timestamp+" for "+self._config.DataCardName+" / "+self._outputPrefix+"\n"
+        myOutputLatex += "\\renewcommand{\\arraystretch}{1.2}\n"
+        myOutputLatex += "\\begin{table}\n"
+        myOutputLatex += "  \\centering\n"
+        if not (self._config.OptionLimitOnSigmaBr or m > 179):
+            myOutputLatex += "  \\caption{Summary of the number of events from the signal with mass point $\\mHpm=%d\\GeVcc$ with $\\BRtH=%.2f$,\n"%(m,myBr)
+        else:
+            myOutputLatex += "  \\caption{Summary of the number of events from the signal with mass point $\\mHpm=%d\\GeVcc$,\n"%(m)
+        myOutputLatex += "           from the background measurements, and the observed event yield. Luminosity uncertainty is not included in the numbers.}\n"
+        myOutputLatex += "  \\label{tab:summary:yields}\n"
+        myOutputLatex += "  \\vskip 0.1 in\n"
+        myOutputLatex += "  \\hspace*{-.8cm}\n"
+        myOutputLatex += "  \\begin{tabular}{ l c }\n"
+        myOutputLatex += "  \\hline\n"
+        myOutputLatex += "  \\multicolumn{1}{ c }{Source}  & $N_{\\text{events}} \\pm \\text{stat.} \\pm \\text{syst.}$  \\\\ \n"
+        myOutputLatex += "  \\hline\n"
+        myOutputLatex += "  HH+HW, $\\mHplus = %3d\\GeVcc             & %s \\\\ \n" % (m, self.getLatexResultString(HW, self.formatStr, self.myPrecision))
+        myOutputLatex += "  \\hline\n"
+        if containsQCDdataset:
+            myOutputLatex += "  Multijet background (data-driven)       & %s \\\\ \n" % self.getLatexResultString(QCD, self.formatStr, self.myPrecision)
+            
+
+        if hasattr(self._config, 'OptionGenuineTauBackgroundSource'):
+            if self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
+                myOutputLatex += "  MC EWK+\\ttbar                           & %s \\\\ \n" % self.getLatexResultString(Embedding, self.formatStr, self.myPrecision)
+            else:
+                myOutputLatex += "  EWK+\\ttbar with $\\tau$ (data-driven)    & %s \\\\ \n" % self.getLatexResultString(Embedding, self.formatStr, self.myPrecision)
+                if EWKFakes != None:
+                    myOutputLatex += "  EWK+\\ttbar with e/\\mu/jet\\to$\\tau$ (MC) & %s \\\\ \n" % self.getLatexResultString(EWKFakes, self.formatStr, self.myPrecision)
+        # FIXME: Add support for config.OptionFakeBMeasurementSource?
+        myOutputLatex += "  \\hline\n"
+        myOutputLatex += "  Total expected from the SM              & %s \\\\ \n" % self.getLatexResultString(TotalExpected, self.formatStr, self.myPrecision)
+        # if self._config.BlindAnalysis:
+        #    myOutputLatex += "  Observed: & BLINDED \\\\ \n"
+        # else:
+        myOutputLatex += "  Observed: & %5d \\\\ \n"%self._observation.getCachedShapeRootHistogramWithUncertainties().getRate()
+        myOutputLatex += "  \\hline\n"
+        myOutputLatex += "  \\end{tabular}\n"
+        myOutputLatex += "\\end{table}\n"
+        myOutputLatex += "\\renewcommand{\\arraystretch}{1}\n"
+        return myOutputLatex
 
     def _getFormattedSystematicsNumber(self, value):
         '''
@@ -1166,15 +1207,8 @@ class TableProducer:
         '''
         Prints systematics summary table
         '''
-#        myColumnOrder = ["HH",
-#                         "HW",
-#                         "QCD",
-#                         "EWK_Tau",
-#                         "EWK_DY",
-#                         "EWK_VV",
-#                         "EWK_tt_faketau",
-#                         "EWK_W_faketau",
-#                         "EWK_t_faketau"]
+        if self._h2tb and light==True:
+            return
         signalColumn="CMS_Hptntj_Hp"
         if light:
             signalColumn="HW"
@@ -1186,74 +1220,93 @@ class TableProducer:
                          "DY_t_genuine",
                          "VV_t_genuine"]
 
-# Old list:
-#        myNuisanceOrder = [["01","$\\tau - p_T^{miss}$ trigger"], # trg
-#                           ["03", "$\\tau$ jet ID (excl. $R_\\tau$"], # tau ID
-#                           ["04", "jet, $\\mathcal{l}\\to\\tau$ mis-ID"], # tau mis-ID
-#                           ["45", "TES"], # energy scale
-#                           ["46", "JES"], # energy scale
-#                           ["47", "Unclustered MET ES"], # energy scale
-#                           ["09", "lepton veto"], # lepton veto
-#                           ["10", "b-jet tagging"], # b tagging
-#                           ["11", "jet$\\to$b mis-ID"], # b mis-tagging
-#                           ["12", "multi-jet stat."], # QCD stat.
-#                           ["13", "multi-jet syst."], # QCD syst.
-#                           ["19", "EWK+$t\\bar{t}$ $\\tau$ stat."], # embedding stat.
-#                           ["14", "multi-jet contam."], # QCD contamination in embedding
-#                           ["15", "$f_{W\\to\\tau\\to\\mu}"], # tau decays to muons in embedding
-#                           ["16", "muon selections"], # muon selections in embedding
-#                           ["34", "pile-up"], # pile-up
-#                           [["17","18","19","22","24","25","26","27"], "simulation stat."], # MC statistics
-#                           [["28","29","30","31","32"], "cross section"], # cross section
-#                           ["33", "luminosity"]] # luminosity
-        myNuisanceOrder = [["CMS_eff_t","tau ID"], # first ID, then the text that goes to the table
-                           ["CMS_eff_t_highpt","high-$p_{T}$ tau ID"],        
-                           ["CMS_eff_t_trg_data","trigger tau leg eff. for data"],
-                           ["CMS_eff_t_trg_MC","trigger tau leg eff. for MC"],
-                           ["CMS_eff_met_trg_data","trigger MET leg eff. for data"],
-                           ["CMS_eff_met_trg_MC","trigger MET leg eff. for MC"],
-                           ["CMS_eff_e_veto","electron veto eff."],
-                           ["CMS_eff_m_veto","muon veto eff."],
-#                           ["CMS_fake_eToTau","CMS fake eToTau"],
-#                           ["CMS_fake_muToTau","CMS fake muToTau"],
-#                           ["CMS_fake_jetToTau","CMS fake jetToTau"],
-                           ["CMS_eff_b","b-tagging eff."],
-                           ["CMS_fake_b","b-mistagging eff."],
-                           ["CMS_scale_t","tau energy scale"],
-                           ["CMS_scale_j","jet energy scale"],
-                           ["CMS_scale_met","MET unclustered energy scale"],
-                           ["CMS_res_j","jet energy resolution"],
-                           ["CMS_Hptntj_topPtReweight","top $p_T$ reweighting"],
-                           ["CMS_pileup","pileup reweighting"],
-                           ["CMS_scale_ttbar", "ttbar scale"],
-                           ["CMS_pdf_ttbar", "ttbar pdf"],
-                           ["CMS_mass_ttbar", "ttbar mass"],
-                           ["CMS_scale_Wjets", "W+jets scale"],
-                           ["CMS_pdf_Wjets", "W+jets pdf"],
-                           ["CMS_scale_DY", "DY scale"],
-                           ["CMS_pdf_DY", "DY pdf"],
-                           ["CMS_scale_VV", "diboson scale"],
-                           ["CMS_pdf_VV", "diboson pdf"],
-                           ["lumi_13TeV","luminosity (13 TeV)"],
-                           ["CMS_Hptntj_QCDbkg_templateFit","Fake tau template fit"],
-                           ["CMS_Hptntj_QCDkbg_metshape","Fake tau MET shape"]
-                       ]
-        # Make table
+
+        if self._h2tb:
+            myColumnOrder = ["Hp",  "FakeB", "TT_GenuineB", "SingleTop_GenuineB", "TTZToQQ_GenuineB",
+                             "TTTT_GenuineB", "DYJetsToQQ_GenuineB",  "TTWJetsToQQ_GenuineB", 
+                             "WJetsToQQ_HT_600ToInf_GenuineB", "Diboson_GenuineB"]
+
+            myNuisanceOrder = [["CMS_eff_trg_MC", "trigger efficiency"],
+                               ["CMS_eff_e_veto", "electron veto eff."],
+                               ["CMS_eff_m_veto", "muon veto eff."],
+                               ["CMS_eff_tau_veto", "tau veto eff."],
+                               ["CMS_eff_b", "b-tagging eff."],
+                               ["CMS_scale_j", "jet energy scale"],
+                               ["CMS_res_j", "jet energy resolution"],
+                               # ["CMS_topPtReweight","top $p_T$ reweighting"],
+                               ["CMS_pileup", "pileup reweighting"],
+                               ["CMS_topTagging", "top tagging"],
+                               ["CMS_scale_ttbar", "$t\\bar{t}$ scale"],
+                               ["CMS_pdf_ttbar", "$t\\bar{t}$ pdf"],
+                               ["CMS_mass_ttbar", "$t\\bar{t}$ mass"],
+                               ["CMS_scale_Wjets", "W+jets scale"],
+                               ["CMS_pdf_Wjets", "W+jets pdf"],
+                               ["CMS_scale_DY",  "DY scale"],
+                               ["CMS_pdf_DY", "DY pdf"],
+                               ["CMS_scale_VV", "Diboson scale"],
+                               ["CMS_pdf_VV", "Diboson pdf"],
+                               ["lumi_13TeV", "luminosity (13 TeV)"],
+                               ["CMS_FakeB_transferFactor", "Fake $b$ transfer factors"]
+                               ]
+        else:
+            myNuisanceOrder = [["CMS_eff_t","tau ID"], # first ID, then the text that goes to the table
+                               ["CMS_eff_t_highpt","high-$p_{T}$ tau ID"],        
+                               ["CMS_eff_t_trg_data","trigger tau leg eff. for data"],
+                               ["CMS_eff_t_trg_MC","trigger tau leg eff. for MC"],
+                               ["CMS_eff_met_trg_data","trigger MET leg eff. for data"],
+                               ["CMS_eff_met_trg_MC","trigger MET leg eff. for MC"],
+                               ["CMS_eff_e_veto","electron veto eff."],
+                               ["CMS_eff_m_veto","muon veto eff."],
+                               # ["CMS_fake_eToTau","CMS fake eToTau"],
+                               # ["CMS_fake_muToTau","CMS fake muToTau"],
+                               # ["CMS_fake_jetToTau","CMS fake jetToTau"],
+                               ["CMS_eff_b","b-tagging eff."],
+                               ["CMS_fake_b","b-mistagging eff."],
+                               ["CMS_scale_t","tau energy scale"],
+                               ["CMS_scale_j","jet energy scale"],
+                               ["CMS_scale_met","MET unclustered energy scale"],
+                               ["CMS_res_j","jet energy resolution"],
+                               ["CMS_Hptntj_topPtReweight","top $p_T$ reweighting"],
+                               ["CMS_pileup","pileup reweighting"],
+                               ["CMS_scale_ttbar", "ttbar scale"],
+                               ["CMS_pdf_ttbar", "ttbar pdf"],
+                               ["CMS_mass_ttbar", "ttbar mass"],
+                               ["CMS_scale_Wjets", "W+jets scale"],
+                               ["CMS_pdf_Wjets", "W+jets pdf"],
+                               ["CMS_scale_DY", "DY scale"],
+                               ["CMS_pdf_DY", "DY pdf"],
+                               ["CMS_scale_VV", "diboson scale"],
+                               ["CMS_pdf_VV", "diboson pdf"],
+                               ["lumi_13TeV","luminosity (13 TeV)"],
+                               ["CMS_Hptntj_QCDbkg_templateFit","Fake tau template fit"],
+                               ["CMS_Hptntj_QCDkbg_metshape","Fake tau MET shape"]
+                               ]
+            
+        # Make table - The horror!
         myTable = []
         for n in myNuisanceOrder: # for each nuisance
             resultFound=False
             myRow = [n[1]]
             isShape=False
+            # For-loop: All columns (in pre-defined order)
             for columnName in myColumnOrder:
-                myMinErrorUp = 9999.0
+                myMinErrorUp   = 9999.0
                 myMinErrorDown = 9999.0
-                myMaxErrorUp = -9999.0
+                myMaxErrorUp   = -9999.0
                 myMaxErrorDown = -9999.0
-                myErrorUp = 0.0
-                myErrorDown = 0.0
+                myErrorUp      = 0.0
+                myErrorDown    = 0.0
+                
+                # For-loop: All datasets
                 for c in self._datasetGroups: 
-                    if columnName in c.getLabel(): # if column name matches to dataset group label
-                        if isinstance(n[0], list): # if this column+nuisance combination matches to a list, loop over the list
+
+                    # if column name matches to dataset group label
+                    foundMatch = columnName in c.getLabel()
+                    if self._h2tb and not "Hp": # dirty but works (for now)
+                        foundMatch = (columnName == c.getLabel()) # exact match needed
+                    if foundMatch: 
+                        # if this column+nuisance combination matches to a list, loop over the list
+                        if isinstance(n[0], list): 
                             for nid in n[0]:
                                 if c.hasNuisanceByMasterId(nid):
                                     # find error up and error down
@@ -1282,6 +1335,7 @@ class TableProducer:
                         else: # if this column+nuisance does not match to a list, but just one entry
                             if c.hasNuisanceByMasterId(n[0]): 
                                 myResult = c.getFullNuisanceResultByMasterId(n[0])
+
                                 if isinstance(myResult.getResult(), ScalarUncertaintyItem):
                                     myErrorDown = myResult.getResult().getUncertaintyDown()
                                     myErrorUp = myResult.getResult().getUncertaintyUp()
@@ -1342,7 +1396,19 @@ class TableProducer:
                 myRow[0]+=" (S)"
             myTable.append(myRow)
 
-        # Make table
+        # Make systematics table & save to file
+        myOutput = self.getSystematicTable(myTable)
+        fileName = self.getSystematicsFileName(light)
+        myFile   = open(fileName, "w")
+        myFile.write(myOutput)
+        myFile.close()
+        msg = "Created systematics LaTeX table %s" % (ShellStyles.SuccessStyle() + fileName + ShellStyles.NormalStyle())
+        self.Verbose(msg, True)
+        return
+
+    def getSystematicTable(self, myTable):
+        if self._h2tb:
+            return self.getSystematicTableHToTB(myTable)
         myOutput = "% table auto generated by datacard generator on "+self._timestamp+" for "+self._config.DataCardName+" / "+self._outputPrefix+"\n\n"
         myOutput += "\\documentclass{article}\n"
         myOutput += "\\begin{document}\n\n"
@@ -1374,23 +1440,50 @@ class TableProducer:
         myOutput += "\\end{table}\n"
         myOutput += "\\renewcommand{\\arraystretch}{1}\n"
         myOutput += "\\end{document}"
-        # Save output to file
-        mySignalText="heavy"
+        return myOutput 
+
+    def getSystematicTableHToTB(self, myTable):
+        myOutput  = "\\renewcommand{\\arraystretch}{1.2}\n"
+        myOutput += "\\begin{table}%%[h]\n"
+        myOutput += "\\begin{center}\n"
+        myOutput += "\\caption{The systematic uncertainties (in \\%) for signal and the backgrounds. The uncertainties, which depend on the final distribution bin, are marked with (S) and for them the maximum contracted value of the negative or positive variation is displayed.}"
+        myOutput += "\\label{tab:summary:systematics}\n"
+        myOutput += "\\vskip 0.1 in\n"
+        myOutput += "\\noindent\\makebox[\\textwidth]{\n"
+        myOutput += "\\begin{tabular}{l|c|c|cccccccc}\n"
+        myOutput += "\\hline\n"
+        myOutput += "& Signal & Fake b & \multicolumn{8}{c}{Genuine b}"
+        myOutput += "\n \\\\"
+        myCaptionLine = [["","","","$t\\bar{t}$", "Single top", "$t\\bar{t}$+Z", "$t\\bar{t}t\\bar{t}$", "$Z/\gamma^{*}$+jets", "$t\\bar{t}$+Z", "W+jets", "Diboson"]] 
+        # Calculate dimensions of tables
+        myWidths = []
+        myWidths = calculateCellWidths(myWidths, myTable)
+        myWidths = calculateCellWidths(myWidths, myCaptionLine)
+        mySeparatorLine = getSeparatorLine(myWidths)
+        # Add caption and table
+        myOutput += getTableOutput(myWidths,myCaptionLine,True)
+        myOutput += "\n \\hline\n"
+        myOutput += getTableOutput(myWidths,myTable,True)
+        myOutput += "\\hline\n"
+        myOutput += "\\end{tabular}\n"
+        myOutput += "}\n"
+        myOutput += "\\end{center}\n"
+        myOutput += "\\end{table}\n"
+        myOutput += "\\renewcommand{\\arraystretch}{1}\n"
+        #myOutput += "\\end{document}"
+        return myOutput 
+
+    def getSystematicsFileName(self, light):
+        postFix = "_heavy.tex"
         if light:
-           mySignalText="light"
+            postFix = "_light.tex"
+        if self._h2tb:
+            postFix = ".tex"
 
-        myFilename = self._infoDirname+"/SystematicsSummary_"+mySignalText
-#        myFilename += "_"+self._timestamp+"_"+self._outputPrefix+"_"+self._config.DataCardName.replace(" ","_")
-        myFilename+=".tex"
-        myFile = open(myFilename, "w")
-        myFile.write(myOutput)
-        myFile.close()
-
-        # Inform the user
-        msg = "Systematics summary table written to "
-        Verbose(msg + ShellStyles.SuccessStyle() + myFilename + ShellStyles.NormalStyle(), True)
-        return
-
+        filePath = os.path.join(self._infoDirname, "SystematicsSummary")
+        fileName = filePath + postFix
+        return fileName
+             
     def makeQCDPuritySummary(self):
         '''
         Prints QCD purity information
