@@ -1523,7 +1523,7 @@ def GetMergeCommand(mergeName, inputFiles, opts):
             cmd = GetHaddCommand(opts, mergeName, inputFiles)
     return cmd
 
-@timeout(600) # 600 seconds = 10 minutes for this functon to timeout
+@timeout(1800) # 1800 seconds = 30 minutes for this functon to timeout
 def MergeFiles(mergeName, inputFiles, opts):
     '''
     Merges ROOT files, either stored locally or on EOS.

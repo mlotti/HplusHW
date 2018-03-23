@@ -23,7 +23,6 @@
 #include "DataFormat/interface/GenParticle.h"
 #include "DataFormat/interface/PFCands.h"
 #include "DataFormat/interface/AK8Jet.h"
-#include "DataFormat/interface/AK8JetsSoftDrop.h"
 
 class BranchManager;
 
@@ -83,7 +82,6 @@ public:
   const GenParticleCollection& genparticles() const { return fGenParticleCollection; }
   const PFCandsCollection& pfCandidates() const { return fPFCandidates; }
   const AK8JetCollection& ak8jets() const { return fAK8JetCollection; }
-  const AK8JetsSoftDropCollection& ak8jetsSoftDrop() const { return fAK8JetsSoftDropCollection; }
 
   const MET& genMET() const { return fGenMET; }
   const MET& met() const { return fMET; }
@@ -120,7 +118,6 @@ private:
   GenParticleCollection fGenParticleCollection;
   PFCandsCollection fPFCandidates;
   AK8JetCollection fAK8JetCollection;
-  AK8JetsSoftDropCollection fAK8JetsSoftDropCollection;
 
   MET fGenMET;
   MET fMET_Type1;

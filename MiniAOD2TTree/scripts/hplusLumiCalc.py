@@ -30,6 +30,7 @@ setenv PATH ${PATH}:$HOME/.local/bin:/afs/cern.ch/cms/lumi/brilconda-1.0.3/bin: 
 hplusLumicalc.py
 or
 hplusLumiCalc.py -i 2016 --transferToEOS --collisions 2016 --offsite
+hplusLumiCalc.py --ignore-logs --trigger="HLT_LooseIsoPFTau50_Trk30_eta2p1_v*"
 
 2) LPC (or outside LXPLUS in general):
 open two terminals
@@ -488,7 +489,7 @@ def GetLumiAndUnits(output):
     return lumi, unit
 
         
-def CallPileupCalc(task, fOUT, inputFile, inputLumiJSON, minBiasXsec, calcMode="true", maxPileupBin="100", numPileupBins="100", pileupHistName="pileup"):
+def CallPileupCalc(task, fOUT, inputFile, inputLumiJSON, minBiasXsec, calcMode="true", maxPileupBin="100", numPileupBins="100", pileupHistName="pileup", trigger=""):
     '''
     Script to estimate pileup distribution using xing instantaneous luminosity
     information and minimum bias cross section.  Output is TH1D stored in root
@@ -501,7 +502,40 @@ def CallPileupCalc(task, fOUT, inputFile, inputLumiJSON, minBiasXsec, calcMode="
     https://github.com/cms-sw/RecoLuminosity-LumiDB/blob/master/scripts/pileupCalc.py
     '''
     Verbose("CallPileupCalc()", True)
-    
+
+    # pile-up for chosen trigger only
+    if len(trigger) > 0:
+        Verbose("Task %s, creating Pileup ROOT file for %s" % (task,trigger) )
+        triggerName = trigger.replace("*","")
+
+        # brilcalc lumi -u /pb -i JSON-file
+        home = os.environ['HOME']
+        path = os.path.join(home, ".local/bin")
+        exe  = os.path.join(path, "brilcalc")
+        brilcalc_csv = os.path.join(task, "results","lumi_"+triggerName+".csv")
+        cmd1 = [exe, "lumi", "--normtag", NormTagJSON, "-i", inputFile, "--hltpath", "'"+trigger+"'", "--byls", "--minBiasXsec", minBiasXsec, "-o", brilcalc_csv]
+
+        brilcalc_out = os.path.join(task, "results", "brilcalc_"+triggerName+".log")
+        sys_cmd1 = " ".join(cmd1) + " > %s" %brilcalc_out
+        Verbose(sys_cmd1)
+        ret = os.system(sys_cmd1)
+
+        pileupReCalc_json = os.path.join(task, "results","pileup_"+triggerName+".json")
+        cmd2 = ["pileupReCalc_HLTpaths.py", "-i", brilcalc_csv, "--inputLumiJSON", inputLumiJSON, "-o", pileupReCalc_json, "--runperiod", "Run2"]
+        pileupReCalc_out = os.path.join(task, "results", "pileupReCalc_"+triggerName+".log")
+        sys_cmd2 = " ".join(cmd2) + " > %s" %pileupReCalc_out
+        Verbose(sys_cmd2)
+        ret = os.system(sys_cmd2)
+
+        fTrgOUT = os.path.join(task, "results","PileUp_trigger.root")
+        cmd3 = ["pileupCalc.py", "-i", inputFile, "--inputLumiJSON", pileupReCalc_json, "--calcMode", calcMode,
+           "--minBiasXsec", minBiasXsec, "--maxPileupBin", maxPileupBin, "--numPileupBins", numPileupBins,
+           fTrgOUT, "--pileupHistName", pileupHistName]
+        pileupCalc_out = os.path.join(task, "results", "pileupCalc_"+triggerName+".log")
+        sys_cmd3 = " ".join(cmd3) + " > %s" %pileupCalc_out
+        Verbose(sys_cmd3)
+        ret = os.system(sys_cmd3)
+
     Verbose("Task %s, creating Pileup ROOT file" % (task) )
     cmd = ["pileupCalc.py", "-i", inputFile, "--inputLumiJSON", inputLumiJSON, "--calcMode", calcMode, 
            "--minBiasXsec", minBiasXsec, "--maxPileupBin", maxPileupBin, "--numPileupBins", numPileupBins, 
@@ -740,6 +774,8 @@ def main(opts, args):
     allowedColl = ["2015", "2016"]
     if opts.collisions == "2016":
         PileUpJSON = PileUpJSON_2016
+        if opts.offsite:
+            PileUpJSON = "pileup_latest.txt"
     elif opts.collisions == "2015":
         PileUpJSON = PileUpJSON_2015
     else:
@@ -843,7 +879,15 @@ def main(opts, args):
         fOUT     = os.path.join(task, "results", "PileUp.root")
         hName = "pileup"
         PrintProgressBar(task + ", PileupCalc ", index, len(files), "[" + os.path.basename(jsonfile) + "]")
-        ret, output = CallPileupCalc(task, fOUT, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="100", numPileupBins="100", pileupHistName=hName)
+
+        if opts.offsite:
+            puJsonFile = os.path.join(os.getcwd(), PileUpJSON.split("/")[-1])
+            if not os.path.isfile(puJsonFile):
+                msg =  "\nOn LPC, the AFS is not mounted anymore (after 20-Feb-2018). So you must copy this file locally with scp!"
+                raise Exception("Could not find pileup json file \"%s\".%s" % (puJsonFile, msg) )
+            else:
+                PileUpJSON = puJsonFile
+        ret, output = CallPileupCalc(task, fOUT, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="100", numPileupBins="100", pileupHistName=hName, trigger=opts.trigger)
 
             
         Verbose("Task %s, changing the --minBiasXsec value in the pileupCalc.py command by +0.05 around the chosen central value." % (task) )
@@ -1004,6 +1048,8 @@ if __name__ == "__main__":
                       help="The output ROOT files will be transfered to appropriate EOS paths [default: '%s']" % (TRANSFERTOEOS) )
     parser.add_option("--ignore-logs", dest="ignoreLogs",default=False, action="store_true",
                       help="Does not check the existence of log files. [default: False]")
+    parser.add_option("--trigger", dest="trigger",default="", type="string",
+                      help="Calculate an extra pu distribution for a chosen trigger")
 
 
     (opts, args) = parser.parse_args()

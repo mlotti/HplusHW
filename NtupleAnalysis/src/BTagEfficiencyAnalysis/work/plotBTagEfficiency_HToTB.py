@@ -1,22 +1,25 @@
 #!/usr/bin/env python
 '''
-Description:
+DESCRIPTION:
 Script that plots the "probability for passing btagging" for 
 a) b-jets (b->b)
 b) c-jets (c->b)
 c) gluon or light-quark jets (guds->b)
 as a function of the jet pT
 
-Usage:
+
+USAGE:
 ./plotBTagEfficiency_HToTB.py -m <pseudo_mcrab_directory> [opts]
 
-Examples:
+
+EXAMPLES:
 ./plotBTagEfficiency_HToTB.py -m BTagEfficiencyAnalysis_HadronFlavour_171115_100257 
 ./plotBTagEfficiency_HToTB.py -m BTagEfficiencyAnalysis_HadronFlavour_171115_100257 --url --error 0.1 --gridX -e "QCD_HT50to100|QCD_HT100to200|QCD_HT200to300"
 ./plotBTagEfficiency_HToTB.py -m BTagEfficiencyAnalysis_HadronFlavour_171115_100257 --url --error 0.1 --gridX --gridY -e "QCD_HT50to100|QCD_HT100to200|QCD_HT200to300"
+./plotBTagEfficiency_HToTB.py -m BTagEfficiencyAnalysis_180313_104047 --error 0.1 --gridX --gridY -e "QCD_HT50to100|QCD_HT100to200|QCD_HT200to300|WJets" --url
 
-Last Used:
-./plotBTagEfficiency_HToTB.py -m BTagEfficiencyAnalysis_HadronFlavour_InclWJets_171116_084530 --url --error 0.1 --gridX --gridY -e "QCD_HT50to100|QCD_HT100to200|QCD_HT200to300|WJets"
+LAST USED:
+./plotBTagEfficiency_HToTB.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/BTagEfficiencyAnalysis/multicrab_Hplus2tbAnalysis_v8030_20180223T0905/BTagEfficiencyAnalysis_180313_104047 --error 0.1 --gridX --gridY --url
 
 '''
 
@@ -39,6 +42,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
 import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
 
@@ -159,7 +163,9 @@ def treatNegativeBins(h):
     return
 
 def doPlot(name, genuineBDataset, fakeBDataset, errorlevel, optimizationMode, lumi):
-    
+    btagWP = "CSVv2-" + name.split("_")[-1]
+    Verbose("Generating efficiency for discriminator WP \"%s\"" % (btagWP), True)
+
     # Definitions
     s = optimizationMode.split("BjetDiscrWorkingPoint")
     discrName      = s[0].replace("OptBjetDiscr", "")
@@ -171,7 +177,10 @@ def doPlot(name, genuineBDataset, fakeBDataset, errorlevel, optimizationMode, lu
         
     # For-loop: All partons
     for i, parton in enumerate(myPartons, 0):
-
+        counter = i+1
+        msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%d" % counter, "/", "%s:" % (len(myPartons)), "%s->b for %s" % (parton.lower(), btagWP))
+        Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), counter==1)
+            
         n = "All%sjets" % parton
         if parton == "B":
             dsetHisto = genuineBDataset.getDatasetRootHisto(n)
@@ -248,26 +257,37 @@ def doPlot(name, genuineBDataset, fakeBDataset, errorlevel, optimizationMode, lu
     myPlot.setLuminosity(lumi)
     myPlot.setEnergy("13")
     #myPlot.setDefaultStyles()
-    
+
+    # Add btag WP to canvas
+    myPlot.appendPlotObject(histograms.PlotText(0.70, 0.48-0.16, btagWP, bold=True, size=20))
+
     # Create the plotting object  
-    drawPlot = plots.PlotDrawer(ratio=False, addLuminosityText=True, cmsTextPosition="outframe")
+    drawPlot = plots.PlotDrawer(ratio=False, addLuminosityText=False, cmsTextPosition="outframe")
 
     # Create the plotting object
-    drawPlot(myPlot, "%s_%s" % ("Hybrid", name), **GetKwargs(name, opts))
+    drawPlot(myPlot, "%s_%s" % ("Hybrid", name), **GetKwargs(name, btagWP, opts))
     
     # Save the plot in custom formats
-    msgList = SavePlot(myPlot, name, os.path.join(opts.saveDir, opts.analysisName), saveFormats = [".C", ".png", ".pdf"])
-    
-    return results, msgList
+    SavePlot(myPlot, name, opts.saveDir, saveFormats = [".C", ".png", ".pdf"])
+    return results
 
 
-def GetKwargs(name, opts):
-    _moveLegend = {"dx": 0.0, "dy": -0.43, "dh": -0.12}
+def GetKwargs(name, btagWP, opts):
+    _moveLegend = {"dx": -0.05, "dy": -0.45-0.16, "dh": -0.15}
     logY        = True
-    _xLabel     = "p_{T} (GeV/c)"
-    #_yLabel     = "Probability for passing b tagging"
-    _yLabel     = "efficiency"
-    yMin        = 1e-3
+    units       = "GeV/c"
+    _xLabel     = "p_{T} (%s)" % (units)
+    _yLabel     = "efficiency / " + units
+    if "Loose" in btagWP:
+        yMin    = 1e-2
+    elif "Medium" in btagWP:        
+        yMin    = 5e-3
+    elif "Tight" in btagWP:        
+        yMin    = 1e-4
+    else:
+        yMin    = 1e-2
+            
+
     if opts.logY:
         yMaxF = 1.2 #10
     else:
@@ -281,20 +301,22 @@ def GetKwargs(name, opts):
         "addCmsText"       : True,
         "cmsExtraText"     : "Simulation",
         "cmsTextPosition"  : "outframe", # options: left, right, outframe
-        #"opts"             : {"xmin": 30.0, "ymin": yMin, "ymaxfactor": yMaxF},
-        "opts"             : {"xmin":  0.0, "ymin": yMin, "ymaxfactor": yMaxF},
+        #"opts"             : {"xmin":  0.0, "ymin": yMin, "ymaxfactor": yMaxF},
+        #"opts"             : {"xmin":  0.0, "ymin": yMin, "ymax": 1.0},
+        "opts"             : {"ymin": yMin, "ymax": 1.0},
         "opts2"            : {"ymin": 0.59, "ymax": 1.41},
         "moveLegend"       : _moveLegend,
-        "cutBox"           : {"cutValue": 30.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        #"cutBox"           : {"cutValue": 30.0, "fillColor": 16, "box": True, "line": True, "greaterThan": True}
+        #"cutBox"           : {"cutValue": 40.0, "fillColor": 16, "box": True, "line": True, "greaterThan": True}
         }
     ROOT.gStyle.SetNdivisions(1108, "X") #n = n1 + 100*n2 + 10000*n3
     return _kwargs
 
 
 def SavePlot(plot, plotName, saveDir, saveFormats = [".pdf", ".png", ".C"]):
-    msgList = []
-
-    # Check that path exists
+    Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
+    
+     # Check that path exists
     if not os.path.exists(saveDir):
         os.makedirs(saveDir)
 
@@ -304,17 +326,10 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".pdf", ".png", ".C"]):
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
         saveNameURL = saveName + ext
-        saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
-        if opts.url:
-            #Print(ShellStyles.SuccessStyle() + saveNameURL + ShellStyles.NormalStyle(), i==0)
-            msgList.append(saveNameURL)
-        else:
-            msg = saveName + ext
-            #Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), False)#i==0)
-            msgList.append(msg)
+        saveNameURL = aux.convertToURL(saveNameURL, opts.url)
+        Verbose(saveNameURL, i==0)
         plot.saveAs(saveName, formats=saveFormats)
-    return msgList
-
+    return
 
 def GetDatasetsFromDir(opts):
     Verbose("Getting datasets")
@@ -397,7 +412,6 @@ def main(opts):
                 "WJetsToQQ_HT_600ToInf": "FakeB"
                 }
     # Definitions
-    messages = []
     results  = []
 
     # For-loop: All optimisation modes
@@ -417,6 +431,13 @@ def main(opts):
         if opts.verbose:
             datasetsMgr.PrintCrossSections()
             datasetsMgr.PrintLuminosities()
+
+        # Remove unwanted datasets
+        removeList = ["QCD_HT50to100", "QCD_HT100to200", "QCD_HT200to300", "QCD_HT200to300_ext1", "WJetsToQQ_HT_600ToInf"]
+        for k, d in enumerate(datasetsMgr.getAllDatasets(), 1):
+            if d.getName() in removeList:
+                datasetsMgr.remove(d.getName())
+                Verbose(ShellStyles.ErrorStyle() + "Removing dataset %s" % d.getName() + ShellStyles.NormalStyle(), k==1)
         if index == 1:
             datasetsMgr.PrintInfo()
 
@@ -434,21 +455,16 @@ def main(opts):
         # Get integrated luminosity
         intLumi = datasetsMgr.getDataset("Data").getLuminosity()
         datasetsMgr.remove(filter(lambda name: "Data" in name, datasetsMgr.getAllDatasetNames()))
-            
+                    
         # Print dataset information
         if index == 1:
             datasetsMgr.PrintInfo()
 
         # Do the plot
         name = GetPlotName(opts)
-        msg  = "{:>2} {:^1} {:<2} {:<30}".format(index, "/", len(optModes), ": Generating efficiency for discriminator WP \"%s\"" % (name.split("_")[-1]) )
-        Print(msg, index==1)
-        #Print(ShellStyles.NoteStyle() + msg + ShellStyles.NormalStyle(), index==1)
-        
-        myResults, msgList = doPlot(name, genuineB, fakeB, opts.errorlevel, opts.optMode, intLumi) 
+        myResults = doPlot(name, genuineB, fakeB, opts.errorlevel, opts.optMode, intLumi) 
         
         # Save results and msgs
-        messages.extend(msgList)
         results.extend(myResults)
         
         # For-loop: All points
@@ -457,8 +473,8 @@ def main(opts):
                 print item
     
     # Print path of all saved plots
-    for i, msg in enumerate(messages, 1):
-        Print(msg, i==1)
+    msg = "All plots saved under directory %s" % (aux.convertToURL(opts.saveDir, opts.url))
+    Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), True)
 
     # Write results to a json file
     with open(opts.json, 'w') as outfile:
@@ -496,7 +512,7 @@ if __name__ == "__main__":
     GRIDY        = False
     LOGY         = True
     ERROR        = 0.05 # 5%
-    SAVEDIR      = "/publicweb/%s/%s/" % (getpass.getuser()[0], getpass.getuser())
+    SAVEDIR      = None
     VERBOSE      = False
     BATCHMODE    = True
     URL          = False
@@ -569,6 +585,10 @@ if __name__ == "__main__":
         parser.print_help()
         #print __doc__
         sys.exit(1)
+
+
+    if opts.saveDir == None:
+        opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="")
 
     # Call the main function
     main(opts)

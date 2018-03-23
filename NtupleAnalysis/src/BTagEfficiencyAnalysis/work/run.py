@@ -9,14 +9,16 @@ used as input to plotting scripts to get the desired results.
 USAGE:
 ./run.py -m <path-to-multicrab-directory> -n 10 -e "Keyword1|Keyword2|Keyword3"
 
-Example:
+
+EXAMPLES:
 ./run.py -m <path-to-multicrab-directory> --analysisType HToTB -e "Charged|DY|QCD_b|WZ|ZZ|TTTT|ST_|WJets|TTWJets|TTZ|WW"
 ./run.py -m <path-to-multicrab-directory> --analysisType HToTB -i 'JetHT|TT|QCD|WJets'
-<<<<<<< HEAD
 ./run.py -m <path-to-multicrab-directory> --analysisType HToTB -e "Charged|DY|QCD_b|WZ|ZZ|TTTT|ST_|TTWJets|TTZ|WW"
 
-Last used:
-./run.py -m /uscms_data/d3/aattikis/workspace/multicrab/multicrab_Hplus2tbAnalysis_v8027_20171002T1247 --analysisType HToTB -e "Charged|DY|QCD_b|WZ|ZZ|TTTT|ST_|TTWJets|TTZ|WW"
+
+LAST USED:
+./run.py -m /uscms_data/d3/aattikis/workspace/multicrab/multicrab_Hplus2tbAnalysis_v8030_20180223T0905 --analysisType HToTB
+
 
 ROOT:
 The available ROOT options for the Error-Ignore-Level are (const Int_t):
@@ -136,10 +138,17 @@ def main():
         Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
         process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=opts.excludeTasks)
     else:
+        myBlackList = []
+        if opts.analysisType == "HToTB":
+            myBlackList = ["QCD_b", "ChargedHiggs", "DY", "WZ", "WW", "ZZ", "TTTT", "ST", "TTWJets", "TTZ"]
+
         Print("Adding all datasets from multiCRAB directory %s" % (opts.mcrab))
         Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
-        process.addDatasetsFromMulticrab(opts.mcrab)
-
+        regex =  "|".join(myBlackList)
+        if len(myBlackList)>0:
+            process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=regex)
+        else:
+            process.addDatasetsFromMulticrab(opts.mcrab)
 
     # ================================================================================================
     # Selection customisations
@@ -159,14 +168,15 @@ def main():
     allSelections.__setattr__("jetPtCutMax", 99990.0)
     allSelections.__setattr__("jetEtaCutMin", -2.5)
     allSelections.__setattr__("jetEtaCutMax", 2.5)
-    # for algo in ["combinedInclusiveSecondaryVertexV2BJetTags"]:
-    # for wp in ["Loose", "Medium", "Tight"]:
-    #    selections = allSelections.clone()
-    #    selections.BJetSelection.bjetDiscr = algo
-    #    selections.BJetSelection.bjetDiscrWorkingPoint = wp
-    #    suffix = "_%s_%s"%(algo,wp)
-    #    print "Added analyzer for algo/wp: %s"%suffix
-    #    process.addAnalyzer("BTagEfficiency"+suffix, Analyzer("BTagEfficiencyAnalysis", config=selections, silent=False))
+    if 0:
+        for algo in ["combinedInclusiveSecondaryVertexV2BJetTags"]:
+            for wp in ["Loose", "Medium", "Tight"]:
+                selections = allSelections.clone()
+                selections.BJetSelection.bjetDiscr = algo
+                selections.BJetSelection.bjetDiscrWorkingPoint = wp
+                suffix = "_%s_%s"%(algo,wp)
+                print "Added analyzer for algo/wp: %s"%suffix
+                process.addAnalyzer("BTagEfficiency"+suffix, Analyzer("BTagEfficiencyAnalysis", config=selections, silent=False))
 
     # Set the analysis type
     allSelections.__setattr__("AnalysisType", opts.analysisType)

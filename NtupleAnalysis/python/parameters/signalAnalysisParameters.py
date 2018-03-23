@@ -43,7 +43,7 @@ tauSelection = PSet(
         tauLdgTrkPtCut = 30.0,
 #                prongs = 13,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
                 prongs = 1,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
-                  rtau = 0.8,   # to disable set to 0.0
+                  rtau = 0.75,   # to disable set to 0.0
   againstElectronDiscr = "againstElectronTightMVA6",
 #  againstElectronDiscr = "",
       againstMuonDiscr = "againstMuonLoose3",
@@ -66,7 +66,7 @@ eVeto = PSet(
     electronEtaCut = 2.5,
 #            electronID = "mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90", # highest (wp90) for vetoing (2012: wp95)
     electronID = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
-    electronIDType    = "default",  # options: "default", "MVA"
+    electronIDType    = "MVA",  # options: "default", "MVA"
     electronMVA       = "ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values",
     electronMVACut    = "Loose",
     electronIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
@@ -124,8 +124,8 @@ bjetSelection = PSet(
     triggerMatchingCone = 0.1,  # DeltaR for matching offline bjet with trigger::TriggerBjet 
               jetPtCuts = [30.0],
              jetEtaCuts = [2.5],
-             #bjetDiscr = "combinedInclusiveSecondaryVertexV2BJetTags",
              bjetDiscr  = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
+#             bjetDiscr  = "pfCombinedMVAV2BJetTags", # use this for MVA b-tagging
  bjetDiscrWorkingPoint  = "Medium",
  numberOfBJetsCutValue  = 1,
  numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
@@ -133,10 +133,12 @@ bjetSelection = PSet(
 
 scaleFactors.setupBtagSFInformation(btagPset=bjetSelection, 
                                     btagPayloadFilename="CSVv2.csv",
+                                    #btagPayloadFilename="cMVAv2_Moriond17_B_H.csv", # use this for MVA b-tagging
                                     #btagEfficiencyFilename="btageff_TTJets.json",
                                     #btagEfficiencyFilename="btageff_WJetsHT.json",
                                     #btagEfficiencyFilename="btageff_hybrid.json",
                                     btagEfficiencyFilename="btageff_hybrid_HToTB.json",
+                                    #btagEfficiencyFilename="btageff_Hybrid_TT+WJets.json", # use for MVA b-tagging
                                     direction="nominal")
 
 #====== MET selection

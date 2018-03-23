@@ -21,11 +21,12 @@ public:
 
 private:
   // Input parameters
-  // const DirectionalCut<float> cfg_PrelimTopFitChiSqr;
   const DirectionalCut<double> cfg_PrelimTopMVACut;
+  const std::string cfg_LdgTopDefinition;
 
   // Common plots
   CommonPlots fCommonPlots;
+
   // Event selection classes and event counters (in same order like they are applied)
   Count cAllEvents;
   Count cTrigger;
@@ -38,8 +39,9 @@ private:
   BJetSelection fBJetSelection;
   Count cBTaggingSFCounter;
   METSelection fMETSelection;
-  // TopologySelection fTopologySelection;
+  QuarkGluonLikelihoodRatio fQGLRSelection;
   TopSelectionBDT fTopSelection;
+  FatJetSelection fFatJetSelection;
   Count cSelected;
     
   // Non-common histograms
@@ -52,8 +54,8 @@ REGISTER_SELECTOR(Hplus2tbAnalysis);
 
 Hplus2tbAnalysis::Hplus2tbAnalysis(const ParameterSet& config, const TH1* skimCounters)
   : BaseSelector(config, skimCounters),
-    // cfg_PrelimTopFitChiSqr(config, "FakeBMeasurement.prelimTopFitChiSqrCut"),
-    cfg_PrelimTopMVACut(config, "FakeBMeasurement.minTopMVACut"),
+    cfg_PrelimTopMVACut(config, "FakeBTopSelectionBDT.MVACut"),
+    cfg_LdgTopDefinition(config.getParameter<std::string>("FakeBTopSelectionBDT.LdgTopDefinition")),
     fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kHplus2tbAnalysis, fHistoWrapper),
     cAllEvents(fEventCounter.addCounter("all events")),
     cTrigger(fEventCounter.addCounter("passed trigger")),
@@ -65,17 +67,17 @@ Hplus2tbAnalysis::Hplus2tbAnalysis(const ParameterSet& config, const TH1* skimCo
     fJetSelection(config.getParameter<ParameterSet>("JetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cBTaggingSFCounter(fEventCounter.addCounter("b tag SF")),
-    // fMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fMETSelection(config.getParameter<ParameterSet>("METSelection")), // no subcounter in main counter
-    // fTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fQGLRSelection(config.getParameter<ParameterSet>("QGLRSelection")),// fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
     cSelected(fEventCounter.addCounter("Selected Events"))
 { }
 
 
 void Hplus2tbAnalysis::book(TDirectory *dir) {
 
-  
+  if (0) std::cout << "=== Hplus2tbAnalysis::book()" << std::endl;
   // Book common plots histograms
   fCommonPlots.book(dir, isData());
 
@@ -87,9 +89,10 @@ void Hplus2tbAnalysis::book(TDirectory *dir) {
   fJetSelection.bookHistograms(dir);
   fBJetSelection.bookHistograms(dir);
   fMETSelection.bookHistograms(dir);
-  // fTopologySelection.bookHistograms(dir);
+  fQGLRSelection.bookHistograms(dir);
   fTopSelection.bookHistograms(dir);
-  
+  fFatJetSelection.bookHistograms(dir);
+
   // Book non-common histograms
   // hAssociatedTop_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTop_Pt", "Associated t pT;p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
   // hAssociatedTop_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTop_Eta", "Associated t eta;#eta", nBinsEta, minEta, maxEta);
@@ -104,6 +107,13 @@ void Hplus2tbAnalysis::setupBranches(BranchManager& branchManager) {
 
 
 void Hplus2tbAnalysis::process(Long64_t entry) {
+
+  // Sanity check
+  if (cfg_LdgTopDefinition != "MVA" &&  cfg_LdgTopDefinition != "Pt")
+    {
+      throw hplus::Exception("config") << "Unsupported method of defining the leading top (=" << cfg_LdgTopDefinition << "). Please select from \"MVA\" and \"Pt\".";
+    }
+
   //====== Initialize
   fCommonPlots.initialize();
   fCommonPlots.setFactorisationBinForEvent(std::vector<float> {});
@@ -184,51 +194,63 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   cBTaggingSFCounter.increment();
 
   //================================================================================================
-  // 10) MET selection
+  // - MET selection
   //================================================================================================
   if (0) std::cout << "=== MET selection" << std::endl;
-  const METSelection::Data METData = fMETSelection.analyze(fEvent, nVertices);
+  const METSelection::Data METData = fMETSelection.silentAnalyze(fEvent, nVertices);
   // if (!METData.passedSelection()) return;
 
   //================================================================================================
-  // 11) Topology selection
+  // 10) Quark-Gluon Likelihood Ratio Selection
   //================================================================================================
-  // if (0) std::cout << "=== Topology selection" << std::endl;
-  // const TopologySelection::Data topologyData = fTopologySelection.analyze(fEvent, jetData);
-  // // if (!topologyData.passedSelection()) return; 
+  if (0) std::cout << "=== QGLR selection" << std::endl;
+  const QuarkGluonLikelihoodRatio::Data QGLRData = fQGLRSelection.analyze(fEvent, jetData, bjetData);
+  if (!QGLRData.passedSelection()) return;
 
   //================================================================================================
-  // 12) Top selection
+  // 11) Top selection
   //================================================================================================
-  /*
-    if (0) std::cout << "=== Top (ChiSq) selection" << std::endl;
-    const TopSelection::Data topData = fTopSelection.analyze(fEvent, jetData, bjetData);
-    // Apply preliminary chiSq cut
-    bool passPrelimChiSq = cfg_PrelimTopFitChiSqr.passedCut(topData.ChiSqr());
-    if (!passPrelimChiSq) return;
-  */
   if (0) std::cout << "=== Top (BDT) selection" << std::endl;
-  const TopSelectionBDT::Data topData = fTopSelection.analyze(fEvent, jetData, bjetData, true);
-  bool passPrelimMVACut = cfg_PrelimTopMVACut.passedCut( std::max(topData.getMVAmax1(), topData.getMVAmax2()) ); //fixme?
-  bool hasFreeBJet      = topData.hasFreeBJet();
-  if (!hasFreeBJet) return;
+  const TopSelectionBDT::Data topData = fTopSelection.analyze(fEvent, jetData, bjetData);
+  bool passPrelimMVACut = false;  
+  if (cfg_LdgTopDefinition == "MVA")
+    {
+      passPrelimMVACut = cfg_PrelimTopMVACut.passedCut( std::min(topData.getMVAmax1(), topData.getMVAmax2()) );
+    }
+  else
+    {
+      passPrelimMVACut = cfg_PrelimTopMVACut.passedCut( std::min(topData.getMVALdgInPt(), topData.getMVASubldgInPt()) );
+    }
+  if (!passPrelimMVACut) return;
+  // NOTE: The two iffs below if removed will cause fillControlPlotsAfterStandardSelections() to crash. 
+  // Need to make necessary changes to fillControlPlots..()
+  if (!topData.hasFreeBJet()) return;
   if (!passPrelimMVACut) return;
 
   //================================================================================================
-  // Standard Selections
+  // PreSelections
   //================================================================================================
-  if (0) std::cout << "=== Standard Selections" << std::endl;
-  // fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, bjetData.isGenuineB());
-  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, TopologySelection::Data(), topData, bjetData.isGenuineB());  
+  if (0) std::cout << "\n=== PreSelections" << std::endl;
+  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, QGLRData, topData, bjetData.isGenuineB());  
   
   //================================================================================================
   // All Selections
   //================================================================================================
-  // if (!topologyData.passedSelection()) return;
+  if (0) std::cout << "=== All Selections" << std::endl;
   if (!topData.passedSelection()) return;
 
-  if (0) std::cout << "=== All Selections" << std::endl;
+  //================================================================================================
+  // *) FatJet veto
+  //================================================================================================
+  if (0) std::cout << "\n=== FatJet veto" << std::endl;
+  const FatJetSelection::Data fatjetData = fFatJetSelection.analyze(fEvent, topData);
+  // const FatJetSelection::Data fatjetData = fFatJetSelection.analyzeWithoutTop(fEvent);
+  // if (fatjetData.fatjetMatchedToTopFound()) return;
+  if (!fatjetData.passedSelection()) return;
+
+  // Increment counters & fill histograms
   cSelected.increment();
+
 
   //================================================================================================
   // Fill final plots

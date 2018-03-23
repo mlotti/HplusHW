@@ -27,9 +27,11 @@ public:
 private:
   // Input parameters (Baseline Bjets)
   const DirectionalCut<int> cfg_BaselineNumberOfBJets;
+  const std::string cfg_BaselineBJetsDiscr;
+  const std::string cfg_BaselineBJetsDiscrWP;
   const DirectionalCut<double> cfg_LdgTopMVACut;
   const DirectionalCut<double> cfg_SubldgTopMVACut;
-  const DirectionalCut<double> cfg_MinTopMVACut;
+  const std::string cfg_LdgTopDefinition;
   const std::string cfg_BjetDiscr;
 
   // Common plots
@@ -51,7 +53,9 @@ private:
   Count cBaselineBTaggingSFCounter;
   BJetSelection fBaselineBJetSelection;
   METSelection fBaselineMETSelection;
+  QuarkGluonLikelihoodRatio fBaselineQGLRSelection;
   TopSelectionBDT fBaselineTopSelection;
+  FatJetSelection fBaselineFatJetSelection;
   Count cBaselineSelected;
   Count cBaselineSelectedCR;
   // Inverted selection
@@ -59,7 +63,9 @@ private:
   Count cInvertedBTaggingSFCounter;
   BJetSelection fInvertedBJetSelection;
   METSelection fInvertedMETSelection;
+  QuarkGluonLikelihoodRatio fInvertedQGLRSelection;
   TopSelectionBDT fInvertedTopSelection;
+  FatJetSelection fInvertedFatJetSelection;
   Count cInvertedSelected;
   Count cInvertedSelectedCR;
 
@@ -481,9 +487,11 @@ REGISTER_SELECTOR(FakeBMeasurement);
 FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCounters)
   : BaseSelector(config, skimCounters),
     cfg_BaselineNumberOfBJets(config, "FakeBMeasurement.baselineBJetsCut"),
+    cfg_BaselineBJetsDiscr(config.getParameter<std::string>("FakeBMeasurement.baselineBJetsDiscr")),
+    cfg_BaselineBJetsDiscrWP(config.getParameter<std::string>("FakeBMeasurement.baselineBJetsDiscrWP")),
     cfg_LdgTopMVACut(config, "FakeBMeasurement.LdgTopMVACut"),
     cfg_SubldgTopMVACut(config, "FakeBMeasurement.SubldgTopMVACut"),
-    cfg_MinTopMVACut(config, "FakeBMeasurement.minTopMVACut"),
+    cfg_LdgTopDefinition(config.getParameter<std::string>("FakeBTopSelectionBDT.LdgTopDefinition")),
     cfg_BjetDiscr(config.getParameter<std::string>("FakeBBjetSelection.bjetDiscr")),
     fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kFakeBMeasurement, fHistoWrapper),
     // fNormalizationSystematicsSignalRegion(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kQCDNormalizationSystematicsSignalRegion, fHistoWrapper), // fixme
@@ -498,16 +506,20 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
     fJetSelection(config.getParameter<ParameterSet>("JetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cBaselineBTaggingCounter(fEventCounter.addCounter("Baseline: passed b-jet selection")),
     cBaselineBTaggingSFCounter(fEventCounter.addCounter("Baseline: b tag SF")),
-    fBaselineBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fBaselineBJetSelection(config.getParameter<ParameterSet>("BJetSelection")),// fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fBaselineMETSelection(config.getParameter<ParameterSet>("METSelection")),
-    fBaselineTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
+    fBaselineQGLRSelection(config.getParameter<ParameterSet>("QGLRSelection")),// fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
+    fBaselineTopSelection(config.getParameter<ParameterSet>("FakeBTopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
+    fBaselineFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
     cBaselineSelected(fEventCounter.addCounter("Baseline: selected events")),
     cBaselineSelectedCR(fEventCounter.addCounter("Baseline: selected CR events")),
     cInvertedBTaggingCounter(fEventCounter.addCounter("Inverted: passed b-jet selection")),
     cInvertedBTaggingSFCounter(fEventCounter.addCounter("Inverted: b tag SF")),
-    fInvertedBJetSelection(config.getParameter<ParameterSet>("FakeBBJetSelection")),//, fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fInvertedBJetSelection(config.getParameter<ParameterSet>("FakeBBjetSelection")),//, fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fInvertedMETSelection(config.getParameter<ParameterSet>("METSelection")),
-    fInvertedTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
+    fInvertedQGLRSelection(config.getParameter<ParameterSet>("QGLRSelection")),// fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
+    fInvertedTopSelection(config.getParameter<ParameterSet>("FakeBTopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
+    fInvertedFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
     cInvertedSelected(fEventCounter.addCounter("Inverted: selected events")),
     cInvertedSelectedCR(fEventCounter.addCounter("Inverted: selected CR events"))
 { }
@@ -972,11 +984,15 @@ void FakeBMeasurement::book(TDirectory *dir) {
   // Baseline selection
   fBaselineBJetSelection.bookHistograms(dir);
   fBaselineMETSelection.bookHistograms(dir);
+  fBaselineQGLRSelection.bookHistograms(dir);
   fBaselineTopSelection.bookHistograms(dir);
+  fBaselineFatJetSelection.bookHistograms(dir);
   // Inverted selection
   fInvertedBJetSelection.bookHistograms(dir);
   fInvertedMETSelection.bookHistograms(dir);
+  fInvertedQGLRSelection.bookHistograms(dir);
   fInvertedTopSelection.bookHistograms(dir);
+  fInvertedFatJetSelection.bookHistograms(dir);
   
   // ====== Histogram settings
   HistoSplitter histoSplitter = fCommonPlots.getHistoSplitter();
@@ -1046,39 +1062,39 @@ void FakeBMeasurement::book(TDirectory *dir) {
 
   // Other histograms
   TDirectory* MvL = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, "ForFakeBMediumVsLoose");
-  hNBJetsMedium_SR        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hNBJetsMedium_SR"       , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax);
-  hNBJetsMedium_VR        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hNBJetsMedium_VR"       , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax); 
-  hNBJetsMedium_CRone     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hNBJetsMedium_CRone"    , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax); 
-  hNBJetsMedium_CRtwo     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hNBJetsMedium_CRtwo"    , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax); 
-  hBJetsPtMedium_SR       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsPtMedium_SR"      , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
-  hBJetsPtMedium_VR       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsPtMedium_VR"      , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
-  hBJetsPtMedium_CRone    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsPtMedium_CRone"   , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
-  hBJetsPtMedium_CRtwo    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsPtMedium_CRtwo"   , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
-  hBJetsEtaMedium_SR      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsEtaMedium_SR"     , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
-  hBJetsEtaMedium_VR      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsEtaMedium_VR"     , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
-  hBJetsEtaMedium_CRone   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsEtaMedium_CRone"  , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
-  hBJetsEtaMedium_CRtwo   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsEtaMedium_CRtwo"  , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
-  hBJetsBdiscMedium_SR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsBdiscMedium_SR"   , ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
-  hBJetsBdiscMedium_VR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsBdiscMedium_VR"   , ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
-  hBJetsBdiscMedium_CRone = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsBdiscMedium_CRone", ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
-  hBJetsBdiscMedium_CRtwo = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsBdiscMedium_CRtwo", ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
+  hNBJetsMedium_SR        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "NBJetsMedium_SR"       , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax);
+  hNBJetsMedium_VR        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "NBJetsMedium_VR"       , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax); 
+  hNBJetsMedium_CRone     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "NBJetsMedium_CRone"    , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax); 
+  hNBJetsMedium_CRtwo     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "NBJetsMedium_CRtwo"    , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax); 
+  hBJetsPtMedium_SR       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsPtMedium_SR"      , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  hBJetsPtMedium_VR       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsPtMedium_VR"      , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  hBJetsPtMedium_CRone    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsPtMedium_CRone"   , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  hBJetsPtMedium_CRtwo    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsPtMedium_CRtwo"   , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  hBJetsEtaMedium_SR      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsEtaMedium_SR"     , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  hBJetsEtaMedium_VR      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsEtaMedium_VR"     , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  hBJetsEtaMedium_CRone   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsEtaMedium_CRone"  , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  hBJetsEtaMedium_CRtwo   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsEtaMedium_CRtwo"  , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  hBJetsBdiscMedium_SR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsBdiscMedium_SR"   , ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
+  hBJetsBdiscMedium_VR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsBdiscMedium_VR"   , ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
+  hBJetsBdiscMedium_CRone = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsBdiscMedium_CRone", ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
+  hBJetsBdiscMedium_CRtwo = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsBdiscMedium_CRtwo", ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
   //
-  hNBJetsLoose_SR        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hNBJetsLoose_SR"       , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax);
-  hNBJetsLoose_VR        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hNBJetsLoose_VR"       , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax); 
-  hNBJetsLoose_CRone     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hNBJetsLoose_CRone"    , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax); 
-  hNBJetsLoose_CRtwo     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hNBJetsLoose_CRtwo"    , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax); 
-  hBJetsPtLoose_SR       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsPtLoose_SR"      , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
-  hBJetsPtLoose_VR       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsPtLoose_VR"      , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
-  hBJetsPtLoose_CRone    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsPtLoose_CRone"   , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
-  hBJetsPtLoose_CRtwo    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsPtLoose_CRtwo"   , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
-  hBJetsEtaLoose_SR      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsEtaLoose_SR"     , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
-  hBJetsEtaLoose_VR      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsEtaLoose_VR"     , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
-  hBJetsEtaLoose_CRone   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsEtaLoose_CRone"  , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
-  hBJetsEtaLoose_CRtwo   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsEtaLoose_CRtwo"  , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
-  hBJetsBdiscLoose_SR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsBdiscLoose_SR"   , ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
-  hBJetsBdiscLoose_VR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsBdiscLoose_VR"   , ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
-  hBJetsBdiscLoose_CRone = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsBdiscLoose_CRone", ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
-  hBJetsBdiscLoose_CRtwo = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "hBJetsBdiscLoose_CRtwo", ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
+  hNBJetsLoose_SR        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "NBJetsLoose_SR"       , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax);
+  hNBJetsLoose_VR        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "NBJetsLoose_VR"       , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax); 
+  hNBJetsLoose_CRone     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "NBJetsLoose_CRone"    , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax); 
+  hNBJetsLoose_CRtwo     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "NBJetsLoose_CRtwo"    , ";b-jet multiplicity;Occur / %0.0f", nNBins, fNMin, fNMax); 
+  hBJetsPtLoose_SR       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsPtLoose_SR"      , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  hBJetsPtLoose_VR       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsPtLoose_VR"      , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  hBJetsPtLoose_CRone    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsPtLoose_CRone"   , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  hBJetsPtLoose_CRtwo    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsPtLoose_CRtwo"   , ";p_{T} (GeV/c);Occur / %0.f GeV/c", nPtBins, fPtMin, fPtMax);
+  hBJetsEtaLoose_SR      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsEtaLoose_SR"     , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  hBJetsEtaLoose_VR      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsEtaLoose_VR"     , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  hBJetsEtaLoose_CRone   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsEtaLoose_CRone"  , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  hBJetsEtaLoose_CRtwo   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsEtaLoose_CRtwo"  , ";#eta;Occur / %.2f", nEtaBins, fEtaMin, fEtaMax);
+  hBJetsBdiscLoose_SR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsBdiscLoose_SR"   , ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
+  hBJetsBdiscLoose_VR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsBdiscLoose_VR"   , ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
+  hBJetsBdiscLoose_CRone = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsBdiscLoose_CRone", ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
+  hBJetsBdiscLoose_CRtwo = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, MvL, "BJetsBdiscLoose_CRtwo", ";b-tag discriminator;Occur / %.2f", nBDiscBins, fBDiscMin, fBDiscMax);
 
   // Other histograms
   myInclusiveLabel = "ForFakeBMeasurement";
@@ -2093,6 +2109,12 @@ void FakeBMeasurement::setupBranches(BranchManager& branchManager) {
 
 void FakeBMeasurement::process(Long64_t entry) {
 
+  // Sanity check
+  if (cfg_LdgTopDefinition != "MVA" &&  cfg_LdgTopDefinition != "Pt") 
+    {
+      throw hplus::Exception("config") << "Unsupported method of defining the leading top (=" << cfg_LdgTopDefinition << "). Please select from \"MVA\" and \"Pt\".";
+    }
+
   //====== Initialize
   fCommonPlots.initialize();
   // fNormalizationSystematicsSignalRegion.initialize();  // fixme
@@ -2170,12 +2192,6 @@ void FakeBMeasurement::process(Long64_t entry) {
     }
   else
     {
-
-      // CSVv2-Medium
-      bool passMediumCuts = cfg_BaselineNumberOfBJets.passedCut(bjetData.getSelectedBJets().size());
-      if (!passMediumCuts) return;
-
-      // Do inverted if multiplicity requirement on CSVv2-Medium  is met
       DoInvertedAnalysis(jetData, nVertices); 
     }
  
@@ -2202,6 +2218,9 @@ bool FakeBMeasurement::areSameJets(const Jet& jet1, const Jet& jet2) {
 void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
                                           const BJetSelection::Data& bjetData,
                                           const int nVertices){
+
+  if (0) std::cout << "\n=== FakeBMeasurement::DoBaselineAnalysis()" << std::endl;
+
   // Increment counter
   cBaselineBTaggingCounter.increment();
 
@@ -2216,24 +2235,36 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   cBaselineBTaggingSFCounter.increment();
 
   //================================================================================================
-  // 10) MET selection
+  // - MET selection
   //================================================================================================
   if (0) std::cout << "=== Baseline: MET selection" << std::endl;
   const METSelection::Data METData = fBaselineMETSelection.silentAnalyze(fEvent, nVertices);
   // if (!METData.passedSelection()) return;
- 
+
+  //================================================================================================
+  // 10) Quark-Gluon Likelihood Ratio Selection
+  //================================================================================================
+  if (0) std::cout << "=== Baseline: QGLR selection" << std::endl;
+  const QuarkGluonLikelihoodRatio::Data QGLRData = fBaselineQGLRSelection.analyze(fEvent, jetData, bjetData);
+  if (!QGLRData.passedSelection()) return;
+
   //================================================================================================
   // 11) Top selection
   //================================================================================================
   if (0) std::cout << "=== Baseline: Top selection" << std::endl;
-  const TopSelectionBDT::Data topData = fBaselineTopSelection.analyze(fEvent, jetData, bjetData);
-  bool passMinTopMVACut = cfg_MinTopMVACut.passedCut( std::min(topData.getMVAmax1(), topData.getMVAmax2()) );
-  bool hasFreeBJet      = topData.hasFreeBJet();
-  if (!hasFreeBJet) return;
-  if (!passMinTopMVACut) return;
+  const TopSelectionBDT::Data topData = fBaselineTopSelection.analyze(fEvent, jetData, bjetData); 
+  if (!topData.passedSelection()) return; // preliminary cut!
+
+  //================================================================================================
+  // *) FatJet veto
+  //================================================================================================
+  if (0) std::cout << "\n=== Baseline: FatJet veto" << std::endl;
+  const FatJetSelection::Data fatjetData = fBaselineFatJetSelection.analyze(fEvent, topData);
+  if (!fatjetData.passedSelection()) return;
 
   // Defining the splitting of phase-space as the eta of the Tetrajet b-jet
   std::vector<float> myFactorisationInfo;
+  // myFactorisationInfo.push_back(topData.getTetrajetBJet().pt() ); //new
   myFactorisationInfo.push_back(topData.getTetrajetBJet().eta() );
   fCommonPlots.setFactorisationBinForEvent(myFactorisationInfo);
   // fNormalizationSystematicsSignalRegion.setFactorisationBinForEvent(myFactorisationInfo); //fixme
@@ -2343,7 +2374,7 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
 
   hBaseline_MET_AfterStandardSelections ->Fill(isGenuineB, METData.getMET().R());
   hBaseline_HT_AfterStandardSelections ->Fill(isGenuineB, jetData.HT());
-  hBaseline_MVAmax1_AfterStandardSelections ->Fill(isGenuineB, topData.getMVAmax1());
+  hBaseline_MVAmax1_AfterStandardSelections ->Fill(isGenuineB, topData.getMVAmax1()); //iro
   hBaseline_MVAmax2_AfterStandardSelections ->Fill(isGenuineB, topData.getMVAmax2());
   hBaseline_LdgTetrajetPt_AfterStandardSelections->Fill(isGenuineB, topData.getLdgTetrajet().pt() );
   hBaseline_LdgTetrajetM_AfterStandardSelections->Fill(isGenuineB, topData.getLdgTetrajet().M() );
@@ -2367,17 +2398,29 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   hBaseline_SubLdgDijetPt_AfterStandardSelections->Fill(isGenuineB, topData.getSubldgDijet().pt() );
   hBaseline_SubLdgDijetM_AfterStandardSelections ->Fill(isGenuineB, topData.getSubldgDijet().M() );
 
-
   //================================================================================================
   // All Selections
   //================================================================================================  
-  if (!topData.passedSelection()) 
+  float ldgMVA;
+  float subldgMVA;
+  if (cfg_LdgTopDefinition == "MVA")
     {
-      // If top fails fill determine if it qualifies for Control Region 1 (CRone)
-      bool passLdgTopMVA    = cfg_LdgTopMVACut.passedCut( topData.getMVAmax1() );
-      bool passSubldgTopMVA = cfg_SubldgTopMVACut.passedCut( topData.getMVAmax2() );
-      bool passInvertedTop  = passLdgTopMVA * passSubldgTopMVA;
-      if (!passInvertedTop) return;
+      ldgMVA    = topData.getMVAmax1();
+      subldgMVA = topData.getMVAmax2();
+    }
+  else
+    {
+      ldgMVA    = topData.getMVALdgInPt();
+      subldgMVA = topData.getMVASubldgInPt();
+    }
+  bool bPass_LdgTopMVA    = cfg_LdgTopMVACut.passedCut(ldgMVA);
+  bool bPass_SubldgTopMVA = cfg_LdgTopMVACut.passedCut(subldgMVA);
+  bool bPass_BothMVA      = bPass_LdgTopMVA * bPass_SubldgTopMVA;
+  bool bPass_InvertedTop  = bPass_LdgTopMVA * cfg_SubldgTopMVACut.passedCut(subldgMVA);
+  if (!bPass_BothMVA) 
+    {
+      // If top fails determine if event falls into  Control Region 2 (CR2)
+      if (!bPass_InvertedTop) return;
 
       if (0) std::cout << "=== Baseline: Control Region 1 (CRone)" << std::endl;
       cBaselineSelectedCR.increment();
@@ -2703,19 +2746,31 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   if (0) std::cout << "\n=== FakeBMeasurement::DoInvertedAnalysis()" << std::endl;
 
   //================================================================================================  
-  // 8) BJet Selection
+  // 8) BJet Selections
   //================================================================================================
-  if (0) std::cout << "=== Inverted: BJet selection" << std::endl;
+  if (0) std::cout << "=== Inverted BJet: BJet selection" << std::endl;
   const BJetSelection::Data invBjetData = fInvertedBJetSelection.silentAnalyze(fEvent, jetData);
   if (!invBjetData.passedSelection()) return;
 
+   // CSVv2-Medium requirement
+   unsigned int nBaselineBjets = 0;
+   double bdiscWP = fInvertedBJetSelection.getDiscriminatorWP( cfg_BaselineBJetsDiscr, cfg_BaselineBJetsDiscrWP);
+
+   for (auto bjet: invBjetData.getSelectedBJets())
+     {
+       if (bjet.bjetDiscriminator() < bdiscWP) continue;
+       nBaselineBjets++;
+     }
+   bool passBaselineBjetCuts   = cfg_BaselineNumberOfBJets.passedCut(nBaselineBjets); 
+   if (!passBaselineBjetCuts) return;
+  
   // Increment counter
   cInvertedBTaggingCounter.increment();
 
   //================================================================================================  
   // 9) BJet SF  
   //================================================================================================
-  if (0) std::cout << "=== Inverted: BJet SF" << std::endl;
+  if (0) std::cout << "=== Inverted BJet: BJet SF" << std::endl;
   if (fEvent.isMC()) 
     { 
       fEventWeight.multiplyWeight(invBjetData.getBTaggingScaleFactorEventWeight());
@@ -2723,24 +2778,37 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   cInvertedBTaggingSFCounter.increment();
 
   //================================================================================================
-  // 10) MET selection
+  // - MET selection
   //================================================================================================
-  if (0) std::cout << "=== Inverted: MET selection" << std::endl;
+  if (0) std::cout << "=== Inverted BJet: MET selection" << std::endl;
   const METSelection::Data METData = fInvertedMETSelection.silentAnalyze(fEvent, nVertices);
   // if (!METData.passedSelection()) return;
 
   //================================================================================================
+  // 10) Quark-Gluon Likelihood Ratio Selection
+  //================================================================================================
+  if (0) std::cout << "=== Inverted BJet: QGLR selection" << std::endl;
+  const QuarkGluonLikelihoodRatio::Data QGLRData = fInvertedQGLRSelection.analyze(fEvent, jetData, invBjetData);
+  if (!QGLRData.passedSelection()) return;
+
+  //================================================================================================
   // 11) Top selection
   //================================================================================================
-  if (0) std::cout << "=== Inverted: Top selection" << std::endl;
-  const TopSelectionBDT::Data topData = fInvertedTopSelection.analyzeWithoutBJets(fEvent, jetData.getSelectedJets(), invBjetData.getSelectedBJets(), true);
-  bool passMinTopMVACut = cfg_MinTopMVACut.passedCut( std::min(topData.getMVAmax1(), topData.getMVAmax2()) );
-  bool hasFreeBJet      = topData.hasFreeBJet();
-  if (!hasFreeBJet) return;
-  if (!passMinTopMVACut) return;
+  if (0) std::cout << "=== Inverted BJet: Top selection" << std::endl;
+  const TopSelectionBDT::Data topData = fInvertedTopSelection.analyze(fEvent, jetData, invBjetData);
+  if (!topData.passedSelection()) return; // preliminary cut!
+
+  //================================================================================================
+  // *) FatJet veto
+  //================================================================================================
+  if (0) std::cout << "\n=== Inverted BJet: FatJet veto" << std::endl;
+  const FatJetSelection::Data fatjetData = fInvertedFatJetSelection.analyze(fEvent, topData);
+  if (!fatjetData.passedSelection()) return;
+
 
   // Defining the splitting of phase-space as the eta of the Tetrajet b-jet
   std::vector<float> myFactorisationInfo;
+  // myFactorisationInfo.push_back(topData.getTetrajetBJet().pt() ); //new
   myFactorisationInfo.push_back(topData.getTetrajetBJet().eta() );
   fCommonPlots.setFactorisationBinForEvent(myFactorisationInfo);
   // fNormalizationSystematicsControlRegion.setFactorisationBinForEvent(myFactorisationInfo); //fixme
@@ -2753,8 +2821,8 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   // Preselections (aka Standard Selections)
   //================================================================================================
-  if (0) std::cout << "=== Inverted: Preselections" << std::endl;
-  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, invBjetData, METData, TopologySelection::Data(), topData, isGenuineB);
+  if (0) std::cout << "=== Inverted BJet: Preselections" << std::endl;
+  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, invBjetData, METData, QGLRData, topData, isGenuineB);
 
   // Fill Triplets  (Inverted)
   hInverted_Njets_AfterStandardSelections->Fill(isGenuineB, jetData.getSelectedJets().size());
@@ -2880,15 +2948,28 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   // All Selections
   //================================================================================================
-  if (!topData.passedSelection()) 
+  float ldgMVA;
+  float subldgMVA;
+  if (cfg_LdgTopDefinition == "MVA")
     {
-      // If top fails determine if event fall into  Control Region 2 (CR2)
-      bool passLdgTopMVA    = cfg_LdgTopMVACut.passedCut( topData.getMVAmax1() );
-      bool passSubldgTopMVA = cfg_SubldgTopMVACut.passedCut( topData.getMVAmax2() );
-      bool passInvertedTop  = passLdgTopMVA * passSubldgTopMVA;
-      if (!passInvertedTop) return;
+      ldgMVA    = topData.getMVAmax1();
+      subldgMVA = topData.getMVAmax2();
+    }
+  else
+    {
+      ldgMVA    = topData.getMVALdgInPt();
+      subldgMVA = topData.getMVASubldgInPt();
+    }
+  bool bPass_LdgTopMVA    = cfg_LdgTopMVACut.passedCut(ldgMVA);
+  bool bPass_SubldgTopMVA = cfg_LdgTopMVACut.passedCut(subldgMVA);
+  bool bPass_BothMVA      = bPass_LdgTopMVA * bPass_SubldgTopMVA;
+  bool bPass_InvertedTop  = bPass_LdgTopMVA * cfg_SubldgTopMVACut.passedCut(subldgMVA);
+  if (!bPass_BothMVA) 
+    {
+      // If top fails determine if event falls into  Control Region 2 (CR2)
+      if (!bPass_InvertedTop) return;
 
-      if (0) std::cout << "=== Inverted: Control Region 2 (CR2)" << std::endl;
+      if (0) std::cout << "=== Inverted BJet: Control Region 2 (CR2)" << std::endl;
       cInvertedSelectedCR.increment();
 
       // Fill plots (CR2)
@@ -3046,7 +3127,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
       return;
     }
 
-  if (0) std::cout << "=== Inverted: Verification Region (VR)" << std::endl;
+  if (0) std::cout << "=== Inverted BJet: Verification Region (VR)" << std::endl;
   cInvertedSelected.increment();
 
   //================================================================================================

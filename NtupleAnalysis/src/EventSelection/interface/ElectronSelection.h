@@ -96,11 +96,13 @@ private:
   Count cSubPassedIsolation;
   
   // Histograms
+  WrappedTH1 *hElectronNAll;
   WrappedTH1 *hElectronPtAll;
   WrappedTH1 *hElectronEtaAll;
   WrappedTH1 *hElectronRelIsoAll;
   WrappedTH1 *hElectronMiniIsoAll;
 
+  WrappedTH1 *hElectronNPassed;
   WrappedTH1 *hElectronPtPassed;
   WrappedTH1 *hElectronEtaPassed;
   WrappedTH1 *hElectronRelIsoPassed;

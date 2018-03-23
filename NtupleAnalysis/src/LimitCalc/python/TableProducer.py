@@ -12,6 +12,7 @@ Classes for producing output
 from HiggsAnalysis.LimitCalc.Extractor import ExtractorBase
 from HiggsAnalysis.LimitCalc.DatacardColumn import DatacardColumn
 from HiggsAnalysis.LimitCalc.ControlPlotMaker import ControlPlotMaker
+from HiggsAnalysis.LimitCalc.ControlPlotMakerHToTB import ControlPlotMakerHToTB
 from HiggsAnalysis.NtupleAnalysis.tools.systematics import ScalarUncertaintyItem
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
@@ -23,30 +24,46 @@ import sys
 import time
 import ROOT
 
-
 #================================================================================================ 
 # Function definition
 #================================================================================================ 
-#def Verbose(msg, printHeader=False):
-#    if not Verbose:
-#        return
-#    if printHeader:
-#        print "=== dcardHplus2tb2017Datacard_v2.py:"
-#
-#    if msg !="":
-#        print "\t", msg
-#    return
+VERBOSE = False
+
+def Verbose(msg, printHeader=False):
+    if not VERBOSE:
+        return
+    if printHeader:
+        print "=== dcardHplus2tb2017Datacard_v2.py:"
+
+    if msg !="":
+        print "\t", msg
+    return
+
+def GetFName():
+    fName = __file__.split("/")[-1]
+    fName = fName.replace(".pyc", ".py")
+    return fName
 
 def Print(msg, printHeader=True):
-    fName = __file__.split("/")[-1]
+    fName = GetFName()
     if printHeader:
         print "=== ", fName
     if msg !="":
         print "\t", msg
     return
 
+def PrintFlushed(msg, printHeader=True):
+    '''
+    Useful when printing progress in a loop
+    '''
+    msg = "\r\t" + msg 
+    if printHeader:
+        print "=== ", GetFName()
+    sys.stdout.write(msg)
+    sys.stdout.flush()
+    return
 
-def createBinByBinStatUncertHistograms(hRate, minimumStatUncertainty=0.5, xmin=None, xmax=None):
+def createBinByBinStatUncertHistograms(hRate, xmin=None, xmax=None):
     '''
     Creates and returns a list of bin-by-bin stat. uncert. histograms
     Inputs:
@@ -63,7 +80,6 @@ def createBinByBinStatUncertHistograms(hRate, minimumStatUncertainty=0.5, xmin=N
         myRangeMin = hRate.GetXaxis().GetBinLowEdge(1)
     if myRangeMax == None:
         myRangeMax = hRate.GetXaxis().GetBinUpEdge(hRate.GetNbinsX())
-
 
     nNegativeRate = 0
     nBelowMinStatUncert = 0
@@ -84,16 +100,15 @@ def createBinByBinStatUncertHistograms(hRate, minimumStatUncertainty=0.5, xmin=N
             hUp.SetTitle(hUp.GetName())
             hDown.SetTitle(hDown.GetName())
 
+            # The stat. uncerntainties are set and stored as errors to the nominal histogram in DatacardColumn.py
+
             # Set hUp rate
             hUp.SetBinContent(i, hUp.GetBinContent(i) + hUp.GetBinError(i))
-            # Make sure that the hUp rate is larger than the minimum stat. uncertainty
-            if hRate.GetBinContent(i) < minimumStatUncertainty:
-                hUp.SetBinContent(i, minimumStatUncertainty)
-
             # Set hDown rate
             statBinDown = hDown.GetBinContent(i)-hDown.GetBinError(i)
             # hDown.SetBinContent(i, statBinDown) # Bug fix (8Nov2017)
             hDown.SetBinContent(i, max(0.0, statBinDown)) # make sure hDown rate is not negative
+
             # Varying dowards can in rare cases lead to a completely empty hDown histo, not accepted as input by Combine
             # To prevent this from happening, we do as follows:
             if hDown.Integral() <= 0:
@@ -112,13 +127,15 @@ def createBinByBinStatUncertHistograms(hRate, minimumStatUncertainty=0.5, xmin=N
     # Print summarty of warnings/errors (if any)
     if nNegativeRate > 0:
         msg = "Rate value for \"%s\" was negative (hence forced to zero) in %d bins" % (hRate.GetName(), nNegativeRate)
-        Print(ShellStyles.WarningLabel() + msg)
+        Verbose(ShellStyles.WarningLabel() + msg)
+
     if nBelowMinStatUncert > 0:
-        msg = "Rate value for \"%s\" was below minimum statistical uncertainty (hence set to default min of %f) in %d bins" % (hRate.GetName(), minimumStatUncertainty, nBelowMinStatUncert)
-        Print(ShellStyles.WarningLabel() + msg, False)
+        msg = "Rate value for \"%s\" was below minimum statistical uncertainty" % (hRate.GetName(), nBelowMinStatUncert)
+        Verbose(ShellStyles.WarningLabel() + msg, False)
+
     if nEmptyDownHistograms > 0:
         msg = "Rate value for \"%s\" was negative but it could not be forced to zero (this would lead to empty hDown histogram), so it was set to 0.00001 in %d bins" % (hRate.GetName(), nEmptyDownHistograms)
-        Print(ShellStyles.WarningLabel() + msg)
+        Verbose(ShellStyles.WarningLabel() + msg)
 
     return myList
 
@@ -184,7 +201,7 @@ def getTableOutput(widths,table,latexMode=False):
 # Class definition
 #================================================================================================ 
 class TableProducer:
-    def __init__(self, opts, config, outputPrefix, luminosity, observation, datasetGroups, extractors, mcrabInfoOutput):
+    def __init__(self, opts, config, outputPrefix, luminosity, observation, datasetGroups, extractors, mcrabInfoOutput, h2tb, verbose=False):
         '''
         Constructor
         '''
@@ -196,34 +213,23 @@ class TableProducer:
         self._datasetGroups = datasetGroups
         self._purgeColumnsWithSmallRateDoneStatus = False
         self._extractors = extractors[:]
+        self._h2tb = h2tb
         self._timestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime(time.time()))
-        if self._opts.lands:
-            self._outputFileStem = "lands_datacard_hplushadronic_m"
-            self._outputRootFileStem = "lands_histograms_hplushadronic_m"
-        elif self._opts.combine:
-            self._outputFileStem = "combine_datacard_hplushadronic_m"
-            self._outputRootFileStem = "combine_histograms_hplushadronic_m"
-        # Calculate number of nuisance parameters
-        # Make directory for output
-        myLimitCode = None
-        if opts.lands:
-            myLimitCode = "lands"
-        elif opts.combine:
-            myLimitCode = "combine"
-        self._dirname = "datacards_%s_%s_%s_%s"%(myLimitCode,self._timestamp,self._config.DataCardName.replace(" ","_"),self._outputPrefix)
-        if hasattr(self._config, "OptionSignalInjection"):
-            self._dirname += "_SignalInjection"
-        os.mkdir(self._dirname)
-        self._infoDirname = self._dirname + "/info"
-        os.mkdir(self._infoDirname)
-        self._ctrlPlotDirname = self._dirname + "/controlPlots"
-        os.mkdir(self._ctrlPlotDirname)
-        # Copy datacard to directory
-        os.system("cp %s %s/inputDatacardForDatacardGenerator.py"%(opts.datacard, self._dirname))
-
+        self._outputFileStem = "combine_datacard_hplushadronic_m"
+        self._outputRootFileStem = "combine_histograms_hplushadronic_m"
+        if self._h2tb:
+            self.channelLabel = "tbhadr"
+        else:
+            self.channelLabel = "taunuhadr"
+        self._verbose = verbose
+        self.makeDirectory()
+            
         # Make control plots
         if self._config.OptionDoControlPlots:
-            ControlPlotMaker(self._opts, self._config, self._ctrlPlotDirname, self._luminosity, self._observation, self._datasetGroups)
+            if hasattr(self._config, 'OptionGenuineTauBackgroundSource'):
+                ControlPlotMaker(self._opts, self._config, self._ctrlPlotDirname, self._luminosity, self._observation, self._datasetGroups)
+            if hasattr(self._config, 'OptionFakeBMeasurementSource'):
+                ControlPlotMakerHToTB(self._opts, self._config, self._ctrlPlotDirname, self._luminosity, self._observation, self._datasetGroups)
         else:
             msg = "Skipped making of data-driven control plots. To enable, set OptionDoControlPlots = True in the input datacard."
             if self._opts.verbose:
@@ -233,13 +239,13 @@ class TableProducer:
         if self._opts.verbose:
             Print(ShellStyles.HighlightStyle() + "Generating reports" + ShellStyles.NormalStyle())
 
-        # Print table of shape variation for shapeQ nuisances
+        # Create table of shape variation for shapeQ nuisances
         self.makeShapeVariationTable()
 
-        # Print event yield summary table
+        # Create event yield summary table
         self.makeEventYieldSummary()
 
-        # Print systematics summary table
+        # Create systematics summary table
         self.makeSystematicsSummary(light=True)
         self.makeSystematicsSummary(light=False)        
 
@@ -278,13 +284,68 @@ class TableProducer:
             f.close()
             # Inform user of code status txt files
             msg = "Created file " 
-            Print(msg + ShellStyles.SuccessStyle() + theFile + ShellStyles.NormalStyle(), index==1)
+            Verbose(msg + ShellStyles.SuccessStyle() + theFile + ShellStyles.NormalStyle(), index==1)
 
         self._extractors = extractors[:]
         
         # Create for each shape nuisance a variation 
         if opts.testShapeSensitivity:
             self._createDatacardsForShapeSensitivityTest()
+        return
+
+
+    def Verbose(self, msg, printHeader=False):
+        if not self._verbose:
+            return
+        if printHeader:
+            print "=== %s:" % self.GetFName()
+        if msg !="":
+            print "\t", msg
+        return
+
+    def GetFName(self):
+        fName = __file__.split("/")[-1]
+        fName = fName.replace(".pyc", ".py")
+        return fName
+    
+    def Print(self, msg, printHeader=True):
+        fName = self.GetFName()
+        if printHeader:
+            print "=== ", fName
+        if msg !="":
+            print "\t", msg
+        return
+
+    def makeDirectory(self):
+        '''
+        The original code is now obsolete since LandS is not used. 
+        All results are with combine => implied
+
+        myLimitCode  = "combine"
+        self._dirname = "datacards_%s_%s_%s_%s" % (myLimitCode,self._timestamp,self._config.DataCardName.replace(" ","_"),self._outputPrefix)
+        '''
+
+        # Make directory for output
+        self._dirname = "datacards_%s_%s_%s" % (self._config.DataCardName.replace(" ","_"), self._outputPrefix, self._timestamp)
+        if hasattr(self._config, "OptionSignalInjection"):
+            self._dirname += "_SignalInjection"
+        self.Verbose("Creating main directory %s" % (self._dirname), True)
+        os.mkdir(self._dirname)
+
+        # Create sub directory for informative files
+        self._infoDirname = self._dirname + "/info"
+        self.Verbose("Creating sub-directory %s" % (self._infoDirname), False)
+        os.mkdir(self._infoDirname)
+
+        # Create sub directory for control plots
+        self._ctrlPlotDirname = self._dirname + "/controlPlots"
+        self.Verbose("Creating sub-directory %s" % (self._ctrlPlotDirname), False)
+        os.mkdir(self._ctrlPlotDirname)
+
+        # Copy the datacards for future reference
+        dcardName = "inputDatacardForDatacardGenerator.py"
+        self.Verbose("Copying datacard %s to main directory %s as %s" % (self._opts.datacard, self._dirname, dcardName), False)
+        os.system("cp %s %s/%s" % (self._opts.datacard, self._dirname, dcardName))
         return
 
     def getDirectory(self):
@@ -328,13 +389,13 @@ class TableProducer:
         self._purgeColumnsWithSmallRate()
 
         # For-loop: All mass points
-        for index, m in enumerate(self._config.MassPoints):
+        for index, m in enumerate(self._config.MassPoints, 1):
             
-            # massString = ShellStyles.HighlightAltStyle() + str(m) + ShellStyles.NormalStyle()
-            # outString  = ShellStyles.HighlightAltStyle() + self._outputPrefix + ShellStyles.NormalStyle()
-            # msg = "Generating datacard for mass point %s for %s" % (massString, outString)
-            msg = "Generating datacard %s/%s" % (index+1, len(self._config.MassPoints)) #for mass point %s for %s" % (massString, outString)
-            Print(ShellStyles.HighlightAltStyle() + msg + ShellStyles.NormalStyle() )
+            # Print progress 
+            msg = "Datacard %s/%s (mH=%s)" % (index, len(self._config.MassPoints), str(m)) 
+            PrintFlushed(ShellStyles.HighlightStyle() + msg + ShellStyles.NormalStyle(), index==1)
+            if index == len(self._config.MassPoints):
+                print 
 
             # Open output root file
             myFilename = self._dirname+"/"+self._outputFileStem+"%d.txt"%m
@@ -401,13 +462,13 @@ class TableProducer:
             myFile = open(myFilename, "w")
             myFile.write(myCard)
             myFile.close()
-            Print("Written datacard to %s" % (ShellStyles.SuccessStyle() + myFilename + ShellStyles.NormalStyle() ))
+            Verbose("Written datacard to %s" % (ShellStyles.SuccessStyle() + myFilename + ShellStyles.NormalStyle() ))
 
             # Save & close histograms to root file
             self._saveHistograms(myRootFile,m),
             myRootFile.Write()
             myRootFile.Close()
-            Print("Written shape ROOT file to %s" % (ShellStyles.SuccessStyle() + myRootFilename + ShellStyles.NormalStyle() ))
+            Verbose("Written shape ROOT file to %s" % (ShellStyles.SuccessStyle() + myRootFilename + ShellStyles.NormalStyle() ))
         return
 
     def _purgeColumnsWithSmallRate(self):
@@ -418,9 +479,9 @@ class TableProducer:
             return
         myLastUntouchableLandsProcessNumber = 0 # For sigma x br
         if not self._config.OptionLimitOnSigmaBr and (self._datasetGroups[0].getLabel()[:2] == "HW" or self._datasetGroups[1].getLabel()[:2] == "HW"):
-            if self._opts.lands:
-                myLastUntouchableLandsProcessNumber = 2 # For light H+ physics model
-            elif self._opts.combine:
+#            if self._opts.lands:
+#                myLastUntouchableLandsProcessNumber = 2 # For light H+ physics model
+            if self._opts.combine:
                 myLastUntouchableLandsProcessNumber = 1 # For light H+ physics model
         myIdsForRemoval = []
         for c in self._datasetGroups:
@@ -447,10 +508,11 @@ class TableProducer:
     def _generateHeader(self, mass=None):
         myString = ""
         myLimitCode = None
-        if self._opts.lands:
-            myLimitCode = "LandS"
-        elif self._opts.combine:
-            myLimitCode = "Combine"
+        #if self._opts.lands:
+        #    myLimitCode = "LandS"
+        #elif self._opts.combine:
+        #    myLimitCode = "Combine"
+        myLimitCode = "Combine"
         if hasattr(self._config, "OptionSignalInjection"):
             myLimitCode = "SIGNALINJECTION(%s, norm=%f) %s"%(self._config.OptionSignalInjection["sample"], self._config.OptionSignalInjection["normalization"], myLimitCode)
         if mass == None:
@@ -482,10 +544,9 @@ class TableProducer:
         myObsCount = self._observation._rateResult._histograms[0].Integral()
         if self._opts.debugMining:
             print "  Observation is %d"%myObsCount
-        if self._opts.lands:
-            myResult = "Observation    %d\n"%myObsCount
-        elif self._opts.combine:
-            myResult =  "bin            taunuhadr\n"
+
+        if 1:
+            myResult =  "bin            %s\n" % (self.channelLabel)
             if hasattr(self._config, "OptionSignalInjection") or self._opts.testShapeSensitivity:
                 myResult += "observation    %f\n"%myObsCount
             else:
@@ -499,10 +560,12 @@ class TableProducer:
         myRow = ["bin",""]
         for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
             if c.isActiveForMass(mass,self._config):
-                if self._opts.lands:
-                    myRow.append("1")
-                elif self._opts.combine:
-                    myRow.append("taunuhadr")
+                #if self._opts.lands:
+                #    myRow.append("1")
+                #elif self._opts.combine:
+                #    myRow.append("taunuhadr")
+                myRow.append(self.channelLabel)
+
         myResult.append(myRow)
         # obtain labels
         myRow = ["process",""]
@@ -608,7 +671,7 @@ class TableProducer:
                     myRow = [myVirtualMergeInformation[n.getId()+"ID"]]
                 else:
                     myRow = ["%s"%(n.getId())]
-                if self._opts.lands:
+                if 0: #self._opts.lands:
                     myRow.append(n.getDistribution())
                 elif self._opts.combine:
                     # Check if there are shapes and scalars on the same row
@@ -664,13 +727,13 @@ class TableProducer:
                             myRow.append(myValueString)
                         else:
                             if n.isShapeNuisance():
-                                if self._opts.lands:
+                                if 0:#self._opts.lands:
                                     myRow.append("0")
                                 elif self._opts.combine:
                                     myRow.append("-")
                             else:
                                 myRow.append("-")
-                if self._opts.lands:
+                if 0: #self._opts.lands:
                     # Add description to end of the row for LandS
                     if n.getId() in myVirtualMergeInformation.keys():
                         myRow.append(myVirtualMergeInformation["%sdescription"%n.getId()])
@@ -801,7 +864,7 @@ class TableProducer:
                 c.setResultHistogramsToRootFile(rootFile)
                 # Add bin-by-bin stat.uncert.
                 hRate = c._rateResult.getHistograms()[0]
-                myHistos = createBinByBinStatUncertHistograms(hRate, self._config.MinimumStatUncertainty)
+                myHistos = createBinByBinStatUncertHistograms(hRate)
                 for h in myHistos:
                     h.SetDirectory(rootFile)
                 c._rateResult._tempHistos.extend(myHistos)
@@ -843,50 +906,55 @@ class TableProducer:
 
         # Inform the user
         msg = "Shape variation tables written to "
-        Print(msg + ShellStyles.SuccessStyle() + myFilename + ShellStyles.NormalStyle() ) #ShellStyles.HighlightAltStyle()
+        Verbose(msg + ShellStyles.SuccessStyle() + myFilename + ShellStyles.NormalStyle() ) #ShellStyles.HighlightAltStyle()
         return
+
+    def getFormattedUnc(self, formatStr,myPrecision,uncUp,uncDown):
+        if abs(round(uncDown,myPrecision)-round(uncUp,myPrecision)) < pow(0.1,myPrecision)-pow(0.1,myPrecision+2): # last term needed because of float point fluctuations
+            # symmetric
+            return "+- %s"%(formatStr%uncDown)
+        else:
+            # asymmetric
+            return "+%s -%s"%(formatStr%uncUp,formatStr%uncDown)
+
+    def getResultString(self, hwu,formatStr,myPrecision):
+        if not hwu==None:
+            return "%s +- %s (stat.) %s (syst.)\n"%(formatStr%hwu.getRate(),formatStr%hwu.getRateStatUncertainty(),
+                                                    self.getFormattedUnc(formatStr,myPrecision,*hwu.getRateSystUncertainty()))
+        else: return ""
+
+    def getLatexFormattedUnc(self, formatStr,myPrecision,uncUp,uncDown):
+        if abs(round(uncDown,myPrecision)-round(uncUp,myPrecision)) < pow(0.1,myPrecision)-pow(0.1,myPrecision+2): # last term needed because of float point fluctuations
+            # symmetric
+                return "\\pm %s"%(formatStr%uncDown)
+        else:
+            # asymmetric
+            return "~^{+%s}_{-%s}"%(formatStr%uncUp, formatStr%uncDown)
+
+    def getLatexResultString(self, hwu,formatStr,myPrecision):
+        if not hwu==None:
+            return "$%s \\pm %s %s $"%(formatStr%hwu.getRate(),formatStr%hwu.getRateStatUncertainty(),
+                                       self.getLatexFormattedUnc(formatStr,myPrecision,*hwu.getRateSystUncertainty()))
+        else: return ""
 
     def makeEventYieldSummary(self):
         '''
         Prints event yield summary table
         '''
-        formatStr = "%6."
-        myPrecision = None
+        self.formatStr = "%6."
+        self.myPrecision = None
         if self._config.OptionNumberOfDecimalsInSummaries == None:
             print ShellStyles.WarningLabel()+"Using default value for number of decimals in summaries. To change, set OptionNumberOfDecimalsInSummaries in your config."+ShellStyles.NormalStyle()
-            formatStr += "1"
-            myPrecision = 1
+            self.formatStr += "1"
+            self.myPrecision = 1
         else:
-            formatStr += "%d"%self._config.OptionNumberOfDecimalsInSummaries
-            myPrecision = self._config.OptionNumberOfDecimalsInSummaries
-        formatStr += "f"
-
-        def getFormattedUnc(formatStr,myPrecision,uncUp,uncDown):
-            if abs(round(uncDown,myPrecision)-round(uncUp,myPrecision)) < pow(0.1,myPrecision)-pow(0.1,myPrecision+2): # last term needed because of float point fluctuations
-                # symmetric
-                return "+- %s"%(formatStr%uncDown)
-            else:
-                # asymmetric
-                return "+%s -%s"%(formatStr%uncUp,formatStr%uncDown)
-
-        def getResultString(hwu,formatStr,myPrecision):
-            return "%s +- %s (stat.) %s (syst.)\n"%(formatStr%hwu.getRate(),formatStr%hwu.getRateStatUncertainty(),
-                getFormattedUnc(formatStr,myPrecision,*hwu.getRateSystUncertainty()))
-
-        def getLatexFormattedUnc(formatStr,myPrecision,uncUp,uncDown):
-            if abs(round(uncDown,myPrecision)-round(uncUp,myPrecision)) < pow(0.1,myPrecision)-pow(0.1,myPrecision+2): # last term needed because of float point fluctuations
-                # symmetric
-                return "\\pm %s"%(formatStr%uncDown)
-            else:
-                # asymmetric
-                return "~^{+%s}){-%s}"%(formatStr%uncUp, formatStr%uncDown)
-
-        def getLatexResultString(hwu,formatStr,myPrecision):
-            return "$%s \\pm %s %s $"%(formatStr%hwu.getRate(),formatStr%hwu.getRateStatUncertainty(),
-                getLatexFormattedUnc(formatStr,myPrecision,*hwu.getRateSystUncertainty()))
-
-        # Loop over mass points
-        for m in self._config.MassPoints:
+            self.formatStr += "%d"%self._config.OptionNumberOfDecimalsInSummaries
+            self.myPrecision = self._config.OptionNumberOfDecimalsInSummaries
+        self.formatStr += "f"
+        
+        # For-loop: All mass points
+        for i, m in enumerate(self._config.MassPoints, 1):
+            Verbose("Mass point is %d" % (m), i==1)
 
             # Initialize
             HH        = None
@@ -896,11 +964,13 @@ class TableProducer:
             Embedding = None
             EWKFakes  = None
 
-            # Loop over columns to obtain RootHistoWithUncertainties objects
             containsQCDdataset = False
-            for c in self._datasetGroups:
+            # For-loop: All columns t(o obtain RootHistoWithUncertainties objects)
+            for j, c in enumerate(self._datasetGroups, 1):
+                Verbose("Column label is %s" % (c.getLabel()), j==1)
 
-                if c.isActiveForMass(m,self._config) and not c.typeIsEmptyColumn():
+                # FIXME: What a mess!
+                if c.isActiveForMass(m, self._config) and not c.typeIsEmptyColumn():
                     # Find out what type the column is
                     if c.getLabel().startswith("HH") or c.getLabel().startswith("CMS_Hptntj_HH"):
                         HH = c.getCachedShapeRootHistogramWithUncertainties().Clone()
@@ -910,16 +980,18 @@ class TableProducer:
                         HW = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                     elif c.getLabel().startswith("HST") or c.getLabel().startswith("CMS_Hptntj_HST"):
                         HST = c.getCachedShapeRootHistogramWithUncertainties().Clone()
-                    elif c.typeIsQCD():
+                    elif c.typeIsQCD() or c.typeIsFakeB():
                         containsQCDdataset = True
                         if QCD == None:
                             try:
                                 QCD = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                             except AttributeError:
-                                raise Exception(ShellStyles.ErrorLabel()+"Did you create the pseudo-Multicrab containing the correctly normalized QCD background? Step 3) in the QCD background measurement instructions.")
+                                msg = "Did you create the pseudo-Multicrab containing the correctly normalized QCD background? Step 3) in the QCD background measurement instructions."
+                                raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
                         else:
                             QCD.Add(c.getCachedShapeRootHistogramWithUncertainties())
-                    elif c.typeIsEWK() or (c.typeIsEWKfake() and self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated"):
+                    elif c.typeIsEWK() or (c.typeIsEWKfake() and self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated") or c.typeIsEWKMC() or c.typeIsGenuineB():
+                        # fixme: what a mess! c.typeIsEWKMC() and c.typeIsGenuineB() ORs added for h2tb. must make a proper code!
                         if Embedding == None:
                             Embedding = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                         else:
@@ -931,11 +1003,12 @@ class TableProducer:
                             EWKFakes.Add(c.getCachedShapeRootHistogramWithUncertainties())
                     else:
                         msg = "Unknown dataset type for dataset %s!%s" % (c.getLabel(), ShellStyles.NormalStyle())
-                        raise Exception(ShellStyles.ErrorLabel() + msg)
+                        raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
+                    
 
             # Calculate signal yield
             myBr = self._config.OptionBr
-            if not (self._config.OptionLimitOnSigmaBr or m > 179):
+            if not (self._config.OptionLimitOnSigmaBr or m > 161 or HW==None):
                 if self._config.OptionBr == None:
                     print ShellStyles.WarningLabel()+"Br(t->bH+) has not been specified in config file, using default 0.01! To specify, add OptionBr=0.05 to the config file."+ShellStyles.NormalStyle()
                     myBr = 0.01
@@ -954,9 +1027,11 @@ class TableProducer:
                 TotalExpected.Add(Embedding)
             else:
                 TotalExpected = Embedding.Clone()
-            if not self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
-                if EWKFakes != None:
-                    TotalExpected.Add(EWKFakes)
+
+            if hasattr(self._config, 'OptionGenuineTauBackgroundSource'):
+                if not self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
+                    if EWKFakes != None:
+                        TotalExpected.Add(EWKFakes)
 
             # Construct table (FIXME: what a mess!)
             '''
@@ -971,19 +1046,22 @@ class TableProducer:
             myOutput += "\n"
             myOutput += "Number of events\n"
             if not (self._config.OptionLimitOnSigmaBr or m > 179):
-                myOutput += "Signal, mH+=%3d GeV, Br(t->bH+)=%.2f: %s"%(m,myBr,getResultString(HW,formatStr,myPrecision))
+                myOutput += "Signal, mH+=%3d GeV, Br(t->bH+)=%.2f: %s"%(m,myBr,self.getResultString(HW, self.formatStr, self.myPrecision))
             else:
-                myOutput += "Signal, mH+=%3d GeV, sigma x Br=1 pb: %s"%(m,getResultString(HW,formatStr,myPrecision))
+                myOutput += "Signal, mH+=%3d GeV, sigma x Br=1 pb: %s"%(m,self.getResultString(HW, self.formatStr, self.myPrecision))
             myOutput += "Backgrounds:\n"
             if containsQCDdataset:
-                myOutput += "                           Multijets: %s"%getResultString(QCD,formatStr,myPrecision)
-            if self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
-                myOutput += "                           MC EWK+tt: %s"%getResultString(Embedding,formatStr,myPrecision)
-            else:
-                myOutput += "                    EWK+tt with taus: %s"%getResultString(Embedding,formatStr,myPrecision)
-                if EWKFakes != None:
-                    myOutput += "               EWK+tt with fake taus: %s"%getResultString(EWKFakes,formatStr,myPrecision)
-            myOutput += "                      Total expected: %s"%getResultString(TotalExpected,formatStr,myPrecision)
+                myOutput += "                           Multijets: %s"%self.getResultString(QCD, self.formatStr, self.myPrecision)
+
+            if hasattr(self._config, 'OptionGenuineTauBackgroundSource'):
+                if self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
+                    myOutput += "                           MC EWK+tt: %s"%self.getResultString(Embedding, self.formatStr, self.myPrecision)
+                else:
+                    myOutput += "                    EWK+tt with taus: %s"%self.getResultString(Embedding, self.formatStr, self.myPrecision)
+                    if EWKFakes != None:
+                        myOutput += "               EWK+tt with fake taus: %s"%self.getResultString(EWKFakes, self.formatStr, self.myPrecision)
+                myOutput += "                      Total expected: %s"%self.getResultString(TotalExpected, self.formatStr, self.myPrecision)
+            # FIXME: Add support for config.OptionFakeBMeasurementSource?
 
             #if self._config.BlindAnalysis:
             #    myOutput += "                            Observed: BLINDED\n\n"
@@ -994,72 +1072,118 @@ class TableProducer:
             if self._config.OptionDisplayEventYieldSummary:
                Print(myOutput)
 
-            # Save output to file
-            myFilename = self._infoDirname + "/EventYieldSummary_m%d.txt" % m #fixme: Ridiculously big name!
+            # Save output to file & infor user
+            myFilename = self._infoDirname + "/EventYieldSummary_m%d.txt" % m
             myFile = open(myFilename, "w")
             myFile.write(myOutput)
             myFile.close()
-            
-            # Inform user
-            if self._opts.verbose:
-                msg = "Event yield summary written to "
-                Print(msg + ShellStyles.SuccessStyle() + msg + myFilename + ShellStyles.NormalStyle(), True) #HighlightAltStyle
-            
-            myOutputLatex = "% table auto generated by datacard generator on "+self._timestamp+" for "+self._config.DataCardName+" / "+self._outputPrefix+"\n"
-            myOutputLatex += "\\renewcommand{\\arraystretch}{1.2}\n"
-            myOutputLatex += "\\begin{table}\n"
-            myOutputLatex += "  \\centering\n"
-            if not (self._config.OptionLimitOnSigmaBr or m > 179):
-                myOutputLatex += "  \\caption{Summary of the number of events from the signal with mass point $\\mHpm=%d\\GeVcc$ with $\\BRtH=%.2f$,\n"%(m,myBr)
-            else:
-                myOutputLatex += "  \\caption{Summary of the number of events from the signal with mass point $\\mHpm=%d\\GeVcc$,\n"%(m)
-            myOutputLatex += "           from the background measurements, and the observed event yield. Luminosity uncertainty is not included in the numbers.}\n"
-            myOutputLatex += "  \\label{tab:summary:yields}\n"
-            myOutputLatex += "  \\vskip 0.1 in\n"
-            myOutputLatex += "  \\hspace*{-.8cm}\n"
-            myOutputLatex += "  \\begin{tabular}{ l c }\n"
-            myOutputLatex += "  \\hline\n"
-            myOutputLatex += "  \\multicolumn{1}{ c }{Source}  & $N_{\\text{events}} \\pm \\text{stat.} \\pm \\text{syst.}$  \\\\ \n"
-            myOutputLatex += "  \\hline\n"
-            myOutputLatex += "  HH+HW, $\\mHplus = %3d\\GeVcc             & %s \\\\ \n"%(m,getLatexResultString(HW,formatStr,myPrecision))
-            myOutputLatex += "  \\hline\n"
-            if containsQCDdataset:
-                myOutputLatex += "  Multijet background (data-driven)       & %s \\\\ \n"%getLatexResultString(QCD,formatStr,myPrecision)
-            if self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
-                myOutputLatex += "  MC EWK+\\ttbar                           & %s \\\\ \n"%getLatexResultString(Embedding,formatStr,myPrecision)
-            else:
-                myOutputLatex += "  EWK+\\ttbar with $\\tau$ (data-driven)    & %s \\\\ \n"%getLatexResultString(Embedding,formatStr,myPrecision)
-                if EWKFakes != None:
-                    myOutputLatex += "  EWK+\\ttbar with e/\\mu/jet\\to$\\tau$ (MC) & %s \\\\ \n"%getLatexResultString(EWKFakes,formatStr,myPrecision)
-            myOutputLatex += "  \\hline\n"
-            myOutputLatex += "  Total expected from the SM              & %s \\\\ \n"%getLatexResultString(TotalExpected,formatStr,myPrecision)
-            #if self._config.BlindAnalysis:
-            #    myOutputLatex += "  Observed: & BLINDED \\\\ \n"
-            #else:
-	    myOutputLatex += "  Observed: & %5d \\\\ \n"%self._observation.getCachedShapeRootHistogramWithUncertainties().getRate()
-            myOutputLatex += "  \\hline\n"
-            myOutputLatex += "  \\end{tabular}\n"
-            myOutputLatex += "\\end{table}\n"
-            myOutputLatex += "\\renewcommand{\\arraystretch}{1}\n"
+            msg = "Event yield summary written to "
+            self.Verbose(msg + ShellStyles.SuccessStyle() + msg + myFilename + ShellStyles.NormalStyle(), True) #HighlightAltStyle
 
-            # Save output to file 
-            myFilename = self._infoDirname + "/EventYieldSummary_m%d_" % (m) 
-            myFilename+= self._timestamp + "_" + self._outputPrefix + "_" + self._config.DataCardName.replace(" ","_")
-            myFilename+= ".tex" #fixme: Ridiculously big name!
-            myFile = open(myFilename, "w")
-            myFile.write(myOutputLatex)
-            myFile.close()
-            
-            # Inform user
-            if self._opts.verbose:
-                # msg = "Latex table of event yield summary for mass %d written to \"%s\"" % (m, myFilename)
-                msg = "Event yield summary (LaTeX) written to "
-                Print(msg + ShellStyles.SuccessStyle() + myFilename + ShellStyles.NormalStyle() ) #ShellStyles.HighlightAltStyle()
-                
-        # Inform user of where the event yield summaries were saved
-        msg = "Event yield summary tables written to " 
-        Print(msg + ShellStyles.SuccessStyle() + self._infoDirname + ShellStyles.NormalStyle(), False) #ShellStyles.HighlightAltStyle() 
+            # Save the event yield to a file (LaTeX table)
+            self.saveEventYieldsToFile(m, QCD, Embedding, TotalExpected)
         return
+
+    def saveEventYieldsToFile(self, m, QCD, Embedding, TotalExpected):
+        # First construct the file name
+        baseName = "EventYieldSummary_m%d_" % (m)
+        fileName  = os.path.join(self._infoDirname, baseName)
+        if self._h2tb:
+            fileName += self._outputPrefix + "_" + self._config.DataCardName.replace(" ","_")
+        else:
+            fileName += self._timestamp + "_" + self._outputPrefix + "_" + self._config.DataCardName.replace(" ","_")
+        fileName += ".tex"
+        # Get the contents of the table
+        myOutputLatex = self.getEventYieldTable(m, QCD, Embedding, TotalExpected)
+
+        # Now save the file
+        myFile = open(fileName, "w")
+        myFile.write(myOutputLatex)
+        myFile.close()
+
+        # Inform user before returning
+        msg = "Event yield summary (LaTeX) written to %s" % (ShellStyles.SuccessStyle() + os.path.basename(fileName) + ShellStyles.NormalStyle())
+        self.Verbose(msg, True)
+        return
+    
+    def getEventYieldTable(self, mass, QCD, Embedding, TotalExpected):
+        if self._h2tb:
+            return self.getEventYieldTableHToTB(mass, QCD, Embedding, TotalExpected)
+        else:
+            return self.getEventYieldTableHToTauNu(mass, QCD, Embedding, TotalExpected)
+
+    def getEventYieldTableHToTB(self, m, QCD, Embedding, TotalExpected):
+        myOutputLatex = "% table auto gene rated by datacard generator on "+self._timestamp+" for "+self._config.DataCardName+" / "+self._outputPrefix+"\n"
+        myOutputLatex += "\\renewcommand{\\arraystretch}{1.2}\n"
+        #myOutputLatex += "\\begin{table}\n"
+        #myOutputLatex += "\\centering\n"
+        myOutputLatex += "\\caption{Summary of the number of events from the signal with mass point $\\mHpm=%d\\GeVcc$,\n"%(m)
+        myOutputLatex += "           from the background measurements, and the observed event yield. Luminosity uncertainty is not included in the numbers.}\n"
+        #myOutputLatex += "\\label{tab:summary:yields}\n"
+        #myOutputLatex += "\\vskip 0.1 in\n"
+        #myOutputLatex += "\\hspace*{-.8cm}\n"
+        myOutputLatex += "\\begin{tabular}{ l c }\n"
+        myOutputLatex += "\\hline\n"
+        myOutputLatex += "\\multicolumn{1}{ c }{Source}  & Events $\\pm$ stat. $\\pm$ syst.  \\\\ \n"
+        myOutputLatex += "\\hline\n"
+        # myOutputLatex += "HH+HW, $\\mHplus = %3d\\GeVcc             & %s \\\\ \n"%(m,getLatexResultString(HW, self.formatStr, self.myPrecision))
+        # myOutputLatex += "\\hline\n"
+        if self._config.OptionFakeBMeasurementSource:
+            myOutputLatex += "\\FakeB background (data-driven)   & %s \\\\ \n" % self.getLatexResultString(QCD, self.formatStr, self.myPrecision)
+            myOutputLatex += "\\GenuineB background              & %s \\\\ \n" % self.getLatexResultString(Embedding, self.formatStr, self.myPrecision)
+        myOutputLatex += "  \\hline\n"
+        myOutputLatex += "  Total expected from the SM              & %s \\\\ \n" % self.getLatexResultString(TotalExpected, self.formatStr, self.myPrecision)
+        if self._config.BlindAnalysis*0:
+            myOutputLatex += "  Observed: & BLINDED \\\\ \n"
+        myOutputLatex += "  Observed & %5d \\\\ \n"%self._observation.getCachedShapeRootHistogramWithUncertainties().getRate()
+        myOutputLatex += "  \\hline\n"
+        myOutputLatex += "  \\end{tabular}\n"
+        #myOutputLatex += "\\end{table}\n"
+        myOutputLatex += "\\renewcommand{\\arraystretch}{1}\n"
+        return myOutputLatex
+
+    def getEventYieldTableHToTauNu(self, m, QCD, Embedding, TotalExpected):
+        myOutputLatex = "% table auto generated by datacard generator on "+self._timestamp+" for "+self._config.DataCardName+" / "+self._outputPrefix+"\n"
+        myOutputLatex += "\\renewcommand{\\arraystretch}{1.2}\n"
+        myOutputLatex += "\\begin{table}\n"
+        myOutputLatex += "  \\centering\n"
+        if not (self._config.OptionLimitOnSigmaBr or m > 179):
+            myOutputLatex += "  \\caption{Summary of the number of events from the signal with mass point $\\mHpm=%d\\GeVcc$ with $\\BRtH=%.2f$,\n"%(m,myBr)
+        else:
+            myOutputLatex += "  \\caption{Summary of the number of events from the signal with mass point $\\mHpm=%d\\GeVcc$,\n"%(m)
+        myOutputLatex += "           from the background measurements, and the observed event yield. Luminosity uncertainty is not included in the numbers.}\n"
+        myOutputLatex += "  \\label{tab:summary:yields}\n"
+        myOutputLatex += "  \\vskip 0.1 in\n"
+        myOutputLatex += "  \\hspace*{-.8cm}\n"
+        myOutputLatex += "  \\begin{tabular}{ l c }\n"
+        myOutputLatex += "  \\hline\n"
+        myOutputLatex += "  \\multicolumn{1}{ c }{Source}  & $N_{\\text{events}} \\pm \\text{stat.} \\pm \\text{syst.}$  \\\\ \n"
+        myOutputLatex += "  \\hline\n"
+        myOutputLatex += "  HH+HW, $\\mHplus = %3d\\GeVcc             & %s \\\\ \n" % (m, self.getLatexResultString(HW, self.formatStr, self.myPrecision))
+        myOutputLatex += "  \\hline\n"
+        if containsQCDdataset:
+            myOutputLatex += "  Multijet background (data-driven)       & %s \\\\ \n" % self.getLatexResultString(QCD, self.formatStr, self.myPrecision)
+            
+
+        if hasattr(self._config, 'OptionGenuineTauBackgroundSource'):
+            if self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
+                myOutputLatex += "  MC EWK+\\ttbar                           & %s \\\\ \n" % self.getLatexResultString(Embedding, self.formatStr, self.myPrecision)
+            else:
+                myOutputLatex += "  EWK+\\ttbar with $\\tau$ (data-driven)    & %s \\\\ \n" % self.getLatexResultString(Embedding, self.formatStr, self.myPrecision)
+                if EWKFakes != None:
+                    myOutputLatex += "  EWK+\\ttbar with e/\\mu/jet\\to$\\tau$ (MC) & %s \\\\ \n" % self.getLatexResultString(EWKFakes, self.formatStr, self.myPrecision)
+        # FIXME: Add support for config.OptionFakeBMeasurementSource?
+        myOutputLatex += "  \\hline\n"
+        myOutputLatex += "  Total expected from the SM              & %s \\\\ \n" % self.getLatexResultString(TotalExpected, self.formatStr, self.myPrecision)
+        # if self._config.BlindAnalysis:
+        #    myOutputLatex += "  Observed: & BLINDED \\\\ \n"
+        # else:
+        myOutputLatex += "  Observed: & %5d \\\\ \n"%self._observation.getCachedShapeRootHistogramWithUncertainties().getRate()
+        myOutputLatex += "  \\hline\n"
+        myOutputLatex += "  \\end{tabular}\n"
+        myOutputLatex += "\\end{table}\n"
+        myOutputLatex += "\\renewcommand{\\arraystretch}{1}\n"
+        return myOutputLatex
 
     def _getFormattedSystematicsNumber(self, value):
         '''
@@ -1076,15 +1200,8 @@ class TableProducer:
         '''
         Prints systematics summary table
         '''
-#        myColumnOrder = ["HH",
-#                         "HW",
-#                         "QCD",
-#                         "EWK_Tau",
-#                         "EWK_DY",
-#                         "EWK_VV",
-#                         "EWK_tt_faketau",
-#                         "EWK_W_faketau",
-#                         "EWK_t_faketau"]
+        if self._h2tb and light==True:
+            return
         signalColumn="CMS_Hptntj_Hp"
         if light:
             signalColumn="HW"
@@ -1096,74 +1213,93 @@ class TableProducer:
                          "DY_t_genuine",
                          "VV_t_genuine"]
 
-# Old list:
-#        myNuisanceOrder = [["01","$\\tau - p_T^{miss}$ trigger"], # trg
-#                           ["03", "$\\tau$ jet ID (excl. $R_\\tau$"], # tau ID
-#                           ["04", "jet, $\\mathcal{l}\\to\\tau$ mis-ID"], # tau mis-ID
-#                           ["45", "TES"], # energy scale
-#                           ["46", "JES"], # energy scale
-#                           ["47", "Unclustered MET ES"], # energy scale
-#                           ["09", "lepton veto"], # lepton veto
-#                           ["10", "b-jet tagging"], # b tagging
-#                           ["11", "jet$\\to$b mis-ID"], # b mis-tagging
-#                           ["12", "multi-jet stat."], # QCD stat.
-#                           ["13", "multi-jet syst."], # QCD syst.
-#                           ["19", "EWK+$t\\bar{t}$ $\\tau$ stat."], # embedding stat.
-#                           ["14", "multi-jet contam."], # QCD contamination in embedding
-#                           ["15", "$f_{W\\to\\tau\\to\\mu}"], # tau decays to muons in embedding
-#                           ["16", "muon selections"], # muon selections in embedding
-#                           ["34", "pile-up"], # pile-up
-#                           [["17","18","19","22","24","25","26","27"], "simulation stat."], # MC statistics
-#                           [["28","29","30","31","32"], "cross section"], # cross section
-#                           ["33", "luminosity"]] # luminosity
-        myNuisanceOrder = [["CMS_eff_t","tau ID"], # first ID, then the text that goes to the table
-                           ["CMS_eff_t_highpt","high-$p_{T}$ tau ID"],        
-                           ["CMS_eff_t_trg_data","trigger tau leg eff. for data"],
-                           ["CMS_eff_t_trg_MC","trigger tau leg eff. for MC"],
-                           ["CMS_eff_met_trg_data","trigger MET leg eff. for data"],
-                           ["CMS_eff_met_trg_MC","trigger MET leg eff. for MC"],
-                           ["CMS_eff_e_veto","electron veto eff."],
-                           ["CMS_eff_m_veto","muon veto eff."],
-#                           ["CMS_fake_eToTau","CMS fake eToTau"],
-#                           ["CMS_fake_muToTau","CMS fake muToTau"],
-#                           ["CMS_fake_jetToTau","CMS fake jetToTau"],
-                           ["CMS_eff_b","b-tagging eff."],
-                           ["CMS_fake_b","b-mistagging eff."],
-                           ["CMS_scale_t","tau energy scale"],
-                           ["CMS_scale_j","jet energy scale"],
-                           ["CMS_scale_met","MET unclustered energy scale"],
-                           ["CMS_res_j","jet energy resolution"],
-                           ["CMS_Hptntj_topPtReweight","top $p_T$ reweighting"],
-                           ["CMS_pileup","pileup reweighting"],
-                           ["CMS_scale_ttbar", "ttbar scale"],
-                           ["CMS_pdf_ttbar", "ttbar pdf"],
-                           ["CMS_mass_ttbar", "ttbar mass"],
-                           ["CMS_scale_Wjets", "W+jets scale"],
-                           ["CMS_pdf_Wjets", "W+jets pdf"],
-                           ["CMS_scale_DY", "DY scale"],
-                           ["CMS_pdf_DY", "DY pdf"],
-                           ["CMS_scale_VV", "diboson scale"],
-                           ["CMS_pdf_VV", "diboson pdf"],
-                           ["lumi_13TeV","luminosity (13 TeV)"],
-                           ["CMS_Hptntj_QCDbkg_templateFit","Fake tau template fit"],
-                           ["CMS_Hptntj_QCDkbg_metshape","Fake tau MET shape"]
-                       ]
-        # Make table
+
+        if self._h2tb:
+            myColumnOrder = ["Hp",  "FakeB", "TT_GenuineB", "SingleTop_GenuineB", "TTZToQQ_GenuineB",
+                             "TTTT_GenuineB", "DYJetsToQQ_GenuineB",  "TTWJetsToQQ_GenuineB", 
+                             "WJetsToQQ_HT_600ToInf_GenuineB", "Diboson_GenuineB"]
+
+            myNuisanceOrder = [["CMS_eff_trg_MC", "trigger efficiency"],
+                               ["CMS_eff_e_veto", "electron veto eff."],
+                               ["CMS_eff_m_veto", "muon veto eff."],
+                               ["CMS_eff_tau_veto", "tau veto eff."],
+                               ["CMS_eff_b", "b-tagging eff."],
+                               ["CMS_scale_j", "jet energy scale"],
+                               ["CMS_res_j", "jet energy resolution"],
+                               # ["CMS_topPtReweight","top $p_T$ reweighting"],
+                               ["CMS_pileup", "pileup reweighting"],
+                               ["CMS_topTagging", "top tagging"],
+                               ["CMS_scale_ttbar", "$t\\bar{t}$ scale"],
+                               ["CMS_pdf_ttbar", "$t\\bar{t}$ pdf"],
+                               ["CMS_mass_ttbar", "$t\\bar{t}$ mass"],
+                               ["CMS_scale_Wjets", "W+jets scale"],
+                               ["CMS_pdf_Wjets", "W+jets pdf"],
+                               ["CMS_scale_DY",  "DY scale"],
+                               ["CMS_pdf_DY", "DY pdf"],
+                               ["CMS_scale_VV", "Diboson scale"],
+                               ["CMS_pdf_VV", "Diboson pdf"],
+                               ["lumi_13TeV", "luminosity (13 TeV)"],
+                               ["CMS_FakeB_transferFactor", "Fake $b$ transfer factors"]
+                               ]
+        else:
+            myNuisanceOrder = [["CMS_eff_t","tau ID"], # first ID, then the text that goes to the table
+                               ["CMS_eff_t_highpt","high-$p_{T}$ tau ID"],        
+                               ["CMS_eff_t_trg_data","trigger tau leg eff. for data"],
+                               ["CMS_eff_t_trg_MC","trigger tau leg eff. for MC"],
+                               ["CMS_eff_met_trg_data","trigger MET leg eff. for data"],
+                               ["CMS_eff_met_trg_MC","trigger MET leg eff. for MC"],
+                               ["CMS_eff_e_veto","electron veto eff."],
+                               ["CMS_eff_m_veto","muon veto eff."],
+                               # ["CMS_fake_eToTau","CMS fake eToTau"],
+                               # ["CMS_fake_muToTau","CMS fake muToTau"],
+                               # ["CMS_fake_jetToTau","CMS fake jetToTau"],
+                               ["CMS_eff_b","b-tagging eff."],
+                               ["CMS_fake_b","b-mistagging eff."],
+                               ["CMS_scale_t","tau energy scale"],
+                               ["CMS_scale_j","jet energy scale"],
+                               ["CMS_scale_met","MET unclustered energy scale"],
+                               ["CMS_res_j","jet energy resolution"],
+                               ["CMS_Hptntj_topPtReweight","top $p_T$ reweighting"],
+                               ["CMS_pileup","pileup reweighting"],
+                               ["CMS_scale_ttbar", "ttbar scale"],
+                               ["CMS_pdf_ttbar", "ttbar pdf"],
+                               ["CMS_mass_ttbar", "ttbar mass"],
+                               ["CMS_scale_Wjets", "W+jets scale"],
+                               ["CMS_pdf_Wjets", "W+jets pdf"],
+                               ["CMS_scale_DY", "DY scale"],
+                               ["CMS_pdf_DY", "DY pdf"],
+                               ["CMS_scale_VV", "diboson scale"],
+                               ["CMS_pdf_VV", "diboson pdf"],
+                               ["lumi_13TeV","luminosity (13 TeV)"],
+                               ["CMS_Hptntj_QCDbkg_templateFit","Fake tau template fit"],
+                               ["CMS_Hptntj_QCDkbg_metshape","Fake tau MET shape"]
+                               ]
+            
+        # Make table - The horror!
         myTable = []
         for n in myNuisanceOrder: # for each nuisance
             resultFound=False
             myRow = [n[1]]
             isShape=False
+            # For-loop: All columns (in pre-defined order)
             for columnName in myColumnOrder:
-                myMinErrorUp = 9999.0
+                myMinErrorUp   = 9999.0
                 myMinErrorDown = 9999.0
-                myMaxErrorUp = -9999.0
+                myMaxErrorUp   = -9999.0
                 myMaxErrorDown = -9999.0
-                myErrorUp = 0.0
-                myErrorDown = 0.0
+                myErrorUp      = 0.0
+                myErrorDown    = 0.0
+                
+                # For-loop: All datasets
                 for c in self._datasetGroups: 
-                    if columnName in c.getLabel(): # if column name matches to dataset group label
-                        if isinstance(n[0], list): # if this column+nuisance combination matches to a list, loop over the list
+
+                    # if column name matches to dataset group label
+                    foundMatch = columnName in c.getLabel()
+                    if self._h2tb and not "Hp": # dirty but works (for now)
+                        foundMatch = (columnName == c.getLabel()) # exact match needed
+                    if foundMatch: 
+                        # if this column+nuisance combination matches to a list, loop over the list
+                        if isinstance(n[0], list): 
                             for nid in n[0]:
                                 if c.hasNuisanceByMasterId(nid):
                                     # find error up and error down
@@ -1192,6 +1328,7 @@ class TableProducer:
                         else: # if this column+nuisance does not match to a list, but just one entry
                             if c.hasNuisanceByMasterId(n[0]): 
                                 myResult = c.getFullNuisanceResultByMasterId(n[0])
+
                                 if isinstance(myResult.getResult(), ScalarUncertaintyItem):
                                     myErrorDown = myResult.getResult().getUncertaintyDown()
                                     myErrorUp = myResult.getResult().getUncertaintyUp()
@@ -1252,7 +1389,19 @@ class TableProducer:
                 myRow[0]+=" (S)"
             myTable.append(myRow)
 
-        # Make table
+        # Make systematics table & save to file
+        myOutput = self.getSystematicTable(myTable)
+        fileName = self.getSystematicsFileName(light)
+        myFile   = open(fileName, "w")
+        myFile.write(myOutput)
+        myFile.close()
+        msg = "Created systematics LaTeX table %s" % (ShellStyles.SuccessStyle() + fileName + ShellStyles.NormalStyle())
+        self.Verbose(msg, True)
+        return
+
+    def getSystematicTable(self, myTable):
+        if self._h2tb:
+            return self.getSystematicTableHToTB(myTable)
         myOutput = "% table auto generated by datacard generator on "+self._timestamp+" for "+self._config.DataCardName+" / "+self._outputPrefix+"\n\n"
         myOutput += "\\documentclass{article}\n"
         myOutput += "\\begin{document}\n\n"
@@ -1284,23 +1433,50 @@ class TableProducer:
         myOutput += "\\end{table}\n"
         myOutput += "\\renewcommand{\\arraystretch}{1}\n"
         myOutput += "\\end{document}"
-        # Save output to file
-        mySignalText="heavy"
+        return myOutput 
+
+    def getSystematicTableHToTB(self, myTable):
+        myOutput  = "\\renewcommand{\\arraystretch}{1.2}\n"
+        myOutput += "\\begin{table}%%[h]\n"
+        myOutput += "\\begin{center}\n"
+        myOutput += "\\caption{The systematic uncertainties (in \\%) for signal and the backgrounds. The uncertainties, which depend on the final distribution bin, are marked with (S) and for them the maximum contracted value of the negative or positive variation is displayed.}"
+        myOutput += "\\label{tab:summary:systematics}\n"
+        myOutput += "\\vskip 0.1 in\n"
+        myOutput += "\\noindent\\makebox[\\textwidth]{\n"
+        myOutput += "\\begin{tabular}{l|c|c|cccccccc}\n"
+        myOutput += "\\hline\n"
+        myOutput += "& Signal & Fake b & \multicolumn{8}{c}{Genuine b}"
+        myOutput += "\n \\\\"
+        myCaptionLine = [["","","","$t\\bar{t}$", "Single top", "$t\\bar{t}$+Z", "$t\\bar{t}t\\bar{t}$", "$Z/\gamma^{*}$+jets", "$t\\bar{t}$+Z", "W+jets", "Diboson"]] 
+        # Calculate dimensions of tables
+        myWidths = []
+        myWidths = calculateCellWidths(myWidths, myTable)
+        myWidths = calculateCellWidths(myWidths, myCaptionLine)
+        mySeparatorLine = getSeparatorLine(myWidths)
+        # Add caption and table
+        myOutput += getTableOutput(myWidths,myCaptionLine,True)
+        myOutput += "\n \\hline\n"
+        myOutput += getTableOutput(myWidths,myTable,True)
+        myOutput += "\\hline\n"
+        myOutput += "\\end{tabular}\n"
+        myOutput += "}\n"
+        myOutput += "\\end{center}\n"
+        myOutput += "\\end{table}\n"
+        myOutput += "\\renewcommand{\\arraystretch}{1}\n"
+        #myOutput += "\\end{document}"
+        return myOutput 
+
+    def getSystematicsFileName(self, light):
+        postFix = "_heavy.tex"
         if light:
-           mySignalText="light"
+            postFix = "_light.tex"
+        if self._h2tb:
+            postFix = ".tex"
 
-        myFilename = self._infoDirname+"/SystematicsSummary_"+mySignalText
-#        myFilename += "_"+self._timestamp+"_"+self._outputPrefix+"_"+self._config.DataCardName.replace(" ","_")
-        myFilename+=".tex"
-        myFile = open(myFilename, "w")
-        myFile.write(myOutput)
-        myFile.close()
-
-        # Inform the user
-        msg = "Systematics summary table written to "
-        Print(msg + ShellStyles.SuccessStyle() + myFilename + ShellStyles.NormalStyle(), False) #HighlightAltStyle
-        return
-
+        filePath = os.path.join(self._infoDirname, "SystematicsSummary")
+        fileName = filePath + postFix
+        return fileName
+             
     def makeQCDPuritySummary(self):
         '''
         Prints QCD purity information
@@ -1437,8 +1613,9 @@ class TableProducer:
         self._observation._rateResult._histograms = [hOriginalObservationFinalHistogram, hOriginalObservationFineBinningHistogram]
         self._observation._result = hOriginalObservationFinalHistogram.Integral()
         self._extractors = myOriginalExtractors[:]
+
         # Output
-        print "\nCreated datacards with 0 +-1 -> 1 +- 0 shift for each shape nuisance"
+        Print("Created datacards with 0 +-1 -> 1 +- 0 shift for each shape nuisance", True)
         for item in myOutList:
             print item
         

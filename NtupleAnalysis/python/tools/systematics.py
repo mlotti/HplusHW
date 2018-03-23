@@ -108,22 +108,31 @@ _crossSectionUncertainty = {
     # Single top, based on http://arxiv.org/abs/1311.0283 and https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SingleTopRefXsec#Single_top_Wt_channel_cross_sect
     "SingleTop_scale":  ScalarUncertaintyItem("xsect", 1.80/71.7),
     "SingleTop_pdf":  ScalarUncertaintyItem("xsect", 3.40/71.7), 
-    "SingleTop": ScalarUncertaintyItem("xsect", 0.062), # scale and pdf combined (quadratically)
 
     # W+jets, based on "Total W" on https://twiki.cern.ch/twiki/bin/view/CMS/StandardModelCrossSectionsat13TeVInclusive
     "WJets_scale":  ScalarUncertaintyItem("xsect", plus=165.7/20508.9, minus=88.2/20508.9), 
     "WJets_pdf":  ScalarUncertaintyItem("xsect", 770.9/20508.9),
-    "WJets":  ScalarUncertaintyItem("xsect", 0.050), # scale and pdf combined (quadratically)
     
     # DY, based on "Z/a* (50) on https://twiki.cern.ch/twiki/bin/view/CMS/StandardModelCrossSectionsat13TeVInclusive
     "DYJetsToLL_scale": ScalarUncertaintyItem("xsect", plus=13.2/2008.4, minus=7.5/2008.4),
     "DYJetsToLL_pdf": ScalarUncertaintyItem("xsect", 75.0/2008.4), 
-    "DYJetsToLL": ScalarUncertaintyItem("xsect", 0.043), # scale and pdf combined (quadratically)
     
     # Diboson, values from MIT PAS AN-16-194 (see also https://twiki.cern.ch/twiki/bin/view/CMS/StandardModelCrossSectionsat13TeVInclusive)
     "Diboson_scale": ScalarUncertaintyItem("xsect", 0.032), 
     "Diboson_pdf": ScalarUncertaintyItem("xsect", 0.044),
-    "Diboson": ScalarUncertaintyItem("xsect", 0.054), # scale and pdf combined (quadratically)
+
+    # ttW, values from HIG-17-022 which shows consistency with all other systematics defined here (TTJets, SingleTop, WJets, DY, Diboson, ..)
+    "TTW_scale": ScalarUncertaintyItem("xsect", plus=0.13, minus=0.12), 
+    "TTW_pdf"  : ScalarUncertaintyItem("xsect", 0.02),  # 2%
+
+    # ttZ, values from HIG-17-022 which shows consistency with all other systematics defined here (TTJets, SingleTop, WJets, DY, Diboson, ..)
+    "TTZ_scale": ScalarUncertaintyItem("xsect", plus=0.10, minus=0.12), 
+    "TTZ_pdf"  : ScalarUncertaintyItem("xsect", 0.03),  # 2%
+
+    # tttt
+#    "TTTT_scale": ScalarUncertaintyItem("xsect", plus=0.10, minus=0.12), 
+#    "TTTT_pdf"  : ScalarUncertaintyItem("xsect", 0.03),  # 2%
+#    "TTTT"      : ScalarUncertaintyItem("xsect", 0.12), # scale and pdf combined (quadratically)
     
     # MC QCD: we do not trust the MC QCD, therefore 100 % uncertainty
     "QCD": ScalarUncertaintyItem("xsect", 1.00),
@@ -184,7 +193,7 @@ def getBinningForTetrajetMass(binLevel=0):
     tetrajet object = ldg (in pT) trijet  + ldg (in ) free bjet 
     '''
     myBins = []
-    if binLevel == -1: #default binning
+    if binLevel == -1: #1 bin (counting experiment)
         myBins = [0.0, 4000.0] 
     elif binLevel == 0: #default binning
         for i in range(0, 1000, 50):
@@ -273,6 +282,7 @@ _dataDrivenCtrlPlotBinning = {
     "InvariantMass*": [0,20,40,60,80,100,120,140,160,200,400,500,600,700,800,900,1000,1500,2000,3000,4000,5000],
     "SelectedTau_pT_AfterStandardSelections": [0,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500,600,700,800,900,1000],
     "SelectedTau_eta_AfterStandardSelections": [-2.5,-2.1,-1.8,-1.6,-1.4,-1.2,-1.0,-0.8,-0.6,-0.4,-0.2,-0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.1,2.5],
+#    "SelectedTau_eta_AfterStandardSelections": [float(x) * 0.1 for x in range(-25, 26)],
     "SelectedTau_phi_AfterStandardSelections": [-3.14,-2.75,-2.36,-1.96,-1.57,-1.18,-0.79,-0.39,0.00,0.39,0.79,1.18,1.57,1.96,2.36,2.75,3.14],
     "SelectedTau_ldgTrkPt_AfterStandardSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500,600,700,800,900,1000],
     "SelectedTau_Rtau_AfterStandardSelections": [0.70,0.72,0.74,0.76,0.78,0.80,0.82,0.84,0.86,0.88,0.90,0.92,0.94,0.96,0.98,1.00],
@@ -297,9 +307,26 @@ _dataDrivenCtrlPlotBinning = {
     "MinDeltaPhiTauJet_AfterAllSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
     "MaxDeltaPhiTauJet_AfterAllSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
     "NVertices_AfterAllSelections": None,
-    #"LdgTetrajetMass_AfterAllSelections": [0,50,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,520,540,560,580,600,620,640,660,680,700,720,740,760,780,800,820,840,860,880,900,920,940,960,980,1000,1020,1040,1060,1080,1100,1150,1200,1250,1300,1350,1400,1450,1500,1750,2000,2250,2500,2750,3000,3250,3500,3750,4000], # for H+ -> tb analysis    
-    "LdgTetrajetMass_AfterAllSelections": getBinningForTetrajetMass(2)
+    # HToTB
+    "MET_AfterAllSelections"  : [i for i in range(0, 100, 10)] + [i for i in range(100, 200, 20)] + [i for i in range(200, 300, 50)] + [i for i in range(300, 400+100, 100)],
+    "HT_AfterAllSelections"   : [i for i in range(500, 1500, 50)] + [i for i in range(1500, 2000, 100)] + [i for i in range(2000, 3000+500, 500)],
+    "MHT_AfterAllSelections"  : [i for i in range(0, 140, 10)] + [i for i in range(140, 240, 20)] + [i for i in range(240, 400, 50)],
+    "QGLR_AfterAllSelections" : [float(i)/100.0 for i in range(0, 105, 5)],
+    "LdgTrijetPt_AfterAllSelections"     : [j for j in range(0, 500, 20)] + [k for k in range(500, 700, 50)] + [k for k in range(700, 900+100, 100)],
+    "LdgTrijetMass_AfterAllSelections"   : [i for i in range(50, 350, 10)],
+    "LdgTrijetBjetPt_AfterAllSelections" : [j for j in range(0, 300, 10)] + [k for k in range(300, 700+40, 40)],
+    "LdgTrijetBjetEta_AfterAllSelections" : None,
+    "LdgTrijetDijetPt_AfterAllSelections": [j for j in range(0, 400, 10)] + [k for k in range(400, 700+25, 25)],
+    "LdgTrijetDijetMass_AfterAllSelections": None,
+    "LdgTrijetTopMassWMassRatioAfterAllSelections": None,
+    "TetrajetBjetPt_AfterAllSelections"  : [j for j in range(0, 400, 20)] + [k for k in range(400, 600, 40)] + [k for k in range(600, 900+100, 100)],
+    "TetrajetBjetEta_AfterAllSelections" : None,
+    "LdgTetrajetPt_AfterAllSelections"   : [j for j in range(0, 500, 20)] + [k for k in range(500, 700, 50)] + [k for k in range(700, 900+100, 100)],
+    "LdgTetrajetMass_AfterAllSelections": getBinningForTetrajetMass(0),
+    "NVertices_AfterAllSelections": [j for j in range(0, 40, 2)] + [j for j in range(40, 60, 5)] + [j for j in range(60, 80+10, 10)]   
 }
+
+
 # Add EWK fake tau shape definitions
 for key in _dataDrivenCtrlPlotBinning.keys():
     if "shape" in key:
