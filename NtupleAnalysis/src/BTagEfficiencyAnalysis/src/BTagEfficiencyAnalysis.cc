@@ -147,10 +147,11 @@ void BTagEfficiencyAnalysis::process(Long64_t entry) {
   cVertexSelection.increment();
 
   //====== Tau selection or Tau veto
-  const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
-  if (fAnalysisType.compare("HToTauNu") == 0 )  
+//  const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
+
+  if (fAnalysisType.compare("HToTauNu") == 0 )  // For taunu analysis, do not apply any tau selection
     {
-      if (!tauData.hasIdentifiedTaus())
+/*      if (!tauData.hasIdentifiedTaus())
 	return;
       if (fEvent.isMC() && !tauData.isGenuineTau()) //if not genuine tau, reject the events
 	return;
@@ -179,10 +180,11 @@ void BTagEfficiencyAnalysis::process(Long64_t entry) {
       if (fEvent.isMC()) {
 	fEventWeight.multiplyWeight(silentMETData.getMETTriggerSF());
       }
-      cMetTriggerSFCounter.increment();
+      cMetTriggerSFCounter.increment(); */
     }
   else // "HToTB"
     {
+      const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
       if (tauData.hasIdentifiedTaus()) return;
     }
   
@@ -200,7 +202,8 @@ void BTagEfficiencyAnalysis::process(Long64_t entry) {
   JetSelection::Data jetData;
   if (fAnalysisType.compare("HToTauNu") == 0 )  
     {
-      jetData = fJetSelection.analyze(fEvent, tauData.getSelectedTau());
+      jetData = fJetSelection.analyzeWithoutTau(fEvent);
+
       if (!jetData.passedSelection())
 	return;
     }

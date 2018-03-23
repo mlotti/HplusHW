@@ -13,5 +13,5 @@
     "markerStyle"     : 20,
     "markerColor"     : 2,
     "markerSize"      : 0.5,
-    "opts"            : {"xmin": 40, "ymin": 0, "ymax": 1.1}
+    "opts"            : {"xmin": 40, "ymin": 0, "ymax": 1.1, "xmax":700.0}
 }

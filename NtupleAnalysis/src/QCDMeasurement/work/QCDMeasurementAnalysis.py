@@ -53,6 +53,7 @@ builder = AnalysisBuilder("QCDMeasurement",
                           searchModes,
                           #### Options ####
                           usePUreweighting=True,
+                          useTopPtReweighting=False,
                           doSystematicVariations=True,
                           )
 #builder.addVariation("METSelection.METCutValue", [100,120,140])
