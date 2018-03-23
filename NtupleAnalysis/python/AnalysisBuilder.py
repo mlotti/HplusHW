@@ -175,7 +175,7 @@ class AnalysisBuilder:
                  searchModes=["m80to160"], # Search mode (see python/parameters/signalAnalysisParameters.py)
                  # Optional options
                  usePUreweighting=True,    # enable/disable vertex reweighting
-                 useTopPtReweighting=False,# enable/disable top pt reweighting for ttbar
+                 useTopPtReweighting=True ,# enable/disable top pt reweighting for ttbar
                  # Systematics options
                  doSystematicVariations=False, # Enable/disable adding modules for systematic uncertainty variation
                  analysisType="HToTauNu",      # Define the analsysi to allow a handle of changing variables accordingly
