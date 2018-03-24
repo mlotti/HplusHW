@@ -17,11 +17,11 @@ def assignTauIdentificationSF(tauSelectionPset):
     if tauSelectionPset.isolationDiscr=="byLooseCombinedIsolationDeltaBetaCorr3Hits":    SF = 0.93
     elif tauSelectionPset.isolationDiscr=="byMediumCombinedIsolationDeltaBetaCorr3Hits": SF = 0.91
     elif tauSelectionPset.isolationDiscr=="byTightCombinedIsolationDeltaBetaCorr3Hits":  SF = 0.89
-    elif tauSelectionPset.isolationDiscr=="byLooseIsolationMVA3oldDMwLT":                SF = 0.99
-    elif tauSelectionPset.isolationDiscr=="byMediumIsolationMVA3oldDMwLT":               SF = 0.97
-    elif tauSelectionPset.isolationDiscr=="byTightIsolationMVA3oldDMwLT":                SF = 0.95
+    elif tauSelectionPset.isolationDiscr=="byLooseIsolationMVArun2v1DBoldDMwLT":         SF = 0.99
+    elif tauSelectionPset.isolationDiscr=="byMediumIsolationMVArun2v1DBoldDMwLT":        SF = 0.97
+    elif tauSelectionPset.isolationDiscr=="byTightIsolationMVArun2v1DBoldDMwLT":         SF = 0.95
     else:
-        raise Exception("Error: tau ID scale factor not defined for discriminator"%isolationDiscr)
+        raise Exception("Error: tau ID scale factor not defined for discriminator %s"%tauSelectionPset.isolationDiscr)
     tauSelectionPset.tauIdentificationSF = SF
 
 ##===== Tau misidentification (simple SF)

@@ -134,15 +134,19 @@ class AnalysisConfig:
 			suffix += "%s"%subkeys[i]
 		    else:
 			suffix += ".%s"%subkeys[i]
-		# Set value
+		# Set varied value in configuration (treat AngularCuts in a special way)
 		if key.startswith("AngularCuts") and subkeys[len(subkeys)-1] == "workingPoint":
                     from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import setAngularCutsWorkingPoint
                     setAngularCutsWorkingPoint(subconfig[len(subconfig)-1], value)
-                else:
+                else: # all other settings than AngularCuts
                     if not hasattr(subconfig[len(subconfig)-1], subkeys[len(subkeys)-1]):
                         raise Exception("Error: Cannot find key %s.%s in the config!"%(suffix, subkeys[len(subkeys)-1]))
                     setattr(subconfig[len(subconfig)-1], subkeys[len(subkeys)-1], value)
-        
+                # Additionally, set a new tau ID scale factor if needed
+                    from HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors import assignTauIdentificationSF
+                    scaleFactors.assignTauIdentificationSF(subconfig[len(subconfig)-1])
+                # TODO: Define here any other updates for scale factors if needed
+
     ## Create and register the analysis after the changes have bene done to the config
     def registerAnalysis(self, process):
         Verbose("registerAnalysis()", True)
