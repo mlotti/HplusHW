@@ -232,7 +232,7 @@ scaleFactors.setupBtagSFInformation(btagPset               = fakeBBjetSelection,
                                     direction              = "nominal")
 
 fakeBTopSelectionBDT = PSet(
-    MVACutValue            = -0.4, # [default: 0.0, 0.6] NOTE: defines SR, VR, CR1, and CR2
+    MVACutValue            = -1.0, # [default: -0.4, 0.0, 0.6] NOTE: defines SR, VR, CR1, and CR2
     MVACutDirection        = ">=",
     LdgTopDefinition       = "MVA",  # [default: "MVA"] (options: "MVA", "Pt")
     MassCutValue           = topSelectionBDT.MassCutValue,
