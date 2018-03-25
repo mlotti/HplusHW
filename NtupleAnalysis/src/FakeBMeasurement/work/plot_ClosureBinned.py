@@ -139,12 +139,12 @@ def GetHistoKwargs(histoName):
         _rebinX       = 2
         if "trijet" in histoName.lower():
             _opts["xmax"] = 800
-            _rebinX = 2 #getBinningForPt(0)
+            _rebinX = 2 
         if "tetrajetbjet" in histoName.lower():
             _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
-            _rebinX = systematics._dataDrivenCtrlPlotBinning["TetrajetBjetPt_AfterAllSelections"] #2 #getBinningForPt(0)
+            _rebinX = systematics._dataDrivenCtrlPlotBinning["TetrajetBjetPt_AfterAllSelections"] 
         if "tetrajet" in histoName.lower():
-            _rebinX = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetPt_AfterAllSelections"] #2 #getBinningForPt(0)
+            _rebinX = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetPt_AfterAllSelections"]
             _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
             if "tetrajetbjet" in histoName.lower():
                 _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
@@ -305,7 +305,7 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     return
 
 def GetBinText(bin):
-    #return "bin-" + str(bin)
+    return "bin-" + str(bin) #tmp
     if bin == "0":
         return "|#eta| < 0.4"
     elif bin == "1":
@@ -453,26 +453,6 @@ def GetBinLabels(region, histoPaths):
             binLabels.append(h.split(region)[-1])
     return binLabels
         
-def getBinningForPt(binLevel=0):
-    myBins = []
-    if binLevel == 0:  #default binning
-        for i in range(0, 300, 25):
-            myBins.append(i)
-        for i in range(300, 600, 50):
-            myBins.append(i)
-        for i in range(600, 1000+100, 100):
-            myBins.append(i)
-    elif binLevel == 1: #finer
-        for i in range(0, 300, 10):
-            myBins.append(i)
-        for i in range(300, 600, 20):
-            myBins.append(i)
-        for i in range(600, 1000+100, 40):
-            myBins.append(i)
-    else:
-        raise Exception(ShellStyles.ErrorStyle() + "Please choose bin-level from 0 to 1" + ShellStyles.NormalStyle())
-    return myBins
-
 def GetHistoPathDict(histoList, printList=False):
     '''
     Maps keys to histogram paths in the ROOT files
