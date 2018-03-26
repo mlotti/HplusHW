@@ -481,11 +481,11 @@ def GetHistoKwargs(histoName, opts):
         myBins   = metBins
         
     if "mvamax1" in h.lower():
-        _xlabel = "Leading MVA"
+        _xlabel = "leading BDT"
         _cutBox = {"cutValue": 0.85, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         myBins  = mvaBins
     if "mvamax2" in h.lower():
-        _xlabel = "Subleading MVA"
+        _xlabel = "subleading BDT"
         _cutBox = {"cutValue": 0.85, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         myBins  = mvaBins
     if "trijetm" in h.lower():
