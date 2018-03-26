@@ -331,13 +331,14 @@ class FakeBNormalizationManager:
             #hFrame.GetXaxis().SetBinLabel(i+1, binLabelText)
             hFrame.GetXaxis().SetBinLabel(i, binLabelText)
 
-        # Set min and max ?
-        hFrame.GetYaxis().SetTitle("transfer factors (R_{i})")
+        # Set axes names
+        hFrame.GetYaxis().SetTitle("transfer factor ")
+        # hFrame.GetYaxis().SetTitle("transfer factors (R_{i})")        
         # hFrame.GetXaxis().SetTitle("Fake-b bin")
         
         # Customise axes
         hFrame.SetMinimum(0.6e-1)
-        hFrame.SetMaximum(5e0)
+        hFrame.SetMaximum(2e0)
         if len(self._BinLabelMap) > 12:
             lSize = 8
         elif len(self._BinLabelMap) > 8:

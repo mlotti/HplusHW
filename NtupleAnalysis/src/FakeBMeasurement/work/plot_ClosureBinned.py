@@ -208,7 +208,7 @@ def GetHistoKwargs(histoName):
     # Define plotting options
     kwargs = {
         "ratioCreateLegend": True,
-        "ratioType"        : None, #"errorScale", #"errorScale", #binomial #errorPropagation
+        "ratioType"        : "errorScale", #"errorScale", #binomial #errorPropagation
         "ratioErrorOptions": {"numeratorStatSyst": False, "denominatorStatSyst": False}, # Include stat.+syst. to numerator (if syst globally enabled)      
         "ratioMoveLegend"  : {"dx": -0.51, "dy": 0.03, "dh": -0.05},
         "errorBarsX"       : True,
