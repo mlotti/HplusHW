@@ -184,9 +184,15 @@ def main():
     allSelections.histogramAmbientLevel = opts.histoLevel
 
     # Set splitting of phase-space (first bin is below first edge value and last bin is above last edge value)
-    allSelections.CommonPlots.histogramSplitting = [
-        PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 1.2, 1.8, 2.1], useAbsoluteValues=True), 
-        # PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 1.8, 2.0, 2.2], useAbsoluteValues=True), #soso
+    allSelections.CommonPlots.histogramSplitting = [        
+        PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True), 
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[100], useAbsoluteValues=False), # C) 
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 1.2, 1.8, 2.1], useAbsoluteValues=True), # C) 
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[60, 100], useAbsoluteValues=False), # B) not bad for -1.0 < BDT < 0.4
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 1.2, 1.8, 2.0], useAbsoluteValues=True), # B) not bad for -1.0 < BDT < 0.4
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[120, 200], useAbsoluteValues=False),          # A) not great for -1.0 < BDT < 0.4
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 1.2, 1.8, 2.1], useAbsoluteValues=True), # A) not great for -1.0 < BDT < 0.4
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 1.8, 2.0, 2.2], useAbsoluteValues=True), #so-so
         # PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 1.2, 1.8], useAbsoluteValues=True), #|eta| < 0.4,  0.4 < |eta| < 1.2, 1.2 < |eta| < 1.8, |eta| > 1.8, 
         # PSet(label="TetrajetBjetEta", binLowEdges=[0.2, 0.4, 0.8, 1.2, 1.6, 2.0, 2.2], useAbsoluteValues=True),
         # PSet(label="TetrajetBjetEta", binLowEdges=[-1.8, -1.2, -0.4, 0.0, 0.4, 1.2, 1.8], useAbsoluteValues=False), 
@@ -327,7 +333,7 @@ if __name__ == "__main__":
     NEVTS         = -1
     HISTOLEVEL    = "Debug" # 'Never', 'Systematics', 'Vital', 'Informative', 'Debug'
     PUREWEIGHT    = True
-    TOPPTREWEIGHT = False
+    TOPPTREWEIGHT = True
     DOSYSTEMATICS = False
 
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
@@ -355,8 +361,8 @@ if __name__ == "__main__":
     parser.add_option("--noPU", dest="usePUreweighting", action="store_false", default = PUREWEIGHT, 
                       help="Do NOT apply Pileup re-weighting (default: %s)" % (PUREWEIGHT) )
 
-    parser.add_option("--noTopPt", dest="useTopPtReweighting", action="store_false", default = TOPPTREWEIGHT, 
-                      help="Do NOT apply top-pt re-weighting (default: %s)" % (TOPPTREWEIGHT) )
+    parser.add_option("--topPt", dest="useTopPtReweighting", action="store_true", default = TOPPTREWEIGHT,
+                      help="Do apply top-pt re-weighting (default: %s)" % (TOPPTREWEIGHT) )
 
     parser.add_option("--doSystematics", dest="doSystematics", action="store_true", default = DOSYSTEMATICS, 
                       help="Do systematics variations  (default: %s)" % (DOSYSTEMATICS) )

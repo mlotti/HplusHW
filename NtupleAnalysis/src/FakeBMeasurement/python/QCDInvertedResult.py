@@ -291,10 +291,14 @@ class QCDInvertedShape:
             myShapeEwkSum.append(0.0)
             myShapeEwkSumUncert.append(0.0)
 
+        # FIXME: New addition to fix "optionUseInclusiveNorm" functionality (24-Mar-2018). Should not affect binned result!  
+        if self._optionUseInclusiveNorm:
+            nSplitBins = 1
+
         self.Verbose("Calculate results separately for each phase-space bin and then combine", True)
         # For-loop: All measurement bins (e.g. tetrajetBejt eta and/or pT bins for h2tb)
         for i in range(0, nSplitBins):
-
+            
             # The zeroth bin (i==0) is the "Inclusive" bin
             msg = "{:<10} {:>3} {:<1} {:<3} {:<30}".format("Splitted-Bin", "%i" % i, "/", "%s" % (nSplitBins), "")
             self.Verbose(ShellStyles.HighlightStyle() + msg + ShellStyles.NormalStyle(), False)
@@ -315,7 +319,7 @@ class QCDInvertedShape:
                 msg = "No normalization factors available for bin '%s' when accessing histogram %s! Ignoring this bin..." % (wQCDLabel, shape.getHistoName())
                 self.Print(ShellStyles.WarningLabel() + msg, True)
             else:
-                wQCD = normFactors[wQCDLabel]                
+                wQCD = normFactors[wQCDLabel]
             msg = "Weighting bin \"%i\" (label=\"%s\")  with normFactor \"%s\"" % (i, wQCDLabel, wQCD)
             self.Verbose(ShellStyles.NoteLabel() + msg, True)
 
@@ -350,7 +354,7 @@ class QCDInvertedShape:
                     binRange   = "%.1f -> %.1f" % (h.GetXaxis().GetBinLowEdge(j), h.GetXaxis().GetBinUpEdge(j) )
                     binWidth   = GetTH1BinWidthString(h, j)
                     binSum    += binContent
-                    myResult   = binContent * wQCD #apply  normalisation factor (transfer from CR to SR) #iro
+                    myResult   = binContent * wQCD #apply  normalisation factor (transfer from CR to SR)
                     self.Verbose("Bin %i: BinContent = %.3f x %.3f = %.3f" % (j, binContent, wQCD, myResult), False)
 
                     # self.Verbose("Calculate abs. stat. uncert. for data and for MC EWK (Do not calculate here MC EWK syst.)", True)
@@ -775,7 +779,7 @@ class QCDInvertedResultManager:
         # Define histogram name as will be written in the ROOT file
         self.Verbose("%sDefining the name of histogram objects, as they will appear in the ROOT file%s" % (ShellStyles.WarningStyle(), ShellStyles.NormalStyle()), True)
         hName  = plotName + "%d" %i
-        hTitle = plotName.replace("CRSelections", "AllSelections").replace("Baseline_", "").replace("Inverted_", "")#FIXME - alex-iro
+        hTitle = plotName.replace("CRSelections", "AllSelections").replace("Baseline_", "").replace("Inverted_", "")#FIXME: not elegant!
 
         # DataDriven
         myShape.delete()
