@@ -1016,6 +1016,7 @@ class TableProducer:
                     
 
             # Calculate signal yield
+            global myBr
             myBr = self._config.OptionBr
             if not (self._config.OptionLimitOnSigmaBr or m > 161 or HW==None):
                 if self._config.OptionBr == None:
