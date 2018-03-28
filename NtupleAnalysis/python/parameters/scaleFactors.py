@@ -342,7 +342,7 @@ class TriggerSFJsonReader:
 #            value = item["efficiency"]*(1.0-item["uncertaintyMinus"])
 	    value = item["efficiency"]-item["uncertaintyMinus"]
             if value < 0.0:
-                bindict[label+"effdown"] = 0.0
+                bindict[label+"effdown"] = 0.000001
             else:
                 bindict[label+"effdown"] = value
             outdict[item["pt"]] = bindict
