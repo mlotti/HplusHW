@@ -299,11 +299,11 @@ class TriggerSFJsonReader:
             self.result["SFdataUp"].append(datadict[key]["dataeffup"] / mcdict[key]["mceff"])
             self.result["SFdataDown"].append(datadict[key]["dataeffdown"] / mcdict[key]["mceff"])
             self.result["SFmcUp"].append(datadict[key]["dataeff"] / mcdict[key]["mceffup"])
-            if abs(mcdict[key]["mceffdown"]) < 0.00001:
+            if abs(mcdict[key]["mceffdown"]) < 0.000001:
                 raise Exception("Down variation in bin '%s' is zero in json '%s'"%(key, filename))
             self.result["SFmcDown"].append(datadict[key]["dataeff"] / mcdict[key]["mceffdown"])
             # Sanity check
-            if self.result["SF"][len(self.result["SF"])-1] < 0.00001:
+            if self.result["SF"][len(self.result["SF"])-1] < 0.000001:
                 raise Exception("Error: In file '%s' bin %s the SF is zero! Please fix!"%(filename, key))
 
     def getResult(self):
@@ -323,7 +323,7 @@ class TriggerSFJsonReader:
 #            value = item["efficiency"]*(1.0-item["uncertaintyMinus"])
 	    value = item["efficiency"]-item["uncertaintyMinus"]
             if value < 0.0:
-                bindict[label+"effdown"] = 0.0
+                bindict[label+"effdown"] = 0.000001
             else:
                 bindict[label+"effdown"] = value
             outdict[item["pt"]] = bindict
