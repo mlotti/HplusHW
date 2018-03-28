@@ -82,7 +82,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.systematics as systematics
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 import HiggsAnalysis.FakeBMeasurement.FakeBNormalization as FakeBNormalization
 import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
-import HiggsAnalysis.FakeBMeasurement.QCDInvertedResult as fakeBResult
+import HiggsAnalysis.FakeBMeasurement.FakeBResult as fakeBResult
 
 #================================================================================================ 
 # Function Definition

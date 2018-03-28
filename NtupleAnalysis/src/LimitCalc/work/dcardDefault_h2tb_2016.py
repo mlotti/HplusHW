@@ -76,7 +76,7 @@ def PrintNuisancesTable(Nuisances, DataGroups):
 #================================================================================================  
 # Options
 #================================================================================================  
-MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000]#, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
+MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
 DataCardName                           = "Hplus2tb_13TeV"
 OptionMassShape                        = "LdgTetrajetMass_AfterAllSelections"
 #OptionMassShape                        = "SubldgTetrajetMass_AfterAllSelections"
@@ -360,10 +360,11 @@ lumi_2016            = systematics.getLuminosityUncertainty("2016")
 lumi13TeV_Const = Nuisance(id="lumi_13TeV"       , label="Luminosity 13 TeV uncertainty", distr="lnN", function="Constant", value=lumi_2016)
 trgMC_Const     = Nuisance(id="CMS_eff_trg_MC"   , label="Trigger MC efficiency (Approx.)", distr="lnN", function="Constant", value=0.05)
 PU_Const        = Nuisance(id="CMS_pileup"       , label="Pileup (Approx.)", distr="lnN", function="Constant", value=0.05)
-# FIXME! counters used are wrong
+# FIXME! counters used are wrong. Should be: numerator= (Not passed veto/passed veto)* DeltaID
 eVeto_Const     = Nuisance(id="CMS_eff_e_veto"   , label="e veto", distr="lnN", function="Ratio", numerator="passed e selection (Veto)", denominator="passed PV", scaling=0.02) #sigma-eID= 2%, fixme
 muVeto_Const    = Nuisance(id="CMS_eff_m_veto"   , label="mu veto", distr="lnN", function="Ratio", numerator="passed mu selection (Veto)", denominator="passed e selection (Veto)", scaling=0.01) #sigma-muID= 1%, fixme
 tauVeto_Const   = Nuisance(id="CMS_eff_tau_veto" , label="tau veto", distr="lnN", function="Ratio", numerator="Passed tau selection (Veto)", denominator="passed mu selection (Veto)", scaling=0.03) #sigma-tauID= 1%, fixme
+
 bTag_Const      = Nuisance(id="CMS_eff_b"        , label="b tagging (Approx.)", distr="lnN", function="Constant", value=0.05)
 JES_Const       = Nuisance(id="CMS_scale_j"      , label="Jet Energy Scale (JES) (Approx.)"     , distr="lnN", function="Constant", value=0.03)
 JER_Const       = Nuisance(id="CMS_res_j"        , label="Jet Energy Resolution (JER) (Approx.)", distr="lnN", function="Constant", value=0.04)
@@ -390,7 +391,8 @@ ttZ_scale_Const      = Nuisance(id="CMS_scale_ttZ"      , label="TTZ XSection sc
 # tttt_scale_Const     = Nuisance(id="CMS_scale_tttt"     , label="TTTT XSection scale uncertainty", distr="lnN", function="Constant", value=tttt_scale_down)
 
 # Fake-b nuisances
-fakeB_TF_Const          = Nuisance(id="CMS_FakeB_transferFactor"  , label="Transfer Factor uncertainty", distr="lnN", function="Constant", value=0.10)
+tf_FakeB_Shape          = Nuisance(id="CMS_FakeB_transferFactor"  , label="Transfer Factor uncertainty",  distr="shapeQ", function="QCDShapeVariation", systVariation="TransferFactor")
+#tf_FakeB_Const          = Nuisance(id="CMS_FakeB_transferFactor"  , label="Transfer Factor uncertainty", distr="lnN", function="Constant", value=0.10)
 lumi13TeV_FakeB_Const   = Nuisance(id="lumi_13TeV_forFakeB"       , label="Luminosity 13 TeV uncertainty", distr="lnN", function="ConstantForFakeB", value=lumi_2016)
 trgMC_FakeB_Const       = Nuisance(id="CMS_eff_trg_MC_forFakeB"   , label="Trigger MC efficiency (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.05)
 PU_FakeB_Const          = Nuisance(id="CMS_pileup_forFakeB"       , label="Pileup (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.05)
@@ -442,7 +444,8 @@ Nuisances.append(ttZ_scale_Const)
 # Nuisances.append(tttt_scale_Const)
 
 # FakeB nuisances
-Nuisances.append(fakeB_TF_Const)
+Nuisances.append(tf_FakeB_Shape) #xenios
+#Nuisances.append(tf_FakeB_Const)
 Nuisances.append(lumi13TeV_FakeB_Const)
 Nuisances.append(PU_FakeB_Const)
 Nuisances.append(topPt_FakeB_Const)
@@ -783,7 +786,7 @@ hLdgHiggsPt = ControlPlotInput(
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
                          "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 900.0} },
-    blindedRange=[200.0, 900.0], # specify range min,max if blinding applies to this control plot      
+    blindedRange=[205.0, 900.0], # specify range min,max if blinding applies to this control plot      
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
     )
 
@@ -943,7 +946,7 @@ hJet1Pt = ControlPlotInput(
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
-                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 1000.0} }
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmin": 40, "xmax": 1000.0} }
     )
 
 hJet2Pt = ControlPlotInput(
@@ -956,7 +959,7 @@ hJet2Pt = ControlPlotInput(
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
-                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 1000.0} }
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmin": 40, "xmax": 1000.0} }
     )
 
 hJet3Pt = ControlPlotInput(
@@ -969,7 +972,7 @@ hJet3Pt = ControlPlotInput(
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
-                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 700.0} }
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmin": 40, "xmax": 700.0} }
     )
 
 hJet4Pt = ControlPlotInput(
@@ -982,7 +985,7 @@ hJet4Pt = ControlPlotInput(
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
-                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 600.0} }
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmin": 40, "xmax": 600.0} }
     )
 
 hJet5Pt = ControlPlotInput(
@@ -995,7 +998,7 @@ hJet5Pt = ControlPlotInput(
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
-                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 500.0} }
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmin": 40, "xmax": 500.0} }
     )
 
 hJet6Pt = ControlPlotInput(
@@ -1008,7 +1011,7 @@ hJet6Pt = ControlPlotInput(
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
-                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 300.0} }
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmin": 40, "xmax": 300.0} }
     )
 
 hJet7Pt = ControlPlotInput(
@@ -1021,7 +1024,7 @@ hJet7Pt = ControlPlotInput(
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
-                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 300.0} }
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmin": 30, "xmax": 300.0} }
     )
 
 hJet1Eta = ControlPlotInput(
@@ -1125,7 +1128,7 @@ hBJet1Pt = ControlPlotInput(
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
-                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 700.0} }
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmin": 40, "xmax": 700.0} }
     )
 
 hBJet2Pt = ControlPlotInput(
@@ -1138,7 +1141,7 @@ hBJet2Pt = ControlPlotInput(
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
-                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 700.0} }
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmin": 40, "xmax": 700.0} }
     )
 
 hBJet3Pt = ControlPlotInput(
@@ -1151,7 +1154,7 @@ hBJet3Pt = ControlPlotInput(
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
-                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 700.0} }
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmin": 40, "xmax": 700.0} }
     )
 
 hBJet1Eta = ControlPlotInput(
@@ -1203,28 +1206,28 @@ ControlPlots.append(hMHT)
 ControlPlots.append(hQGLR)
 ControlPlots.append(hLdgTopPt)
 ControlPlots.append(hLdgTopMass)
-ControlPlots.append(hLdgTopBjetPt)
-ControlPlots.append(hLdgTopBjetEta)
+### ControlPlots.append(hLdgTopBjetPt)
+### ControlPlots.append(hLdgTopBjetEta)
 ControlPlots.append(hLdgTopDijetPt)
 ControlPlots.append(hLdgTopDijetMass)
-ControlPlots.append(hLdgTopR32)
+### ControlPlots.append(hLdgTopR32)
 ControlPlots.append(hTetrajetBjetPt)
 ControlPlots.append(hTetrajetBjetEta)
 ControlPlots.append(hLdgHiggsPt)
 ControlPlots.append(hLdgHiggsMass)
 ControlPlots.append(hVertices)
 ControlPlots.append(hNjets)
-ControlPlots.append(hNBjets) #no agreement expected
+### ControlPlots.append(hNBjets) #no agreement expected
 ControlPlots.append(hBJetPt)
 ControlPlots.append(hBJetEta)
-ControlPlots.append(hBtagDiscriminator) #no agreement expected
+### ControlPlots.append(hBtagDiscriminator) #no agreement expected
 ControlPlots.append(hSubldgTopPt)
 ControlPlots.append(hSubldgTopMass)
-ControlPlots.append(hSubldgTopBjetPt)
-ControlPlots.append(hSubldgTopBjetEta)
+### ControlPlots.append(hSubldgTopBjetPt)
+### ControlPlots.append(hSubldgTopBjetEta)
 ControlPlots.append(hSubldgTopDijetPt)
 ControlPlots.append(hSubldgTopDijetMass)
-ControlPlots.append(hSubldgTopR32)
+### ControlPlots.append(hSubldgTopR32)
 ControlPlots.append(hSubldgHiggsPt)
 ControlPlots.append(hSubldgHiggsMass)
 ControlPlots.append(hJet1Pt)

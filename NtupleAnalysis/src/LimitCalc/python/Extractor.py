@@ -13,6 +13,8 @@ from HiggsAnalysis.NtupleAnalysis.tools.counter import EventCounter
 import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 from HiggsAnalysis.NtupleAnalysis.tools.systematics import ScalarUncertaintyItem,getBinningForPlot
 import HiggsAnalysis.QCDMeasurement.systematicsForMetShapeDifference as systematicsForMetShapeDifference
+import HiggsAnalysis.FakeBMeasurement.FakeBSystematics as fakeBSystematics
+
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.histogramsExtras as histogramsExtras
@@ -1023,6 +1025,8 @@ class QCDShapeVariationExtractor(ExtractorBase):
 
     ## Virtual method for extracting histograms
     def extractHistograms(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0, rootHistoWithUncertainties = None):
+        if "FakeB" in datasetColumn.getLabel() or  "FakeB" ==  datasetColumn.getLabel():
+            return self.extractHistogramsForFakeB(datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation, rootHistoWithUncertainties)
         myHistograms = []
         if not rootHistoWithUncertainties:
             # Check that results have been cached
@@ -1089,6 +1093,118 @@ class QCDShapeVariationExtractor(ExtractorBase):
         myHistograms.append(hUp)
         myHistograms.append(hDown)
         # Return result
+        return myHistograms
+
+    def extractHistogramsForFakeB(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0, rootHistoWithUncertainties = None):
+        '''
+        Virtual method for extracting histograms
+        
+        The shape difference of the charged Higgs boson invariant mass distributions between the samples (CR1 Vs CR2, VR and SR)
+        is calculated in the following way:
+        1) The invariant mass distributions for the FakeB events (Data-EwkGenuineB) are obtained for both regions after all selections
+        2) The areas of these distributions are normalized to unity.
+        3) For each bin in the distributions, the statistical uncertainty due to the limited number of events in the bin is calculated.
+        This statistical uncertainty is assumed to be the only uncertainty affecting the event number in that bin.
+        4) One normalized distribution is divided by the other, and the statistical uncertainty of the resulting quotient distribution 
+        is calculated by error propagation. This uncertainty is used as an estimate for the shape difference between the two regions.
+        '''
+        myHistograms = []
+        if not rootHistoWithUncertainties:
+            self.Verbose("Check that results have been cached", True)
+            if datasetColumn.getCachedShapeRootHistogramWithUncertainties() == None:
+                msg = "You forgot to cache rootHistogramWithUncertainties for the datasetColumn before creating extractors for nuisances!"
+                raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
+
+        self.Verbose("Get uncertainty variation dictionary", True)
+        myShapeUncertDict = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getShapeUncertainties()
+        if rootHistoWithUncertainties != None:
+            myShapeUncertDict = rootHistoWithUncertainties.getShapeUncertainties()
+
+        self.Verbose("Check that asked variation does not exist yet", True)
+        if self._systVariation in myShapeUncertDict.keys():
+            msg = "FakeB systematics for labelled \"%s\" already exists for dataset column \"%s\"!" % (self._systVariation, datasetColumn.getLabel())
+            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
+
+        self.Verbose("Obtaining the Rate histograms (ROOT Histogram With Uncertainties)", True)
+        dset = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn())
+        myRateHisto = None
+        if rootHistoWithUncertainties == None:
+            myRateHisto = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getRootHisto()
+        else:
+            myRateHisto = rootHistoWithUncertainties.getRootHisto()
+        
+        self.Verbose("Constuct full histogram path in ROOT file", True)
+        myHistoNamePrefix = myRateHisto.GetName().replace("_cloned","").replace("_" + dset.name, "")
+        myHistoNameShort  = myHistoNamePrefix
+        myHistoFolder     = "ForDataDrivenCtrlPlots"
+        myHistoNamePrefix = os.path.join(myHistoFolder, myHistoNamePrefix)
+
+        # Define the histograms sources for the invariant mass shape (ForDataDrivenCtrlPlots/LdgTetrajetMass_AfterAllSelections)
+        mySrcUp   = "_SystVar" + self._systVariation + "Up"
+        mySrcDown = "_SystVar" + self._systVariation + "Down"
+
+        # Get the invariant mass shape for the case where TF+Error
+        self.Verbose("Getting ROOT histo at \"%s (Var=\"%s\")" % (myHistoNamePrefix, mySrcUp), True)
+        (hSystUpFromSrc, hSystUpFromSrcName) = dset.getRootHisto(myHistoNamePrefix, analysisPostfix=mySrcUp)
+
+        # Get the invariant mass shape for the case where TF-Error
+        self.Verbose("Getting ROOT histo at \"%s (Var=\"%s\")" % (myHistoNamePrefix, mySrcDown), True)
+        (hSystDownFromSrc, hSystDownFromSrcName) = dset.getRootHisto(myHistoNamePrefix, analysisPostfix=mySrcDown)
+        # For Testing purposes only! ( to see impact)
+        if 0:
+            hSystUpFromSrc.Scale(5) 
+            hSystDownFromSrc.Scale(10)
+
+        self.Verbose("Store original source histograms (SystUpFromSrc)", True)
+        srcPrefix  = "%s_%sSource" % (datasetColumn.getLabel(), self.getId())
+        hSystUpFromSrcSource = aux.Clone(hSystUpFromSrc, srcPrefix + "_SystUpFromSrc")
+        hSystUpFromSrcSource.SetTitle(srcPrefix + "_SystUpFromSrc")
+        histogramsExtras.makeFlowBinsVisible(hSystUpFromSrcSource)
+        myHistograms.append(hSystUpFromSrcSource)
+
+        self.Verbose("Store original source histograms (SystDownFromSrc)", True)
+        hSystDownFromSrcSource = aux.Clone(hSystDownFromSrc, srcPrefix + "_SystDownFromSrc")
+        hSystDownFromSrcSource.SetTitle(srcPrefix + "_SystDownFromSrc")
+        histogramsExtras.makeFlowBinsVisible(hSystDownFromSrcSource)
+        myHistograms.append(hSystDownFromSrcSource)
+
+        self.Verbose("Handle under/overflow bins (numerator)", True)
+        histogramsExtras.makeFlowBinsVisible(hSystUpFromSrc)
+
+        self.Verbose("Handle under/overflow bins (denominator)", True)
+        histogramsExtras.makeFlowBinsVisible(hSystDownFromSrc)
+
+        self.Verbose("Create output histograms (up)", True)
+        title = datasetColumn.getLabel() + "_" + self._masterExID
+        hUp   = aux.Clone(myRateHisto)
+        hUp.SetTitle(title + "Up")
+        hUp.Reset()
+
+        self.Verbose("Create output histograms (down)", True)
+        hDown = aux.Clone(myRateHisto)
+        hDown.SetTitle(title + "Down")
+        hDown.Reset()
+
+        self.Verbose("Do calculation and fill output histograms", True) # XENIOS IRO
+        myTFSystematics = fakeBSystematics.SystematicsForTransferFactor(self._verbose)
+        # Nominal histogram is myRateHisto, hUp and hDown are empty histos to be filled with hSystUpFromSrc, and hSystDownFromSrc
+        myTFSystematics.createSystHistograms(myRateHisto, hUp, hDown, hSystUpFromSrc, hSystDownFromSrc)
+
+        # Store uncertainty histograms
+        if rootHistoWithUncertainties == None:
+            datasetColumn.getCachedShapeRootHistogramWithUncertainties().addShapeUncertaintyFromVariation(self._systVariation, hUp, hDown)
+        else:
+            rootHistoWithUncertainties.addShapeUncertaintyFromVariation(self._systVariation, hUp, hDown)
+
+        self.Verbose("Add rate histogram to make the histograms compatible with Combine", True)
+        hUp.Add(myRateHisto)
+        hDown.Add(myRateHisto)
+
+        self.Verbose("Append histograms to output list", True)
+        myHistograms.append(hUp)
+        myHistograms.append(hDown)
+
+        self.Verbose("Return result", True)
         return myHistograms
 
     ## Virtual method for printing debug information
