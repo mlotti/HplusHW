@@ -13,8 +13,16 @@ import os
 # Tau ID efficiency scale factor
 # https://twiki.cern.ch/twiki/bin/view/CMS/TauIDRecommendation13TeV
 def assignTauIdentificationSF(tauSelectionPset):
-    tauSelectionPset.tauIdentificationSF = 0.9 # for Run-2 2016
-
+    SF = 1.0
+    if tauSelectionPset.isolationDiscr=="byLooseCombinedIsolationDeltaBetaCorr3Hits":    SF = 0.93
+    elif tauSelectionPset.isolationDiscr=="byMediumCombinedIsolationDeltaBetaCorr3Hits": SF = 0.91
+    elif tauSelectionPset.isolationDiscr=="byTightCombinedIsolationDeltaBetaCorr3Hits":  SF = 0.89
+    elif tauSelectionPset.isolationDiscr=="byLooseIsolationMVArun2v1DBoldDMwLT":         SF = 0.99
+    elif tauSelectionPset.isolationDiscr=="byMediumIsolationMVArun2v1DBoldDMwLT":        SF = 0.97
+    elif tauSelectionPset.isolationDiscr=="byTightIsolationMVArun2v1DBoldDMwLT":         SF = 0.95
+    else:
+        raise Exception("Error: tau ID scale factor not defined for discriminator %s"%tauSelectionPset.isolationDiscr)
+    tauSelectionPset.tauIdentificationSF = SF
 
 ##===== Tau misidentification (simple SF)
 # \param tauSelectionPset  the tau config PSet
@@ -138,6 +146,16 @@ def setupBtagSFInformation(btagPset, btagPayloadFilename, btagEfficiencyFilename
         btagPset.btagSFVariationInfo = variationInfo
     #print btagPset
 
+# A helper function to update b-tag SF information in AnalysisBuilder for syst. variations
+def updateBtagSFInformationForVariations(btagPset, direction, variationInfo=None):
+    # Set syst. uncert. variation information
+    btagPset.btagSFVariationDirection = direction
+    if variationInfo == None:
+        btagPset.btagSFVariationInfo = "None"
+    else:
+        btagPset.btagSFVariationInfo = variationInfo
+
+
 ## Helper function accessed through setupBtagSFInformation
 def _setupBtagSFDatabase(btagPset, btagPayloadFilename, direction, variationInfo):
     fullname = os.path.join(os.getenv("HIGGSANALYSIS_BASE"), "NtupleAnalysis", "data", btagPayloadFilename)
@@ -147,7 +165,8 @@ def _setupBtagSFDatabase(btagPset, btagPayloadFilename, direction, variationInfo
     headerRow = None
     rows = []
     validAlgoHeaderPairs = {
-      "pfCombinedInclusiveSecondaryVertexV2BJetTags": "CSVv2"
+      "pfCombinedInclusiveSecondaryVertexV2BJetTags": "CSVv2",
+      "pfCombinedMVAV2BJetTags": "cMVAv2"
     }
     if not btagPset.__getattr__("bjetDiscr") in validAlgoHeaderPairs.keys():
         raise Exception("Error: No valid payload header ID has been specified for btag algo %s"%btagPset.__getattr__("bjetDiscr"))

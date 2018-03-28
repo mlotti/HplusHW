@@ -18,10 +18,9 @@ maxEvents = {}
 #maxEvents["Charged"] = 100
 process = Process("SignalAnalysis"+obtainAnalysisSuffix(sys.argv),maxEvents=maxEvents)
 blacklist = []
-#blacklist = ["ChargedHiggs_TTToHplusBWB"]
-#blacklist = ["ChargedHiggs_HplusTB"]
+#blacklist = ["ChargedHiggs_HplusTB_HplusToTauNu_M_","ChargedHiggs_HplusToTauNu_M_200_","ChargedHiggs_HplusTB_HplusToTauNu_HeavyMass_M_"]
 whitelist = []
-#whitelist = ["Tau_Run2016C_","TT"]
+#whitelist = ["Tau_Run2016C_","DY","ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_175"]
 process.addDatasetsFromMulticrab(sys.argv[1],blacklist=blacklist,whitelist=whitelist)
 
 # Add config
@@ -39,7 +38,8 @@ allSelections.AngularCutsBackToBack.cutValueJet1 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet2 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet3 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet4 = 40.0
-allSelections.TauSelection.rtau = 0.7
+allSelections.TauSelection.rtau = 0.75
+#allSelections.TauSelection.rtauSmallerThan = 0.75
 allSelections.BJetSelection.bjetDiscrWorkingPoint = "Medium"
 
 
@@ -64,6 +64,7 @@ builder = AnalysisBuilder("SignalAnalysis",
                           searchModes,
                           #### Options ####
                           usePUreweighting=True,
+                          useTopPtReweighting=True,
                           doSystematicVariations=True
                           )
 #builder.addVariation("METSelection.METCutValue", [100,120,140])

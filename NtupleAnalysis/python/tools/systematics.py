@@ -108,22 +108,31 @@ _crossSectionUncertainty = {
     # Single top, based on http://arxiv.org/abs/1311.0283 and https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SingleTopRefXsec#Single_top_Wt_channel_cross_sect
     "SingleTop_scale":  ScalarUncertaintyItem("xsect", 1.80/71.7),
     "SingleTop_pdf":  ScalarUncertaintyItem("xsect", 3.40/71.7), 
-    "SingleTop": ScalarUncertaintyItem("xsect", 0.062), # scale and pdf combined (quadratically)
 
     # W+jets, based on "Total W" on https://twiki.cern.ch/twiki/bin/view/CMS/StandardModelCrossSectionsat13TeVInclusive
     "WJets_scale":  ScalarUncertaintyItem("xsect", plus=165.7/20508.9, minus=88.2/20508.9), 
     "WJets_pdf":  ScalarUncertaintyItem("xsect", 770.9/20508.9),
-    "WJets":  ScalarUncertaintyItem("xsect", 0.050), # scale and pdf combined (quadratically)
     
     # DY, based on "Z/a* (50) on https://twiki.cern.ch/twiki/bin/view/CMS/StandardModelCrossSectionsat13TeVInclusive
     "DYJetsToLL_scale": ScalarUncertaintyItem("xsect", plus=13.2/2008.4, minus=7.5/2008.4),
     "DYJetsToLL_pdf": ScalarUncertaintyItem("xsect", 75.0/2008.4), 
-    "DYJetsToLL": ScalarUncertaintyItem("xsect", 0.043), # scale and pdf combined (quadratically)
     
     # Diboson, values from MIT PAS AN-16-194 (see also https://twiki.cern.ch/twiki/bin/view/CMS/StandardModelCrossSectionsat13TeVInclusive)
     "Diboson_scale": ScalarUncertaintyItem("xsect", 0.032), 
     "Diboson_pdf": ScalarUncertaintyItem("xsect", 0.044),
-    "Diboson": ScalarUncertaintyItem("xsect", 0.054), # scale and pdf combined (quadratically)
+
+    # ttW, values from HIG-17-022 which shows consistency with all other systematics defined here (TTJets, SingleTop, WJets, DY, Diboson, ..)
+    "TTW_scale": ScalarUncertaintyItem("xsect", plus=0.13, minus=0.12), 
+    "TTW_pdf"  : ScalarUncertaintyItem("xsect", 0.02),  # 2%
+
+    # ttZ, values from HIG-17-022 which shows consistency with all other systematics defined here (TTJets, SingleTop, WJets, DY, Diboson, ..)
+    "TTZ_scale": ScalarUncertaintyItem("xsect", plus=0.10, minus=0.12), 
+    "TTZ_pdf"  : ScalarUncertaintyItem("xsect", 0.03),  # 2%
+
+    # tttt
+#    "TTTT_scale": ScalarUncertaintyItem("xsect", plus=0.10, minus=0.12), 
+#    "TTTT_pdf"  : ScalarUncertaintyItem("xsect", 0.03),  # 2%
+#    "TTTT"      : ScalarUncertaintyItem("xsect", 0.12), # scale and pdf combined (quadratically)
     
     # MC QCD: we do not trust the MC QCD, therefore 100 % uncertainty
     "QCD": ScalarUncertaintyItem("xsect", 1.00),
@@ -178,11 +187,53 @@ def getScalarUncertainties(datasetName, isGenuineTau):
     myList.append(getLuminosityUncertainty())
     return myList
 
+def getBinningForTetrajetMass(binLevel=0):
+    '''
+    Binning for H->tb invariant mass histogram 
+    tetrajet object = ldg (in pT) trijet  + ldg (in ) free bjet 
+    '''
+    myBins = []
+    if binLevel == -1: #1 bin (counting experiment)
+        myBins = [0.0, 4000.0] 
+    elif binLevel == 0: #default binning
+        for i in range(0, 1000, 50):
+            myBins.append(i)
+        for i in range(1000, 2000, 100):
+            myBins.append(i)
+        for i in range(2000, 4000+500, 500):
+            myBins.append(i)
+    elif binLevel == 1: #finer binning
+        for i in range(0, 1000, 25):
+            myBins.append(i)
+        for i in range(1000, 2000, 50):
+            myBins.append(i)
+        for i in range(2000, 4000+250, 250):
+            myBins.append(i)
+    elif binLevel == 2: #even finer binning
+        for i in range(0, 1000, 20):
+            myBins.append(i)
+        for i in range(1000, 2000, 40):
+            myBins.append(i)
+        for i in range(2000, 4000+200, 200):
+            myBins.append(i)
+    elif binLevel == 3: #even more finer binning
+        print "%sWARNING! This binning will take hours to compute limits!%s" % (ShellStyles.ErrorStyle(), ShellStyles.NormalStyle())
+        for i in range(0, 1000, 10):
+            myBins.append(i)
+        for i in range(1000, 2000, 20):
+            myBins.append(i)
+        for i in range(2000, 4000+50, 50):
+            myBins.append(i)
+    else:
+        raise Exception(ShellStyles.ErrorStyle() + "Please choose bin-level from -1 to 2" + ShellStyles.NormalStyle())
+    return myBins
+
 # Binning for data-driven control plots and final shapes
 # Needed to get systematics right for QCD anti-isol. -> isol. systematics
 # Format: list of left bin edges; last entry is maximum value
 _dataDrivenCtrlPlotBinning = {
     "WeightedCounters": None,
+    "NVertices_AfterStandardSelections": None,
     "Njets*": [3,4,5,6,7,8,9,10],
     "JetPt_AfterStandardSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500,1000],
     "JetEta_AfterStandardSelections": [-2.5,-2.2,-2.0,-1.8,-1.6,-1.4,-1.2,-1.0,-0.8,-0.6,-0.4,-0.2,-0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2,2.5],
@@ -191,24 +242,24 @@ _dataDrivenCtrlPlotBinning = {
     "ImprovedDeltaPhiCuts*": [0,20,40,60,80,100,120,140,160,180,200,220,240,260],
     "CollinearAngularCutsMinimum*": [0,20,40,60,80,100,120,140,160,180,200,220,240,260],
     "BackToBackAngularCutsMinimum*": [0,20,40,60,80,100,120,140,160,180,200,220,240,260],
-    #"MET": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500,600,700,800],
-    "MET": [0,20,40,60,80,100,120,140,160,200,250,300,400,500,600,700,800,900,1000,2000,3000,4000,5000],
+    "MET": [0,20,40,60,80,100,120,140,160,200,250,300,400,500,600,700,800],
     "METPhi": [-3.14,-2.75,-2.36,-1.96,-1.57,-1.18,-0.79,-0.39,0.00,0.39,0.79,1.18,1.57,1.96,2.36,2.75,3.14],
     "METPhiMinusTauPhi": [0.00,0.39,0.79,1.18,1.57,1.96,2.36,2.75,3.14],
-    "MET_AfterAllSelections": [0,20,40,60,80,100,120,140,160,180,200,250,300,400,500,600,700,800,900,1000,2000,3000,4000,5000],
+    "MET_AfterAllSelections": [0,20,40,60,80,100,120,140,160,180,200,250,300,400,500,600,700,800],
+#    "MET_AfterAllSelections"  : [i for i in range(0, 100, 10)] + [i for i in range(100, 200, 20)] + [i for i in range(200, 300, 50)] + [i for i in range(300, 700+100, 100)], #HToTB
     "METPhi_AfterAllSelections": [-3.14,-2.36,-1.57,-0.79,0.00,0.79,1.57,2.36,3.14],
     "METPhiMinusTauPhi_AfterAllSelections": [0.00,0.39,0.79,1.18,1.57,1.96,2.36,2.75,3.14],
     "TauPlusMETPt": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,450,500,600,700,800,900,1000],
     "TauPlusMETPt_AfterAllSelections": [0,40,80,120,160,200,240,280,320,360,400,450,500,600,700,800,900,1000],
     "NBjets": [0,1,2,3,4,5,6,7,8],
     "BJetSelection*": [0,1,2,3,4,5,6,7,8],
-    "BJetPt": [0,30,50,70,90,110,130,150,200,300,400,500,600,700,800,900,1000],
-    "BJetEta": [-2.5,-2.0,-1.5,-1.0,-0.5,0.0,0.5,1.0,1.5,2.0,2.5],
-    "BtagDiscriminator": [-1.0,-0.9,0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0],
+    "BJetPt": [0,30,50,70,90,110,130,150,200,300,400,500],
+    "BJetEta": [-2.5,-2.2,-2.0,-1.8,-1.6,-1.4,-1.2,-1.0,-0.8,-0.6,-0.4,-0.2,-0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2,2.5],
+    "BtagDiscriminator": [-1.0,-0.9,0.0,0.2,0.4,0.5,0.6,0.7,0.8,0.9,1.0],
     "NBjets_AfterAllSelections": [0,1,2,3,4,5,6,7,8],
-    "BJetPt_AfterAllSelections": [0,20,30,50,70,90,110,130,150,200,300,400,500,600,700,800,900,1000],
+    "BJetPt_AfterAllSelections": [0,20,30,50,70,90,110,130,150,200,300,400,500],
     "BJetEta_AfterAllSelections": [-2.5,-2.0,-1.5,-1.0,-0.5,0.0,0.5,1.0,1.5,2.0,2.5],
-    "BtagDiscriminator_AfterAllSelections": [-1.0,-0.9,0.0,0.2,0.4,0.5,0.6,0.7,0.8,0.9,1.0],
+    "BtagDiscriminator_AfterAllSelections": [0.0,0.2,0.4,0.5,0.6,0.7,0.8,0.9,1.0],
     "DeltaPhiTauMet_AfterAllSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
     "MinDeltaPhiTauJet": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
     "MaxDeltaPhiTauJet": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
@@ -225,27 +276,30 @@ _dataDrivenCtrlPlotBinning = {
 #    "TransverseMass*": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,350,400,500,600,700,800,900,1000,1500], # MIT rebin
 
 #    "shapeTransverseMass": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,600,700,800],
-    "shapeTransverseMass": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,600,700,800,900,1000,1500,2000,3000,4000,5000], #extended to 5000
+#    "shapeTransverseMass": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,600,700,800,900,1000,1500,2000,3000,4000,5000], #default extended to 5000
+    "shapeTransverseMass": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,600,800,10000], #aggressive rebinning to get rid of empty bins
 #    "shapeTransverseMass": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,350,400,500,600,700,800,900,1000,1500], # MIT rebin
 
     "shapeInvariantMass": [0,20,40,60,80,100,120,140,160,200,300,400,500,600,700,800,900,1000,1500,2000,3000,4000,5000],
     "InvariantMass*": [0,20,40,60,80,100,120,140,160,200,400,500,600,700,800,900,1000,1500,2000,3000,4000,5000],
     "SelectedTau_pT_AfterStandardSelections": [0,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500,600,700,800,900,1000],
-    "SelectedTau_eta_AfterStandardSelections": [-2.5,-2.2,-2.0,-1.8,-1.6,-1.4,-1.2,-1.0,-0.8,-0.6,-0.4,-0.2,-0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2,2.5],
+    "SelectedTau_eta_AfterStandardSelections": [-2.5,-2.1,-1.8,-1.6,-1.4,-1.2,-1.0,-0.8,-0.6,-0.4,-0.2,-0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.1,2.5],
+#    "SelectedTau_eta_AfterStandardSelections": [float(x) * 0.1 for x in range(-25, 26)],
     "SelectedTau_phi_AfterStandardSelections": [-3.14,-2.75,-2.36,-1.96,-1.57,-1.18,-0.79,-0.39,0.00,0.39,0.79,1.18,1.57,1.96,2.36,2.75,3.14],
     "SelectedTau_ldgTrkPt_AfterStandardSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500,600,700,800,900,1000],
-    "SelectedTau_Rtau_AfterStandardSelections": [0.70,0.72,0.74,0.76,0.78,0.80,0.82,0.84,0.86,0.88,0.90,0.92,0.94,0.96,0.98,1.00],
+    "SelectedTau_Rtau_AfterStandardSelections": [0.70,0.72,0.74,0.75,0.76,0.78,0.80,0.82,0.84,0.86,0.88,0.90,0.92,0.94,0.96,0.98,1.00],
+    "SelectedTau_Rtau_FullRange_AfterStandardSelections": [0.0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.70,0.75,0.80,0.85,0.90,0.95,1.00],
     "SelectedTau_p_AfterStandardSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500,600,700,800,900,1000],
     "SelectedTau_LeadingTrackP_AfterStandardSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500,600,700,800,900,1000],
     "SelectedTau_DecayMode_AfterStandardSelections": None,
     "SelectedTau_Nprongs_AfterStandardSelections": None,
     "SelectedTau_source_AfterStandardSelections": None,
     "SelectedTau_pT_AfterAllSelections": [0,50,60,80,100,150,200,300,400,500,600,700,800,900,1000],
-    "SelectedTau_eta_AfterAllSelections": [-2.5,-2.0,-1.5,-1.0,-0.5,0.0,0.5,1.0,1.5,2.0,2.5],
+    "SelectedTau_eta_AfterAllSelections": [-2.5,-2.1,-1.8,-1.6,-1.4,-1.2,-1.0,-0.8,-0.6,-0.4,-0.2,-0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.1,2.5],
     "SelectedTau_phi_AfterAllSelections": [-3.14,-2.36,-1.57,-0.79,0.00,0.79,1.57,2.36,3.14],
     "SelectedTau_ldgTrkPt_AfterAllSelections": [0,20,40,50,60,70,80,100,150,200,300,400,500,600,700,800,900,1000],
-    "SelectedTau_Rtau_AfterAllSelections": [0.70,0.75,0.80,0.85,0.90,0.95,1.00],
-    "SelectedTau_Rtau_FullRange_AfterAllSelections": [0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.70,0.80,0.90,1.00],
+    "SelectedTau_Rtau_FullRange_AfterAllSelections": [0.0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.70,0.75,0.80,0.85,0.90,0.95,1.00],
+    "SelectedTau_Rtau_AfterAllSelections": [0.70,0.72,0.74,0.75,0.76,0.78,0.80,0.82,0.84,0.86,0.88,0.90,0.92,0.94,0.96,0.98,1.00],
     "SelectedTau_p_AfterAllSelections": [0,20,40,50,60,70,80,100,150,200,300,500,600,700,800,900,1000],
     "SelectedTau_LeadingTrackP_AfterAllSelections": [0,41,60,80,100,150,200,300,500,600,700,800,900,1000],
     "SelectedTau_DecayMode_AfterAllSelections": None,
@@ -255,12 +309,25 @@ _dataDrivenCtrlPlotBinning = {
     "MinDeltaPhiTauJet_AfterAllSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
     "MaxDeltaPhiTauJet_AfterAllSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
     "NVertices_AfterAllSelections": None,
-#    "LdgTetrajetMass_AfterAllSelections": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,520,540,560,580,600,620,640,660,680,700,750,800,850,900,950,1000,1200,1400,1600,1800,2000,3000,4000], # for H+ -> tb analysis
-#    "LdgTetrajetMass_AfterAllSelections": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,520,540,560,580,600,620,640,660,680,700,720,740,760,780,800,820,840,860,880,900,920,940,960,980,1000,1050,1100,1150,1200,1250,1300,1350,1400,1500,1600,1700,1800,1900,2000,2500,3000,3500,4000], # for H+ -> tb analysis
-#    "LdgTetrajetMass_AfterAllSelections": [0,60,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,520,540,560,580,600,620,640,660,680,700,720,740,760,780,800,820,840,860,880,900,920,940,960,980,1000,1020,1040,1060,1080,1100,1120,1140,1160,1180,1200,1220,1240,1260,1280,1300,1350,1400,1450,1500,1600,1700,1800,1900,2000,2200,2400,2600,2800,3000,3500,4000], # for H+ -> tb analysis
-    "LdgTetrajetMass_AfterAllSelections": [0,50,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,520,540,560,580,600,620,640,660,680,700,720,740,760,780,800,820,840,860,880,900,920,940,960,980,1000,1020,1040,1060,1080,1100,1150,1200,1250,1300,1350,1400,1450,1500,1750,2000,2250,2500,2750,3000,3250,3500,3750,4000], # for H+ -> tb analysis
-
+    # HToTB
+    "HT_AfterAllSelections"   : [i for i in range(500, 1500, 50)] + [i for i in range(1500, 2000, 100)] + [i for i in range(2000, 3000+500, 500)],
+    "MHT_AfterAllSelections"  : [i for i in range(0, 140, 10)] + [i for i in range(140, 240, 20)] + [i for i in range(240, 400, 50)],
+    "QGLR_AfterAllSelections" : [float(i)/100.0 for i in range(0, 105, 5)],
+    "LdgTrijetPt_AfterAllSelections"     : [j for j in range(0, 500, 20)] + [k for k in range(500, 700, 50)] + [k for k in range(700, 900+100, 100)],
+    "LdgTrijetMass_AfterAllSelections"   : [i for i in range(50, 350, 10)],
+    "LdgTrijetBjetPt_AfterAllSelections" : [j for j in range(0, 300, 10)] + [k for k in range(300, 700+40, 40)],
+    "LdgTrijetBjetEta_AfterAllSelections" : None,
+    "LdgTrijetDijetPt_AfterAllSelections": [j for j in range(0, 400, 10)] + [k for k in range(400, 700+25, 25)],
+    "LdgTrijetDijetMass_AfterAllSelections": None,
+    "LdgTrijetTopMassWMassRatioAfterAllSelections": None,
+    "TetrajetBjetPt_AfterAllSelections"  : [j for j in range(0, 400, 20)] + [k for k in range(400, 600, 40)] + [k for k in range(600, 900+100, 100)],
+    "TetrajetBjetEta_AfterAllSelections" : None,
+    "LdgTetrajetPt_AfterAllSelections"   : [j for j in range(0, 500, 20)] + [k for k in range(500, 700, 50)] + [k for k in range(700, 900+100, 100)],
+    "LdgTetrajetMass_AfterAllSelections": getBinningForTetrajetMass(0),
+    "NVertices_AfterAllSelections": [j for j in range(0, 40, 2)] + [j for j in range(40, 60, 5)] + [j for j in range(60, 80+10, 10)]   
 }
+
+
 # Add EWK fake tau shape definitions
 for key in _dataDrivenCtrlPlotBinning.keys():
     if "shape" in key:

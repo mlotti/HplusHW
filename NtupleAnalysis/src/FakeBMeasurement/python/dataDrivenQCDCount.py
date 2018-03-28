@@ -35,13 +35,13 @@ class DataDrivenQCDShape:
         ewkFullName     = os.path.join(ewkPath, histoName)
 
         if (self._optionUseInclusiveNorm):
-            msg = "Disabled call for getting splitted histograms. Getting \"Inclusive\" histogram only instead."
-            self.Verbose(ShellStyles.WarningLabel() + msg, self._verbose)
+            msg = "Will create \"Inclusive\"-histogram results"
+            self.Verbose(ShellStyles.NoteStyle() + msg + ShellStyles.NormalStyle(), False)
             self._dataList  = list(self._getInclusiveHistogramsFromSingleSource(dsetMgr, dsetLabelData, dataFullName, luminosity)) # was called by default
             self._ewkList   = list(self._getInclusiveHistogramsFromSingleSource(dsetMgr, dsetLabelEwk , ewkFullName , luminosity)) # was called by default
         else:
-            msg = "This splitted histograms method is not validated! Use \"Inclusive\" histogram only instead."
-            self.Print(ShellStyles.WarningLabel() + msg, False)
+            msg = "Will create \"Splitted\"-histogram results"
+            self.Verbose(ShellStyles.NoteStyle() + msg + ShellStyles.NormalStyle(), False)
             self._dataList  = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelData, dataFullName, luminosity)) #FIXME: Does this work for Inclusive?
             self._ewkList   = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelEwk , ewkFullName , luminosity)) #FIXME: Does this work for Inclusive?
         return
@@ -65,8 +65,9 @@ class DataDrivenQCDShape:
     def _getInclusiveHistogramsFromSingleSource(self, dsetMgr, dsetlabel, histoName, luminosity):
         myHistoList = []
         myNameList  = histoName.split("/")
-        myMultipleFileNameStem = histoName
-
+        # FIXME: New addition to fix "optionUseInclusiveNorm" functionality (24-Mar-2018). Should not affect binned result!  
+        #myMultipleFileNameStem = histoName # the original code. should work (but it doesn't)
+        myMultipleFileNameStem = histoName + "/" + histoName.split("/")[-1] + "Inclusive" #the new code
         self.Verbose("Getting ROOT histo \"%s\" of dataset \"%s\"" % (myMultipleFileNameStem, dsetlabel), True)
         myDsetRootHisto = dsetMgr.getDataset(dsetlabel).getDatasetRootHisto(myMultipleFileNameStem)
 
@@ -75,13 +76,12 @@ class DataDrivenQCDShape:
             self.Verbose("Setting luminosity to \"%d\" pb-1 for dataset \"%s\"" % (luminosity, dsetlabel), False)
             myDsetRootHisto.normalizeToLuminosity(luminosity)
 
-        # Get histogram, rename it and set owenership
+        # Get histogram, rename it and set ownership
         h = myDsetRootHisto.getHistogram()
         newName = histoName + "_" + dsetlabel
         self.Verbose("Setting histogram name to \"%s\"" % (newName), False)
         h.SetName(newName)
         ROOT.SetOwnership(h, True)
-
         self.Verbose("Appending histogram \"%s\" of dataset \"%s\" to the list" % (h.GetName(), dsetlabel), False)
         myHistoList.append(h)
         return myHistoList
@@ -115,6 +115,12 @@ class DataDrivenQCDShape:
         at bin-index 0 you have the inclusive histogram!
         '''
         if binIndex >= len(self._dataList):
+            # FIXME: New addition to fix "optionUseInclusiveNorm" functionality (24-Mar-2018). Should not affect binned result!  
+            if self._optionUseInclusiveNorm: #new
+                h = aux.Clone(self._dataList[0])#new
+                newName = h.GetName() + "_DataDriven"#new
+                h.SetName(newName)#new
+                return h#new
             msg = "Requested bin index %d out of range (0-%d)!" % (binIndex, len(self._dataList) )
             raise Exception(ShellStyles.ErrorStyle() + msg, ShellStyles.NormalStyle() )
 
@@ -134,7 +140,13 @@ class DataDrivenQCDShape:
         Return the data in a given phase space split bin
         '''
         if binIndex >= len(self._dataList):
-            raise Exception(ShellStyles.ErrorLabel()+"DataDrivenQCDShape::getDataHistoForSplittedBin: requested bin index %d out of range (0-%d)!"%(binIndex,len(self._dataList)))
+            # FIXME: New addition to fix "optionUseInclusiveNorm" functionality (24-Mar-2018). Should not affect binned result!  
+            if self._optionUseInclusiveNorm: #new
+                h = aux.Clone(self._dataList[0])#new
+                h.SetName(h.GetName() + "_")#new
+                return h#new
+            msg = "Requested bin index %d out of range (0-%d)!" % (binIndex, len(self._dataList) )
+            raise Exception(ShellStyles.ErrorLabel() + msg + ShellStyles.NormalStyle())
         h = aux.Clone(self._dataList[binIndex])
         h.SetName(h.GetName()+"_")
         return h
@@ -144,7 +156,14 @@ class DataDrivenQCDShape:
         Return the EWK MC in a given phase space split bin
         '''
         if binIndex >= len(self._dataList):
-            raise Exception(ShellStyles.ErrorLabel()+"DataDrivenQCDShape::getEwkHistoForSplittedBin: requested bin index %d out of range (0-%d)!"%(binIndex,len(self._ewkList)))
+            # FIXME: New addition to fix "optionUseInclusiveNorm" functionality (24-Mar-2018). Should not affect binned result!  
+            if self._optionUseInclusiveNorm: #new
+                h = aux.Clone(self._ewkList[0])#new
+                h.SetName(h.GetName() + "_")#new
+                return h#new
+            msg = "Requested bin index %d out of range (0-%d)!" % (binIndex, len(self._ewkList) )
+            raise Exception(ShellStyles.ErrorLabel() + msg + ShellStyles.NormalStyle())
+
         h = aux.Clone(self._ewkList[binIndex])
         h.SetName(h.GetName()+"_")
         return h
@@ -152,8 +171,7 @@ class DataDrivenQCDShape:
     def getIntegratedDataDrivenQCDHisto(self):
         '''
         Return the sum of data-ewk integrated over the phase space splitted bins
-        '''
-        
+        '''        
         # Do the "Inclusive" histogram (here I assume that the first in the list is the inclusive)
         h = aux.Clone(self._dataList[0])
         histoName = "_".join(h.GetName().split("_", 2)[:2]) + "_DataDriven_Integrated"
@@ -168,7 +186,7 @@ class DataDrivenQCDShape:
         for i in range(1, len(self._dataList)):
 
             msg = "Splitted-bin mode has not been validated yet"
-            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
+            #raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
 
             # Accumulate given bin-histo from Data
             h.Add(self._dataList[i])
@@ -437,4 +455,3 @@ class DataDrivenQCDEfficiency:
             ROOT.gDirectory.Delete("hDenomEwk")
         # FIXME: add histogram for efficiency
         return
-

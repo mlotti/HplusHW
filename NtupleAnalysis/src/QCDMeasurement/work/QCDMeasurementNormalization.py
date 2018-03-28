@@ -31,7 +31,7 @@ analysis = "QCDMeasurement"
 #==== Set rebin factor for normalization plots 
 #     Histograms are generated with 1 GeV bin width, so 
 #     10 here means that the fit is done on 10 GeV bins
-_rebinFactor = 5
+_rebinFactor = 10
 
 #=== Set to true if you want to use HT binned WJets samples instead of inclusive
 useWJetsHT = True
@@ -249,47 +249,42 @@ def main(argv, dsetMgr, moduleInfoString):
         #===== Define fit functions and fit parameters
         # The available functions are defined in the FitFunction class in the QCDMeasurement/python/QCDNormalization.py file
         
-        # commented out fitter for EWK fake taus, since only the fit on inclusive EWK is used to obtain w_QCD
-        #boundary = 100
-        #template_EWKFakeTaus_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunctionInv", boundary=boundary, norm=1, rejectPoints=1),
-                                                #FITMIN, FITMAX)
-        #template_EWKFakeTaus_Baseline.setDefaultFitParam(defaultInitialValue=[10.0, 100, 45,   0.02],
-                                                         #defaultLowerLimit=  [ 0.1,  70,  10,  0.001],
-                                                         #defaultUpperLimit=  [ 30, 300,  100,    0.1])
-        # commented out fitter for EWK genuine taus, since only the fit on inclusive EWK is used to obtain w_QCD
-        #boundary = 150
-        #template_EWKGenuineTaus_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=boundary, norm=1, rejectPoints=1),
-                                                   #FITMIN, FITMAX)
-        #template_EWKGenuineTaus_Baseline.setDefaultFitParam(defaultLowerLimit=[0.5,  90, 30, 0.0001],
-                                                            #defaultUpperLimit=[ 20, 150, 50,    1.0])
         # Inclusive EWK
-        boundary = 150
+        # The function is essentially pure Gaussian up to boundary value, and exponential after that, i.e.
+        # A*Gaus(x, mean,sigma) when x > boundary_x
+        # A*Gaus(boundary_x, mean,sigma)*exp(-beta*x)
+        # par[0] = overall normalization A
+        # par[1] = mean
+        # par[3] = sigma
+        # par[4] = beta in the exponential tail
+        boundary = 160
         template_EWKInclusive_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=boundary, norm=1, rejectPoints=1),
                                                  FITMIN, FITMAX)
         template_EWKInclusive_Baseline.setDefaultFitParam(defaultLowerLimit=[0.5,  90, 30, 0.0001],
-                                                          defaultUpperLimit=[ 20, 150, 60,    1.0])
+                                                          defaultUpperLimit=[ 30, 250, 60,    1.0])
 
         # Fake tau and QCD
         # Note that the same function is used for QCD only and QCD+EWK fakes (=Fake Tau)
 
         # Old function, used until May 2017    
 #        template_QCD_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunction", norm=1), FITMIN, FITMAX)
-#        template_QCD_Inverted.setDefaultFitParam(defaultLowerLimit=[0.0001, 0.001, 0.1, 0.0,  10, 0.0001, 0.001],
-#                                                 defaultUpperLimit=[   200,    10,  10, 150, 100,      1, 0.05])
-#        template_QCD_Inverted.setDefaultFitParam(defaultLowerLimit=[ 30, 0.1, 0.1,    0,  10,     0.0, 0.0001], # new default limits to make fits more stable,
-#                                                 defaultUpperLimit=[ 130, 20,  20,  200, 200,     1.0,    1.0]) # corresponding to the 7 free param. of the fit function        
+#        template_QCD_Inverted.setDefaultFitParam(defaultLowerLimit=[ 30, 0.1, 0.1,   0,  10, 0.0, 0.0001],
+#                                                 defaultUpperLimit=[ 130, 20,  20,  200, 200,     1.0,    1.0])
 
-        # New dunction with one more d.o.f in Rayleigh distribution WARNING!!! UNSTABLE!!!
-#        template_QCD_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunctionWithPeakShift", norm=1), FITMIN, FITMAX)
-#        template_QCD_Inverted.setDefaultFitParam(defaultLowerLimit=[ 30, 0.1, -10,   0,  -20,  10,   0.0001, 0.0001], 
-#                                                 defaultUpperLimit=[ 130, 20,  10,  20,  200, 100,     1.0,   0.05]) 
+        # Latest version of the Rayleigh peak with shift + Gaussian + Exponential combination, used from March 2018, i.e.
+        # A*((x-b)/sigma^2)*exp((x-b)^2/(2*sigma^2))+B*Gaus(x,mean,sigma2)+C*exp(-beta*x)
+        # par[0] sigma for Rayielgh term
+        # par[1] overall normalization A
+        # par[2] peak shift b for Rayleigh term
+        # par[3] normalization B for the Gaussian term
+        # par[4] normalization C for the exponential tail
+        # par[5] mean for Gaussian term
+        # par[6] sigma2 for Gaussian term
+        # par[7] beta for exponential tail
+        template_QCD_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunctionWithPeakShiftClear", norm=1), FITMIN, FITMAX)
+        template_QCD_Inverted.setDefaultFitParam(defaultLowerLimit=[ 30, 0.1, -10,   0,  -20,  10,   0.0001, 0.0001], 
+                                                 defaultUpperLimit=[ 130, 20,  10,  20,  200, 100,     1.0,   0.05]) 
 
-
-        # As the factor multiplicative for exponential function (p6 in QCDFunctionWithPeakShift tends to 0 in fitting, 
-        # we drop that term and use only this:
-        template_QCD_Inverted.setFitter(QCDNormalization.FitFunction("RayleighShiftedPlusGaussian", norm=1), FITMIN, FITMAX)
-        template_QCD_Inverted.setDefaultFitParam(defaultLowerLimit=[ 30, 0.1, -10,   0,  -20,  10], 
-                                                 defaultUpperLimit=[ 130, 20,  10,  20,  200, 100])      
 
 
         #===== Loop over tau pT bins

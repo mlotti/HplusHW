@@ -307,7 +307,7 @@ def main(opts, moduleSelector, multipleDirs):
                         Print("Performing tail fit for heavy H+ ...")
                         myHeavyStatus = True
                         for m in config.MassPoints:
-                            if m < 175:
+                            if m < 161:
                                 myHeavyStatus = False
                         if myHeavyStatus:
                             Print("Doing tail fit ...")

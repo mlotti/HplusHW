@@ -75,7 +75,7 @@ TauLegSkim::TauLegSkim(const edm::ParameterSet& iConfig)
     tauEtaCut          = iConfig.getParameter<double>("TauEtaCut");                            
 
     muonPtCut          = iConfig.getParameter<double>("MuonPtCut");                            
-    muonPtCut          = iConfig.getParameter<double>("MuonEtaCut");                            
+    muonEtaCut         = iConfig.getParameter<double>("MuonEtaCut");                            
 
     genWeights = iConfig.getParameter<std::vector<edm::ParameterSet> >("GenWeights");
     genWeightToken = new edm::EDGetTokenT<GenEventInfoProduct>[genWeights.size()];
