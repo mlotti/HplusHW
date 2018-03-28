@@ -313,10 +313,12 @@ def GetBinText(bin):
     elif bin == "2":
         return "0.8 < |#eta| < 1.6"
     elif bin == "3":
-        return "1.6 < |#eta| < 2.0"
+        return "1.6 < |#eta| < 1.8"
     elif bin == "4":
-        return "2.0 < |#eta| < 2.2"
+        return "1.8 < |#eta| < 2.0"
     elif bin == "5":
+        return "2.0 < |#eta| < 2.2"
+    elif bin == "6":
         return "|#eta| > 2.2"
     elif bin == "Inclusive":
         return bin

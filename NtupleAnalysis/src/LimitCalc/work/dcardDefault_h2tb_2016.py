@@ -76,7 +76,7 @@ def PrintNuisancesTable(Nuisances, DataGroups):
 #================================================================================================  
 # Options
 #================================================================================================  
-MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
+MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000]#, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
 DataCardName                           = "Hplus2tb_13TeV"
 OptionMassShape                        = "LdgTetrajetMass_AfterAllSelections"
 OptionBr                               = 1.0   # [default: 1.0]    (The Br(t->bH+) used in figures and tables)
@@ -84,6 +84,7 @@ OptionSqrtS                            = 13    # [default: 13]     (The sqrt(s) 
 BlindAnalysis                          = True  # [default: True]   (True, unless you have a green light for unblinding)
 OptionBlindThreshold                   = None  # [default: 0.2]    (If signal exceeds this fraction of expected events, data is blinded; set to None to disable)
 MinimumStatUncertainty                 = 0.5   # [default: 0.5]    (Minimum stat. uncertainty to set to bins with zero events)
+UseAutomaticMinimumStatUncertainty     = False # Do NOT use the MinimumStatUncertainty value above for ~empty bins, but determine the value from the lowest non-zero rate for each dataset   
 OptionCombineSingleColumnUncertainties = False # [default: False]  (Approxmation that makes limit running faster)
 OptionDisplayEventYieldSummary         = False # [default: False]  (Print "Event yield summary", using the TableProducer.py)
 OptionDoControlPlots                   = True  # [default: True]   (Produce control plots defined at end of this file)
@@ -360,7 +361,7 @@ trgMC_Const     = Nuisance(id="CMS_eff_trg_MC"   , label="Trigger MC efficiency 
 PU_Const        = Nuisance(id="CMS_pileup"       , label="Pileup (Approx.)", distr="lnN", function="Constant", value=0.05)
 eVeto_Const     = Nuisance(id="CMS_eff_e_veto"   , label="e veto", distr="lnN", function="Ratio", numerator="passed e selection (Veto)", denominator="passed PV", scaling=0.02) #sigma-eID= 2%, fixme
 muVeto_Const    = Nuisance(id="CMS_eff_m_veto"   , label="mu veto", distr="lnN", function="Ratio", numerator="passed mu selection (Veto)", denominator="passed e selection (Veto)", scaling=0.01) #sigma-muID= 1%, fixme
-tauVeto_Const   = Nuisance(id="CMS_eff_tau_veto" , label="tau veto", distr="lnN", function="Ratio", numerator="Passed tau selection (Veto)", denominator="passed mu selection (Veto)", scaling=0.01) #sigma-tauID= 1%, fixme
+tauVeto_Const   = Nuisance(id="CMS_eff_tau_veto" , label="tau veto", distr="lnN", function="Ratio", numerator="Passed tau selection (Veto)", denominator="passed mu selection (Veto)", scaling=0.03) #sigma-tauID= 1%, fixme
 bTag_Const      = Nuisance(id="CMS_eff_b"        , label="b tagging (Approx.)", distr="lnN", function="Constant", value=0.05)
 JES_Const       = Nuisance(id="CMS_scale_j"      , label="Jet Energy Scale (JES) (Approx.)"     , distr="lnN", function="Constant", value=0.03)
 JER_Const       = Nuisance(id="CMS_res_j"        , label="Jet Energy Resolution (JER) (Approx.)", distr="lnN", function="Constant", value=0.04)
@@ -538,7 +539,7 @@ hHT = ControlPlotInput(
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
                          "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 3000.0} },
-    #blindedRange=[800.0, 3000.0], # specify range min,max if blinding applies to this control plot      
+    blindedRange=[800.0, 3000.0], # specify range min,max if blinding applies to this control plot      
     )
 
 hMHT = ControlPlotInput(
@@ -554,7 +555,7 @@ hMHT = ControlPlotInput(
                          "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 400.0} }
     )
 
-hTopPt = ControlPlotInput(
+hLdgTopPt = ControlPlotInput(
     title            = "LdgTrijetPt_AfterAllSelections",
     histoName        = "LdgTrijetPt_AfterAllSelections",
     details          = { "xlabel"             : "p_{T}",
@@ -567,7 +568,7 @@ hTopPt = ControlPlotInput(
                          "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 900.0} }
     )
 
-hTopMass = ControlPlotInput(
+hLdgTopMass = ControlPlotInput(
     title            = "LdgTrijetMass_AfterAllSelections",
     histoName        = "LdgTrijetMass_AfterAllSelections",
     details          = { "xlabel"             : "m_{jjb}",
@@ -580,7 +581,7 @@ hTopMass = ControlPlotInput(
                          "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 350.0} }
     )
 
-hTopBjetPt = ControlPlotInput(
+hLdgTopBjetPt = ControlPlotInput(
     title            = "LdgTrijetBjetPt_AfterAllSelections",
     histoName        = "LdgTrijetBjetPt_AfterAllSelections",
     details          = { "xlabel"             : "p_{T}",
@@ -593,7 +594,7 @@ hTopBjetPt = ControlPlotInput(
                          "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 700.0} }
     )
 
-hTopBjetEta = ControlPlotInput(
+hLdgTopBjetEta = ControlPlotInput(
     title            = "LdgTrijetBjetEta_AfterAllSelections",
     histoName        = "LdgTrijetBjetEta_AfterAllSelections",
     details          = { "xlabel"             : "#eta",
@@ -607,7 +608,7 @@ hTopBjetEta = ControlPlotInput(
     )
 
 
-hTopDijetPt = ControlPlotInput(
+hLdgTopDijetPt = ControlPlotInput(
     title            = "LdgTrijetDijetPt_AfterAllSelections",
     histoName        = "LdgTrijetDijetPt_AfterAllSelections",
     details          = { "xlabel"             : "p_{T}",
@@ -620,7 +621,7 @@ hTopDijetPt = ControlPlotInput(
                          "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 700.0} }
     )
 
-hTopDijetMass = ControlPlotInput(
+hLdgTopDijetMass = ControlPlotInput(
     title            = "LdgTrijetDijetMass_AfterAllSelections",
     histoName        = "LdgTrijetDijetMass_AfterAllSelections",
     details          = { "xlabel"             : "m_{jj}",
@@ -633,10 +634,103 @@ hTopDijetMass = ControlPlotInput(
                          "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmin": 40.0, "xmax": 160.0} }
     )
 
-hTopR32  = ControlPlotInput(
+
+hSubldgTopPt = ControlPlotInput(
+    title            = "SubldgTrijetPt_AfterAllSelections",
+    histoName        = "SubldgTrijetPt_AfterAllSelections",
+    details          = { "xlabel"             : "p_{T}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "GeV/c",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 900.0} }
+    )
+
+hSubldgTopMass = ControlPlotInput(
+    title            = "SubldgTrijetMass_AfterAllSelections",
+    histoName        = "SubldgTrijetMass_AfterAllSelections",
+    details          = { "xlabel"             : "m_{jjb}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "GeV/c^{2}",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 350.0} }
+    )
+
+hSubldgTopBjetPt = ControlPlotInput(
+    title            = "SubldgTrijetBjetPt_AfterAllSelections",
+    histoName        = "SubldgTrijetBjetPt_AfterAllSelections",
+    details          = { "xlabel"             : "p_{T}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "GeV/c",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 700.0} }
+    )
+
+hSubldgTopBjetEta = ControlPlotInput(
+    title            = "SubldgTrijetBjetEta_AfterAllSelections",
+    histoName        = "SubldgTrijetBjetEta_AfterAllSelections",
+    details          = { "xlabel"             : "#eta",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmin": -2.5, "xmax": 2.5} },
+    )
+
+
+hSubldgTopDijetPt = ControlPlotInput(
+    title            = "SubldgTrijetDijetPt_AfterAllSelections",
+    histoName        = "SubldgTrijetDijetPt_AfterAllSelections",
+    details          = { "xlabel"             : "p_{T}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "GeV/c",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmax": 700.0} }
+    )
+
+hSubldgTopDijetMass = ControlPlotInput(
+    title            = "SubldgTrijetDijetMass_AfterAllSelections",
+    histoName        = "SubldgTrijetDijetMass_AfterAllSelections",
+    details          = { "xlabel"             : "m_{jj}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "GeV/c^{2}",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmin": 40.0, "xmax": 160.0} }
+    )
+
+hLdgTopR32  = ControlPlotInput(
     title            = "LdgTrijetTopMassWMassRatioAfterAllSelections",
     histoName        = "LdgTrijetTopMassWMassRatioAfterAllSelections",
-    details          = { "xlabel"             : "R_{32}",
+    details          = { "xlabel"             : "R_{32}^{ldg}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmin": 0.5, "xmax": 4.0} }
+    )
+
+hSubldgTopR32  = ControlPlotInput(
+    title            = "SubldgTrijetTopMassWMassRatioAfterAllSelections",
+    histoName        = "SubldgTrijetTopMassWMassRatioAfterAllSelections",
+    details          = { "xlabel"             : "R_{32}^{sub-ldg}",
                          "ylabel"             : "Events",
                          "divideByBinWidth"   : False,
                          "unit"               : "",
@@ -736,22 +830,105 @@ hQGLR  = ControlPlotInput(
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
     )
 
+hNjets = ControlPlotInput(
+    title            = "Njets_AfterAllSelections",
+    histoName        = "Njets_AfterAllSelections",
+    details          = { "xlabel"             : "jets multiplicity",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmin": 7.0,"xmax": 20.0} }#,
+    #blindedRange=[100.0, 400.0], # specify range min,max if blinding applies to this control plot      
+    )
+
+
+hNBjets = ControlPlotInput(
+    title            = "NBjets_AfterAllSelections",
+    histoName        = "NBjets_AfterAllSelections",
+    details          = { "xlabel"             : "b-jets multiplicity",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10, "xmin": 3.0,"xmax": 10.0} }#,
+    #blindedRange=[100.0, 400.0], # specify range min,max if blinding applies to this control plot      
+    )
+
+hBJetPt = ControlPlotInput(
+    title            = "BJetPt_AfterAllSelections",
+    histoName        = "BJetPt_AfterAllSelections",
+    details          = { "xlabel"             : "p_{T}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "GeV/c",
+                         "log"                : True,
+                         "legendPosition"     : "SE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10}}#,
+    #blindedRange=[100.0, 400.0], # specify range min,max if blinding applies to this control plot      
+    )
+
+hBJetEta = ControlPlotInput(
+    title            = "BJetEta_AfterAllSelections",
+    histoName        = "BJetEta_AfterAllSelections",
+    details          = { "xlabel"             : "#eta",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "",
+                         "log"                : True,
+                         "legendPosition"     : "SE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10}}#,
+    #blindedRange=[100.0, 400.0], # specify range min,max if blinding applies to this control plot      
+    )
+
+hBtagDiscriminator = ControlPlotInput(
+    title            = "BtagDiscriminator_AfterAllSelections",
+    histoName        = "BtagDiscriminator_AfterAllSelections",
+    details          = { "xlabel"             : "CSVv2 discriminator",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "",
+                         "log"                : True,
+                         "legendPosition"     : "NE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10}}#,
+    #blindedRange=[100.0, 400.0], # specify range min,max if blinding applies to this control plot      
+    )
+
 #================================================================================================ 
 # Create ControlPlot list (NOTE: Remember to set OptionDoControlPlots to True)
 #================================================================================================ 
 ControlPlots.append(hMET)
-ControlPlots.append(hHT)
-ControlPlots.append(hMHT)
-ControlPlots.append(hQGLR)
-ControlPlots.append(hTopPt)
-ControlPlots.append(hTopMass)
-ControlPlots.append(hTopBjetPt)
-ControlPlots.append(hTopBjetEta)
-ControlPlots.append(hTopDijetPt)
-ControlPlots.append(hTopDijetMass)
-ControlPlots.append(hTetrajetBjetPt)
-ControlPlots.append(hTetrajetBjetEta)
-ControlPlots.append(hHiggsPt)
-ControlPlots.append(hHiggsMass)
-ControlPlots.append(hVertices)
-# ControlPlots.append(hTopR32)
+# ControlPlots.append(hHT)
+# ControlPlots.append(hMHT)
+# ControlPlots.append(hQGLR)
+# ControlPlots.append(hLdgTopPt)
+# ControlPlots.append(hLdgTopMass)
+# ControlPlots.append(hLdgTopBjetPt)
+# ControlPlots.append(hLdgTopBjetEta)
+# ControlPlots.append(hLdgTopDijetPt)
+# ControlPlots.append(hLdgTopDijetMass)
+# ControlPlots.append(hLdgTopR32)
+# ControlPlots.append(hTetrajetBjetPt)
+# ControlPlots.append(hTetrajetBjetEta)
+# ControlPlots.append(hHiggsPt)
+# ControlPlots.append(hHiggsMass)
+# ControlPlots.append(hVertices)
+# ControlPlots.append(hNjets)
+# ControlPlots.append(hNBjets) #no agreement expected
+# ControlPlots.append(hBJetPt)
+# ControlPlots.append(hBJetEta)
+# ControlPlots.append(hBtagDiscriminator) #no agreement expected
+# ControlPlots.append(hSubldgTopPt)
+# ControlPlots.append(hSubldgTopMass)
+# ControlPlots.append(hSubldgTopBjetPt)
+# ControlPlots.append(hSubldgTopBjetEta)
+# ControlPlots.append(hSubldgTopDijetPt)
+# ControlPlots.append(hSubldgTopDijetMass)
+# ControlPlots.append(hSubldgTopR32)
