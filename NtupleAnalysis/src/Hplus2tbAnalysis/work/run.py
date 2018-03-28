@@ -332,8 +332,8 @@ if __name__ == "__main__":
     parser.add_option("--noPU", dest="usePUreweighting", action="store_false", default = PUREWEIGHT, 
                       help="Do NOT apply Pileup re-weighting (default: %s)" % (PUREWEIGHT) )
 
-    parser.add_option("--noTopPt", dest="useTopPtReweighting", action="store_false", default = TOPPTREWEIGHT, 
-                      help="Do NOT apply top-pt re-weighting (default: %s)" % (TOPPTREWEIGHT) )
+    parser.add_option("--topPt", dest="useTopPtReweighting", action="store_true", default = TOPPTREWEIGHT, 
+                      help="Do apply top-pt re-weighting (default: %s)" % (TOPPTREWEIGHT) )
 
     parser.add_option("--doSystematics", dest="doSystematics", action="store_true", default = DOSYSTEMATICS, 
                       help="Do systematics variations  (default: %s)" % (DOSYSTEMATICS) )

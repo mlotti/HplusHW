@@ -128,7 +128,7 @@ elif bjetSelection.bjetDiscr == "pfCombinedMVAV2BJetTags":
                                         btagEfficiencyFilename = "btageff_Hybrid_TT+WJetsHT.json", # use with taunu analysis and WJetsHT samples
                                         direction              = "nominal")
 else:
-    pass
+    pass #should crash
 
 #=================================================================================================
 # QGL selection
@@ -232,8 +232,8 @@ scaleFactors.setupBtagSFInformation(btagPset               = fakeBBjetSelection,
                                     direction              = "nominal")
 
 fakeBTopSelectionBDT = PSet(
-    MVACutValue            = -0.4, # [default: 0.0, 0.6] NOTE: defines SR, VR, CR1, and CR2
-    MVACutDirection        = ">=",
+    MVACutValue            = -1.0,   # [default: -0.4, 0.0, 0.6] NOTE: defines SR, VR, CR1, and CR2
+    MVACutDirection        = ">",    # [default: ">"] (NOTE: Crashes if set to ">=" -1)
     LdgTopDefinition       = "MVA",  # [default: "MVA"] (options: "MVA", "Pt")
     MassCutValue           = topSelectionBDT.MassCutValue,
     MassCutDirection       = topSelectionBDT.MassCutDirection,
