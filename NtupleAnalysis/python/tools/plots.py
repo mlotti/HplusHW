@@ -126,10 +126,10 @@ _physicalMcAdd = {
     "QCD_Pt_470to600_MuEnrichedPt5_ext1" : "QCD_Pt_470to600_MuEnrichedPt5",
     "QCD_Pt_470to600_MuEnrichedPt5_ext2" : "QCD_Pt_470to600_MuEnrichedPt5",
     "QCD_Pt_600to800_MuEnrichedPt5"      : "QCD_Pt_600to800_MuEnrichedPt5",
-    "QCD_Pt_600to800_MuEnrichedPt5_ext1" : "QCD_Pt_600to800_MuEnrichedPt5_ext1",
+    "QCD_Pt_600to800_MuEnrichedPt5_ext1" : "QCD_Pt_600to800_MuEnrichedPt5",
     "QCD_Pt_800to1000_MuEnrichedPt5"     : "QCD_Pt_800to1000_MuEnrichedPt5",
-    "QCD_Pt_800to1000_MuEnrichedPt5_ext1": "QCD_Pt_800to1000_MuEnrichedPt5_ext1",
-    "QCD_Pt_800to1000_MuEnrichedPt5_ext2": "QCD_Pt_800to1000_MuEnrichedPt5_ext2",
+    "QCD_Pt_800to1000_MuEnrichedPt5_ext1": "QCD_Pt_800to1000_MuEnrichedPt5",
+    "QCD_Pt_800to1000_MuEnrichedPt5_ext2": "QCD_Pt_800to1000_MuEnrichedPt5",
     "QCD_Pt_1000toInf_MuEnrichedPt5"     : "QCD_Pt_1000toInf_MuEnrichedPt5",
     
     "WJetsToLNu_HT_0To70"          : "WJetsToLNu_HT_0To70",
