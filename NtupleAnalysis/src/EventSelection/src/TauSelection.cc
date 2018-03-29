@@ -1,6 +1,5 @@
 // -*- c++ -*-
 #include "EventSelection/interface/TauSelection.h"
-
 #include "Framework/interface/Exception.h"
 #include "Framework/interface/ParameterSet.h"
 #include "EventSelection/interface/CommonPlots.h"
@@ -80,6 +79,11 @@ TauSelection::TauSelection(const ParameterSet& config, EventCounter& eventCounte
   cSubPassedAntiIsolation(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed anti-isolation")),
   cSubPassedAntiIsolationRtau(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed anti-isolated Rtau")),
   cSubPassedTauSelectionGenuine(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed tau selection and genuine")),
+  cSubPassedElectronToTau(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Electrons passing tau selection")),
+  cSubPassedMuonToTau(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Muons passing tau selection")),
+  cSubPassedJetToTau(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Jets passing tau selection")),
+  cSubPassedGluonToTau(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Gluons passing tau selection")),
+  cSubPassedUnknownToTau(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Unknown decays passing tau selection")),
   cSubPassedTauSelectionMultipleTaus(fEventCounter.addSubCounter("tau selection ("+postfix+")", "multiple selected taus")),
   cSubPassedAntiIsolatedTauSelection(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed anti-isolated tau selection")),
   cSubPassedAntiIsolatedTauSelectionMultipleTaus(fEventCounter.addSubCounter("tau selection ("+postfix+")", "multiple anti-isolated taus"))
@@ -143,6 +147,11 @@ TauSelection::TauSelection(const ParameterSet& config, const std::string& postfi
   cSubPassedAntiIsolation(fEventCounter.addSubCounter("tau selection", "Passed anti-isolation")),
   cSubPassedAntiIsolationRtau(fEventCounter.addSubCounter("tau selection", "Passed anti-isolated Rtau")),
   cSubPassedTauSelectionGenuine(fEventCounter.addSubCounter("tau selection", "Passed tau selection and genuine")),
+  cSubPassedElectronToTau(fEventCounter.addSubCounter("tau selection", "Electrons passing tau selection")),
+  cSubPassedMuonToTau(fEventCounter.addSubCounter("tau selection", "Muons passing tau selection")),
+  cSubPassedJetToTau(fEventCounter.addSubCounter("tau selection", "Jets passing tau selection")),
+  cSubPassedGluonToTau(fEventCounter.addSubCounter("tau selection", "Gluons passing tau selection")),
+  cSubPassedUnknownToTau(fEventCounter.addSubCounter("tau selection", "Unknown decays passing tau selection")),
   cSubPassedTauSelectionMultipleTaus(fEventCounter.addSubCounter("tau selection", "multiple selected taus")),
   cSubPassedAntiIsolatedTauSelection(fEventCounter.addSubCounter("tau selection", "Passed anti-isolated tau selection")),
   cSubPassedAntiIsolatedTauSelectionMultipleTaus(fEventCounter.addSubCounter("tau selection", "multiple anti-isolated taus"))
@@ -417,8 +426,18 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
     cSubPassedAntiIsolation.increment();
   if (passedAntiIsolRtau)
     cSubPassedAntiIsolationRtau.increment();
-  if (output.fSelectedTaus.size() > 0 && output.isGenuineTau() )
-  cSubPassedTauSelectionGenuine.increment();
+  if (output.fSelectedTaus.size() > 0 && output.isGenuineTau())
+    cSubPassedTauSelectionGenuine.increment();
+  if (event.isMC() && output.hasIdentifiedTaus() && output.getSelectedTau().isElectronToTau())
+    cSubPassedElectronToTau.increment();
+  if (event.isMC() && output.hasIdentifiedTaus() && output.getSelectedTau().isMuonToTau())
+    cSubPassedMuonToTau.increment();
+  if (event.isMC() && output.hasIdentifiedTaus() && output.getSelectedTau().isJetToTau())
+    cSubPassedJetToTau.increment();
+  if (event.isMC() && output.hasIdentifiedTaus() && output.getSelectedTau().isGluonToTau())
+    cSubPassedGluonToTau.increment();
+  if (event.isMC() && output.hasIdentifiedTaus() && output.getSelectedTau().isUnknownTauDecay())
+    cSubPassedUnknownToTau.increment(); 
   if (output.fSelectedTaus.size() > 1)
     cSubPassedTauSelectionMultipleTaus.increment();
   if (output.fAntiIsolatedTaus.size() > 0)
