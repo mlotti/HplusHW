@@ -15,8 +15,10 @@ import os
 def assignTauIdentificationSF(tauSelectionPset):
     SF = 1.0
     if tauSelectionPset.isolationDiscr=="byLooseCombinedIsolationDeltaBetaCorr3Hits":    SF = 0.93
+    elif tauSelectionPset.isolationDiscr=="byVLooseCombinedIsolationDeltaBetaCorr3Hits": SF = 0.93 # use loose value because VLoose not measured
     elif tauSelectionPset.isolationDiscr=="byMediumCombinedIsolationDeltaBetaCorr3Hits": SF = 0.91
     elif tauSelectionPset.isolationDiscr=="byTightCombinedIsolationDeltaBetaCorr3Hits":  SF = 0.89
+    elif tauSelectionPset.isolationDiscr=="byVLooseIsolationMVArun2v1DBoldDMwLT":        SF = 0.99
     elif tauSelectionPset.isolationDiscr=="byLooseIsolationMVArun2v1DBoldDMwLT":         SF = 0.99
     elif tauSelectionPset.isolationDiscr=="byMediumIsolationMVArun2v1DBoldDMwLT":        SF = 0.97
     elif tauSelectionPset.isolationDiscr=="byTightIsolationMVArun2v1DBoldDMwLT":         SF = 0.95

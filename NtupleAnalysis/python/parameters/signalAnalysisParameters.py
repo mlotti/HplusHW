@@ -47,8 +47,8 @@ tauSelection = PSet(
   againstElectronDiscr = "againstElectronTightMVA6",
 #  againstElectronDiscr = "",
       againstMuonDiscr = "againstMuonLoose3",
-#        isolationDiscr = "byMediumIsolationMVA3oldDMwLT",
-        isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
+        isolationDiscr = "byLooseIsolationMVArun2v1DBoldDMwLT", # MVA (default)
+#        isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits",  # cut-based
 )
 # tau identification scale factors
 scaleFactors.assignTauIdentificationSF(tauSelection)
