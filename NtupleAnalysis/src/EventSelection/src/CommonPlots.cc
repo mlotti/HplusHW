@@ -818,7 +818,7 @@ void CommonPlots::book(TDirectory *dir, bool isData) {
 
   fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlJetPtAfterAllSelections, 
 						   "JetPt_AfterAllSelections", ";Selected jets p_{T}, GeV/c;N_{events}",
-						   fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+						   2*fPtBinSettings.bins(), fPtBinSettings.min(), 2*fPtBinSettings.max());
 
   fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlJetEtaAfterAllSelections, 
 						   "JetEta_AfterAllSelections", ";Selected jets #eta;N_{events}",
@@ -881,7 +881,7 @@ void CommonPlots::book(TDirectory *dir, bool isData) {
 
   fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlBJetPtAfterAllSelections,
 						   "BJetPt_AfterAllSelections", ";Selected b jets p_{T}, GeV/c;N_{events}",
-						   fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+						   2*fPtBinSettings.bins(), fPtBinSettings.min(), 2*fPtBinSettings.max());
 
   fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlBJetEtaAfterAllSelections,
 						   "BJetEta_AfterAllSelections", ";Selected b jets #eta;N_{events}",
