@@ -403,13 +403,19 @@ def GetHistoKwargs(histoName, ext, opts):
         _cutBox       = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         binWmin, binWmax = GetBinWidthMinMax(_rebinX)
         _ylabel = "Events / %.0f-%.0f %s" % (binWmin, binWmax, _units)
-    if "mvamax" in hName:
+    if "mvamax1" in hName:
         _rebinX = 1
         _units  = ""
         _format = "%0.2f " + _units
-        #_xlabel = "BDTG discriminant"
         _xlabel = "top-tag discriminant"
         _opts["xmin"] =  0.0 #0.45
+        _cutBox = {"cutValue": 0.40, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+    if "mvamax2" in hName:
+        _rebinX = 1
+        _units  = ""
+        _format = "%0.2f " + _units
+        _xlabel = "top-tag discriminant"
+        #_opts["xmin"] = -1.0 #0.45
         _cutBox = {"cutValue": 0.40, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
     if "nbjets" in hName:
         _units  = ""
