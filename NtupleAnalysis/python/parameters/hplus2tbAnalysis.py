@@ -300,5 +300,5 @@ allSelections = PSet(
     FakeBTopSelectionBDT  = fakeBTopSelectionBDT,
     CommonPlots           = commonPlotsOptions,
     HistogramAmbientLevel = histogramAmbientLevel,
-    QGLRSelection         = qglrSelection,
+    # QGLRSelection         = qglrSelection,
 )
