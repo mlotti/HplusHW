@@ -209,15 +209,16 @@ class SystematicsForTransferFactor:
         cleanName = fullName.replace("_cloned", "")
         cleanName = cleanName.replace("_FakeBMeasurementTrijetMass", "")
         rebinX    = systematics.getBinningForPlot(cleanName)
+        
+        # if hRate.GetNbinsX() != hSystUpFromVar.GetNbinsX():
 
-        self.Verbose("Make sure this histogram has the same binning as the final data-driven plot", True)
         if rebinX != None:
             self.Verbose("Rebinning histogram \"%s\" (\"%s\")" % (cleanName, fullName), True)
-            hRate        = hRate.Rebin(len(rebinX)-1, hRate.GetName(), array.array("d", rebinX))
+            hRate            = hRate.Rebin(len(rebinX)-1, hRate.GetName(), array.array("d", rebinX))
             hSystUpFromVar   = hSystUpFromVar.Rebin(len(rebinX)-1, hSystUpFromVar.GetName(), array.array("d", rebinX))
             hSystDownFromVar = hSystDownFromVar.Rebin(len(rebinX)-1, hSystDownFromVar.GetName(), array.array("d", rebinX))
-            #hSystUp      = hSystUp.Rebin(len(rebinX)-1, hSystUp.GetName(), array.array("d", rebinX))     #don't !
-            #hSystDown    = hSystDown.Rebin(len(rebinX)-1, hSystDown.GetName(), array.array("d", rebinX)) #don't !
+            ### hSystUp      = hSystUp.Rebin(len(rebinX)-1, hSystUp.GetName(), array.array("d", rebinX))     #don't !
+            ### hSystDown    = hSystDown.Rebin(len(rebinX)-1, hSystDown.GetName(), array.array("d", rebinX)) #don't !
 
         # Constuct a summary table
         table   = []
