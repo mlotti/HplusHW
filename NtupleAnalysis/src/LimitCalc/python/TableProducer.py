@@ -931,11 +931,24 @@ class TableProducer:
             # asymmetric
             return "~^{+%s}_{-%s}"%(formatStr%uncUp, formatStr%uncDown)
 
-    def getLatexResultString(self, hwu,formatStr,myPrecision):
-        if not hwu==None:
-            return "$%s \\pm %s %s $"%(formatStr%hwu.getRate(),formatStr%hwu.getRateStatUncertainty(),
-                                       self.getLatexFormattedUnc(formatStr,myPrecision,*hwu.getRateSystUncertainty()))
-        else: return ""
+    def getLatexResultString(self, hwu, formatStr, myPrecision):
+        '''
+        hwu = Histo With Uncertainties
+        '''
+        if hwu==None:
+            return ""
+        
+        # For sanity checks
+        if 0:
+            hwu.printUncertainties()
+            hwu.Debug()
+        
+        # Construct the result with the given precision
+        rate   = formatStr % hwu.getRate()
+        stat   = formatStr % hwu.getRateStatUncertainty()
+        syst   = self.getLatexFormattedUnc(formatStr, myPrecision, *hwu.getRateSystUncertainty())
+        result = "$%s \\pm %s %s $" % (rate, stat, syst)
+        return result
 
     def makeEventYieldSummary(self):
         '''

@@ -76,6 +76,7 @@ def PrintNuisancesTable(Nuisances, DataGroups):
 #================================================================================================  
 # Options
 #================================================================================================  
+OptionTest                             = True # True
 MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
 DataCardName                           = "Hplus2tb_13TeV"
 OptionMassShape                        = "LdgTetrajetMass_AfterAllSelections"
@@ -1231,7 +1232,7 @@ hBJet3Eta = ControlPlotInput(
 ControlPlots.append(hMET)
 ControlPlots.append(hHT)
 ControlPlots.append(hMHT)
-ControlPlots.append(hQGLR)
+### ControlPlots.append(hQGLR) # disabled (to speed-up code)
 ControlPlots.append(hLdgTopPt)
 ControlPlots.append(hLdgTopMass)
 ControlPlots.append(hLdgTopBjetPt)
@@ -1280,3 +1281,8 @@ ControlPlots.append(hBJet3Pt)
 ControlPlots.append(hBJet1Eta)
 ControlPlots.append(hBJet2Eta)
 ControlPlots.append(hBJet3Eta)
+
+if OptionTest:
+    ControlPlots = []
+    ControlPlots.append(hLdgHiggsMass)
+    MassPoints = [180, 500]
