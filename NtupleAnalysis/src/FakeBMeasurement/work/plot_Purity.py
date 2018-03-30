@@ -108,9 +108,9 @@ def main(opts):
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
-    style.setGridX(True)
-    style.setGridY(True)
-    style.setOptStat(True)
+    style.setGridX(False)
+    style.setGridY(False)
+    style.setOptStat(False)
     
     # Obtain dsetMgrCreator and register it to module selector
     dsetMgrCreator = dataset.readFromMulticrabCfg(directory=opts.mcrab)

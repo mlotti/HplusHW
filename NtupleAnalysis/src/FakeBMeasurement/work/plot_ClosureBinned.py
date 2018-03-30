@@ -121,11 +121,13 @@ def GetHistoKwargs(histoName):
     _cutBox = {}
     _rebinX = 1
     _logY   = True
-    _ylabel = "Events / %.0f"
+    _yNorm  = "Events"
     if opts.normaliseToOne:
+        _yNorm  = "Arbitrary units"
         _opts   = {"ymin": 0.7e-4, "ymaxfactor": 2.0}
     else:
         _opts   = {"ymin": 1e0, "ymaxfactor": 2.0}
+    _ylabel = _yNorm + " / %.0f"
     if _logY:
         _opts["ymaxfactor"] = 5.0
 
@@ -150,7 +152,7 @@ def GetHistoKwargs(histoName):
                 _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         if isinstance(_rebinX, list):
             binWmin, binWmax = GetBinWidthMinMax(_rebinX)
-            _ylabel = "Events / %.0f-%.0f %s" % (binWmin, binWmax, _units)
+            _ylabel = _yNorm + " / %.0f-%.0f %s" % (binWmin, binWmax, _units)
 
     if "mass" in histoName.lower():
         _units        = "GeV/c^{2}"
@@ -171,7 +173,7 @@ def GetHistoKwargs(histoName):
             _cutBox       = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         if isinstance(_rebinX, list):
             binWmin, binWmax = GetBinWidthMinMax(_rebinX)
-            _ylabel = "Events / %.0f-%.0f %s" % (binWmin, binWmax, _units)
+            _ylabel = _yNorm + " / %.0f-%.0f %s" % (binWmin, binWmax, _units)
 
     if "met" in histoName.lower():
         _units        = "GeV"
@@ -181,7 +183,7 @@ def GetHistoKwargs(histoName):
         _opts["xmax"] = 400
         _rebinX = systematics._dataDrivenCtrlPlotBinning["MET_AfterAllSelections"]
         binWmin, binWmax = GetBinWidthMinMax(myBins)
-        _ylabel = "Events / %.0f-%.0f %s" % (binWmin, binWmax, _units)
+        _ylabel = _yNorm + " / %.0f-%.0f %s" % (binWmin, binWmax, _units)
 
     if "ht" in histoName.lower():
         _rebinX = systematics._dataDrivenCtrlPlotBinning["MET_AfterAllSelections"]
@@ -191,13 +193,13 @@ def GetHistoKwargs(histoName):
         _xlabel  = "#eta"
         _cutBox  = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         _rebinX  = 1
-        _ylabel  = "Events / %.2f"
+        _ylabel  = _yNorm + " / %.2f"
         _opts["xmin"] = -2.5
         _opts["xmax"] = +2.5
 
     if "bdisc" in histoName.lower():
         _format = "%0.2f"
-        _ylabel = "Events / " + _format
+        _ylabel = _yNorm + " / " + _format
         _rebinX = 2
         _opts["xmin"] = 0.8
         _opts["xmax"] = 1.0
@@ -332,9 +334,9 @@ def main(opts):
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
-    style.setOptStat(True)
-    style.setGridX(True)
-    style.setGridY(True)
+    style.setGridX(False)
+    style.setGridY(False)
+    style.setOptStat(False)
     
     # Obtain dsetMgrCreator and register it to module selector
     dsetMgrCreator = dataset.readFromMulticrabCfg(directory=opts.mcrab)
