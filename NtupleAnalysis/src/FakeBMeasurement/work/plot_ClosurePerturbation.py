@@ -196,6 +196,34 @@ def main(opts):
         hList  = datasetsMgr1.getDataset(datasetsMgr1.getAllDatasetNames()[0]).getDirectoryContent(opts.folder)
         hPaths = [os.path.join(opts.folder, h) for h in hList]
 
+        # Create a smaller list with only histos of interest
+        hListS = []
+        for h in hList:
+            if "StandardSelections" in h:
+                continue
+            if "IsGenuineB" in h:
+                continue
+            if "_Bjet" in h:
+                continue
+            if "_Jet" in h:
+                continue
+            if "_SubLdg" in h:
+                continue
+            if "_Njets" in h:
+                continue
+            if "_NBjets" in h:
+                continue
+            if "_Delta" in h:
+                continue
+            if "Dijet" in h:
+                continue
+            if "Bdisc" in h:
+                continue
+            # Otherwise keep the histogram
+            hListS.append(h)
+
+        hPathsS = [os.path.join(opts.folder, h) for h in hListS]
+        
         # Create two lists of paths: one for "Baseline" (SR)  and one for "Inverted" (CR)
         path_SR  = []  # baseline, _AfterAllSelections
         path_CR1 = []  # baseline, _AfterCRSelections
@@ -203,17 +231,7 @@ def main(opts):
         path_CR2 = []  # inverted, _AfterCRSelections
 
         # For-loop: All histogram paths
-        for p in hPaths:
-            
-            if "AfterStandardSelections" in p:
-                continue
-
-            #if "tetrajetmass" not in p.lower():
-            #    continue
-
-            #if "mass" not in p.lower():
-            #    continue
-            
+        for p in hPathsS: #hPaths:
             if "Baseline" in p:
                 if "AllSelections" in p:
                     path_SR.append(p)
@@ -230,7 +248,8 @@ def main(opts):
         for hCR1, hCR2 in zip(path_CR1, path_CR2):
             if "IsGenuineB" in hCR1:
                 continue
-            hName = hCR1.replace("_AfterCRSelections", "_CR1vCR2").replace("ForFakeBMeasurement/Baseline_", "")
+            #hName = hCR1.replace("_AfterCRSelections", "_CR1vCR2").replace("ForFakeBMeasurement/Baseline_", "")
+            hName = hCR1.replace("_AfterCRSelections", " (CR1 and R2)").replace("ForFakeBMeasurement/Baseline_", "")
             msg   = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % counter, "/", "%s:" % (len(path_CR1)), hName)
             Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), counter==1)
 
@@ -243,9 +262,10 @@ def main(opts):
         for hSR, hVR in zip(path_SR, path_VR):
             if "IsGenuineB" in hSR:
                 continue
-            if 0:
+            if 1:
                 continue
-            hName = hCR1.replace("_AfterCRSelections", "_SRvVR").replace("ForFakeBMeasurement/Baseline_", "")
+            #hName = hCR1.replace("_AfterCRSelections", "_SRvVR").replace("ForFakeBMeasurement/Baseline_", "")
+            hName = hCR1.replace("_AfterCRSelections", " (SR and VR)").replace("ForFakeBMeasurement/Baseline_", "")
             msg   = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % counter, "/", "%s:" % (len(path_CR1)), hName)
             Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), counter==1)
 
