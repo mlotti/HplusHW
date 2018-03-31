@@ -83,7 +83,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 import HiggsAnalysis.FakeBMeasurement.FakeBNormalization as FakeBNormalization
 import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
-import HiggsAnalysis.FakeBMeasurement.QCDInvertedResult as fakeBResult
+import HiggsAnalysis.FakeBMeasurement.FakeBResult as fakeBResult
 
 #================================================================================================ 
 # Function Definition
@@ -662,7 +662,7 @@ def PlotHistosAndCalculateTF(datasetsMgr, histoList, binLabels, opts):
     #=========================================================================================
     Verbose("Write the normalisation factors to a python file", True)
     fileName = os.path.join(opts.mcrab, "FakeBTransferFactors%s.py"% ( getModuleInfoString(opts) ) )
-    manager.writeNormFactorFile(fileName, opts)
+    manager.writeTransferFactorsToFile(fileName, opts)
     return
 
 if __name__ == "__main__":
