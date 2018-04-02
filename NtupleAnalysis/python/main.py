@@ -517,6 +517,11 @@ class Process:
         readMbytesTotal = 0
         callsTotal = 0
 
+        # Print the datasets that will be run on!
+        self.Print("Will process %d datasets in total:" % (len(self._datasets) ), True)
+        for i, d in enumerate(self._datasets, 1):
+            self.Print("%d) %s" % (i, sh_Note + d.getName() + sh_Normal), i==0)
+
         # Process over datasets
         ndset = 0
         for i, dset in enumerate(self._datasets, 1):
@@ -566,7 +571,7 @@ class Process:
                     anames.append(aname)
             if nanalyzers == 0:
                 self.Print("Skipping %s, no analyzers" % dset.getName(), True)
-                continue
+                continue                            
 
             self.Print("Processing dataset (%d/%d)" % (ndset, len(self._datasets) ))
             align= "{:<23} {:<1} {:<60}"
