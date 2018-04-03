@@ -118,14 +118,23 @@ class AnalysisConfig:
 			suffix += "%s"%subkeys[i]
 		    else:
 			suffix += ".%s"%subkeys[i]
-		# Set value
+		# Set varied value in configuration (treat AngularCuts in a special way)
 		if key.startswith("AngularCuts") and subkeys[len(subkeys)-1] == "workingPoint":
                     from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import setAngularCutsWorkingPoint
                     setAngularCutsWorkingPoint(subconfig[len(subconfig)-1], value)
-                else:
+                else: # all other settings than AngularCuts
                     if not hasattr(subconfig[len(subconfig)-1], subkeys[len(subkeys)-1]):
                         raise Exception("Error: Cannot find key %s.%s in the config!"%(suffix, subkeys[len(subkeys)-1]))
                     setattr(subconfig[len(subconfig)-1], subkeys[len(subkeys)-1], value)
+                # Additionally, set a new tau ID scale factor if needed
+                    from HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors import assignTauIdentificationSF
+                    scaleFactors.assignTauIdentificationSF(subconfig[len(subconfig)-1])
+                # TODO: Define here any other updates for scale factors if needed
+
+    ## Create and register the analysis after the changes have bene done to the config
+    def registerAnalysis(self, process):
+        Verbose("registerAnalysis()", True)
+        process.addAnalyzer(self._moduleName, Analyzer(self._selectorName, config=self._config, silent=True))
         return
 
     def Verbose(self, msg, printHeader=False):
@@ -177,8 +186,10 @@ class AnalysisBuilder:
                  name, # The module name (beware, the downstream python code has assumptions on this)
                  dataEras=["2016"], # Data era (see python/tools/dataset.py::_dataEras)
                  searchModes=["m80to160"], # Search mode (see python/parameters/signalAnalysisParameters.py)
-                 usePUreweighting=True, # Enable/disable vertex reweighting
-                 useTopPtReweighting=False, # Enable/disable top pt reweighting for ttbar
+                 # Optional options
+                 usePUreweighting=True,    # enable/disable vertex reweighting
+                 useTopPtReweighting=True, # enable/disable top pt reweighting for ttbar
+                 # Systematics options
                  doSystematicVariations=False, # Enable/disable adding modules for systematic uncertainty variation
                  analysisType="HToTauNu", # Define the analysis type (e.g. "HToTauNu", "HToTB")
                  verbose=False,

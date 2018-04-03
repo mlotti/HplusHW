@@ -84,6 +84,13 @@ def createBinByBinStatUncertHistograms(hRate, xmin=None, xmax=None):
     nNegativeRate = 0
     nBelowMinStatUncert = 0
     nEmptyDownHistograms = 0
+
+#   TEST PRINT
+#    print "Contents of histogram %s:"%hRate.GetTitle()
+#    for i in range(1, hRate.GetNbinsX()+1):
+#        print "bin %d (from %f to %f): %f +- %f"%(i,hRate.GetXaxis().GetBinLowEdge(i),hRate.GetXaxis().GetBinUpEdge(i),hRate.GetBinContent(i),hRate.GetBinError(i))
+         
+
     # For-loop: All histogram bins
     for i in range(1, hRate.GetNbinsX()+1):
         #print hRate.GetXaxis().GetBinLowEdge(i), xmin, hRate.GetXaxis().GetBinUpEdge(i), xmax
@@ -966,6 +973,8 @@ class TableProducer:
         self.formatStr += "f"
         
         # For-loop: All mass points
+        global HW 
+        global containsQCDdataset
         for i, m in enumerate(self._config.MassPoints, 1):
             Verbose("Mass point is %d" % (m), i==1)
 
@@ -1020,6 +1029,7 @@ class TableProducer:
                     
 
             # Calculate signal yield
+            global myBr
             myBr = self._config.OptionBr
             if not (self._config.OptionLimitOnSigmaBr or m > 161 or HW==None):
                 if self._config.OptionBr == None:

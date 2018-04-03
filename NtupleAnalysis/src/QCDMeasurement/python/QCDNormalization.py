@@ -456,7 +456,7 @@ class QCDNormalizationTemplate:
         h = self._histo.Clone(self._histo.GetName()+"clone")
         h.Scale(self._normalizationFactor)
         plot.histoMgr.appendHisto(histograms.Histo(h,self._histo.GetName()))
-        plot.createFrame(self._plotDirName+"/template_"+self._name.replace(" ","_")+"_"+self._binLabel, opts={"ymin": 0.1, "ymaxfactor": 15.})
+        plot.createFrame(self._plotDirName+"/template_"+self._name.replace(" ","_")+"_"+self._binLabel.replace(":","_"), opts={"ymin": 0.1, "ymaxfactor": 15.})
         plot.getFrame().GetXaxis().SetTitle("E_{T}^{miss}")
         plot.getFrame().GetYaxis().SetTitle("N_{events} / bin")
         plot.getPad().SetLogy(True)

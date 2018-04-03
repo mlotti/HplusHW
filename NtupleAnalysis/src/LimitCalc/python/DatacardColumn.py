@@ -862,6 +862,7 @@ class DatacardColumn():
                     minimumError=error
             if minimumError > 0.0:
                 minStatUncert = minimumError
+            print "Determined the min. stat. error to be used to be %f"%minStatUncert
 
         self.Verbose("Setting the minimum stat. uncertainty for histogram %s to be %f"%(myTitle,minStatUncert))
 
@@ -875,9 +876,9 @@ class DatacardColumn():
                 # Treat zero or sightly positive rates
                 if binRate == 0.0 or binError < minStatUncert:
                     msg  = "Rate value is zero or below min.stat.uncert. in bin %d for column '%s' (it was %f)! " % (k, self.getLabel(), binRate)
-                    msg += "Compensating up stat uncertainty to %f!" % (config.MinimumStatUncertainty)
+                    msg += "Compensating up stat uncertainty to %f!" % (minStatUncert)
                     self.Verbose(ShellStyles.WarningLabel() + msg)
-                    self._rateResult._histograms[0].SetBinError(k, config.MinimumStatUncertainty)                   
+                    self._rateResult._histograms[0].SetBinError(k, minStatUncert)                   
                     nBelowMinStatUncert += 1
                 # Treat negative rates
                 if binRate < -0.00001:
