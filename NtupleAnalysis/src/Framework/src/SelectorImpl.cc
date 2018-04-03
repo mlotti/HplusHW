@@ -294,7 +294,7 @@ void SelectorImpl::SlaveTerminate() {
   delete fBranchManager;
   if(fOutputFile) {
     fOutputFile->Write();
-    std::cout << "\tSaved output file       : " << fOutputFile->GetName() << std::endl;
+    // std::cout << "\tSaved output file       : " << fOutputFile->GetName() << std::endl;
     gROOT->GetListOfFiles()->Remove(fOutputFile);
     fOutputFile->Close();
     if(fProofFile) {

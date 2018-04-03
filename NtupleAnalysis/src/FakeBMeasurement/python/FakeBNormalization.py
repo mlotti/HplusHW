@@ -339,12 +339,12 @@ class FakeBNormalizationManager:
             
         # Apply TDR style
         style = tdrstyle.TDRStyle()
+        style.setGridX(False)
+        style.setGridY(False)
         style.setOptStat(False)
-        style.setGridX(True)
-        style.setGridY(True)
 
         # Create graphs
-        gFakeB = makeGraph(ROOT.kFullCircle, ROOT.kRed, keyList, self._TF, self._TF_Error, self._TF_Error)
+        gFakeB = makeGraph(ROOT.kFullCircle, ROOT.kAzure, keyList, self._TF, self._TF_Error, self._TF_Error)
 
         # Make plot
         hFrame = ROOT.TH1F("frame","frame", len(keyList), 0, len(keyList))
@@ -381,8 +381,8 @@ class FakeBNormalizationManager:
         # Create canvas
         c = ROOT.TCanvas()
         c.SetLogy(True)
-        c.SetGridx()
-        c.SetGridy()
+        c.SetGridx(False)
+        c.SetGridy(False)
 
         hFrame.Draw()
         gFakeB.Draw("p same")
@@ -392,7 +392,7 @@ class FakeBNormalizationManager:
         l = ROOT.TLegend(0.65, 0.80, 0.90, 0.90)
         l.SetFillStyle(-1)
         l.SetBorderSize(0)
-        l.AddEntry(gFakeB, "Value #pm Stat.", "LP") # "Fake-#it{b} #pm Stat.", "LP"
+        l.AddEntry(gFakeB, "Value #pm stat.", "LP") # "Fake-#it{b} #pm Stat.", "LP"
         l.SetTextSize(0.035)
         l.Draw()
 
@@ -491,8 +491,8 @@ class FakeBNormalizationManager:
         # Apply TDR style
         style = tdrstyle.TDRStyle()
         style.setOptStat(False)
-        style.setGridX(True)
-        style.setGridY(True)
+        style.setGridX(False)
+        style.setGridY(False)
         style.setWide(True, 0.15)
         
         # Set the colour styling

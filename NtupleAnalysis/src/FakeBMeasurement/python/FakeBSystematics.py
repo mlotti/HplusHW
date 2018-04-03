@@ -39,7 +39,6 @@ class SystematicsForMetShapeDifference:
         self._hCombinedCtrlRegion    = None
         self._systUpHistogram        = None
         self._systDownHistogram      = None
-        self.Print("Here", True)
         self._calculate(signalRegion, ctrlRegion, finalShape, moduleInfoString, quietMode, optionDoBinByBinHistograms)
         return
 
@@ -201,21 +200,25 @@ class SystematicsForTransferFactor:
         hSystDown = Rate - 1sigma
         where the rate is obtained from the filled histogram provided ("hRate")
         and sigma is the TF_Error as discussed above (error propagation on the division of CR1 and CR2)
+
+        In this function we don't need to calculate the error propagation. The function assumes that the histograms provided
+        already have the final variations in place (i.e. up = rate+error, down = rate-error)
         ''' 
         # Get the (clean) histogram name 
         fullName  = hRate.GetName()
         cleanName = fullName.replace("_cloned", "")
         cleanName = cleanName.replace("_FakeBMeasurementTrijetMass", "")
         rebinX    = systematics.getBinningForPlot(cleanName)
+        
+        # if hRate.GetNbinsX() != hSystUpFromVar.GetNbinsX():
 
-        # Make sure this histogram has the same binning as the final data-driven plot!
         if rebinX != None:
             self.Verbose("Rebinning histogram \"%s\" (\"%s\")" % (cleanName, fullName), True)
-            hRate        = hRate.Rebin(len(rebinX)-1, hRate.GetName(), array.array("d", rebinX))
+            hRate            = hRate.Rebin(len(rebinX)-1, hRate.GetName(), array.array("d", rebinX))
             hSystUpFromVar   = hSystUpFromVar.Rebin(len(rebinX)-1, hSystUpFromVar.GetName(), array.array("d", rebinX))
             hSystDownFromVar = hSystDownFromVar.Rebin(len(rebinX)-1, hSystDownFromVar.GetName(), array.array("d", rebinX))
-            # hSystUp      = hSystUp.Rebin(len(rebinX)-1, hSystUp.GetName(), array.array("d", rebinX))     #don't 
-            # hSystDown    = hSystDown.Rebin(len(rebinX)-1, hSystDown.GetName(), array.array("d", rebinX)) #don't
+            ### hSystUp      = hSystUp.Rebin(len(rebinX)-1, hSystUp.GetName(), array.array("d", rebinX))     #don't !
+            ### hSystDown    = hSystDown.Rebin(len(rebinX)-1, hSystDown.GetName(), array.array("d", rebinX)) #don't !
 
         # Constuct a summary table
         table   = []
@@ -248,44 +251,56 @@ class SystematicsForTransferFactor:
                 
             # Fill summary table for given bin
             row = align.format(i, binCentre, "%.1f" % rateNominal, "%.1f" % rateSystUp, "%.1f" % rateSystDown, "%.1f" % rateSystUpPerc, "%.1f" % rateSystDownPerc)
-            self.Verbose(ShellStyles.ErrorStyle() + row + ShellStyles.NormalStyle(), i==1)
             table.append(row)
+            self.Verbose(ShellStyles.ErrorStyle() + row + ShellStyles.NormalStyle(), i==1)
 
             # Fill the up/down systematics histograms
             self.Verbose("Setting the systematics values in the histograms SystUp and SystDown", False)
             hSystUp.SetBinContent(i, rateSystUp)
             hSystDown.SetBinContent(i, rateSystDown)
 
+        # Append total uncertainty info
+        table.extend(self.GetTotalUncertainyTable(hRate, hSystUpFromVar, hSystDownFromVar, hLine, align))
+        
+        # Print summary table
+        if  quietMode == False or self._verbose == True:
+            for i, row in enumerate(table, 1):
+                self.Print(row, i==1)
+        return
+
+    def GetTotalUncertainyTable(self, hRate, hSystUp, hSystDown, hLine, align):
+        table = []
+
         # Calculate total uncertainty
-        signalIntegral = hSystUpFromVar.Integral()
-        ctrlIntegral   = hSystDownFromVar.Integral()
+        rateNominalSum  = hRate.Integral()
+        rateSystUpSum   = hSystUp.Integral()
+        rateSystDownSum = hSystDown.Integral()
         signalUncert   = 0.0
         ctrlUncert     = 0.0
         ratio          = 1.0
         ratioSigma     = 0.0
+        nBinsX          = hRate.GetNbinsX()
+
         # For-loop: All bins in histo (up)
-        for i in range(1, hSystUp.GetNbinsX()+1):
-            signalUncert += hSystUpFromVar.GetBinError(i)**2
-            ctrlUncert   += hSystDownFromVar.GetBinError(i)**2
+        for i in range(1, nBinsX+1):
+            signalUncert += hSystUp.GetBinError(i)**2
+            ctrlUncert   += hSystDown.GetBinError(i)**2
 
         # Sanity check
-        if signalIntegral > 0.0 and ctrlIntegral > 0.0:
+        if rateSystUpSum > 0.0 and rateSystDownSum > 0.0:
             # Calculate ratio and its error with error propagation
-            ratio = signalIntegral / ctrlIntegral
+            ratio = rateSystUpSum / rateSystDownSum
             # Calculate ratio error with error propagation
-            ratioSigma = errorPropagationForDivision(signalIntegral, sqrt(signalUncert), ctrlIntegral, sqrt(ctrlUncert) )
+            ratioSigma = errorPropagationForDivision(rateSystUpSum, sqrt(signalUncert), rateSystDownSum, sqrt(ctrlUncert) )
 
         # Calculate % errors up/down
         table.append(hLine)
         sigmaUp   = (ratio + ratioSigma - 1.0)*100
         sigmaDown = (ratio - ratioSigma - 1.0)*100
         rangeX    = "%s to %s" % (hRate.GetBinCenter(1), hRate.GetBinCenter(nBinsX))
-        rangeBins = "1 to %d" % (nBinsX)
-        table.append( align.format(rangeBins, rangeX, "", "", "", "%.1f" % (sigmaUp), "%.1f" % (sigmaDown)) )
-        
+        rangeBins = "1 to %d" % (nBinsX)    
+        table.append( align.format(rangeBins, rangeX, "%.1f" % rateNominalSum, "%.1f" % rateSystUpSum, "%.1f" % rateSystDownSum, "%.1f" % (sigmaUp), "%.1f" % (sigmaDown)) )
+        evtYield  = "{:^85}".format("Events +/- stat. +/- syst. = %.1f +/- %.1f +/- %.1f" % (rateNominalSum, abs(rateNominalSum-rateSystUpSum), abs(rateNominalSum-rateSystDownSum)))
+        table.append( ShellStyles.HighlightAltStyle() + evtYield + ShellStyles.NormalStyle() )
         table.append(hLine)
-
-        # Print summary table
-        for i, row in enumerate(table, 1):
-            self.Verbose(row, i==1)
-        return
+        return table
