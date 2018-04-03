@@ -245,7 +245,9 @@ def main(argv, dsetMgr, moduleInfoString):
         template_EWKInclusive_Inverted = manager.createTemplate("EWKInclusive_Inverted")
         template_QCD_Baseline = manager.createTemplate("QCD_Baseline")
         template_QCD_Inverted = manager.createTemplate("QCD_Inverted")
-        
+        template_FakeTau_Baseline = manager.createTemplate("FakeTau_Baseline")
+        template_FakeTau_Inverted = manager.createTemplate("FakeTau_Inverted")
+                
         #===== Define fit functions and fit parameters
         # The available functions are defined in the FitFunction class in the QCDMeasurement/python/QCDNormalization.py file
         
@@ -258,12 +260,15 @@ def main(argv, dsetMgr, moduleInfoString):
         # par[3] = sigma
         # par[4] = beta in the exponential tail
         boundary = 160
-        template_EWKInclusive_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=boundary, norm=1, rejectPoints=1),
-                                                 FITMIN, FITMAX)
-        template_EWKInclusive_Baseline.setDefaultFitParam(defaultLowerLimit=[0.5,  90, 30, 0.0001],
-                                                          defaultUpperLimit=[ 30, 250, 60,    1.0])
+#        template_EWKInclusive_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=boundary, norm=1, rejectPoints=1),
+#                                                 FITMIN, FITMAX)
+#        template_EWKInclusive_Baseline.setDefaultFitParam(defaultLowerLimit=[0.5,  90, 30, 0.0001],
+#                                                          defaultUpperLimit=[ 30, 250, 60,    1.0])
 
         # Fake tau and QCD
+        template_EWKGenuineTaus_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=boundary, norm=1, rejectPoints=1),FITMIN, FITMAX)
+        template_EWKGenuineTaus_Baseline.setDefaultFitParam(defaultLowerLimit=[0.5,  90, 30, 0.0001],
+                                                            defaultUpperLimit=[ 30, 250, 60,    1.0])
         # Note that the same function is used for QCD only and QCD+EWK fakes (=Fake Tau)
 
         # Old function, used until May 2017    
@@ -281,9 +286,9 @@ def main(argv, dsetMgr, moduleInfoString):
         # par[5] mean for Gaussian term
         # par[6] sigma2 for Gaussian term
         # par[7] beta for exponential tail
-        template_QCD_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunctionWithPeakShiftClear", norm=1), FITMIN, FITMAX)
-        template_QCD_Inverted.setDefaultFitParam(defaultLowerLimit=[ 30, 0.1, -10,   0,  -20,  10,   0.0001, 0.0001], 
-                                                 defaultUpperLimit=[ 130, 20,  10,  20,  200, 100,     1.0,   0.05]) 
+        template_FakeTau_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunctionWithPeakShiftClear", norm=1), FITMIN, FITMAX)
+        template_FakeTau_Inverted.setDefaultFitParam(defaultLowerLimit=[ 30, 0.1, -10,   0,  -20,  10,   0.0001, 0.0001], 
+                                                     defaultUpperLimit=[ 130, 20,  10,  20,  200, 100,     1.0,   0.05]) 
 
 
 
@@ -318,7 +323,7 @@ def main(argv, dsetMgr, moduleInfoString):
             #===== Obtain inclusive EWK histograms
             hmetBase_EWKinclusive = hmetBase_EWK_GenuineTaus.Clone("EWKinclusiveBase")
             hmetBase_EWKinclusive.Add(hmetBase_EWK_FakeTaus, 1.0)
-            
+
             hmetInverted_EWKinclusive = hmetInverted_EWK_GenuineTaus.Clone("EWKinclusiveInv")
             hmetInverted_EWKinclusive.Add(hmetInverted_EWK_FakeTaus, 1.0)
 
@@ -331,27 +336,35 @@ def main(argv, dsetMgr, moduleInfoString):
             # QCD from baseline is usable only as a cross check
             hmetBase_QCD = hmetBase_data.Clone("QCDbase")
             hmetBase_QCD.Add(hmetBase_EWKinclusive,-1)
-            
+
             hmetInverted_QCD = hmetInverted_data.Clone("QCDinv")
             hmetInverted_QCD.Add(hmetInverted_EWKinclusive,-1)
+
+            hmetBase_FakeTau = hmetBase_data.Clone("QCDbase")
+            hmetBase_FakeTau.Add(hmetBase_EWK_GenuineTaus,-1)
+            
+            hmetInverted_FakeTau = hmetInverted_data.Clone("QCDinv")
+            hmetInverted_FakeTau.Add(hmetInverted_EWK_GenuineTaus,-1)
             
             #===== Set histograms to the templates
             template_EWKFakeTaus_Inverted.setHistogram(hmetInverted_EWK_FakeTaus, binLabels[i])
             template_EWKGenuineTaus_Inverted.setHistogram(hmetInverted_EWK_GenuineTaus, binLabels[i])
             template_EWKInclusive_Inverted.setHistogram(hmetInverted_EWKinclusive, binLabels[i])
             template_QCD_Inverted.setHistogram(hmetInverted_QCD, binLabels[i])
+            template_FakeTau_Inverted.setHistogram(hmetInverted_FakeTau, binLabels[i])
             
             template_EWKFakeTaus_Baseline.setHistogram(hmetBase_EWK_FakeTaus, binLabels[i])
             template_EWKGenuineTaus_Baseline.setHistogram(hmetBase_EWK_GenuineTaus, binLabels[i])
             template_EWKInclusive_Baseline.setHistogram(hmetBase_EWKinclusive, binLabels[i])
             template_QCD_Baseline.setHistogram(hmetBase_QCD, binLabels[i])
+            template_FakeTau_Baseline.setHistogram(hmetBase_QCD, binLabels[i])
             
             #===== Make plots of templates
             manager.plotTemplates()
             
             #===== Fit individual templates to data
             fitOptions = "R B L W M" # RBLWM
-
+            
             manager.calculateNormalizationCoefficients(hmetBase_data, fitOptions, FITMIN, FITMAX)
             
             #===== Calculate combined normalisation coefficient (f_fakes = w*f_QCD + (1-w)*f_EWKfakes)
