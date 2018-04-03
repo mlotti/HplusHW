@@ -216,23 +216,6 @@ class ModuleBuilder:
         self._outputCreator.addModule(myModule)
         return
 
-    def buildQCDNormalizationSystModule(self, dataPath, ewkPath):
-        '''
-        Up variation of QCD normalization (i.e. ctrl->signal region transition)
-        Note that only the source histograms for the shape uncert are stored
-        because the result must be calculated after rebinning
-        (and rebinning is no longer done here for flexibility reasons)
-        '''
-        mySystModule = pseudoMultiCrabCreator.PseudoMultiCrabModule(self._dsetMgr,
-                                                                    self._era,
-                                                                    self._searchMode,
-                                                                    self._optimizationMode,
-                                                                    "SystVarQCDNormSource") # fixme: iro
-        mySystModule.addPlots(self._nominalResult.getQCDNormalizationSystPlots(),
-                              self._nominalResult.getQCDNormalizationSystPlotLabels())
-        self._outputCreator.addModule(mySystModule)
-        return
-
     def buildTransferFactorVarSystModule(self, dataPath, ewkPath, normFactorsUp, normFactorsDown):
         '''
         This function re-calculates all histograms as normal and stores them into 
@@ -256,7 +239,8 @@ class ModuleBuilder:
         '''
         # Up variation of Transfer Factors
         print
-        Print(ShellStyles.CaptionStyle() + "TF+Error Variation" + ShellStyles.NormalStyle() , True)
+        #Print(ShellStyles.HighlightAltStyle() + "TF+Error Variation" + ShellStyles.NormalStyle() , True)
+        Print(ShellStyles.HighlightAltStyle() + "Extra Module: SystVarTransferFactorPlus" + ShellStyles.NormalStyle(), False)
         mySystModulePlus = pseudoMultiCrabCreator.PseudoMultiCrabModule(self._dsetMgr, 
                                                                         self._era, 
                                                                         self._searchMode,
@@ -282,7 +266,8 @@ class ModuleBuilder:
 
         # Down variation of Transfer Factors
         print
-        Print(ShellStyles.CaptionStyle() + "TF-Error Variation" + ShellStyles.NormalStyle() , True)
+        #Print(ShellStyles.HighlightAltStyle() + "TF-Error Variation" + ShellStyles.NormalStyle() , True)
+        Print(ShellStyles.HighlightAltStyle() + "Extra Module: SystVarTransferFactorMinus" + ShellStyles.NormalStyle(), False)
         mySystModuleMinus = pseudoMultiCrabCreator.PseudoMultiCrabModule(self._dsetMgr, 
                                                                          self._era, 
                                                                          self._searchMode,
@@ -300,12 +285,12 @@ class ModuleBuilder:
                                                                         optionDoFakeBNormalisationSyst=False,
                                                                         optionUseInclusiveNorm=self._opts.useInclusiveNorm,
                                                                         keyList = ["AllSelections"],
-                                                                        verbose=opts.verbose) #iro alex xenios
+                                                                        verbose=opts.verbose)
         
         mySystModuleMinus.addPlots(self._transferFactorMinusResult.getShapePlots(), self._transferFactorMinusResult.getShapePlotLabels())
         # Save "_SystVarTransferFactorDown" folder to pseudo-dataset pseudo-multicrab
         self._outputCreator.addModule(mySystModuleMinus)
-        print
+        # print
         return
 
 #================================================================================================
@@ -344,8 +329,8 @@ def printTimeEstimate(globalStart, localStart, nCurrent, nAll):
     s += "%02d"%(myEstimate)
     
     # Print info
-    Print("Module finished in %.1f seconds" % (myLocalDelta), True)
-    Print("Estimated time to complete %s" %  (s), False)
+    Verbose("Module finished in %.1f seconds" % (myLocalDelta), True)
+    Verbose("Estimated time to complete %s" %  (s), False)
     return
 
 
@@ -359,10 +344,10 @@ def getModuleInfoString(dataEra, searchMode, optimizationMode):
 def getTransferFactorsSrcFilename(dirName, fileName):
     src = os.path.join(dirName, fileName)
     if not os.path.exists(src):
-        msg = "Normalisation factors ('%s') not found!\nRun script \"plotQCD_Fit.py\" to auto-generate the normalization factors python file." % src
-        raise Exception(ShellStyles.ErrorLabel() + msg)
+        msg = "Normalisation factors ('%s') not found!\nRun script \"./getABCD_TF.py\" to auto-generate the transfer factors (TFs) file." % src
+        raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
     else:
-        Print("Importing  transfer factors (TFs) from file %s" % (ShellStyles.SuccessStyle() + os.path.basename(src) + ShellStyles.NormalStyle()), True)
+        Print("Importing transfer factors (TFs) from file %s" % (ShellStyles.NoteStyle() + os.path.basename(src) + ShellStyles.NormalStyle()), True)
     return src
 
 def getNormFactorFileList(dirName, fileBaseName):
@@ -483,9 +468,28 @@ def importNormFactors(era, searchMode, optimizationMode, multicrabDirName):
     myNormFactors["SystVarDown"] = myNormFactorsImportSystVarDown
 
     # Print the Normalisation Factors aka Transfer Factors (TF)
-    printNormFactors(myNormFactors)
+    if 0:
+        printNormFactors(myNormFactors)
     return myNormFactors
 
+def getSystematicsNames(mySystematicsNamesRaw, opts):
+    mySystematicsNames = []
+    # Sanity check
+    if len(mySystematicsNamesRaw) < 1:
+        Print("There are 0 systematic variation sources", True)
+        return mySystematicsNames
+    if opts.test:
+        Print("Disabling systematic variations", True)
+        return mySystematicsNames
+
+    # For-loop: All systematics raw names
+    for i, item in enumerate(mySystematicsNamesRaw, 0):
+        # Print("Using systematic %s" % (ShellStyles.NoteStyle() + item + ShellStyles.NormalStyle()), i==0)
+        mySystematicsNames.append("%sPlus" % item)
+        mySystematicsNames.append("%sMinus"% item)    
+
+    Print("There are %d systematic variation sources:%s\n\t%s%s" % (len(mySystematicsNames), ShellStyles.NoteStyle(), "\n\t".join(mySystematicsNames), ShellStyles.NormalStyle()), True)
+    return mySystematicsNames
 
 #================================================================================================ 
 # Main
@@ -500,21 +504,14 @@ def main(opts):
 
     # Obtain systematics names
     mySystematicsNamesRaw = dsetMgrCreator.getSystematicVariationSources()
-    mySystematicsNames    = []
-    for i, item in enumerate(mySystematicsNamesRaw, 0):
-        Print("Using systematic %s" % (ShellStyles.NoteStyle() + item + ShellStyles.NormalStyle()), i==0)
-        mySystematicsNames.append("%sPlus" % item)
-        mySystematicsNames.append("%sMinus"% item)    
-    if opts.test:
-        mySystematicsNames = []
-    Print("There are %s %ssystematic variation%s sources" % (len(mySystematicsNames), ShellStyles.NoteStyle(), ShellStyles.NormalStyle()), True)
+    mySystematicsNames    = getSystematicsNames(mySystematicsNamesRaw, opts)
     
     # Set the primary source 
     Verbose("Setting the primary source (label=%s)" % (ShellStyles.NoteStyle() + opts.analysisName + ShellStyles.NormalStyle()), True)
-    myModuleSelector.setPrimarySource(label=opts.analysisName, dsetMgrCreator=dsetMgrCreator) #fixme: what is label for?
+    myModuleSelector.setPrimarySource(label=opts.analysisName, dsetMgrCreator=dsetMgrCreator)
 
     # Select modules
-    myModuleSelector.doSelect(opts=None) #fixme: (opts=opts)
+    myModuleSelector.doSelect(opts=None) #fixme: (opts=opts)?
 
     # Loop over era/searchMode/optimizationMode combos
     myTotalModules  = myModuleSelector.getSelectedCombinationCount() * (len(mySystematicsNames)+1) * len(opts.shape)
@@ -540,7 +537,7 @@ def main(opts):
     for iShape, shapeType in enumerate(opts.shape, 1):
         
         msg = "Shape %d/%d:%s %s" % (iShape, len(opts.shape), ShellStyles.NormalStyle(), shapeType)
-        Print(ShellStyles.CaptionStyle() + msg, True)
+        Verbose(ShellStyles.HighlightAltStyle() + msg, True)
 
         # Initialize
         myOutputCreator.initialize(subTitle=shapeType, prefix="") #fixme: remove shapeType from sub-directory name?
@@ -552,18 +549,20 @@ def main(opts):
         if 0:
             optList.append("") #append the default opt mode iff more optimization modes exist
 
-        # For-Loop over era, searchMode, and optimizationMode options
+        # For-loop: All eras
         for era in erasList:
+            # For-loop: All searchModes
             for searchMode in modesList:
+                # For-loop: AlloptimizationModes
                 for optimizationMode in optList:
-                    
                     Verbose("era = %s, searchMode = %s, optMode = %s" % (era, searchMode, optimizationMode), True)
+
                     # If an optimization mode is defined in options skip the rest
                     if opts.optMode != None:
                         if optimizationMode != opts.optMode:
                             continue
 
-                    # Obtain normalization factors
+                    # Obtain normalization factors for given Era, SearchMode, and OptimizationMode!
                     myNormFactors = importNormFactors(era, searchMode, optimizationMode, opts.mcrab)
 
                     # Nominal module
@@ -571,8 +570,11 @@ def main(opts):
                     iModule += 1
 
                     # Inform user of what is being processes
-                    msg = "Module %d/%d:%s %s/%s" % (iModule, myTotalModules, ShellStyles.NormalStyle(), myModuleInfoString, shapeType)
-                    Print(ShellStyles.CaptionStyle() + msg, True)
+                    if optimizationMode != "":
+                        msg = "Module %d/%d: %s_%s_%s_%s" % (iModule, myTotalModules, opts.analysisName, searchMode, era, optimizationMode)
+                    else:
+                        msg = "Module %d/%d: %s_%s_%s" % (iModule, myTotalModules, opts.analysisName, searchMode, era)
+                    Print(ShellStyles.HighlightAltStyle() + msg + ShellStyles.NormalStyle(), iModule==1) 
 
                     # Keep time
                     myStartTime = time.time()
@@ -589,12 +591,10 @@ def main(opts):
                     doFakeBNormalisationSyst = False 
                     nominalModule.buildModule(opts.dataSrc, opts.ewkSrc, myNormFactors[opts.normFactorKey], doFakeBNormalisationSyst, opts.normDataSrc, opts.normEwkSrc)
 
+                    # Do TF variations named "SystVarUp" and "SystVarDown" (i.e. (Get results using TF+Error and TF-Error instead of TF)
                     if len(mySystematicsNames) > 0:
-                        Print("Adding QCD normalization systematics (iff also other systematics  present) ", True)
-                        nominalModule.buildQCDNormalizationSystModule(opts.dataSrc, opts.ewkSrc)
-
-                    # Do TF variations (Get results using TF+Error and TF-Error instead of TF)
-                    nominalModule.buildTransferFactorVarSystModule(opts.dataSrc, opts.ewkSrc, myNormFactors["SystVarUp"], myNormFactors["SystVarDown"])
+                        Verbose("Adding FakeB normalization systematics (iff also other systematics  present) ", True)
+                        nominalModule.buildTransferFactorVarSystModule(opts.dataSrc, opts.ewkSrc, myNormFactors["SystVarUp"], myNormFactors["SystVarDown"])
                     
                     Verbose("Deleting nominal module", True)
                     nominalModule.delete()
@@ -605,8 +605,9 @@ def main(opts):
                     Verbose("Now do the rest of systematics variations", True)
                     for syst in mySystematicsNames:
                         iModule += 1
-                        msg = "Analyzing systematics variations %d/%d: %s/%s/%s" % (iModule, myTotalModules, myModuleInfoString, syst, shapeType)
-                        Print(ShellStyles.CaptionStyle() + msg + ShellStyles.NormalStyle(), True)
+                        msg = "Module %d/%d: %s/%s" % (iModule, myTotalModules, myModuleInfoString, syst)
+                        print
+                        Print(ShellStyles.HighlightAltStyle() + msg + ShellStyles.NormalStyle(), False)
                         myStartTime = time.time()
                         systModule  = ModuleBuilder(opts, myOutputCreator)
                         # Create dataset manager with given settings
@@ -616,12 +617,12 @@ def main(opts):
                         systModule.buildModule(opts.dataSrc, opts.ewkSrc, myNormFactors[opts.normFactorKey], False, opts.normDataSrc, opts.normEwkSrc)
                         printTimeEstimate(myGlobalStartTime, myStartTime, iModule, myTotalModules)
                         systModule.delete()
-
+        print
         Verbose("Pseudo-multicrab ready for %s" % shapeType, True)
-    
+        
     # Print some timing statistics
     Verbose("Average processing time per module was %.1f seconds" % getAvgProcessTimeForOneModule(myGlobalStartTime, myTotalModules), True)
-    Print("Total elapsed time was %.1f seconds" % getTotalElapsedTime(myGlobalStartTime), False)
+    Print("Total elapsed time was %.1f seconds" % getTotalElapsedTime(myGlobalStartTime), True)
 
     # Create rest of pseudo multicrab directory
     myOutputCreator.finalize(silent=False)
@@ -666,7 +667,7 @@ if __name__ == "__main__":
     NORM_EWK_SRC     = DATA_SRC + "EWKGenuineB"
     INCLUSIVE_ONLY   = False
     SHAPE            = ["TrijetMass"]
-    NORMFACTOR_KEY   = "Nominal" # "Nominal", "SystVarUp", "SystVarDown" #fixme: iro
+    NORMFACTOR_KEY   = "Nominal" # "Nominal", "SystVarUp", "SystVarDown"
  
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]", add_help_option=True, conflict_handler="resolve")
@@ -722,11 +723,19 @@ if __name__ == "__main__":
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE, 
                       help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
 
-    parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
-                      help="List of datasets in mcrab to include")
+#    parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
+#                      help="List of datasets in mcrab to include")
+#
+#    parser.add_option("-e", "--excludeTasks", dest="excludeTasks", action="store", 
+#                      help="List of datasets in mcrab to exclude")
 
-    parser.add_option("-e", "--excludeTasks", dest="excludeTasks", action="store", 
-                      help="List of datasets in mcrab to exclude")
+    # iro
+    #parser.add_option("-e", "--dataEra", dest="era", type="string", action="append", help="Evaluate specified data eras")
+    #parser.add_option("-m", "--searchMode", dest="searchMode", type="string", action="append", help="name of search mode")
+    #parser.add_option("-o", "--optimizationMode", dest="optimizationMode", type="string", action="append", help="Evaluate specified optimization mode")
+    #parser.add_option("-s", "--systematicVariation", dest="systematicVariation", type="string", action="append", help="Evaluated specified systematic variations")
+    #parser.add_option("-l", "--list", dest="listVariations", action="store_true", default=False, help="Print a list of available variations")
+    # iro
 
     parser.add_option("--dataSrc", dest="dataSrc", action="store", default=DATA_SRC,
                       help="Source of Data histograms [default: %s" % (DATA_SRC) )

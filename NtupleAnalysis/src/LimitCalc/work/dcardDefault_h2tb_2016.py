@@ -76,8 +76,9 @@ def PrintNuisancesTable(Nuisances, DataGroups):
 #================================================================================================  
 # Options
 #================================================================================================  
-OptionTest                             = False # True
-MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
+OptionTest                             = False
+#MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
+MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
 DataCardName                           = "Hplus2tb_13TeV"
 OptionMassShape                        = "LdgTetrajetMass_AfterAllSelections"
 #OptionMassShape                        = "SubldgTetrajetMass_AfterAllSelections"
@@ -99,8 +100,9 @@ ToleranceForMinimumRate                = 0.0   # [default: 0.0]    (Tolerance fo
 labelPrefix                            = ""    # [default: ""]     (Prefix for the labels of datacard columns; e.g. "CMS_Hptntj_", "CMS_H2tb_")
 labelPostfix                           = "_GenuineB"
 OptionIncludeSystematics               = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
+OptionShapeSystematics                 = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionConvertFromShapeToConstantList   = []    # [default: []]     (Convert these nuisances from shape to constant; Makes limits run faster & converge more easily)
-OptionSeparateShapeAndNormalizationFromSystVariationList=[] # [default: []]  (Separate in the following shape nuisances the shape and normalization components)
+OptionSeparateShapeAndNormaFromSystList= []    # [default: []]     (Separate in the following shape nuisances the shape and normalization components)
 
 #================================================================================================  
 # Counter and histogram path definitions
@@ -312,12 +314,12 @@ DataGroups.append(Diboson)
 from HiggsAnalysis.LimitCalc.InputClasses import Nuisance
 
 # Define all individual nuisances that can be potentially used (ShapeVariations require running with systematics flag! Defined in AnalysisBuilder.py)
-JES_Shape    = Nuisance(id="CMS_scale_j"      , label="Jet Energy Scale (JES)", distr="shapeQ", function="ShapeVariation", systVariation="JES")
-JER_Shape    = Nuisance(id="CMS_res_j"        , label="Jet Energy Resolution (JER)", distr="shapeQ", function="ShapeVariation", systVariation="JER")
-bTag_Shape   = Nuisance(id="CMS_eff_b"        , label="b tagging", distr="shapeQ", function="ShapeVariation", systVariation="BTagSF")
-TopPt_Shape  = Nuisance(id="CMS_topPtReweight", label="Top pT reweighting", distr="shapeQ", function="ShapeVariation", systVariation="TopPt")
-PU_Shape     = Nuisance(id="CMS_pileup"       , label="Pileup", distr="shapeQ", function="ShapeVariation", systVariation="PUWeight")
-topTag_Shape = Nuisance(id="CMS_topTagging"   , label="Top tagging (Approx.)", distr="shapeQ", function="ShapeVariation", systVariation="PUWeight")  #fixme
+JES_Shape      = Nuisance(id="CMS_scale_j"      , label="Jet Energy Scale (JES)", distr="shapeQ", function="ShapeVariation", systVariation="JES")
+JER_Shape      = Nuisance(id="CMS_res_j"        , label="Jet Energy Resolution (JER)", distr="shapeQ", function="ShapeVariation", systVariation="JER")
+bTag_Shape     = Nuisance(id="CMS_eff_b"        , label="b tagging", distr="shapeQ", function="ShapeVariation", systVariation="BTagSF")
+TopPt_Shape    = Nuisance(id="CMS_topPtReweight", label="Top pT reweighting", distr="shapeQ", function="ShapeVariation", systVariation="TopPt")
+PU_Shape       = Nuisance(id="CMS_pileup"       , label="Pileup", distr="shapeQ", function="ShapeVariation", systVariation="PUWeight")
+tf_FakeB_Shape = Nuisance(id="CMS_FakeB_transferFactor"  , label="Transfer Factor uncertainty",  distr="shapeQ", function="QCDShapeVariation", systVariation="TransferFactor")
 # NOTE: systVariation key is first declared in HiggsAnalysis/NtupleAnalysis/python/AnalysisBuilder.py
 
 
@@ -392,8 +394,7 @@ ttZ_scale_Const      = Nuisance(id="CMS_scale_ttZ"      , label="TTZ XSection sc
 # tttt_scale_Const     = Nuisance(id="CMS_scale_tttt"     , label="TTTT XSection scale uncertainty", distr="lnN", function="Constant", value=tttt_scale_down)
 
 # Fake-b nuisances
-tf_FakeB_Shape          = Nuisance(id="CMS_FakeB_transferFactor"  , label="Transfer Factor uncertainty",  distr="shapeQ", function="QCDShapeVariation", systVariation="TransferFactor")
-#tf_FakeB_Const          = Nuisance(id="CMS_FakeB_transferFactor"  , label="Transfer Factor uncertainty", distr="lnN", function="Constant", value=0.10)
+tf_FakeB_Const          = Nuisance(id="CMS_FakeB_transferFactor"  , label="Transfer Factor uncertainty", distr="lnN", function="Constant", value=0.10)
 lumi13TeV_FakeB_Const   = Nuisance(id="lumi_13TeV_forFakeB"       , label="Luminosity 13 TeV uncertainty", distr="lnN", function="ConstantForFakeB", value=lumi_2016)
 trgMC_FakeB_Const       = Nuisance(id="CMS_eff_trg_MC_forFakeB"   , label="Trigger MC efficiency (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.05)
 PU_FakeB_Const          = Nuisance(id="CMS_pileup_forFakeB"       , label="Pileup (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.05)
@@ -417,14 +418,19 @@ Nuisances = []
 Nuisances.append(lumi13TeV_Const)
 Nuisances.append(PU_Const)     #fixme: constant -> shape
 Nuisances.append(topPt_Const)
-Nuisances.append(trgMC_Const)  #fixme: constant -> shape
+Nuisances.append(trgMC_Const)
 Nuisances.append(eVeto_Const)
 Nuisances.append(muVeto_Const)
 Nuisances.append(tauVeto_Const)
 Nuisances.append(bTag_Const) 
-Nuisances.append(JES_Const)    # fixme: constant -> shape
-Nuisances.append(JER_Const)    # fixme: constant -> shape
-Nuisances.append(topTag_Const) # fixme: constant -> shape
+if OptionShapeSystematics:
+    Nuisances.append(JES_Shape)
+    Nuisances.append(JER_Shape)
+else:
+    Nuisances.append(JES_Const)
+    Nuisances.append(JER_Const)
+Nuisances.append(topTag_Const) # fixme: constant -> shape (?)
+
 # Cross section uncertainties
 Nuisances.append(ttbar_scale_Const) 
 Nuisances.append(ttbar_pdf_Const)
@@ -445,8 +451,10 @@ Nuisances.append(ttZ_scale_Const)
 # Nuisances.append(tttt_scale_Const)
 
 # FakeB nuisances
-Nuisances.append(tf_FakeB_Shape) #xenios
-#Nuisances.append(tf_FakeB_Const)
+if OptionShapeSystematics:
+    Nuisances.append(tf_FakeB_Shape)
+else:
+    Nuisances.append(tf_FakeB_Const)
 Nuisances.append(lumi13TeV_FakeB_Const)
 Nuisances.append(PU_FakeB_Const)
 Nuisances.append(topPt_FakeB_Const)
@@ -468,9 +476,9 @@ PrintNuisancesTable(Nuisances, DataGroups)
 #================================================================================================ 
 # Merge nuisances to same row (first item specifies the name for the row)
 # This is for correlated uncertainties. It forces 2 nuisances to be on SAME datacard row
-# For examle, ttbar xs scale and singleTop pdf should be varied togethed (up or down) but alwasy in phase
-#================================================================================================ 
+# For example, ttbar xs scale and singleTop pdf should be varied togethed (up or down) but alwasy in phase
 # WARNING: This mostly (or solely?) applies for constants. not shape systematics!
+#================================================================================================ 
 MergeNuisances=[]
 
 # Correlate ttbar and single top cross-section uncertainties
@@ -512,7 +520,7 @@ from HiggsAnalysis.LimitCalc.InputClasses import separateShapeAndNormalizationFr
 nSysShapeComponents = len(OptionSeparateShapeAndNormalizationFromSystVariationList)
 if (nSysShapeComponents>0):
     Print("Separating %s/%s shape and normalization components" % (nSysShapeComponents, nSysTotal), True)
-    separateShapeAndNormalizationFromSystVariation(Nuisances, OptionSeparateShapeAndNormalizationFromSystVariationList)
+    separateShapeAndNormalizationFromSystVariation(Nuisances, OptionSeparateShapeAndNormFromSystList)
 
 #================================================================================================ 
 # Control plots
