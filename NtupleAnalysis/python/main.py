@@ -358,17 +358,22 @@ class Process:
         dataset._optionDefaults["input"] = "histograms-*.root" #"miniaod2tree*.root"
         dsetMgrCreator = dataset.readFromMulticrabCfg(directory=directory, *args, **kwargs)
         dsets = dsetMgrCreator.getDatasetPrecursors()
+        # Check if data datasets included
+        for i, d in enumerate(dsets, 1):
+            if d.isData():
+                self.datasetsData.append(d)
         dsetMgrCreator.close()
 
         # Create a manager with data datasets (to enable PU reweighting even if not running with data)
-        dsetMgrCreator_tmp = dataset.readFromMulticrabCfg(directory=directory)
-        dsets_tmp = dsetMgrCreator_tmp.getDatasetPrecursors()
-        for i, d in enumerate(dsets_tmp, 1):
-            if d.isData():
-                self.datasetsData.append(d)
-        self.Print("Pileup reweighting will be done accodring to the sum of:\n\t%s" % (sh_Note + "\n\t".join([d.getName() for d in self.datasetsData]) + sh_Normal), True)
-        
-        dsetMgrCreator_tmp.close()
+        if len(self.datasetsData) < 1:
+            dsetMgrCreator_tmp = dataset.readFromMulticrabCfg(directory=directory)
+            dsets_tmp = dsetMgrCreator_tmp.getDatasetPrecursors()
+            for i, d in enumerate(dsets_tmp, 1):
+                if d.isData():
+                    self.datasetsData.append(d)
+            dsetMgrCreator_tmp.close()
+        self.Print("Pileup reweighting will be done according to the sum of:\n\t%s" % (sh_Note + "\n\t".join([d.getName() for d in self.datasetsData]) + sh_Normal), True)
+
 
         if len(whitelist) > 0:
             for dset in dsets:
