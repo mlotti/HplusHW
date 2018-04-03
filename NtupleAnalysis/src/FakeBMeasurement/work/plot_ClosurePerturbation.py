@@ -577,13 +577,13 @@ def GetHistoKwargs(histoName, ext, opts):
         elif "jet7" in hName:
             _opts["xmax"] = 200.0
         elif "tetrajet" in hName:
-            _opts["xmax"] = 1000.0
+            _rebinX = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetPt_AfterAllSelections"]
             _cutBox = {"cutValue": 200.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
             ROOT.gStyle.SetNdivisions(8, "X")
         elif "dijet" in hName:
             _cutBox = {"cutValue": 200.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         elif "trijet" in hName:
-            _opts["xmax"] = 800.0
+            _rebinX = systematics._dataDrivenCtrlPlotBinning["LdgTrijetPt_AfterAllSelections"]
         else:
             _opts["xmax"] = 600.0
         #ROOT.gStyle.SetNdivisions(8, "X")
@@ -626,9 +626,12 @@ def GetHistoKwargs(histoName, ext, opts):
         if "trijet" in hName:
             _opts["xmin"] = 0.7
 
+    if "trijetmass" in hName:
+        _rebinX = systematics._dataDrivenCtrlPlotBinning["LdgTrijetMass_AfterAllSelections"]
+        _opts["xmax"] = 350.0
     if "tetrajetm" in hName:
         _units  = "GeV/c^{2}"
-        _rebinX = systematics.getBinningForTetrajetMass(0)
+        _rebinX = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetMass_AfterAllSelections"]
         binWmin, binWmax = GetBinWidthMinMax(_rebinX)
         _ylabel = _yNorm + " / %.0f-%.0f %s" % (binWmin, binWmax, _units)
         _xlabel = "m_{jjbb} (%s)" % (_units)
