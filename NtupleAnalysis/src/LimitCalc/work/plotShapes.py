@@ -56,13 +56,27 @@ class RatioPlotContainer:
         self._systNameList  = []
         return
 
+    def _GetName(self):
+        return __file__.split("/")[-1].replace(".pyc", ".py")
+
     def Print(self, msg, printHeader=False):
-        fName = __file__.split("/")[-1]
+        fName = self._GetName()
         if printHeader==True:
             print "=== ", fName
             print "\t", msg
         else:
             print "\t", msg
+        return
+
+    def PrintFlushed(self, msg, printHeader=True):
+        '''
+        Useful when printing progress in a loop
+        '''
+        msg = "\r\t" + msg + " "*20
+        if printHeader:
+            print "=== ", self._GetFName()
+            sys.stdout.write(msg)
+        sys.stdout.flush()
         return
 
     def Verbose(self, msg, printHeader=True, verbose=False):
@@ -235,13 +249,30 @@ class DatasetContainer:
         self._cardReader = cardReader
         return
 
+    def _GetName(self):
+        return __file__.split("/")[-1].replace(".pyc", ".py")
+
+    def GetName(self):
+        return self._name
+
     def Print(self, msg, printHeader=False):
-        fName = __file__.split("/")[-1]
+        fName = self._GetName()
         if printHeader==True:
             print "=== ", fName
             print "\t", msg
         else:
             print "\t", msg
+        return
+
+    def PrintFlushed(self, msg, printHeader=True):
+        '''
+        Useful when printing progress in a loop
+        '''
+        msg = "\r\t" + msg + " "*20
+        if printHeader:
+            print "=== ", self._GetFName()
+            sys.stdout.write(msg)
+        sys.stdout.flush()
         return
 
     def Verbose(self, msg, printHeader=True, verbose=False):
@@ -291,7 +322,7 @@ class DatasetContainer:
         # For-loop: All uncertainties
         for i, uncName in enumerate(self._uncertaintyShapes, 1):
             myShortName = uncName
-            self.Print("{:>3} {:^1} {:<3} {:<1} {:<40}".format(i, "/", len(self._uncertaintyShapes), ":", myShortName), i==1)
+            self.Verbose("{:>3} {:^1} {:<3} {:<1} {:<40}".format(i, "/", len(self._uncertaintyShapes), ":", myShortName), i==1)
 
             myLongName = self._cardReader.getHistoNameForNuisance(self._name, uncName)
 
@@ -406,7 +437,8 @@ def customizeMarker(p):
             th1.SetPointEYlow(i, 0)
 
 def doPlot(opts,mass,nameList,allShapeNuisances,luminosity,myDatacardPattern,rootFilePattern,signalTable):
-    f = ROOT.TFile.Open(rootFilePattern%mass)
+    fName = rootFilePattern % mass
+    f = ROOT.TFile.Open(fName)
 
     content = f.GetListOfKeys()
     # Suppress the warning message of missing dictionary for some iterator
@@ -446,16 +478,37 @@ def doPlot(opts,mass,nameList,allShapeNuisances,luminosity,myDatacardPattern,roo
     #rebinList = [0,200,250,300,350,400,450,500,550,600,700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400,2500]
 
     ## Do the actual plots
-    for d in datasets:
-        #d.debug()
-        d.doPlot(opts,shapes,f,mass,luminosity,signalTable,rebinList)
-    # Close the file
+    for i, d in enumerate(datasets, 1):
+        if opts.verbose:
+            d.debug()
+
+        if i < len(datasets):
+            dsetName = ShellStyles.HighlightAltStyle() + d.GetName() + ShellStyles.NormalStyle()
+        else:
+            dsetName = ShellStyles.SuccessStyle() + d.GetName() + ShellStyles.NormalStyle()
+        #msg = "{:<15} {:<3} {:<1} {:<20}".format("m = %d GeV, Shape %d /" % (mass, i), len(datasets), ":", dsetName)
+        msg = "{:<15} {:<35}".format("m = %d GeV, Shape %d /" % (mass, i), str(len(datasets)) + " for dataset " + dsetName)
+        PrintFlushed(msg, i==1)
+        d.doPlot(opts, shapes, f, mass, luminosity, signalTable, rebinList)
+    print
+    Verbose("Closing ROOT file %s" % (fName), True)
     f.Close()
 
 def _integral(h):
     # return h.Integral(0, h.GetNbinsX()+1)
     return h.Integral()
 
+
+def PrintFlushed(msg, printHeader=True):
+    '''
+    Useful when printing progress in a loop
+    '''
+    msg = "\r\t" + msg + " "*20
+    if printHeader:
+        print "=== ",  __file__.split("/")[-1]
+    sys.stdout.write(msg)
+    sys.stdout.flush()
+    return
 
 def Print(msg, printHeader=False):
     fName = __file__.split("/")[-1]
@@ -507,7 +560,7 @@ def main(opts):
     Print("The following masses will be considered: %s" % (ShellStyles.HighlightAltStyle() + ", ".join(massPoints) + ShellStyles.NormalStyle() ), True)
 
     # For-loop: All mass points
-    for m in massPoints:
+    for i, m in enumerate(massPoints, 1):
         # Obtain luminosity from the datacard
         myLuminosity = float(limitTools.readLuminosityFromDatacard(".", myDatacardPattern % m ) )
 
@@ -515,11 +568,27 @@ def main(opts):
         doPlot(opts, int(m), nameList, allShapeNuisances, myLuminosity, myDatacardPattern, myRootfilePattern, signalTable)
 
     # Print signal table
-    Print("Max contracted uncertainty for signal:", True)
-    # For-loop: All signal
-    for k in enumerate(signalTable.keys(), 1):
+    Print("Max contracted uncertainty for signal:", True)    
+    table = []
+    align = "{:>15} {:>15} {:>15}"
+    hLine = "="*50
+    table.append(hLine)
+    table.append(align.format("Systematic", "Minimum", "Maximum"))
+    table.append(hLine)
+    # For-loop: All signal    
+    for i, k in enumerate(signalTable.keys(), 1):
         # Print("Key = %s" % (k), False)
-        Print("%s, %.3f--%.3f"%(k, signalTable[k]["min"],signalTable[k]["max"]), i==1)
+        minVal = "%.3f" % (signalTable[k]["min"])
+        maxVal = "%.3f" % (signalTable[k]["max"])
+        msg    = align.format(k, minVal, maxVal)
+        table.append(msg)
+    table.append(hLine)
+    for row in table:
+        Print(row, False)
+
+    msg = "All results under directory %s" % (ShellStyles.SuccessStyle() + opts.dirName + ShellStyles.NormalStyle())
+    Print(msg, True)
+
     return
 
 #================================================================================================
