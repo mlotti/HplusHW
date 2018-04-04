@@ -144,9 +144,9 @@ def GetHistoKwargs(histoName):
             _rebinX = 2 
         if "tetrajetbjet" in histoName.lower():
             _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
-            _rebinX = systematics._dataDrivenCtrlPlotBinning["TetrajetBjetPt_AfterAllSelections"] 
+            _rebinX = 1#systematics._dataDrivenCtrlPlotBinning["TetrajetBjetPt_AfterAllSelections"] 
         if "tetrajet" in histoName.lower():
-            _rebinX = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetPt_AfterAllSelections"]
+            _rebinX = 1#systematics._dataDrivenCtrlPlotBinning["LdgTetrajetPt_AfterAllSelections"]
             _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
             if "tetrajetbjet" in histoName.lower():
                 _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
@@ -307,7 +307,7 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     return
 
 def GetBinText(bin):
-    return "bin-" + str(bin) #tmp
+    # return "bin-" + str(bin) #tmp
     if bin == "0":
         return "|#eta| < 0.4"
     elif bin == "1":
