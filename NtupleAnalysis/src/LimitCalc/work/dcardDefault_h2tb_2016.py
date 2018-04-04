@@ -73,10 +73,43 @@ def PrintNuisancesTable(Nuisances, DataGroups):
     return
 
 
+def getFakeBSystematics(myTTBarSystematics, OptionShapeSystematics, verbose=False):
+    '''
+    Return a list of all systematics to be considered for the Fake-b measurement
+
+    Takes as input the TTbar list and ammends/adds to its.
+
+    # Approximation 1: only ttbar xsect uncertainty applied to FakeB, as ttbar dominates the EWK GenuineB (but uncertainty is scaled according to 1-purity)
+    # Approximation 2: lepton and tau-veto neglected (negligible contribution)
+    '''
+    mySystematics = []
+    # For-loop: All TT Systematics
+    for syst in myTTBarSystematics:
+        if "veto" in syst.lower():
+            continue 
+        # Only append to name if it is NOT a shape uncertainty!
+        if syst not in myJetSystematics:
+            newSyst = syst + "_forFakeB"
+        else:
+            if OptionShapeSystematics:
+                newSyst = syst
+            else:
+                newSyst = syst + "_forFakeB"
+        mySystematics.append(newSyst)
+
+    # Add by hand the systematics related to Transfer Factors
+    mySystematics.append("CMS_FakeB_transferFactor")
+
+    if verbose:
+        for i, s in enumerate(mySystematics, 1):
+            Print("Fake-b Systematic %d) %s" % (i, s), i==1)
+    return mySystematics
+
+
 #================================================================================================  
 # Options
 #================================================================================================  
-OptionTest                             = False
+OptionTest                             = True
 #MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
 MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
 DataCardName                           = "Hplus2tb_13TeV"
@@ -102,7 +135,7 @@ labelPostfix                           = "_GenuineB"
 OptionIncludeSystematics               = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionShapeSystematics                 = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionConvertFromShapeToConstantList   = []    # [default: []]     (Convert these nuisances from shape to constant; Makes limits run faster & converge more easily)
-OptionSeparateShapeAndNormaFromSystList= []    # [default: []]     (Separate in the following shape nuisances the shape and normalization components)
+OptionSeparateShapeAndNormFromSystList = []    # [default: []]     (Separate in the following shape nuisances the shape and normalization components)
 
 #================================================================================================  
 # Counter and histogram path definitions
@@ -139,7 +172,7 @@ myLeptonVetoSystematics = ["CMS_eff_e_veto", "CMS_eff_m_veto", "CMS_eff_tau_veto
 myJetSystematics        = ["CMS_scale_j", "CMS_res_j"]
 myBtagSystematics       = ["CMS_eff_b"]
 
-# Define systematics dictionary (easy access)
+# Define systematics dictionary (easier access)
 mySystematics = {}
 mySystematics["MC"]          =  myLumiSystematics + myPileupSystematics + myTrgEffSystematics + myLeptonVetoSystematics + myJetSystematics + myBtagSystematics + myTopTagSystematics
 mySystematics["Signal"]      = mySystematics["MC"]
@@ -152,23 +185,13 @@ mySystematics["TTTT"]        = mySystematics["MC"]
 mySystematics["DYJets"]      = mySystematics["MC"] + ["CMS_scale_DY", "CMS_pdf_DY"]
 mySystematics["TTWJetsToQQ"] = mySystematics["MC"] + ["CMS_pdf_ttW", "CMS_scale_ttW"]
 mySystematics["WJetsToQQ_HT_600ToInf"]  = mySystematics["MC"] + ["CMS_scale_Wjets", "CMS_pdf_Wjets"]
-mySystematics["Diboson"] = mySystematics["MC"] + ["CMS_scale_VV", "CMS_pdf_VV"]
-
-# Construct Fake-b systematics 
-# NOTE: Only ttbar XSection uncertinty applied to FakeB, as ttbar
-# dominates the EWK sample but uncertainty is scaled according to 1-purity
-for syst in mySystematics["TT"]:
-    newSyst = syst + "_forFakeB"
-    if "veto" in syst.lower(): #fixme: how should I treat this?
-        continue 
-    mySystematics["FakeB"].append(newSyst)
-mySystematics["FakeB"].append("CMS_FakeB_transferFactor")
-
+mySystematics["Diboson"]     = mySystematics["MC"] + ["CMS_scale_VV", "CMS_pdf_VV"]
+mySystematics["FakeB"]       = getFakeBSystematics(mySystematics["TT"], OptionShapeSystematics, verbose=False)
 if not OptionIncludeSystematics:
-    for i,dset in enumerate(mySystematics, 1):
-        #Print("Dataset %s has following systematics: %s" % (dset, ", ".join(mySystematics[dset])), i==1)
-        mySystematics[dset] = []
     msg = "Disabled systematics for all datasets (Stat. only datacards)"
+    # For-loop: All dataset-systematics pairs
+    for i,dset in enumerate(mySystematics, 1):
+        mySystematics[dset] = []
     Print(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle(), True)
 
 #================================================================================================  
@@ -322,7 +345,6 @@ PU_Shape       = Nuisance(id="CMS_pileup"       , label="Pileup", distr="shapeQ"
 tf_FakeB_Shape = Nuisance(id="CMS_FakeB_transferFactor"  , label="Transfer Factor uncertainty",  distr="shapeQ", function="QCDShapeVariation", systVariation="TransferFactor")
 # NOTE: systVariation key is first declared in HiggsAnalysis/NtupleAnalysis/python/AnalysisBuilder.py
 
-
 #================================================================================================  
 # Constant Nuisance Parameters (aka Systematics)  (= rows in datacard) 
 #================================================================================================ 
@@ -358,16 +380,13 @@ ttZ_scale_up         = systematics.getCrossSectionUncertainty("TTZ_scale").getUn
 #tttt_scale_down      = systematics.getCrossSectionUncertainty("TTTT_scale").getUncertaintyDown()
 #tttt_scale_up        = systematics.getCrossSectionUncertainty("TTTT_scale").getUncertaintyUp()
 lumi_2016            = systematics.getLuminosityUncertainty("2016")
-
 # Default nuisances
 lumi13TeV_Const = Nuisance(id="lumi_13TeV"       , label="Luminosity 13 TeV uncertainty", distr="lnN", function="Constant", value=lumi_2016)
 trgMC_Const     = Nuisance(id="CMS_eff_trg_MC"   , label="Trigger MC efficiency (Approx.)", distr="lnN", function="Constant", value=0.05)
 PU_Const        = Nuisance(id="CMS_pileup"       , label="Pileup (Approx.)", distr="lnN", function="Constant", value=0.05)
-# FIXME! counters used are wrong. Should be: numerator= (Not passed veto/passed veto)* DeltaID
-eVeto_Const     = Nuisance(id="CMS_eff_e_veto"   , label="e veto", distr="lnN", function="Ratio", numerator="passed e selection (Veto)", denominator="passed PV", scaling=0.02) #sigma-eID= 2%, fixme
-muVeto_Const    = Nuisance(id="CMS_eff_m_veto"   , label="mu veto", distr="lnN", function="Ratio", numerator="passed mu selection (Veto)", denominator="passed e selection (Veto)", scaling=0.01) #sigma-muID= 1%, fixme
-tauVeto_Const   = Nuisance(id="CMS_eff_tau_veto" , label="tau veto", distr="lnN", function="Ratio", numerator="Passed tau selection (Veto)", denominator="passed mu selection (Veto)", scaling=0.03) #sigma-tauID= 1%, fixme
-
+eVeto_Const     = Nuisance(id="CMS_eff_e_veto"   , label="e veto", distr="lnN", function="Ratio", numerator="passed e selection (Veto)", denominator="passed PV", scaling=0.02) #sigma-eID= 2%, fixme: count
+muVeto_Const    = Nuisance(id="CMS_eff_m_veto"   , label="mu veto", distr="lnN", function="Ratio", numerator="passed mu selection (Veto)", denominator="passed e selection (Veto)", scaling=0.01) #sigma-muID= 1%, fixme:count
+tauVeto_Const   = Nuisance(id="CMS_eff_tau_veto" , label="tau veto", distr="lnN", function="Ratio", numerator="Passed tau selection (Veto)", denominator="passed mu selection (Veto)", scaling=0.03) #sigma-tauID= 1%, fixme:count
 bTag_Const      = Nuisance(id="CMS_eff_b"        , label="b tagging (Approx.)", distr="lnN", function="Constant", value=0.05)
 JES_Const       = Nuisance(id="CMS_scale_j"      , label="Jet Energy Scale (JES) (Approx.)"     , distr="lnN", function="Constant", value=0.03)
 JER_Const       = Nuisance(id="CMS_res_j"        , label="Jet Energy Resolution (JER) (Approx.)", distr="lnN", function="Constant", value=0.04)
@@ -398,12 +417,12 @@ tf_FakeB_Const          = Nuisance(id="CMS_FakeB_transferFactor"  , label="Trans
 lumi13TeV_FakeB_Const   = Nuisance(id="lumi_13TeV_forFakeB"       , label="Luminosity 13 TeV uncertainty", distr="lnN", function="ConstantForFakeB", value=lumi_2016)
 trgMC_FakeB_Const       = Nuisance(id="CMS_eff_trg_MC_forFakeB"   , label="Trigger MC efficiency (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.05)
 PU_FakeB_Const          = Nuisance(id="CMS_pileup_forFakeB"       , label="Pileup (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.05)
-#eVeto_FakeB_Const       = Nuisance(id="CMS_eff_e_veto_forFakeB"   , label="e veto", distr="lnN", function="Ratio", numerator="passed e selection (Veto)", denominator="passed PV", scaling=0.02) 
-#muVeto_FakeB_Const      = Nuisance(id="CMS_eff_m_veto_forFakeB"   , label="mu veto", distr="lnN", function="Ratio", numerator="passed mu selection (Veto)", denominator="passed e selection (Veto)", scaling=0.01)
-#tauVeto_FakeB_Const     = Nuisance(id="CMS_eff_tau_veto_forFakeB" , label="tau veto", distr="lnN", function="Ratio", numerator="Passed tau selection (Veto)", denominator="passed mu selection (Veto)", scaling=0.01)
+eVeto_FakeB_Const       = Nuisance(id="CMS_eff_e_veto_forFakeB"   , label="e veto", distr="lnN", function="Ratio", numerator="passed e selection (Veto)", denominator="passed PV", scaling=0.02) 
+muVeto_FakeB_Const      = Nuisance(id="CMS_eff_m_veto_forFakeB"   , label="mu veto", distr="lnN", function="Ratio", numerator="passed mu selection (Veto)", denominator="passed e selection (Veto)", scaling=0.01)
+tauVeto_FakeB_Const     = Nuisance(id="CMS_eff_tau_veto_forFakeB" , label="tau veto", distr="lnN", function="Ratio", numerator="Passed tau selection (Veto)", denominator="passed mu selection (Veto)", scaling=0.01)
+JES_FakeB_Const         = Nuisance(id="CMS_scale_j_forFakeB"      , label="Jet Energy Scale (JES)", distr="shapeQ", function="Constant", systVariation="JES")
+JER_FakeB_Const         = Nuisance(id="CMS_res_j_forFakeB"        , label="Jet Energy Resolution (JER)", distr="shapeQ", function="Constant", systVariation="JER")
 bTag_FakeB_Const        = Nuisance(id="CMS_eff_b_forFakeB"        , label="b tagging (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.05)
-JES_FakeB_Const         = Nuisance(id="CMS_scale_j_forFakeB"      , label="Jet Energy Scale (JES) (Approx.)"     , distr="lnN", function="ConstantForFakeB", value=0.03)
-JER_FakeB_Const         = Nuisance(id="CMS_res_j_forFakeB"        , label="Jet Energy Resolution (JER) (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.04)
 topPt_FakeB_Const       = Nuisance(id="CMS_topPtReweight_forFakeB", label="Top pT reweighting (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.25)
 topTag_FakeB_Const      = Nuisance(id="CMS_topTagging_forFakeB"   , label="Top tagging (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.20)
 ttbar_scale_FakeB_Const = Nuisance(id="CMS_scale_ttbar_forFakeB"  , label="TTbar XSection scale uncertainty", distr="lnN", function="ConstantForFakeB", value=tt_scale_down, upperValue=tt_scale_up)
@@ -423,6 +442,7 @@ Nuisances.append(eVeto_Const)
 Nuisances.append(muVeto_Const)
 Nuisances.append(tauVeto_Const)
 Nuisances.append(bTag_Const) 
+# Energy Scale
 if OptionShapeSystematics:
     Nuisances.append(JES_Shape)
     Nuisances.append(JER_Shape)
@@ -430,8 +450,7 @@ else:
     Nuisances.append(JES_Const)
     Nuisances.append(JER_Const)
 Nuisances.append(topTag_Const) # fixme: constant -> shape (?)
-
-# Cross section uncertainties
+# Cross-sections
 Nuisances.append(ttbar_scale_Const) 
 Nuisances.append(ttbar_pdf_Const)
 Nuisances.append(ttbar_mass_Const)
@@ -449,22 +468,22 @@ Nuisances.append(ttZ_pdf_Const)
 Nuisances.append(ttZ_scale_Const)
 # Nuisances.append(tttt_pdf_Const)
 # Nuisances.append(tttt_scale_Const)
-
-# FakeB nuisances
+# FakeB Measurement
 if OptionShapeSystematics:
     Nuisances.append(tf_FakeB_Shape)
 else:
     Nuisances.append(tf_FakeB_Const)
+    Nuisances.append(JES_FakeB_Const)
+    Nuisances.append(JER_FakeB_Const)
 Nuisances.append(lumi13TeV_FakeB_Const)
 Nuisances.append(PU_FakeB_Const)
 Nuisances.append(topPt_FakeB_Const)
 Nuisances.append(trgMC_FakeB_Const)
-#Nuisances.append(eVeto_FakeB_Const)
-#Nuisances.append(muVeto_FakeB_Const)
-#Nuisances.append(tauVeto_FakeB_Const)
+if 0: # approximation 2: lepton and tau-veto neglected (negligible contribution)
+    Nuisances.append(eVeto_FakeB_Const)
+    Nuisances.append(muVeto_FakeB_Const)
+    Nuisances.append(tauVeto_FakeB_Const)
 Nuisances.append(bTag_FakeB_Const) 
-Nuisances.append(JES_FakeB_Const)
-Nuisances.append(JER_FakeB_Const)
 Nuisances.append(topTag_FakeB_Const)
 Nuisances.append(ttbar_scale_FakeB_Const) 
 Nuisances.append(ttbar_pdf_FakeB_Const)
@@ -497,8 +516,11 @@ MergeNuisances.append(["CMS_pileup"       , "CMS_pileup_forFakeB"])
 #MergeNuisances.append(["CMS_eff_m_veto"   , "CMS_eff_m_veto_forFakeB"])
 #MergeNuisances.append(["CMS_eff_tau_veto" , "CMS_eff_tau_veto_forFakeB"])
 MergeNuisances.append(["CMS_eff_b"        , "CMS_eff_b_forFakeB"])
-MergeNuisances.append(["CMS_scale_j"      , "CMS_scale_j_forFakeB"])
-MergeNuisances.append(["CMS_res_j"        , "CMS_res_j_forFakeB"])
+if OptionShapeSystematics:
+    pass
+else:
+    MergeNuisances.append(["CMS_scale_j"      , "CMS_scale_j_forFakeB"])
+    MergeNuisances.append(["CMS_res_j"        , "CMS_res_j_forFakeB"])
 MergeNuisances.append(["CMS_topPtReweight", "CMS_topPtReweight_forFakeB"])
 MergeNuisances.append(["CMS_topTagging"   , "CMS_topTagging_forFakeB"])
 #MergeNuisances.append(["CMS_scale_ttbar"  , "CMS_scale_ttbar_forFakeB"])
@@ -517,7 +539,7 @@ if nSysToConvert > 0:
 
 # Separate the shape nuisances and the shape and normalization components if asked
 from HiggsAnalysis.LimitCalc.InputClasses import separateShapeAndNormalizationFromSystVariation
-nSysShapeComponents = len(OptionSeparateShapeAndNormalizationFromSystVariationList)
+nSysShapeComponents = len(OptionSeparateShapeAndNormFromSystList)
 if (nSysShapeComponents>0):
     Print("Separating %s/%s shape and normalization components" % (nSysShapeComponents, nSysTotal), True)
     separateShapeAndNormalizationFromSystVariation(Nuisances, OptionSeparateShapeAndNormFromSystList)
