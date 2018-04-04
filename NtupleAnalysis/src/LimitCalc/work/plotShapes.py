@@ -13,7 +13,7 @@ EXAMPLES:
 
 
 LAST USED:
-../plotShapes.py --dirName shapeSyst --xmax 3000 --logy
+../plotShapes.py --dirName shapeSyst --xmax 3000 --logy --h2tb
 
 '''
 
@@ -31,6 +31,7 @@ ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
+import HiggsAnalysis.NtupleAnalysis.tools.systematics as systematics
 import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
@@ -319,10 +320,16 @@ class DatasetContainer:
         x = 0.6
         size = 20
         myRatioContainer = RatioPlotContainer(self._label)
+    
         # For-loop: All uncertainties
         for i, uncName in enumerate(self._uncertaintyShapes, 1):
             myShortName = uncName
             self.Verbose("{:>3} {:^1} {:<3} {:<1} {:<40}".format(i, "/", len(self._uncertaintyShapes), ":", myShortName), i==1)
+
+            #msg = "{:<10} {:<15} {:<20}".format("m = %s GeV"  % (mass), "Shape %s (%d/%d) " % (uncName, len(self._uncertaintyShapes)))
+            msg = "{:>5} {:>2} {:^1} {:>3} {:<20}".format("Shape", i, "/", str(len(self._uncertaintyShapes))+":", uncName)
+            #PrintFlushed(msg, False)
+            Print(msg, False)
 
             myLongName = self._cardReader.getHistoNameForNuisance(self._name, uncName)
 
@@ -475,29 +482,26 @@ def doPlot(opts,mass,nameList,allShapeNuisances,luminosity,myDatacardPattern,roo
                 shapes.append(n)
 
     rebinList = None
-    #rebinList = [0,200,250,300,350,400,450,500,550,600,700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400,2500]
+    if opts.h2tb:
+        rebinList = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetMass_AfterAllSelections"] 
 
     ## Do the actual plots
     for i, d in enumerate(datasets, 1):
         if opts.verbose:
             d.debug()
-
+        msg = "{:>10}, {:<20}".format("m = %d GeV" % (mass), d.GetName())
         if i < len(datasets):
-            dsetName = ShellStyles.HighlightAltStyle() + d.GetName() + ShellStyles.NormalStyle()
+            Print(ShellStyles.HighlightAltStyle() + msg + ShellStyles.NormalStyle(), False)
         else:
-            dsetName = ShellStyles.SuccessStyle() + d.GetName() + ShellStyles.NormalStyle()
-        #msg = "{:<15} {:<3} {:<1} {:<20}".format("m = %d GeV, Shape %d /" % (mass, i), len(datasets), ":", dsetName)
-        msg = "{:<15} {:<35}".format("m = %d GeV, Shape %d /" % (mass, i), str(len(datasets)) + " for dataset " + dsetName)
-        PrintFlushed(msg, i==1)
+            Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), False)
+        
         d.doPlot(opts, shapes, f, mass, luminosity, signalTable, rebinList)
-    print
     Verbose("Closing ROOT file %s" % (fName), True)
     f.Close()
 
 def _integral(h):
     # return h.Integral(0, h.GetNbinsX()+1)
     return h.Integral()
-
 
 def PrintFlushed(msg, printHeader=True):
     '''
@@ -625,7 +629,8 @@ if __name__ == "__main__":
     INDIVIDUAL  = False
     CARDPATTERN = None
     ROOTPATTERN = None
-    
+    HToTB       = False
+
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]",add_help_option=False,conflict_handler="resolve")
 
@@ -667,6 +672,9 @@ if __name__ == "__main__":
 
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true",  default=VERBOSE,
                       help="Enable verbosity (for debugging) [default: %s]" % (VERBOSE) )
+
+    parser.add_option("--h2tb", dest="h2tb", action="store_true", default=HToTB,
+                      help="Flag to indicate that settings should reflect h2tb analysis [default: %s]" % (HToTB) )
 
     (opts, args) = parser.parse_args()
 
