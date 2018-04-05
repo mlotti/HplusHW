@@ -338,6 +338,8 @@ datasetsSignalTauNu.append(Dataset('/HplusToTauNu_M_200_TuneCUETP8M1_tauola_13Te
 datasetsSignalTauNu.append(Dataset('/ChargedHToTauNu_M140_13TeV_pythia8/amarini-PUMoriond17-MINIAODSIM-v1-28028af67189b3de7224b79195bd0e1d/USER', dbs="phys03",dataVersion="80Xmc", dasQuery=das, name="ChargedHiggs_HplusTB_HplusToTauNu_M_140_Pythia8"))
 datasetsSignalTauNu.append(Dataset('/ChargedHToTauNu_M160_13TeV_pythia8/amarini-PUMoriond17-MINIAODSIM-v1-28028af67189b3de7224b79195bd0e1d/USER', dbs="phys03",dataVersion="80Xmc", dasQuery=das, name="ChargedHiggs_HplusTB_HplusToTauNu_M_160_Pythia8"))
 datasetsSignalTauNu.append(Dataset('/ChargedHToTauNu_M140_13TeV_pythia8/amarini-PUMoriond17-MINIAODSIM-v1-28028af67189b3de7224b79195bd0e1d/USER', dbs="phys03",dataVersion="80Xmc", dasQuery=das, name="ChargedHiggs_HplusTB_HplusToTauNu_M_180_Pythia8"))
+datasetsSignalTauNu.append(Dataset('/ChargedHToTauNu_lowmass_M140_13TeV_pythia8/amarini-PUMoriond17-MINIAODSIM-v1-28028af67189b3de7224b79195bd0e1d/USER', dbs="phys03",dataVersion="80Xmc", dasQuery=das, name="ChargedHiggs_TTToHplusBWB_HplusToTauNu_M_140_Pythia8"))
+datasetsSignalTauNu.append(Dataset('/ChargedHToTauNu_lowmass_M160_13TeV_pythia8/amarini-PUMoriond17-MINIAODSIM-v1-28028af67189b3de7224b79195bd0e1d/USER', dbs="phys03",dataVersion="80Xmc", dasQuery=das, name="ChargedHiggs_TTToHplusBWB_HplusToTauNu_M_160_Pythia8"))
 
 datasetsSingleTop = []
 das1 = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FST_t-channel_antitop*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
