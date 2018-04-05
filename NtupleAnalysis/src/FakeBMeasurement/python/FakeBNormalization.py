@@ -359,8 +359,14 @@ class FakeBNormalizationManager:
         # hFrame.GetXaxis().SetTitle("Fake-b bin")
         
         # Customise axes
-        hFrame.SetMinimum(0.6e-1)
-        hFrame.SetMaximum(2e0)
+        logy = False
+        if logy:
+            hFrame.SetMinimum(0.6e-1)
+            hFrame.SetMaximum(2e0)
+        else:
+            hFrame.SetMinimum(0.0)
+            hFrame.SetMaximum(1.0)
+            
         if len(self._BinLabelMap) > 12:
             lSize = 8
         elif len(self._BinLabelMap) > 8:
@@ -380,7 +386,7 @@ class FakeBNormalizationManager:
 
         # Create canvas
         c = ROOT.TCanvas()
-        c.SetLogy(True)
+        c.SetLogy(logy)
         c.SetGridx(False)
         c.SetGridy(False)
 
@@ -394,7 +400,8 @@ class FakeBNormalizationManager:
         l.SetBorderSize(0)
         l.AddEntry(gFakeB, "Value #pm stat.", "LP") # "Fake-#it{b} #pm Stat.", "LP"
         l.SetTextSize(0.035)
-        l.Draw()
+        if 0:
+            l.Draw()
 
         # Store ROOT ignore level to normal before changing it
         backup = ROOT.gErrorIgnoreLevel
