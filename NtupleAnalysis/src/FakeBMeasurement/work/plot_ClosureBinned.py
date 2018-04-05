@@ -307,7 +307,7 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     return
 
 def GetBinText(bin):
-    # return "bin-" + str(bin) #tmp
+    return "bin-" + str(bin) #tmp
     if bin == "0":
         return "|#eta| < 0.4"
     elif bin == "1":
@@ -405,8 +405,8 @@ def main(opts):
         datasetsMgr.PrintInfo()
         
         # List of TDirectoryFile (_CRone, _CRtwo, _VR, _SR)
-        tdirs  = ["LdgTrijetPt_"   , "LdgTrijetMass_"  , "LdgTrijetBJetBdisc_", "TetrajetBJetPt_",
-                  "TetrajetBJetEta_", "TetrajetBJetBdisc_" , "LdgTetrajetPt_", "LdgTetrajetMass_"]
+        tdirs  = ["LdgTrijetPt_"   , "LdgTrijetMass_"  , "TetrajetBJetPt_", #"LdgTrijetBJetBdisc_", "TetrajetBJetBdisc_",
+                  "TetrajetBJetEta_", "LdgTetrajetPt_", "LdgTetrajetMass_"] 
         region = ["CRone", "CRtwo"]
         hList  = []
         for d in tdirs:

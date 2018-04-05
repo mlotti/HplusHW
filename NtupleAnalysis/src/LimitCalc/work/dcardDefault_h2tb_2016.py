@@ -1,6 +1,6 @@
 '''
 DESCRIPTION:
-This is a datacard template for 2016 results. 
+-This is a datacard template for 2016 results. 
 It can be used to generate datacards for H+ -> tb analysis, 
 in the fully hadronic final state. 
 
@@ -109,12 +109,14 @@ def getFakeBSystematics(myTTBarSystematics, OptionShapeSystematics, verbose=Fals
 #================================================================================================  
 # Options
 #================================================================================================  
-OptionTest                             = True
-#MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
-MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
+OptionTest                             = False
+OptionIncludeSystematics               = False # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
+OptionShapeSystematics                 = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
+OptionDoControlPlots                   = True  # [default: True]   (Produce control plots defined at end of this file)
+
+MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
 DataCardName                           = "Hplus2tb_13TeV"
-OptionMassShape                        = "LdgTetrajetMass_AfterAllSelections"
-#OptionMassShape                        = "SubldgTetrajetMass_AfterAllSelections"
+OptionMassShape                        = "LdgTetrajetMass_AfterAllSelections" #"SubldgTetrajetMass_AfterAllSelections"
 OptionBr                               = 1.0   # [default: 1.0]    (The Br(t->bH+) used in figures and tables)
 OptionSqrtS                            = 13    # [default: 13]     (The sqrt(s) used in figures and tables)
 BlindAnalysis                          = True  # [default: True]   (True, unless you have a green light for unblinding)
@@ -123,7 +125,6 @@ MinimumStatUncertainty                 = 0.5   # [default: 0.5]    (Minimum stat
 UseAutomaticMinimumStatUncertainty     = False # Do NOT use the MinimumStatUncertainty value above for ~empty bins, but determine the value from the lowest non-zero rate for each dataset   
 OptionCombineSingleColumnUncertainties = False # [default: False]  (Approxmation that makes limit running faster)
 OptionDisplayEventYieldSummary         = False # [default: False]  (Print "Event yield summary", using the TableProducer.py)
-OptionDoControlPlots                   = True  # [default: True]   (Produce control plots defined at end of this file)
 OptionDoWithoutSignal                  = False # [default: False]  (Also do control plots without any signal present)
 OptionFakeBMeasurementSource           = "DataDriven" # [default: "DataDriven"] (options: "DataDriven", "MC")
 OptionLimitOnSigmaBr                   = True  # [default: True]   (Set to true for heavy H+)
@@ -132,8 +133,6 @@ ToleranceForLuminosityDifference       = 0.05  # [default: 0.05]   (Tolerance fo
 ToleranceForMinimumRate                = 0.0   # [default: 0.0]    (Tolerance for almost zero rate columns with smaller rate are suppressed) 
 labelPrefix                            = ""    # [default: ""]     (Prefix for the labels of datacard columns; e.g. "CMS_Hptntj_", "CMS_H2tb_")
 labelPostfix                           = "_GenuineB"
-OptionIncludeSystematics               = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
-OptionShapeSystematics                 = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionConvertFromShapeToConstantList   = []    # [default: []]     (Convert these nuisances from shape to constant; Makes limits run faster & converge more easily)
 OptionSeparateShapeAndNormFromSystList = []    # [default: []]     (Separate in the following shape nuisances the shape and normalization components)
 
@@ -420,8 +419,8 @@ PU_FakeB_Const          = Nuisance(id="CMS_pileup_forFakeB"       , label="Pileu
 eVeto_FakeB_Const       = Nuisance(id="CMS_eff_e_veto_forFakeB"   , label="e veto", distr="lnN", function="Ratio", numerator="passed e selection (Veto)", denominator="passed PV", scaling=0.02) 
 muVeto_FakeB_Const      = Nuisance(id="CMS_eff_m_veto_forFakeB"   , label="mu veto", distr="lnN", function="Ratio", numerator="passed mu selection (Veto)", denominator="passed e selection (Veto)", scaling=0.01)
 tauVeto_FakeB_Const     = Nuisance(id="CMS_eff_tau_veto_forFakeB" , label="tau veto", distr="lnN", function="Ratio", numerator="Passed tau selection (Veto)", denominator="passed mu selection (Veto)", scaling=0.01)
-JES_FakeB_Const         = Nuisance(id="CMS_scale_j_forFakeB"      , label="Jet Energy Scale (JES)", distr="shapeQ", function="Constant", systVariation="JES")
-JER_FakeB_Const         = Nuisance(id="CMS_res_j_forFakeB"        , label="Jet Energy Resolution (JER)", distr="shapeQ", function="Constant", systVariation="JER")
+JES_FakeB_Const         = Nuisance(id="CMS_scale_j_forFakeB"      , label="Jet Energy Scale (JES) (Approx.)"     , distr="lnN", function="ConstantForFakeB", value=0.03)
+JER_FakeB_Const         = Nuisance(id="CMS_res_j_forFakeB"        , label="Jet Energy Resolution (JER) (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.04)
 bTag_FakeB_Const        = Nuisance(id="CMS_eff_b_forFakeB"        , label="b tagging (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.05)
 topPt_FakeB_Const       = Nuisance(id="CMS_topPtReweight_forFakeB", label="Top pT reweighting (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.25)
 topTag_FakeB_Const      = Nuisance(id="CMS_topTagging_forFakeB"   , label="Top tagging (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.20)
@@ -450,6 +449,7 @@ else:
     Nuisances.append(JES_Const)
     Nuisances.append(JER_Const)
 Nuisances.append(topTag_Const) # fixme: constant -> shape (?)
+
 # Cross-sections
 Nuisances.append(ttbar_scale_Const) 
 Nuisances.append(ttbar_pdf_Const)
@@ -468,6 +468,7 @@ Nuisances.append(ttZ_pdf_Const)
 Nuisances.append(ttZ_scale_Const)
 # Nuisances.append(tttt_pdf_Const)
 # Nuisances.append(tttt_scale_Const)
+
 # FakeB Measurement
 if OptionShapeSystematics:
     Nuisances.append(tf_FakeB_Shape)
@@ -479,15 +480,16 @@ Nuisances.append(lumi13TeV_FakeB_Const)
 Nuisances.append(PU_FakeB_Const)
 Nuisances.append(topPt_FakeB_Const)
 Nuisances.append(trgMC_FakeB_Const)
-if 0: # approximation 2: lepton and tau-veto neglected (negligible contribution)
-    Nuisances.append(eVeto_FakeB_Const)
-    Nuisances.append(muVeto_FakeB_Const)
-    Nuisances.append(tauVeto_FakeB_Const)
 Nuisances.append(bTag_FakeB_Const) 
 Nuisances.append(topTag_FakeB_Const)
 Nuisances.append(ttbar_scale_FakeB_Const) 
 Nuisances.append(ttbar_pdf_FakeB_Const)
 Nuisances.append(ttbar_mass_FakeB_Const)
+# approximation 2: lepton and tau-veto neglected (negligible contribution)
+if 0:
+    Nuisances.append(eVeto_FakeB_Const)
+    Nuisances.append(muVeto_FakeB_Const)
+    Nuisances.append(tauVeto_FakeB_Const)
 
 # Print summary table of all defined nuisances!
 PrintNuisancesTable(Nuisances, DataGroups)
