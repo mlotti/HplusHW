@@ -287,14 +287,14 @@ class AnalysisBuilder:
         items.extend(["JES", "JER"])
         
         # b quark systematics
-        # items.extend(["BTagSF"])
+        items.extend(["BTagSF"])
 
         # top quark systematics
-        #if self._useTopPtReweighting:
-        #    items.append("TopPt") 
+        if self._useTopPtReweighting:
+            items.append("TopPt") 
 
         # PU weight systematics
-        #items.extend(["PUWeight"])
+        items.extend(["PUWeight"])
         return items
 
     def _processSystematicsVariations(self):
