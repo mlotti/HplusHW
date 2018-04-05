@@ -122,13 +122,12 @@ if bjetSelection.bjetDiscr == "pfCombinedInclusiveSecondaryVertexV2BJetTags":
                                         btagEfficiencyFilename = "btageff_HToTB.json",
                                         direction              = "nominal")
 elif bjetSelection.bjetDiscr == "pfCombinedMVAV2BJetTags":
-    print "--> "*10
     scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
                                         btagPayloadFilename    = "cMVAv2_Moriond17_B_H.csv", # use this for MVA b-tagging
                                         btagEfficiencyFilename = "btageff_Hybrid_TT+WJetsHT.json", # use with taunu analysis and WJetsHT samples
                                         direction              = "nominal")
 else:
-    pass
+    pass #should crash
 
 #=================================================================================================
 # QGL selection
@@ -189,7 +188,7 @@ if 0:
 topSelectionBDT = PSet(
     MVACutValue            = 0.40,    # [default: 0.40, 0.85]
     MVACutDirection        =  ">=",   # [default: ">="]
-    MassCutValue           = 500.0,   # [default: 400.0]
+    MassCutValue           = 500.0,   # [default: 500.0] # matters for fake b
     MassCutDirection       = "<=",    # [default: "<"]
     CSV_bDiscCutValue      = 0.8484,  # [default: 0.8484] #Do not evaluate top candidate if b-jet assigned as b from top fails this cut
     CSV_bDiscCutDirection  = ">=",    # [default: ">="]
@@ -232,10 +231,10 @@ scaleFactors.setupBtagSFInformation(btagPset               = fakeBBjetSelection,
                                     direction              = "nominal")
 
 fakeBTopSelectionBDT = PSet(
-    MVACutValue            = -0.4, # [default: 0.0, 0.6] NOTE: defines SR, VR, CR1, and CR2
-    MVACutDirection        = ">=",
+    MVACutValue            = -1.0,   # [default: -0.4, 0.0, 0.6] NOTE: defines SR, VR, CR1, and CR2
+    MVACutDirection        = ">",    # [default: ">"] (NOTE: Crashes if set to ">=" -1)
     LdgTopDefinition       = "MVA",  # [default: "MVA"] (options: "MVA", "Pt")
-    MassCutValue           = topSelectionBDT.MassCutValue,
+    MassCutValue           = topSelectionBDT.MassCutValue, # try to increase this to increase statistics!
     MassCutDirection       = topSelectionBDT.MassCutDirection,
     CSV_bDiscCutValue      = topSelectionBDT.CSV_bDiscCutValue,
     CSV_bDiscCutDirection  = topSelectionBDT.CSV_bDiscCutDirection,
@@ -249,7 +248,7 @@ fakeBMeasurement = PSet(
     baselineBJetsDiscrWP      = bjetSelection.bjetDiscrWorkingPoint,
     LdgTopMVACutValue         = topSelectionBDT.MVACutValue,
     LdgTopMVACutDirection     = topSelectionBDT.MVACutDirection, 
-    SubldgTopMVACutValue      = topSelectionBDT.MVACutValue,
+    SubldgTopMVACutValue      = topSelectionBDT.MVACutValue, #0.20,
     SubldgTopMVACutDirection  = "<",
     )
 
@@ -300,5 +299,5 @@ allSelections = PSet(
     FakeBTopSelectionBDT  = fakeBTopSelectionBDT,
     CommonPlots           = commonPlotsOptions,
     HistogramAmbientLevel = histogramAmbientLevel,
-    QGLRSelection         = qglrSelection,
+    # QGLRSelection         = qglrSelection,
 )

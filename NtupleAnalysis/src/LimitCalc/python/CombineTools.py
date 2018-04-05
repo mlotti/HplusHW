@@ -1660,14 +1660,10 @@ hadd higgsCombineinj_m{MASS}.Asymptotic.mH{MASS}.root higgsCombineinj_m{MASS}.As
 
 
 
-        # xenios-1: What do we do here?
-
+        # Run multi-fit
         self._runMLFit(mass)
-
-
-
-        # xenios-2: What do we do here?
-
+        
+        # Run significance
         self._runSignificance(mass)
 
         return result

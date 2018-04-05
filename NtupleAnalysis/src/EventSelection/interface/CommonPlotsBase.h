@@ -40,6 +40,7 @@ public:
   virtual void fillControlPlotsAfterAntiIsolatedTauSelection(const Event& event, const TauSelection::Data& data);
   virtual void fillControlPlotsAfterMETTriggerScaleFactor(const Event& event);
   virtual void fillControlPlotsAfterBjetSelection(const Event& event, const BJetSelection::Data& data);
+  virtual void fillControlPlotsAfterBtagSF(const Event& event, const JetSelection::Data& jetData ,const BJetSelection::Data& bjetData);
   virtual void fillControlPlotsAfterStandardSelections(const Event& event,
 						       const JetSelection::Data& jetData, 
 						       const BJetSelection::Data& bjetData, 
