@@ -72,7 +72,7 @@ def Verbose(msg, printHeader=False):
         return
 
     if printHeader:
-        print "=== run.py:"
+        print "=== runSystematics.py:"
 
     if msg !="":
         print "\t", msg
@@ -81,7 +81,7 @@ def Verbose(msg, printHeader=False):
 
 def Print(msg, printHeader=True):
     if printHeader:
-        print "=== run.py:"
+        print "=== runSystematics.py:"
 
     if msg !="":
         print "\t", msg
