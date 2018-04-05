@@ -17,9 +17,12 @@ EXAMPLES:
 ../../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY --yMin 1e-3 --yMax 10 --subdir StatOnly --url
 ../../../plotBRLimit_Hplus2tb.py --excludedArea --gridX --gridY --subdir  --yMin 1e-1
 ../../../plotBRLimit_Hplus2tb.py --excludedArea --gridX --gridY --yMin 1e-1
+../../../plotBRLimit_Hplus2tb.py --excludedArea --gridX --gridY --yMin 1e-1 --yMax 50 --subdir StatOnly --url
+../../../plotBRLimit_Hplus2tb.py --excludedArea --gridX --gridY --yMin 1e-1 --yMax 50 --subdir StatPlusSyst --url
 
 LAST USED:
-../../../plotBRLimit_Hplus2tb.py --excludedArea --gridX --gridY --yMin 1e-1 --subdir StatOnly --url
+../../../plotBRLimit_Hplus2tb.py --excludedArea --yMin 0.1 --yMax 30 --subdir MVAm0p10to0p40_6BinsAbsEta_0PtBins_NoFatjetVeto
+../../../plotBRLimit_Hplus2tb.py --excludedArea --yMin 0.1 --yMax 30 --subdir MVAm0p10to0p40_6BinsAbsEta_0PtBins_NoFatjetVeto_StatOnly
 
 '''
 
@@ -74,6 +77,7 @@ def main(opts):
     if not opts.unblinded:
         msg="Working in BLINDED mode, i.e. I will not tell you the observed limit before you say please ..."
         Print(msg, True)
+
     limits = limit.BRLimits()
 
     # Enable OpenGL
@@ -96,6 +100,8 @@ def main(opts):
     # Use BR symbol for H+ decay channel with subscript or parentheses?
     if opts.parentheses:
         limit.useParentheses()
+    else:
+        limit.useSubscript(True)
     
     # Do the limit plots
     doBRlimit(limits, opts.unblinded, opts, logy=False)
@@ -108,6 +114,7 @@ def main(opts):
     
     # Save the Limits in a LaTeX table file
     limits.saveAsLatexTable(unblindedStatus=opts.unblinded, nDigits=opts.digits)
+    limits.saveAsLatexTable(unblindedStatus=opts.unblinded, nDigits=opts.digits, savePath=os.path.join(opts.saveDir, opts.subdir) )
     return
 
 
@@ -181,7 +188,7 @@ def doBRlimit(limits, unblindedStatus, opts, logy=False):
 
     if limit.BRassumption != "":
         plot.frame.GetYaxis().SetTitle("95% CL limit for #sigma_{H^{+}} (pb)")
-    else:
+    else:        
         plot.frame.GetYaxis().SetTitle(limit.sigmaBRlimit)
         # plot.frame.GetYaxis().SetTitle(limit.BRlimit)
 
