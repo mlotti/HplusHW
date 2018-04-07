@@ -146,12 +146,14 @@ def main():
 
     # Set splitting of phase-space (first bin is below first edge value and last bin is above last edge value)
     allSelections.CommonPlots.histogramSplitting = [        
-        PSet(label="TetrajetBjetPt" , binLowEdges=[100], useAbsoluteValues=False),
-        PSet(label="TetrajetBjetEta", binLowEdges=[0.6, 0.9, 1.2, 1.5, 1.8, 2.1], useAbsoluteValues=True), 
-        #PSet(label="TetrajetBjetPt" , binLowEdges=[80], useAbsoluteValues=False),
-        #PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0], useAbsoluteValues=True), 
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[120], useAbsoluteValues=False),
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.6, 1.2, 1.8, 2.1], useAbsoluteValues=True), 
+        ## PSet(label="TetrajetBjetPt" , binLowEdges=[100], useAbsoluteValues=False),
+        ## PSet(label="TetrajetBjetEta", binLowEdges=[0.6, 0.9, 1.2, 1.5, 1.8, 2.1], useAbsoluteValues=True), 
+        ## PSet(label="TetrajetBjetPt" , binLowEdges=[80], useAbsoluteValues=False),
+        ## PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0], useAbsoluteValues=True), 
         ### Default binnins
-        # PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True), 
+        PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True), 
         ### Other attempts
         # PSet(label="TetrajetBjetEta", binLowEdges=[-2.2, -2.0, -1.6, -0.8, -0.4, +0.4, +0.8, +1.6, +2.0, +2.2], useAbsoluteValues=False), 
         # PSet(label="TetrajetBjetPt" , binLowEdges=[100], useAbsoluteValues=False), # C) 
@@ -273,7 +275,6 @@ def GetDatasetCompleteList():
     myCompleteList.append("JetHT_Run2016H_03Feb2017_ver2_v1_281613_284035")
     myCompleteList.append("JetHT_Run2016H_03Feb2017_ver3_v1_284036_284044")
     #
-    myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_500")
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_180")
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_200")
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_220")
@@ -353,7 +354,6 @@ def GetDatasetWhitelist(opts):
         myWhitelist.append("JetHT_Run2016H_03Feb2017_ver2_v1_281613_284035")
         myWhitelist.append("JetHT_Run2016H_03Feb2017_ver3_v1_284036_284044")
     elif opts.group == "C":
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_500")
         myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_180")
         myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_200")
         myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_220")

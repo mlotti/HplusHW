@@ -115,6 +115,8 @@ def main():
     maxEvents = {}
     for d in whiteList:
         maxEvents[d] = -1
+        if  d == "ChargedHiggs_HplusTB_HplusToTB_M_650":
+            maxEvents[d] = 3000000
         # maxEvents[d] = 1000 #for testing
     process = Process(prefix, postfix, maxEvents)
                 
