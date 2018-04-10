@@ -983,10 +983,10 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
                                       "QCD_Baseline", "QCD_Inverted"]
 
     def calculateNormalizationCoefficients(self, dataHisto, fitOptions, FITMIN, FITMAX, **kwargs):
-        ####qcdTemplate = self._templates["QCD_Inverted"]
-        qcdTemplate = self._templates["FakeTau_Inverted"]
-        ####ewkTemplate = self._templates["EWKInclusive_Baseline"]
-        ewkTemplate = self._templates["EWKGenuineTaus_Baseline"]
+        qcdTemplate = self._templates["QCD_Inverted"]
+        ####qcdTemplate = self._templates["FakeTau_Inverted"]
+        ewkTemplate = self._templates["EWKInclusive_Baseline"]
+        ####ewkTemplate = self._templates["EWKGenuineTaus_Baseline"]
         templatesToBeFitted = [qcdTemplate, ewkTemplate]
         self._checkInputValidity(templatesToBeFitted)
         

@@ -357,7 +357,7 @@ def main(argv, dsetMgr, moduleInfoString):
             template_EWKGenuineTaus_Baseline.setHistogram(hmetBase_EWK_GenuineTaus, binLabels[i])
             template_EWKInclusive_Baseline.setHistogram(hmetBase_EWKinclusive, binLabels[i])
             template_QCD_Baseline.setHistogram(hmetBase_QCD, binLabels[i])
-            template_FakeTau_Baseline.setHistogram(hmetBase_QCD, binLabels[i])
+            template_FakeTau_Baseline.setHistogram(hmetBase_FakeTau, binLabels[i])
             
             #===== Make plots of templates
             manager.plotTemplates()
