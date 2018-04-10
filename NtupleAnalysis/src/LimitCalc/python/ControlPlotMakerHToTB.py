@@ -104,10 +104,12 @@ class ControlPlotMakerHToTB:
 
                 # The case m < 0 is for plotting hitograms without any signal
                 if m > 0:
-                    saveName = "%s/DataDrivenCtrlPlot_M%d_%02d_%s" % (self._dirname, m, i, myCtrlPlot.title)
+                    # saveName = "%s/DataDrivenCtrlPlot_M%d_%02d_%s" % (self._dirname, m, i, myCtrlPlot.title)
+                    saveName = "%s/DataDrivenCtrlPlot_M%d_%s" % (self._dirname, m, myCtrlPlot.title)
                     msg = "Control Plot %d/%d (m=%s GeV)"  % (counter, nMasses*nPlots, str(m))
                 else:
-                    saveName = "%s/DataDrivenCtrlPlot_%02d_%s" % (self._dirname, i, myCtrlPlot.title)
+                    # saveName = "%s/DataDrivenCtrlPlot_%02d_%s" % (self._dirname, i, myCtrlPlot.title)
+                    saveName = "%s/DataDrivenCtrlPlot_%s" % (self._dirname, myCtrlPlot.title)
                     msg = "Control Plot %d/%d (no signal)"  % (counter, nMasses*nPlots)
 
                 # Inform the user of progress

@@ -108,9 +108,9 @@ def main(opts):
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
-    style.setGridX(True)
-    style.setGridY(True)
-    style.setOptStat(True)
+    style.setGridX(False)
+    style.setGridY(False)
+    style.setOptStat(False)
     
     # Obtain dsetMgrCreator and register it to module selector
     dsetMgrCreator = dataset.readFromMulticrabCfg(directory=opts.mcrab)
@@ -481,12 +481,14 @@ def GetHistoKwargs(histoName, opts):
         myBins   = metBins
         
     if "mvamax1" in h.lower():
-        _xlabel = "leading BDT"
-        _cutBox = {"cutValue": 0.85, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        #_xlabel = "leading BDT"
+        _xlabel = "top-tag discriminant"
+        _cutBox = {"cutValue": 0.40, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         myBins  = mvaBins
     if "mvamax2" in h.lower():
-        _xlabel = "subleading BDT"
-        _cutBox = {"cutValue": 0.85, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        #_xlabel = "subleading BDT"
+        _xlabel = "top-tag discriminant"
+        _cutBox = {"cutValue": 0.40, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         myBins  = mvaBins
     if "trijetm" in h.lower():
         _units  = "GeV/c^{2}" 

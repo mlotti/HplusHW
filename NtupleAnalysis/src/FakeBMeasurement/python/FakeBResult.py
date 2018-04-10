@@ -600,13 +600,16 @@ class FakeBResultManager:
         if len(self._histoPathsEWK) != len(self._histoPathsData):
             msg = "List of histograms for EWK does not match in size that of Data"
             raise Exception(ShellStyles.ErrorLabel() + msg + ShellStyles.NormalStyle())
-
+            
         # For-Loop: All plots to consider
         for i, plotName in enumerate(self._histoPathsData, 1):
 
             # Inform user of progress
             msg = "{:<9} {:>3} {:<1} {:<3} {:<80}".format("Histogram", "%i" % i, "/", "%s:" % (len(self._histoPathsData)), os.path.join(dataPath, plotName) )
             self.PrintFlushed(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), i==1)
+
+            if "JetEtaPhi_AfterAllSelections" in plotName:
+                continue 
 
             # Ensure that histograms exist && pass other sanity checks
             dataOk = self._sanityChecks(dsetMgr, dataPath, plotName) 

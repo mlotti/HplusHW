@@ -1150,21 +1150,18 @@ class QCDShapeVariationExtractor(ExtractorBase):
         # Get the invariant mass shape for the case where TF-Error
         self.Verbose("Getting ROOT histo at \"%s (Var=\"%s\")" % (myHistoNamePrefix, mySrcDown), True)
         (hSystDownFromSrc, hSystDownFromSrcName) = dset.getRootHisto(myHistoNamePrefix, analysisPostfix=mySrcDown)
-        # For Testing purposes only! ( to see impact)
-        if 0:
-            hSystUpFromSrc.Scale(5) 
-            hSystDownFromSrc.Scale(10)
 
         self.Verbose("Store original source histograms (SystUpFromSrc)", True)
-        srcPrefix  = "%s_%sSource" % (datasetColumn.getLabel(), self.getId())
-        hSystUpFromSrcSource = aux.Clone(hSystUpFromSrc, srcPrefix + "_SystUpFromSrc")
-        hSystUpFromSrcSource.SetTitle(srcPrefix + "_SystUpFromSrc")
+        # srcPrefix  = "%s_%sSource" % (datasetColumn.getLabel(), self.getId())
+        srcPrefix  = "%s_%s" % (datasetColumn.getLabel(), self.getId())
+        hSystUpFromSrcSource = aux.Clone(hSystUpFromSrc, srcPrefix + "Up")
+        hSystUpFromSrcSource.SetTitle(srcPrefix + "Up")
         histogramsExtras.makeFlowBinsVisible(hSystUpFromSrcSource)
         myHistograms.append(hSystUpFromSrcSource)
 
         self.Verbose("Store original source histograms (SystDownFromSrc)", True)
-        hSystDownFromSrcSource = aux.Clone(hSystDownFromSrc, srcPrefix + "_SystDownFromSrc")
-        hSystDownFromSrcSource.SetTitle(srcPrefix + "_SystDownFromSrc")
+        hSystDownFromSrcSource = aux.Clone(hSystDownFromSrc, srcPrefix + "Down")
+        hSystDownFromSrcSource.SetTitle(srcPrefix + "Down")
         histogramsExtras.makeFlowBinsVisible(hSystDownFromSrcSource)
         myHistograms.append(hSystDownFromSrcSource)
 
@@ -1185,32 +1182,24 @@ class QCDShapeVariationExtractor(ExtractorBase):
         hDown.SetTitle(title + "Down")
         hDown.Reset()
 
-        self.Verbose("Do calculation and fill output histograms", True) # XENIOS IRO
+        self.Verbose("Do calculation and fill output histograms", True)
         myTFSystematics = fakeBSystematics.SystematicsForTransferFactor(self._verbose)
-        # Nominal histogram is myRateHisto, hUp and hDown are empty histos to be filled with hSystUpFromSrc, and hSystDownFromSrc
-        myTFSystematics.createSystHistograms(myRateHisto, hUp, hDown, hSystUpFromSrc, hSystDownFromSrc)
+        myTFSystematics.createSystHistograms(myRateHisto, hUp, hDown, hSystUpFromSrc, hSystDownFromSrc, quietMode=True)
 
         # Store uncertainty histograms
         if rootHistoWithUncertainties == None:
             datasetColumn.getCachedShapeRootHistogramWithUncertainties().addShapeUncertaintyFromVariation(self._systVariation, hUp, hDown)
         else:
             rootHistoWithUncertainties.addShapeUncertaintyFromVariation(self._systVariation, hUp, hDown)
-
-        self.Verbose("Add rate histogram to make the histograms compatible with Combine", True)
-        hUp.Add(myRateHisto)
-        hDown.Add(myRateHisto)
-
-        self.Verbose("Append histograms to output list", True)
-        myHistograms.append(hUp)
-        myHistograms.append(hDown)
-
-        self.Verbose("Return result", True)
         return myHistograms
 
-    ## Virtual method for printing debug information
     def printDebugInfo(self):
+        '''
+        Virtual method for printing debug information
+        '''
         print "QCDShapeVariationExtractor"
         ExtractorBase.printDebugInfo(self)
+        return
 
 ## ControlPlotExtractor class
 # Extracts histograms for control plot

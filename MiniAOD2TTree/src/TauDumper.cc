@@ -38,6 +38,7 @@ TauDumper::TauDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<ed
     MCtau = new FourVectorDumper[inputCollections.size()];
     matchingJet = new FourVectorDumper[inputCollections.size()];
 
+    bTEScorrection = inputCollections[0].getParameter<bool>("TEScorrection");
     if(systVariations){
       systTESup = new FourVectorDumper[inputCollections.size()];
       systTESdown = new FourVectorDumper[inputCollections.size()];
@@ -105,6 +106,31 @@ void TauDumper::book(TTree* tree){
     }
 }
 
+pat::Tau TauDumper::TEScorrection(const pat::Tau& tau){
+    // https://twiki.cern.ch/twiki/bin/view/CMS/TauIDRecommendation13TeV
+    if(!bTEScorrection) return tau;
+
+    double taupt = tau.p4().pt();
+    if(taupt>400) return tau;
+
+    double correction = 1.0;
+    int dm = tau.decayMode();
+    switch (dm){
+	case reco::PFTau::kOneProng0PiZero:
+	    correction += -0.005;
+	    break;
+	case reco::PFTau::kOneProng1PiZero:
+	    correction += 0.011;
+            break;
+	case reco::PFTau::kThreeProng0PiZero:
+	    correction += 0.006;
+            break;
+    }
+    pat::Tau correctedTau(tau);
+    correctedTau.setP4(correction*tau.p4());
+    return correctedTau;
+}
+
 bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
   if (!booked) return true;
   
@@ -123,7 +149,9 @@ bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
       double TESvariationExtreme = inputCollections[ic].getUntrackedParameter<double>("TESvariationExtreme");
       
       for(size_t i=0; i<tauHandle->size(); ++i) {
-        const pat::Tau& tau = tauHandle->at(i);
+        const pat::Tau& rawtau = tauHandle->at(i);
+
+	pat::Tau tau = TEScorrection(rawtau);
 
         pt[ic].push_back(tau.p4().pt());
         eta[ic].push_back(tau.p4().eta());
@@ -373,3 +401,4 @@ void TauDumper::reset(){
       }
     }
 }
+

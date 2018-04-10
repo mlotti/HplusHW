@@ -76,6 +76,7 @@ def PrintNuisancesTable(Nuisances, DataGroups):
 #================================================================================================  
 # Options
 #================================================================================================  
+OptionTest                             = False # True
 MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
 DataCardName                           = "Hplus2tb_13TeV"
 OptionMassShape                        = "LdgTetrajetMass_AfterAllSelections"
@@ -863,6 +864,34 @@ hNBjets = ControlPlotInput(
     #blindedRange=[100.0, 400.0], # specify range min,max if blinding applies to this control plot      
     )
 
+hJetPt = ControlPlotInput(
+    title            = "JetPt_AfterAllSelections",
+    histoName        = "JetPt_AfterAllSelections",
+    details          = { "xlabel"             : "p_{T}",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "GeV/c",
+                         "log"                : True,
+                         "legendPosition"     : "SE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"xmin": 40.0, "ymin": 1e-1, "ymaxfactor": 10}}#,
+    #blindedRange=[100.0, 400.0], # specify range min,max if blinding applies to this control plot      
+    )
+
+hJetEta = ControlPlotInput(
+    title            = "JetEta_AfterAllSelections",
+    histoName        = "JetEta_AfterAllSelections",
+    details          = { "xlabel"             : "#eta",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "",
+                         "log"                : True,
+                         "legendPosition"     : "SE",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10}}#,
+    #blindedRange=[100.0, 400.0], # specify range min,max if blinding applies to this control plot      
+    )
+
 hBJetPt = ControlPlotInput(
     title            = "BJetPt_AfterAllSelections",
     histoName        = "BJetPt_AfterAllSelections",
@@ -873,7 +902,7 @@ hBJetPt = ControlPlotInput(
                          "log"                : True,
                          "legendPosition"     : "SE",
                          "ratioLegendPosition": "right",
-                         "opts"               : {"ymin": 1e-1, "ymaxfactor": 10}}#,
+                         "opts"               : {"xmin": 40.0, "ymin": 1e-1, "ymaxfactor": 10}}#,
     #blindedRange=[100.0, 400.0], # specify range min,max if blinding applies to this control plot      
     )
 
@@ -1203,11 +1232,11 @@ hBJet3Eta = ControlPlotInput(
 ControlPlots.append(hMET)
 ControlPlots.append(hHT)
 ControlPlots.append(hMHT)
-ControlPlots.append(hQGLR)
+### ControlPlots.append(hQGLR) # disabled (to speed-up code)
 ControlPlots.append(hLdgTopPt)
 ControlPlots.append(hLdgTopMass)
-### ControlPlots.append(hLdgTopBjetPt)
-### ControlPlots.append(hLdgTopBjetEta)
+ControlPlots.append(hLdgTopBjetPt)
+ControlPlots.append(hLdgTopBjetEta)
 ControlPlots.append(hLdgTopDijetPt)
 ControlPlots.append(hLdgTopDijetMass)
 ### ControlPlots.append(hLdgTopR32)
@@ -1218,13 +1247,15 @@ ControlPlots.append(hLdgHiggsMass)
 ControlPlots.append(hVertices)
 ControlPlots.append(hNjets)
 ### ControlPlots.append(hNBjets) #no agreement expected
+ControlPlots.append(hJetPt)
+ControlPlots.append(hJetEta)
 ControlPlots.append(hBJetPt)
 ControlPlots.append(hBJetEta)
 ### ControlPlots.append(hBtagDiscriminator) #no agreement expected
 ControlPlots.append(hSubldgTopPt)
 ControlPlots.append(hSubldgTopMass)
-### ControlPlots.append(hSubldgTopBjetPt)
-### ControlPlots.append(hSubldgTopBjetEta)
+ControlPlots.append(hSubldgTopBjetPt)
+ControlPlots.append(hSubldgTopBjetEta)
 ControlPlots.append(hSubldgTopDijetPt)
 ControlPlots.append(hSubldgTopDijetMass)
 ### ControlPlots.append(hSubldgTopR32)
@@ -1250,3 +1281,8 @@ ControlPlots.append(hBJet3Pt)
 ControlPlots.append(hBJet1Eta)
 ControlPlots.append(hBJet2Eta)
 ControlPlots.append(hBJet3Eta)
+
+if OptionTest:
+    ControlPlots = []
+    ControlPlots.append(hLdgHiggsMass)
+    MassPoints = [180, 500]
