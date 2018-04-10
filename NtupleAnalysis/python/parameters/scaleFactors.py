@@ -13,8 +13,16 @@ import os
 # Tau ID efficiency scale factor
 # https://twiki.cern.ch/twiki/bin/view/CMS/TauIDRecommendation13TeV
 def assignTauIdentificationSF(tauSelectionPset):
-    tauSelectionPset.tauIdentificationSF = 0.9 # for Run-2 2016
-
+    SF = 1.0
+    if tauSelectionPset.isolationDiscr=="byLooseCombinedIsolationDeltaBetaCorr3Hits":    SF = 0.93
+    elif tauSelectionPset.isolationDiscr=="byMediumCombinedIsolationDeltaBetaCorr3Hits": SF = 0.91
+    elif tauSelectionPset.isolationDiscr=="byTightCombinedIsolationDeltaBetaCorr3Hits":  SF = 0.89
+    elif tauSelectionPset.isolationDiscr=="byLooseIsolationMVArun2v1DBoldDMwLT":         SF = 0.99
+    elif tauSelectionPset.isolationDiscr=="byMediumIsolationMVArun2v1DBoldDMwLT":        SF = 0.97
+    elif tauSelectionPset.isolationDiscr=="byTightIsolationMVArun2v1DBoldDMwLT":         SF = 0.95
+    else:
+        raise Exception("Error: tau ID scale factor not defined for discriminator %s"%tauSelectionPset.isolationDiscr)
+    tauSelectionPset.tauIdentificationSF = SF
 
 ##===== Tau misidentification (simple SF)
 # \param tauSelectionPset  the tau config PSet
@@ -334,7 +342,7 @@ class TriggerSFJsonReader:
 #            value = item["efficiency"]*(1.0-item["uncertaintyMinus"])
 	    value = item["efficiency"]-item["uncertaintyMinus"]
             if value < 0.0:
-                bindict[label+"effdown"] = 0.0
+                bindict[label+"effdown"] = 0.000001
             else:
                 bindict[label+"effdown"] = value
             outdict[item["pt"]] = bindict

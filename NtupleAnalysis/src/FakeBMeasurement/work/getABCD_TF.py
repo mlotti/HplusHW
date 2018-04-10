@@ -83,7 +83,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 import HiggsAnalysis.FakeBMeasurement.FakeBNormalization as FakeBNormalization
 import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
-import HiggsAnalysis.FakeBMeasurement.QCDInvertedResult as fakeBResult
+import HiggsAnalysis.FakeBMeasurement.FakeBResult as fakeBResult
 
 #================================================================================================ 
 # Function Definition
@@ -183,7 +183,7 @@ def GetHistoKwargs(histoName):
     if "tetrajetbjeteta" in histoName.lower():
         _units   = ""
         _xlabel  = "#eta"
-        _cutBox  = {"cutValue": 0.8, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _cutBox  = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         _opts   = {"xmin": -2.5, "xmax": +2.5, "ymin": 1e0, "ymax": 1e3}
         _rebinX  = 1
         _ylabel  = "Events / %.2f"
@@ -662,7 +662,7 @@ def PlotHistosAndCalculateTF(datasetsMgr, histoList, binLabels, opts):
     #=========================================================================================
     Verbose("Write the normalisation factors to a python file", True)
     fileName = os.path.join(opts.mcrab, "FakeBTransferFactors%s.py"% ( getModuleInfoString(opts) ) )
-    manager.writeNormFactorFile(fileName, opts)
+    manager.writeTransferFactorsToFile(fileName, opts)
     return
 
 if __name__ == "__main__":

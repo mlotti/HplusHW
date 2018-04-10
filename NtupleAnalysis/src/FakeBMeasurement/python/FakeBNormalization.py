@@ -1,4 +1,3 @@
-
 '''
 Description:
 This package contains the tools for calculating 
@@ -64,13 +63,17 @@ class FakeBNormalizationManager:
         self._binLabels    = binLabels
         self._sources      = {}
         self._commentLines = []
-        self._BinLabelMap  = {}
         self._TF           = {} # Transfer Factor (TF)
         self._TF_Error     = {}
         self._TF_Up        = {}
         self._TF_Down      = {}
         self._dqmKeys      = OrderedDict()
         self._myPath       = os.path.join(resultDirName, "normalisationPlots")
+        self._BinLabelMap  = {}
+        self._FakeBNormalization      = {} # for the time being same as TF
+        self._FakeBNormalizationError = {} # for the time being same as TF_Error
+        self._FakeBNormalizationUp    = {} # for the time being same as TF_Up
+        self._FakeBNormalizationDown  = {} # for the time being same as TF_Down
         if not isinstance(binLabels, list):
             raise Exception("Error: binLabels needs to be a list of strings")
         self.Verbose("__init__")
@@ -97,7 +100,8 @@ class FakeBNormalizationManager:
     def Print(self, msg, printHeader=False):
         fName = __file__.split("/")[-1]
         if printHeader==True:
-            print "=== ", fName + ": class " + self.__class__.__name__
+           # print "=== ", fName + ": class " + self.__class__.__name__
+            print "=== ", fName
             print "\t", msg
         else:
             print "\t", msg
@@ -125,7 +129,7 @@ class FakeBNormalizationManager:
         else:
             raise Exception("Error: _TF dictionary has no key \"%s\"! "% (binLabel) )
     
-    def CalculateTransferFactor(self, binLabel, hFakeB_Baseline, hFakeB_Inverted, verbose=False):
+    def CalculateTransferFactor(self, binLabel, hFakeB_CR1, hFakeB_CR2, verbose=False):
         '''
         Calculates the combined normalization and, if specified, 
         varies it up or down by factor (1+variation)
@@ -141,53 +145,41 @@ class FakeBNormalizationManager:
         lines = []
 
         # NOTES: Add EWKGenuineB TF, Add Data TF, add QCD TF, Add EWK TF, add MCONLY TFs
-        nSR_Error = ROOT.Double(0.0)
-        nCR_Error = ROOT.Double(0.0)
+        nCR1_Error = ROOT.Double(0.0)
+        nCR2_Error = ROOT.Double(0.0)
         # nTotalError = ROOT.TMath.Sqrt(nSRerror**2 + nCRError**2)
         
-        nSR = hFakeB_Baseline.IntegralAndError(1, hFakeB_Baseline.GetNbinsX()+1, nSR_Error)
-        nCR = hFakeB_Inverted.IntegralAndError(1, hFakeB_Inverted.GetNbinsX()+1, nCR_Error)
-        # nTotal = nSR + nCR
+        nCR1 = hFakeB_CR1.IntegralAndError(1, hFakeB_CR1.GetNbinsX()+1, nCR1_Error)
+        nCR2 = hFakeB_CR2.IntegralAndError(1, hFakeB_CR2.GetNbinsX()+1, nCR2_Error)
+        # nTotal = nCR1 + nCR2
 
         # Calculate Transfer Factor (TF) from Control Region (R) to Signal Region (SR): R = N_CR1/ N_CR2
         TF       = None
         TF_Up    = None
         TF_Down  = None
         TF_Error = None
+        TF       = (nCR1 / nCR2)
+        TF_Error = errorPropagation.errorPropagationForDivision(nCR1, nCR1_Error, nCR2, nCR2_Error)
+        TF_Up    = TF + TF_Error
+        if TF_Up > 1.0:
+            TF_Up = 1.0
+        TF_Down = TF - TF_Error
+        if TF_Down < 0.0:
+            TF_Down = 0.0
+        lines.append("TF (bin=%s) = N_CR1 / N_CR2 = %f / %f =  %f +- %f" % (binLabel, nCR1, nCR2, TF, TF_Error) )
 
-        if 1: ## nTotal > 0.0:
-            TF = nSR / nCR
-            TF_Error = errorPropagation.errorPropagationForDivision(nSR, nSR_Error, nCR, nCR_Error)
-            TF_Up = TF + TF_Error
-            if TF_Up > 1.0:
-                TF_Up = 1.0
-            TF_Down = TF - TF_Error
-            if TF_Down < 0.0:
-                TF_Down = 0.0
-        lines.append("TF (bin=%s) = N_CR1 / N_CR2 = %f / %f =  %f +- %f" % (binLabel, nSR, nCR, TF, TF_Error) )
-
-        # Calculate the combined normalization factor (f_fakes = w*f_QCD + (1-w)*f_EWKfakes)
-        fakeRate      = None
-        fakeRateError = None
-        fakeRateUp    = None
-        fakeRateDown  = None
+        # Calculate the transfer factors (R_{i}) where i is index of bin the Fake-b measurement is made in (pT and/or eta of ldg b-jet)
         if TF != None:
-            #     fakeRate = w*self._TF[binLabel] + (1.0-w)*self._ewkNormalization[binLabel]
-            #     fakeRateUp = wUp*self._TF[binLabel] + (1.0-wUp)*self._ewkNormalization[binLabel]
-            #     fakeRateDown = wDown*self._TF[binLabel] + (1.0-wDown)*self._ewkNormalization[binLabel]
-            #     fakeRateErrorPart1 = errorPropagation.errorPropagationForProduct(w, wError, self._TF[binLabel], self._TFError[binLabel])
-            #     fakeRateErrorPart2 = errorPropagation.errorPropagationForProduct(w, wError, self._ewkNormalization[binLabel], self._ewkNormalizationError[binLabel])
-            #     fakeRateError = ROOT.TMath.Sqrt(fakeRateErrorPart1**2 + fakeRateErrorPart2**2)
-            
             # Replace bin label with histo title (has exact binning info)
-            self._BinLabelMap[binLabel] = hFakeB_Inverted.GetTitle()
+            self._BinLabelMap[binLabel] = self.getNiceBinLabel(hFakeB_CR2.GetTitle())
             self._TF[binLabel   ]       = TF
             self._TF_Error[binLabel]    = TF_Error
             self._TF_Up[binLabel]       = TF_Up
-            self._TF_Down[binLabel]     = TF_Down
-        # self._combinedFakesNormalizationError[binLabel] = fakeRateError
-        # self._combinedFakesNormalizationUp[binLabel] = fakeRateUp
-        # self._combinedFakesNormalizationDown[binLabel] = fakeRateDown
+            self._TF_Down[binLabel]     = TF_Down 
+            self._FakeBNormalization[binLabel]      = TF       # TF
+            self._FakeBNormalizationError[binLabel] = TF_Error # Error(TF)
+            self._FakeBNormalizationUp[binLabel]    = TF_Up    # TF + Error
+            self._FakeBNormalizationDown[binLabel]  = TF_Down  # TF - Error
 
         # Store all information for later used (write to file)
         self._commentLines.extend(lines)
@@ -197,8 +189,24 @@ class FakeBNormalizationManager:
             for i, line in enumerate(lines, 1):
                 Print(line, i==1)
         return
-        
-    def writeNormFactorFile(self, filename, opts):
+
+    def getNiceBinLabel(self, binLabel):
+        newLabel = binLabel.replace("abs", "")
+        if 1:
+            newLabel = newLabel.replace("TetrajetBjet", " ")
+            newLabel = newLabel.replace("TetrajetBJet", " ")
+        else: #more room
+            newLabel = newLabel.replace("TetrajetBjet", "b-jet ")
+            newLabel = newLabel.replace("TetrajetBJet", "b-jet ")
+        newLabel = newLabel.replace("_", " ")
+        newLabel = newLabel.replace("(", "|")
+        newLabel = newLabel.replace(")", "|")
+        newLabel = newLabel.replace("Eta", "#eta")
+        newLabel = newLabel.replace("..", "-")
+        newLabel = newLabel.replace("CRtwo", "")
+        return newLabel
+
+    def writeTransferFactorsToFile(self, filename, opts):
         '''
         Save the fit results for QCD and EWK.
 
@@ -223,7 +231,7 @@ class FakeBNormalizationManager:
         s += "\n"
         s += "import sys\n"
         s += "\n"
-        s += "def QCDInvertedNormalizationSafetyCheck(era, searchMode, optimizationMode):\n"
+        s += "def FakeBNormalisationSafetyCheck(era, searchMode, optimizationMode):\n"
         s += "    validForEra        = \"%s\"\n" % opts.dataEra
         s += "    validForSearchMode = \"%s\"\n" % opts.searchMode
         s += "    validForOptMode    = \"%s\"\n" % opts.optMode
@@ -235,29 +243,43 @@ class FakeBNormalizationManager:
         s += "        raise Exception(\"Error: inconsistent optimization mode, normalisation factors valid for\",validForOptMode,\"but trying to use with\",optimizationMode)\n"
         s += "    return"
         s += "\n"
+        s += "\n"
 
-        s += "QCDNormalization = {\n"
-        for k in self._TF:
-            if 0:
-                print "key = %s, value = %s" % (k, self._TF[k])
-            s += '    "%s": %f,\n'%(k, self._TF[k])
+        # First write the transfer factor (for each Fake-b measurement bin)
+        s += "FakeBNormalisation_Value = {\n"
+        for binLabel in self._TF:            
+            s += '    "%s": %f,\n' % (binLabel, self._TF[binLabel])
         s += "}\n"
+        s += "\n"
 
-        s += "QCDNormalizationError = {\n"
-        for k in self._TF_Error:
-            s += '    "%s": %f,\n'%(k, self._TF_Error[k])
+        # Then write the transfer factor error (for each Fake-b measurement bin)
+        s += "FakeBNormalisation_Error = {\n"
+        for binLabel in self._TF_Error:
+            s += '    "%s": %f,\n' % (binLabel, self._TF_Error[binLabel])
         s += "}\n"
+        s += "\n"
 
-        s += "QCDNormalizationErrorUp = {\n"
-        for k in self._TF_Up:
-            s += '    "%s": %f,\n'%(k, self._TF_Up[k])
+        # Then write the transfer factors + error (for each Fake-b measurement bin)
+        s += "FakeBNormalisation_ErrorUp = {\n"
+        for binLabel in self._TF_Up:
+            s += '    "%s": %f,\n' % (binLabel, self._TF_Up[binLabel])
         s += "}\n"
+        s += "\n"
 
-        s += "QCDNormalizationErrorDown = {\n"
-        for k in self._TF_Down:
-            s += '    "%s": %f,\n'%(k, self._TF_Down[k])
+        # Then write the transfer factors - error (for each Fake-b measurement bin)
+        s += "FakeBNormalisation_ErrorDown = {\n"
+        for binLabel in self._TF_Down:
+            s += '    "%s": %f,\n' % (binLabel, self._TF_Down[binLabel])
         s += "}\n"
+        s += "\n"
 
+        # Then write the transfer factors - error (for each Fake-b measurement bin)
+        s += "BinLabelMap = {\n"
+        for binLabel in self._BinLabelMap:
+            s += '    "%s": \"%s\",\n' % (binLabel, self._BinLabelMap[binLabel])
+        s += "}\n"
+        s += "\n"
+            
         self.Verbose("Writing results in file %s" % filename, True)
         fOUT = open(filename,"w")
         fOUT.write(s)
@@ -271,14 +293,16 @@ class FakeBNormalizationManager:
         self.Print(msg, True)
 
         # Create the transfer factors plot (for each bin of FakeB measurement)
-        self._generateCoefficientPlot() 
-        # self._generateDQMplot()
+        self._generateTransferFactorsPlot() 
+        self._generateDQMPlot()
         return
 
-    def _generateCoefficientPlot(self):
+    def _generateTransferFactorsPlot(self):
         '''
-        This probably is needed in the case the measurement is done in
-        bins of a correlated quantity (e.g. pT in the case of inverted tau isolation
+        The resulting plot will contain the transfer factors (y-axis) for a given measurement bin (x-axis)
+        This is needed in the case the Fake-b measurement is done in
+        bins of a correlated quantity (e.g. eta of leading b-jet in Fake-b for HToTB, and tau-pT in the 
+        case of inverted tau isolatio for HToTau)
         '''
         def makeGraph(markerStyle, color, binList, valueDict, upDict, downDict):
             g = ROOT.TGraphAsymmErrors(len(binList))
@@ -315,30 +339,34 @@ class FakeBNormalizationManager:
             
         # Apply TDR style
         style = tdrstyle.TDRStyle()
+        style.setGridX(False)
+        style.setGridY(False)
         style.setOptStat(False)
-        style.setGridX(True)
-        style.setGridY(True)
 
         # Create graphs
-        gFakeB  = makeGraph(ROOT.kFullCircle, ROOT.kRed, keyList, self._TF, self._TF_Error, self._TF_Error)
+        gFakeB = makeGraph(ROOT.kFullCircle, ROOT.kAzure, keyList, self._TF, self._TF_Error, self._TF_Error)
 
         # Make plot
         hFrame = ROOT.TH1F("frame","frame", len(keyList), 0, len(keyList))
+
         # Change bin labels to text
         for i, binLabel in enumerate(keyList, 1):
-            # for i in range(len(keyList)):
             binLabelText = self.getFormattedBinLabelString(binLabel)
-            #hFrame.GetXaxis().SetBinLabel(i+1, binLabelText)
             hFrame.GetXaxis().SetBinLabel(i, binLabelText)
 
         # Set axes names
-        hFrame.GetYaxis().SetTitle("transfer factor ")
-        # hFrame.GetYaxis().SetTitle("transfer factors (R_{i})")        
+        hFrame.GetYaxis().SetTitle("transfer factor") #R_{i}
         # hFrame.GetXaxis().SetTitle("Fake-b bin")
         
         # Customise axes
-        hFrame.SetMinimum(0.6e-1)
-        hFrame.SetMaximum(2e0)
+        logy = False
+        if logy:
+            hFrame.SetMinimum(0.6e-1)
+            hFrame.SetMaximum(2e0)
+        else:
+            hFrame.SetMinimum(0.0)
+            hFrame.SetMaximum(1.0)
+            
         if len(self._BinLabelMap) > 12:
             lSize = 8
         elif len(self._BinLabelMap) > 8:
@@ -358,9 +386,9 @@ class FakeBNormalizationManager:
 
         # Create canvas
         c = ROOT.TCanvas()
-        c.SetLogy(True)
-        c.SetGridx()
-        c.SetGridy()
+        c.SetLogy(logy)
+        c.SetGridx(False)
+        c.SetGridy(False)
 
         hFrame.Draw()
         gFakeB.Draw("p same")
@@ -370,10 +398,10 @@ class FakeBNormalizationManager:
         l = ROOT.TLegend(0.65, 0.80, 0.90, 0.90)
         l.SetFillStyle(-1)
         l.SetBorderSize(0)
-        # l.AddEntry(gFakeB, "Fake-#it{b} #pm Stat.", "LP")
-        l.AddEntry(gFakeB, "Value #pm Stat.", "LP")
+        l.AddEntry(gFakeB, "Value #pm stat.", "LP") # "Fake-#it{b} #pm Stat.", "LP"
         l.SetTextSize(0.035)
-        l.Draw()
+        if 0:
+            l.Draw()
 
         # Store ROOT ignore level to normal before changing it
         backup = ROOT.gErrorIgnoreLevel
@@ -381,14 +409,14 @@ class FakeBNormalizationManager:
 
         # Save the plot
         for item in ["png", "C", "pdf"]:
-            c.Print(self._plotDirName + "/QCDNormalisationCoefficients.%s" % item)
+            c.Print(self._plotDirName + "/FakeBNormalisationCoefficients.%s" % item)
 
         # Reset the ROOT ignore level to normal
         ROOT.gErrorIgnoreLevel = backup
 
         # Inform user
-        msg = "Transfer-factors written in %s " % (ShellStyles.SuccessStyle() + self._plotDirName + ShellStyles.NormalStyle())
-        self.Print(msg, False)
+        msg = "Plot saved under %s" % (ShellStyles.SuccessStyle() + self._plotDirName + "/" + ShellStyles.NormalStyle())
+        self.Print(msg, True)
         return
 
     def getFormattedBinLabelString(self, binLabel):
@@ -396,81 +424,141 @@ class FakeBNormalizationManager:
         Dirty trick to get what I want
         '''
         if binLabel not in self._BinLabelMap:
-            # for k in self._BinLabelMap:
-            #     print k
             raise Exception("Got unexpected bin label \"%s\"!" % binLabel)
         newLabel = self._BinLabelMap[binLabel]
         newLabel = newLabel.replace("abs(", "|")
         newLabel = newLabel.replace(")", "|")
         newLabel = newLabel.replace("..", "-")
         newLabel = newLabel.replace(":", ",")
-        newLabel = newLabel.replace("TetrajetBjet", "") #"b^{ldg} ")
+        newLabel = newLabel.replace("TetrajetBJet", "") #"b^{ldg} ")
         newLabel = newLabel.replace("Pt", "p_{T} ")
         newLabel = newLabel.replace("Eta", "#eta ")
         if "inclusive" in binLabel.lower():
             newLabel = "Inclusive"
         return newLabel
 
-    def _generateDQMplot(self):
+    def _generateDQMPlot(self):
         '''
-        Create a DQM style plot
+        Create a Data Quality Monitor (DQM) style plot
+        to easily check the error for each transfer factor
+        and whether it is within an acceptable relative error
         '''
+        # Define error warning/tolerance on relative errors
+        okay = 0.05 #  5 %
+        warn = 0.15 # 15 %
+
         # Check the uncertainties on the normalization factors
-        for k in self._dqmKeys.keys():
-            self._addDqmEntry(k, "norm.coeff.uncert::QCD" , self._TFError[k], 0.03, 0.10)
-            self._addDqmEntry(k, "norm.coeff.uncert::fake", self._ewkNormalizationError[k], 0.03, 0.10)
-            value = abs(self._combinedFakesNormalizationUp[k]-self._combinedFakesNormalization[k])
-            value = max(value, abs(self._combinedFakesNormalizationDown[k]-self._combinedFakesNormalizationUp[k]))
-            self._addDqmEntry(k, "norm.coeff.uncert::combined", value, 0.03, 0.10)
+        for k in self._BinLabelMap:
+            relErrorUp   = abs(self._TF_Up[k])/(self._TF[k])
+            relErrorDown = abs(self._TF_Down[k])/(self._TF[k])
+            relError     = self._TF_Error[k]/self._TF[k]
+            if 0: 
+                print "bin = %s , relErrorUp = %s, relErrorDown = %s " % (k, relErrorUp, relErrorDown)
+
+            #self._addDqmEntry(self._BinLabelMap[k], "R", self._TF[k], 1.00, 1.00)
+            self._addDqmEntry(self._BinLabelMap[k], "#frac{R + #sigma_{R}}{R}", +relErrorUp, 1+okay, 1+warn)
+            self._addDqmEntry(self._BinLabelMap[k], "#frac{R - #sigma_{R}}{R}", 1.0-relErrorDown, okay, warn)
+            self._addDqmEntry(self._BinLabelMap[k], "#frac{#sigma_{R}}{R}"    , +relError, okay, warn)
+            # absDelta = abs(self._FakeBNormalizationUp[k]-self._FakeBNormalization[k])
+            # maxError = max(absDelta, abs(self._FakeBNormalizationDown[k]-self._FakeBNormalizationUp[k]))
+            # self._addDqmEntry(self._BinLabelMap[k], "value", maxError, 0.40, 0.50) # okTolerance, warnTolerance
+            
         # Construct the DQM histogram
-        h = ROOT.TH2F("QCD DQM", "QCD DQM",
-                      len(self._dqmKeys[self._dqmKeys.keys()[0]].keys()), 0, len(self._dqmKeys[self._dqmKeys.keys()[0]].keys()),
-                      len(self._dqmKeys.keys()), 0, len(self._dqmKeys.keys()))
+        nBinsX = len(self._dqmKeys[self._dqmKeys.keys()[0]].keys())
+        nBinsY = len(self._dqmKeys.keys())
+        h = ROOT.TH2F("FakeB DQM", "FakeB DQM", nBinsX, 0, nBinsX, nBinsY, 0, nBinsY)
+
+        # Customise axes
         h.GetXaxis().SetLabelSize(15)
-        h.GetYaxis().SetLabelSize(15)
+        h.GetYaxis().SetLabelSize(15)        
         h.SetMinimum(0)
         h.SetMaximum(3)
-        #h.GetXaxis().LabelsOption("v")
+        if 0:
+            h.GetXaxis().LabelsOption("v")
+            h.GetYaxis().LabelsOption("v")
+            
         nWarnings = 0
-        nErrors = 0
+        nErrors   = 0
+        # For-loop: All x-axis bins
         for i in range(h.GetNbinsX()):
+            # For-loop: All y-axis bins
             for j in range(h.GetNbinsY()):
                 ykey = self._dqmKeys.keys()[j]
                 xkey = self._dqmKeys[ykey].keys()[i]
+
+                # Set the bin content
                 h.SetBinContent(i+1, j+1, self._dqmKeys[ykey][xkey])
-                h.GetYaxis().SetBinLabel(j+1, ykey)
                 h.GetXaxis().SetBinLabel(i+1, xkey)
+                h.GetYaxis().SetBinLabel(j+1, ykey)
                 if self._dqmKeys[ykey][xkey] > 2:
                     nErrors += 1
                 elif self._dqmKeys[ykey][xkey] > 1:
                     nWarnings += 1
+
+        # Apply TDR style
+        style = tdrstyle.TDRStyle()
+        style.setOptStat(False)
+        style.setGridX(False)
+        style.setGridY(False)
+        style.setWide(True, 0.15)
+        
+        # Set the colour styling
         palette = array.array("i", [ROOT.kGreen+1, ROOT.kYellow, ROOT.kRed])
         ROOT.gStyle.SetPalette(3, palette)
+
+        # Create canvas        
         c = ROOT.TCanvas()
-        c.SetBottomMargin(0.2)
-        c.SetLeftMargin(0.2)
-        c.SetRightMargin(0.2)
+        c.SetLogx(False)
+        c.SetLogy(False)
+        c.SetLogz(False)
+        c.SetGridx()
+        c.SetGridy()
         h.Draw("colz")
-        
+
+        # Add CMS text and text with colour keys
+        histograms.addStandardTexts(cmsTextPosition="outframe")
+        histograms.addText(0.55, 0.80, "green  < %s %%" % (okay*100), size=20)
+        histograms.addText(0.55, 0.84, "yellow < %s %%" % (warn*100), size=20)
+        histograms.addText(0.55, 0.88, "red    > %s %%" % (warn*100), size=20)
+
+        # Save the canvas to a file
         backup = ROOT.gErrorIgnoreLevel
         ROOT.gErrorIgnoreLevel = ROOT.kWarning
-        for item in ["png", "C", "pdf"]:
-            c.Print(self._plotDirName+"/QCDNormalisationDQM.%s"%item)
+        plotName = os.path.join(self._plotDirName, "FakeBNormalisationDQM")
+        # For-loop: Save formats
+        for ext in ["png", "C", "pdf"]:
+            saveName ="%s.%s" % (plotName, ext)
+            c.Print(saveName)
         ROOT.gErrorIgnoreLevel = backup
         ROOT.gStyle.SetPalette(1)
-        print "Obtained %d warnings and %d errors for the normalization"%(nWarnings, nErrors)
-        if nWarnings > 0 or nErrors > 0:
-            print "Please have a look at %s/QCDNormalisationDQM.png to see the origin of the warning(s) and error(s)"%self._plotDirName
+
+        msg = "Obtained %d warnings and %d errors for the normalisation" % (nWarnings, nErrors)
+        self.Verbose(msg)
+        if nWarnings > 0:
+            msg = "DQM has %d warnings and %d errors! Please have a look at %s.png." % (nWarnings, nErrors, os.path.basename(plotName))
+            self.Verbose(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle(), True)
+
+        #if nWarnings > 0 or nErrors > 0:
+        if nErrors > 0:
+            msg = "DQM has %d warnings and %d errors! Please have a look at %s.png." % (nWarnings, nErrors, os.path.basename(plotName))
+            self.Print(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle(), True)
         return
 
     def _addDqmEntry(self, binLabel, name, value, okTolerance, warnTolerance):
+        # Define colour codes
+        red    = 2.5
+        yellow = 1.5 
+        green  = 0.5
+
         if not binLabel in self._dqmKeys.keys():
             self._dqmKeys[binLabel] = OrderedDict()
-        result = 2.5
-        if abs(value) < okTolerance:
-            result = 0.5
-        elif abs(value) < warnTolerance:
-            result = 1.5
+        result = red
+        if abs(value) < okTolerance: # Green
+            result = green
+        elif abs(value) < warnTolerance: # Yellow
+            result = yellow
+        else:# Red
+            pass
         self._dqmKeys[binLabel][name] = result
         return
 
@@ -528,9 +616,8 @@ class FakeBNormalizationManager:
     ## Helper method to be called from parent class when calculating norm.coefficients
     def _getResultOutput(self, binLabel):
         lines = []
-        lines.append("   Normalization factor (QCD): %f +- %f"%(self._TF[binLabel], self._TFError[binLabel]))
-        lines.append("   Normalization factor (EWK fake taus): %f +- %f"%(self._ewkNormalization[binLabel], self._ewkNormalizationError[binLabel]))
-        lines.append("   Combined norm. factor: %f +- %f"%(self._combinedFakesNormalization[binLabel], self._combinedFakesNormalizationError[binLabel]))
+        lines.append("Transfer Factor (bin=%s): %f +- %f" % (binLabel, self._TF[binLabel], self._TFError[binLabel]) )
+        lines.append("Normalisation (bin=%s)  : %f +- %f" % (binLabel, self._FakeBNormalization[binLabel], self._FakeBNormalizationError[binLabel]))
 
         # Store all information for later used (write to file)
         self._commentLines.extend(lines)
