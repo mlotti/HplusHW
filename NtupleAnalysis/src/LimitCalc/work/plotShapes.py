@@ -379,7 +379,7 @@ class DatasetContainer:
             myParams["ylabel"] = "Events"
             myParams["log"]    = opts.logy
             myParams["opts"]   = {"xmin": opts.xmin, "xmax": opts.xmax, "ymin": 0.0}
-            myParams["opts2"]  = {"ymin": 0.7, "ymax": 1.3}
+            myParams["opts2"]  = {"ymin": 0.60, "ymax": 1.40}
             myParams["ratio"]  = True
             myParams["ratioType"]   = "errorScale"
             myParams["ratioYlabel"] = "Var./Nom."
