@@ -188,14 +188,17 @@ bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
         }
         // Systematics variations
         if (systVariations && !iEvent.isRealData()) {
-          systTESup[ic].add(tau.p4().pt()*(1.0+TESvariation),
+	  double variation = TESvariation;
+          if(tau.p4().pt() > 400) variation = TESvariationExtreme;
+
+          systTESup[ic].add(tau.p4().pt()*(1.0+variation),
                             tau.p4().eta(),
                             tau.p4().phi(),
-                            tau.p4().energy()*(1.0+TESvariation));
-          systTESdown[ic].add(tau.p4().pt()*(1.0-TESvariation),
+                            tau.p4().energy()*(1.0+variation));
+          systTESdown[ic].add(tau.p4().pt()*(1.0-variation),
                             tau.p4().eta(),
                             tau.p4().phi(),
-                            tau.p4().energy()*(1.0-TESvariation));
+                            tau.p4().energy()*(1.0-variation));
           systExtremeTESup[ic].add(tau.p4().pt()*(1.0+TESvariationExtreme),
                                     tau.p4().eta(),
                                     tau.p4().phi(),
