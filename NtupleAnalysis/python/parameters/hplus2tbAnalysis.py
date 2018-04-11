@@ -234,7 +234,7 @@ fakeBTopSelectionBDT = PSet(
     MVACutValue            = -1.0,   # [default: -0.4, 0.0, 0.6] NOTE: defines SR, VR, CR1, and CR2
     MVACutDirection        = ">",    # [default: ">"] (NOTE: Crashes if set to ">=" -1)
     LdgTopDefinition       = "MVA",  # [default: "MVA"] (options: "MVA", "Pt")
-    MassCutValue           = 800.0,  # topSelectionBDT.MassCutValue, # try to increase this to increase statistics!
+    MassCutValue           = 600.0,  # topSelectionBDT.MassCutValue, (800.0 is way too much. TTbar takes > 24 hours)
     MassCutDirection       = topSelectionBDT.MassCutDirection,
     CSV_bDiscCutValue      = topSelectionBDT.CSV_bDiscCutValue,
     CSV_bDiscCutDirection  = topSelectionBDT.CSV_bDiscCutDirection,

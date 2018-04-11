@@ -185,8 +185,10 @@ def main():
 
     # Set splitting of phase-space (first bin is below first edge value and last bin is above last edge value)
     allSelections.CommonPlots.histogramSplitting = [        
-        # PSet(label="TetrajetBjetPt" , binLowEdges=[120], useAbsoluteValues=False),
-        # PSet(label="TetrajetBjetEta", binLowEdges=[0.6, 1.2, 1.8, 2.1], useAbsoluteValues=True), 
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[60, 100], useAbsoluteValues=False),
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6, 2.1], useAbsoluteValues=True), # B) not bad for -1.0 < BDT < 0.4
+        ## PSet(label="TetrajetBjetPt" , binLowEdges=[120], useAbsoluteValues=False),
+        ## PSet(label="TetrajetBjetEta", binLowEdges=[0.6, 1.2, 1.8, 2.1], useAbsoluteValues=True), 
         ## PSet(label="TetrajetBjetPt" , binLowEdges=[100], useAbsoluteValues=False),
         ## PSet(label="TetrajetBjetEta", binLowEdges=[0.6, 0.9, 1.2, 1.5, 1.8, 2.1], useAbsoluteValues=True), 
         ## PSet(label="TetrajetBjetPt" , binLowEdges=[80], useAbsoluteValues=False),
