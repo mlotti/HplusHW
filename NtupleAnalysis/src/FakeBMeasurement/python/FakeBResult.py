@@ -291,10 +291,14 @@ class QCDInvertedShape:
             myShapeEwkSum.append(0.0)
             myShapeEwkSumUncert.append(0.0)
 
+        # FIXME: New addition to fix "optionUseInclusiveNorm" functionality (24-Mar-2018). Should not affect binned result!  
+        if self._optionUseInclusiveNorm:
+            nSplitBins = 1
+
         self.Verbose("Calculate results separately for each phase-space bin and then combine", True)
         # For-loop: All measurement bins (e.g. tetrajetBejt eta and/or pT bins for h2tb)
         for i in range(0, nSplitBins):
-
+            
             # The zeroth bin (i==0) is the "Inclusive" bin
             msg = "{:<10} {:>3} {:<1} {:<3} {:<30}".format("Splitted-Bin", "%i" % i, "/", "%s" % (nSplitBins), "")
             self.Verbose(ShellStyles.HighlightStyle() + msg + ShellStyles.NormalStyle(), False)
@@ -315,7 +319,7 @@ class QCDInvertedShape:
                 msg = "No normalization factors available for bin '%s' when accessing histogram %s! Ignoring this bin..." % (wQCDLabel, shape.getHistoName())
                 self.Print(ShellStyles.WarningLabel() + msg, True)
             else:
-                wQCD = normFactors[wQCDLabel]                
+                wQCD = normFactors[wQCDLabel]
             msg = "Weighting bin \"%i\" (label=\"%s\")  with normFactor \"%s\"" % (i, wQCDLabel, wQCD)
             self.Verbose(ShellStyles.NoteLabel() + msg, True)
 
@@ -350,7 +354,7 @@ class QCDInvertedShape:
                     binRange   = "%.1f -> %.1f" % (h.GetXaxis().GetBinLowEdge(j), h.GetXaxis().GetBinUpEdge(j) )
                     binWidth   = GetTH1BinWidthString(h, j)
                     binSum    += binContent
-                    myResult   = binContent * wQCD #apply  normalisation factor (transfer from CR to SR) #iro
+                    myResult   = binContent * wQCD #apply  normalisation factor (transfer from CR to SR)
                     self.Verbose("Bin %i: BinContent = %.3f x %.3f = %.3f" % (j, binContent, wQCD, myResult), False)
 
                     # self.Verbose("Calculate abs. stat. uncert. for data and for MC EWK (Do not calculate here MC EWK syst.)", True)
@@ -570,12 +574,12 @@ class QCDInvertedShape:
 #================================================================================================
 # Function Definition
 #================================================================================================
-class QCDInvertedResultManager:
+class FakeBResultManager:
     '''
     Manager class for obtaining all the required information to be saved to a pseudo-multicrab
     '''
     def __init__(self, dataPath, ewkPath, dsetMgr, luminosity, moduleInfoString, normFactors,
-                 optionCalculateQCDNormalizationSyst=True, normDataSrc=None, normEWKSrc=None,
+                 optionDoFakeBNormalisationSyst=True, normDataSrc=None, normEWKSrc=None,
                  optionUseInclusiveNorm=False, keyList=[], verbose=False):
         self._verbose = verbose
         self._shapePlots = []
@@ -592,17 +596,20 @@ class QCDInvertedResultManager:
         else:
             self._histoPathsEWK  = self._GetHistoPaths(dsetMgr, "EWK" , ewkPath , keyList)
         
-        # Sanity chech:
+        # Sanity check
         if len(self._histoPathsEWK) != len(self._histoPathsData):
             msg = "List of histograms for EWK does not match in size that of Data"
             raise Exception(ShellStyles.ErrorLabel() + msg + ShellStyles.NormalStyle())
-
+            
         # For-Loop: All plots to consider
         for i, plotName in enumerate(self._histoPathsData, 1):
 
             # Inform user of progress
-            msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % i, "/", "%s:" % (len(self._histoPathsData)), os.path.join(dataPath, plotName) )
-            self.Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), i==1)
+            msg = "{:<9} {:>3} {:<1} {:<3} {:<80}".format("Histogram", "%i" % i, "/", "%s:" % (len(self._histoPathsData)), os.path.join(dataPath, plotName) )
+            self.PrintFlushed(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), False)
+
+            if "JetEtaPhi_AfterAllSelections" in plotName:
+                continue 
 
             # Ensure that histograms exist && pass other sanity checks
             dataOk = self._sanityChecks(dsetMgr, dataPath, plotName) 
@@ -615,13 +622,13 @@ class QCDInvertedResultManager:
             self.Verbose("Obtaining shape plots (the returned object is not owned)", True)
             myShapeHisto = self._obtainShapeHistograms(i, dataPath, ewkPath, dsetMgr, plotName, luminosity, normFactors)
 
-            # Obtain plots for systematics coming from shape difference for control plots # fixme: Systematics
-            if optionCalculateQCDNormalizationSyst:
+            # Obtain plots for systematics coming from invariant mass shape difference
+            if optionDoFakeBNormalisationSyst:
                 if isinstance(myShapeHisto, ROOT.TH2):
-                    msg = "Skipping met shape uncertainty because histogram has more than 1 dimensions!"
+                    msg = "Skipping invariant mass shape uncertainty because histogram has more than 1 dimensions!"
                     self.Print(ShellStyles.WarningLabel() + msg, True)
                 else:
-                    self._obtainQCDNormalizationSystHistograms(myShapeHisto, dsetMgr, plotName, luminosity, normDataSrc, normEWKSrc)
+                    self._obtainQCDNormalizationSystHistograms(myShapeHisto, dsetMgr, plotName, luminosity, normDataSrc, normEWKSrc) #iro: fixme (missing plots)
             
         msg = "Obtaining final shape from data path %s" % (ShellStyles.NoteStyle() + dataPath + ShellStyles.NormalStyle())
         self.Verbose(msg, True)
@@ -634,6 +641,21 @@ class QCDInvertedResultManager:
             print "\t", msg
         else:
             print "\t", msg
+        return
+
+    def _GetFName(self):
+        fName = __file__.split("/")[-1].replace("pyc", "py")
+        return fName
+
+    def PrintFlushed(self, msg, printHeader=True):
+        '''
+        Useful when printing progress in a loop
+        '''
+        msg = "\r\t" + msg
+        if printHeader:
+            print "=== ", self._GetFName()
+        sys.stdout.write(msg)
+        sys.stdout.flush()
         return
 
     def Verbose(self, msg, printHeader=True):
@@ -651,7 +673,7 @@ class QCDInvertedResultManager:
         '''
         # Get all objects inside the ROOT file under specific directory 
         msg = "Obtaining all ROOT file contents for dataset %s from folder %s (these must be filled in the Verification Region (VR))" % (dataset, ShellStyles.NoteStyle() + folderPath + ShellStyles.NormalStyle())
-        self.Print(msg, True)
+        self.Verbose(msg, True)
         allObjects  = dsetMgr.getDataset(dataset).getDirectoryContent(folderPath)
         keepObjects = []
         skipObjects = []
@@ -775,7 +797,7 @@ class QCDInvertedResultManager:
         # Define histogram name as will be written in the ROOT file
         self.Verbose("%sDefining the name of histogram objects, as they will appear in the ROOT file%s" % (ShellStyles.WarningStyle(), ShellStyles.NormalStyle()), True)
         hName  = plotName + "%d" %i
-        hTitle = plotName.replace("CRSelections", "AllSelections").replace("Baseline_", "").replace("Inverted_", "")#FIXME - alex-iro
+        hTitle = plotName.replace("CRSelections", "AllSelections").replace("Baseline_", "").replace("Inverted_", "")#FIXME: not elegant!
 
         # DataDriven
         myShape.delete()
@@ -816,7 +838,9 @@ class QCDInvertedResultManager:
                                                                         histoName=plotName,
                                                                         dataPath=normDataSrc+"QCDNormalizationSignal",
                                                                         ewkPath=normEWKSrc+"QCDNormalizationSignal",
-                                                                        luminosity=luminosity)
+                                                                        luminosity=luminosity,
+                                                                        optionUseInclusiveNorm=False,
+                                                                        verbose=True)
 
         myPlotControlRegionShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr=dsetMgr,
                                                                          dsetLabelData="Data",
@@ -824,7 +848,10 @@ class QCDInvertedResultManager:
                                                                          histoName=plotName,
                                                                          dataPath=normDataSrc+"QCDNormalizationControl",
                                                                          ewkPath=normEWKSrc+"QCDNormalizationControl",
-                                                                         luminosity=luminosity)
+                                                                         luminosity=luminosity,
+                                                                         optionUseInclusiveNorm=False,
+                                                                         verbose=True)
+
 
         myPlotRegionTransitionSyst = metSyst.SystematicsForMetShapeDifference(myPlotSignalRegionShape, 
                                                                               myPlotControlRegionShape, 

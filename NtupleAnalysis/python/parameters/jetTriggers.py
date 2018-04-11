@@ -102,11 +102,22 @@ fakeBTopSelectionBDT = hplus2tbAnalysis.fakeBTopSelectionBDT
 
 fakeBMeasurement = hplus2tbAnalysis.fakeBMeasurement
 
+#Soti
+systTopBDTSelection = PSet(
+    MiniIsoCutValue          = "0.1",
+    MiniIsoCutDirection      = "<=",
+    MiniIsoInvCutValue       = "0.1",
+    MiniIsoInvCutDirection   = ">",
+    METCutValue              = "50",
+    METCutDirection          = ">=",
+    MVACutValue              = "0.4",
+    MVACutDirection          = ">=",
+)
+
 #================================================================================================
 # Common plots options
 #================================================================================================
 commonPlotsOptions = hplus2tbAnalysis.commonPlotsOptions
-
 
 #================================================================================================
 # Build all selections group
@@ -129,4 +140,5 @@ allSelections = PSet(
     CommonPlots           = commonPlotsOptions,
     HistogramAmbientLevel = histogramAmbientLevel,
     QGLRSelection         = qglrSelection,
+    SystTopBDTSelection   = systTopBDTSelection,
 )

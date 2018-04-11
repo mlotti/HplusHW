@@ -429,6 +429,7 @@ class DataCardGenerator:
         Construct final, prefix for output dir name
         '''
         # Construct prefix extension
+        optMode = optimizationMode
         if optimizationMode == "":
             optMode = "Nominal"
         s = "Era%s_Search%s_Opt%s"%(era, searchMode, optMode)

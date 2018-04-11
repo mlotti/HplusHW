@@ -35,7 +35,12 @@ TopSelectionBDT::Data::Data()
   fSubldgTetrajet_p4(),
   fSelectedTopsJet1(),
   fSelectedTopsJet2(),
-  fSelectedTopsBJet()
+  fSelectedTopsBJet(),
+  fSelectedTopsMVA(),
+  fAllTopsJet1(),
+  fAllTopsJet2(),
+  fAllTopsBJet(),
+  fAllTopsMVA()
 { }
 
 TopSelectionBDT::Data::~Data() { }
@@ -615,6 +620,15 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
       output.fSelectedTopsJet1.push_back(fSelectedTops.Jet1.at(i));
       output.fSelectedTopsJet2.push_back(fSelectedTops.Jet2.at(i));
       output.fSelectedTopsBJet.push_back(fSelectedTops.BJet.at(i));
+      output.fSelectedTopsMVA.push_back(fSelectedTops.MVA.at(i));
+    }
+
+  for (size_t i = 0; i < fAllTops.MVA.size(); i++)
+    {
+      output.fAllTopsJet1.push_back(fAllTops.Jet1.at(i));
+      output.fAllTopsJet2.push_back(fAllTops.Jet2.at(i));
+      output.fAllTopsBJet.push_back(fAllTops.BJet.at(i));
+      output.fAllTopsMVA.push_back(fAllTops.MVA.at(i));
     }
 	
    //================================================================================================

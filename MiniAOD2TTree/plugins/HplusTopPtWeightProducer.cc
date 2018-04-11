@@ -103,9 +103,9 @@ void HplusTopPtWeightProducer::produce(edm::Event& iEvent, const edm::EventSetup
       std::vector<const reco::Candidate*> tops = GenParticleTools::findParticles(handle, 6);
       for (auto& p: tops) {
         double pt = p->pt();
-        // Top pt weight is valid only up to 400 GeV
-        if (pt > 400.0) {
-          pt = 400.0;
+        // Top pt weight is valid only up to 800 GeV
+        if (pt > 800.0) {
+          pt = 800.0;
         }
         weight *= TMath::Exp(fParA - fParB*pt);
       }
