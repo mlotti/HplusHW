@@ -757,9 +757,6 @@ def WalkEOSDir(taskName, pathOnEOS, opts): #fixme: bad code
         rootFiles = []
         for d in dirContents:
             subDir = d 
-            # Marina 
-            if "0000" in pathOnEOS: 
-                continue
             if "crab_"+taskName in subDir:
                 pathOnEOS = WalkEOSDir(taskName, pathOnEOS + "/" + subDir, opts)
             else:
