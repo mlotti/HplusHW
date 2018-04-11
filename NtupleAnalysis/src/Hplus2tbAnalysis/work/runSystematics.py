@@ -115,9 +115,9 @@ def main():
     maxEvents = {}
     for d in whiteList:
         maxEvents[d] = -1
+        #maxEvents[d] = 100 #for testing
         if  d == "ChargedHiggs_HplusTB_HplusToTB_M_650":
-            maxEvents[d] = 3000000
-        # maxEvents[d] = 1000 #for testing
+            maxEvents[d] = 2000000
     process = Process(prefix, postfix, maxEvents)
                 
     # ================================================================================================
@@ -160,6 +160,7 @@ def main():
         if len(whitelist)>0:
             process.addDatasetsFromMulticrab(opts.mcrab, includeOnlyTasks="|".join(whitelist))
         elif len(myBlackList)>0:
+        #if len(myBlackList)>0:
             process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks="|".join(myBlackList))
         else:
             process.addDatasetsFromMulticrab(opts.mcrab)
@@ -266,7 +267,6 @@ def GetDatasetCompleteList():
     myCompleteList.append("JetHT_Run2016D_03Feb2017_v1_276315_276811")
     myCompleteList.append("JetHT_Run2016E_03Feb2017_v1_276831_277420")
     myCompleteList.append("JetHT_Run2016F_03Feb2017_v1_277932_278800")
-    #
     myCompleteList.append("JetHT_Run2016F_03Feb2017_v1_278801_278808")
     myCompleteList.append("JetHT_Run2016G_03Feb2017_v1_278820_280385")
     myCompleteList.append("JetHT_Run2016H_03Feb2017_ver2_v1_281613_284035")
@@ -278,20 +278,17 @@ def GetDatasetCompleteList():
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_220")
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_250")
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_300")
-    #
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_350")
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_400")
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_500")
-    #
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_650")
-    #
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_800")
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_1000")
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_1500")
-    #
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_2000")
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_2500")
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_3000")
+    myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_5000")
     #
     myCompleteList.append("ZZTo4Q")
     myCompleteList.append("ZJetsToQQ_HT600toInf")
@@ -352,26 +349,19 @@ def GetDatasetWhitelist(opts):
         myWhitelist.append("JetHT_Run2016H_03Feb2017_ver2_v1_281613_284035")
         myWhitelist.append("JetHT_Run2016H_03Feb2017_ver3_v1_284036_284044")
     elif opts.group == "C":
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_500")
         myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_180")
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_200")
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_220")
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_250")
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_300")
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_800")
     elif opts.group == "D":
         myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_350")
         myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_400")
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_500")
     elif opts.group == "E":
         myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_650")
     elif opts.group == "F":
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_800")
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_1000")
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_220")
         myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_1500")
     elif opts.group == "G":
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_2000")
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_250")
         myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_2500")
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_3000")
     elif opts.group == "H":
         myWhitelist.append("ZZTo4Q")
         myWhitelist.append("ZJetsToQQ_HT600toInf")
@@ -379,10 +369,8 @@ def GetDatasetWhitelist(opts):
         myWhitelist.append("WZ")
         myWhitelist.append("WWTo4Q")
         myWhitelist.append("WJetsToQQ_HT_600ToInf")
-        myWhitelist.append("TTZToQQ")
-        myWhitelist.append("TTWJetsToQQ")
-        myWhitelist.append("TTTT")
-        myWhitelist.append("TT")
+        #myWhitelist.append("TTZToQQ")
+        #myWhitelist.append("TTWJetsToQQ")
     elif opts.group == "I":    
         myWhitelist.append("DYJetsToQQ_HT180")
         myWhitelist.append("QCD_HT50to100")
@@ -408,6 +396,21 @@ def GetDatasetWhitelist(opts):
         myWhitelist.append("ST_tW_antitop_5f_inclusiveDecays_ext1")
         myWhitelist.append("ST_tW_top_5f_inclusiveDecays")
         myWhitelist.append("ST_tW_top_5f_inclusiveDecays_ext1")
+    elif opts.group == "J":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_200")
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_2000")
+    elif opts.group == "K":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_300")
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_3000")
+    elif opts.group == "L":
+        myWhitelist.append("TT")
+        myWhitelist.append("TTTT")
+    elif opts.group == "M":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_500")
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_5000")
+    elif opts.group == "N":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_1000")
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_10000")
     else:
         msg = "Unknown systematics submission dataset group \"%s\"%" % (opts.group)
         raise Exception(msg)
