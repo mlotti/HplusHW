@@ -350,7 +350,7 @@ bool JetTriggersSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetup )
 	}
 	
 	// Apply acceptance cuts
-	if (miniRelIsoEA > cfg_muonMiniRelIsoEA)  continue;
+	//if (miniRelIsoEA > cfg_muonMiniRelIsoEA)  continue;
 	if(obj.p4().pt() < cfg_muonPtCut)         continue;
 	if(fabs(obj.p4().eta()) > cfg_muonEtaCut) continue;
 	

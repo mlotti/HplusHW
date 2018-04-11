@@ -1496,7 +1496,7 @@ def GetRequestName(dataset):
     # runRange_re    = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15(?P<BunchSpacing>\S*)_JSON(?P<Silver>(_\S+|))\.")
     # runRange_re    = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15(?P<BunchSpacing>\S*)_JSON")
     # runRange_re    = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15_(?P<BunchSpacing>\d+ns)_JSON_v")
-    
+
     # Scan through the string 'dataset.URL' & look for any location where the compiled RE 'mcdataset_re' matches
     match = mcdataset_re.search(dataset.URL)
     if dataset.isData():
@@ -1505,6 +1505,10 @@ def GetRequestName(dataset):
     # Append the dataset name
     if match:
 	requestName = match.group("name")
+
+    print "Request Name (FIRST) = ", requestName
+    firstName = requestName
+    
 
     # Append the Run number (for Data samples only)
     if dataset.isData():
@@ -1521,10 +1525,57 @@ def GetRequestName(dataset):
     if tev_match:
 	requestName = tev_match.group("name")
 
+    if "fsrdown" in firstName:
+        requestName = requestName+"_fsrdown"
+    elif "fsrup" in firstName:
+        requestName = requestName+"_fsrup"
+    elif "isrdown" in firstName:
+        requestName = requestName+"_isrdown"
+    elif "isrup" in firstName:
+        requestName = requestName+"_isrup"
+    elif "evtgen" in firstName:
+        requestName = requestName+"_evtgen"
+    elif "GluonMoveCRTune" in firstName:
+        requestName = requestName+"_GluonMoveCRTune"
+    elif "GluonMoveCRTune_erdON" in firstName:
+        requestName = requestName+"_GluonMoveCRTune_erdON"
+    elif "QCDbasedCRTune_erdON" in firstName:
+        requestName = requestName+"_QCDbasedCRTune_erdON"
+    elif "erdON" in firstName:
+        requestName = requestName+"_erdON"
+    elif "mtop1665" in firstName:
+        requestName = requestName+"_mtop1665"
+    elif "mtop1695" in firstName:
+        requestName = requestName+"_mtop1695"
+    elif "mtop1715" in firstName:
+        requestName = requestName+"_mtop1715"
+    elif "mtop1735" in firstName:
+        requestName = requestName+"_mtop1735"
+    elif "mtop1755" in firstName:
+        requestName = requestName+"_mtop1755"
+    elif "mtop1785" in firstName:
+        requestName = requestName+"_mtop1785"
+    elif "TuneCUETP8M2T4down" in firstName:
+        requestName = requestName+"_TuneCUETP8M2T4down"
+    elif "TuneCUETP8M2T4up" in firstName:
+        requestName = requestName+"_TuneCUETP8M2T4up"
+    elif "TuneEE5C" in firstName:
+        requestName = requestName+"_TuneEE5C"
+    elif "SingleLeptFromT" in firstName and "madgraph" in firstName:
+        requestName = requestName+"_madgraph"
+    elif "SingleLeptFromT" in firstName and "amcatnlo" in firstName:
+        requestName = requestName+"_amcatnlo"
+
+
+
+
     # Append the Ext
     ext_match = ext_re.search(dataset.URL)
     if ext_match:
 	requestName+=ext_match.group("name")
+
+    print "Request Name =", requestName
+    
 
     # Append the Run Range (for Data samples only)
     if dataset.isData():
@@ -1846,6 +1897,9 @@ def CreateJob(opts, args):
     taskDirName  = GetTaskDirName(analysis, version, datasets)
     opts.dirName = taskDirName
 
+    for dataset in datasets:
+        print dataset
+    
     # Give user last chance to abort
     AskToContinue(taskDirName, analysis, opts)
     
