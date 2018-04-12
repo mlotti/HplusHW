@@ -582,7 +582,7 @@ void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, cons
   cBaselineTauSelectedEvents.increment();
   // Fill final plots
   
-  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hBaselineTauTransverseMass, isGenuineTau || isElectronToTau || isMuonToTau, myTransverseMass);
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hBaselineTauTransverseMass, isGenuineTau || tau.isElectronToTau() || tau.isMuonToTau(), myTransverseMass);
   
 //====== Experimental code
 
