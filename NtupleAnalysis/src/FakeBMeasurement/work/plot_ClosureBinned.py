@@ -307,7 +307,7 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     return
 
 def GetBinText(bin):
-    return "bin-" + str(bin) #tmp
+    # return "bin-" + str(bin) #tmp
     if bin == "0":
         return "|#eta| < 0.4"
     elif bin == "1":
