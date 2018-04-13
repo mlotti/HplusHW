@@ -17,7 +17,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 from HiggsAnalysis.QCDMeasurement.systematicsForMetShapeDifference import *
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 from HiggsAnalysis.QCDMeasurement.dataDrivenQCDCount import *
-from HiggsAnalysis.QCDMeasurement.QCDInvertedResult import *
+from HiggsAnalysis.QCDMeasurement.FakeBResult import *
 
 
 class QCDInvertedPlotBase:

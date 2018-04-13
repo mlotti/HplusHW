@@ -37,6 +37,7 @@ ROOT.gROOT.SetBatch(True)
 from ROOT import *
 
 import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
+import HiggsAnalysis.NtupleAnalysis.tools.systematics as systematics
 import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
 import HiggsAnalysis.NtupleAnalysis.tools.counter as counter
 import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
@@ -108,9 +109,9 @@ def main(opts):
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
-    style.setGridX(True)
-    style.setGridY(True)
-    style.setOptStat(True)
+    style.setGridX(False)
+    style.setGridY(False)
+    style.setOptStat(False)
     
     # Obtain dsetMgrCreator and register it to module selector
     dsetMgrCreator = dataset.readFromMulticrabCfg(directory=opts.mcrab)
@@ -204,7 +205,7 @@ def main(opts):
         # hList.extend([h for h in allHistos if "StandardSelections" in h and "_Vs" not in h])
 
         # Create a list with strings included in the histogram names you want to plot
-        myHistos = ["LdgTrijetPt", "LdgTrijetMass", "LdgTetrajetMass", "MVAmax2", "MVAmax1", "HT", "MET"]
+        myHistos = ["LdgTrijetPt", "LdgTrijetMass",  "TetrajetBJetPt", "TetrajetBJetEta", "LdgTetrajetPt", "LdgTetrajetMass", "MVAmax2", "MVAmax1", "HT", "MET"]
         #myHistos = ["LdgTrijetPt", "LdgTrijetMass", "LdgTetrajetMass", "MVAmax2", "MVAmax1", "Njets", "NBjets", 
         #            "Bjet3Bdisc", "Bjet2Bdisc", "Bjet1Bdisc", "Bjet3Pt", "Bjet2Pt", "Bjet1Pt"]
 
@@ -212,7 +213,8 @@ def main(opts):
         for i, h in enumerate(myHistos, 1):
             hGraphList = []
             for b in ["Baseline_", "Inverted_"]:
-                for r in ["_AfterAllSelections", "_AfterCRSelections"]:
+                #for r in ["_AfterAllSelections", "_AfterCRSelections"]:
+                for r in [ "_AfterCRSelections", "_AfterAllSelections"]:
                     histoName = b + h + r
                     hgQCD, kwargs = GetPurityHistoGraph(datasetsMgr, opts.folder, histoName)
 
@@ -378,6 +380,7 @@ def GetHistoKwargs(histoName, opts):
     _yMin       = 0.0
     _yMax       = 1.09
     _cutBox     = None
+    # _cutBoxY    = {"cutValue": 0.85, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
     _cutBoxY    = {"cutValue": 0.85, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
     _xlabel     = "x-axis"
     _bins       = None
@@ -400,133 +403,85 @@ def GetHistoKwargs(histoName, opts):
         "cutBoxY"          : _cutBoxY
         }
 
-    # Common bin settings
-    myBins     = []
-    ptBins     = []
-    jetBins    = []
-    bjetBins   = []
-    btagBins   = []
-    mvaBins    = []
-    triMBins   = [] 
-    tetraMBins = [] 
-
-    for i in range(0, 21, 1):
-        mvaBins.append(i*0.05)
-
-    for i in range(4, 21, 1):
-        j = i*0.05
-        btagBins.append(j)
-
-    for i in range(6, 15, 1):
-        jetBins.append(i)
-    for i in range(0, 9, 1):
-        bjetBins.append(i)
-
-    for i in range(0, 100, 25):
-        ptBins.append(i)
-    for j in range(100, 300, 50):
-        ptBins.append(j)
-    for j in range(300, 400+100, 100):
-        ptBins.append(j)
-    for j in range(400, 500+100, 100):
-        ptBins.append(j)
-
-    for j in range(0, 300, 20):
-        triMBins.append(j)
-    for j in range(300, 500+50, 50):
-        triMBins.append(j)
-
-    for j in range(0, 1000, 100):
-        tetraMBins.append(j)
-    for k in range(1000, 2000, 200):
-        tetraMBins.append(k)
-    for l in range(2000, 4000+1000, 1000):
-        tetraMBins.append(l)
-
-    metBins = []
-    for j in range(0, 100, 20):
-        metBins.append(j)
-    for j in range(100, 400, 150):
-        metBins.append(j)
-
-    htBins = []
-    for j in range(500, 1000, 100):
-        htBins.append(j)
-    for j in range(1000, 2000, 200):
-        htBins.append(j)
-    for j in range(2000, 2500, 500):
-        htBins.append(j)
-    for j in range(2500, 3500+1000, 1000):
-        htBins.append(j)
-
     # Set x-axis divisions
     n1 = 8 # primary divisions
     n2 = 5 # second order divisions
     n3 = 2 # third order divisions
     nDivs = n1 + 100*n2 + 10000*n3
+    myBins = []
+
     if 1:
         ROOT.gStyle.SetNdivisions(nDivs, "X")
 
-    if "pt" in h.lower():# don't move further down!
+    if "ldgtrijetpt" in h.lower():
         _xlabel = "p_{T} (GeV/c)"
-        myBins  = ptBins
+        myBins  = systematics._dataDrivenCtrlPlotBinning["LdgTrijetPt_AfterAllSelections"]
+
+    if "eta" in h.lower():
+        _xlabel  = "#eta"
+        myBins   = [float(eta)/10.0 for eta in range(-25, 25, 1)]
+
+    if "tetrajetbjetpt" in h.lower():
+        _xlabel = "p_{T} (GeV/c)"
+        myBins   = systematics._dataDrivenCtrlPlotBinning["TetrajetBjetPt_AfterAllSelections"]
 
     if "ht" in h.lower():
-        _xlabel  = "H_{T} (GeV"
-        myBins   = htBins
+        _xlabel  = "H_{T} (GeV)"
+        myBins   = systematics._dataDrivenCtrlPlotBinning["HT_AfterAllSelections"]
         _cutBox  = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
 
     if "met" in h.lower():
         _xlabel  = "E_{T}^{miss} (GeV"
-        myBins   = metBins
+        myBins   = systematics._dataDrivenCtrlPlotBinning["MET_AfterAllSelections"]
         
     if "mvamax1" in h.lower():
-        _xlabel = "leading BDT"
-        _cutBox = {"cutValue": 0.85, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        myBins  = mvaBins
+        #_xlabel = "leading BDT"
+        _xlabel = "top-tag discriminant"
+        _cutBox = {"cutValue": 0.40, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        myBins  = [float(mva)/10.0 for mva in range(-10, 10, 1)]
+
     if "mvamax2" in h.lower():
-        _xlabel = "subleading BDT"
-        _cutBox = {"cutValue": 0.85, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        myBins  = mvaBins
+        #_xlabel = "subleading BDT"
+        _xlabel = "top-tag discriminant"
+        _cutBox = {"cutValue": 0.40, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        myBins  = [float(mva)/10.0 for mva in range(-10, 10, 1)]
+
     if "trijetm" in h.lower():
         _units  = "GeV/c^{2}" 
         _xlabel = "m_{jjb} (%s)" % _units
-        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        myBins = triMBins
-    if "bjet1pt" in h.lower():
-        _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _xlabel = "p_{T} (GeV/c)"
-        myBins  = ptBins
-        #myBins.extend([400, 600])
-    if "bjet2pt" in h.lower():
-        _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _xlabel = "p_{T} (GeV/c)"
-        myBins  = ptBins
-        #myBins.extend([400, 600])
-    if "bjet3pt" in h.lower():        
-        _cutBox = {"cutValue": 30.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _xlabel = "p_{T} (GeV/c)"
-        myBins  = ptBins
+        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        myBins = systematics._dataDrivenCtrlPlotBinning["LdgTrijetMass_AfterAllSelections"]
+        
     if "bdisc" in h.lower():
         _units  = "" 
         _xlabel = "b-tag discriminant"
         # _cutBox = {"cutValue": 0.5426, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _cutBox = {"cutValue": 0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        myBins  = btagBins
+        myBins  = [float(i)/10 for i in range(0, 10)]
+
     if "nbjets" in h.lower():
         _units  = "" 
         _cutBox = {"cutValue": 3.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _xlabel = "b-jet multiplicity"
-        myBins  = bjetBins
+        myBins  = [i for i in range(3, 11)]
+
     if "njets" in h.lower():
         _units  = "" 
         _cutBox = {"cutValue": 7.0, "fillColor": 16, "box": True, "line": True, "greaterThan": True}
         _xlabel = "jet multiplicity"
-        myBins  = jetBins
+        myBins  = [i for i in range(7, 16)]
+
+    if "tetrajetpt" in h.lower():
+        _units  = "GeV/c" 
+        _xlabel = "p_{T} (%s)" % (_units)
+        myBins  = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetPt_AfterAllSelections"]
+        #ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
+
     if "tetrajetm" in h.lower():
         _units  = "GeV/c^{2}" 
         _xlabel = "m_{jjbb} (%s)" % (_units)
-        myBins  = tetraMBins
+        #myBins  = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetMass_AfterAllSelections"]
+        myBins  = systematics.getBinningForTetrajetMass(0)
         ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
 
     _kwargs["opts"]    = {"ymin": _yMin, "ymax": _yMax}
