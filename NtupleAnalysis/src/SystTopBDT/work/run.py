@@ -120,6 +120,7 @@ def main():
     maxEvents = {}
     for d in whiteList:
         maxEvents[d] = 100
+        #maxEvents[d] = -1
     process = Process(prefix, postfix, maxEvents)
                 
     # ================================================================================================
@@ -172,7 +173,7 @@ def main():
     
     
     
-    print allSelections.BJetSelection
+    ##print allSelections.BJetSelection
     
     # allSelections.BjetSelection.triggerMatchingApply = True
     # allSelections.TopSelection.ChiSqrCutValue = 100.0
