@@ -103,8 +103,8 @@ def main():
     blackList    = GetDatasetBlackList(completeList, whiteList)
     maxEvents = {}
     for d in whiteList:
-        #maxEvents[d] = -1
-        maxEvents[d] = 100 #for testing
+        maxEvents[d] = -1
+        #maxEvents[d] = 100 #for testing
     process = Process(prefix, postfix, maxEvents)
 
     # ================================================================================================
