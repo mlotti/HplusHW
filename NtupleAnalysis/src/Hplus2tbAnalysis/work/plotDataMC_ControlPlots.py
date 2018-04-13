@@ -540,7 +540,7 @@ def GetHistoKwargs(h, opts):
 
     if h == "counter":
         xMin = 15.0
-        xMax = 20.0 #21.0
+        xMax = 19.0 #20.0 #21.0
         kwargs["opts"]   = {"xmin": xMin, "xmax": xMax, "ymin": 1e0, "ymax": 1e8}
         # kwargs["cutBox"] = {"cutValue": xMin+2, "fillColor": 16, "box": False, "line": False, "greaterThan": True} #indicate btag SF
 
