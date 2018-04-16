@@ -21,8 +21,14 @@ class WrappedTH2;
 class TauSelection: public BaseSelection {
 public:
     enum TauMisIDRegionType {
+      kBarrel0to0p4,
+      kBarrel0p4to0p8,
+      kBarrel0p8to1p2,
+      kBarrel1p2to1p7,
       kBarrel,
       kEndcap,
+      kElectronBarrel,
+      kElectronEndcap,
       kFullCoverage
     };
   

@@ -53,9 +53,9 @@ tauSelection = PSet(
 # tau identification scale factors
 scaleFactors.assignTauIdentificationSF(tauSelection)
 # tau misidentification scale factors
-scaleFactors.assignTauMisidentificationSF(tauSelection, "eToTau", "full", "nominal")
-scaleFactors.assignTauMisidentificationSF(tauSelection, "muToTau", "full", "nominal")
-scaleFactors.assignTauMisidentificationSF(tauSelection, "jetToTau", "full", "nominal")
+scaleFactors.assignTauMisidentificationSF(tauSelection, "eToTau", "nominal")
+scaleFactors.assignTauMisidentificationSF(tauSelection, "muToTau", "nominal")
+scaleFactors.assignTauMisidentificationSF(tauSelection, "jetToTau", "nominal")
 # tau trigger SF
 
 scaleFactors.assignTauTriggerSF(tauSelection, "nominal", trg.TautriggerEfficiencyJsonName)
