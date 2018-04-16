@@ -54,8 +54,8 @@ class AnalysisConfig:
 		    self._config.METSelection.systematicVariation = "_"+value.replace("Plus_x","down_x").replace("Minus_x","up_x").replace("UES","MET_Type1_UnclusteredEn") 
 		    self._config.METSelection.systematicVariation = "_"+value.replace("Plus_y","down_y").replace("Minus_y","up_y").replace("UES","MET_Type1_UnclusteredEn")
 		# Fake tau 
-                partonFakingTau = None
 		elif value.startswith("FakeTau"):
+                    partonFakingTau = None
                     if "Electron" in value:
                         partonFakingTau = "eToTau"
                     elif "Muon" in value:
