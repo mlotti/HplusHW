@@ -177,10 +177,10 @@ myTauIDSystematics=["CMS_eff_t"] #tau ID
 if not LightAnalysis and OptionIncludeSystematics:
     myTauIDSystematics.extend(["CMS_eff_t_highpt"])
 
-myTauMisIDSystematics=["CMS_fake_eToTau","CMS_fake_muToTau"] # tau mis-ID, "CMS_fake_jetToTau" not included, as jet->tau comes from fake tau BG measurement
+myTauMisIDSystematics=["CMS_fake_e_to_t","CMS_fake_m_to_t"] # tau mis-ID, "CMS_fake_jetToTau" not included, as jet->tau comes from fake tau BG measurement
 myESSystematics=["CMS_scale_t","CMS_scale_j","CMS_res_j","CMS_scale_met"] # TES, JES, CMS_res_j, UES
 myBtagSystematics=["CMS_eff_b","CMS_fake_b"] # b tag and mistag
-myTopSystematics=["CMS_Hptntj_topPtReweight"] # top pt reweighting
+myTopSystematics=["CMS_topPtReweight"] # top pt reweighting
 myPileupSystematics=["CMS_pileup"] # CMS_pileup
 myLeptonVetoSystematics=["CMS_eff_e_veto","CMS_eff_m_veto"] # CMS_pileup
 
@@ -220,7 +220,7 @@ for mass in LightMassPoints:
     hwx.setNuisances(myTrgSystematics[:]+myTauIDSystematics[:]+myTauMisIDSystematics[:]
                      +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
 #                     +["xsect_ttbar","lumi_13TeV"])
-                     +["CMS_scale_ttbar","CMS_pdf_ttbar","CMS_mass_ttbar","lumi_13TeV"])
+                     +["QCDscale_ttbar","pdf_ttbar","mass_ttbar","lumi_13TeV"])
     hwx.setDatasetDefinition("TTToHplusBWB_M"+str(mass))
     DataGroups.append(hwx)
 for mass in HeavyMassPoints+IntermediateMassPoints:
@@ -237,13 +237,13 @@ for mass in HeavyMassPoints+IntermediateMassPoints:
 
 myQCDSystematics = myTrgSystematics[:]+myESSystematics[:]+myBtagSystematics[:]+myTopSystematics[:]+myPileupSystematics[:]
 #approximation 1: only ttbar xsect uncertinty applied to QCD, as ttbar dominates the EWK BG (but uncertainty is scaled according to 1-purity, i.e. #all_ttbar+EWK_events_in_QCDandFakeTau/#all_events_in_QCDandFakeTau)
-myQCDSystematics+=["CMS_scale_ttbar_forQCD","CMS_pdf_ttbar_forQCD","CMS_mass_ttbar_forQCD","lumi_13TeV_forQCD","CMS_eff_t_forQCD"]
+myQCDSystematics+=["QCDscale_ttbar_forQCD","pdf_ttbar_forQCD","mass_ttbar_forQCD","lumi_13TeV_forQCD","CMS_eff_t_forQCD"]
 #approximation 2: myLeptonVetoSystematics neglected for QCD
 
 if OptionIncludeSystematics: 
     if not LightAnalysis:
         myQCDSystematics += ["CMS_eff_t_highpt"]
-    myQCDSystematics += ["CMS_Hptntj_FakeTauBG_templateFit","CMS_Hptntj_QCDkbg_metshape"] #these can be used only if QCDMeasurement has been run with systematics
+    myQCDSystematics += ["CMS_Hptntj_fake_t_fit","CMS_Hptntj_fake_t_shape"] #these can be used only if QCDMeasurement has been run with systematics
 
 # Set label prefix (or use postfix when signal model requires the name to start in a specifi way)
 labelPrefix="CMS_Hptntj_"
@@ -284,7 +284,7 @@ else:
                                 validMassPoints=MassPoints,
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]+myTauMisIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
-                                  +myTopSystematics+["CMS_scale_ttbar","CMS_pdf_ttbar","CMS_mass_ttbar","lumi_13TeV"]))
+                                  +myTopSystematics+["QCDscale_ttbar","pdf_ttbar","mass_ttbar","lumi_13TeV"]))
     DataGroups.append(DataGroup(label=labelPrefix+"W", landsProcess=4,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
                                 datasetType="Embedding", 
@@ -292,7 +292,7 @@ else:
                                 validMassPoints=MassPoints,
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]+myTauMisIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
-                                  +["CMS_scale_Wjets","CMS_pdf_Wjets","lumi_13TeV"]))
+                                  +["QCDscale_Wjets","pdf_Wjets","lumi_13TeV"]))
     DataGroups.append(DataGroup(label=labelPrefix+"singleTop", landsProcess=5,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
                                 datasetType="Embedding",
@@ -300,7 +300,7 @@ else:
                                 validMassPoints=MassPoints,
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]+myTauMisIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
-                                  +["CMS_scale_singleTop","CMS_pdf_singleTop","lumi_13TeV"]))
+                                  +["QCDscale_singleTop","pdf_singleTop","lumi_13TeV"]))
     DataGroups.append(DataGroup(label=labelPrefix+"DY", landsProcess=6,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
                                 datasetType="Embedding",
@@ -309,7 +309,7 @@ else:
                                 validMassPoints=MassPoints,
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]+myTauMisIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
-                                  +["CMS_scale_DY","CMS_pdf_DY","lumi_13TeV"]))
+                                  +["QCDscale_DY","pdf_DY","lumi_13TeV"]))
     DataGroups.append(DataGroup(label=labelPrefix+"VV", landsProcess=7,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus, 
                                 datasetType="Embedding", 
@@ -317,7 +317,7 @@ else:
                                 validMassPoints=MassPoints,
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]+myTauMisIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
-                                  +["CMS_scale_VV","CMS_pdf_VV","lumi_13TeV"]))
+                                  +["QCDscale_VV","pdf_VV","lumi_13TeV"]))
 
     # Example of how to merge columns
     # mergeColumnsByLabel.append({"label": labelPrefix+"EWK", "mergeList": [labelPrefix+"W",labelPrefix+"DY"]}) #,labelPrefix+"VV"]})
@@ -396,19 +396,19 @@ else:
         distr="lnN", function="Constant",value=0.02))
 
 #=====  e->tau mis-ID
-if "CMS_fake_eToTau" in myShapeSystematics:
-    Nuisances.append(Nuisance(id="CMS_fake_eToTau", label="tau-jet ID (no Rtau) e->tau",
+if "CMS_fake_e_to_t" in myShapeSystematics:
+    Nuisances.append(Nuisance(id="CMS_fake_e_to_t", label="tau-jet ID (no Rtau) e->tau",
         distr="shapeQ", function="ShapeVariation", systVariation="FakeTauElectron"))
 else:
-    Nuisances.append(Nuisance(id="CMS_fake_eToTau", label="APPROXIMATION for tau-jet ID (no Rtau) e->tau",
+    Nuisances.append(Nuisance(id="CMS_fake_e_to_t", label="APPROXIMATION for tau-jet ID (no Rtau) e->tau",
         distr="lnN", function="Constant", value=0.001))
 
 # mu->tau mis-ID
-if "CMS_fake_muToTau" in myShapeSystematics:
-    Nuisances.append(Nuisance(id="CMS_fake_muToTau", label="tau-jet ID (no Rtau) mu->tau",
+if "CMS_fake_m_to_t" in myShapeSystematics:
+    Nuisances.append(Nuisance(id="CMS_fake_m_to_t", label="tau-jet ID (no Rtau) mu->tau",
         distr="shapeQ", function="ShapeVariation", systVariation="FakeTauMuon"))
 else:
-    Nuisances.append(Nuisance(id="CMS_fake_muToTau", label="APPROXIMATION for tau-jet ID (no Rtau) mu->tau",
+    Nuisances.append(Nuisance(id="CMS_fake_m_to_t", label="APPROXIMATION for tau-jet ID (no Rtau) mu->tau",
         distr="lnN", function="Constant", value=0.001))
 
 # jet->tau mis-ID
@@ -450,11 +450,11 @@ else:
         distr="lnN", function="Constant",value=0.04))
 
 #===== Top pt SF
-if "CMS_Hptntj_topPtReweight" in myShapeSystematics:
-    Nuisances.append(Nuisance(id="CMS_Hptntj_topPtReweight", label="top pT reweighting",
+if "CMS_topPtReweight" in myShapeSystematics:
+    Nuisances.append(Nuisance(id="CMS_topPtReweight", label="top pT reweighting",
         distr="shapeQ", function="ShapeVariation", systVariation="TopPt"))
 else:
-    Nuisances.append(Nuisance(id="CMS_Hptntj_topPtReweight", label="APPROXIMATION for top pT reweighting",
+    Nuisances.append(Nuisance(id="CMS_topPtReweight", label="APPROXIMATION for top pT reweighting",
         distr="lnN", function="Constant",value=0.25))
 
 #===== Pileup
@@ -472,15 +472,15 @@ else:
 #    distr="lnN", function="Constant",
 #    value=systematics.getCrossSectionUncertainty("TTJets").getUncertaintyDown(),
 #    upperValue=systematics.getCrossSectionUncertainty("TTJets").getUncertaintyUp()))
-Nuisances.append(Nuisance(id="CMS_scale_ttbar", label="ttbar cross section scale uncertainty ",
+Nuisances.append(Nuisance(id="QCDscale_ttbar", label="ttbar cross section scale uncertainty ",
     distr="lnN", function="Constant",
     value=systematics.getCrossSectionUncertainty("TTJets_scale").getUncertaintyDown(),
     upperValue=systematics.getCrossSectionUncertainty("TTJets_scale").getUncertaintyUp()))
-Nuisances.append(Nuisance(id="CMS_pdf_ttbar", label="ttbar pdf uncertainty",
+Nuisances.append(Nuisance(id="pdf_ttbar", label="ttbar pdf uncertainty",
     distr="lnN", function="Constant",
     value=systematics.getCrossSectionUncertainty("TTJets_pdf").getUncertaintyDown(),
     upperValue=systematics.getCrossSectionUncertainty("TTJets_pdf").getUncertaintyUp()))
-Nuisances.append(Nuisance(id="CMS_mass_ttbar", label="ttbar top mass uncertainty",
+Nuisances.append(Nuisance(id="mass_ttbar", label="ttbar top mass uncertainty",
     distr="lnN", function="Constant",
     value=systematics.getCrossSectionUncertainty("TTJets_mass").getUncertaintyDown(),
     upperValue=systematics.getCrossSectionUncertainty("TTJets_mass").getUncertaintyUp()))
@@ -490,14 +490,14 @@ Nuisances.append(Nuisance(id="CMS_mass_ttbar", label="ttbar top mass uncertainty
 #    distr="lnN", function="ConstantForQCD",
 #    value=systematics.getCrossSectionUncertainty("TTJets").getUncertaintyDown(),
 #    upperValue=systematics.getCrossSectionUncertainty("TTJets").getUncertaintyUp()))
-Nuisances.append(Nuisance(id="CMS_scale_ttbar_forQCD", label="ttbar cross section scale uncertainty ",
+Nuisances.append(Nuisance(id="QCDscale_ttbar_forQCD", label="ttbar cross section scale uncertainty ",
     distr="lnN", function="ConstantForQCD",
     value=systematics.getCrossSectionUncertainty("TTJets_scale").getUncertaintyDown(),
     upperValue=systematics.getCrossSectionUncertainty("TTJets_scale").getUncertaintyUp()))
-Nuisances.append(Nuisance(id="CMS_pdf_ttbar_forQCD", label="ttbar pdf uncertainty",
+Nuisances.append(Nuisance(id="pdf_ttbar_forQCD", label="ttbar pdf uncertainty",
     distr="lnN", function="ConstantForQCD",
     value=systematics.getCrossSectionUncertainty("TTJets_pdf").getUncertaintyDown()))
-Nuisances.append(Nuisance(id="CMS_mass_ttbar_forQCD", label="ttbar top mass uncertainty",
+Nuisances.append(Nuisance(id="mass_ttbar_forQCD", label="ttbar top mass uncertainty",
     distr="lnN", function="ConstantForQCD",
     value=systematics.getCrossSectionUncertainty("TTJets_mass").getUncertaintyDown(),
     upperValue=systematics.getCrossSectionUncertainty("TTJets_mass").getUncertaintyUp()))
@@ -506,11 +506,11 @@ Nuisances.append(Nuisance(id="CMS_mass_ttbar_forQCD", label="ttbar top mass unce
 #Nuisances.append(Nuisance(id="xsect_Wjets", label="W+jets cross section",
 #    distr="lnN", function="Constant",
 #    value=systematics.getCrossSectionUncertainty("WJets").getUncertaintyDown()))
-Nuisances.append(Nuisance(id="CMS_scale_Wjets", label="W+jets cross section scale uncertainty",
+Nuisances.append(Nuisance(id="QCDscale_Wjets", label="W+jets cross section scale uncertainty",
     distr="lnN", function="Constant",
     value=systematics.getCrossSectionUncertainty("WJets_scale").getUncertaintyDown(),
     upperValue=systematics.getCrossSectionUncertainty("WJets_scale").getUncertaintyUp()))
-Nuisances.append(Nuisance(id="CMS_pdf_Wjets", label="W+jets pdf uncertainty",
+Nuisances.append(Nuisance(id="pdf_Wjets", label="W+jets pdf uncertainty",
     distr="lnN", function="Constant",
     value=systematics.getCrossSectionUncertainty("WJets_pdf").getUncertaintyDown()))
 
@@ -519,10 +519,10 @@ Nuisances.append(Nuisance(id="CMS_pdf_Wjets", label="W+jets pdf uncertainty",
 #Nuisances.append(Nuisance(id="xsect_singleTop", label="single top cross section",
 #    distr="lnN", function="Constant",
 #    value=systematics.getCrossSectionUncertainty("SingleTop").getUncertaintyDown()))
-Nuisances.append(Nuisance(id="CMS_scale_singleTop", label="single top cross section sale uncertainty",
+Nuisances.append(Nuisance(id="QCDscale_singleTop", label="single top cross section sale uncertainty",
     distr="lnN", function="Constant",
     value=systematics.getCrossSectionUncertainty("SingleTop_scale").getUncertaintyDown()))
-Nuisances.append(Nuisance(id="CMS_pdf_singleTop", label="single top pdf ucnertainty",
+Nuisances.append(Nuisance(id="pdf_singleTop", label="single top pdf ucnertainty",
     distr="lnN", function="Constant",
     value=systematics.getCrossSectionUncertainty("SingleTop_pdf").getUncertaintyDown()))
 
@@ -530,11 +530,11 @@ Nuisances.append(Nuisance(id="CMS_pdf_singleTop", label="single top pdf ucnertai
 #Nuisances.append(Nuisance(id="xsect_DYtoll", label="Z->ll cross section",
 #    distr="lnN", function="Constant",
 #    value=systematics.getCrossSectionUncertainty("DYJetsToLL").getUncertaintyDown()))
-Nuisances.append(Nuisance(id="CMS_scale_DY", label="Z->ll cross section scale uncertainty",
+Nuisances.append(Nuisance(id="QCDscale_DY", label="Z->ll cross section scale uncertainty",
     distr="lnN", function="Constant",
     value=systematics.getCrossSectionUncertainty("DYJetsToLL_scale").getUncertaintyDown(),
     upperValue=systematics.getCrossSectionUncertainty("DYJetsToLL_scale").getUncertaintyUp()))
-Nuisances.append(Nuisance(id="CMS_pdf_DY", label="Z->ll pdf uncertainty",
+Nuisances.append(Nuisance(id="pdf_DY", label="Z->ll pdf uncertainty",
     distr="lnN", function="Constant",
     value=systematics.getCrossSectionUncertainty("DYJetsToLL_pdf").getUncertaintyDown()))
 
@@ -542,10 +542,10 @@ Nuisances.append(Nuisance(id="CMS_pdf_DY", label="Z->ll pdf uncertainty",
 #Nuisances.append(Nuisance(id="xsect_VV", label="diboson cross section",
 #    distr="lnN", function="Constant",
 #    value=systematics.getCrossSectionUncertainty("Diboson").getUncertaintyDown()))
-Nuisances.append(Nuisance(id="CMS_scale_VV", label="diboson cross section scale uncertainty",
+Nuisances.append(Nuisance(id="QCDscale_VV", label="diboson cross section scale uncertainty",
     distr="lnN", function="Constant",
     value=systematics.getCrossSectionUncertainty("Diboson_scale").getUncertaintyDown()))
-Nuisances.append(Nuisance(id="CMS_pdf_VV", label="diboson pdf uncertainty",
+Nuisances.append(Nuisance(id="pdf_VV", label="diboson pdf uncertainty",
     distr="lnN", function="Constant",
     value=systematics.getCrossSectionUncertainty("Diboson_pdf").getUncertaintyDown()))
 
@@ -565,9 +565,9 @@ Nuisances.append(Nuisance(id="lumi_13TeV_forQCD", label="lumi_13TeVnosity",
 
 #===== QCD measurement
 if OptionIncludeSystematics:
-    Nuisances.append(Nuisance(id="CMS_Hptntj_FakeTauBG_templateFit", label="QCDInv: fit", 
+    Nuisances.append(Nuisance(id="CMS_Hptntj_fake_t_fit", label="QCDInv: fit", 
         distr="lnN", function="Constant", value=0.03))
-    Nuisances.append(Nuisance(id="CMS_Hptntj_QCDkbg_metshape", label="QCD met shape syst.",
+    Nuisances.append(Nuisance(id="CMS_Hptntj_fake_t_shape", label="QCD mT shape syst.",
         distr="shapeQ", function="QCDShapeVariation", systVariation="QCDNormSource"))
 
 #===== Embedding
@@ -588,6 +588,9 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
         distr="shapeQ", function="ShapeVariation", systVariation="EmbMTWeight",
     ))
 
+# Print summary table of all defined nuisances!
+PrintNuisancesTable(Nuisances, DataGroups)
+
 #================================================================================================ 
 # Merge nuisances to same row (first item specifies the name for the row)
 # This is for correlated uncertainties. It forces 2 nuisances to be on SAME datacard row
@@ -605,15 +608,15 @@ MergeNuisances=[]
 #MergeNuisances.append(["CMS_eff_b","CMS_fake_b"]) #FIXME: mergning should add uncerteinties quadratically
 
 # Correlate ttbar and single top xsect uncertainties
-MergeNuisances.append(["CMS_scale_ttbar","CMS_scale_singleTop"])
-MergeNuisances.append(["CMS_pdf_ttbar","CMS_pdf_singleTop"])
+MergeNuisances.append(["QCDscale_ttbar","QCDscale_singleTop"])
+MergeNuisances.append(["pdf_ttbar","pdf_singleTop"])
 
 # Merge QCDandFakeTau nuisances to corresponding t_genuine nuisances
 MergeNuisances.append(["CMS_eff_t","CMS_eff_t_forQCD"])
 #MergeNuisances.append(["xsect_ttbar", "xsect_ttbar_forQCD"])
-MergeNuisances.append(["CMS_scale_ttbar", "CMS_scale_ttbar_forQCD"])
-MergeNuisances.append(["CMS_pdf_ttbar", "CMS_pdf_ttbar_forQCD"])
-MergeNuisances.append(["CMS_mass_ttbar", "CMS_mass_ttbar_forQCD"])
+MergeNuisances.append(["QCDscale_ttbar", "QCDscale_ttbar_forQCD"])
+MergeNuisances.append(["pdf_ttbar", "pdf_ttbar_forQCD"])
+MergeNuisances.append(["mass_ttbar", "mass_ttbar_forQCD"])
 MergeNuisances.append(["lumi_13TeV", "lumi_13TeV_forQCD"])
 
 #================================================================================================ 

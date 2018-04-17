@@ -927,7 +927,7 @@ class DatacardColumn():
 	# Treat QCD MET shape nuisance
 	myQCDMetshapeFoundStatus = False
 	for j in range(0,len(self._nuisanceResults)):
-	    if "CMS_Hptntj_QCDkbg_metshape" in self._nuisanceResults[j].getId():
+	    if "CMS_Hptntj_fake_t_shape" in self._nuisanceResults[j].getId():
                 myQCDMetshapeFoundStatus = True
 		hDenominator = None
 		hNumerator = None
@@ -951,7 +951,7 @@ class DatacardColumn():
                     raise Exception()
 		systematicsForMetShapeDifference.createSystHistograms(self._rateResult._histograms[0], hUp, hDown, hNumerator, hDenominator, quietMode=False)
         if not myQCDMetshapeFoundStatus and self.typeIsQCDinverted():
-            print ShellStyles.WarningLabel()+"QCD metshape uncertainty has not been rebinned, please check that it has the name 'QCD_metshape'!"
+            print ShellStyles.WarningLabel()+"QCD metshape uncertainty has not been rebinned, please check that it has the name 'CMS_Hptntj_fake_t_shape'!"
 
         # Update root histo with uncertainties to contain the binned version
         if self._cachedShapeRootHistogramWithUncertainties != None:
