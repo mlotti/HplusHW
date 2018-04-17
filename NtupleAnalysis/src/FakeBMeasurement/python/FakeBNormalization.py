@@ -63,6 +63,10 @@ class FakeBNormalizationManager:
         self._binLabels    = binLabels
         self._sources      = {}
         self._commentLines = []
+        self._NEvtsCR1       = {}
+        self._NEvtsCR1_Error = {}
+        self._NEvtsCR2       = {}
+        self._NEvtsCR2_Error = {}
         self._TF           = {} # Transfer Factor (TF)
         self._TF_Error     = {}
         self._TF_Up        = {}
@@ -172,6 +176,10 @@ class FakeBNormalizationManager:
         if TF != None:
             # Replace bin label with histo title (has exact binning info)
             self._BinLabelMap[binLabel] = self.getNiceBinLabel(hFakeB_CR2.GetTitle())
+            self._NEvtsCR1[binLabel]       = nCR1
+            self._NEvtsCR1_Error[binLabel] = nCR1_Error
+            self._NEvtsCR2[binLabel]       = nCR2
+            self._NEvtsCR2_Error[binLabel] = nCR2_Error
             self._TF[binLabel   ]       = TF
             self._TF_Error[binLabel]    = TF_Error
             self._TF_Up[binLabel]       = TF_Up
@@ -444,8 +452,8 @@ class FakeBNormalizationManager:
         and whether it is within an acceptable relative error
         '''
         # Define error warning/tolerance on relative errors
-        okay = 0.05 #  5 %
-        warn = 0.15 # 15 %
+        okay = 2.0/(len(self._BinLabelMap.keys()))
+        warn = 5.0/(len(self._BinLabelMap.keys()))
 
         # Check the uncertainties on the normalization factors
         for k in self._BinLabelMap:
@@ -454,7 +462,8 @@ class FakeBNormalizationManager:
             relError     = self._TF_Error[k]/self._TF[k]
             if 0: 
                 print "bin = %s , relErrorUp = %s, relErrorDown = %s " % (k, relErrorUp, relErrorDown)
-
+                
+            '''
             #self._addDqmEntry(self._BinLabelMap[k], "R", self._TF[k], 1.00, 1.00)
             self._addDqmEntry(self._BinLabelMap[k], "#frac{R + #sigma_{R}}{R}", +relErrorUp, 1+okay, 1+warn)
             self._addDqmEntry(self._BinLabelMap[k], "#frac{R - #sigma_{R}}{R}", 1.0-relErrorDown, okay, warn)
@@ -462,6 +471,20 @@ class FakeBNormalizationManager:
             # absDelta = abs(self._FakeBNormalizationUp[k]-self._FakeBNormalization[k])
             # maxError = max(absDelta, abs(self._FakeBNormalizationDown[k]-self._FakeBNormalizationUp[k]))
             # self._addDqmEntry(self._BinLabelMap[k], "value", maxError, 0.40, 0.50) # okTolerance, warnTolerance
+            '''
+            NCR1 = 0
+            NCR2 = 0
+            for j in self._NEvtsCR1:
+                NCR1 += self._NEvtsCR1[j]
+            for j in self._NEvtsCR2:
+                NCR2 += self._NEvtsCR2[j]
+            print "NCR1 = %0.1f, NCR2 = %0.1f, k = %s" % (NCR1, NCR2, k)
+            print "NCR1 = %s, NCR2 = %s, k = %s" % (NCR1, NCR2, k)
+            self._addDqmEntry(self._BinLabelMap[k], "N_{CR1}", self._NEvtsCR1[k], self._NEvtsCR1[k]*okay, self._NEvtsCR1[k]*warn)
+            self._addDqmEntry(self._BinLabelMap[k], "#frac{#sigma_{CR1}}{N_{CR1}}", self._NEvtsCR1_Error[k]/NCR1, okay, warn)
+            self._addDqmEntry(self._BinLabelMap[k], "N_{CR2}", self._NEvtsCR2[k], self._NEvtsCR2[k]*okay, self._NEvtsCR2[k]*warn)
+            self._addDqmEntry(self._BinLabelMap[k], "#frac{#sigma_{CR2}}{N_{CR2}}", self._NEvtsCR2_Error[k]/NCR2, okay, warn)
+
             
         # Construct the DQM histogram
         nBinsX = len(self._dqmKeys[self._dqmKeys.keys()[0]].keys())
