@@ -24,14 +24,14 @@ import re
 #================================================================================================  
 
 LightAnalysis = True 
-IntermediateAnalysis = False
+IntermediateAnalysis = True
 HeavyAnalysis = True
 
 # Set mass points according to the chosen ranges
 LightMassPoints=[80,90,100,120,140,150,155,160]
 IntermediateMassPoints=[165,170,175]
 IntermediateMassPointsAll=[145,150,155,160,156,170,175,180,190,200]
-HeavyMassPoints=[180,200,220,250,300,400,500,750,1000,2000,3000]
+HeavyMassPoints=[180,200,220,250,300,400,500,750,800,1000,2000,2500,3000] #, 5000, 7000, 10000]
 
 # Set mass points
 MassPoints = []
@@ -43,11 +43,12 @@ if HeavyAnalysis:
     MassPoints+=LightMassPoints[:]+HeavyMassPoints[:]
 
 # For intermediate-only generation, use all intermediate samples (also overlapping)
-if not LightAnalysis and not HeavyAnalysis and IntermediateAnalysis:
+IntermediateAnalysisOnly = not LightAnalysis and not HeavyAnalysis and IntermediateAnalysis
+if IntermediateAnalysisOnly:
     MassPoints+=IntermediateMassPointsAll[:]    
 
 # Set mass points for control plots (overriding the previous settings):
-# MassPoints = [500]
+#MassPoints = [200]
 
 #================================================================================================  
 # Options
@@ -60,7 +61,7 @@ OptionMassShape="TransverseMass" # Use "FullMass" in order to use invariant mass
 ToleranceForLuminosityDifference=0.05 # Tolerance for throwing error on luminosity difference (0.01=1 percent agreement is required)
 
 # Control plots and blinding policy
-OptionDoControlPlots= not True #FIXME: If you want control plots, switch this to true!
+OptionDoControlPlots= False #FIXME: If you want control plots, switch this to true!
 OptionCtrlPlotsAfterAllSelections=True # Produce control plots after all selections (all selections for transverse mass)
 OptionBlindThreshold=None # If signal exceeds this fraction of expected events, data is blinded; set to None to disable
 
@@ -211,27 +212,33 @@ EWKFakeIdList=[]
 signalTemplate=DataGroup(datasetType="Signal", histoPath=histoPathInclusive, shapeHistoName=shapeHistoName)
 mergeColumnsByLabel=[]
 
-for mass in LightMassPoints:
-    myMassList=[mass]
-    hwx=signalTemplate.clone()
-    hwx.setLabel("HW_M"+str(mass)+"_CMS_Hptntj")
-    hwx.setLandSProcess(0)
-    hwx.setValidMassPoints(myMassList)
-    hwx.setNuisances(myTrgSystematics[:]+myTauIDSystematics[:]+myTauMisIDSystematics[:]
-                     +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
-#                     +["xsect_ttbar","lumi_13TeV"])
-                     +["QCDscale_ttbar","pdf_ttbar","mass_ttbar","lumi_13TeV"])
-    hwx.setDatasetDefinition("TTToHplusBWB_M"+str(mass))
-    DataGroups.append(hwx)
+if not IntermediateAnalysisOnly:
+    for mass in LightMassPoints:
+        myMassList=[mass]
+        hwx=signalTemplate.clone()
+        hwx.setLabel("HW_M"+str(mass)+"_CMS_Hptntj")
+        hwx.setLandSProcess(0)
+        hwx.setValidMassPoints(myMassList)
+        hwx.setNuisances(myTrgSystematics[:]+myTauIDSystematics[:]+myTauMisIDSystematics[:]
+                         +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
+#                         +["xsect_ttbar","lumi_13TeV"])
+                         +["QCDscale_ttbar","pdf_ttbar","mass_ttbar","lumi_13TeV"])
+        hwx.setDatasetDefinition("TTToHplusBWB_M"+str(mass))
+        DataGroups.append(hwx)
 for mass in HeavyMassPoints+IntermediateMassPoints:
     myMassList=[mass]
     hx=signalTemplate.clone()
     hx.setLabel("CMS_Hptntj_Hp"+str(mass))
     hx.setLandSProcess(0)
     hx.setValidMassPoints(myMassList)
-    hx.setNuisances(myTrgSystematics[:]+myTauIDSystematics[:]+myTauMisIDSystematics[:]
-                    +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
-                    +["lumi_13TeV"])
+    hxNuisanceList = myTrgSystematics[:]+myTauIDSystematics[:]+myTauMisIDSystematics[:]+myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]+["lumi_13TeV"]
+    if IntermediateAnalysisOnly:
+        if mass in IntermediateMassPointsAll:
+            hxNuisanceList += ["CMS_Hptntj_NLO_vs_LO"]
+    else:
+        if mass in IntermediateMassPoints:
+            hxNuisanceList += ["CMS_Hptntj_NLO_vs_LO"]
+    hx.setNuisances(hxNuisanceList)
     hx.setDatasetDefinition("HplusTB_M"+str(mass))
     DataGroups.append(hx)
 
@@ -322,6 +329,9 @@ else:
     # Example of how to merge columns
     # mergeColumnsByLabel.append({"label": labelPrefix+"EWK", "mergeList": [labelPrefix+"W",labelPrefix+"DY"]}) #,labelPrefix+"VV"]})
 
+# Reserve column 2 (this was necessary for LandS; code could be updated to combine for this piece)
+DataGroups.append(DataGroup(label="res.", landsProcess=2,datasetType="None", validMassPoints=MassPoints))
+
 #================================================================================================  
 # Nuisance Parameters (aka systematic uncertainties, repredented by rows in the final datacard) 
 #================================================================================================ 
@@ -331,6 +341,10 @@ else:
 from HiggsAnalysis.LimitCalc.InputClasses import Nuisance
 ReservedNuisances=[]
 Nuisances=[]
+
+#====signal acceptance
+Nuisances.append(Nuisance(id="CMS_Hptntj_NLO_vs_LO", label="acceptance uncertainty for intermediate signal",
+    distr="lnN", function="Constant", value=0.10))
 
 #=====tau ID and mis-ID
 # tau ID
@@ -706,7 +720,7 @@ ControlPlots.append(ControlPlotInput(
                          "log": True,
                          "legendPosition": "SE",
                          "ratioLegendPosition": "right",
-                         "opts": {"ymin": 0.0009} },
+                         "opts": {"ymin": 0.0009,  "xmax": 0.75} },
 ))
 ControlPlots.append(ControlPlotInput(
     title            = "SelectedTau_Rtau_AfterStandardSelections",
@@ -718,7 +732,7 @@ ControlPlots.append(ControlPlotInput(
                          "log": True,
                          "legendPosition": "SE",
                          "ratioLegendPosition": "right",
-                         "opts": {"ymin": 0.0009} },
+                         "opts": {"ymin": 0.0009,  "xmin": 0.75} },
 ))
 #ControlPlots.append(ControlPlotInput(
 #    title            = "SelectedTau_DecayMode_AfterStandardSelections",
@@ -851,7 +865,7 @@ ControlPlots.append(ControlPlotInput(
                          "divideByBinWidth": True,
                          "unit": "GeV",
                          "log": True,
-                         "opts": {"ymin": 0.00009, "ymaxfactor": 10, "xmax": 500} },
+                         "opts": {"ymin": 0.00009, "ymaxfactor": 10, "xmax": 400} },
     flowPlotCaption  = "^{}E_{T}^{miss}", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 ControlPlots.append(ControlPlotInput(
@@ -1012,8 +1026,8 @@ if OptionCtrlPlotsAfterAllSelections:
         "unit": "",
         "log": True,
         "legendPosition": "SW",
-        "opts2": {"ymin": 0.2, "ymax": 1.8},
-        "opts": {"ymin": 0.009} }))
+        "opts": {"ymin": 0.009}, 
+        "opts2": {"ymin": 0.2, "ymax": 1.8} }))
     ControlPlots.append(ControlPlotInput(title="SelectedTau_Rtau_AfterAllSelections",
         histoName="SelectedTau_Rtau_AfterAllSelections",
         details={ "xlabel": "Selected #tau R_{#tau}",
@@ -1023,7 +1037,7 @@ if OptionCtrlPlotsAfterAllSelections:
         "log": True,
         "legendPosition": "SE",
         "ratioLegendPosition": "right",
-        "opts": {"ymin": 0.009} }))
+        "opts": {"ymin": 0.009, "xmin" : 0.75} }))
 #    ControlPlots.append(ControlPlotInput(title="SelectedTau_DecayMode_AfterAllSelections",
 #        histoName="SelectedTau_DecayMode_AfterAllSelections",
 #        details={ "xlabel": "Selected #tau Decay mode",
@@ -1252,3 +1266,38 @@ if OptionCtrlPlotsAfterAllSelections:
           "log": True,
           "legendPosition": "SE",
           "opts": {"ymin": 0.09} }))
+
+# New control plots
+
+ControlPlots.append(ControlPlotInput(
+    title            = "Njets_AfterBtagSF",
+    histoName        = "Njets_AfterBtagSF",
+    details          = { "xlabel": "Number of selected jets",
+                         "ylabel": "Events",
+                         "divideByBinWidth": False,
+                         "unit": "",
+                         "log": True,
+                         "opts": {"ymin": 0.9} },
+))
+
+ControlPlots.append(ControlPlotInput(
+    title            = "JetPt_AfterBtagSF",
+    histoName        = "JetPt_AfterBtagSF",
+    details          = { "xlabel": "jet ^{}p_{T}",
+                         "ylabel": "Events/^{}#Deltap_{T}",
+                         "divideByBinWidth": True,
+                         "unit": "GeV/c",
+                         "log": True,
+                         "opts": {"ymin": 0.0009, "ymaxfactor": 10, "xmax": 500} },
+))
+
+ControlPlots.append(ControlPlotInput(
+    title            = "BJetPt_AfterBtagSF",
+    histoName        = "BJetPt_AfterBtagSF",
+    details          = { "xlabel": "b jet ^{}p_{T}",
+                         "ylabel": "Events/^{}#Deltap_{T}",
+                         "divideByBinWidth": True,
+                         "unit": "GeV/c",
+                         "log": True,
+                         "opts": {"ymin": 0.0009, "ymaxfactor": 10, "xmax": 500} },
+))
