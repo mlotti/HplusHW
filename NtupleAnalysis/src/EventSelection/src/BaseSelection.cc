@@ -48,7 +48,7 @@ void BaseSelection::ensureAnalyzeAllowed(const EventID& iEventID) {
   if(fEventNumber == iEventID.event() &&
      fLumiNumber == iEventID.lumi() &&
      fRunNumber == iEventID.run()) {
-    std::string demangled = type(this);
+    std::string demangled = type(*this);
     throw hplus::Exception("LogicError") << "Called " << demangled << "::analyze() after it has already been called in event " 
                            << fEventNumber << ":" << fLumiNumber << ":" << fRunNumber << ". This is not allowed. (exception from BaseSelection::ensureAnalyzeAllowed())";
   }

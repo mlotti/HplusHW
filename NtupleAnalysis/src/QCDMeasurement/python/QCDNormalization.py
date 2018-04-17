@@ -984,8 +984,10 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
 
     def calculateNormalizationCoefficients(self, dataHisto, fitOptions, FITMIN, FITMAX, **kwargs):
         qcdTemplate = self._templates["QCD_Inverted"]
-        ewkInclusiveTemplate = self._templates["EWKInclusive_Baseline"]
-        templatesToBeFitted = [qcdTemplate, ewkInclusiveTemplate]
+        ####qcdTemplate = self._templates["FakeTau_Inverted"]
+        ewkTemplate = self._templates["EWKInclusive_Baseline"]
+        ####ewkTemplate = self._templates["EWKGenuineTaus_Baseline"]
+        templatesToBeFitted = [qcdTemplate, ewkTemplate]
         self._checkInputValidity(templatesToBeFitted)
         
         #===== Fit templates
@@ -997,14 +999,21 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
         binLabel = self._templates[self._requiredTemplateList[0]].getBinLabel()
         dataTemplate.setHistogram(dataHisto, binLabel)
         dataTemplate.plot()
-        dataTemplate.setFitter(FitFunction("FitDataWithQCDAndInclusiveEWK",
-                                           QCDFitFunction = qcdTemplate.getFitFunction(),
-                                           parQCD = qcdTemplate.getFittedParameters(),
-                                           QCDnorm = 1.0,
-                                           EWKInclusiveFunction = ewkInclusiveTemplate.getFitFunction(),
-                                           parEWK = ewkInclusiveTemplate.getFittedParameters(),
-                                           EWKNorm = 1.0),
-                               FITMIN, FITMAX)
+        dataTemplate.setFitter(FitFunction("FitDataWithFakesAndGenuineTaus",
+                                           QCDAndFakesFitFunction = qcdTemplate.getFitFunction(),
+                                           parQCDAndFakes = qcdTemplate.getFittedParameters(),
+                                           QCDAndFakesnorm = 1.0,
+                                           EWKGenuineTausFitFunction = ewkTemplate.getFitFunction(),
+                                           parEWKGenuineTaus = ewkTemplate.getFittedParameters(),
+                                           EWKGenuineTausNorm = 1.0),FITMIN, FITMAX)
+#    dataTemplate.setFitter(FitFunction("FitDataWithQCDAndInclusiveEWK",
+#                                           QCDFitFunction = qcdTemplate.getFitFunction(),
+#                                           parQCD = qcdTemplate.getFittedParameters(),
+#                                           QCDnorm = 1.0,
+#                                           EWKInclusiveFunction = ewkTemplate.getFitFunction(),
+#                                           parEWK = ewkTemplate.getFittedParameters(),
+#                                           EWKNorm = 1.0),
+#                                           FITMIN, FITMAX)
         #===== Do fit to data
         dataTemplate.setDefaultFitParam(defaultInitialValue=[1.0, 0.90, 0.10], defaultLowerLimit=[0.0, 0.0, 0.0], defaultUpperLimit=[10.0, 1.0, 1.0])
         dataTemplate.doFit(fitOptions)
