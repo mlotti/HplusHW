@@ -562,23 +562,28 @@ class DatacardColumn():
             myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
 
             if myDatasetRootHisto.isMC():
-                # Set signal xsection for heavy H+
-                if config.OptionLimitOnSigmaBr:
-                    if self._landsProcess <= 0:
-                        # Set cross section of sample to 1 pb in order to obtain limit on sigma x Br
-                        #myDatasetRootHisto.Delete()
-                        dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(1)
-                        myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
-                        if self._verbose:
-                            print "..... Assuming this is signal -> set cross section to 1 pb for limit calculation"
-                # for light H+, use 13 TeV ttbar xsect from https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
-                elif (not config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH" or self._label[:2] == "WH")):
+                # Set signal cross section for light H+
+                # Check the options in configuration
+                limitOnSigmaBr = False # use heavy signal model by default
+                if hasattr(config, 'OptionLimitOnSigmaBr'):
+                    OptionLimitOnSigmaBr = config.OptionLimitOnSigmaBr
+                limitOnBrBr = False # do not use light signal model by default
+                if hasattr(config, 'OptionLimitOnBrBr'):
+                    OptionLimitOnBrBr = config.OptionLimitOnBrBr
+                # For light H+, use 13 TeV ttbar xsect from https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
+                if not limitOnSigmaBr and (limitOnBrBr or (self._label.startswith("HW") or self._label.startswith("HH") or self._label.startswith("WH"))):
                      ttbarxsect = xsect.backgroundCrossSections.crossSection("TT", energy="13")
                      if abs(dsetMgr.getDataset(self.getDatasetMgrColumn()).getCrossSection() - ttbarxsect) > 0.0001:
-                         print ShellStyles.WarningLabel()+"Forcing light H+ xsection to 13 TeV ttbar cross section %f in DatacardColumn.py"%ttbarxsect
+                         print ShellStyles.WarningLabel()+"Forcing light H+ signal sample %s to 13 TeV ttbar cross section %f in DatacardColumn.py"%(self._label,ttbarxsect)
                          dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(ttbarxsect)
                          myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
-
+                # Set signal xsection for heavy H+
+                elif limitOnSigmaBr or not limitOnBrBr:
+                    if self._landsProcess <= 0:
+                        # Set cross section of sample to 1 pb in order to obtain limit on sigma x Br
+                        dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(1)
+                        myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
+                        print ShellStyles.WarningLabel()+"Forcing heavy H+ signal sample %s to normalization of 1 pb xsect in DatacardColumn.py"%self._label
 
                 # Normalize to luminosity
                 myDatasetRootHisto.normalizeToLuminosity(luminosity)
