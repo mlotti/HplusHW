@@ -1228,13 +1228,12 @@ class TableProducer:
         signalColumn="CMS_Hptntj_Hp"
         if light:
             signalColumn="HW"
-        myColumnOrder = [signalColumn,
-                         "QCDandFakeTau",
-                         "ttbar_t_genuine",
-                         "W_t_genuine",
-                         "singleTop_t_genuine",
-                         "DY_t_genuine",
-                         "VV_t_genuine"]
+        myColumnOrder = [signalColumn, 
+                         "ttbar_CMS_Hptntj", 
+                         "CMS_Hptntj_W", 
+                         "CMS_Hptntj_singleTop",
+                         "CMS_Hptntj_DY", 
+                         "CMS_Hptntj_VV"]
 
 
         if self._h2tb:
@@ -1273,29 +1272,28 @@ class TableProducer:
                                ["CMS_eff_met_trg_MC","trigger MET leg eff. for MC"],
                                ["CMS_eff_e_veto","electron veto eff."],
                                ["CMS_eff_m_veto","muon veto eff."],
-                               # ["CMS_fake_eToTau","CMS fake eToTau"],
-                               # ["CMS_fake_muToTau","CMS fake muToTau"],
-                               # ["CMS_fake_jetToTau","CMS fake jetToTau"],
+                               ["CMS_fake_e_to_t","electrons mis-id. as taus"],
+                               ["CMS_fake_m_to_t","muons mis-id. as taus"],
                                ["CMS_eff_b","b-tagging eff."],
                                ["CMS_fake_b","b-mistagging eff."],
                                ["CMS_scale_t","tau energy scale"],
                                ["CMS_scale_j","jet energy scale"],
                                ["CMS_scale_met","MET unclustered energy scale"],
                                ["CMS_res_j","jet energy resolution"],
-                               ["CMS_Hptntj_topPtReweight","top $p_T$ reweighting"],
+                               ["CMS_topPtReweight","top $p_T$ reweighting"],
                                ["CMS_pileup","pileup reweighting"],
-                               ["CMS_scale_ttbar", "ttbar scale"],
-                               ["CMS_pdf_ttbar", "ttbar pdf"],
-                               ["CMS_mass_ttbar", "ttbar mass"],
-                               ["CMS_scale_Wjets", "W+jets scale"],
-                               ["CMS_pdf_Wjets", "W+jets pdf"],
-                               ["CMS_scale_DY", "DY scale"],
-                               ["CMS_pdf_DY", "DY pdf"],
-                               ["CMS_scale_VV", "diboson scale"],
-                               ["CMS_pdf_VV", "diboson pdf"],
+                               ["QCDscale_ttbar", "ttbar scale"],
+                               ["pdf_ttbar", "ttbar pdf"],
+                               ["mass_ttbar", "ttbar mass"],
+                               ["QCDscale_Wjets", "W+jets scale"],
+                               ["pdf_Wjets", "W+jets pdf"],
+                               ["QCDscale_DY", "DY scale"],
+                               ["pdf_DY", "DY pdf"],
+                               ["QCDscale_VV", "diboson scale"],
+                               ["pdf_VV", "diboson pdf"],
                                ["lumi_13TeV","luminosity (13 TeV)"],
-                               ["CMS_Hptntj_QCDbkg_templateFit","Fake tau template fit"],
-                               ["CMS_Hptntj_QCDkbg_metshape","Fake tau MET shape"]
+                               ["CMS_Hptntj_fake_t_fit","Fake tau template fit"],
+                               ["CMS_Hptntj_fake_t_shape","Fake tau MET shape"]
                                ]
             
         # Make table - The horror!
@@ -1437,7 +1435,7 @@ class TableProducer:
         myOutput += "\\noindent\\makebox[\\textwidth]{\n"
         myOutput += "\\begin{tabular}{l|c|c|ccccc}\n"
         myOutput += "\\hline\n"
-        myOutput += "& Signal & Fake tau & \multicolumn{5}{c}{EWK+t\={t} genuine tau}"
+        myOutput += "& Signal & Jet \to \taujet & \multicolumn{5}{c}{EWK+t\={t} genuine tau and e/\mu \to \taujet}"
         myOutput += "\n \\\\"
         myCaptionLine = [["","","","t\={t}","W+jets","single top","DY","Diboson"]] 
         # Calculate dimensions of tables
