@@ -2338,7 +2338,7 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
 
   // Defining the splitting of phase-space as the eta of the Tetrajet b-jet
   std::vector<float> myFactorisationInfo;
-  // myFactorisationInfo.push_back(topData.getTetrajetBJet().pt() ); //new
+  myFactorisationInfo.push_back(topData.getTetrajetBJet().pt() ); //new
   myFactorisationInfo.push_back(topData.getTetrajetBJet().eta() );
   fCommonPlots.setFactorisationBinForEvent(myFactorisationInfo);
   // fNormalizationSystematicsSignalRegion.setFactorisationBinForEvent(myFactorisationInfo); //fixme
@@ -2898,7 +2898,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
 
   // Defining the splitting of phase-space as the eta of the Tetrajet b-jet
   std::vector<float> myFactorisationInfo;
-  // myFactorisationInfo.push_back(topData.getTetrajetBJet().pt() ); //new
+  myFactorisationInfo.push_back(topData.getTetrajetBJet().pt() ); //new
   myFactorisationInfo.push_back(topData.getTetrajetBJet().eta() );
   fCommonPlots.setFactorisationBinForEvent(myFactorisationInfo);
   // fNormalizationSystematicsControlRegion.setFactorisationBinForEvent(myFactorisationInfo); //fixme

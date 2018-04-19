@@ -381,8 +381,8 @@ def main(opts):
         #folderList1 = [h for h in folderList if "MET" in h]
         #folderList1 = [h for h in folderList if "TetrajetBJetPt" in h]
         folderList1 = [h for h in folderList if "TetrajetBJetEta" in h]
-        folderList2 = [h for h in folderList1 if "CRtwo" in h or "VR" in h or "SR" in h or "CRone" in h]
-        
+        folderList2 = [h for h in folderList1 if "VR" in h or "SR" in h or "CRone" in h or "CRtwo" in h  or "CRthree" in h  or "CRfour" in h]
+
         # For-loop: All folders
         histoPaths = []
         for f in folderList2:
@@ -464,6 +464,10 @@ def GetHistoPathDict(histoList, printList=False):
             region = "CRone"
         elif "_CRtwo" in h:
             region = "CRtwo"
+        elif "_CRthree" in h:
+            region = "CRthree"
+        elif "_CRfour" in h:
+            region = "CRfour"
         else:
             raise Exception("Could not determine Control Region for histogram %s" % (h) )
         # Save histogram in dictionary
@@ -542,7 +546,7 @@ def PlotHistosAndCalculateTF(datasetsMgr, histoList, binLabels, opts):
     _kwargs = GetHistoKwargs(histoList[0])
 
     # Get the root histos for all datasets and Control Regions (CRs)
-    regions = ["SR", "VR", "CRone", "CRtwo"]
+    regions = ["SR", "VR", "CRone", "CRtwo", "CRthree", "CRfour"]
     rhDict  = GetRootHistos(datasetsMgr, histoList, regions, binLabels)
 
     #=========================================================================================
@@ -552,10 +556,10 @@ def PlotHistosAndCalculateTF(datasetsMgr, histoList, binLabels, opts):
     if opts.inclusiveOnly:
         #manager.CalculateTransferFactor(binLabels[0], rhDict["CRone-FakeB"], rhDict["CRtwo-FakeB"])
         binLabel = "Inclusive"
-        manager.CalculateTransferFactor("Inclusive", rhDict["FakeB-CRone-Inclusive"], rhDict["FakeB-CRtwo-Inclusive"])
+        manager.CalculateTransferFactor("Inclusive", rhDict["FakeB-CRone-Inclusive"], rhDict["FakeB-CRtwo-Inclusive"], rhDict["FakeB-CRthree-Inclusive"], rhDict["FakeB-CRfour-Inclusive"])
     else:
         for bin in binLabels:
-            manager.CalculateTransferFactor(bin, rhDict["FakeB-CRone-%s" % bin], rhDict["FakeB-CRtwo-%s" % bin])
+            manager.CalculateTransferFactor(bin, rhDict["FakeB-CRone-%s" % bin], rhDict["FakeB-CRtwo-%s" % bin], rhDict["FakeB-CRthree-%s" % bin], rhDict["FakeB-CRfour-%s" % bin])
 
     # Get unique a style for each region
     for k in rhDict:

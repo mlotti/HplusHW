@@ -67,6 +67,10 @@ class FakeBNormalizationManager:
         self._NEvtsCR1_Error = {}
         self._NEvtsCR2       = {}
         self._NEvtsCR2_Error = {}
+        self._NEvtsCR3       = {}
+        self._NEvtsCR3_Error = {}
+        self._NEvtsCR4       = {}
+        self._NEvtsCR4_Error = {}
         self._TF           = {} # Transfer Factor (TF)
         self._TF_Error     = {}
         self._TF_Up        = {}
@@ -133,7 +137,7 @@ class FakeBNormalizationManager:
         else:
             raise Exception("Error: _TF dictionary has no key \"%s\"! "% (binLabel) )
     
-    def CalculateTransferFactor(self, binLabel, hFakeB_CR1, hFakeB_CR2, verbose=False):
+    def CalculateTransferFactor(self, binLabel, hFakeB_CR1, hFakeB_CR2, hFakeB_CR3, hFakeB_CR4, verbose=False):
         '''
         Calculates the combined normalization and, if specified, 
         varies it up or down by factor (1+variation)
@@ -151,11 +155,14 @@ class FakeBNormalizationManager:
         # NOTES: Add EWKGenuineB TF, Add Data TF, add QCD TF, Add EWK TF, add MCONLY TFs
         nCR1_Error = ROOT.Double(0.0)
         nCR2_Error = ROOT.Double(0.0)
-        # nTotalError = ROOT.TMath.Sqrt(nSRerror**2 + nCRError**2)
+        nCR3_Error = ROOT.Double(0.0)
+        nCR4_Error = ROOT.Double(0.0)
         
+        # Get Events in all CRs and their associated errors
         nCR1 = hFakeB_CR1.IntegralAndError(1, hFakeB_CR1.GetNbinsX()+1, nCR1_Error)
         nCR2 = hFakeB_CR2.IntegralAndError(1, hFakeB_CR2.GetNbinsX()+1, nCR2_Error)
-        # nTotal = nCR1 + nCR2
+        nCR3 = hFakeB_CR3.IntegralAndError(1, hFakeB_CR3.GetNbinsX()+1, nCR3_Error)
+        nCR4 = hFakeB_CR4.IntegralAndError(1, hFakeB_CR4.GetNbinsX()+1, nCR4_Error)
 
         # Calculate Transfer Factor (TF) from Control Region (R) to Signal Region (SR): R = N_CR1/ N_CR2
         TF       = None
@@ -180,6 +187,10 @@ class FakeBNormalizationManager:
             self._NEvtsCR1_Error[binLabel] = nCR1_Error
             self._NEvtsCR2[binLabel]       = nCR2
             self._NEvtsCR2_Error[binLabel] = nCR2_Error
+            self._NEvtsCR3[binLabel]       = nCR3
+            self._NEvtsCR3_Error[binLabel] = nCR3_Error
+            self._NEvtsCR4[binLabel]       = nCR4
+            self._NEvtsCR4_Error[binLabel] = nCR4_Error
             self._TF[binLabel   ]       = TF
             self._TF_Error[binLabel]    = TF_Error
             self._TF_Up[binLabel]       = TF_Up
@@ -452,9 +463,9 @@ class FakeBNormalizationManager:
         and whether it is within an acceptable relative error
         '''
         # Define error warning/tolerance on relative errors
-        okay = 2.0/(len(self._BinLabelMap.keys()))
-        warn = 5.0/(len(self._BinLabelMap.keys()))
-
+        okay  = 1.0/(len(self._BinLabelMap.keys()))
+        warn  = 0.5*okay
+        NEvts = []
         # Check the uncertainties on the normalization factors
         for k in self._BinLabelMap:
             relErrorUp   = abs(self._TF_Up[k])/(self._TF[k])
@@ -462,29 +473,37 @@ class FakeBNormalizationManager:
             relError     = self._TF_Error[k]/self._TF[k]
             if 0: 
                 print "bin = %s , relErrorUp = %s, relErrorDown = %s " % (k, relErrorUp, relErrorDown)
-                
-            '''
-            #self._addDqmEntry(self._BinLabelMap[k], "R", self._TF[k], 1.00, 1.00)
-            self._addDqmEntry(self._BinLabelMap[k], "#frac{R + #sigma_{R}}{R}", +relErrorUp, 1+okay, 1+warn)
-            self._addDqmEntry(self._BinLabelMap[k], "#frac{R - #sigma_{R}}{R}", 1.0-relErrorDown, okay, warn)
-            self._addDqmEntry(self._BinLabelMap[k], "#frac{#sigma_{R}}{R}"    , +relError, okay, warn)
-            # absDelta = abs(self._FakeBNormalizationUp[k]-self._FakeBNormalization[k])
-            # maxError = max(absDelta, abs(self._FakeBNormalizationDown[k]-self._FakeBNormalizationUp[k]))
-            # self._addDqmEntry(self._BinLabelMap[k], "value", maxError, 0.40, 0.50) # okTolerance, warnTolerance
-            '''
+
+            # Add DQM entries
             NCR1 = 0
             NCR2 = 0
+            NCR3 = 0
+            NCR4 = 0
             for j in self._NEvtsCR1:
                 NCR1 += self._NEvtsCR1[j]
+                NEvts.append(self._NEvtsCR1[j])
             for j in self._NEvtsCR2:
                 NCR2 += self._NEvtsCR2[j]
-            print "NCR1 = %0.1f, NCR2 = %0.1f, k = %s" % (NCR1, NCR2, k)
-            print "NCR1 = %s, NCR2 = %s, k = %s" % (NCR1, NCR2, k)
-            self._addDqmEntry(self._BinLabelMap[k], "N_{CR1}", self._NEvtsCR1[k], self._NEvtsCR1[k]*okay, self._NEvtsCR1[k]*warn)
-            self._addDqmEntry(self._BinLabelMap[k], "#frac{#sigma_{CR1}}{N_{CR1}}", self._NEvtsCR1_Error[k]/NCR1, okay, warn)
-            self._addDqmEntry(self._BinLabelMap[k], "N_{CR2}", self._NEvtsCR2[k], self._NEvtsCR2[k]*okay, self._NEvtsCR2[k]*warn)
-            self._addDqmEntry(self._BinLabelMap[k], "#frac{#sigma_{CR2}}{N_{CR2}}", self._NEvtsCR2_Error[k]/NCR2, okay, warn)
+                NEvts.append(self._NEvtsCR2[j])                
+            for j in self._NEvtsCR3:
+                NCR3 += self._NEvtsCR3[j]
+                NEvts.append(self._NEvtsCR3[j])
+            for j in self._NEvtsCR4:
+                NCR4 += self._NEvtsCR4[j]
+                NEvts.append(self._NEvtsCR4[j])                
 
+            if 0:
+                print "NCR1[%s] = %0.1f, NCR2[%s] = %0.1f, k = %s" % (k, self._NEvtsCR1[k], k, self._NEvtsCR2[k], k)
+                print "NCR1 = %s, NCR2 = %s, k = %s" % (NCR1, NCR2, k)
+                print "error/NCR1[%s] = %0.2f, error/NCR2[%s] = %0.2f" % (k, self._NEvtsCR1_Error[k]/self._NEvtsCR1[k], k, self._NEvtsCR2_Error[k]/self._NEvtsCR2[k])
+            
+            # Add DQM plot entries
+            self._addDqmEntry(self._BinLabelMap[k], "N_{CR1}", self._NEvtsCR1[k], NCR1*okay, NCR1*warn)
+            self._addDqmEntry(self._BinLabelMap[k], "N_{CR2}", self._NEvtsCR2[k], NCR2*okay, NCR2*warn)
+            self._addDqmEntry(self._BinLabelMap[k], "N_{CR3}", self._NEvtsCR3[k], NCR3*okay, NCR3*warn)
+            self._addDqmEntry(self._BinLabelMap[k], "N_{CR4}", self._NEvtsCR4[k], NCR4*okay, NCR4*warn)
+            # self._addDqmEntry(self._BinLabelMap[k], "#frac{#sigma_{CR1}}{N_{CR1}}", self._NEvtsCR1_Error[k]/NCR1, 0.05, 0.15)
+            # self._addDqmEntry(self._BinLabelMap[k], "#frac{#sigma_{CR2}}{N_{CR2}}", self._NEvtsCR2_Error[k]/NCR2, 0.05, 0.15)
             
         # Construct the DQM histogram
         nBinsX = len(self._dqmKeys[self._dqmKeys.keys()[0]].keys())
@@ -493,9 +512,17 @@ class FakeBNormalizationManager:
 
         # Customise axes
         h.GetXaxis().SetLabelSize(15)
-        h.GetYaxis().SetLabelSize(15)        
-        h.SetMinimum(0)
-        h.SetMaximum(3)
+        h.GetYaxis().SetLabelSize(10)
+
+        # Set Min and Max of z-axis
+        if 0: # red, yellow, green for DQM 
+            h.SetMinimum(0)
+            h.SetMaximum(3)
+        else: # pure entries instead of red, yellow, green
+            h.SetMinimum(min(NEvts)*0.25)
+            h.SetMaximum(round(max(NCR1, NCR2, NCR3, NCR4)))
+            h.SetContour(10)
+            #h.SetContour(3)
         if 0:
             h.GetXaxis().LabelsOption("v")
             h.GetYaxis().LabelsOption("v")
@@ -525,24 +552,33 @@ class FakeBNormalizationManager:
         style.setGridY(False)
         style.setWide(True, 0.15)
         
-        # Set the colour styling
-        palette = array.array("i", [ROOT.kGreen+1, ROOT.kYellow, ROOT.kRed])
-        ROOT.gStyle.SetPalette(3, palette)
+        # Set the colour styling (red, yellow, green)
+        if 0:
+            palette = array.array("i", [ROOT.kGreen+1, ROOT.kYellow, ROOT.kRed])
+            ROOT.gStyle.SetPalette(3, palette)
+        else:
+            # https://root.cern.ch/doc/master/classTColor.html
+            ROOT.gStyle.SetPalette(ROOT.kLightTemperature)
+            # ROOT.gStyle.SetPalette(ROOT.kColorPrintableOnGrey)
+            #tdrstyle.setRainBowPalette()
+            #tdrstyle.setDeepSeaPalette()
 
         # Create canvas        
         c = ROOT.TCanvas()
         c.SetLogx(False)
         c.SetLogy(False)
-        c.SetLogz(False)
+        c.SetLogz(True)
         c.SetGridx()
         c.SetGridy()
-        h.Draw("colz")
+        h.Draw("COLZ") #"COLZ TEXT"
+
 
         # Add CMS text and text with colour keys
-        histograms.addStandardTexts(cmsTextPosition="outframe")
-        histograms.addText(0.55, 0.80, "green  < %s %%" % (okay*100), size=20)
-        histograms.addText(0.55, 0.84, "yellow < %s %%" % (warn*100), size=20)
-        histograms.addText(0.55, 0.88, "red    > %s %%" % (warn*100), size=20)
+        histograms.addStandardTexts(cmsTextPosition="outframe") 
+        if 0:
+            histograms.addText(0.55, 0.80, "green < %.0f %%" % (okay*100), size=20)
+            histograms.addText(0.55, 0.84, "yellow < %.0f %%" % (warn*100), size=20)
+            histograms.addText(0.55, 0.88, "red > %.0f %%" % (warn*100), size=20)
 
         # Save the canvas to a file
         backup = ROOT.gErrorIgnoreLevel
@@ -564,7 +600,7 @@ class FakeBNormalizationManager:
         #if nWarnings > 0 or nErrors > 0:
         if nErrors > 0:
             msg = "DQM has %d warnings and %d errors! Please have a look at %s.png." % (nWarnings, nErrors, os.path.basename(plotName))
-            self.Print(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle(), True)
+            self.Verbose(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle(), True)
         return
 
     def _addDqmEntry(self, binLabel, name, value, okTolerance, warnTolerance):
@@ -576,13 +612,16 @@ class FakeBNormalizationManager:
         if not binLabel in self._dqmKeys.keys():
             self._dqmKeys[binLabel] = OrderedDict()
         result = red
-        if abs(value) < okTolerance: # Green
+
+        if abs(value) > okTolerance:
             result = green
-        elif abs(value) < warnTolerance: # Yellow
+        elif abs(value) > warnTolerance:
             result = yellow
-        else:# Red
+        else:
             pass
-        self._dqmKeys[binLabel][name] = result
+
+        #self._dqmKeys[binLabel][name] = result
+        self._dqmKeys[binLabel][name] = value #iro
         return
 
     def _getSanityCheckTextForFractions(self, dataTemplate, binLabel, saveToComments=False):
