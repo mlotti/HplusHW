@@ -166,8 +166,8 @@ def main():
         myBlackList = ["M_180", "M_200" , "M_220" , "M_250" , "M_300" , "M_350" , "M_400" , "M_500" , "M_650",
                        "M_800", 
                        "M_1000", "M_1500", "M_2000", "M_2500", "M_3000", "M_5000", "M_7000", "M_10000", "QCD"]
-        Print("Adding all datasets from multiCRAB directory %s except %s" % (opts.mcrab, (",".join(myBlackList))) )
-        Print("Vertex reweighting is done according to the chosen data era (%s)" % (",".join(dataEras)) )
+        Verbose("Adding all datasets from multiCRAB directory %s except %s" % (opts.mcrab, (",".join(myBlackList))) )
+        Verbose("Vertex reweighting is done according to the chosen data era (%s)" % (",".join(dataEras)) )
         # process.addDatasetsFromMulticrab(opts.mcrab, blacklist=myBlackList)
         if len(myBlackList) > 0:
             regex = "|".join(myBlackList)
@@ -185,7 +185,19 @@ def main():
 
     # Set splitting of phase-space (first bin is below first edge value and last bin is above last edge value)
     allSelections.CommonPlots.histogramSplitting = [        
-        ### Default binnins
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[60, 100], useAbsoluteValues=False),
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6, 2.1], useAbsoluteValues=True), # B) not bad for -1.0 < BDT < 0.4
+        ## PSet(label="TetrajetBjetPt" , binLowEdges=[120], useAbsoluteValues=False),
+        ## PSet(label="TetrajetBjetEta", binLowEdges=[0.6, 1.2, 1.8, 2.1], useAbsoluteValues=True), 
+        ## PSet(label="TetrajetBjetPt" , binLowEdges=[100], useAbsoluteValues=False),
+        ## PSet(label="TetrajetBjetEta", binLowEdges=[0.6, 0.9, 1.2, 1.5, 1.8, 2.1], useAbsoluteValues=True), 
+        ## PSet(label="TetrajetBjetPt" , binLowEdges=[80], useAbsoluteValues=False),
+        ## PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0], useAbsoluteValues=True), 
+        ### Default binning
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[60, 80, 140, 200], useAbsoluteValues=False), #Fotis
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.5, 2.1], useAbsoluteValues=True),  #Fotis
+        #PSet(label="TetrajetBjetPt" , binLowEdges=[50, 60, 80, 100, 160], useAbsoluteValues=False),
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.2, 0.4, 0.6, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True), 
         PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True), 
         ### Other attempts
         # PSet(label="TetrajetBjetEta", binLowEdges=[-2.2, -2.0, -1.6, -0.8, -0.4, +0.4, +0.8, +1.6, +2.0, +2.2], useAbsoluteValues=False), 

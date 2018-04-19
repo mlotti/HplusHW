@@ -438,7 +438,7 @@ class BRLimits:
         return isLight
         
 
-    def saveAsLatexTable(self, unblindedStatus=False, nDigits=3):
+    def saveAsLatexTable(self, unblindedStatus=False, nDigits=3, savePath=None):
         '''
         Save the table as tex format
         '''        
@@ -496,7 +496,12 @@ class BRLimits:
         fileName = "limitsTable.tex"
         openMode = "w"  
         Verbose("Opening file '%s' in mode '%s'" % (fileName, openMode), True)
-        f = open(fileName, openMode)
+        if savePath == None:
+            f = open(fileName, openMode)
+        else:
+            if not os.path.isdir(savePath):
+                raise Exception("Cannot save LaTeX table! The path provided (%s) is not a directory!" % (savePath))
+            f = open(os.path.join(savePath, fileName), openMode)
         f.write(s)
         f.close()
         Print("Wrote LaTeX table in file '%s'" % (fileName), True)

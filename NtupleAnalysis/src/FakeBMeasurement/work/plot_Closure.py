@@ -537,7 +537,9 @@ def GetHistoKwargs(histoName, ext, opts):
     if "tetrajetm" in hName:
         #_rebinX = 4
         _units  = "GeV/c^{2}"
-        _rebinX = systematics.getBinningForTetrajetMass(0)
+        #_rebinX = systematics.getBinningForTetrajetMass(0)
+        _rebinX = systematics.getBinningForTetrajetMass(9)
+        #_rebinX  = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetMass_AfterAllSelections"]
         binWmin, binWmax = GetBinWidthMinMax(_rebinX)
         _ylabel = _yNorm + " / %.0f-%.0f %s" % (binWmin, binWmax, _units)
         _xlabel = "m_{jjbb} (%s)" % (_units)

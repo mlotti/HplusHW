@@ -14,15 +14,15 @@ cd datacards_test4b/CombineResults_taujets_170913_192047
 
 EXAMPLES:
 ../../plotBRLimit_Hplus2tb.py [opts]
-../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY
-../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY --yMin 1e-3 --settings Default
-../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY --yMin 1e-3 --settings NoLumi
-../../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY --yMin 1e-3 --settings Default --url
-../../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY --yMin 1e-3 --yMax 10 --settings NoLumi
-
+../../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY --yMin 1e-3 --yMax 10 --subdir StatOnly --url
+../../../plotBRLimit_Hplus2tb.py --excludedArea --gridX --gridY --subdir  --yMin 1e-1
+../../../plotBRLimit_Hplus2tb.py --excludedArea --gridX --gridY --yMin 1e-1
+../../../plotBRLimit_Hplus2tb.py --excludedArea --gridX --gridY --yMin 1e-1 --yMax 50 --subdir StatOnly --url
+../../../plotBRLimit_Hplus2tb.py --excludedArea --gridX --gridY --yMin 1e-1 --yMax 50 --subdir StatPlusSyst --url
 
 LAST USED:
-../../../plotBRLimit_Hplus2tb.py --excludedArea --gridX --gridY --settings NoLumi --yMin 1e-1
+../../../plotBRLimit_Hplus2tb.py --excludedArea --yMin 0.1 --yMax 30 --subdir MVAm0p10to0p40_6BinsAbsEta_0PtBins_NoFatjetVeto
+../../../plotBRLimit_Hplus2tb.py --excludedArea --yMin 0.1 --yMax 30 --subdir MVAm0p10to0p40_6BinsAbsEta_0PtBins_NoFatjetVeto_StatOnly
 
 '''
 
@@ -77,6 +77,7 @@ def main(opts):
     if not opts.unblinded:
         msg="Working in BLINDED mode, i.e. I will not tell you the observed limit before you say please ..."
         Print(msg, True)
+
     limits = limit.BRLimits()
 
     # Enable OpenGL
@@ -99,6 +100,8 @@ def main(opts):
     # Use BR symbol for H+ decay channel with subscript or parentheses?
     if opts.parentheses:
         limit.useParentheses()
+    else:
+        limit.useSubscript(True)
     
     # Do the limit plots
     doBRlimit(limits, opts.unblinded, opts, logy=False)
@@ -111,6 +114,7 @@ def main(opts):
     
     # Save the Limits in a LaTeX table file
     limits.saveAsLatexTable(unblindedStatus=opts.unblinded, nDigits=opts.digits)
+    limits.saveAsLatexTable(unblindedStatus=opts.unblinded, nDigits=opts.digits, savePath=os.path.join(opts.saveDir, opts.subdir) )
     return
 
 
@@ -184,7 +188,7 @@ def doBRlimit(limits, unblindedStatus, opts, logy=False):
 
     if limit.BRassumption != "":
         plot.frame.GetYaxis().SetTitle("95% CL limit for #sigma_{H^{+}} (pb)")
-    else:
+    else:        
         plot.frame.GetYaxis().SetTitle(limit.sigmaBRlimit)
         # plot.frame.GetYaxis().SetTitle(limit.BRlimit)
 
@@ -208,7 +212,7 @@ def doBRlimit(limits, unblindedStatus, opts, logy=False):
     plot.save()
 
     # Save the plots
-    SavePlot(plot, saveName, os.path.join(opts.saveDir, opts.settings) )
+    SavePlot(plot, saveName, os.path.join(opts.saveDir, opts.subdir) )
 
     return
 
@@ -392,7 +396,7 @@ if __name__ == "__main__":
     GRIDY       = False
     MINY        = -1
     MAXY        = -1
-    SETTINGS    = ""
+    SUBDIR      = ""
     SAVEDIR     = "/afs/cern.ch/user/%s/%s/public/html/Combine" % (getpass.getuser()[0], getpass.getuser())
     URL         = False
 
@@ -440,8 +444,8 @@ if __name__ == "__main__":
     parser.add_option("--yMax", dest="yMax", default=MAXY, type="float",
                       help="Overwrite automaticly calculated maximum value of y-axis [default: %s]" % (MAXY) )
 
-    parser.add_option("--settings", dest="settings", type="string", default=SETTINGS,
-                      help="Sub-directory describing additional settings used when creating the limits (e.g. no lumi) [default: %s]" % SETTINGS) 
+    parser.add_option("--subdir", dest="subdir", type="string", default=SUBDIR,
+                      help="Sub-directory describing additional settings used when creating the limits (e.g. no lumi) [default: %s]" % SUBDIR) 
 
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR,
                       help="Directory where all plots will be saved [default: %s]" % SAVEDIR)

@@ -3,21 +3,10 @@
 INSTRUCTIONS:
 Designed for use with CONDOR
 
-The required minimum input is a multiCRAB directory with at least one dataset. If successfull
-a pseudo multiCRAB with name "analysis_YYMMDD_HHMMSS/" will be created, inside which each
-dataset has its own directory with the results (ROOT files with histograms). These can be later
-used as input to plotting scripts to get the desired results.
-
-
-PROOF:
-Enable only if your analysis is CPU-limited (e.g. limit calculation) With one analyzer at
-a time most probably you are I/O -limited. The limit is how much memory one process is using.
-
-
 USAGE:
-./runSystematics.py -m <multicrab_directory> -j <numOfCores> -i <DatasetName>
+./runSystematics.py -m <multicrab_directory> -i "Keyword1|Keyword2|Keyword3"
 or
-./runSystematics.py -m <multicrab_directory> -n 10 -e "Keyword1|Keyword2|Keyword3"
+./runSystematics.py -m <multicrab_directory> -e "Keyword1|Keyword2|Keyword3" -n 100
 
 ROOT:
 The available ROOT options for the Error-Ignore-Level are (const Int_t):
@@ -27,6 +16,7 @@ The available ROOT options for the Error-Ignore-Level are (const Int_t):
         kWarning  =   2000
         kError    =   3000
         kBreak    =   4000
+
 
 HistoLevel:
 For the histogramAmbientLevel each DEEPER level is a SUBSET of the rest. 
@@ -48,15 +38,14 @@ from optparse import OptionParser
 import time
 
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
-from HiggsAnalysis.NtupleAnalysis.AnalysisBuilder import AnalysisBuilder
-
+from HiggsAnalysis.NtupleAnalysis.AnalysisBuilder import AnalysisBuilder    
 
 import ROOT
-    
+
 #================================================================================================
 # Options
 #================================================================================================
-prefix      = "Hplus2tbAnalysis"
+prefix      = "FakeBMeasurement"
 postfix     = ""
 dataEras    = ["2016"]
 searchModes = ["80to1000"]
@@ -97,14 +86,14 @@ def main():
     tStart = time.time()
     Verbose("Started @ " + str(tStart), True)
 
-    # Require at least two arguments (script-name, path to multicrab)      
+    # Require at least two arguments (script-name, path to multicrab)     
     if len(sys.argv) < 2:
         Print("Not enough arguments passed to script execution. Printing docstring & EXIT.")
         print __doc__
         sys.exit(0)
     else:
         pass
-        
+
 
     # ================================================================================================
     # Setup the process
@@ -116,11 +105,8 @@ def main():
     for d in whiteList:
         maxEvents[d] = -1
         #maxEvents[d] = 100 #for testing
-        if  d == "ChargedHiggs_HplusTB_HplusToTB_M_650":
-            maxEvents[d] = 1000000
-            #maxEvents[d] = 2000000
     process = Process(prefix, postfix, maxEvents)
-                
+
     # ================================================================================================
     # Add the datasets (according to user options)
     # ================================================================================================
@@ -129,72 +115,74 @@ def main():
         process.addDatasetsFromMulticrab(opts.mcrab, includeOnlyTasks=opts.includeOnlyTasks)
     elif (opts.excludeTasks):
         Verbose("Adding all datasets except %s from multiCRAB directory %s" % (opts.excludeTasks, opts.mcrab))
-        Verbose("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
+        Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
         process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=opts.excludeTasks)
     else:
-        myBlackList = ["QCD_b",
-                       "ChargedHiggs_HplusTB_HplusToTB_M_180_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_200_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_220_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_250_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_300_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_350_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_400_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_500_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_800_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_1000_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_2000_ext1"
-                       "ChargedHiggs_HplusTB_HplusToTB_M_2500_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_3000_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_5000",
-                       "ChargedHiggs_HplusTB_HplusToTB_M_7000",
-                       "ChargedHiggs_HplusTB_HplusToTB_M_10000",
-                       ]
-        if opts.doSystematics:
-            whitelist = GetDatasetWhitelist(opts)
+        myBlackList = blackList
+        #myBlackList = ["M_180", "M_200" , "M_220" , "M_250" , "M_300" , "M_350" , "M_400" , "M_500" , "M_650",
+        #               "M_800", "M_1000", "M_1500", "M_2000", "M_2500", "M_3000", "M_5000", "M_7000", "M_10000"]
 
         # Extend the blacklist with datasets not in the group
-        myBlackList.extend(blackList)
+        #myBlackList.extend(blackList)
 
-        Verbose("Adding the following datasets from multiCRAB directory %s:\n\t%s" % (opts.mcrab, "\n\t".join(whitelist) ))
-        Verbose("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
-        if len(whitelist)>0:
-            process.addDatasetsFromMulticrab(opts.mcrab, includeOnlyTasks="|".join(whitelist))
-        elif len(myBlackList)>0:
-        #if len(myBlackList)>0:
-            process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks="|".join(myBlackList))
+        Verbose("Adding all datasets from multiCRAB directory %s except %s" % (opts.mcrab, (",".join(myBlackList))) )
+        Verbose("Vertex reweighting is done according to the chosen data era (%s)" % (",".join(dataEras)) )
+        regex = "|".join(myBlackList)
+        if len(myBlackList) > 0:
+            #print "regex = ", regex
+            #sys.exit()
+            process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=regex)
         else:
             process.addDatasetsFromMulticrab(opts.mcrab)
 
     # ================================================================================================
-    # Overwrite Default Settings  
+    # Overwrite Default Settings
     # ================================================================================================
     from HiggsAnalysis.NtupleAnalysis.parameters.hplus2tbAnalysis import allSelections
+
     allSelections.verbose = opts.verbose
     allSelections.histogramAmbientLevel = opts.histoLevel
-    # allSelections.BjetSelection.triggerMatchingApply = True
-    # allSelections.TopSelection.ChiSqrCutValue = 100.0
-    # allSelections.BJetSelection.numberOfBJetsCutValue = 0
-    # allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
 
+    # Set splitting of phase-space (first bin is below first edge value and last bin is above last edge value)
+    allSelections.CommonPlots.histogramSplitting = [        
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[120], useAbsoluteValues=False),
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.6, 1.2, 1.8, 2.1], useAbsoluteValues=True), 
+        ## PSet(label="TetrajetBjetPt" , binLowEdges=[100], useAbsoluteValues=False),
+        ## PSet(label="TetrajetBjetEta", binLowEdges=[0.6, 0.9, 1.2, 1.5, 1.8, 2.1], useAbsoluteValues=True), 
+        ## PSet(label="TetrajetBjetPt" , binLowEdges=[80], useAbsoluteValues=False),
+        ## PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0], useAbsoluteValues=True), 
+        ### Default binning
+        #PSet(label="TetrajetBjetEta", binLowEdges=[0.2, 0.4, 0.6, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True), 
+        PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True), 
+        ### Other attempts
+        # PSet(label="TetrajetBjetEta", binLowEdges=[-2.2, -2.0, -1.6, -0.8, -0.4, +0.4, +0.8, +1.6, +2.0, +2.2], useAbsoluteValues=False), 
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[100], useAbsoluteValues=False), # C) 
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 1.2, 1.8, 2.1], useAbsoluteValues=True), # C) 
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[60, 100], useAbsoluteValues=False), # B) not bad for -1.0 < BDT < 0.4
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 1.2, 1.8, 2.0], useAbsoluteValues=True), # B) not bad for -1.0 < BDT < 0.4
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[120, 200], useAbsoluteValues=False),          # A) not great for -1.0 < BDT < 0.4
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 1.2, 1.8, 2.1], useAbsoluteValues=True), # A) not great for -1.0 < BDT < 0.4
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 1.8, 2.0, 2.2], useAbsoluteValues=True), #so-so
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 1.2, 1.8], useAbsoluteValues=True), #|eta| < 0.4,  0.4 < |eta| < 1.2, 1.2 < |eta| < 1.8, |eta| > 1.8, 
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.2, 0.4, 0.8, 1.2, 1.6, 2.0, 2.2], useAbsoluteValues=True),
+        # PSet(label="TetrajetBjetEta", binLowEdges=[-1.8, -1.2, -0.4, 0.0, 0.4, 1.2, 1.8], useAbsoluteValues=False), 
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[40, 60, 100, 200, 300], useAbsoluteValues=False), # pT < 40, pT=40-60, pT=60-100, pT=100-200, pT > 200
+        ]
     
-    # ================================================================================================
-    # Add Analysis Variations
-    # ================================================================================================
-    # selections = allSelections.clone()
-    # process.addAnalyzer(prefix, Analyzer(prefix, config=selections, silent=False) ) #trigger passed from selections
-
+    # allSelections.BJetSelection.triggerMatchingApply = True # at least 1 trg b-jet matched to offline b-jets
+    # allSelections.Trigger.triggerOR = ["HLT_PFHT400_SixJet30_DoubleBTagCSV_p056"]
+    # allSelections.Trigger.triggerOR = ["HLT_PFHT450_SixJet40_BTagCSV_p056"]
 
     # ================================================================================================
     # Command Line Options
     # ================================================================================================ 
     # from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import applyAnalysisCommandLineOptions
     # applyAnalysisCommandLineOptions(sys.argv, allSelections)
-
     
-    #================================================================================================
+
+    # ================================================================================================
     # Build analysis modules
-    #================================================================================================
+    # ================================================================================================
     PrintOptions(opts)
     builder = AnalysisBuilder(prefix,
                               dataEras,
@@ -206,31 +194,44 @@ def main():
                               verbose=opts.verbose)
 
     # Add variations (e.g. for optimisation)
-    # builder.addVariation("METSelection.METCutValue", [100,120,140])
-    # builder.addVariation("AngularCutsBackToBack.workingPoint", ["Loose","Medium","Tight"])
-    # builder.addVariation("BJetSelection.triggerMatchingApply", [False])
-    # builder.addVariation("TopSelection.ChiSqrCutValue", [5, 10, 15, 20])
-
+    # builder.addVariation("BJetSelection.triggerMatchingApply", [True, False]) # At least 1 trg b-jet dR-matched to offline b-jets
+    # builder.addVariation("FakeBMeasurement.prelimTopFitChiSqrCutValue", [100, 20])
+    # builder.addVariation("FakeBMeasurement.prelimTopFitChiSqrCutDirection", ["<=", "==", ">="])
+    # builder.addVariation("FakeBMeasurement.numberOfBJetsCutValue", [0, 1])
+    # builder.addVariation("FakeBMeasurement.numberOfBJetsCutDirection", ["=="])
+    # builder.addVariation("FakeBMeasurement.numberOfBJetsCutDirection", ["<=", "==", ">="])
+    # builder.addVariation("FakeBMeasurement.numberOfInvertedBJetsCutValue", [0, 1])
+    # builder.addVariation("FakeBMeasurement.numberOfInvertedBJetsCutDirection", [">="])
+    # builder.addVariation("FakeBMeasurement.invertedBJetDiscr", "")
+    # builder.addVariation("FakeBMeasurement.invertedBJetDiscrWorkingPoint", "Loose")
+    # builder.addVariation("FakeBMeasurement.invertedBJetsSortType", ["Random", "DescendingBDiscriminator"])
+    # builder.addVariation("FakeBMeasurement.invertedBJetsDiscrMaxCutValue", [0.82, 0.80, 0.75, 0.70])
+    # builder.addVariation("TopSelection.ChiSqrCutValue", [100])
+    # builder.addVariation("Trigger.triggerOR", [["HLT_PFHT450_SixJet40"], ["HLT_PFHT400_SixJet30"]])
+    # builder.addVariation("TopologySelection.FoxWolframMomentCutValue", [0.5, 0.7])
+    # builder.addVariation("Trigger.triggerOR", [["HLT_PFHT400_SixJet30_DoubleBTagCSV_p056"], ["HLT_PFHT450_SixJet40_BTagCSV_p056"]])
+    # builder.addVariation("Trigger.triggerOR", [["HLT_PFHT400_SixJet30_DoubleBTagCSV_p056", "HLT_PFHT450_SixJet40_BTagCSV_p056"]])
+    
     # Build the builder
     builder.build(process, allSelections)
-
+    
     # ================================================================================================
     # Example of adding an analyzer whose configuration depends on dataVersion
     # ================================================================================================
-    #def createAnalyzer(dataVersion):
-    #a = Analyzer("ExampleAnalysis")
-    #if dataVersion.isMC():
-    #a.tauPtCut = 10
-    #else:
-    #a.tauPtCut = 20
-    #return a
-    #process.addAnalyzer("test2", createAnalyzer)
-
+    # def createAnalyzer(dataVersion):
+    # a = Analyzer("ExampleAnalysis")
+    # if dataVersion.isMC():
+    # a.tauPtCut = 10
+    # else:
+    # a.tauPtCut = 20
+    # return a
+    # process.addAnalyzer("test2", createAnalyzer)
     
     # ================================================================================================
     # Pick events
     # ================================================================================================
-    #process.addOptions(EventSaver = PSet(enabled = True,pickEvents = True))
+    # process.addOptions(EventSaver = PSet(enabled = True,pickEvents = True))
+
     # ================================================================================================
     # Run the analysis
     # ================================================================================================
@@ -239,7 +240,7 @@ def main():
         Print("Running process with PROOF (proofWorkes=%s)" % ( str(opts.jCores) ) )
         process.run(proof=True, proofWorkers=opts.jCores)
     else:
-        Verbose("Running process")
+        Print("Running process (no PROOF)")
         process.run()
 
     # Print total time elapsed
@@ -268,28 +269,35 @@ def GetDatasetCompleteList():
     myCompleteList.append("JetHT_Run2016D_03Feb2017_v1_276315_276811")
     myCompleteList.append("JetHT_Run2016E_03Feb2017_v1_276831_277420")
     myCompleteList.append("JetHT_Run2016F_03Feb2017_v1_277932_278800")
+    #
     myCompleteList.append("JetHT_Run2016F_03Feb2017_v1_278801_278808")
     myCompleteList.append("JetHT_Run2016G_03Feb2017_v1_278820_280385")
     myCompleteList.append("JetHT_Run2016H_03Feb2017_ver2_v1_281613_284035")
     myCompleteList.append("JetHT_Run2016H_03Feb2017_ver3_v1_284036_284044")
     #
-    myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_500")
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_180")
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_200")
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_220")
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_250")
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_300")
+    #
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_350")
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_400")
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_500")
+    #
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_650")
+    #
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_800")
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_1000")
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_1500")
+    #
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_2000")
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_2500")
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_3000")
+    #
     myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_5000")
+    myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_7000")
+    myCompleteList.append("ChargedHiggs_HplusTB_HplusToTB_M_10000")
     #
     myCompleteList.append("ZZTo4Q")
     myCompleteList.append("ZJetsToQQ_HT600toInf")
@@ -340,39 +348,21 @@ def GetDatasetWhitelist(opts):
     myWhitelist = []
     if opts.group == "A":
         myWhitelist.append("JetHT_Run2016B_03Feb2017_ver2_v2_273150_275376")
-        myWhitelist.append("JetHT_Run2016C_03Feb2017_v1_275656_276283")
-        myWhitelist.append("JetHT_Run2016D_03Feb2017_v1_276315_276811")
-        myWhitelist.append("JetHT_Run2016E_03Feb2017_v1_276831_277420")
-        myWhitelist.append("JetHT_Run2016F_03Feb2017_v1_277932_278800")
     elif opts.group == "B":
+        myWhitelist.append("JetHT_Run2016C_03Feb2017_v1_275656_276283")
+    elif opts.group == "C":
+        myWhitelist.append("JetHT_Run2016D_03Feb2017_v1_276315_276811")
+    elif opts.group == "D":
+        myWhitelist.append("JetHT_Run2016E_03Feb2017_v1_276831_277420")
+    elif opts.group == "E":
+        myWhitelist.append("JetHT_Run2016F_03Feb2017_v1_277932_278800")
         myWhitelist.append("JetHT_Run2016F_03Feb2017_v1_278801_278808")
+    elif opts.group == "F":
         myWhitelist.append("JetHT_Run2016G_03Feb2017_v1_278820_280385")
+    elif opts.group == "G":
         myWhitelist.append("JetHT_Run2016H_03Feb2017_ver2_v1_281613_284035")
         myWhitelist.append("JetHT_Run2016H_03Feb2017_ver3_v1_284036_284044")
-    elif opts.group == "C":
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_180")
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_800")
-    elif opts.group == "D":
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_350")
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_400")
-    elif opts.group == "E":
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_650")
-    elif opts.group == "F":
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_220")
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_1500")
-    elif opts.group == "G":
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_250")
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_2500")
-    elif opts.group == "H":
-        myWhitelist.append("ZZTo4Q")
-        myWhitelist.append("ZJetsToQQ_HT600toInf")
-        myWhitelist.append("WZ_ext1")
-        myWhitelist.append("WZ")
-        myWhitelist.append("WWTo4Q")
-        myWhitelist.append("WJetsToQQ_HT_600ToInf")
-        #myWhitelist.append("TTZToQQ")
-        #myWhitelist.append("TTWJetsToQQ")
-    elif opts.group == "I":    
+    elif opts.group == "H":    
         myWhitelist.append("DYJetsToQQ_HT180")
         myWhitelist.append("QCD_HT50to100")
         myWhitelist.append("QCD_HT100to200")
@@ -390,6 +380,7 @@ def GetDatasetWhitelist(opts):
         myWhitelist.append("QCD_HT1500to2000_ext1")
         myWhitelist.append("QCD_HT2000toInf")
         myWhitelist.append("QCD_HT2000toInf_ext1")
+    elif opts.group == "I":
         myWhitelist.append("ST_s_channel_4f_InclusiveDecays")
         myWhitelist.append("ST_t_channel_antitop_4f_inclusiveDecays")
         myWhitelist.append("ST_t_channel_top_4f_inclusiveDecays")
@@ -398,20 +389,17 @@ def GetDatasetWhitelist(opts):
         myWhitelist.append("ST_tW_top_5f_inclusiveDecays")
         myWhitelist.append("ST_tW_top_5f_inclusiveDecays_ext1")
     elif opts.group == "J":
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_200")
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_2000")
-    elif opts.group == "K":
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_300")
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_3000")
-    elif opts.group == "L":
         myWhitelist.append("TT")
+    elif opts.group == "K":
+        myWhitelist.append("TTWJetsToQQ")
+        myWhitelist.append("TTZToQQ")
         myWhitelist.append("TTTT")
-    elif opts.group == "M":
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_500")
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_5000")
-    elif opts.group == "N":
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_1000")
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_10000")
+        myWhitelist.append("WJetsToQQ_HT_600ToInf")
+        myWhitelist.append("ZJetsToQQ_HT600toInf")
+        myWhitelist.append("WWTo4Q")
+        myWhitelist.append("WZ")
+        myWhitelist.append("WZ_ext1")
+        myWhitelist.append("ZZTo4Q")
     else:
         msg = "Unknown systematics submission dataset group \"%s\"%" % (opts.group)
         raise Exception(msg)
@@ -438,11 +426,10 @@ def PrintOptions(opts):
     table.append( msgAlign.format("useTopPtReweighting", opts.useTopPtReweighting, TOPPTREWEIGHT) )
     table.append( msgAlign.format("doSystematics", opts.doSystematics, DOSYSTEMATICS) ) 
     table.append( hLine )
-
-    # Print("Will run on multicrab directory %s" % (opts.mcrab), True)     
+    
+    # Print("Will run on multicrab directory %s" % (opts.mcrab), True)
     for i, line in enumerate(table):
         Print(line, i==0)
-
     return
 
 
@@ -467,7 +454,7 @@ if __name__ == "__main__":
     # Default Values
     VERBOSE       = False
     NEVTS         = -1
-    HISTOLEVEL    = "Debug" #"Informative" #"Debug"
+    HISTOLEVEL    = "Debug" # 'Never', 'Systematics', 'Vital', 'Informative', 'Debug'
     PUREWEIGHT    = True
     TOPPTREWEIGHT = True
     DOSYSTEMATICS = False
@@ -498,7 +485,7 @@ if __name__ == "__main__":
     parser.add_option("--noPU", dest="usePUreweighting", action="store_false", default = PUREWEIGHT, 
                       help="Do NOT apply Pileup re-weighting (default: %s)" % (PUREWEIGHT) )
 
-    parser.add_option("--topPt", dest="useTopPtReweighting", action="store_true", default = TOPPTREWEIGHT, 
+    parser.add_option("--topPt", dest="useTopPtReweighting", action="store_true", default = TOPPTREWEIGHT,
                       help="Do apply top-pt re-weighting (default: %s)" % (TOPPTREWEIGHT) )
 
     parser.add_option("--doSystematics", dest="doSystematics", action="store_true", default = DOSYSTEMATICS, 
@@ -506,6 +493,7 @@ if __name__ == "__main__":
 
     parser.add_option("--group", dest="group", default = GROUP, 
                       help="The group of datasets to run on. Capital letter from \"A\" to \"I\"  (default: %s)" % (GROUP) )
+
 
     (opts, args) = parser.parse_args()
 
@@ -515,5 +503,5 @@ if __name__ == "__main__":
     allowedLevels = ['Never', 'Systematics', 'Vital', 'Informative', 'Debug']
     if opts.histoLevel not in allowedLevels:
         raise Exception("Invalid ambient histogram level \"%s\"! Valid options are: %s" % (opts.histoLevel, ", ".join(allowedLevels)))
-
+    
     main()

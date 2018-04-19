@@ -606,7 +606,7 @@ class FakeBResultManager:
 
             # Inform user of progress
             msg = "{:<9} {:>3} {:<1} {:<3} {:<80}".format("Histogram", "%i" % i, "/", "%s:" % (len(self._histoPathsData)), os.path.join(dataPath, plotName) )
-            self.PrintFlushed(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), i==1)
+            self.PrintFlushed(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), False)
 
             if "JetEtaPhi_AfterAllSelections" in plotName:
                 continue 
