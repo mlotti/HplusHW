@@ -153,6 +153,7 @@ def GetHistoKwargs(histoName):
                 #_rebinX = 8
                 #_rebinX = 5
                 _rebinX = [i for i in range(0, 550, 50)] + [600, 800, 1000]
+                _rebinX = 2
                 
 
     if "mass" in histoName.lower():
@@ -170,7 +171,7 @@ def GetHistoKwargs(histoName):
             #_rebinX       = systematics.getBinningForTetrajetMass(0)
             #_rebinX       = systematics.getBinningForTetrajetMass(2)
             #_rebinX       = systematics.getBinningForTetrajetMass(9)
-            _rebinX       = 5
+            _rebinX       = 10 #5
             _opts["xmin"] =    0
             _opts["xmax"] = 3000
 
@@ -311,10 +312,10 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     return
 
 def GetBinText(bin):
-    if bin == "Inclusive":
-        return "combined"
-    else:
-        return "bin-" + str(bin)
+    #if bin == "Inclusive":
+    #    return "combined"
+    #else:
+    #    return "bin-" + str(bin)
     if bin == "0":
         return "p_{T} < 80 GeV/c, |#eta| < 0.8"
     elif bin == "1":

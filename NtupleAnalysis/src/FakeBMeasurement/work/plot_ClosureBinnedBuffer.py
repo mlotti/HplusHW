@@ -288,24 +288,28 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     return
 
 def GetBinText(bin):
-    if bin == "Inclusive":
-        return "combined"
-    else:
-        return "bin-" + str(bin) #iro
+    #if bin == "Inclusive":
+    #    return "combined" 
+    #else:
+    #    return "bin-" + str(bin) 
     if bin == "0":
-        return "|#eta| < 0.4"
+        return "p_{T} < 80 GeV/c, |#eta| < 0.8"
     elif bin == "1":
-        return "0.4 < |#eta| < 0.8"
+        return "p_{T} = 80-200 GeV/c, |#eta| < 0.8"
     elif bin == "2":
-        return "0.8 < |#eta| < 1.6"
+        return "p_{T} > 200 GeV/c, |#eta| < 0.8"
     elif bin == "3":
-        return "1.6 < |#eta| < 1.8"
+        return "p_{T} < 80 GeV/c, |#eta| = 0.8-1.6"
     elif bin == "4":
-        return "1.8 < |#eta| < 2.0"
+        return "p_{T} = 80-200 GeV/c, |#eta| = 0.8-1.6"
     elif bin == "5":
-        return "2.0 < |#eta| < 2.2"
+        return "p_{T} > 200 GeV/c, |#eta| = 0.8-1.6"
     elif bin == "6":
-        return "|#eta| > 2.2"
+        return "p_{T} < 80 GeV/c, |#eta| > 1.6"
+    elif bin == "7":
+        return "p_{T} = 80-200 GeV/c, |#eta| > 1.6"
+    elif bin == "8":
+        return "p_{T} > 200 GeV/c, |#eta| > 1.6"
     elif bin == "Inclusive":
         return "combined"
     else:
