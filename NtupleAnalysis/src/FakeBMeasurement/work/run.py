@@ -194,8 +194,12 @@ def main():
         ## PSet(label="TetrajetBjetPt" , binLowEdges=[80], useAbsoluteValues=False),
         ## PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0], useAbsoluteValues=True), 
         ### Default binning
-        PSet(label="TetrajetBjetPt" , binLowEdges=[80, 200], useAbsoluteValues=False), # Fotis
-        PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True), # Fotis
+        PSet(label="TetrajetBjetPt" , binLowEdges=[80, 160], useAbsoluteValues=False), # Alexandros
+        PSet(label="TetrajetBjetEta", binLowEdges=[1.0, 1.8], useAbsoluteValues=True), # Alexandros
+        #
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[80, 200], useAbsoluteValues=False), # Fotis
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True), # Fotis
+        #
         # PSet(label="TetrajetBjetPt" , binLowEdges=[60, 80, 140, 200], useAbsoluteValues=False), #Fotis
         # PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.5, 2.1], useAbsoluteValues=True),  #Fotis
         # PSet(label="TetrajetBjetPt" , binLowEdges=[50, 60, 80, 100, 160], useAbsoluteValues=False),
