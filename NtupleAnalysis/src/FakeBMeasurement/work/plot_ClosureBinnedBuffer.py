@@ -167,13 +167,13 @@ def GetHistoKwargs(histoName):
 
         if "tetrajet" in histoName.lower():
             _xlabel       = "m_{jjbb} (%s)" % (_units)
-            _opts["xmin"] =    0
-            _opts["xmax"] = 3000
-            #_rebinX       = systematics.getBinningForTetrajetMass(0)
+            _rebinX       = systematics.getBinningForTetrajetMass(0)
             #_rebinX       = systematics.getBinningForTetrajetMass(2)
             #_rebinX       = systematics.getBinningForTetrajetMass(9)
-            _rebinX       = 2
-
+            _rebinX       = 5
+            _opts["xmin"] =    0
+            _opts["xmax"] = 3000
+            
     if "tetrajetbjeteta" in histoName.lower():
         _units   = ""
         _xlabel  = "#eta"
@@ -590,6 +590,10 @@ def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
                 h1 = rhDict[k1].Clone()
                 h2 = rhDict[k2].Clone()
                 
+                # First normalise the histos
+                h1.Scale(1.0/h1.Integral())
+                h2.Scale(1.0/h2.Integral())
+
                 # Add-up individual bins
                 rFakeB_CRthree.Add(h1, +1)
                 rFakeB_CRfour.Add(h2, +1)

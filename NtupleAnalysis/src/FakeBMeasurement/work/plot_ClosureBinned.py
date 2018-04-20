@@ -159,8 +159,6 @@ def GetHistoKwargs(histoName):
         _units        = "GeV/c^{2}"
         _xlabel       = "m_{jjb} (%s)" % (_units)
         _ylabel      += " " + _units
-        #_opts["xmin"] =  50
-        #_opts["xmax"] = 500
         _cutBox       = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
 
         if "trijet" in histoName.lower():
@@ -169,15 +167,12 @@ def GetHistoKwargs(histoName):
 
         if "tetrajet" in histoName.lower():
             _xlabel       = "m_{jjbb} (%s)" % (_units)
-            #_opts["xmin"] =    0
-            #_opts["xmax"] = 3000
             #_rebinX       = systematics.getBinningForTetrajetMass(0)
             #_rebinX       = systematics.getBinningForTetrajetMass(2)
             #_rebinX       = systematics.getBinningForTetrajetMass(9)
-            #_rebinX       = 5
-            _rebinX       = 2
-            #_opts["xmin"] =    0
-            _opts["xmax"] = 1000
+            _rebinX       = 5
+            _opts["xmin"] =    0
+            _opts["xmax"] = 3000
 
     if "met" in histoName.lower():
         _units        = "GeV"
@@ -319,21 +314,25 @@ def GetBinText(bin):
     if bin == "Inclusive":
         return "combined"
     else:
-        return "bin-" + str(bin) #iro
+        return "bin-" + str(bin)
     if bin == "0":
-        return "|#eta| < 0.4"
+        return "p_{T} < 80 GeV/c, |#eta| < 0.8"
     elif bin == "1":
-        return "0.4 < |#eta| < 0.8"
+        return "p_{T} = 80-200 GeV/c, |#eta| < 0.8"
     elif bin == "2":
-        return "0.8 < |#eta| < 1.6"
+        return "p_{T} > 200 GeV/c, |#eta| < 0.8"
     elif bin == "3":
-        return "1.6 < |#eta| < 1.8"
+        return "p_{T} < 80 GeV/c, |#eta| = 0.8-1.6"
     elif bin == "4":
-        return "1.8 < |#eta| < 2.0"
+        return "p_{T} = 80-200 GeV/c, |#eta| = 0.8-1.6"
     elif bin == "5":
-        return "2.0 < |#eta| < 2.2"
+        return "p_{T} > 200 GeV/c, |#eta| = 0.8-1.6"
     elif bin == "6":
-        return "|#eta| > 2.2"
+        return "p_{T} < 80 GeV/c, |#eta| > 1.6"
+    elif bin == "7":
+        return "p_{T} = 80-200 GeV/c, |#eta| > 1.6"
+    elif bin == "8":
+        return "p_{T} > 200 GeV/c, |#eta| > 1.6"
     elif bin == "Inclusive":
         return "combined"
     else:
@@ -417,7 +416,7 @@ def main(opts):
         datasetsMgr.PrintInfo()
         
         # List of TDirectoryFile (_CRone, _CRtwo, _VR, _SR)
-        tdirs  = ["LdgTrijetPt_"   , "LdgTrijetMass_"  , "TetrajetBJetPt_", "TetrajetBJetEta_", "LdgTetrajetPt_", "LdgTetrajetMass_"] 
+        tdirs  = ["LdgTrijetPt_", "LdgTrijetMass_"  , "TetrajetBJetPt_", "TetrajetBJetEta_", "LdgTetrajetPt_", "LdgTetrajetMass_"] 
         region = ["CRone", "CRtwo"]
         hList  = []
         for d in tdirs:
@@ -517,6 +516,10 @@ def GetHistoLabelTriplet(histoName):
         region = "CRone"
     elif "_CRtwo" in histoName:
         region = "CRtwo"
+    elif "_CRthree" in histoName:
+        region = "CRthree"
+    elif "_CRfour" in histoName:
+        region = "CRfour"
     else:
         raise Exception("Could not determine Control Region for histogram %s" % (h) )
 
@@ -573,7 +576,6 @@ def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
 
     # For-loop: All root-histo keys (All fake-B bins, all CRs, (CR1, CR2, ..)  and all folders (Data, EWKFakeB, EWKGenuineB)
     for key1 in rhDict:
-
         # Definitions
         region1      = "CRone"
         region2      = "CRtwo"
@@ -592,6 +594,7 @@ def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
         if region != region1:
             continue
 
+        Verbose("Accessing histogram %s" % key1, False)
         if bInclusive:
             Verbose("The histo key is \"%s\" and its name is \"%s\"" % (key1, rhDict[key1].GetName()), True)
 
@@ -601,11 +604,14 @@ def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
             rFakeB_CRtwo = rhDict[key2].Clone()
             rFakeB_CRtwo.Reset("ICES")
 
+            # For-loop: All fakeB bins (to add-up all binned histos)
             for i, b in enumerate(binLabels, 1):
                 if "Inclusive" in b:
                     Verbose("Skipping bin-label %s" % (b), False)
                     continue
-
+                else:
+                    Verbose("Adding bin %s" % (b), False)
+    
                 # Determine keys
                 k1 = key1.replace("Inclusive", b)
                 k2 = key2.replace("Inclusive", b)
@@ -614,7 +620,11 @@ def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
                 Verbose("Cloning histogram %s"  % (rhDict[k1].GetName()), False)
                 h1 = rhDict[k1].Clone()
                 h2 = rhDict[k2].Clone()
-                
+
+                # First normalise the histos
+                h1.Scale(1.0/h1.Integral())
+                h2.Scale(1.0/h2.Integral())
+
                 # Add-up individual bins
                 rFakeB_CRone.Add(h1, +1)
                 rFakeB_CRtwo.Add(h2, +1)
