@@ -17,10 +17,10 @@ USAGE:
 
 EXAMPLES:
 ./plot_ClosurePerturbation.py -m FakeBMeasurement_PreSel_3CSVv2M_b3Pt40_InvSel_3CSVv2L_2CSVv2M_MVAm1p00to0p40_6BinsAbsEta_0PtBins_NoFatjetVeto_180326_062820 -n FakeBMeasurement_PreSel_3CSVv2M_b3Pt40_InvSel_3CSVv2L_2CSVv2M_MVAm1p00to0p38_6BinsAbsEta_0PtBins_NoFatjetVeto_180328_142550 -l FakeBMeasurement_PreSel_3CSVv2M_b3Pt40_InvSel_3CSVv2L_2CSVv2M_MVAm1p00to0p36_6BinsAbsEta_0PtBins_NoFatjetVeto_180328_142751
-
+./plot_ClosurePerturbation.py -m FakeBMeasurement_PreSel_3CSVv2M_b3Pt40_InvSel_3CSVv2L_2CSVv2M_MVAm1p00to0p40_6BinsAbsEta_0PtBins_NoFatjetVeto_180326_062820 -n FakeBMeasurement_PreSel_3CSVv2M_b3Pt40_InvSel_3CSVv2L_2CSVv2M_MVAm1p00to0p36_6BinsAbsEta_0PtBins_NoFatjetVeto_180328_142751 -l FakeBMeasurement_PreSel_3CSVv2M_b3Pt40_InvSel_3CSVv2L_2CSVv2M_MVAm1p00to0p34_6BinsAbsEta_0PtBins_NoFatjetVeto_180328_142923/
 
 LAST USED:
-./plot_ClosurePerturbation.py -m FakeBMeasurement_PreSel_3CSVv2M_b3Pt40_InvSel_3CSVv2L_2CSVv2M_MVAm1p00to0p40_6BinsAbsEta_0PtBins_NoFatjetVeto_180326_062820 -n FakeBMeasurement_PreSel_3CSVv2M_b3Pt40_InvSel_3CSVv2L_2CSVv2M_MVAm1p00to0p36_6BinsAbsEta_0PtBins_NoFatjetVeto_180328_142751 -l FakeBMeasurement_PreSel_3CSVv2M_b3Pt40_InvSel_3CSVv2L_2CSVv2M_MVAm1p00to0p34_6BinsAbsEta_0PtBins_NoFatjetVeto_180328_142923/
+./plot_ClosurePerturbation.py -m FakeBMeasurement_Preapproval_MVAm1p00to0p40_6AbsEtaBins_0PtBins_NoFatjetVeto_Systematics_12Apr2018 -n FakeBMeasurement_PreSel_3CSVv2M_b3Pt40_InvSel_3CSVv2L_2CSVv2M_MVAm1p00to0p30_6BinsAbsEta_0PtBins_NoFatjetVeto_180331_001547 -l FakeBMeasurement_PreSel_3CSVv2M_b3Pt40_InvSel_3CSVv2L_2CSVv2M_MVAm1p00to0p20_6BinsAbsEta_0PtBins_NoFatjetVeto_180331_001221 --logY
 
 '''
 
@@ -219,6 +219,12 @@ def main(opts):
                 continue
             if "Bdisc" in h:
                 continue
+            #if "MVA" in h:
+            #    continue
+            if "MET" in h:
+                continue
+            if "HT" in h:
+                continue
             # Otherwise keep the histogram
             hListS.append(h)
 
@@ -254,7 +260,7 @@ def main(opts):
             Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), counter==1)
 
             PlotComparison(datasetsMgr1, datasetsMgr2, datasetsMgr3, hCR1, hCR2, "CR1")
-            PlotComparison(datasetsMgr1, datasetsMgr2, datasetsMgr3, hCR1, hCR2, "CR2")
+            PlotComparison(datasetsMgr1, datasetsMgr2, datasetsMgr3, hCR1, hCR2, "CR2") #iro
             counter+=1
 
         
@@ -364,7 +370,8 @@ def PlotComparison(datasetsMgr1, datasetsMgr2, datasetsMgr3, hBaseline, hInverte
 
     baseline_FakeB3 = baseline_Data3.Clone("Baseline-FakeB3")
     inverted_FakeB3 = inverted_Data3.Clone("Inverted-FakeB3")
-    
+
+
     # Subtract the EWK GenuineB
     baseline_FakeB1.Add(baseline_EWKGenuineB1, -1)
     inverted_FakeB1.Add(inverted_EWKGenuineB1, -1)
@@ -435,7 +442,6 @@ def PlotComparison(datasetsMgr1, datasetsMgr2, datasetsMgr3, hBaseline, hInverte
         p.histoMgr.setHistoLegendStyle("Inverted-FakeB1", "L")
         p.histoMgr.setHistoLegendStyle("Inverted-FakeB2", "LP")
         p.histoMgr.setHistoLegendStyle("Inverted-FakeB3", "LP")
-        
         # Set legend labels
         p.histoMgr.setHistoLegendLabelMany({
                 "Inverted-FakeB1" : "%s (BDT < %s)" % (ext, BDT1),
@@ -443,12 +449,13 @@ def PlotComparison(datasetsMgr1, datasetsMgr2, datasetsMgr3, hBaseline, hInverte
                 "Inverted-FakeB3" : "%s (BDT < %s)" % (ext, BDT3),
             })
 
+
     # Get histogram keyword arguments
     kwargs_ = GetHistoKwargs(hBaseline_Inclusive, ext, opts)
 
     # Draw the histograms
-    plots.drawPlot(p, hBaseline_Inclusive, **kwargs_)
-
+    plots.drawPlot(p, hBaseline_Inclusive, **kwargs_) #iro
+    
     # Save plot in all formats    
     saveName = hBaseline_Inclusive.split("/")[-1]
     saveName = saveName.replace("Baseline_", "")
@@ -465,11 +472,16 @@ def GetHistoKwargs(histoName, ext, opts):
     _rebinX = 1
     _ylabel = None
     _yNorm  = "Events"
+    _logY   = opts.logY
+    if _logY:
+        maxFactorY = 4.0
+    else:
+        maxFactorY = 1.2
     if opts.normaliseToOne:
         _yNorm  = "Arbitrary units"
-        _opts   = {"ymin": 0.7e-4, "ymaxfactor": 2.0}
+        _opts   = {"ymin": 0.7e-4, "ymaxfactor": maxFactorY}
     else:
-        _opts   = {"ymin": 1e0, "ymaxfactor": 2.0}
+        _opts   = {"ymin": 1e0, "ymaxfactor": maxFactorY}
     _format = "%0.0f"
     _xlabel = None
     _ratio  = True
@@ -504,7 +516,7 @@ def GetHistoKwargs(histoName, ext, opts):
         _units  = ""
         _format = "%0.2f " + _units
         _xlabel = "top-tag discriminant"
-        _opts["xmin"] =  0.0 #0.45
+        _opts["xmin"] =  0.4 #0.45
         _cutBox = {"cutValue": 0.40, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
 
     if "mvamax2" in hName:
@@ -558,9 +570,19 @@ def GetHistoKwargs(histoName, ext, opts):
         _xlabel = "m_{jjb} (%s)" % _units
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         _opts["xmax"] = 500.0 # 300
+
+    if "eta" in hName:
+        _rebinX = 2 
+        _units  = ""
+        _format = "%0.2f " + _units
+        _cutBox = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        _opts["xmin"] = -2.5
+        _opts["xmax"] = +2.5
+
     if "pt" in hName:
         _rebinX = 2 
-        _format = "%0.0f GeV/c"
+        _units  = "GeV/c"
+        _format = "%0.0f " + _units
         _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         if "jet1" in hName:
             _opts["xmax"] = 1000.0
@@ -577,44 +599,26 @@ def GetHistoKwargs(histoName, ext, opts):
         elif "jet7" in hName:
             _opts["xmax"] = 200.0
         elif "tetrajet" in hName:
-            _rebinX = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetPt_AfterAllSelections"]
             _cutBox = {"cutValue": 200.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+            #_rebinX = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetPt_AfterAllSelections"]
+            _rebinX = 5
+            #_rebinX = 10
+            _opts["xmax"] = 800.0
+            if isinstance(_rebinX, list):
+                binWmin, binWmax = GetBinWidthMinMax(_rebinX)
+                _ylabel = _yNorm + " / %.0f-%.0f %s" % (binWmin, binWmax, _units)
+            else:
+                _ylabel = _yNorm + " / %.0f " + _units
+        
             ROOT.gStyle.SetNdivisions(8, "X")
         elif "dijet" in hName:
             _cutBox = {"cutValue": 200.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         elif "trijet" in hName:
             _rebinX = systematics._dataDrivenCtrlPlotBinning["LdgTrijetPt_AfterAllSelections"]
+            _rebinX = [i for i in range(0, 600+50, 50)]
         else:
             _opts["xmax"] = 600.0
         #ROOT.gStyle.SetNdivisions(8, "X")
-
-    if "eta" in hName:
-        _format = "%0.2f"
-        _cutBox = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
-        _opts["xmin"] = -2.6 #-3.0
-        _opts["xmax"] = +2.6 #+3.0
-        ROOT.gStyle.SetNdivisions(10, "X")
-
-    if "deltaeta" in hName:
-        _format = "%0.2f"
-        _opts["xmin"] = 0.0
-        _opts["xmax"] = 6.0
-        if "tetrajetbjet" in hName:
-            _xlabel = "#Delta#eta (b_{jjb}, b_{free})"
-    if "deltaphi" in hName:
-        _units  = "rads"
-        _format = "%0.2f " + _units
-        _opts["xmin"] = 0.0
-        _opts["xmax"] = 3.2
-        if "tetrajetbjet" in hName:
-            _xlabel = "#Delta#phi (b_{jjb}, b_{free}) (%s)" % (_units)
-
-    if "deltar" in hName:
-        _format = "%0.2f"
-        _opts["xmin"] = 0.0
-        _opts["xmax"] = 6.0
-        if "tetrajetbjet" in hName:
-            _xlabel = "#DeltaR (b_{jjb}, b_{free})"
 
     if "bdisc" in hName:
         _format = "%0.2f"
@@ -631,9 +635,17 @@ def GetHistoKwargs(histoName, ext, opts):
         _opts["xmax"] = 350.0
     if "tetrajetm" in hName:
         _units  = "GeV/c^{2}"
-        _rebinX = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetMass_AfterAllSelections"]
-        binWmin, binWmax = GetBinWidthMinMax(_rebinX)
-        _ylabel = _yNorm + " / %.0f-%.0f %s" % (binWmin, binWmax, _units)
+        #_rebinX = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetMass_AfterAllSelections"]
+        #_rebinX = systematics.getBinningForTetrajetMass(0)
+        #_rebinX = systematics.getBinningForTetrajetMass(9)
+        #_rebinX = 5
+        _rebinX = 10
+        _opts["xmax"] = 3000.0
+        if isinstance(_rebinX, list):
+            binWmin, binWmax = GetBinWidthMinMax(_rebinX)
+            _ylabel = _yNorm + " / %.0f-%.0f %s" % (binWmin, binWmax, _units)
+        else:
+            _ylabel = _yNorm + " / %.0f " + _units
         _xlabel = "m_{jjbb} (%s)" % (_units)
         ROOT.gStyle.SetNdivisions(6, "X")
 
@@ -659,7 +671,9 @@ def GetHistoKwargs(histoName, ext, opts):
         "cmsExtraText"     : "Preliminary",
         "opts"             : _opts,
         "opts2"            : {"ymin": 0.30, "ymax": 1.70},
-        "log"              : True,
+        #"opts2"            : {"ymin": 0.6, "ymax": 2.0-0.6},
+        #"opts2"            : {"ymin": 0.80, "ymax": 2.0-0.80},
+        "log"              : _logY,
         "createLegend"     : {"x1": 0.58, "y1": 0.78, "x2": 0.98, "y2": 0.92},
         "cutBox"           : _cutBox,
         }
@@ -730,13 +744,12 @@ if __name__ == "__main__":
     OPTMODE      = ""
     BATCHMODE    = True
     URL          = False
-    NOERROR      = True
     SAVEDIR      = None
     VERBOSE      = False
-    HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
     NORMALISE    = True
     SIGNALMASS   = 500
     FOLDER       = "ForFakeBMeasurement"
+    LOGY         = False
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -749,6 +762,9 @@ if __name__ == "__main__":
 
     parser.add_option("-l", "--mcrab3", dest="mcrab3", action="store", 
                       help="Path to the multicrab directory (3) for input")
+
+    parser.add_option("--logY", dest="logY", action="store_true", default=LOGY, 
+                      help="Set y-axis to logarithmic scalen [default: %s]" % LOGY)
 
     parser.add_option("-o", "--optMode", dest="optMode", type="string", default=OPTMODE, 
                       help="The optimization mode when analysis variation is enabled  [default: %s]" % OPTMODE)
@@ -773,9 +789,6 @@ if __name__ == "__main__":
     
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE, 
                       help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
-
-    parser.add_option("--histoLevel", dest="histoLevel", action="store", default = HISTOLEVEL,
-                      help="Histogram ambient level (default: %s)" % (HISTOLEVEL))
 
     parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
                       help="List of datasets in mcrab to include")

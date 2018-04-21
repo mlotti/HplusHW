@@ -27,6 +27,7 @@ LAST USED:
 ./plot_EfficiencySystTop.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/SystTopBDT/SystTopBDT_180412_TTs/ --folder SystTopBDT_Genuine --type highPtRadiation
 ./plot_EfficiencySystTop.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/SystTopBDT/SystTopBDT_180412_TTs/ --folder SystTopBDT_Genuine --type colourReconnection
 ./plot_EfficiencySystTop.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/SystTopBDT/SystTopBDT_180412_TTs/ --folder SystTopBDT_Genuine --type mTop
+./plot_EfficiencySystTop.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/SystTopBDT/SystTopBDT_180412_TTs/ --folder SystTopBDT_Genuine --type evtGen
 
 STATISTICS OPTIONS:
 https://iktp.tu-dresden.de/~nbarros/doc/root/TEfficiency.html
@@ -607,7 +608,7 @@ if __name__ == "__main__":
         opts.excludeTasks = "mtop|hdamp|evtgen|fsr|isr"
     elif opts.type == "mTop": #top mass
         opts.excludeTasks = "hdamp|evtgen|erdON|fsr|isr"
-    elif opts.type == "evtgen": #EvtGen is a MC event generator that simulates the decays of heavy flavour particles
+    elif opts.type == "evtGen": #EvtGen is a MC event generator that simulates the decays of heavy flavour particles
         opts.excludeTasks = "mtop|hdamp|erdON|fsr|isr"
     else:
         raise Exception("This should NEVER be reached!")

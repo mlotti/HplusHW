@@ -500,9 +500,11 @@ def GetHistoKwargs(histoName, ext, opts):
     if "eta" in hName:
         _format = "%0.2f"
         _cutBox = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmin"] = -2.6 #-3.0
-        _opts["xmax"] = +2.6 #+3.0
-        ROOT.gStyle.SetNdivisions(10, "X")
+        #_opts["xmin"] = -2.6 #-3.0
+        _opts["xmin"] =  0.0 #iro
+        _opts["xmax"] = +2.4 #+3.0
+        _rebinX = 1
+        #ROOT.gStyle.SetNdivisions(10, "X")
     if "deltaeta" in hName:
         _format = "%0.2f"
         _opts["xmin"] = 0.0
@@ -537,7 +539,8 @@ def GetHistoKwargs(histoName, ext, opts):
     if "tetrajetm" in hName:
         #_rebinX = 4
         _units  = "GeV/c^{2}"
-        _rebinX = systematics.getBinningForTetrajetMass(0)
+        #_rebinX = systematics.getBinningForTetrajetMass(0)
+        _rebinX = systematics.getBinningForTetrajetMass(9)
         #_rebinX  = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetMass_AfterAllSelections"]
         binWmin, binWmax = GetBinWidthMinMax(_rebinX)
         _ylabel = _yNorm + " / %.0f-%.0f %s" % (binWmin, binWmax, _units)

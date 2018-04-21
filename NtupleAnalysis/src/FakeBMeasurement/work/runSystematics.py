@@ -129,8 +129,6 @@ def main():
         Verbose("Vertex reweighting is done according to the chosen data era (%s)" % (",".join(dataEras)) )
         regex = "|".join(myBlackList)
         if len(myBlackList) > 0:
-            #print "regex = ", regex
-            #sys.exit()
             process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=regex)
         else:
             process.addDatasetsFromMulticrab(opts.mcrab)
@@ -151,8 +149,11 @@ def main():
         ## PSet(label="TetrajetBjetEta", binLowEdges=[0.6, 0.9, 1.2, 1.5, 1.8, 2.1], useAbsoluteValues=True), 
         ## PSet(label="TetrajetBjetPt" , binLowEdges=[80], useAbsoluteValues=False),
         ## PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0], useAbsoluteValues=True), 
-        ### Default binnins
-        PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True), 
+        ### Default binning
+        PSet(label="TetrajetBjetPt" , binLowEdges=[80, 200], useAbsoluteValues=False), # Fotis
+        PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True), # Fotis
+        #PSet(label="TetrajetBjetEta", binLowEdges=[0.2, 0.4, 0.6, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True), 
+        #PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True), 
         ### Other attempts
         # PSet(label="TetrajetBjetEta", binLowEdges=[-2.2, -2.0, -1.6, -0.8, -0.4, +0.4, +0.8, +1.6, +2.0, +2.2], useAbsoluteValues=False), 
         # PSet(label="TetrajetBjetPt" , binLowEdges=[100], useAbsoluteValues=False), # C) 
@@ -389,10 +390,10 @@ def GetDatasetWhitelist(opts):
         myWhitelist.append("ST_tW_top_5f_inclusiveDecays_ext1")
     elif opts.group == "J":
         myWhitelist.append("TT")
+        myWhitelist.append("TTWJetsToQQ") #keep here
+        myWhitelist.append("TTZToQQ") #keep here
+        myWhitelist.append("TTTT") #keep here
     elif opts.group == "K":
-        myWhitelist.append("TTWJetsToQQ")
-        myWhitelist.append("TTZToQQ")
-        myWhitelist.append("TTTT")
         myWhitelist.append("WJetsToQQ_HT_600ToInf")
         myWhitelist.append("ZJetsToQQ_HT600toInf")
         myWhitelist.append("WWTo4Q")

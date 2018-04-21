@@ -30,6 +30,8 @@ class TauDumper : public BaseDumper {
 	void reset();
 
     private:
+	pat::Tau TEScorrection(const pat::Tau&);
+
         void fillMCMatchInfo(size_t ic, edm::Handle<reco::GenParticleCollection>& genParticles, const pat::Tau& tau);
         
 	bool filter();
@@ -59,6 +61,7 @@ class TauDumper : public BaseDumper {
         
         // Systematics variations for tau 4-vector
         bool systVariations;
+        bool bTEScorrection;
         FourVectorDumper *systTESup;
         FourVectorDumper *systTESdown;
         FourVectorDumper *systExtremeTESup;
