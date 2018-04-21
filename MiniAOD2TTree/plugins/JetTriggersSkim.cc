@@ -331,7 +331,7 @@ bool JetTriggersSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetup )
 	  }
 	
 	// Apply muon selections
-	double miniRelIsoEA = getMiniIsolation_EffectiveArea(pfcandHandle, dynamic_cast<const reco::Candidate *>(&obj), 0.05, 0.2, 10., false, false, *rhoHandle);
+	//double miniRelIsoEA = getMiniIsolation_EffectiveArea(pfcandHandle, dynamic_cast<const reco::Candidate *>(&obj), 0.05, 0.2, 10., false, false, *rhoHandle);
 	
 	if (cfg_muonID == "loose" || cfg_muonID == "Loose")
 	  {
@@ -350,7 +350,7 @@ bool JetTriggersSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetup )
 	}
 	
 	// Apply acceptance cuts
-	if (miniRelIsoEA > cfg_muonMiniRelIsoEA)  continue;
+	//if (miniRelIsoEA > cfg_muonMiniRelIsoEA)  continue;
 	if(obj.p4().pt() < cfg_muonPtCut)         continue;
 	if(fabs(obj.p4().eta()) > cfg_muonEtaCut) continue;
 	
