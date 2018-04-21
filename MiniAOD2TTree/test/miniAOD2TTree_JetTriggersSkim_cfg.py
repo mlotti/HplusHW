@@ -162,7 +162,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     Trigger = cms.PSet(
 	TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess())),
 	TriggerBits    = cms.vstring(
-            "HLT_IsoMu24_v",
+            "HLT_Mu50_v",
             "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056_v",
             "HLT_PFHT450_SixJet40_BTagCSV_p056_v",
             "HLT_PFHT400_SixJet30_v",
