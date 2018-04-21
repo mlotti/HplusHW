@@ -72,6 +72,8 @@ _physicalMcAdd = {
     "WZ"     : "WZ",
     "WZ_ext" : "WZ",
     "WZ_ext1": "WZ",
+    "WW"     : "WW",
+    "WW_ext1": "WW",
     "ZZ"     : "ZZ",
     "ZZ_ext1": "ZZ",
     "WWTo2L2Nu" : "WWTo2L2Nu",
