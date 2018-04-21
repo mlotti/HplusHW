@@ -1133,12 +1133,9 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
     isGenuineTop_StandardSelections = IsGenuineTop(topData, "all", mu, BJet_LeptonicBr, searchForLeptonicTop, MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet);
     isGenuineTop_AllSelections      = IsGenuineTop(topData, "selected", mu, BJet_LeptonicBr, searchForLeptonicTop, MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet);
     //Skip if no trijets have been mached for datasets with gen top
-    bool haveGenTop        = GenTops.size() > 0;
-    bool haveMatchedTrijet = MCtrue_Bjet.size() > 0;
-
-    if (0) {
-      if (haveGenTop && !haveMatchedTrijet) return;
-    }
+    // bool haveGenTop        = GenTops.size() > 0;
+    // bool haveMatchedTrijet = MCtrue_Bjet.size() > 0;
+    //if (haveGenTop && !haveMatchedTrijet) return;
   }//if (fEvent.isMC())
 
   if (MuPass_Iso){ 
@@ -1629,10 +1626,7 @@ void SystTopBDT::DoInvertedAnalysis(const JetSelection::Data& jetData, const BJe
     isGenuineTop_AllSelections      = IsGenuineTop(topData, "selected", mu, BJet_LeptonicBr, searchForLeptonicTop, MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet);
     bool haveGenTop        = GenTops.size() > 0;
     bool haveMatchedTrijet = MCtrue_Bjet.size() > 0;
-    
-    if (0){
-      if (haveGenTop && !haveMatchedTrijet) return;
-    }
+    if (haveGenTop && !haveMatchedTrijet) return;
   }//if (fEvent.isMC())
 
   if (MuPass_Iso){
