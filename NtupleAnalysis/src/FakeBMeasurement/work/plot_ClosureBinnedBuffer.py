@@ -41,15 +41,15 @@ properly the "Control-Region" data.
 
 
 USAGE:
-./plot_ClosureBinned.py.py -m <pseudo_mcrab_directory> [opts]
+./plot_ClosureBinnedBuffer.py.py -m <pseudo_mcrab_directory> [opts]
 
 
 EXAMPLES:
-./plot_ClosureBinned.py -m FakeBMeasurement_NewLeptonVeto_PreSel_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_3BinsEta0p6Eta1p4_180203_14315 --normaliseToOne --url
-
+./plot_ClosureBinnedBuffer.py -m FakeBMeasurement_NewLeptonVeto_PreSel_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_3BinsEta0p6Eta1p4_180203_14315 --normaliseToOne --url
+./plot_ClosureBinnedBuffer.py -m FakeBMeasurement_NewLeptonVeto_PreSel_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_3BinsEta0p6Eta1p4_180203_14315
 
 LAST USED:
-./plot_ClosureBinned.py -m FakeBMeasurement_NewLeptonVeto_PreSel_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p60to085_3BinsEta0p6Eta1p4_180203_14315
+./plot_ClosureBinnedBuffer.py -m FakeBMeasurement_Preapproval_MVAm1p00to0p40_MVAm0p40to0p50_8AbsEtaBins_0PtBins_NoFatjetVeto_StatOnly_180418_052932 -n --ratio
 
 '''
 
@@ -153,7 +153,6 @@ def GetHistoKwargs(histoName):
                 #_rebinX = 8
                 #_rebinX = 5
                 _rebinX = [i for i in range(0, 550, 50)] + [600, 800, 1000]
-                _rebinX = 2
                 
 
     if "mass" in histoName.lower():
@@ -168,26 +167,13 @@ def GetHistoKwargs(histoName):
 
         if "tetrajet" in histoName.lower():
             _xlabel       = "m_{jjbb} (%s)" % (_units)
-            #_rebinX       = systematics.getBinningForTetrajetMass(0)
+            _rebinX       = systematics.getBinningForTetrajetMass(0)
             #_rebinX       = systematics.getBinningForTetrajetMass(2)
             #_rebinX       = systematics.getBinningForTetrajetMass(9)
-            _rebinX       = 10 #5
+            _rebinX       = 5
             _opts["xmin"] =    0
             _opts["xmax"] = 3000
-
-    if "met" in histoName.lower():
-        _units        = "GeV"
-        _xlabel       = "E_{T}^{miss} (%s)" % (_units)
-        _cutBox       = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
-        _opts["xmin"] =   0
-        _opts["xmax"] = 400
-        _rebinX = systematics._dataDrivenCtrlPlotBinning["MET_AfterAllSelections"]
-        binWmin, binWmax = GetBinWidthMinMax(myBins)
-        _ylabel = _yNorm + " / %.0f-%.0f %s" % (binWmin, binWmax, _units)
-
-    if "ht" in histoName.lower():
-        _rebinX = systematics._dataDrivenCtrlPlotBinning["MET_AfterAllSelections"]
-
+            
     if "tetrajetbjeteta" in histoName.lower():
         _units   = ""
         _xlabel  = "#eta"
@@ -196,16 +182,6 @@ def GetHistoKwargs(histoName):
         _ylabel  = _yNorm + " / %.2f"
         _opts["xmin"] = -2.5
         _opts["xmax"] = +2.5
-
-    if "bdisc" in histoName.lower():
-        _format = "%0.2f"
-        _ylabel = _yNorm + " / " + _format
-        _rebinX = 2
-        _opts["xmin"] = 0.8
-        _opts["xmax"] = 1.0
-        _cutBox = {"cutValue": +0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _xlabel = "b-tag discriminant"
-        ROOT.gStyle.SetNdivisions(8, "X")
 
     # Variable bin width y-axis
     if isinstance(_rebinX, list):
@@ -313,9 +289,9 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
 
 def GetBinText(bin):
     #if bin == "Inclusive":
-    #    return "combined"
+    #    return "combined" 
     #else:
-    #    return "bin-" + str(bin)
+    #    return "bin-" + str(bin) 
     if bin == "0":
         return "p_{T} < 80 GeV/c, |#eta| < 0.8"
     elif bin == "1":
@@ -387,7 +363,6 @@ def main(opts):
 
         # ZJets and DYJets overlap!
         if "ZJetsToQQ_HT600toInf" in datasetsMgr.getAllDatasetNames() and "DYJetsToQQ_HT180" in datasetsMgr.getAllDatasetNames():
-            Print("Cannot use both ZJetsToQQ and DYJetsToQQ due to duplicate events? Investigate. Removing ZJetsToQQ datasets for now ..", True)
             datasetsMgr.remove(filter(lambda name: "ZJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
 
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
@@ -416,9 +391,9 @@ def main(opts):
         # Print dataset information
         datasetsMgr.PrintInfo()
         
-        # List of TDirectoryFile (_CRone, _CRtwo, _VR, _SR)
-        tdirs  = ["LdgTrijetPt_", "LdgTrijetMass_"  , "TetrajetBJetPt_", "TetrajetBJetEta_", "LdgTetrajetPt_", "LdgTetrajetMass_"] 
-        region = ["CRone", "CRtwo"]
+        # List of TDirectoryFile (_CRone, _CRtwo, _CRthree, _CRfour, _VR, _SR)
+        tdirs  = ["LdgTrijetPt_"   , "LdgTrijetMass_"  , "TetrajetBJetPt_", "TetrajetBJetEta_", "LdgTetrajetPt_", "LdgTetrajetMass_"] 
+        region = ["CRthree", "CRfour"]
         hList  = []
         for d in tdirs:
             for r in region:
@@ -437,7 +412,7 @@ def main(opts):
             histoPaths.extend( pathList )
 
         # Get all the bin labels 
-        binLabels = GetBinLabels("CRone", histoPaths)
+        binLabels = GetBinLabels("CRthree", histoPaths)
     
         for i, t in enumerate(tdirs, 1):
             myList = []
@@ -459,7 +434,7 @@ def GetBinLabels(region, histoPaths):
 
     # Determine bin labels
     for h in histoPaths:
-        region = "_CRone"
+        region = "_CRthree"
         if region not in h:
             continue
         else:
@@ -577,9 +552,10 @@ def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
 
     # For-loop: All root-histo keys (All fake-B bins, all CRs, (CR1, CR2, ..)  and all folders (Data, EWKFakeB, EWKGenuineB)
     for key1 in rhDict:
+
         # Definitions
-        region1      = "CRone"
-        region2      = "CRtwo"
+        region1      = "CRthree"
+        region2      = "CRfour"
         key2         = key1.replace(region1, region2)
         dataset      = key1.split("-")[0]
         region       = key1.split("-")[1]
@@ -595,24 +571,20 @@ def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
         if region != region1:
             continue
 
-        Verbose("Accessing histogram %s" % key1, False)
         if bInclusive:
             Verbose("The histo key is \"%s\" and its name is \"%s\"" % (key1, rhDict[key1].GetName()), True)
 
-            rFakeB_CRone = rhDict[key1].Clone()
-            rFakeB_CRone.Reset("ICES")
+            rFakeB_CRthree = rhDict[key1].Clone()
+            rFakeB_CRthree.Reset("ICES")
             
-            rFakeB_CRtwo = rhDict[key2].Clone()
-            rFakeB_CRtwo.Reset("ICES")
+            rFakeB_CRfour = rhDict[key2].Clone()
+            rFakeB_CRfour.Reset("ICES")
 
-            # For-loop: All fakeB bins (to add-up all binned histos)
             for i, b in enumerate(binLabels, 1):
                 if "Inclusive" in b:
                     Verbose("Skipping bin-label %s" % (b), False)
                     continue
-                else:
-                    Verbose("Adding bin %s" % (b), False)
-    
+
                 # Determine keys
                 k1 = key1.replace("Inclusive", b)
                 k2 = key2.replace("Inclusive", b)
@@ -621,30 +593,30 @@ def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
                 Verbose("Cloning histogram %s"  % (rhDict[k1].GetName()), False)
                 h1 = rhDict[k1].Clone()
                 h2 = rhDict[k2].Clone()
-
+                
                 # First normalise the histos
                 h1.Scale(1.0/h1.Integral())
                 h2.Scale(1.0/h2.Integral())
 
                 # Add-up individual bins
-                rFakeB_CRone.Add(h1, +1)
-                rFakeB_CRtwo.Add(h2, +1)
+                rFakeB_CRthree.Add(h1, +1)
+                rFakeB_CRfour.Add(h2, +1)
         else:
             # Get the histos
-            rFakeB_CRone = rhDict[key1]
-            rFakeB_CRtwo = rhDict[key2]
+            rFakeB_CRthree = rhDict[key1]
+            rFakeB_CRfour = rhDict[key2]
 
         # Normalise the histos?
         if opts.normaliseToOne:
-            rFakeB_CRone.Scale(1.0/rFakeB_CRone.Integral())
-            rFakeB_CRtwo.Scale(1.0/rFakeB_CRtwo.Integral())
+            rFakeB_CRthree.Scale(1.0/rFakeB_CRthree.Integral())
+            rFakeB_CRfour.Scale(1.0/rFakeB_CRfour.Integral())
 
         # Apply histogram styles          
-        styles.getABCDStyle("CRone").apply(rFakeB_CRone)
-        styles.getABCDStyle("CRtwo").apply(rFakeB_CRtwo)
+        styles.getABCDStyle("CRthree").apply(rFakeB_CRthree)
+        styles.getABCDStyle("CRfour").apply(rFakeB_CRfour)
         
         # Create the plot
-        p = plots.ComparisonManyPlot(rFakeB_CRone, [rFakeB_CRtwo], saveFormats=[])
+        p = plots.ComparisonManyPlot(rFakeB_CRthree, [rFakeB_CRfour], saveFormats=[])
         p.setLuminosity(opts.intLumi)
     
         # Set draw/legend style
@@ -656,16 +628,16 @@ def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
         
         # Set legend labels
         p.histoMgr.setHistoLegendLabelMany({
-                hName1 : "CR1",
-                hName2 : "CR2",
+                hName1 : "CR3",
+                hName2 : "CR4",
                 })
 
         # Draw the plot and save it
         if bin == "Inclusive":
-            histoName = histoList[0] + "_CR1vCR2_combined"
+            histoName = histoList[0] + "_CR3vCR4_combined"
         else:
-            histoName = histoList[0] + "_CR1vCR2_bin%s" % (bin)
-        saveName = histoName.split("/")[-1].replace("CRone0_", "").replace("CRtwo0_", "")
+            histoName = histoList[0] + "_CR4vCR4_bin%s" % (bin)
+        saveName = histoName.split("/")[-1].replace("CRthree0_", "").replace("CRfour0_", "")
         
         # Get the histogram customisations (keyword arguments)
         p.appendPlotObject(histograms.PlotText(0.20, 0.88, GetBinText(bin), bold=True, size=22))
@@ -773,4 +745,4 @@ if __name__ == "__main__":
     main(opts)
 
     if not opts.batchMode:
-        raw_input("=== plot_ClosureBinned.py: Press any key to quit ROOT ...")
+        raw_input("=== plot_ClosureBinnedBuffer.py: Press any key to quit ROOT ...")

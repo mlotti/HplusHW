@@ -192,8 +192,6 @@ _physicalMcAdd = {
     "ChargedHiggs_HplusTB_HplusToTB_M_2500": "ChargedHiggs_HplusTB_HplusToTB_M_2500",
     "ChargedHiggs_HplusTB_HplusToTB_M_3000": "ChargedHiggs_HplusTB_HplusToTB_M_3000",
 
-
-    # Marina
     "TTJets_SingleLeptFromT_madgraph"               : "TTJets_SemiLept",
     "TTJets_SingleLeptFromT_madgraph_ext1"          : "TTJets_SemiLept",
     "TTJets_SingleLeptFromT_genMET_150_madgraph"    : "TTJets_SemiLept",
@@ -377,7 +375,6 @@ _physicalToLogical.update({
         "WZ": "WZ",
         "ZZ": "ZZ",
         
-        # Marina
         "TTGJets"                        : "TTGJets",
         "TTToSemiLep_TuneCUETP8M2T4down" : "TTToSemiLep_TuneCUETP8M2T4down",
         "TTToSemiLep_TuneCUETP8M2T4up"   : "TTToSemiLep_TuneCUETP8M2T4up",

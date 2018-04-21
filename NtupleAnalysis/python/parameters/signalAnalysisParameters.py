@@ -47,15 +47,15 @@ tauSelection = PSet(
   againstElectronDiscr = "againstElectronTightMVA6",
 #  againstElectronDiscr = "",
       againstMuonDiscr = "againstMuonLoose3",
-#        isolationDiscr = "byMediumIsolationMVA3oldDMwLT",
-        isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
+        isolationDiscr = "byLooseIsolationMVArun2v1DBoldDMwLT", # MVA (default)
+#        isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits",  # cut-based
 )
 # tau identification scale factors
 scaleFactors.assignTauIdentificationSF(tauSelection)
 # tau misidentification scale factors
-scaleFactors.assignTauMisidentificationSF(tauSelection, "eToTau", "full", "nominal")
-scaleFactors.assignTauMisidentificationSF(tauSelection, "muToTau", "full", "nominal")
-scaleFactors.assignTauMisidentificationSF(tauSelection, "jetToTau", "full", "nominal")
+scaleFactors.assignTauMisidentificationSF(tauSelection, "eToTau", "nominal")
+scaleFactors.assignTauMisidentificationSF(tauSelection, "muToTau", "nominal")
+scaleFactors.assignTauMisidentificationSF(tauSelection, "jetToTau", "nominal")
 # tau trigger SF
 
 scaleFactors.assignTauTriggerSF(tauSelection, "nominal", trg.TautriggerEfficiencyJsonName)

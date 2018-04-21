@@ -205,7 +205,7 @@ def main(opts):
         # hList.extend([h for h in allHistos if "StandardSelections" in h and "_Vs" not in h])
 
         # Create a list with strings included in the histogram names you want to plot
-        myHistos = ["LdgTrijetPt", "LdgTrijetMass",  "TetrajetBJetPt", "TetrajetBJetEta", "LdgTetrajetPt","LdgTetrajetMass", "MVAmax2", "MVAmax1", "HT", "MET"]
+        myHistos = ["LdgTrijetPt", "LdgTrijetMass",  "TetrajetBJetPt", "TetrajetBJetEta", "LdgTetrajetPt", "LdgTetrajetMass", "MVAmax2", "MVAmax1", "HT", "MET"]
         #myHistos = ["LdgTrijetPt", "LdgTrijetMass", "LdgTetrajetMass", "MVAmax2", "MVAmax1", "Njets", "NBjets", 
         #            "Bjet3Bdisc", "Bjet2Bdisc", "Bjet1Bdisc", "Bjet3Pt", "Bjet2Pt", "Bjet1Pt"]
 
@@ -480,7 +480,8 @@ def GetHistoKwargs(histoName, opts):
     if "tetrajetm" in h.lower():
         _units  = "GeV/c^{2}" 
         _xlabel = "m_{jjbb} (%s)" % (_units)
-        myBins  = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetMass_AfterAllSelections"]
+        #myBins  = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetMass_AfterAllSelections"]
+        myBins  = systematics.getBinningForTetrajetMass(0)
         ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
 
     _kwargs["opts"]    = {"ymin": _yMin, "ymax": _yMax}

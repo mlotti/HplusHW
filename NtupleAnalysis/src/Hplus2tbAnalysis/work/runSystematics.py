@@ -117,7 +117,8 @@ def main():
         maxEvents[d] = -1
         #maxEvents[d] = 100 #for testing
         if  d == "ChargedHiggs_HplusTB_HplusToTB_M_650":
-            maxEvents[d] = 2000000
+            maxEvents[d] = 1000000
+            #maxEvents[d] = 2000000
     process = Process(prefix, postfix, maxEvents)
                 
     # ================================================================================================
@@ -150,15 +151,15 @@ def main():
                        "ChargedHiggs_HplusTB_HplusToTB_M_10000",
                        ]
         if opts.doSystematics:
-            whitelist = GetDatasetWhitelist(opts)
+            whiteList = GetDatasetWhitelist(opts)
 
         # Extend the blacklist with datasets not in the group
         myBlackList.extend(blackList)
 
-        Verbose("Adding the following datasets from multiCRAB directory %s:\n\t%s" % (opts.mcrab, "\n\t".join(whitelist) ))
+        Verbose("Adding the following datasets from multiCRAB directory %s:\n\t%s" % (opts.mcrab, "\n\t".join(whiteList) ))
         Verbose("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
-        if len(whitelist)>0:
-            process.addDatasetsFromMulticrab(opts.mcrab, includeOnlyTasks="|".join(whitelist))
+        if len(whiteList)>0:
+            process.addDatasetsFromMulticrab(opts.mcrab, includeOnlyTasks="|".join(whiteList))
         elif len(myBlackList)>0:
         #if len(myBlackList)>0:
             process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks="|".join(myBlackList))
