@@ -701,7 +701,7 @@ void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, cons
     fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
     cInvertedTauBTaggingSFCounter.increment();
   }
-
+  fCommonPlots.fillControlPlotsAfterBtagSF(fEvent,jetData,bjetData);
 
 
   if (event.isMC()) {
