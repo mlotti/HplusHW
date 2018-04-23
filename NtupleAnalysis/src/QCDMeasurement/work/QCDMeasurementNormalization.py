@@ -34,6 +34,8 @@ analysis = "QCDMeasurement"
 _rebinFactor = 10
 
 #=== Set to true if you want to use HT binned WJets samples instead of inclusive
+#    NB! Remember to check also that _generalOptions["ewkDatasetsForMerging"]
+#    in makeQCDInvertedPseudoMulticrabForDatacards.py is consistent with this!
 useWJetsHT = True
 
 #=== Set tau pT bins to be used
