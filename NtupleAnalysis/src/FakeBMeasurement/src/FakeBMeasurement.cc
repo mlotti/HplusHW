@@ -38,8 +38,6 @@ private:
 
   // Common plots
   CommonPlots fCommonPlots;
-  // CommonPlots fNormalizationSystematicsSignalRegion;  // fixme
-  // CommonPlots fNormalizationSystematicsControlRegion; // fixme
 
   // Event selection classes and event counters (in same order like they are applied)
   Count cAllEvents;
@@ -516,8 +514,6 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
     cfg_LdgTopDefinition(config.getParameter<std::string>("FakeBTopSelectionBDT.LdgTopDefinition")),
     cfg_BjetDiscr(config.getParameter<std::string>("FakeBBjetSelection.bjetDiscr")),
     fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kFakeBMeasurement, fHistoWrapper),
-    // fNormalizationSystematicsSignalRegion(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kQCDNormalizationSystematicsSignalRegion, fHistoWrapper), // fixme
-    // fNormalizationSystematicsControlRegion(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kQCDNormalizationSystematicsControlRegion, fHistoWrapper),// fixme
     cAllEvents(fEventCounter.addCounter("All events")),
     cTrigger(fEventCounter.addCounter("Passed trigger")),
     fMETFilterSelection(config.getParameter<ParameterSet>("METFilter"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
@@ -1012,8 +1008,6 @@ void FakeBMeasurement::book(TDirectory *dir) {
   
   // Book common plots histograms
   fCommonPlots.book(dir, isData());
-  // fNormalizationSystematicsSignalRegion.book(dir, isData()); // fixme
-  // fNormalizationSystematicsControlRegion.book(dir, isData()); // fixme
 
   // Book histograms in event selection classes
   fMETFilterSelection.bookHistograms(dir);
@@ -2191,8 +2185,6 @@ void FakeBMeasurement::process(Long64_t entry) {
 
   //====== Initialize
   fCommonPlots.initialize();
-  // fNormalizationSystematicsSignalRegion.initialize();  // fixme
-  // fNormalizationSystematicsControlRegion.initialize(); // fixme
 
   cAllEvents.increment();
   int nVertices = fEvent.vertexInfo().value();
@@ -2338,10 +2330,9 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
 
   // Defining the splitting of phase-space as the eta of the Tetrajet b-jet
   std::vector<float> myFactorisationInfo;
-  myFactorisationInfo.push_back(topData.getTetrajetBJet().pt() ); //new
+  // myFactorisationInfo.push_back(topData.getTetrajetBJet().pt() ); //new
   myFactorisationInfo.push_back(topData.getTetrajetBJet().eta() );
   fCommonPlots.setFactorisationBinForEvent(myFactorisationInfo);
-  // fNormalizationSystematicsSignalRegion.setFactorisationBinForEvent(myFactorisationInfo); //fixme
 
   // If 1 or more untagged genuine bjets are found the event is considered fakeB. Otherwise genuineB  
   bool isGenuineB = bjetData.isGenuineB();
@@ -2898,11 +2889,9 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
 
   // Defining the splitting of phase-space as the eta of the Tetrajet b-jet
   std::vector<float> myFactorisationInfo;
-  myFactorisationInfo.push_back(topData.getTetrajetBJet().pt() ); //new
+  // myFactorisationInfo.push_back(topData.getTetrajetBJet().pt() ); //new
   myFactorisationInfo.push_back(topData.getTetrajetBJet().eta() );
   fCommonPlots.setFactorisationBinForEvent(myFactorisationInfo);
-  // fNormalizationSystematicsControlRegion.setFactorisationBinForEvent(myFactorisationInfo); //fixme
-  // fNormalizationSystematicsControlRegion.fillControlPlotsAfterTauSelection(fEvent, tauData); //fixme
 
   // If 1 or more untagged genuine bjets are found the event is considered fakeB. Otherwise genuineB
   bool isGenuineB = invBjetData.isGenuineB();
