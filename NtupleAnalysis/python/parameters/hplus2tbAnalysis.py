@@ -220,8 +220,8 @@ fakeBMeasurement = PSet(
     LdgTopMVACutValue              = topSelectionBDT.MVACutValue,
     LdgTopMVACutDirection          = topSelectionBDT.MVACutDirection, 
     # Define CR1, CR2
-    SubldgTopMVACutValue           = 0.4, #[default: 0.4] #buffer
-    #SubldgTopMVACutValue           = topSelectionBDT.MVACutValue,
+    #SubldgTopMVACutValue           = 0.4, #[default: 0.4] #buffer
+    SubldgTopMVACutValue           = topSelectionBDT.MVACutValue, #default
     SubldgTopMVACutDirection       = "<",
     # CR3, CR4 are automatically defined as:
     # BDT <  topSelectionBDT.MVACutValue
