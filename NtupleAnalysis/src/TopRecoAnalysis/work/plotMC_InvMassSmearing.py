@@ -150,15 +150,8 @@ def main(opts):
         style.setGridX(False)
         style.setGridY(False)
 
-        # Do the topSelection histos
-        folder      = opts.folder 
-        histoPaths1 = []
-        histoList   = datasetsMgr.getDataset(datasetOrder[0]).getDirectoryContent(folder)
-        histoPaths  = [os.path.join(folder, h) for h in histoList]
-        hList       = [x for x in histoPaths if "TetrajetMass" in x]
-
-        # For-loop: All histos
-        PlotHistograms(datasetsMgr, hList)
+        # Do the histograms
+        PlotHistograms(datasetsMgr)
 
     return
 
@@ -191,7 +184,7 @@ def SavePlot(plot, saveName, saveDir, saveFormats = [".pdf", ".png"]):
         plot.saveAs(savePath, formats=saveFormats)
     return
 
-def PlotHistograms(datasetsMgr, hList):
+def PlotHistograms(datasetsMgr):
 
     # Definitions
     kwargs = {}
@@ -201,31 +194,56 @@ def PlotHistograms(datasetsMgr, hList):
     dName =  "ChargedHiggs_HplusTB_HplusToTB_M_%s" % (opts.signalMass)
 
     # Matched Leading Trijet
-    p0 = plots.MCPlot(datasetsMgr, "AnalysisTriplets/TetrajetMass_LdgTopIsHTop", normalizeToOne=True, saveFormats=[], **kwargs)
+    p0 = plots.MCPlot(datasetsMgr, "AnalysisTriplets/TetrajetMass_LdgTopIsHTop", normalizeToLumi=opts.intLumi, saveFormats=[], **kwargs)
     hTopTrue = p0.histoMgr.getHisto(dName).getRootHisto().Clone("Matched-LdgTrijet")
     histos.append(hTopTrue)
 
     # Matched Bjet
-    p1 = plots.MCPlot(datasetsMgr, "AnalysisTripletsTrue/TetrajetMass", normalizeToOne=True, saveFormats=[], **kwargs)
+    p1 = plots.MCPlot(datasetsMgr, "AnalysisTripletsTrue/TetrajetMass", normalizeToLumi=opts.intLumi, saveFormats=[], **kwargs)
     hBjetTrue = p1.histoMgr.getHisto(dName).getRootHisto().Clone("Matched-Bjet")
     histos.append(hBjetTrue)
 
     # Matched Leading Trijet + Bjet
-    p2 = plots.MCPlot(datasetsMgr, "AnalysisTripletsTrue/TetrajetMass_LdgTopIsHTop", normalizeToOne=True, saveFormats=[], **kwargs)
+    p2 = plots.MCPlot(datasetsMgr, "AnalysisTripletsTrue/TetrajetMass_LdgTopIsHTop", normalizeToLumi=opts.intLumi, saveFormats=[], **kwargs)
     hAllTrue = p2.histoMgr.getHisto(dName).getRootHisto().Clone("Matched-LdgTrijet-Bjet")
     histos.append(hAllTrue)
         
     # Inclusive
-    p3 = plots.MCPlot(datasetsMgr, "AnalysisTriplets/TetrajetMass", normalizeToOne=True, saveFormats=[], **kwargs)
+    p3 = plots.MCPlot(datasetsMgr, "AnalysisTriplets/TetrajetMass", normalizeToLumi=opts.intLumi, saveFormats=[], **kwargs)
     hInclusive = p3.histoMgr.getHisto(dName).getRootHisto().Clone("Inclusive")
     histos.append(hInclusive)
 
-    # Make comparison plot
-    for h in histos:
-        h = h.Scale(1/h.Integral())
+    # Unmatched
+    hUnmatched = p3.histoMgr.getHisto(dName).getRootHisto().Clone("Unmatched")
+    hUnmatched.Add(hAllTrue , +1)
+    hUnmatched.Add(hBjetTrue, -1)
+    hUnmatched.Add(hTopTrue , -1)
+    histos.append(Unmatched)
 
     # Make comparison plot
-    p = plots.ComparisonManyPlot(hInclusive, [hBjetTrue, hTopTrue, hAllTrue], saveFormats=[])
+    nTotal = hInclusive.Integral()
+    align  = "{:>25} {:>25}"
+    title  = align.format("Histogram", "Percentage (%)")
+    hLine  = 50*"="
+    table  = []
+    table.append(hLine)
+    table.append(title)
+    table.append(hLine)
+    for h in histos:
+        n     = h.Integral()
+        perc  = (n/nTotal)*100
+        table.append(align.format(h.GetName(), " %.1f" % (perc) ))
+
+        if opts.normaliseToOne:
+            h = h.Scale(1/h.Integral())
+
+    # Print table info
+    table.append(hLine)
+    for row in table:
+        print row
+
+    # Make comparison plot
+    p = plots.ComparisonManyPlot(hInclusive, [hBjetTrue, hTopTrue, hAllTrue, hUnmatched], saveFormats=[])
     p.setLuminosity(opts.intLumi)
 
     # Overwite signal style?
@@ -235,24 +253,28 @@ def PlotHistograms(datasetsMgr, hList):
     p.histoMgr.forHisto("Matched-Bjet"           , styles.mcStyle) #getInvertedLineStyle()) 
     p.histoMgr.forHisto("Matched-LdgTrijet"      , styles.stylesCompound[-1])
     p.histoMgr.forHisto("Inclusive"              , styles.getGenuineBLineStyle())
+    p.histoMgr.forHisto("Unmatched"              , styles.errorRatioStatStyle)
         
     # Set draw style
     p.histoMgr.setHistoDrawStyle("Inclusive", "AP")
     p.histoMgr.setHistoDrawStyle("Matched-Bjet", "AP")
     p.histoMgr.setHistoDrawStyle("Matched-LdgTrijet", "HIST")
     p.histoMgr.setHistoDrawStyle("Matched-LdgTrijet-Bjet", "HIST")
+    p.histoMgr.setHistoDrawStyle("Unmatched", "HIST")
 
     # Set legend style    
     p.histoMgr.setHistoLegendStyle("Inclusive", "LP")
     p.histoMgr.setHistoLegendStyle("Matched-Bjet", "LP")
     p.histoMgr.setHistoLegendStyle("Matched-LdgTrijet", "F")
     p.histoMgr.setHistoLegendStyle("Matched-LdgTrijet-Bjet", "F")
+    p.histoMgr.setHistoLegendStyle("Unmatched", "F")
 
     p.histoMgr.setHistoLegendLabelMany({
             "Inclusive"              : "Inclusive",
             "Matched-Bjet"           : "b-jet match",
             "Matched-LdgTrijet"      : "top match",
             "Matched-LdgTrijet-Bjet" : "top + b-jet match",
+            "Unmatched"              : "Combinatoric",
             })
     
     
@@ -264,10 +286,15 @@ def PlotHistograms(datasetsMgr, hList):
     else:
         _leg     = {"x1": 0.60, "y1": 0.65, "x2": 0.85, "y2": 0.87}
 
+    if opts.normaliseToOne:
+        yLabel = "Arbitrary Units / %0.0f " + _units
+    else:
+        yLabel = "Events / %0.0f " + _units
+
     plots.drawPlot(p, 
                    saveName,
                    xlabel       = "m_{jjbb} (%s)" % (_units),
-                   ylabel       = "Arbitrary Units / %0.0f " + _units,
+                   ylabel       = yLabel,
                    log          = False,
                    rebinX       = 5,
                    cmsExtraText = "Preliminary",
@@ -337,7 +364,6 @@ if __name__ == "__main__":
     NOERROR      = True
     VERBOSE      = False
     NORMALISE    = False
-    FOLDER       = ""
     ANALYSISNAME = "TopRecoAnalysis"
     SAVEDIR      = "/publicweb/a/aattikis/" + ANALYSISNAME
 
@@ -389,9 +415,6 @@ if __name__ == "__main__":
 
     parser.add_option("-n", "--normaliseToOne", dest="normaliseToOne", action="store_true", 
                       help="Normalise the histograms to one? [default: %s]" % (NORMALISE) )
-
-    parser.add_option("--folder", dest="folder", type="string", default = FOLDER,
-                      help="ROOT file folder under which all histograms to be plotted are located [default: %s]" % (FOLDER) )
 
     (opts, parseArgs) = parser.parse_args()
 
