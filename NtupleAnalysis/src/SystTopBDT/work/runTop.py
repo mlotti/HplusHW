@@ -114,13 +114,8 @@ def main():
     # ================================================================================================
     # Setup the process
     # ================================================================================================
-    completeList = GetDatasetCompleteList()
-    whiteList    = GetDatasetWhitelist(opts)
-    blackList    = GetDatasetBlackList(completeList, whiteList)
     maxEvents = {}
-    for d in whiteList:
-        maxEvents[d] = 100
-        #maxEvents[d] = -1
+    maxEvents["All"] = opts.nEvts
     process = Process(prefix, postfix, maxEvents)
                 
     # ================================================================================================
@@ -134,14 +129,37 @@ def main():
         Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
         process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=opts.excludeTasks)
     else:
-        myBlackList = []
-        myBlackList.extend(blackList)
-        Verbose("Adding all datasets from multiCRAB directory %s" % (opts.mcrab))
-        Verbose("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
+        myBlackList = ["QCD_b"
+                       "ChargedHiggs_HplusTB_HplusToTB_M_180_ext1", 
+                       "ChargedHiggs_HplusTB_HplusToTB_M_200_ext1", 
+                       "ChargedHiggs_HplusTB_HplusToTB_M_220_ext1", 
+                       "ChargedHiggs_HplusTB_HplusToTB_M_250_ext1", 
+                       "ChargedHiggs_HplusTB_HplusToTB_M_300_ext1", 
+                       "ChargedHiggs_HplusTB_HplusToTB_M_350_ext1", 
+                       "ChargedHiggs_HplusTB_HplusToTB_M_400_ext1", 
+                       "ChargedHiggs_HplusTB_HplusToTB_M_500_ext1", 
+                       #"ChargedHiggs_HplusTB_HplusToTB_M_650",  #10M events!
+                       "ChargedHiggs_HplusTB_HplusToTB_M_800_ext1", 
+                       "ChargedHiggs_HplusTB_HplusToTB_M_1000_ext1", 
+                       "ChargedHiggs_HplusTB_HplusToTB_M_2000_ext1"
+                       "ChargedHiggs_HplusTB_HplusToTB_M_2500_ext1", 
+                       "ChargedHiggs_HplusTB_HplusToTB_M_3000_ext1", 
+                       # "ChargedHiggs_HplusTB_HplusToTB_M_1000",
+                       "ChargedHiggs_HplusTB_HplusToTB_M_1500",   # Speeed things up
+                       "ChargedHiggs_HplusTB_HplusToTB_M_2000",   # Speeed things up
+                       "ChargedHiggs_HplusTB_HplusToTB_M_2500",   # Speeed things up
+                       "ChargedHiggs_HplusTB_HplusToTB_M_3000",   # Speeed things up
+                       "ChargedHiggs_HplusTB_HplusToTB_M_5000",   # Speeed things up
+                       "ChargedHiggs_HplusTB_HplusToTB_M_7000",   # Speeed things up  
+                       "ChargedHiggs_HplusTB_HplusToTB_M_10000",  # Speeed things up
+                       ]
+        if opts.doSystematics:
+            myBlackList.append("QCD")
+
+        Print("Adding all datasets from multiCRAB directory %s" % (opts.mcrab))
+        Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
         regex =  "|".join(myBlackList)
-        if len(whiteList)>0:
-            process.addDatasetsFromMulticrab(opts.mcrab, includeOnlyTasks="|".join(whiteList))
-        elif len(myBlackList)>0:
+        if len(myBlackList)>0:
             process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=regex)
         else:
             process.addDatasetsFromMulticrab(opts.mcrab)
@@ -152,6 +170,10 @@ def main():
     # Overwrite Default Settings  
     # ================================================================================================
     from HiggsAnalysis.NtupleAnalysis.parameters.jetTriggers import allSelections
+    # Marina
+    from HiggsAnalysis.NtupleAnalysis.main import PSet
+    import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
+
     allSelections.verbose = opts.verbose
     allSelections.histogramAmbientLevel = opts.histoLevel
 
@@ -159,8 +181,20 @@ def main():
     #  Systematics selections
     #==========================
 
+    # BDT MisID SF
+    '''
+    MisIDSF = PSet(
+        MisIDSFJsonName = "tauLegTriggerEfficiency_2016_fit.json",
+        ApplyMisIDSF    = True, 
+        )
+    scaleFactors.assignMisIDSF(MisIDSF, "nominal", MisIDSF.MisIDSFJsonName)
+    
+    allSelections.MisIDSF = MisIDSF
+    
+    print allSelections
+    '''
     # MET
-    allSelections.METSelection.METCutValue = 30.0
+    allSelections.METSelection.METCutValue = 50.0
     
     # Muon
     allSelections.MuonSelection.muonPtCut = 30
@@ -168,13 +202,16 @@ def main():
     # Jets
     allSelections.JetSelection.numberOfJetsCutValue = 4
     allSelections.JetSelection.jetPtCuts = [40.0, 40.0, 40.0, 30.0]
-    
-    
-    
-    
-    
-    ##print allSelections.BJetSelection
-    
+        
+    # Trigger 
+    allSelections.Trigger.triggerOR = ["HLT_Mu50"]
+
+    # Bjets
+    allSelections.BJetSelection.jetPtCuts = [40.0, 30.0]
+    allSelections.BJetSelection.numberOfBJetsCutValue = 2
+
+    #print allSelections.BJetSelection
+
     # allSelections.BjetSelection.triggerMatchingApply = True
     # allSelections.TopSelection.ChiSqrCutValue = 100.0
     # allSelections.BJetSelection.numberOfBJetsCutValue = 0
@@ -255,300 +292,6 @@ def main():
     return
 
 #================================================================================================
-def GetDatasetBlackList(completeList, whiteList):
-    myBlacklist = []
-    for d in completeList:
-        if d in whiteList:
-            continue
-        myBlacklist.append(d)
-    return myBlacklist
-            
-def GetDatasetCompleteList():
-    myCompleteList = []
-    myCompleteList.append("SingleMuon_Run2016B_03Feb2017_ver2_v2_273150_275376")
-    myCompleteList.append("SingleMuon_Run2016C_03Feb2017_v1_275656_276283")
-    myCompleteList.append("SingleMuon_Run2016D_03Feb2017_v1_276315_276811")
-    myCompleteList.append("SingleMuon_Run2016E_03Feb2017_v1_276831_277420")
-    #
-    myCompleteList.append("SingleMuon_Run2016F_03Feb2017_v1_277932_278800")
-    myCompleteList.append("SingleMuon_Run2016F_03Feb2017_v1_278801_278808")
-    myCompleteList.append("SingleMuon_Run2016G_03Feb2017_v1_278820_280385")
-    myCompleteList.append("SingleMuon_Run2016H_03Feb2017_ver2_v1_281613_284035")
-    myCompleteList.append("SingleMuon_Run2016H_03Feb2017_ver3_v1_284036_284044")
-
-    myCompleteList.append("TT")
-    #
-    myCompleteList.append("TT_GluonMoveCRTune")
-    #
-    myCompleteList.append("TT_QCDbasedCRTune_erdON")
-    myCompleteList.append("TT_QCDbasedCRTune_erdON_ext1")
-    #
-    myCompleteList.append("TT_TuneCUETP8M2T4down")
-    myCompleteList.append("TT_TuneCUETP8M2T4down_ext1")
-    myCompleteList.append("TT_TuneCUETP8M2T4up")
-    myCompleteList.append("TT_TuneCUETP8M2T4up_ext1")
-    myCompleteList.append("TT_TuneEE5C")
-    myCompleteList.append("TT_TuneEE5C_ext2")
-    myCompleteList.append("TT_TuneEE5C_ext3")
-    #
-    myCompleteList.append("TT_erdON")
-    myCompleteList.append("TT_erdON_ext1")
-    myCompleteList.append("TT_evtgen")
-    #
-    myCompleteList.append("TT_fsrdown")
-    myCompleteList.append("TT_fsrdown_ext1")
-    myCompleteList.append("TT_fsrdown_ext2")
-    myCompleteList.append("TT_fsrup")
-    myCompleteList.append("TT_fsrup_ext1")
-    myCompleteList.append("TT_fsrup_ext2")
-    #
-    myCompleteList.append("TT_hdampDOWN")
-    myCompleteList.append("TT_hdampDOWN_ext1")
-    myCompleteList.append("TT_hdampUP")
-    myCompleteList.append("TT_hdampUP_ext1")
-    #
-    myCompleteList.append("TT_isrdown")
-    myCompleteList.append("TT_isrdown_ext1")
-    myCompleteList.append("TT_isrdown_ext2")
-    myCompleteList.append("TT_isrup_ext1")
-    myCompleteList.append("TT_isrup_ext2")
-    #
-    myCompleteList.append("TT_mtop1665")
-    myCompleteList.append("TT_mtop1695_ext1")
-    myCompleteList.append("TT_mtop1695_ext2")
-    myCompleteList.append("TT_mtop1715")
-    myCompleteList.append("TT_mtop1735")
-    myCompleteList.append("TT_mtop1755")
-    myCompleteList.append("TT_mtop1755_ext1")
-    myCompleteList.append("TT_mtop1755_ext2")
-    myCompleteList.append("TT_mtop1785")
-    #
-    myCompleteList.append("TT_widthx0p2")
-    myCompleteList.append("TT_widthx0p5")
-    myCompleteList.append("TT_widthx0p8")
-    myCompleteList.append("TT_widthx2")
-    myCompleteList.append("TT_widthx4")
-    myCompleteList.append("TT_widthx8")
-
-    myCompleteList.append("TTZToQQ")
-
-    myCompleteList.append("TTWJetsToQQ")
-    myCompleteList.append("TTWJetsToLNu_ext2")
-    myCompleteList.append("TTWJetsToLNu_ext1")
-
-    myCompleteList.append("TTToSemiLep_hdampUP")
-    myCompleteList.append("TTToSemiLep_hdampDOWN")
-    myCompleteList.append("TTToSemiLep_TuneCUETP8M2T4up")
-    myCompleteList.append("TTToSemiLep_TuneCUETP8M2T4down")
-
-    myCompleteList.append("TTGJets_ext1")
-    myCompleteList.append("TTGJets")
-
-    myCompleteList.append("ZZ_ext1")
-    myCompleteList.append("ZZ")
-
-    myCompleteList.append("WWToLNuQQ")
-
-    myCompleteList.append("WZ_ext1")
-    myCompleteList.append("WZ")
-
-    myCompleteList.append("WJetsToLNu_HT_2500ToInf_ext1")
-    myCompleteList.append("WJetsToLNu_HT_2500ToInf")
-    myCompleteList.append("WJetsToLNu_HT_1200To2500_ext1")
-    myCompleteList.append("WJetsToLNu_HT_1200To2500")
-    myCompleteList.append("WJetsToLNu_HT_800To1200_ext1")
-    myCompleteList.append("WJetsToLNu_HT_800To1200")
-    myCompleteList.append("WJetsToLNu_HT_600To800_ext1")
-    myCompleteList.append("WJetsToLNu_HT_600To800")
-    myCompleteList.append("WJetsToLNu_HT_400To600_ext1")
-    myCompleteList.append("WJetsToLNu_HT_400To600")
-    myCompleteList.append("WJetsToLNu_HT_200To400_ext2")
-    myCompleteList.append("WJetsToLNu_HT_200To400_ext1")
-    myCompleteList.append("WJetsToLNu_HT_200To400")
-    myCompleteList.append("WJetsToLNu_HT_100To200_ext2")
-    myCompleteList.append("WJetsToLNu_HT_100To200_ext1")
-    myCompleteList.append("WJetsToLNu_HT_100To200")
-    myCompleteList.append("WJetsToLNu_HT_70To100")
-
-    myCompleteList.append("DYJetsToLL_M_50_ext1")
-
-    myCompleteList.append("TTJets_SingleLeptFromT_amcatnlo")
-    myCompleteList.append("TTJets_SingleLeptFromT_genMET_150_madgraph")
-    myCompleteList.append("TTJets_SingleLeptFromT_madgraph")
-    myCompleteList.append("TTJets_SingleLeptFromT_madgraph_ext1")
-    myCompleteList.append("TTJets_SingleLeptFromTbar_amcatnlo")
-    myCompleteList.append("TTJets_SingleLeptFromTbar_genMET_150_madgraph")
-    myCompleteList.append("TTJets_SingleLeptFromTbar_madgraph")
-    myCompleteList.append("TTJets_SingleLeptFromTbar_madgraph_ext1")
-
-    myCompleteList.append("QCD_Pt_120to170_MuEnrichedPt5")
-    myCompleteList.append("QCD_Pt_15to20_MuEnrichedPt5")
-    myCompleteList.append("QCD_Pt_170to300_MuEnrichedPt5")
-    myCompleteList.append("QCD_Pt_170to300_MuEnrichedPt5_ext1")
-    myCompleteList.append("QCD_Pt_20to30_MuEnrichedPt5")
-    myCompleteList.append("QCD_Pt_300to470_MuEnrichedPt5")
-    myCompleteList.append("QCD_Pt_300to470_MuEnrichedPt5_ext1")
-    myCompleteList.append("QCD_Pt_300to470_MuEnrichedPt5_ext2")
-    myCompleteList.append("QCD_Pt_30to50_MuEnrichedPt5")
-    myCompleteList.append("QCD_Pt_470to600_MuEnrichedPt5")
-    myCompleteList.append("QCD_Pt_470to600_MuEnrichedPt5_ext1")
-    myCompleteList.append("QCD_Pt_470to600_MuEnrichedPt5_ext2")
-    myCompleteList.append("QCD_Pt_50to80_MuEnrichedPt5")
-    myCompleteList.append("QCD_Pt_600to800_MuEnrichedPt5")
-    myCompleteList.append("QCD_Pt_600to800_MuEnrichedPt5_ext1")
-    myCompleteList.append("QCD_Pt_800to1000_MuEnrichedPt5")
-    myCompleteList.append("QCD_Pt_800to1000_MuEnrichedPt5_ext1")
-    myCompleteList.append("QCD_Pt_800to1000_MuEnrichedPt5_ext2")
-    myCompleteList.append("QCD_Pt_80to120_MuEnrichedPt5")
-    myCompleteList.append("QCD_Pt_80to120_MuEnrichedPt5_ext1")
-    myCompleteList.append("QCD_Pt_1000toInf_MuEnrichedPt5")
-    return myCompleteList
-
-def GetDatasetWhitelist(opts):
-    myWhitelist = []
-
-    if opts.group == "A":
-        myWhitelist.append("SingleMuon_Run2016B_03Feb2017_ver2_v2_273150_275376")
-        myWhitelist.append("SingleMuon_Run2016C_03Feb2017_v1_275656_276283")
-        myWhitelist.append("SingleMuon_Run2016D_03Feb2017_v1_276315_276811")
-        myWhitelist.append("SingleMuon_Run2016E_03Feb2017_v1_276831_277420")    
-    elif opts.group == "B":
-        myWhitelist.append("SingleMuon_Run2016F_03Feb2017_v1_277932_278800")
-        myWhitelist.append("SingleMuon_Run2016F_03Feb2017_v1_278801_278808")
-        myWhitelist.append("SingleMuon_Run2016G_03Feb2017_v1_278820_280385")
-        myWhitelist.append("SingleMuon_Run2016H_03Feb2017_ver2_v1_281613_284035")
-        myWhitelist.append("SingleMuon_Run2016H_03Feb2017_ver3_v1_284036_284044")
-    elif opts.group == "C":
-        myWhitelist.append("TT")
-        #
-        myWhitelist.append("TT_GluonMoveCRTune")
-        #
-        myWhitelist.append("TT_QCDbasedCRTune_erdON")
-        myWhitelist.append("TT_QCDbasedCRTune_erdON_ext1")
-        #
-        myWhitelist.append("TT_TuneCUETP8M2T4down")
-        myWhitelist.append("TT_TuneCUETP8M2T4down_ext1")
-        myWhitelist.append("TT_TuneCUETP8M2T4up")
-        myWhitelist.append("TT_TuneCUETP8M2T4up_ext1")
-        myWhitelist.append("TT_TuneEE5C")
-        myWhitelist.append("TT_TuneEE5C_ext2")
-        myWhitelist.append("TT_TuneEE5C_ext3")
-        #
-        myWhitelist.append("TT_erdON")
-        myWhitelist.append("TT_erdON_ext1")
-        myWhitelist.append("TT_evtgen")
-        #
-        myWhitelist.append("TT_fsrdown")
-        myWhitelist.append("TT_fsrdown_ext1")
-        myWhitelist.append("TT_fsrdown_ext2")
-        myWhitelist.append("TT_fsrup")
-        myWhitelist.append("TT_fsrup_ext1")
-        myWhitelist.append("TT_fsrup_ext2")
-        #
-        myWhitelist.append("TT_hdampDOWN")
-        myWhitelist.append("TT_hdampDOWN_ext1")
-        myWhitelist.append("TT_hdampUP")
-        myWhitelist.append("TT_hdampUP_ext1")
-        #
-        myWhitelist.append("TT_isrdown")
-        myWhitelist.append("TT_isrdown_ext1")
-        myWhitelist.append("TT_isrdown_ext2")
-        myWhitelist.append("TT_isrup_ext1")
-        myWhitelist.append("TT_isrup_ext2")
-        #
-        myWhitelist.append("TT_mtop1665")
-        myWhitelist.append("TT_mtop1695_ext1")
-        myWhitelist.append("TT_mtop1695_ext2")
-        myWhitelist.append("TT_mtop1715")
-        myWhitelist.append("TT_mtop1735")
-        myWhitelist.append("TT_mtop1755")
-        myWhitelist.append("TT_mtop1755_ext1")
-        myWhitelist.append("TT_mtop1755_ext2")
-        myWhitelist.append("TT_mtop1785")
-        #
-        myWhitelist.append("TT_widthx0p2")
-        myWhitelist.append("TT_widthx0p5")
-        myWhitelist.append("TT_widthx0p8")
-        myWhitelist.append("TT_widthx2")
-        myWhitelist.append("TT_widthx4")
-        myWhitelist.append("TT_widthx8")
-    elif opts.group == "D":
-        myWhitelist.append("WJetsToLNu_HT_2500ToInf_ext1")
-        myWhitelist.append("WJetsToLNu_HT_2500ToInf")
-        myWhitelist.append("WJetsToLNu_HT_1200To2500_ext1")
-        myWhitelist.append("WJetsToLNu_HT_1200To2500")
-        myWhitelist.append("WJetsToLNu_HT_800To1200_ext1")
-        myWhitelist.append("WJetsToLNu_HT_800To1200")
-        myWhitelist.append("WJetsToLNu_HT_600To800_ext1")
-        myWhitelist.append("WJetsToLNu_HT_600To800")
-        myWhitelist.append("WJetsToLNu_HT_400To600_ext1")
-        myWhitelist.append("WJetsToLNu_HT_400To600")
-        myWhitelist.append("WJetsToLNu_HT_200To400_ext2")
-        myWhitelist.append("WJetsToLNu_HT_200To400_ext1")
-        myWhitelist.append("WJetsToLNu_HT_200To400")
-        myWhitelist.append("WJetsToLNu_HT_100To200_ext2")
-        myWhitelist.append("WJetsToLNu_HT_100To200_ext1")
-        myWhitelist.append("WJetsToLNu_HT_100To200")
-        myWhitelist.append("WJetsToLNu_HT_70To100")    
-    elif opts.group == "E":
-        myWhitelist.append("QCD_Pt_120to170_MuEnrichedPt5")
-        myWhitelist.append("QCD_Pt_15to20_MuEnrichedPt5")
-        myWhitelist.append("QCD_Pt_170to300_MuEnrichedPt5")
-        myWhitelist.append("QCD_Pt_170to300_MuEnrichedPt5_ext1")
-        myWhitelist.append("QCD_Pt_20to30_MuEnrichedPt5")
-        myWhitelist.append("QCD_Pt_300to470_MuEnrichedPt5")
-        myWhitelist.append("QCD_Pt_300to470_MuEnrichedPt5_ext1")
-        myWhitelist.append("QCD_Pt_300to470_MuEnrichedPt5_ext2")
-        myWhitelist.append("QCD_Pt_30to50_MuEnrichedPt5")
-        myWhitelist.append("QCD_Pt_470to600_MuEnrichedPt5")
-        myWhitelist.append("QCD_Pt_470to600_MuEnrichedPt5_ext1")
-        myWhitelist.append("QCD_Pt_470to600_MuEnrichedPt5_ext2")
-        myWhitelist.append("QCD_Pt_50to80_MuEnrichedPt5")
-        myWhitelist.append("QCD_Pt_600to800_MuEnrichedPt5")
-        myWhitelist.append("QCD_Pt_600to800_MuEnrichedPt5_ext1")
-        myWhitelist.append("QCD_Pt_800to1000_MuEnrichedPt5")
-        myWhitelist.append("QCD_Pt_800to1000_MuEnrichedPt5_ext1")
-        myWhitelist.append("QCD_Pt_800to1000_MuEnrichedPt5_ext2")
-        myWhitelist.append("QCD_Pt_80to120_MuEnrichedPt5")
-        myWhitelist.append("QCD_Pt_80to120_MuEnrichedPt5_ext1")
-        myWhitelist.append("QCD_Pt_1000toInf_MuEnrichedPt5")    
-    elif opts.group == "F":
-        myWhitelist.append("TTJets_SingleLeptFromT_amcatnlo")
-        myWhitelist.append("TTJets_SingleLeptFromT_genMET_150_madgraph")
-        myWhitelist.append("TTJets_SingleLeptFromT_madgraph")
-        myWhitelist.append("TTJets_SingleLeptFromT_madgraph_ext1")
-        myWhitelist.append("TTJets_SingleLeptFromTbar_amcatnlo")
-        myWhitelist.append("TTJets_SingleLeptFromTbar_genMET_150_madgraph")
-        myWhitelist.append("TTJets_SingleLeptFromTbar_madgraph")
-        myWhitelist.append("TTJets_SingleLeptFromTbar_madgraph_ext1")
-    elif opts.group == "G":
-        myWhitelist.append("TTZToQQ")
-        myWhitelist.append("TTWJetsToQQ")
-        myWhitelist.append("TTWJetsToLNu_ext2")
-        myWhitelist.append("TTWJetsToLNu_ext1")    
-    elif opts.group == "H":
-        myWhitelist.append("TTToSemiLep_hdampUP")
-        myWhitelist.append("TTToSemiLep_hdampDOWN")
-        myWhitelist.append("TTToSemiLep_TuneCUETP8M2T4up")
-        myWhitelist.append("TTToSemiLep_TuneCUETP8M2T4down")
-    elif opts.group == "I":    
-        myWhitelist.append("TTGJets_ext1")
-        myWhitelist.append("TTGJets")               
-    elif opts.group == "J":
-        myWhitelist.append("ZZ_ext1")
-        myWhitelist.append("ZZ")        
-    elif opts.group == "K":
-        myWhitelist.append("WWToLNuQQ")        
-    elif opts.group == "L":
-        myWhitelist.append("WZ_ext1")
-        myWhitelist.append("WZ")
-    elif opts.group == "M":
-        myWhitelist.append("DYJetsToLL_M_50_ext1")    
-    else:
-        msg = "Unknown systematics submission dataset group \"%s\"%" % (opts.group)
-        raise Exception(msg)
-    return myWhitelist
-
 def PrintOptions(opts):
     '''
     '''
@@ -603,7 +346,6 @@ if __name__ == "__main__":
     PUREWEIGHT    = True
     TOPPTREWEIGHT = True
     DOSYSTEMATICS = False
-    GROUP         = "A"
 
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
     parser.add_option("-m", "--mcrab", dest="mcrab", action="store", 
@@ -635,9 +377,6 @@ if __name__ == "__main__":
 
     parser.add_option("--doSystematics", dest="doSystematics", action="store_true", default = DOSYSTEMATICS, 
                       help="Do systematics variations  (default: %s)" % (DOSYSTEMATICS) )
-
-    parser.add_option("--group", dest="group", default = GROUP, 
-                      help="The group of datasets to run on. Capital letter from \"A\" to \"I\"  (default: %s)" % (GROUP) )
 
     (opts, args) = parser.parse_args()
 
