@@ -106,10 +106,12 @@ fakeBMeasurement = hplus2tbAnalysis.fakeBMeasurement
 systTopBDTSelection = PSet(
     MiniIsoCutValue          = "0.1",
     MiniIsoCutDirection      = "<=",
-    MiniIsoInvCutValue       = "0.1",
+    MiniIsoInvCutValue       = "0.2",
     MiniIsoInvCutDirection   = ">",
     METCutValue              = "50",
     METCutDirection          = ">=",
+    METInvCutValue           = "30",
+    METInvCutDirection       = "<",
     MVACutValue              = "0.4",
     MVACutDirection          = ">=",
 )

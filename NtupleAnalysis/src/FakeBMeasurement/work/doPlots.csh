@@ -20,6 +20,7 @@ set PSEUDO_MCRAB_DIR = ${1}
 
 ./plot_Closure.py -m $PSEUDO_MCRAB_DIR -n --url
 ./plot_ClosureBinned.py -m $PSEUDO_MCRAB_DIR -n --url --ratio
+./plot_ClosureBinnedBuffer.py -m $PSEUDO_MCRAB_DIR -n --url --ratio
 #./plot_FailedBJet.py -m  $PSEUDO_MCRAB_DIR --url
 ./plot_Purity.py -m $PSEUDO_MCRAB_DIR --url
 ./plot_DataMC.py -m $PSEUDO_MCRAB_DIR --folder counters/weighted --url

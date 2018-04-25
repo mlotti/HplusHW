@@ -539,9 +539,14 @@ def GetHistoKwargs(h, opts):
         kwargs["moveLegend"] = {"dx": -0.49, "dy": -0.00, "dh": 0.1}        
 
     if h == "counter":
-        xMin = 15.0
-        xMax = 19.0 #20.0 #21.0
-        kwargs["opts"]   = {"xmin": xMin, "xmax": xMax, "ymin": 1e0, "ymax": 1e8}
+        xMin = 15.0 # 7 jets
+        xMax = 19.0 # 2 tops
+        if 0:
+            kwargs["opts"]   = {"xmin": xMin, "xmax": xMax, "ymin": 1e0, "ymax": 3e11}
+        else:
+            kwargs["opts"]       = {"xmin": xMin, "xmax": xMax, "ymin": 1e0, "ymax": 0.5e8}
+            #kwargs["moveLegend"] = {"dx": -0.50, "dy": -0.36, "dh": 0.1}
+            kwargs["moveLegend"] = {"dx": -0.50, "dy": -0.32, "dh": 0.1}
         # kwargs["cutBox"] = {"cutValue": xMin+2, "fillColor": 16, "box": False, "line": False, "greaterThan": True} #indicate btag SF
 
     if "IsolPt" in h:
@@ -572,8 +577,11 @@ def GetHistoKwargs(h, opts):
         #kwargs["cutBox"] = {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         kwargs["rebinX"] = systematics._dataDrivenCtrlPlotBinning["NVertices_AfterAllSelections"]
         binWmin, binWmax = GetBinWidthMinMax(kwargs["rebinX"])
-        kwargs["ylabel"] = "Events / %.0f-%.0f (%s)" % (binWmin, binWmax, "")
-        kwargs["opts"]   = {"xmax": 80.0, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["ylabel"] = "Events / %.0f-%.0f" % (binWmin, binWmax)
+        kwargs["opts"]   = {"xmax": 80.0, "ymin": yMin, "ymaxfactor": 400}
+        kwargs["divideByBinWidth"] = True
+        if kwargs["divideByBinWidth"]:
+            kwargs["ylabel"] = "Events / #Deltabin / %.0f-%.0f" % (binWmin, binWmax)
 
     if "electronPt" in h:
         units            = "GeV/c"

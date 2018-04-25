@@ -17,6 +17,7 @@ def assignTauIdentificationSF(tauSelectionPset):
     if tauSelectionPset.isolationDiscr=="byLooseCombinedIsolationDeltaBetaCorr3Hits":    SF = 0.93
     elif tauSelectionPset.isolationDiscr=="byMediumCombinedIsolationDeltaBetaCorr3Hits": SF = 0.91
     elif tauSelectionPset.isolationDiscr=="byTightCombinedIsolationDeltaBetaCorr3Hits":  SF = 0.89
+    elif tauSelectionPset.isolationDiscr=="byVLooseIsolationMVArun2v1DBoldDMwLT":        SF = 0.99
     elif tauSelectionPset.isolationDiscr=="byLooseIsolationMVArun2v1DBoldDMwLT":         SF = 0.99
     elif tauSelectionPset.isolationDiscr=="byMediumIsolationMVArun2v1DBoldDMwLT":        SF = 0.97
     elif tauSelectionPset.isolationDiscr=="byTightIsolationMVArun2v1DBoldDMwLT":         SF = 0.95
@@ -27,50 +28,43 @@ def assignTauIdentificationSF(tauSelectionPset):
 ##===== Tau misidentification (simple SF)
 # \param tauSelectionPset  the tau config PSet
 # \param partonFakingTau   "eToTau", "muToTau", "jetToTau"
-# \param etaRegion         "barrel", "endcap"
 # \param direction         "nominal, "up", "down"
-def assignTauMisidentificationSF(tauSelectionPset, partonFakingTau, etaRegion, direction):
-    if not etaRegion in ["barrel", "endcap", "full"]:
-        raise Exception("Error: unknown option for eta region('%s')!"%etaRegion)
-    if not direction in ["nominal", "up", "down"]:
-        raise Exception("Error: unknown option for direction('%s')!"%direction)
+def assignTauMisidentificationSF(tauSelectionPset, partonFakingTau, direction):
     dirNumber = 0
     if direction == "up":
         dirNumber = 1
     elif direction == "down":
         dirNumber = -1
     if partonFakingTau == "eToTau":
-        _assignEToTauSF(tauSelectionPset, etaRegion, dirNumber)
+        _assignEToTauSF(tauSelectionPset, dirNumber)
     elif partonFakingTau == "muToTau":
-        _assignMuToTauSF(tauSelectionPset, etaRegion, dirNumber)
+        _assignMuToTauSF(tauSelectionPset, dirNumber)
     elif partonFakingTau == "jetToTau":
-        _assignJetToTauSF(tauSelectionPset, etaRegion, dirNumber)
+        _assignJetToTauSF(tauSelectionPset, dirNumber)
     else:
         raise Exception("Error: unknown option for parton faking tau ('%s')!"%partonFakingTau)
-    
-def _assignEToTauSF(tauSelectionPset, etaRegion, dirNumber):
-    if etaRegion == "barrel":
-        tauSelectionPset.tauMisidetificationEToTauBarrelSF = 1.0 + dirNumber*0.20
-    elif etaRegion == "endcap":
-        tauSelectionPset.tauMisidetificationEToTauEndcapSF = 1.0 + dirNumber*0.20
-    elif etaRegion == "full":
-        tauSelectionPset.tauMisidetificationEToTauSF = 1.0 + dirNumber*0.20
 
-def _assignMuToTauSF(tauSelectionPset, etaRegion, dirNumber):
-    if etaRegion == "barrel":
-        tauSelectionPset.tauMisidetificationMuToTauBarrelSF = 1.0 + dirNumber*0.30
-    elif etaRegion == "endcap":
-        tauSelectionPset.tauMisidetificationMuToTauEndcapSF = 1.0 + dirNumber*0.30
-    elif etaRegion == "full":
-        tauSelectionPset.tauMisidetificationMuToTauSF = 1.0 + dirNumber*0.30
+# Values from https://twiki.cern.ch/twiki/bin/view/CMS/TauIDRecommendation13TeV#Electron_to_tau_fake_rate
+# Measured SF in Run-2 (2016), for Tight WP
+def _assignEToTauSF(tauSelectionPset, dirNumber):
+    tauSelectionPset.tauMisidetificationEToTauElectronBarrelSF = 1.40 + dirNumber*0.12
+    tauSelectionPset.tauMisidetificationEToTauElectronEndcapSF = 1.90 + dirNumber*0.30
+#    tauSelectionPset.tauMisidetificationEToTauSF = 1.0 + dirNumber*0.30
 
-def _assignJetToTauSF(tauSelectionPset, etaRegion, dirNumber):
-    if etaRegion == "barrel":
-        tauSelectionPset.tauMisidetificationJetToTauBarrelSF = 1.0 + dirNumber*0.20
-    elif etaRegion == "endcap":
-        tauSelectionPset.tauMisidetificationJetToTauEndcapSF = 1.0 + dirNumber*0.20
-    elif etaRegion == "full":
-        tauSelectionPset.tauMisidetificationJetToTauSF = 1.0 + dirNumber*0.20
+# Values from https://twiki.cern.ch/twiki/bin/view/CMS/TauIDRecommendation13TeV#Muon_Rejection,
+# Measured SF in Run-2 with bad muon filter, for Cut-based Loose WP
+def _assignMuToTauSF(tauSelectionPset, dirNumber):
+    tauSelectionPset.tauMisidetificationMuToTauBarrel0to0p4SF   = 1.22 + dirNumber*0.04
+    tauSelectionPset.tauMisidetificationMuToTauBarrel0p4to0p8SF = 1.12 + dirNumber*0.04
+    tauSelectionPset.tauMisidetificationMuToTauBarrel0p8to1p2SF = 1.26 + dirNumber*0.04
+    tauSelectionPset.tauMisidetificationMuToTauBarrel1p2to1p7SF = 1.22 + dirNumber*0.15
+    tauSelectionPset.tauMisidetificationMuToTauEndcapSF = 2.39 + dirNumber*0.16
+#    tauSelectionPset.tauMisidetificationMuToTauSF = 1.0 + dirNumber*0.30
+
+def _assignJetToTauSF(tauSelectionPset, dirNumber):
+    tauSelectionPset.tauMisidetificationJetToTauBarrelSF = 1.0 + dirNumber*0.20
+    tauSelectionPset.tauMisidetificationJetToTauEndcapSF = 1.0 + dirNumber*0.20
+#    tauSelectionPset.tauMisidetificationJetToTauSF = 1.0 + dirNumber*0.20
 
 # Marina
 def assignMisIDSF(pset, direction, jsonfile, variationType="MC"):
