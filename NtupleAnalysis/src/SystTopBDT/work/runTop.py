@@ -182,9 +182,8 @@ def main():
     #==========================
 
     # BDT MisID SF
-    '''
     MisIDSF = PSet(
-        MisIDSFJsonName = "tauLegTriggerEfficiency_2016_fit.json",
+        MisIDSFJsonName = "Efficiency_LdgTrijet2016_bin_CR1.json", # For Fake TT:  Efficiency_LdgTrijet2016_bin_CR1.json",   # For QCD, EWK & SingleTop:  Efficiency_LdgTrijet2016_bin.json",
         ApplyMisIDSF    = True, 
         )
     scaleFactors.assignMisIDSF(MisIDSF, "nominal", MisIDSF.MisIDSFJsonName)
@@ -192,7 +191,7 @@ def main():
     allSelections.MisIDSF = MisIDSF
     
     print allSelections
-    '''
+    
     # MET
     allSelections.METSelection.METCutValue = 50.0
     

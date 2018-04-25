@@ -74,10 +74,9 @@ private:
   FatJetSelection fFatJetSelection;
   Count cSelected;
   
-  // Marina
-  //GenericScaleFactor fMisIDSFReader;
-  //Count cMisIDSFCounter;
-  //const bool cfg_ApplyMisIDSF;
+  GenericScaleFactor fMisIDSFReader;
+  Count cMisIDSFCounter;
+  const bool cfg_ApplyMisIDSF;
   
   //====================================================================
   //Signal Region
@@ -363,11 +362,10 @@ SystTopBDT::SystTopBDT(const ParameterSet& config, const TH1* skimCounters)
     fQGLRSelection(config.getParameter<ParameterSet>("QGLRSelection")),// fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
-    cSelected(fEventCounter.addCounter("Selected Events"))
-    // Marina
-    //fMisIDSFReader(config.getParameterOptional<ParameterSet>("MisIDSF.MisIDSF")),
-    //cMisIDSFCounter(fEventCounter.addCounter("Mis-ID SF")),
-    //cfg_ApplyMisIDSF(config.getParameterOptional<ParameterSet>("ApplyMisIDSF"))
+    cSelected(fEventCounter.addCounter("Selected Events")),
+    fMisIDSFReader(config.getParameterOptional<ParameterSet>("MisIDSF.MisIDSF")),
+    cMisIDSFCounter(fEventCounter.addCounter("Mis-ID SF")),
+    cfg_ApplyMisIDSF(config.getParameterOptional<ParameterSet>("ApplyMisIDSF"))
 { }
 
 
@@ -1229,14 +1227,13 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
     // ==================================================================================
     //    Apply Mis-ID SF
     // ==================================================================================
-    // Marina Apply Mis-ID SF
-    //if (fEvent.isMC())
-    // {
-    //double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
-    //std::cout<<"SR:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
-    //fEventWeight.multiplyWeight(MisIDweight);
-    //}
-    //cMisIDSFCounter.increment();
+    if (fEvent.isMC())
+      {
+	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
+	//std::cout<<"SR:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
+	fEventWeight.multiplyWeight(MisIDweight);
+      }
+    cMisIDSFCounter.increment();
     
     int selected_ldgTopIndex = getLeadingTopIndex(topData, "selected", mu, BJet_LeptonicBr, searchForLeptonicTop);
 
@@ -1383,14 +1380,13 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
     // ==================================================================================
     //    Apply Mis-ID SF
     // ==================================================================================
-    // Marina MisID SF
-    //if (fEvent.isMC())
-    //  {
-    //	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
-    //std::cout<<"VR:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
-    //	fEventWeight.multiplyWeight(MisIDweight);
-    // }
-    //cMisIDSFCounter.increment();
+    if (fEvent.isMC())
+      {
+    	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
+	//std::cout<<"VR:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
+	fEventWeight.multiplyWeight(MisIDweight);
+      }
+    cMisIDSFCounter.increment();
     // ----------------------------------------------------------------------------------
     
     int selected_ldgTopIndex = getLeadingTopIndex(topData, "selected", mu, BJet_LeptonicBr, searchForLeptonicTop);
@@ -1755,14 +1751,13 @@ void SystTopBDT::DoInvertedAnalysis(const JetSelection::Data& jetData, const BJe
     // ==================================================================================
     //    Apply Mis-ID SF
     // ==================================================================================
-    // Marina Mis-ID SF
-    //if (fEvent.isMC())
-    //  {
-    //double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
-    //std::cout<<"CR1:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
-    //	fEventWeight.multiplyWeight(MisIDweight);
-    //  }
-    //cMisIDSFCounter.increment();
+    if (fEvent.isMC())
+      {
+	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
+	//std::cout<<"CR1:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
+	fEventWeight.multiplyWeight(MisIDweight);
+      }
+    cMisIDSFCounter.increment();
     // ----------------------------------------------------------------------------------
 
     int selected_ldgTopIndex = getLeadingTopIndex(topData, "selected", mu, BJet_LeptonicBr, searchForLeptonicTop);
@@ -1904,14 +1899,13 @@ void SystTopBDT::DoInvertedAnalysis(const JetSelection::Data& jetData, const BJe
     // ==================================================================================
     //    Apply Mis-ID SF
     // ==================================================================================
-    // Marina Mis-ID SF
-    //if (fEvent.isMC())
-    //  {
-    //double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
-    //std::cout<<"CR2:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
-    //fEventWeight.multiplyWeight(MisIDweight);
-    //  }
-    //cMisIDSFCounter.increment();  
+    if (fEvent.isMC())
+      {
+	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
+	//std::cout<<"CR2:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
+	fEventWeight.multiplyWeight(MisIDweight);
+      }
+    cMisIDSFCounter.increment();  
     // ----------------------------------------------------------------------------------
 
     int selected_ldgTopIndex = getLeadingTopIndex(topData, "selected", mu, BJet_LeptonicBr, searchForLeptonicTop);
