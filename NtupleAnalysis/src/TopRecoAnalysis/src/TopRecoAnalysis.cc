@@ -263,9 +263,15 @@ private:
   WrappedTH1Triplet *hSubldgTrijet_DeltaY_Trijet_TetrajetBjet_trueBoth;
 
   WrappedTH1Triplet *hTetrajetMass;
+  WrappedTH1Triplet *hTetrajetMass_InTopDir;
+  WrappedTH1Triplet *hTetrajetMass_haveMatchedH;
+  WrappedTH1Triplet *hTetrajetMass_haveMatchedAssocTop;
+  WrappedTH1Triplet *hTetrajetMass_haveOnlyMatchedAssocTop;
   WrappedTH1Triplet *hTetrajetMass_M800;
+  WrappedTH1Triplet *hTetrajetMass_TopUnmatched;
   WrappedTH1Triplet *hTetrajetMass_LdgTopIsHTop;
   WrappedTH1Triplet *hTetrajetMass_SubldgTopIsHTop;
+  WrappedTH1Triplet *hTetrajetMass_LdgWIsWfromH;
   WrappedTH1 *hTetrajetMass_deltaPhiCond;
   WrappedTH1Triplet *hTetrajetMass_isGenuineB;
   WrappedTH1Triplet *hTetrajetMass_closeJetToTetrajetBjet;
@@ -486,7 +492,8 @@ void TopRecoAnalysis::book(TDirectory *dir) {
 
   // const int nInvMassBins    = fCommonPlots.getInvMassBinSettings().bins();
   // const float fInvMassMin   = fCommonPlots.getInvMassBinSettings().min();
-  // const float fInvMassMax   = fCommonPlots.getInvMassBinSettings().max();
+  const float fInvMassMax   = fCommonPlots.getInvMassBinSettings().max();
+  std::cout<<fInvMassMax<<std::endl;
 
   const int nPtBins_modif       =     fCommonPlots.getPtBinSettings().bins();
   const double fPtMin_modif     = 2 * fCommonPlots.getPtBinSettings().min();
@@ -851,15 +858,23 @@ void TopRecoAnalysis::book(TDirectory *dir) {
 										     nDPhiBins , fDPhiMin , fDPhiMax, nPtBins_modif,fPtMin_modif,fPtMax_modif);
 
 
-  hTetrajetMass                     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass", ";m_{jjbb} (GeV/c^{2})",                 250,  0, 2500);
-  hTetrajetMass_M800                     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_M800", ";m_{jjbb} (GeV/c^{2})",       250,  0, 2500);
-  hTetrajetMass_LdgTopIsHTop        = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_LdgTopIsHTop", ";m_{jjbb} (GeV/c^{2})",    250,  0, 2500);
-  hTetrajetMass_SubldgTopIsHTop     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_SubldgTopIsHTop", ";m_{jjbb} (GeV/c^{2})", 250,  0, 2500);
-  hTetrajetMass_deltaPhiCond        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TetrajetMass_deltaPhiCond", ";m_{jjbb} (GeV/c^{2})",              250,  0, 2500);
-  hTetrajetMass_isGenuineB          = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_isGenuineB", ";m_{jjbb} (GeV/c^{2})",      250,  0, 2500);
+  hTetrajetMass                     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass", ";m_{jjbb} (GeV/c^{2})",                 300,  0, 3000);
+  hTetrajetMass_InTopDir            = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_InTopDir", ";m_{jjbb} (GeV/c^{2})",                 300,  0, 3000);
+  hTetrajetMass_M800                = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_M800", ";m_{jjbb} (GeV/c^{2})",       300,  0, 3000);
+  hTetrajetMass_LdgTopIsHTop        = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_LdgTopIsHTop", ";m_{jjbb} (GeV/c^{2})",    300,  0, 3000);
+  hTetrajetMass_SubldgTopIsHTop     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_SubldgTopIsHTop", ";m_{jjbb} (GeV/c^{2})", 300,  0, 3000);
+  hTetrajetMass_LdgWIsWfromH        = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_LdgWIsWfromH", ";m_{jjbb} (GeV/c^{2})",    300,  0, 3000);
+  hTetrajetMass_TopUnmatched        = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_TopUnmatched", ";m_{jjbb} (GeV/c^{2})",    300,  0, 3000);
+  hTetrajetMass_deltaPhiCond        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TetrajetMass_deltaPhiCond", ";m_{jjbb} (GeV/c^{2})",              300,  0, 3000);
+  hTetrajetMass_isGenuineB          = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_isGenuineB", ";m_{jjbb} (GeV/c^{2})",      300,  0, 3000);
+  hTetrajetMass_haveMatchedH         = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_haveMatchedH", ";m_{jjbb} (GeV/c^{2})",      300,  0, 3000);
+  hTetrajetMass_haveMatchedAssocTop  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_haveMatchedAssocTop", ";m_{jjbb} (GeV/c^{2})",      300,  0, 3000);
+  hTetrajetMass_haveOnlyMatchedAssocTop = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_haveOnlyMatchedAssocTop", ";m_{jjbb} (GeV/c^{2})",      300,  0, 3000);
 
 
   hTetrajetMass_closeJetToTetrajetBjet = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_closeJetToTetrajetBjet", ";m_{jjbb} (GeV/c^{2})",      250,  0, 2500);
+
+
 
 
   hTetrajetPtDPhi                     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetPtDPhi", ";p_{T,jjbb}#Delta#phi(top,b) (GeV/c)",      nPtBins, fPtMin, fPtMax*fDPhiMax);
@@ -1397,7 +1412,7 @@ void TopRecoAnalysis::process(Long64_t entry) {
   //================================================================================================
   if (0) std::cout << "=== Standard Selections" << std::endl;
   //fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, bjetData.isGenuineB());
-  
+
   //================================================================================================
   // All Selections
   //================================================================================================
@@ -1556,6 +1571,7 @@ void TopRecoAnalysis::process(Long64_t entry) {
   std::vector<genParticle> GenChargedHiggs;
   std::vector<genParticle> GenChargedHiggs_BQuark;
   std::vector<genParticle> GenTops;
+  genParticle              GenHTop;
   std::vector<genParticle> GenTops_BQuark;
   std::vector<genParticle> GenTops_SubldgQuark;
   std::vector<genParticle> GenTops_LdgQuark;
@@ -1571,7 +1587,9 @@ void TopRecoAnalysis::process(Long64_t entry) {
   
   int nGenuineTops = 0;
   GenTops = GetGenParticles(fEvent.genparticles().getGenParticles(), 6);
-  
+  for (auto& top: GenTops){
+    if (HasMother(fEvent, top, 37)) GenHTop = top;
+  }
 
   hCevts_FatJet_Pt450 -> Fill("All", 1);
   bool foundFatJet_Pt450 =false;
@@ -1911,8 +1929,12 @@ void TopRecoAnalysis::process(Long64_t entry) {
 
   bool haveMatchedChargedHiggsBJet    = HBjet.size() > 0;
   bool haveMatchedTopFromChargedHiggs = HiggsTop_Bjet.size() > 0;
+
+  bool haveMatchedChargedHiggs        = haveMatchedChargedHiggsBJet && haveMatchedTopFromChargedHiggs;
   bool haveMatchedAssocTop            = AssocTop_Bjet.size() > 0; 
   
+  bool haveOnlyMatchedAssocTop        = (!haveMatchedTopFromChargedHiggs)&&(haveMatchedAssocTop);
+
   if (0) std::cout<<haveMatchedAssocTop<<std::endl;
   
   if (doMatching){
@@ -2179,8 +2201,20 @@ void TopRecoAnalysis::process(Long64_t entry) {
   
   bool LdgTopIsTopFromH = false;
   bool SubldgTopIsTopFromH = false;
+  bool LdgWIsWfromH = false;  //LdgW = W from leading Top
+
   if (haveMatchedTopFromChargedHiggs)  LdgTopIsTopFromH       = isRealMVATop(LdgTrijet.Jet1, LdgTrijet.Jet2, LdgTrijet.BJet, HiggsTop_LdgJet.at(0), HiggsTop_SubldgJet.at(0), HiggsTop_Bjet.at(0));
   if (haveMatchedTopFromChargedHiggs)  SubldgTopIsTopFromH    = isRealMVATop(SubldgTrijet.Jet1, SubldgTrijet.Jet2, SubldgTrijet.BJet, HiggsTop_LdgJet.at(0), HiggsTop_SubldgJet.at(0), HiggsTop_Bjet.at(0));
+    
+    
+  //bool IsInTopDir = ROOT::Math::VectorUtil::DeltaR(topData.getLdgTrijet(), GenHTop.p4());
+
+  if (haveMatchedTopFromChargedHiggs){
+    bool same1 = areSameJets(LdgTrijet.Jet1, HiggsTop_LdgJet.at(0)) && areSameJets(LdgTrijet.Jet2, HiggsTop_SubldgJet.at(0));
+    bool same2 = areSameJets(LdgTrijet.Jet2, HiggsTop_LdgJet.at(0)) && areSameJets(LdgTrijet.Jet1, HiggsTop_SubldgJet.at(0));
+    if (!LdgWIsWfromH) LdgWIsWfromH = (same1 || same2);  //If Ldg top not matched: check if W is matched with the W from Higgs
+  }
+      
 
   double LdgTrijet_Rapidity = 0.5*log((LdgTrijet.TrijetP4.E() + LdgTrijet.TrijetP4.Pz())/(LdgTrijet.TrijetP4.E() - LdgTrijet.TrijetP4.Pz()));
   double SubldgTrijet_Rapidity = 0.5*log((SubldgTrijet.TrijetP4.E() + SubldgTrijet.TrijetP4.Pz())/(SubldgTrijet.TrijetP4.E() - SubldgTrijet.TrijetP4.Pz()));
@@ -2232,14 +2266,12 @@ void TopRecoAnalysis::process(Long64_t entry) {
   //===Definitions
 
   //===Fill Histograms
-
+  //if (!haveMatchedChargedHiggs) return;
 
   hLdgTrijetPt         -> Fill(LdgTopIsTopFromH, LdgTrijet.TrijetP4.Pt());
   hLdgTrijetDijetPt    -> Fill(LdgTopIsTopFromH, topData.getLdgTrijetDijet().Pt());
   hSubldgTrijetPt      -> Fill(SubldgTopIsTopFromH, SubldgTrijet.TrijetP4.Pt());
   hSubldgTrijetDijetPt -> Fill(SubldgTopIsTopFromH, topData.getLdgTrijetDijet().Pt());
-
-
 
   hLdgTrijet_DeltaR_Trijet_TetrajetBjet      -> Fill(LdgTopIsTopFromH, deltaR_LdgTrijet_TetrajetBjet);
   hLdgTrijet_DeltaEta_Trijet_TetrajetBjet    -> Fill(LdgTopIsTopFromH, deltaEta_LdgTrijet_TetrajetBjet);
@@ -2282,14 +2314,27 @@ void TopRecoAnalysis::process(Long64_t entry) {
   //Boolean defines if tetrajetBjet is correctly identified
   hTetrajetMass -> Fill(isBfromH, tetrajet_p4.M());
   if (tetrajet_p4.M() < 800)  hTetrajetMass_M800            -> Fill(isBfromH, tetrajet_p4.M());
-  if (LdgTopIsTopFromH)       hTetrajetMass_LdgTopIsHTop    -> Fill(isBfromH, tetrajet_p4.M());
+  if (LdgTopIsTopFromH){
+    hTetrajetMass_LdgTopIsHTop    -> Fill(isBfromH, tetrajet_p4.M());
+  }
+  else{
+    hTetrajetMass_TopUnmatched    -> Fill(isBfromH, tetrajet_p4.M());
+  }
   if (SubldgTopIsTopFromH)    hTetrajetMass_SubldgTopIsHTop -> Fill(isBfromH, subldgTetrajet_p4.M());
+  if (LdgWIsWfromH)           hTetrajetMass_LdgWIsWfromH    -> Fill(isBfromH, tetrajet_p4.M());
+
+  
 
   bool passDeltaPhi_condition = deltaR_SubldgTrijet_TetrajetBjet >= -deltaR_LdgTrijet_TetrajetBjet + pi;
   if (passDeltaPhi_condition) hTetrajetMass_deltaPhiCond    -> Fill(tetrajet_p4.M());
   
   hTetrajetMass_isGenuineB -> Fill(bjetData.isGenuineB(), tetrajet_p4.M());
   
+  if (haveMatchedChargedHiggs) hTetrajetMass_haveMatchedH        -> Fill(isBfromH, tetrajet_p4.M());
+  if (haveMatchedAssocTop)     hTetrajetMass_haveMatchedAssocTop -> Fill(isBfromH, tetrajet_p4.M());
+  if (haveOnlyMatchedAssocTop) hTetrajetMass_haveOnlyMatchedAssocTop  -> Fill(isBfromH, tetrajet_p4.M());
+  //if (IsInTopDir)              hTetrajetMass_InTopDir        -> Fill(isBfromH, tetrajet_p4.M());
+
   hTetrajetPtDPhi -> Fill (isBfromH, tetrajet_p4.Pt()*deltaPhi_LdgTrijet_TetrajetBjet);
   if (LdgTopIsTopFromH)       hTetrajetPtDPhi_LdgTopIsHTop -> Fill(isBfromH, tetrajet_p4.Pt()*deltaPhi_LdgTrijet_TetrajetBjet);
   if (tetrajet_p4.M() < 800)  hTetrajetPtDPhi_M800         -> Fill(isBfromH, tetrajet_p4.Pt()*deltaPhi_LdgTrijet_TetrajetBjet);
