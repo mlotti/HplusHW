@@ -899,7 +899,7 @@ def GetScaleFactors(datasetsMgr, hName_CR2, intLumi):
     # =========================================================================================
     # Mistag rate: CR2:
     # =========================================================================================
-    
+    f2 = 0.906115  #Soti remove me 
     #======= QCD efficiency
     denom_QCD_CR2 = rhDict["QCD-CR2"]
     #Get numerator plot
@@ -980,11 +980,11 @@ def GetScaleFactors(datasetsMgr, hName_CR2, intLumi):
 
     analysis = opts.analysisName
     label = "2016_CR2"
-    plotDir =  os.path.join(opts.folder, "Efficiency_LdgTrijet"+label+"_bin.json")
-    pythonWriter.addParameters(plotDir, label, runRange, intLumi, eff_data_CR2)
-    pythonWriter.addMCParameters(label, eff_QCD_CR2)
-    fileName_json = "Efficiency_LdgTrijet"+label+"_bin.json"
-    pythonWriter.writeJSON(fileName_json)
+    #plotDir =  os.path.join(opts.folder, "Efficiency_LdgTrijet"+label+"_bin.json")
+    #pythonWriter.addParameters(plotDir, label, runRange, intLumi, eff_data_CR2)
+    #pythonWriter.addMCParameters(label, eff_QCD_CR2)
+    #fileName_json = "Efficiency_LdgTrijet"+label+"_bin.json"
+    #pythonWriter.writeJSON(fileName_json)
 
 
     # =========================================================================================
@@ -1090,10 +1090,10 @@ def GetScaleFactors(datasetsMgr, hName_CR2, intLumi):
     analysis = opts.analysisName
     label = "2016"
     plotDir =  os.path.join(opts.folder, "Efficiency_LdgTrijet"+label+"_bin.json")
-    #pythonWriter.addParameters(plotDir, label, runRange, intLumi, eff_data_CR1)
-    #pythonWriter.addMCParameters(label, eff_EWK_TTfake_CR1)
-    #fileName_json = "Efficiency_LdgTrijet"+label+"_bin_CR1.json"
-    #pythonWriter.writeJSON(fileName_json)
+    pythonWriter.addParameters(plotDir, label, runRange, intLumi, eff_data_CR1)
+    pythonWriter.addMCParameters(label, eff_EWK_TTfake_CR1)
+    fileName_json = "Efficiency_LdgTrijet"+label+"_bin_CR1.json"
+    pythonWriter.writeJSON(fileName_json)
 
 
     return
