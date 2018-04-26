@@ -41,7 +41,7 @@ if IntermediateAnalysis:
     MassPoints+=IntermediateMassPoints[:]    
 if HeavyAnalysis:
     MassPoints+=LightMassPoints[:]+HeavyMassPoints[:]
-
+WJetsHT
 # For intermediate-only generation, use all intermediate samples (also overlapping)
 IntermediateAnalysisOnly = not LightAnalysis and not HeavyAnalysis and IntermediateAnalysis
 if IntermediateAnalysisOnly:
@@ -69,7 +69,7 @@ OptionBlindThreshold=None # If signal exceeds this fraction of expected events, 
 OptionIncludeSystematics=True # Include shape systematics (multicrabs must beproduced with doSystematics=True)
 OptionCombineSingleColumnUncertainties = False # (approxmation that makes limit running faster)
 # Datasets
-OptionUseWJetsHT = False # Use HT binned WJets samples instead of inclusive for WJets background
+OptionUseWJetsHT = True # Use HT binned WJets samples instead of inclusive for WJets background
 OptionGenuineTauBackgroundSource="MC_FakeAndGenuineTauNotSeparated" # Use "DataDriven" to get EWK+tt genuine taus from embedded samples
 
 # Summary tables
