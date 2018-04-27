@@ -24,15 +24,15 @@ We call the ratio f=(CR1/CR2) the transfer factor that gets us from VR to the SR
 is needed to ensure the normalisation of the sample obtained from VR is corrected.
 
 USAGE:
-./getEfficiencies_withQCDdd.py -num <pseudo_nummcrab_directory> -den <pseudo_dencrab_directory> [opts]
+./getEfficiencies.py -num <pseudo_nummcrab_directory> -den <pseudo_dencrab_directory> [opts]
 
 
 EXAMPLES: 
-./getEfficiencies_withQCDdd.py --noSF SystTopBDT_180422_MET50_MuIso0p1_InvMET30_InvMuIso0p2_noSF --withQCDSF SystTopBDT_180424_104907_with_EWK_QCD_ST_SF --withEWKFakeTTSF SystTopBDT_180424_175913_withFakeTTSF_new/ -e "TTWJetsToLNu|TTWJetsToQQ" --url
-./getEfficiencies_withQCDdd.py --noSF SystTopBDT_180422_MET50_MuIso0p1_InvMET30_InvMuIso0p2_noSF --withQCDSF SystTopBDT_180424_104907_with_EWK_QCD_ST_SF --withEWKFakeTTSF SystTopBDT_180424_175913_withFakeTTSF_new/ --url -e "TTWJets"
+./getEfficiencies.py --noSF SystTopBDT_180422_MET50_MuIso0p1_InvMET30_InvMuIso0p2_noSF --withQCDSF SystTopBDT_180424_104907_with_EWK_QCD_ST_SF --withEWKFakeTTSF SystTopBDT_180424_175913_withFakeTTSF_new/ -e "TTWJetsToLNu|TTWJetsToQQ" --url
+./getEfficiencies.py --noSF SystTopBDT_180422_MET50_MuIso0p1_InvMET30_InvMuIso0p2_noSF --withQCDSF SystTopBDT_180424_104907_with_EWK_QCD_ST_SF --withEWKFakeTTSF SystTopBDT_180424_175913_withFakeTTSF_new/ --url -e "TTWJets"
 
 LAST USED:
-./getEfficiencies_withQCDdd.py --noSF SystTopBDT_180425_063552_MET50_MuIso0p1_InvMET30_InvMuIso0p2_noSF_NEW --withQCDSF SystTopBDT_180426_131358_MET50_MuIso0p1_InvMET30_InvMuIso0p2_QCDEWKSTSF --withEWKFakeTTSF SystTopBDT_180426_130544_MET50_MuIso0p1_InvMET30_InvMuIso0p2_FakeTTSF
+./getEfficiencies.py --noSF SystTopBDT_180425_063552_MET50_MuIso0p1_InvMET30_InvMuIso0p2_noSF_NEW --withQCDSF SystTopBDT_180426_131358_MET50_MuIso0p1_InvMET30_InvMuIso0p2_QCDEWKSTSF --withEWKFakeTTSF SystTopBDT_180426_130544_MET50_MuIso0p1_InvMET30_InvMuIso0p2_FakeTTSF
 
 '''
 
@@ -1341,4 +1341,4 @@ if __name__ == "__main__":
     main(opts)
 
     if not opts.batchMode:
-        raw_input("=== getEfficiencies_withQCDdd.py: Press any key to quit ROOT ...")
+        raw_input("=== getEfficiencies.py: Press any key to quit ROOT ...")
