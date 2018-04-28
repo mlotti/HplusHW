@@ -639,6 +639,7 @@ def PlotHistos(noSF_datasetsMgr, withQCDSF_datasetsMgr, withEWKFakeTTSF_datasets
     rhDict_den_noSF["NormQCD-SR-Inclusive"] = rhDict_den_noSF["QCD-SR-Inclusive"].Clone("NormQCD-SR-Inclusive")
     rhDict_den_noSF["NormQCD-SR-Inclusive"].Scale(f1)
 
+
     # ============================================================
     # Get the normalization of TT in SR = Data- (EWK + f1*QCD + SingleTop)
     # ===========================================================
@@ -692,6 +693,55 @@ def PlotHistos(noSF_datasetsMgr, withQCDSF_datasetsMgr, withEWKFakeTTSF_datasets
     # Save the the TT in denominator (normalized to Data-EWK-SingleTop-QCD) to the root-histo dictionary
     rhDict_den_noSF["NormTT-SR-Fake"] = rhDict_den_noSF["TT-SR-Fake"].Clone("NormTT-SR-Fake")
     rhDict_den_noSF["NormTT-SR-Fake"].Scale(f2)
+
+    # test - iro  --------  --------  --------  --------  --------
+    print "TEST"
+    region = "VR"
+    region = "SR"
+    region = "CR1"
+
+    key    = "Data-%s-Inclusive" % (region)
+    h1 = histograms.Histo(rhDict_den_noSF[key], "Data")
+    h1.setIsDataMC(isData=True, isMC=False)
+
+    key= "TT-%s-Inclusive" % (region)
+    #rhDict_den_noSF[key].Scale(f2)
+    h2 = histograms.Histo(rhDict_den_noSF[key], "TT")
+    h2.setIsDataMC(isData=False, isMC=True)
+
+    key  = "QCD-%s-Inclusive" % (region)
+    hQCD = rhDict_den_noSF[key].Clone()
+    hQCD.Scale(f1)
+    # h3 = histograms.Histo(rhDict_den_noSF["NormQCD-SR-Inclusive"], "QCD")
+    h3 = histograms.Histo(hQCD, "QCD")
+    h3.setIsDataMC(isData=False, isMC=True)
+
+    key = "SingleTop-%s-Inclusive" % (region)
+    h4  = histograms.Histo(rhDict_den_noSF[key], "SingleTop")
+    h4.setIsDataMC(isData=False, isMC=True)
+
+    key = "EWK-%s-Inclusive" % (region)
+    h5  = histograms.Histo(rhDict_den_noSF[key], "EWK")
+    h5.setIsDataMC(isData=False, isMC=True)
+
+    if region == "VR":
+        p = plots.DataMCPlot2([h1, h3, h2, h4, h5], saveFormats=[])
+    else:
+        p = plots.DataMCPlot2([h1, h2, h3, h4, h5], saveFormats=[])
+
+    p = plots.DataMCPlot2([h1, h2, h3, h4, h5], saveFormats=[])
+
+    #p = plots.ComparisonManyPlot(h1, [h2], saveFormats=[])
+    p.setLuminosity(opts.intLumi)
+    p.setDefaultStyles()
+    _kwargs["stackMCHistograms"] = True
+    _kwargs["ratioYlabel"]       = "Data/MC "
+    _kwargs["ratioInvert"]       = False
+    hName = "LeadingTrijet_Pt_%s" % (region)
+    plots.drawPlot(p, hName, **_kwargs)
+    SavePlot(p, hName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png"])
+    #sys.exit()
+    # test - iro  --------  --------  --------  --------  --------
     
 
     #=========================================================================================
