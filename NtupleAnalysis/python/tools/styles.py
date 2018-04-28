@@ -357,7 +357,7 @@ invertedLineStyle = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.
                                    StyleFill(fillColor=ROOT.kRed, fillStyle=0)])
 altQCDStyle       = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange-2, markerSizes=None, markerStyle=ROOT.kFullDiamond),
                                    StyleLine(lineColor=ROOT.kOrange-2, lineStyle=ROOT.kSolid, lineWidth=3), 
-                                   StyleFill(fillColor=ROOT.kOrange-2, fillStyle=3001)])
+                                   StyleFill(fillColor=ROOT.kOrange-2, fillStyle=1001)])
 genuineBAltStyle   = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kAzure-3, markerSizes=None, markerStyle=ROOT.kOpenCircle),
                                    StyleLine(lineColor=ROOT.kAzure-3, lineStyle=ROOT.kSolid, lineWidth=3), 
                                    StyleFill(fillColor=ROOT.kAzure-3, fillStyle=1001)])
@@ -481,6 +481,10 @@ stylesCompound = [
             StyleMarker(markerSize=1.2, markerColor=ROOT.kGreen+2, markerSizes=None, markerStyle=ROOT.kFullCross),
             StyleLine(lineColor=ROOT.kGreen+2, lineStyle=ROOT.kDotted, lineWidth=3), 
             StyleFill(fillColor=ROOT.kGreen+2, fillStyle=1001)]),
+    StyleCompound([
+            StyleMarker(markerSize=1.2, markerColor=ROOT.kAzure-1, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
+            StyleLine(lineColor=ROOT.kAzure-1, lineStyle=ROOT.kSolid, lineWidth=3),  #ROOT.kDashDotted
+            StyleFill(fillColor=ROOT.kAzure-1, fillStyle=3002)]),
     ]
 
 
