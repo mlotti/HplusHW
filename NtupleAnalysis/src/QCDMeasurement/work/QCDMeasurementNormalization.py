@@ -261,7 +261,7 @@ def main(argv, dsetMgr, moduleInfoString):
         # par[1] = mean
         # par[3] = sigma
         # par[4] = beta in the exponential tail
-        boundary = 190
+        boundary = 170 # 170 good for RtauMore, 180 better for RtauLess
         # QCD
         template_EWKInclusive_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=boundary, norm=1, rejectPoints=1),FITMIN, FITMAX)
         template_EWKInclusive_Baseline.setDefaultFitParam(defaultLowerLimit=[0.5,  90, 30, 0.0001],
