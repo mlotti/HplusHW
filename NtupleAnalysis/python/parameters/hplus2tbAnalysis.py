@@ -1,4 +1,4 @@
- #!/usr/bin/env python
+#!/usr/bin/env python
 
 from HiggsAnalysis.NtupleAnalysis.main import PSet
 import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
@@ -143,6 +143,21 @@ jsonReader.setupQGLInformation(QGLRPset  = qglrSelection,
                                jsonname_Light  = "QGLdiscriminator_QCD_LightJets.json",
                                jsonname_Gluon  = "QGLdiscriminator_QCD_GluonJets.json")
 
+#=================================================================================================
+# Fat jet selection
+#=================================================================================================
+fatjetVeto = PSet(
+    fatjetType                  = "FatJets", # [default: "FatJets"]  
+    fatjetPtCuts                = [450.0],   # [default: [450.0] ]
+    fatjetEtaCuts               = [2.4],     # [default: [2.4] ]
+    fatjetIDDiscr               = "IDloose", # [default: "IDLoose"] (options: IDloose, IDtight, IDtightLeptonVeto)
+    fatjetPUIDDiscr             = "",        # [default: ""]
+    topMatchDeltaR              = 0.8,       # [default: 0.8]
+    topMatchTypes               = [1],       # [default: 1]   (options: kJJB=1, kJJ=2, kJB=3, kJJBorJJ=4, kJJBorJB=5, kJJorJB=6, kAll=7, any = -1)
+    numberOfFatJetsCutValue     = 0,         # [default: 0]
+    numberOfFatJetsCutDirection = ">=",      # [default: "=="] (TO DISABLE: >=0)
+)
+
 #================================================================================================
 # MET selection
 #================================================================================================
@@ -159,28 +174,13 @@ metSelection = PSet(
 # Top selection BDT                                               
 #================================================================================================        
 topSelectionBDT = PSet(
-    MVACutValue            = 0.50,    # [default: 0.50]
+    MVACutValue            = 0.40,    # [default: 0.40]
     MVACutDirection        =  ">=",   # [default: ">="]
     MassCutValue           = 500.0,   # [default: 500.0]  # Do not evaluate top candidate if mass greater than this cut
     MassCutDirection       = "<=",    # [default: "<"]
     CSV_bDiscCutValue      = 0.8484,  # [default: 0.8484] # Do not evaluate top candidate if b-jet assigned as b from top fails this cut
     CSV_bDiscCutDirection  = ">=",    # [default: ">="]
     WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32.weights.xml", # (All XML files located in data/TopTaggerWeights/)
-)
-
-#=================================================================================================
-# Fat jet selection
-#=================================================================================================
-fatjetVeto = PSet(
-    fatjetType                  = "FatJets", # [default: "FatJets"]  
-    fatjetPtCuts                = [450.0],   # [default: [450.0] ]
-    fatjetEtaCuts               = [2.4],     # [default: [2.4] ]
-    fatjetIDDiscr               = "IDloose", # [default: "IDLoose"] (options: IDloose, IDtight, IDtightLeptonVeto)
-    fatjetPUIDDiscr             = "",        # [default: ""]
-    topMatchDeltaR              = 0.8,       # [default: 0.8]
-    topMatchTypes               = [1],       # [default: 1]   (options: kJJB=1, kJJ=2, kJB=3, kJJBorJJ=4, kJJBorJB=5, kJJorJB=6, kAll=7, any = -1)
-    numberOfFatJetsCutValue     = 0,         # [default: 0]
-    numberOfFatJetsCutDirection = ">=",      # [default: "=="] (TO DISABLE: >=0)
 )
 
 #================================================================================================
@@ -220,10 +220,10 @@ fakeBMeasurement = PSet(
     LdgTopMVACutValue              = topSelectionBDT.MVACutValue,
     LdgTopMVACutDirection          = topSelectionBDT.MVACutDirection, 
     # Define CR1, CR2
-    SubldgTopMVACutValue           = 0.4, #[default: 0.4]
-    #SubldgTopMVACutValue           = topSelectionBDT.MVACutValue,
+    #SubldgTopMVACutValue           = 0.4, #[default: 0.4] #buffer
+    SubldgTopMVACutValue           = topSelectionBDT.MVACutValue, #default
     SubldgTopMVACutDirection       = "<",
-    # Define CR3, CR4: Automatically defined as:
+    # CR3, CR4 are automatically defined as:
     # BDT <  topSelectionBDT.MVACutValue
     # BDT >= (topSelectionBDT.MVACutValue-fakeBMeasurement.SubldgTopMVACutValue)
     )
@@ -269,7 +269,7 @@ allSelections = PSet(
     BJetSelection         = bjetSelection,
     METSelection          = metSelection,
     TopSelectionBDT       = topSelectionBDT,
-    FatJetSelection       = fatjetVeto,
+    # FatJetSelection       = fatjetVeto,
     FakeBMeasurement      = fakeBMeasurement,
     FakeBBjetSelection    = fakeBBjetSelection,
     FakeBTopSelectionBDT  = fakeBTopSelectionBDT,

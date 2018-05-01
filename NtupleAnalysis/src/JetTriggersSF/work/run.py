@@ -61,7 +61,7 @@ import ROOT
 # Options
 #================================================================================================
 prefix      = "JetTriggersSF"
-postfix     = "CleanUpTest"
+postfix     = ""
 dataEras    = ["2016"]
 searchModes = ["80to1000"]
 
@@ -109,8 +109,9 @@ def main():
     # ================================================================================================
     # Setup the process
     # ================================================================================================
-    process = Process(prefix, postfix, opts.nEvts)
-
+    maxEvents = {}
+    maxEvents["All"] = opts.nEvts
+    process = Process(prefix, postfix, maxEvents)
             
     # ================================================================================================
     # Add the datasets (according to user options)
@@ -123,34 +124,27 @@ def main():
         Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
         process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=opts.excludeTasks)
     else:
+        myBlackList = []
+        
         Print("Adding all datasets from multiCRAB directory %s" % (opts.mcrab))
         Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
-        process.addDatasetsFromMulticrab(opts.mcrab)
+        regex =  "|".join(myBlackList)
+        if len(myBlackList)>0:
+            process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=regex)
+        else:
+            process.addDatasetsFromMulticrab(opts.mcrab)
 
-
+    
     # ================================================================================================
     # Selection customisations
     # ================================================================================================
     from HiggsAnalysis.NtupleAnalysis.parameters.jetTriggers import allSelections
-    #from HiggsAnalysis.NtupleAnalysis.parameters.hplus2tbAnalysis import allSelections
-    #from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections
-    
-    # Overwrite verbosity
     allSelections.verbose = opts.verbose
-
-    # Overwrite histo ambient level (Options: Systematics, Vital, Informative, Debug)
     allSelections.histogramAmbientLevel = opts.histoLevel
-
-    
-    # Set splitting of phase space (first bin is below first edge value and last bin is above last edge value)
-    # allSelections.CommonPlots.histogramSplitting = [
-    #     PSet(label="tauPt", binLowEdges=[60.0, 70.0, 80.0, 100.0], useAbsoluteValues=False),
-    #     ]
-
-    # allSelections.TauSelection.rtau = 0.0      
+    # allSelections.BjetSelection.triggerMatchingApply = True
+    # allSelections.TopSelection.ChiSqrCutValue = 100.0
     # allSelections.BJetSelection.numberOfBJetsCutValue = 0
     # allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
-
     
     # ================================================================================================
     # Add Analysis Variations
@@ -164,7 +158,7 @@ def main():
     # ================================================================================================ 
     # from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import applyAnalysisCommandLineOptions
     # applyAnalysisCommandLineOptions(sys.argv, allSelections)
-
+    
     
     #================================================================================================
     # Build analysis modules
@@ -203,17 +197,18 @@ def main():
     # ================================================================================================
     #process.addOptions(EventSaver = PSet(enabled = True,pickEvents = True))
 
-
     # ================================================================================================
     # Run the analysis
     # ================================================================================================
-    # Run the analysis with PROOF? By default it uses all cores, but you can give proofWorkers=<N> as a parameter
+    # Run the analysis with PROOF? You can give proofWorkers=<N> as a parameter
     if opts.jCores:
         Print("Running process with PROOF (proofWorkes=%s)" % ( str(opts.jCores) ) )
         process.run(proof=True, proofWorkers=opts.jCores)
     else:
-        Print("Running process (no PROOF)")
+        Print("Running process")
         process.run()
+        
+
 
 
 #================================================================================================
@@ -305,4 +300,10 @@ if __name__ == "__main__":
 
     if opts.mcrab == None:
         raise Exception("Please provide input multicrab directory with -m")
+
+
+    allowedLevels = ['Never', 'Systematics', 'Vital', 'Informative', 'Debug']
+    if opts.histoLevel not in allowedLevels:
+        raise Exception("Invalid ambient histogram level \"%s\"! Valid options are: %s" % (opts.histoLevel, ", ".join(allowedLevels)))
+
     main()
