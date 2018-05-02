@@ -17,10 +17,11 @@ USAGE:
 
 EXAMPLES:
 ./plot_Boost.py -m HtbKinematics_180430_031946 --intLumi 35900 --url
-
-
-LAST USED:1
 ./plot_Boost.py -m HtbKinematics_180430_031946 -n
+
+
+LAST USED:
+./plot_Boost.py -m HtbKinematics_Preapproval_AllSelections_30Apr2018 -n 
 
 '''
 
@@ -204,7 +205,7 @@ def PlotMC(datasetsMgr, histo):
         p2 = "q_{2}"        
     if "Htb_tbW_WBoson_Htb_tbW_BQuark_dR" in histo:
         p1 = "W^{+}"
-        p2 = "q_{2}"
+        p2 = "b_{2}"
 
     # Draw the histograms
     _cutBox = None
@@ -242,7 +243,7 @@ def PlotMC(datasetsMgr, histo):
         _rebinX = 2
         _opts["xmin"] = 0.0
         _opts["xmax"] = 5.0
-        _cutBox = {"cutValue": 0.8, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        #_cutBox = {"cutValue": 0.8, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _xlabel = "#DeltaR(%s, %s)" % (p1, p2)
 
     if _logY:
@@ -341,7 +342,7 @@ if __name__ == "__main__":
     OPTMODE      = ""
     BATCHMODE    = True
     #SIGNALMASS   = [200, 500, 2000]
-    SIGNALMASS   = [500]#, 1000]
+    SIGNALMASS   = [400]
     INTLUMI      = -1.0
     MERGEEWK     = False
     URL          = False
