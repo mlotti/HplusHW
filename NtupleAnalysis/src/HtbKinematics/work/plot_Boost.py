@@ -342,7 +342,7 @@ if __name__ == "__main__":
     OPTMODE      = ""
     BATCHMODE    = True
     #SIGNALMASS   = [200, 500, 2000]
-    SIGNALMASS   = [400]
+    SIGNALMASS   = [400, 1000]
     INTLUMI      = -1.0
     MERGEEWK     = False
     URL          = False
