@@ -2,18 +2,22 @@
 #====================================================================================================
 # Before running the following script, make sure you have installed the CombineHarvester tools
 #
+# PREREQUISITES:
 # cd $CMSSW_BASE/src
 # git clone https://github.com/cms-analysis/CombineHarvester.git CombineHarvester
 # cd CombineHarvester
 # scram b -j 6
 # 
-# Last Used:
-# 
-# ./doPulls.csh combine_datacard_hplushadronic_m500.txt higgsCombineblinded_m500.AsymptoticLimits.mH500.root 500
 #
-# The txt and root files can be found under the CombineResults_taujets_<date>_<time> folder inside your datacard folder
+# LAST USED:
+# cd limits2018/datacards_Hplus2tb_13TeV_EraRun2016_DataDriven_mH180to3000_Systematics_BDT0p40_Binning12_28Apr2018_autoMCstats
+# ../.././doPulls.csh combine_datacard_hplushadronic_m180.txt higgsCombineblinded_m180.AsymptoticLimits.mH180.root 180
+# ../.././doPulls.csh combine_datacard_hplushadronic_m500.txt higgsCombineblinded_m500.AsymptoticLimits.mH500.root 500 
 #
-# Relevant links:
+# (The TXT and ROOT files can be found under the CombineResults_taujets_<date>_<time> folder inside your datacard folder
+#
+#
+# USEFUL LINKS:
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsWG/SWGuideNonStandardCombineUses#Nuisance_parameter_impacts
 # http://cms-analysis.github.io/CombineHarvester/index.html
 # https://www.gitbook.com/book/cms-hcomb/combine/details
@@ -32,7 +36,6 @@ if ($#argv != 3) then
     echo
     exit 1
 endif
-
 
 #===================
 # Define Variables
