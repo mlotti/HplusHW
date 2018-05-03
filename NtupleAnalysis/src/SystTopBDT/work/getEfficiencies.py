@@ -30,9 +30,12 @@ USAGE:
 EXAMPLES: 
 ./getEfficiencies.py --noSF SystTopBDT_180422_MET50_MuIso0p1_InvMET30_InvMuIso0p2_noSF --withQCDSF SystTopBDT_180424_104907_with_EWK_QCD_ST_SF --withEWKFakeTTSF SystTopBDT_180424_175913_withFakeTTSF_new/ -e "TTWJetsToLNu|TTWJetsToQQ" --url
 ./getEfficiencies.py --noSF SystTopBDT_180422_MET50_MuIso0p1_InvMET30_InvMuIso0p2_noSF --withQCDSF SystTopBDT_180424_104907_with_EWK_QCD_ST_SF --withEWKFakeTTSF SystTopBDT_180424_175913_withFakeTTSF_new/ --url -e "TTWJets"
+./getEfficiencies.py --noSF SystTopBDT_180425_063552_MET50_MuIso0p1_InvMET30_InvMuIso0p2_noSF_NEW --withQCDSF SystTopBDT_180426_131358_MET50_MuIso0p1_InvMET30_InvMuIso0p2_QCDEWKSTSF --withEWKFakeTTSF SystTopBDT_180426_130544_MET50_MuIso0p1_InvMET30_InvMuIso0p2_FakeTTSF
+
 
 LAST USED:
-./getEfficiencies.py --noSF SystTopBDT_180425_063552_MET50_MuIso0p1_InvMET30_InvMuIso0p2_noSF_NEW --withQCDSF SystTopBDT_180426_131358_MET50_MuIso0p1_InvMET30_InvMuIso0p2_QCDEWKSTSF --withEWKFakeTTSF SystTopBDT_180426_130544_MET50_MuIso0p1_InvMET30_InvMuIso0p2_FakeTTSF
+./getEfficiencies.py --noSF SystTopBDT_180430_070218_MET50_MuIso0p16_InvMET40_InvMuIso0p2_noSF --withEWKFakeTTSF SystTopBDT_180430_123513_MET50_MuIso0p16_InvMET40_InvMuIso0p2_FakeTTSF --withQCDSF SystTopBDT_180430_123122_MET50_MuIso0p16_InvMET40_InvMuIso0p2_QCDEWKSTSF
+
 
 '''
 
@@ -694,8 +697,8 @@ def PlotHistos(noSF_datasetsMgr, withQCDSF_datasetsMgr, withEWKFakeTTSF_datasets
     rhDict_den_noSF["NormTT-SR-Fake"] = rhDict_den_noSF["TT-SR-Fake"].Clone("NormTT-SR-Fake")
     rhDict_den_noSF["NormTT-SR-Fake"].Scale(f2)
 
-    # test - iro  --------  --------  --------  --------  --------
-    print "TEST"
+    '''
+    # test
     region = "VR"
     region = "SR"
     region = "CR1"
@@ -741,8 +744,8 @@ def PlotHistos(noSF_datasetsMgr, withQCDSF_datasetsMgr, withEWKFakeTTSF_datasets
     plots.drawPlot(p, hName, **_kwargs)
     SavePlot(p, hName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png"])
     #sys.exit()
-    # test - iro  --------  --------  --------  --------  --------
-    
+    # test
+    '''    
 
     #=========================================================================================
     # Get all the denominators histograms for the efficiency calculation
