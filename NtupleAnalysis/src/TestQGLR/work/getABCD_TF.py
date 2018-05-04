@@ -78,12 +78,13 @@ import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
+import HiggsAnalysis.NtupleAnalysis.tools.statisticalFunctions as stat
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 import HiggsAnalysis.FakeBMeasurement.FakeBNormalization as FakeBNormalization
 import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
-import HiggsAnalysis.FakeBMeasurement.FakeBResult as fakeBResult
+import HiggsAnalysis.FakeBMeasurement.QCDInvertedResult as fakeBResult
 
 #================================================================================================ 
 # Function Definition
@@ -128,9 +129,16 @@ def GetHistoKwargs(histoName):
     _rebinX = 1
     _logY   = True
     _opts   = {"ymin": 1e0, "ymaxfactor": 1.2}
-    _ylabel = "Events / %.0f"
+    _ylabel = "Events / %.2f"
     if _logY:
         _opts = {"ymin": 1e0, "ymaxfactor": 5.0}
+
+
+    if "QGLR" in histoName:
+        _units  = ""
+        _xlabel = "QGLR"
+        _cutBox = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        _rebinX = 1
 
     if "pt" in histoName.lower():
         _units        = "GeV/c"
@@ -183,7 +191,7 @@ def GetHistoKwargs(histoName):
     if "tetrajetbjeteta" in histoName.lower():
         _units   = ""
         _xlabel  = "#eta"
-        _cutBox  = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        _cutBox  = {"cutValue": 0.8, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _opts   = {"xmin": -2.5, "xmax": +2.5, "ymin": 1e0, "ymax": 1e3}
         _rebinX  = 1
         _ylabel  = "Events / %.2f"
@@ -356,7 +364,7 @@ def main(opts):
             opts.intLumi = datasetsMgr.getDataset("Data").getLuminosity()
         
         # Remove datasets
-        removeList = ["QCD-b", "Charged"]
+        removeList = ["QCD-b"]#, "Charged"]
         if not opts.useMC:
             removeList.append("QCD")
         for i, d in enumerate(removeList, 0):
@@ -380,9 +388,9 @@ def main(opts):
         #folderList1 = [h for h in folderList if "TetrajetMass" in h]
         #folderList1 = [h for h in folderList if "MET" in h]
         #folderList1 = [h for h in folderList if "TetrajetBJetPt" in h]
-        folderList1 = [h for h in folderList if "TetrajetBJetEta" in h]
-        folderList2 = [h for h in folderList1 if "VR" in h or "SR" in h or "CRone" in h or "CRtwo" in h  or "CRthree" in h  or "CRfour" in h]
-
+        folderList1 = [h for h in folderList if "QGLR" in h]
+        folderList2 = [h for h in folderList1 if "CRtwo" in h or "VR" in h or "SR" in h or "CRone" in h]
+        
         # For-loop: All folders
         histoPaths = []
         for f in folderList2:
@@ -464,10 +472,6 @@ def GetHistoPathDict(histoList, printList=False):
             region = "CRone"
         elif "_CRtwo" in h:
             region = "CRtwo"
-        elif "_CRthree" in h:
-            region = "CRthree"
-        elif "_CRfour" in h:
-            region = "CRfour"
         else:
             raise Exception("Could not determine Control Region for histogram %s" % (h) )
         # Save histogram in dictionary
@@ -546,7 +550,7 @@ def PlotHistosAndCalculateTF(datasetsMgr, histoList, binLabels, opts):
     _kwargs = GetHistoKwargs(histoList[0])
 
     # Get the root histos for all datasets and Control Regions (CRs)
-    regions = ["SR", "VR", "CRone", "CRtwo", "CRthree", "CRfour"]
+    regions = ["SR", "VR", "CRone", "CRtwo"]
     rhDict  = GetRootHistos(datasetsMgr, histoList, regions, binLabels)
 
     #=========================================================================================
@@ -556,10 +560,10 @@ def PlotHistosAndCalculateTF(datasetsMgr, histoList, binLabels, opts):
     if opts.inclusiveOnly:
         #manager.CalculateTransferFactor(binLabels[0], rhDict["CRone-FakeB"], rhDict["CRtwo-FakeB"])
         binLabel = "Inclusive"
-        manager.CalculateTransferFactor("Inclusive", rhDict["FakeB-CRone-Inclusive"], rhDict["FakeB-CRtwo-Inclusive"], rhDict["FakeB-CRthree-Inclusive"], rhDict["FakeB-CRfour-Inclusive"])
+        manager.CalculateTransferFactor("Inclusive", rhDict["FakeB-CRone-Inclusive"], rhDict["FakeB-CRtwo-Inclusive"])
     else:
         for bin in binLabels:
-            manager.CalculateTransferFactor(bin, rhDict["FakeB-CRone-%s" % bin], rhDict["FakeB-CRtwo-%s" % bin], rhDict["FakeB-CRthree-%s" % bin], rhDict["FakeB-CRfour-%s" % bin])
+            manager.CalculateTransferFactor(bin, rhDict["FakeB-CRone-%s" % bin], rhDict["FakeB-CRtwo-%s" % bin])
 
     # Get unique a style for each region
     for k in rhDict:
@@ -637,6 +641,29 @@ def PlotHistosAndCalculateTF(datasetsMgr, histoList, binLabels, opts):
         # Create empty histogram stack list
         myStackList = []
         
+        # Signal
+        p2 = plots.DataMCPlot(datasetsMgr, "ForTestQGLR/QGLR_SR/QGLR_SRInclusive", saveFormats=[])
+        
+        hSignal_800 = p2.histoMgr.getHisto('ChargedHiggs_HplusTB_HplusToTB_M_800').getRootHisto()
+        hhSignal_800= histograms.Histo(hSignal_800, 'ChargedHiggs_HplusTB_HplusToTB_M_800', "H^{+} m_{H^+}=800 GeV")
+        hhSignal_800.setIsDataMC(isData=False, isMC=True)
+        myStackList.append(hhSignal_800)
+        
+        hSignal_250 = p2.histoMgr.getHisto('ChargedHiggs_HplusTB_HplusToTB_M_250').getRootHisto()
+        hhSignal_250= histograms.Histo(hSignal_250, 'ChargedHiggs_HplusTB_HplusToTB_M_250', "H^{+} m_{H^+}=250 GeV")#plots._legendLabels['ChargedHiggs_HplusTB_HplusToTB_M_250'])
+        hhSignal_250.setIsDataMC(isData=False, isMC=True)
+        #myStackList.append(hhSignal_250)
+                
+        hSignal_500 = p2.histoMgr.getHisto('ChargedHiggs_HplusTB_HplusToTB_M_500').getRootHisto()
+        hhSignal_500= histograms.Histo(hSignal_500, 'ChargedHiggs_HplusTB_HplusToTB_M_500', "H^{+} m_{H^+}=500 GeV")#plots._legendLabels['ChargedHiggs_HplusTB_HplusToTB_M_500'])
+        hhSignal_500.setIsDataMC(isData=False, isMC=True)
+        #myStackList.append(hhSignal_500)
+
+        hSignal_1000 = p2.histoMgr.getHisto('ChargedHiggs_HplusTB_HplusToTB_M_1000').getRootHisto()
+        hhSignal_1000= histograms.Histo(hSignal_1000, 'ChargedHiggs_HplusTB_HplusToTB_M_1000', "H^{+} m_{H^+}=1000 GeV")#plots._legendLabels['ChargedHiggs_HplusTB_HplusToTB_M_500'])
+        hhSignal_1000.setIsDataMC(isData=False, isMC=True)
+        #myStackList.append(hhSignal_1000)
+        
         # Add the FakeB data-driven background to the histogram list    
         hFakeB = histograms.Histo(rBkgSum_SR, "FakeB", "Fake-b")
         hFakeB.setIsDataMC(isData=False, isMC=True)
@@ -656,17 +683,225 @@ def PlotHistosAndCalculateTF(datasetsMgr, histoList, binLabels, opts):
         p.setLuminosity(opts.intLumi)
         p.setDefaultStyles()
 
+        
     # Draw the plot and save it
     hName = "test"
     plots.drawPlot(p, hName, **_kwargs)
-    SavePlot(p, hName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png"])
+    SavePlot(p, hName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf"])
+    
+    #==========================================================================================
+    # Calculate Cut-Flow Efficiency
+    #==========================================================================================
+    kwargs = {
+        "rebinX" : 1,
+        "xlabel" : "QGLR",
+        "ylabel" : "Significance / %.02f ",
+        "opts"   : {"ymin": 0.0, "ymaxfactor": 1.3},
+        "createLegend": {"x1": 0.55, "y1": 0.70, "x2": 0.92, "y2": 0.92},
+        #            "cutBox"           : {"cutValue": 0.0, "fillColor" : 16, "box": False, "line": False, "greaterThan": True},
+        }
+    
+    
+    efficiencyList = [] 
+    xValues = []
+    
+    yValues_250 = []
+    yValues_500 = []
+    yValues_800 = []
+    yValues_1000 = []
+    yValues_Bkg = []
+
+
+    nBins = hSignal_250.GetNbinsX()+1
+
+    hBkg = p.histoMgr.getHisto("ChargedHiggs_HplusTB_HplusToTB_M_800").getRootHisto().Clone("Bkg")
+    hBkg.Reset()
+
+    # Bkg: FakeB + Genuine B
+    hBkg.Add(hFakeB.getRootHisto(), +1)
+    hBkg.Add(hGenuineB.getRootHisto(), +1)
+
+    for i in range (0, nBins):
+        
+        # Cut value 
+        cut = hSignal_250.GetBinCenter(i)
+        
+        passed_250  = hSignal_250.Integral(i, hSignal_250.GetXaxis().GetNbins())
+        passed_500  = hSignal_500.Integral(i, hSignal_500.GetXaxis().GetNbins())
+        passed_800  = hSignal_800.Integral(i, hSignal_800.GetXaxis().GetNbins())
+        passed_1000 = hSignal_1000.Integral(i, hSignal_1000.GetXaxis().GetNbins())
+        
+        passed_Bkg  = hBkg.Integral(i, hBkg.GetXaxis().GetNbins())
+        
+        total_250   = hSignal_250.Integral()
+        total_500   = hSignal_500.Integral()
+        total_800   = hSignal_800.Integral()
+        total_1000  = hSignal_1000.Integral()
+        total_Bkg   = hBkg.Integral()
+         
+        eff_250  = float(passed_250)/total_250
+        eff_500  = float(passed_500)/total_500
+        eff_800  = float(passed_800)/total_800
+        eff_1000 = float(passed_1000)/total_1000
+        
+        eff_Bkg = float(passed_Bkg)/total_Bkg
+        
+        xValues.append(cut)
+        yValues_250.append(eff_250)
+        yValues_500.append(eff_500)
+        yValues_800.append(eff_800)
+        yValues_1000.append(eff_1000)
+        
+        yValues_Bkg.append(eff_Bkg)
+        
+    # Create the Efficiency Plot
+    tGraph_250 = ROOT.TGraph(len(xValues), array.array("d", xValues), array.array("d", yValues_250))
+    tGraph_500 = ROOT.TGraph(len(xValues), array.array("d", xValues), array.array("d", yValues_500))
+    tGraph_800 = ROOT.TGraph(len(xValues), array.array("d", xValues), array.array("d", yValues_800))
+    tGraph_1000 = ROOT.TGraph(len(xValues), array.array("d", xValues), array.array("d", yValues_1000))
+    tGraph_Bkg  = ROOT.TGraph(len(xValues), array.array("d", xValues), array.array("d", yValues_Bkg))
+
+    styles.getSignalStyleHToTB_M("200").apply(tGraph_250)
+    styles.getSignalStyleHToTB_M("500").apply(tGraph_500)
+    styles.getSignalStyleHToTB_M("800").apply(tGraph_800)
+    styles.getSignalStyleHToTB_M("1000").apply(tGraph_1000)
+    styles.getQCDLineStyle().apply(tGraph_Bkg)
+    
+    drawStyle = "CPE"
+    effGraph_250  = histograms.HistoGraph(tGraph_250, "H^{+} m_{H^{+}} = 250 GeV", "lp", drawStyle)
+    effGraph_500  = histograms.HistoGraph(tGraph_500, "H^{+} m_{H^{+}} = 500 GeV", "lp", drawStyle)
+    effGraph_800  = histograms.HistoGraph(tGraph_800, "H^{+} m_{H^{+}} = 800 GeV", "lp", drawStyle)
+    effGraph_1000 = histograms.HistoGraph(tGraph_1000, "H^{+} m_{H^{+}} = 1000 GeV", "lp", drawStyle)
+    effGraph_Bkg  = histograms.HistoGraph(tGraph_Bkg, "Bkg", "lp", drawStyle)
+    
+    efficiencyList.append(effGraph_250)
+    efficiencyList.append(effGraph_500)
+    efficiencyList.append(effGraph_800)
+    efficiencyList.append(effGraph_1000)
+    efficiencyList.append(effGraph_Bkg)
+    
+    # Efficiency plot
+    pE = plots.PlotBase(efficiencyList, saveFormats=["pdf"])
+    pE.createFrame("QGLR_Efficiency")
+    pE.setEnergy("13")
+    pE.getFrame().GetYaxis().SetLabelSize(18)
+    pE.getFrame().GetXaxis().SetLabelSize(20)
+    
+    pE.getFrame().GetYaxis().SetTitle("Efficiency / 0.01")
+    pE.getFrame().GetXaxis().SetTitle("QGLR Cut")
+    
+    # Add Standard Texts to plot
+    histograms.addStandardTexts()
+    
+    # Customise Legend
+    moveLegend = {"dx": -0.50, "dy": -0.5, "dh": -0.1}
+    pE.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
+    
+    pE.draw()
+#    plots.drawPlot(pE, "QGLR_Efficiency", **kwargs)
+    SavePlot(pE, "QGLR_Efficiency", os.path.join(opts.saveDir, opts.optMode), saveFormats=[".png", ".pdf"] )
+    
+
+
+    #==========================================================================================
+    # Calculate Significance
+    #==========================================================================================
+                
+    SignalName = "ChargedHiggs_HplusTB_HplusToTB_M_800"
+    
+    hSignif_250  = p.histoMgr.getHisto(SignalName).getRootHisto().Clone(SignalName)
+    hSignif_500  = p.histoMgr.getHisto(SignalName).getRootHisto().Clone(SignalName)
+    hSignif_800  = p.histoMgr.getHisto(SignalName).getRootHisto().Clone(SignalName)
+    hSignif_1000 = p.histoMgr.getHisto(SignalName).getRootHisto().Clone(SignalName)
+    
+    hSignif_250.Reset()
+    hSignif_500.Reset()
+    hSignif_800.Reset()
+    hSignif_1000.Reset()
+    
+    hBkg = p.histoMgr.getHisto(SignalName).getRootHisto().Clone("Bkg")
+    hBkg.Reset()
+    
+    # Bkg: FakeB + Genuine B
+    hBkg.Add(hFakeB.getRootHisto(), +1)
+    hBkg.Add(hGenuineB.getRootHisto(), +1)
+    
+    nBins = hSignif_250.GetNbinsX()+1
+
+    # For-loop: All histo bins
+    for i in range (1, nBins+1):
+    
+        sigmaB = ROOT.Double(0)
+        
+        b = hBkg.IntegralAndError(i, nBins, sigmaB)
+        
+        s_250 = hSignal_250.Integral(i, nBins)
+        s_500 = hSignal_500.Integral(i, nBins)
+        s_800 = hSignal_800.Integral(i, nBins)
+        s_1000 = hSignal_1000.Integral(i, nBins)
+        
+        # Calculate significance
+        signif_250 = stat.significance(s_250, b, sigmaB, option="Simple")#Asimov")
+        signif_500 = stat.significance(s_500, b, sigmaB, option="Simple")#Asimov")
+        signif_800 = stat.significance(s_800, b, sigmaB, option="Simple")#Asimov")
+        signif_1000 = stat.significance(s_1000, b, sigmaB, option="Simple")#"Asimov")
+
+        # Set signif for this bin
+        hSignif_250.SetBinContent(i, signif_250)
+        hSignif_500.SetBinContent(i, signif_500)
+        hSignif_800.SetBinContent(i, signif_800)
+        hSignif_1000.SetBinContent(i, signif_1000)
+        
+        # Apply style
+        s_250 = styles.getSignalStyleHToTB_M("200")
+        s_250.apply(hSignif_250)
+        
+        s_500 = styles.getSignalStyleHToTB_M("500")
+        s_500.apply(hSignif_500)
+        
+        s_800 = styles.getSignalStyleHToTB_M("800")
+        s_800.apply(hSignif_800)
+
+        s_1000 = styles.getSignalStyleHToTB_M("1000")
+        s_1000.apply(hSignif_1000)
+        
+        hList = []
+        hList.append(hSignif_250)
+        hList.append(hSignif_500)
+        hList.append(hSignif_800)
+        hList.append(hSignif_1000)
+        
+        hSignif_250.SetName("H^{+} m_{H^{+}} = 250 GeV")
+        hSignif_500.SetName("H^{+} m_{H^{+}} = 500 GeV")
+        hSignif_800.SetName("H^{+} m_{H^{+}} = 800 GeV")
+        hSignif_1000.SetName("H^{+} m_{H^{+}} = 1000 GeV")
+        
+    pS = plots.PlotBase(hList, saveFormats=["png", "pdf"])
+    pS.setLuminosity(opts.intLumi)
+        
+    # Drawing style
+    pS.histoMgr.setHistoDrawStyleAll("HIST")
+    pS.histoMgr.setHistoLegendStyleAll("L")
+    pS.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetMarkerSize(1.0))
+    pS.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineStyle(ROOT.kSolid))
+    pS.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetMarkerStyle(ROOT.kFullCircle))
+    
+    # Draw the plot
+    name = "QGLR_Signif" + "GE"
+    
+    plots.drawPlot(pS, name, **kwargs)
+    SavePlot(pS, name, os.path.join(opts.saveDir, opts.optMode), saveFormats=[".png", ".pdf"] ) 
+    
+
+        
+
 
     #=========================================================================================
     # Calculate the Transfer Factor (TF) and save to file
     #=========================================================================================
     Verbose("Write the normalisation factors to a python file", True)
     fileName = os.path.join(opts.mcrab, "FakeBTransferFactors%s.py"% ( getModuleInfoString(opts) ) )
-    manager.writeTransferFactorsToFile(fileName, opts)
+    manager.writeNormFactorFile(fileName, opts)
     return
 
 if __name__ == "__main__":
@@ -687,7 +922,7 @@ if __name__ == "__main__":
     '''
     
     # Default Settings
-    ANALYSISNAME = "FakeBMeasurement"
+    ANALYSISNAME = "TestQGLR"
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
     OPTMODE      = None
@@ -700,7 +935,7 @@ if __name__ == "__main__":
     VERBOSE      = False
     USEMC        = False
     RATIO        = True
-    FOLDER       = "ForFakeBMeasurement"
+    FOLDER       = "ForTestQGLR"
     INCLUSIVE    = False
 
     # Define the available script options

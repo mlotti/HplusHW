@@ -13,6 +13,7 @@ EXAMPLES:
 
 
 LAST USED:
+cd datacards_Hplus2tb_13TeV_EraRun2016_DataDriven_mH180to3000_Systematics_BDT0p40_Binning12_28Apr2018
 ../plotShapes.py --dirName shapeSyst --xmax 3000 --logy --h2tb
 
 '''
