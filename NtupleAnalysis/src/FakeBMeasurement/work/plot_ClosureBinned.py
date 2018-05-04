@@ -382,7 +382,7 @@ def main(opts):
             datasetsMgr.PrintLuminosities()
             
         # Get the PSets:
-        if 1:
+        if 0:
             datasetsMgr.printSelections()
             #PrintPSet("BJetSelection", datasetsMgr, depth=150)
             #PrintPSet("fakeBMeasurement", datasetsMgr, depth=150)
