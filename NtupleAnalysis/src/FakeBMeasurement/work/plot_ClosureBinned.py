@@ -312,32 +312,33 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     return
 
 def GetBinText(bin):
-    #if bin == "Inclusive":
-    #    return "combined"
-    #else:
-    #    return "bin-" + str(bin)
-    if bin == "0":
-        return "p_{T} < 80 GeV/c, |#eta| < 0.8"
-    elif bin == "1":
-        return "p_{T} = 80-200 GeV/c, |#eta| < 0.8"
-    elif bin == "2":
-        return "p_{T} > 200 GeV/c, |#eta| < 0.8"
-    elif bin == "3":
-        return "p_{T} < 80 GeV/c, |#eta| = 0.8-1.6"
-    elif bin == "4":
-        return "p_{T} = 80-200 GeV/c, |#eta| = 0.8-1.6"
-    elif bin == "5":
-        return "p_{T} > 200 GeV/c, |#eta| = 0.8-1.6"
-    elif bin == "6":
-        return "p_{T} < 80 GeV/c, |#eta| > 1.6"
-    elif bin == "7":
-        return "p_{T} = 80-200 GeV/c, |#eta| > 1.6"
-    elif bin == "8":
-        return "p_{T} > 200 GeV/c, |#eta| > 1.6"
-    elif bin == "Inclusive":
+    if bin == "Inclusive":
         return "combined"
     else:
-        raise Exception(ShellStyles.ErrorStyle() + "Unexpected bin %s" % (bin)  + ShellStyles.NormalStyle())
+        return "bin-" + str(bin)
+
+    # if bin == "0":
+    #     return "p_{T} < 80 GeV/c, |#eta| < 0.8"
+    # elif bin == "1":
+    #     return "p_{T} = 80-200 GeV/c, |#eta| < 0.8"
+    # elif bin == "2":
+    #     return "p_{T} > 200 GeV/c, |#eta| < 0.8"
+    # elif bin == "3":
+    #     return "p_{T} < 80 GeV/c, |#eta| = 0.8-1.6"
+    # elif bin == "4":
+    #     return "p_{T} = 80-200 GeV/c, |#eta| = 0.8-1.6"
+    # elif bin == "5":
+    #     return "p_{T} > 200 GeV/c, |#eta| = 0.8-1.6"
+    # elif bin == "6":
+    #     return "p_{T} < 80 GeV/c, |#eta| > 1.6"
+    # elif bin == "7":
+    #     return "p_{T} = 80-200 GeV/c, |#eta| > 1.6"
+    # elif bin == "8":
+    #     return "p_{T} > 200 GeV/c, |#eta| > 1.6"
+    # elif bin == "Inclusive":
+    #     return "combined"
+    # else:
+    #     raise Exception(ShellStyles.ErrorStyle() + "Unexpected bin %s" % (bin)  + ShellStyles.NormalStyle())
 
 #================================================================================================ 
 # Main
@@ -384,6 +385,8 @@ def main(opts):
         if 0:
             datasetsMgr.printSelections()
             #PrintPSet("BJetSelection", datasetsMgr, depth=150)
+            #PrintPSet("fakeBMeasurement", datasetsMgr, depth=150)
+            sys.exit()
 
         # ZJets and DYJets overlap!
         if "ZJetsToQQ_HT600toInf" in datasetsMgr.getAllDatasetNames() and "DYJetsToQQ_HT180" in datasetsMgr.getAllDatasetNames():
