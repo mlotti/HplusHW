@@ -77,17 +77,17 @@ private:
   const std::vector<float> cfg_BJetEtaCuts;
   const DirectionalCut<int> cfg_BJetNumberCut;
   // METSelection PSet_METSelection;
-  TopologySelection PSet_TopologySelection;
-  const DirectionalCut<double> cfg_SphericityCut;
-  const DirectionalCut<double> cfg_AplanarityCut;
-  const DirectionalCut<double> cfg_PlanarityCut;
-  const DirectionalCut<double> cfg_CircularityCut;
-  const DirectionalCut<double> cfg_Y23Cut;
-  const DirectionalCut<double> cfg_CparameterCut;
-  const DirectionalCut<double> cfg_DparameterCut;
-  const DirectionalCut<double> cfg_FoxWolframMomentCut;
-  const DirectionalCut<double> cfg_AlphaTCut;
-  const DirectionalCut<double> cfg_CentralityCut;
+  // TopologySelection PSet_TopologySelection;
+  // const DirectionalCut<double> cfg_SphericityCut;
+  // const DirectionalCut<double> cfg_AplanarityCut;
+  // const DirectionalCut<double> cfg_PlanarityCut;
+  // const DirectionalCut<double> cfg_CircularityCut;
+  // const DirectionalCut<double> cfg_Y23Cut;
+  // const DirectionalCut<double> cfg_CparameterCut;
+  // const DirectionalCut<double> cfg_DparameterCut;
+  // const DirectionalCut<double> cfg_FoxWolframMomentCut;
+  // const DirectionalCut<double> cfg_AlphaTCut;
+  // const DirectionalCut<double> cfg_CentralityCut;
   // TopSelection PSet_TopSelection;
   const HistogramSettings cfg_PtBinSetting;
   const HistogramSettings cfg_EtaBinSetting;
@@ -130,7 +130,7 @@ private:
   Count cTauVeto;
   Count cJetSelection;
   Count cBJetSelection;
-  Count cTopologySelection;
+  // Count cTopologySelection;
   Count cTopSelection;
   Count cSelected;
   // BR Counters
@@ -222,6 +222,7 @@ private:
   WrappedTH1 *h_Htb_tbW_BQuark_Htb_tbW_Wqq_Quark_dR;
   WrappedTH1 *h_Htb_tbW_BQuark_Htb_tbW_Wqq_AntiQuark_dR;
   //
+  WrappedTH1 *h_Htb_tbW_WBoson_Quark_Htb_tbW_WBoson_AntiQuark_dR;
   WrappedTH1 *h_Htb_tbW_WBoson_Htb_BQuark_dR;
   WrappedTH1 *h_Htb_tbW_WBoson_Htb_tbW_BQuark_dR;
   WrappedTH1 *h_Htb_tbW_WBoson_gtt_tbW_BQuark_dR;
@@ -231,6 +232,7 @@ private:
   WrappedTH1 *h_gtt_tbW_WBoson_gtt_tbW_BQuark_dR;
   WrappedTH1 *h_gtt_tbW_WBoson_gbb_BQuark_dR;
   //
+  WrappedTH1 *h_Htb_tbW_WBoson_Quark_Htb_tbW_WBoson_AntiQuark_dEta;
   WrappedTH1 *h_Htb_tbW_WBoson_Htb_BQuark_dEta;
   WrappedTH1 *h_Htb_tbW_WBoson_Htb_tbW_BQuark_dEta;
   WrappedTH1 *h_Htb_tbW_WBoson_gtt_tbW_BQuark_dEta;
@@ -240,6 +242,7 @@ private:
   WrappedTH1 *h_gtt_tbW_WBoson_gtt_tbW_BQuark_dEta;
   WrappedTH1 *h_gtt_tbW_WBoson_gbb_BQuark_dEta;
   //
+  WrappedTH1 *h_Htb_tbW_WBoson_Quark_Htb_tbW_WBoson_AntiQuark_dPhi;
   WrappedTH1 *h_Htb_tbW_WBoson_Htb_BQuark_dPhi;
   WrappedTH1 *h_Htb_tbW_WBoson_Htb_tbW_BQuark_dPhi;
   WrappedTH1 *h_Htb_tbW_WBoson_gtt_tbW_BQuark_dPhi;
@@ -405,17 +408,17 @@ HtbKinematics::HtbKinematics(const ParameterSet& config, const TH1* skimCounters
     cfg_BJetEtaCuts(config.getParameter<std::vector<float>>("BJetSelection.jetEtaCuts")),
     cfg_BJetNumberCut(config, "BJetSelection.numberOfBJetsCut"),
     // PSet_METSelection(config.getParameter<ParameterSet>("METSelection")),
-    PSet_TopologySelection(config.getParameter<ParameterSet>("TopologySelection")),
-    cfg_SphericityCut(config, "TopologySelection.SphericityCut"),
-    cfg_AplanarityCut(config, "TopologySelection.AplanarityCut"),
-    cfg_PlanarityCut(config, "TopologySelection.PlanarityCut"),
-    cfg_CircularityCut(config, "TopologySelection.CircularityCut"),
-    cfg_Y23Cut(config, "TopologySelection.Y23Cut"),
-    cfg_CparameterCut(config, "TopologySelection.CparameterCut"),
-    cfg_DparameterCut(config, "TopologySelection.DparameterCut"),
-    cfg_FoxWolframMomentCut(config, "TopologySelection.FoxWolframMomentCut"),
-    cfg_AlphaTCut(config, "TopologySelection.AlphaTCut"),
-    cfg_CentralityCut(config, "TopologySelection.CentralityCut"),
+    // PSet_TopologySelection(config.getParameter<ParameterSet>("TopologySelection")),
+    // cfg_SphericityCut(config, "TopologySelection.SphericityCut"),
+    // cfg_AplanarityCut(config, "TopologySelection.AplanarityCut"),
+    // cfg_PlanarityCut(config, "TopologySelection.PlanarityCut"),
+    // cfg_CircularityCut(config, "TopologySelection.CircularityCut"),
+    // cfg_Y23Cut(config, "TopologySelection.Y23Cut"),
+    // cfg_CparameterCut(config, "TopologySelection.CparameterCut"),
+    // cfg_DparameterCut(config, "TopologySelection.DparameterCut"),
+    // cfg_FoxWolframMomentCut(config, "TopologySelection.FoxWolframMomentCut"),
+    // cfg_AlphaTCut(config, "TopologySelection.AlphaTCut"),
+    // cfg_CentralityCut(config, "TopologySelection.CentralityCut"),
     // PSet_TopSelection(config.getParameter<ParameterSet>("TopSelection")),
     cfg_PtBinSetting(config.getParameter<ParameterSet>("CommonPlots.ptBins")),
     cfg_EtaBinSetting(config.getParameter<ParameterSet>("CommonPlots.etaBins")),
@@ -431,7 +434,7 @@ HtbKinematics::HtbKinematics(const ParameterSet& config, const TH1* skimCounters
     cTauVeto(fEventCounter.addCounter("#tau-veto")),
     cJetSelection(fEventCounter.addCounter("Jets + H_{T}")),
     cBJetSelection(fEventCounter.addCounter("b-jets")),
-    cTopologySelection(fEventCounter.addCounter("Topology")),
+    // cTopologySelection(fEventCounter.addCounter("Topology")),
     cTopSelection(fEventCounter.addCounter("Top")),
     cSelected(fEventCounter.addCounter("All Selections")),
     cInclusive(fEventCounter.addSubCounter("Branching", "All events")),
@@ -555,6 +558,7 @@ void HtbKinematics::book(TDirectory *dir) {
   h_gtt_TQuark_gtt_tbW_BQuark_dR            = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "gtt_TQuark_gtt_tbW_BQuark_dR"           , ";#DeltaR", nBinsdR, mindR, maxdR);
   h_gtt_tbW_BQuark_gtt_tbW_Wqq_Quark_dR     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "gtt_tbW_BQuark_gtt_tbW_Wqq_Quark_dR"    , ";#DeltaR", nBinsdR, mindR, maxdR);
   h_gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark_dR = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark_dR", ";#DeltaR", nBinsdR, mindR, maxdR);
+  h_Htb_tbW_WBoson_Quark_Htb_tbW_WBoson_AntiQuark_dR = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "Htb_tbW_WBoson_Quark_Htb_tbW_WBoson_AntiQuark_dR", ";#DeltaR", nBinsdR, mindR, maxdR);
   h_Htb_tbW_WBoson_Htb_BQuark_dR     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "Htb_tbW_WBoson_Htb_BQuark_dR"    , ";#DeltaR", nBinsdR, mindR, maxdR);
   h_Htb_tbW_WBoson_Htb_tbW_BQuark_dR = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "Htb_tbW_WBoson_Htb_tbW_BQuark_dR", ";#DeltaR", nBinsdR, mindR, maxdR);
   h_Htb_tbW_WBoson_gtt_tbW_BQuark_dR = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "Htb_tbW_WBoson_gtt_tbW_BQuark_dR", ";#DeltaR", nBinsdR, mindR, maxdR);
@@ -577,6 +581,7 @@ void HtbKinematics::book(TDirectory *dir) {
   h_gtt_tbW_BQuark_gtt_tbW_Wqq_Quark_dEta     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "gtt_tbW_BQuark_gtt_tbW_Wqq_Quark_dEta"    , ";#Delta#eta", nBinsdEta, mindEta, maxdEta);
   h_gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark_dEta", ";#Delta#eta", nBinsdEta, mindEta, maxdEta);
 
+  h_Htb_tbW_WBoson_Quark_Htb_tbW_WBoson_AntiQuark_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "Htb_tbW_WBoson_Quark_Htb_tbW_WBoson_AntiQuark_dEta", ";#Delta#eta", nBinsdEta, mindEta, maxdEta);
   h_Htb_tbW_WBoson_Htb_BQuark_dEta     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "Htb_tbW_WBoson_Htb_BQuark_dEta"    , ";#Delta#eta", nBinsdEta, mindEta, maxdEta);
   h_Htb_tbW_WBoson_Htb_tbW_BQuark_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "Htb_tbW_WBoson_Htb_tbW_BQuark_dEta", ";#Delta#eta", nBinsdEta, mindEta, maxdEta);
   h_Htb_tbW_WBoson_gtt_tbW_BQuark_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "Htb_tbW_WBoson_gtt_tbW_BQuark_dEta", ";#Delta#eta", nBinsdEta, mindEta, maxdEta);
@@ -598,6 +603,8 @@ void HtbKinematics::book(TDirectory *dir) {
   h_gtt_TQuark_gtt_tbW_BQuark_dPhi           = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "gtt_TQuark_gtt_tbW_BQuark_dPhi"           ,";#Delta#phi (rads)", nBinsdPhi, mindPhi, maxdPhi);
   h_gtt_tbW_BQuark_gtt_tbW_Wqq_Quark_dPhi    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "gtt_tbW_BQuark_gtt_tbW_Wqq_Quark_dPhi"    ,";#Delta#phi (rads)", nBinsdPhi, mindPhi, maxdPhi);
   h_gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark_dPhi= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark_dPhi",";#Delta#phi (rads)", nBinsdPhi, mindPhi, maxdPhi);
+
+  h_Htb_tbW_WBoson_Quark_Htb_tbW_WBoson_AntiQuark_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "Htb_tbW_WBoson_Quark_Htb_tbW_WBoson_AntiQuark_dPhi", ";#Delta#phi", nBinsdPhi, mindPhi, maxdPhi);
   h_Htb_tbW_WBoson_Htb_BQuark_dPhi     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "Htb_tbW_WBoson_Htb_BQuark_dPhi"    , ";#Delta#phi", nBinsdPhi, mindPhi, maxdPhi);
   h_Htb_tbW_WBoson_Htb_tbW_BQuark_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "Htb_tbW_WBoson_Htb_tbW_BQuark_dPhi", ";#Delta#phi", nBinsdPhi, mindPhi, maxdPhi);
   h_Htb_tbW_WBoson_gtt_tbW_BQuark_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, th1, "Htb_tbW_WBoson_gtt_tbW_BQuark_dPhi", ";#Delta#phi", nBinsdPhi, mindPhi, maxdPhi);
@@ -871,6 +878,7 @@ void HtbKinematics::process(Long64_t entry) {
   //================================================================================================
   // nothing to do
 
+  /*
 
   //================================================================================================
   // 11) Topology selection 
@@ -896,7 +904,7 @@ void HtbKinematics::process(Long64_t entry) {
   if ( !cfg_CentralityCut.passedCut(Centrality) ) return;
   if ( !cfg_AlphaTCut.passedCut(alphaT) ) return;
   cTopologySelection.increment();
-
+  */
 
   //================================================================================================
   // 12) Top selection 
@@ -1672,6 +1680,8 @@ void HtbKinematics::process(Long64_t entry) {
   double dR_Htb_BQuark_Htb_tbW_Wqq_AntiQuark     = ROOT::Math::VectorUtil::DeltaR( Htb_BQuark_p4, Htb_tbW_Wqq_AntiQuark_p4);
   double dR_Htb_tbW_BQuark_Htb_tbW_Wqq_Quark     = ROOT::Math::VectorUtil::DeltaR( Htb_tbW_BQuark_p4, Htb_tbW_Wqq_Quark_p4);
   double dR_Htb_tbW_BQuark_Htb_tbW_Wqq_AntiQuark = ROOT::Math::VectorUtil::DeltaR( Htb_tbW_BQuark_p4, Htb_tbW_Wqq_AntiQuark_p4);
+
+  double dR_Htb_tbW_Wqq_Quark_Htb_tbW_Wqq_AntiQuark = ROOT::Math::VectorUtil::DeltaR( Htb_tbW_Wqq_Quark_p4, Htb_tbW_Wqq_AntiQuark_p4);
   double dR_Htb_tbW_WBoson_Htb_BQuark            = ROOT::Math::VectorUtil::DeltaR( Htb_tbW_WBoson_p4, Htb_BQuark_p4    );
   double dR_Htb_tbW_WBoson_Htb_tbW_BQuark        = ROOT::Math::VectorUtil::DeltaR( Htb_tbW_WBoson_p4, Htb_tbW_BQuark_p4);
   double dR_Htb_tbW_WBoson_gtt_tbW_BQuark        = ROOT::Math::VectorUtil::DeltaR( Htb_tbW_WBoson_p4, gtt_tbW_BQuark_p4);
@@ -1689,6 +1699,7 @@ void HtbKinematics::process(Long64_t entry) {
   double dEta_Htb_BQuark_Htb_tbW_Wqq_AntiQuark     = std::abs( Htb_BQuark_p4.eta() - Htb_tbW_Wqq_AntiQuark_p4.eta() );
   double dEta_Htb_tbW_BQuark_Htb_tbW_Wqq_Quark     = std::abs( Htb_tbW_BQuark_p4.eta() - Htb_tbW_Wqq_Quark_p4.eta() );
   double dEta_Htb_tbW_BQuark_Htb_tbW_Wqq_AntiQuark = std::abs( Htb_tbW_BQuark_p4.eta() - Htb_tbW_Wqq_AntiQuark_p4.eta() );
+  double dEta_Htb_tbW_Wqq_Quark_Htb_tbW_Wqq_AntiQuark = std::abs( Htb_tbW_Wqq_Quark_p4.eta() - Htb_tbW_Wqq_AntiQuark_p4.eta());
   double dEta_Htb_tbW_WBoson_Htb_BQuark            = std::abs( Htb_tbW_WBoson_p4.eta() - Htb_BQuark_p4.eta()     );
   double dEta_Htb_tbW_WBoson_Htb_tbW_BQuark        = std::abs( Htb_tbW_WBoson_p4.eta() - Htb_tbW_BQuark_p4.eta() );
   double dEta_Htb_tbW_WBoson_gtt_tbW_BQuark        = std::abs( Htb_tbW_WBoson_p4.eta() - gtt_tbW_BQuark_p4.eta() );
@@ -1706,6 +1717,7 @@ void HtbKinematics::process(Long64_t entry) {
   double dPhi_Htb_BQuark_Htb_tbW_Wqq_AntiQuark     = std::abs(ROOT::Math::VectorUtil::DeltaPhi( Htb_BQuark_p4, Htb_tbW_Wqq_AntiQuark_p4 ));
   double dPhi_Htb_tbW_BQuark_Htb_tbW_Wqq_Quark     = std::abs(ROOT::Math::VectorUtil::DeltaPhi( Htb_tbW_BQuark_p4, Htb_tbW_Wqq_Quark_p4 ));
   double dPhi_Htb_tbW_BQuark_Htb_tbW_Wqq_AntiQuark = std::abs(ROOT::Math::VectorUtil::DeltaPhi( Htb_tbW_BQuark_p4, Htb_tbW_Wqq_AntiQuark_p4));
+  double dPhi_Htb_tbW_Wqq_Quark_Htb_tbW_Wqq_AntiQuark = std::abs(ROOT::Math::VectorUtil::DeltaPhi( Htb_tbW_Wqq_Quark_p4, Htb_tbW_Wqq_AntiQuark_p4));
   double dPhi_Htb_tbW_WBoson_Htb_BQuark            = std::abs(ROOT::Math::VectorUtil::DeltaPhi( Htb_tbW_WBoson_p4, Htb_BQuark_p4    ) );
   double dPhi_Htb_tbW_WBoson_Htb_tbW_BQuark        = std::abs(ROOT::Math::VectorUtil::DeltaPhi( Htb_tbW_WBoson_p4, Htb_tbW_BQuark_p4) );
   double dPhi_Htb_tbW_WBoson_gtt_tbW_BQuark        = std::abs(ROOT::Math::VectorUtil::DeltaPhi( Htb_tbW_WBoson_p4, gtt_tbW_BQuark_p4) );
@@ -1758,6 +1770,8 @@ void HtbKinematics::process(Long64_t entry) {
   h_gtt_TQuark_gtt_tbW_BQuark_dR            ->Fill(dR_gtt_TQuark_gtt_tbW_BQuark);
   h_gtt_tbW_BQuark_gtt_tbW_Wqq_Quark_dR     ->Fill(dR_gtt_tbW_BQuark_gtt_tbW_Wqq_Quark);
   h_gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark_dR ->Fill(dR_gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark);
+
+  h_Htb_tbW_WBoson_Quark_Htb_tbW_WBoson_AntiQuark_dR->Fill(dR_Htb_tbW_Wqq_Quark_Htb_tbW_Wqq_AntiQuark);
   h_Htb_tbW_WBoson_Htb_BQuark_dR            ->Fill(dR_Htb_tbW_WBoson_Htb_BQuark); 
   h_Htb_tbW_WBoson_Htb_tbW_BQuark_dR        ->Fill(dR_Htb_tbW_WBoson_Htb_tbW_BQuark); 
   h_Htb_tbW_WBoson_gtt_tbW_BQuark_dR        ->Fill(dR_Htb_tbW_WBoson_gtt_tbW_BQuark); 
@@ -1779,6 +1793,7 @@ void HtbKinematics::process(Long64_t entry) {
   h_gtt_TQuark_gtt_tbW_BQuark_dEta            ->Fill(dEta_gtt_TQuark_gtt_tbW_BQuark);
   h_gtt_tbW_BQuark_gtt_tbW_Wqq_Quark_dEta     ->Fill(dEta_gtt_tbW_BQuark_gtt_tbW_Wqq_Quark);
   h_gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark_dEta ->Fill(dEta_gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark);
+  h_Htb_tbW_WBoson_Quark_Htb_tbW_WBoson_AntiQuark_dEta->Fill(dEta_Htb_tbW_Wqq_Quark_Htb_tbW_Wqq_AntiQuark);
   h_Htb_tbW_WBoson_Htb_BQuark_dEta            ->Fill(dEta_Htb_tbW_WBoson_Htb_BQuark); 
   h_Htb_tbW_WBoson_Htb_tbW_BQuark_dEta        ->Fill(dEta_Htb_tbW_WBoson_Htb_tbW_BQuark); 
   h_Htb_tbW_WBoson_gtt_tbW_BQuark_dEta        ->Fill(dEta_Htb_tbW_WBoson_gtt_tbW_BQuark); 
@@ -1800,6 +1815,7 @@ void HtbKinematics::process(Long64_t entry) {
   h_gtt_TQuark_gtt_tbW_BQuark_dPhi            ->Fill(dPhi_gtt_TQuark_gtt_tbW_BQuark);
   h_gtt_tbW_BQuark_gtt_tbW_Wqq_Quark_dPhi     ->Fill(dPhi_gtt_tbW_BQuark_gtt_tbW_Wqq_Quark);
   h_gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark_dPhi ->Fill(dPhi_gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark);
+  h_Htb_tbW_WBoson_Quark_Htb_tbW_WBoson_AntiQuark_dPhi->Fill(dPhi_Htb_tbW_Wqq_Quark_Htb_tbW_Wqq_AntiQuark);
   h_Htb_tbW_WBoson_Htb_BQuark_dPhi            ->Fill(dPhi_Htb_tbW_WBoson_Htb_BQuark); 
   h_Htb_tbW_WBoson_Htb_tbW_BQuark_dPhi        ->Fill(dPhi_Htb_tbW_WBoson_Htb_tbW_BQuark); 
   h_Htb_tbW_WBoson_gtt_tbW_BQuark_dPhi        ->Fill(dPhi_Htb_tbW_WBoson_gtt_tbW_BQuark); 

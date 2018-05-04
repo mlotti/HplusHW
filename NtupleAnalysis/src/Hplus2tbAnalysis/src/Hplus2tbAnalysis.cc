@@ -41,7 +41,7 @@ private:
   METSelection fMETSelection;
   // QuarkGluonLikelihoodRatio fQGLRSelection;
   TopSelectionBDT fTopSelection;
-  FatJetSelection fFatJetSelection;
+  // FatJetSelection fFatJetSelection;
   Count cSelected;
     
   // Non-common histograms
@@ -70,7 +70,7 @@ Hplus2tbAnalysis::Hplus2tbAnalysis(const ParameterSet& config, const TH1* skimCo
     fMETSelection(config.getParameter<ParameterSet>("METSelection")), // no subcounter in main counter
     // fQGLRSelection(config.getParameter<ParameterSet>("QGLRSelection")),// fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    fFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
+    // fFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
     cSelected(fEventCounter.addCounter("Selected Events"))
 { }
 
@@ -91,7 +91,7 @@ void Hplus2tbAnalysis::book(TDirectory *dir) {
   fMETSelection.bookHistograms(dir);
   // fQGLRSelection.bookHistograms(dir);
   fTopSelection.bookHistograms(dir);
-  fFatJetSelection.bookHistograms(dir);
+  // fFatJetSelection.bookHistograms(dir);
 
   // Book non-common histograms
   // hAssociatedTop_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTop_Pt", "Associated t pT;p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
@@ -239,14 +239,14 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   if (0) std::cout << "=== All Selections" << std::endl;
   if (!topData.passedSelection()) return;
 
-  //================================================================================================
-  // *) FatJet veto
-  //================================================================================================
-  if (0) std::cout << "\n=== FatJet veto" << std::endl;
-  const FatJetSelection::Data fatjetData = fFatJetSelection.analyze(fEvent, topData);
-  // const FatJetSelection::Data fatjetData = fFatJetSelection.analyzeWithoutTop(fEvent);
-  // if (fatjetData.fatjetMatchedToTopFound()) return;
-  if (!fatjetData.passedSelection()) return;
+//  //================================================================================================
+//  // *) FatJet veto
+//  //================================================================================================
+//  if (0) std::cout << "\n=== FatJet veto" << std::endl;
+//  const FatJetSelection::Data fatjetData = fFatJetSelection.analyze(fEvent, topData);
+//  // const FatJetSelection::Data fatjetData = fFatJetSelection.analyzeWithoutTop(fEvent);
+//  // if (fatjetData.fatjetMatchedToTopFound()) return;
+//  if (!fatjetData.passedSelection()) return;
 
   // Increment counters & fill histograms
   cSelected.increment();

@@ -59,7 +59,7 @@ public:
 private:
   // Input parameters
   // const DirectionalCut<float> cfg_PrelimTopFitChiSqr;
-  const DirectionalCut<double> cfg_PrelimTopMVACut;
+  //const DirectionalCut<double> cfg_PrelimTopMVACut;
 
   // Common plots
   CommonPlots fCommonPlots;
@@ -77,6 +77,7 @@ private:
   METSelection fMETSelection;
   //  TopologySelection fTopologySelection;
   TopSelectionBDT fTopSelection;
+  FatJetSelection fFatJetSelection;
   Count cSelected;
     
   // Non-common histograms
@@ -262,9 +263,15 @@ private:
   WrappedTH1Triplet *hSubldgTrijet_DeltaY_Trijet_TetrajetBjet_trueBoth;
 
   WrappedTH1Triplet *hTetrajetMass;
+  WrappedTH1Triplet *hTetrajetMass_InTopDir;
+  WrappedTH1Triplet *hTetrajetMass_haveMatchedH;
+  WrappedTH1Triplet *hTetrajetMass_haveMatchedAssocTop;
+  WrappedTH1Triplet *hTetrajetMass_haveOnlyMatchedAssocTop;
   WrappedTH1Triplet *hTetrajetMass_M800;
+  WrappedTH1Triplet *hTetrajetMass_TopUnmatched;
   WrappedTH1Triplet *hTetrajetMass_LdgTopIsHTop;
   WrappedTH1Triplet *hTetrajetMass_SubldgTopIsHTop;
+  WrappedTH1Triplet *hTetrajetMass_LdgWIsWfromH;
   WrappedTH1 *hTetrajetMass_deltaPhiCond;
   WrappedTH1Triplet *hTetrajetMass_isGenuineB;
   WrappedTH1Triplet *hTetrajetMass_closeJetToTetrajetBjet;
@@ -378,6 +385,7 @@ private:
   WrappedTH1 *hCEvts_HTmodif900_BeforeAfterTopSelection;
   WrappedTH1Triplet *hCevts_HTmodif900;
   WrappedTH1 *hCEvts_LdgTrijet_MergedResolved;
+  WrappedTH1 *hCEvts_LdgTrijet_MergedResolved_ht900;
 
   WrappedTH1 *hCEvts_LdgTrijetMatchedToFatJet_FatJetPt200;
   WrappedTH1 *hCEvts_LdgTrijetMatchedToFatJet_FatJetPt250;
@@ -389,9 +397,46 @@ private:
   WrappedTH1 *hCEvts_LdgTrijetMatchedToFatJet_FatJetPt550;
   WrappedTH1 *hCEvts_LdgTrijetMatchedToFatJet_FatJetPt600;
 
+  WrappedTH1 *hCEvts_LdgTrijetMatchedToFatJet_FatJetPt300_less;
+  WrappedTH1 *hCEvts_LdgTrijetMatchedToFatJet_FatJetPt400_less;
+  WrappedTH1 *hCEvts_LdgTrijetMatchedToFatJet_FatJetPt450_less;
+  WrappedTH1 *hCEvts_LdgTrijetMatchedToFatJet_FatJetPtInf_less;
+
+  WrappedTH1 *hCEvts_LdgTrijetMatchedToFatJet_FatJetPt300_less_ht900;
+  WrappedTH1 *hCEvts_LdgTrijetMatchedToFatJet_FatJetPt400_less_ht900;
+  WrappedTH1 *hCEvts_LdgTrijetMatchedToFatJet_FatJetPt450_less_ht900;
+  WrappedTH1 *hCEvts_LdgTrijetMatchedToFatJet_FatJetPtInf_less_ht900;
+  
+  WrappedTH1 *hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPtInf_less;
+  WrappedTH1 *hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt450_less;
+  WrappedTH1 *hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt400_less;
+  WrappedTH1 *hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt300_less;
+
+  WrappedTH1 *hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPtInf_less_t1b;
+  WrappedTH1 *hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt450_less_t1b;
+  WrappedTH1 *hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt400_less_t1b;
+  WrappedTH1 *hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt300_less_t1b;
+
+  WrappedTH1 *hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPtInf_less_wb;
+  WrappedTH1 *hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt450_less_wb;
+  WrappedTH1 *hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt400_less_wb;
+  WrappedTH1 *hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt300_less_wb;
+
+  WrappedTH1 *hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPtInf_less_jb;
+  WrappedTH1 *hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt450_less_jb;
+  WrappedTH1 *hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt400_less_jb;
+  WrappedTH1 *hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt300_less_jb;
+
+  WrappedTH1 *hFatJetMultiplicity;
   //fraction of trijets matched to fat jets for different fatjet.pt values
   vector<WrappedTH1*> hCEvts_LdgTrijetMatchedToFatJet_Ptcuts;
+  vector<WrappedTH1*> hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less;
+  vector<WrappedTH1*> hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less_ht900;
 
+  vector<WrappedTH1*> hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less;
+  vector<WrappedTH1*> hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_t1b;
+  vector<WrappedTH1*> hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_wb;
+  vector<WrappedTH1*> hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_jb;
 
 };
 
@@ -402,7 +447,7 @@ TopRecoAnalysis::TopRecoAnalysis(const ParameterSet& config, const TH1* skimCoun
   : BaseSelector(config, skimCounters),
     // cfg_PrelimTopFitChiSqr(config, "FakeBMeasurement.prelimTopFitChiSqrCut"),
     // cfg_PrelimTopMVACut(config, "FakeBMeasurement.prelimTopMVACut"),
-    cfg_PrelimTopMVACut(config, "FakeBMeasurement.minTopMVACut"),
+    //cfg_PrelimTopMVACut(config, "FakeBMeasurement.minTopMVACut"),
     fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kHplus2tbAnalysis, fHistoWrapper),
     cAllEvents(fEventCounter.addCounter("all events")),
     cTrigger(fEventCounter.addCounter("passed trigger")),
@@ -417,7 +462,9 @@ TopRecoAnalysis::TopRecoAnalysis(const ParameterSet& config, const TH1* skimCoun
     fMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     //    fTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
     cSelected(fEventCounter.addCounter("Selected Events"))
+
 { }
 
 
@@ -437,6 +484,7 @@ void TopRecoAnalysis::book(TDirectory *dir) {
   fMETSelection.bookHistograms(dir);
   //  fTopologySelection.bookHistograms(dir);
   fTopSelection.bookHistograms(dir);
+  fFatJetSelection.bookHistograms(dir);
 
   const int nWMassBins    = fCommonPlots.getWMassBinSettings().bins();
   const float fWMassMin   = fCommonPlots.getWMassBinSettings().min();
@@ -444,7 +492,8 @@ void TopRecoAnalysis::book(TDirectory *dir) {
 
   // const int nInvMassBins    = fCommonPlots.getInvMassBinSettings().bins();
   // const float fInvMassMin   = fCommonPlots.getInvMassBinSettings().min();
-  // const float fInvMassMax   = fCommonPlots.getInvMassBinSettings().max();
+  const float fInvMassMax   = fCommonPlots.getInvMassBinSettings().max();
+  std::cout<<fInvMassMax<<std::endl;
 
   const int nPtBins_modif       =     fCommonPlots.getPtBinSettings().bins();
   const double fPtMin_modif     = 2 * fCommonPlots.getPtBinSettings().min();
@@ -809,15 +858,23 @@ void TopRecoAnalysis::book(TDirectory *dir) {
 										     nDPhiBins , fDPhiMin , fDPhiMax, nPtBins_modif,fPtMin_modif,fPtMax_modif);
 
 
-  hTetrajetMass                     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass", ";m_{jjbb} (GeV/c^{2})",                 250,  0, 2500);
-  hTetrajetMass_M800                     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_M800", ";m_{jjbb} (GeV/c^{2})",       250,  0, 2500);
-  hTetrajetMass_LdgTopIsHTop        = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_LdgTopIsHTop", ";m_{jjbb} (GeV/c^{2})",    250,  0, 2500);
-  hTetrajetMass_SubldgTopIsHTop     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_SubldgTopIsHTop", ";m_{jjbb} (GeV/c^{2})", 250,  0, 2500);
-  hTetrajetMass_deltaPhiCond        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TetrajetMass_deltaPhiCond", ";m_{jjbb} (GeV/c^{2})",              250,  0, 2500);
-  hTetrajetMass_isGenuineB          = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_isGenuineB", ";m_{jjbb} (GeV/c^{2})",      250,  0, 2500);
+  hTetrajetMass                     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass", ";m_{jjbb} (GeV/c^{2})",                 300,  0, 3000);
+  hTetrajetMass_InTopDir            = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_InTopDir", ";m_{jjbb} (GeV/c^{2})",                 300,  0, 3000);
+  hTetrajetMass_M800                = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_M800", ";m_{jjbb} (GeV/c^{2})",       300,  0, 3000);
+  hTetrajetMass_LdgTopIsHTop        = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_LdgTopIsHTop", ";m_{jjbb} (GeV/c^{2})",    300,  0, 3000);
+  hTetrajetMass_SubldgTopIsHTop     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_SubldgTopIsHTop", ";m_{jjbb} (GeV/c^{2})", 300,  0, 3000);
+  hTetrajetMass_LdgWIsWfromH        = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_LdgWIsWfromH", ";m_{jjbb} (GeV/c^{2})",    300,  0, 3000);
+  hTetrajetMass_TopUnmatched        = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_TopUnmatched", ";m_{jjbb} (GeV/c^{2})",    300,  0, 3000);
+  hTetrajetMass_deltaPhiCond        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TetrajetMass_deltaPhiCond", ";m_{jjbb} (GeV/c^{2})",              300,  0, 3000);
+  hTetrajetMass_isGenuineB          = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_isGenuineB", ";m_{jjbb} (GeV/c^{2})",      300,  0, 3000);
+  hTetrajetMass_haveMatchedH         = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_haveMatchedH", ";m_{jjbb} (GeV/c^{2})",      300,  0, 3000);
+  hTetrajetMass_haveMatchedAssocTop  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_haveMatchedAssocTop", ";m_{jjbb} (GeV/c^{2})",      300,  0, 3000);
+  hTetrajetMass_haveOnlyMatchedAssocTop = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_haveOnlyMatchedAssocTop", ";m_{jjbb} (GeV/c^{2})",      300,  0, 3000);
 
 
   hTetrajetMass_closeJetToTetrajetBjet = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetMass_closeJetToTetrajetBjet", ";m_{jjbb} (GeV/c^{2})",      250,  0, 2500);
+
+
 
 
   hTetrajetPtDPhi                     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TetrajetPtDPhi", ";p_{T,jjbb}#Delta#phi(top,b) (GeV/c)",      nPtBins, fPtMin, fPtMax*fDPhiMax);
@@ -931,6 +988,7 @@ void TopRecoAnalysis::book(TDirectory *dir) {
   hCevts_HTmodif900 = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "Cevts_HTmodif900", ";", 2, 0, 2);
 
   hCEvts_LdgTrijet_MergedResolved  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "CEvts_LdgTrijet_MergedResolved", ";", 2, 0, 2);
+  hCEvts_LdgTrijet_MergedResolved_ht900  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "CEvts_LdgTrijet_MergedResolved_ht900", ";", 2, 0, 2);
   hCEvts_LdgTrijetMatchedToFatJet_FatJetPt200 = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "CEvts_LdgTrijetMatchedToFatJet_FatJetPt200", ";", 3, 0, 3);
   hCEvts_LdgTrijetMatchedToFatJet_FatJetPt250 = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "CEvts_LdgTrijetMatchedToFatJet_FatJetPt250", ";", 3, 0, 3);
   hCEvts_LdgTrijetMatchedToFatJet_FatJetPt300 = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "CEvts_LdgTrijetMatchedToFatJet_FatJetPt300", ";", 3, 0, 3);
@@ -940,6 +998,27 @@ void TopRecoAnalysis::book(TDirectory *dir) {
   hCEvts_LdgTrijetMatchedToFatJet_FatJetPt500 = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "CEvts_LdgTrijetMatchedToFatJet_FatJetPt500", ";", 3, 0, 3);
   hCEvts_LdgTrijetMatchedToFatJet_FatJetPt550 = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "CEvts_LdgTrijetMatchedToFatJet_FatJetPt550", ";", 3, 0, 3);
   hCEvts_LdgTrijetMatchedToFatJet_FatJetPt600 = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "CEvts_LdgTrijetMatchedToFatJet_FatJetPt600", ";", 3, 0, 3);
+
+  hCEvts_LdgTrijetMatchedToFatJet_FatJetPt300_less = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "CEvts_LdgTrijetMatchedToFatJet_FatJetPt300_less", ";", 3, 0, 3);
+  hCEvts_LdgTrijetMatchedToFatJet_FatJetPt400_less = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "CEvts_LdgTrijetMatchedToFatJet_FatJetPt400_less", ";", 3, 0, 3);
+  hCEvts_LdgTrijetMatchedToFatJet_FatJetPt450_less = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "CEvts_LdgTrijetMatchedToFatJet_FatJetPt450_less", ";", 3, 0, 3);
+  hCEvts_LdgTrijetMatchedToFatJet_FatJetPtInf_less = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "CEvts_LdgTrijetMatchedToFatJet_FatJetPtInf_less", ";", 3, 0, 3);
+
+  hCEvts_LdgTrijetMatchedToFatJet_FatJetPt300_less_ht900 = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "CEvts_LdgTrijetMatchedToFatJet_FatJetPt300_less_ht900", ";", 3, 0, 3);
+  hCEvts_LdgTrijetMatchedToFatJet_FatJetPt400_less_ht900 = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "CEvts_LdgTrijetMatchedToFatJet_FatJetPt400_less_ht900", ";", 3, 0, 3);
+  hCEvts_LdgTrijetMatchedToFatJet_FatJetPt450_less_ht900 = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "CEvts_LdgTrijetMatchedToFatJet_FatJetPt450_less_ht900", ";", 3, 0, 3);
+  hCEvts_LdgTrijetMatchedToFatJet_FatJetPtInf_less_ht900 = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "CEvts_LdgTrijetMatchedToFatJet_FatJetPtInf_less_ht900", ";", 3, 0, 3);
+
+						
+  hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less.push_back(hCEvts_LdgTrijetMatchedToFatJet_FatJetPtInf_less);
+  hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less.push_back(hCEvts_LdgTrijetMatchedToFatJet_FatJetPt450_less);
+  hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less.push_back(hCEvts_LdgTrijetMatchedToFatJet_FatJetPt400_less);
+  hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less.push_back(hCEvts_LdgTrijetMatchedToFatJet_FatJetPt300_less);
+
+  hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less_ht900.push_back(hCEvts_LdgTrijetMatchedToFatJet_FatJetPtInf_less_ht900);
+  hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less_ht900.push_back(hCEvts_LdgTrijetMatchedToFatJet_FatJetPt450_less_ht900);
+  hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less_ht900.push_back(hCEvts_LdgTrijetMatchedToFatJet_FatJetPt400_less_ht900);
+  hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less_ht900.push_back(hCEvts_LdgTrijetMatchedToFatJet_FatJetPt300_less_ht900);
 
   // To ease manipulation put in vector                                                                                                                                                                                 
   //fraction of trijets matched to fat jets for different fatjet.pt values                                                                                                                                                           
@@ -953,7 +1032,63 @@ void TopRecoAnalysis::book(TDirectory *dir) {
   hCEvts_LdgTrijetMatchedToFatJet_Ptcuts.push_back(hCEvts_LdgTrijetMatchedToFatJet_FatJetPt550);
   hCEvts_LdgTrijetMatchedToFatJet_Ptcuts.push_back(hCEvts_LdgTrijetMatchedToFatJet_FatJetPt600);
 
+  hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPtInf_less = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, 
+										     "FatJetMult_LdgTrijetMatchedToFatJet_FatJetPtInf_less", ";Multiplicity", 20, 0, 20);
+  hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt450_less = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, 
+										     "FatJetMult_LdgTrijetMatchedToFatJet_FatJetPt450_less", ";Multiplicity", 20, 0, 20);
+  hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt400_less = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, 
+										     "FatJetMult_LdgTrijetMatchedToFatJet_FatJetPt400_less", ";Multiplicity", 20, 0, 20);
+  hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt300_less = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, 
+										     "FatJetMult_LdgTrijetMatchedToFatJet_FatJetPt300_less", ";Multiplicity", 20, 0, 20);
 
+  hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPtInf_less_t1b = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, 
+										     "FatJetMult_LdgTrijetMatchedToFatJet_FatJetPtInf_less_t1b", ";Multiplicity", 20, 0, 20);
+  hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt450_less_t1b = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, 
+										     "FatJetMult_LdgTrijetMatchedToFatJet_FatJetPt450_less_t1b", ";Multiplicity", 20, 0, 20);
+  hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt400_less_t1b = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, 
+										     "FatJetMult_LdgTrijetMatchedToFatJet_FatJetPt400_less_t1b", ";Multiplicity", 20, 0, 20);
+  hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt300_less_t1b = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, 
+										     "FatJetMult_LdgTrijetMatchedToFatJet_FatJetPt300_less_t1b", ";Multiplicity", 20, 0, 20);
+
+  hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPtInf_less_wb = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, 
+										     "FatJetMult_LdgTrijetMatchedToFatJet_FatJetPtInf_less_wb", ";Multiplicity", 20, 0, 20);
+  hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt450_less_wb = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, 
+										     "FatJetMult_LdgTrijetMatchedToFatJet_FatJetPt450_less_wb", ";Multiplicity", 20, 0, 20);
+  hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt400_less_wb = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, 
+										     "FatJetMult_LdgTrijetMatchedToFatJet_FatJetPt400_less_wb", ";Multiplicity", 20, 0, 20);
+  hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt300_less_wb = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, 
+										     "FatJetMult_LdgTrijetMatchedToFatJet_FatJetPt300_less_wb", ";Multiplicity", 20, 0, 20);
+
+  hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPtInf_less_jb = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, 
+										     "FatJetMult_LdgTrijetMatchedToFatJet_FatJetPtInf_less_jb", ";Multiplicity", 20, 0, 20);
+  hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt450_less_jb = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, 
+										     "FatJetMult_LdgTrijetMatchedToFatJet_FatJetPt450_less_jb", ";Multiplicity", 20, 0, 20);
+  hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt400_less_jb = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, 
+										     "FatJetMult_LdgTrijetMatchedToFatJet_FatJetPt400_less_jb", ";Multiplicity", 20, 0, 20);
+  hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt300_less_jb = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, 
+										     "FatJetMult_LdgTrijetMatchedToFatJet_FatJetPt300_less_jb", ";Multiplicity", 20, 0, 20);
+
+  hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less.push_back(hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPtInf_less);
+  hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less.push_back(hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt450_less);
+  hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less.push_back(hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt400_less);
+  hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less.push_back(hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt300_less);
+
+  hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_t1b.push_back(hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPtInf_less_t1b);
+  hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_t1b.push_back(hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt450_less_t1b);
+  hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_t1b.push_back(hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt400_less_t1b);
+  hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_t1b.push_back(hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt300_less_t1b);
+
+  hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_wb.push_back(hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPtInf_less_wb);
+  hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_wb.push_back(hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt450_less_wb);
+  hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_wb.push_back(hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt400_less_wb);
+  hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_wb.push_back(hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt300_less_wb);
+
+  hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_jb.push_back(hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPtInf_less_jb);
+  hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_jb.push_back(hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt450_less_jb);
+  hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_jb.push_back(hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt400_less_jb);
+  hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_jb.push_back(hFatJetMult_LdgTrijetMatchedToFatJet_FatJetPt300_less_jb);
+
+  hFatJetMultiplicity = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "FatJetMultiplicity", ";Multiplicity", 20, 0, 20);
   return;
 }
 
@@ -1262,12 +1397,22 @@ void TopRecoAnalysis::process(Long64_t entry) {
   // if (!hasFreeBJet) return;
   // if (!passPrelimMVACut) return;
 
+  //================================================================================================                                                                                    
+  // *) FatJet veto                                                                                                                                                                     
+  //================================================================================================                                                                                     
+  if (0) std::cout << "\n=== FatJet veto" << std::endl;
+  const FatJetSelection::Data fatjetData = fFatJetSelection.analyze(fEvent, topData);
+  // const FatJetSelection::Data fatjetData = fFatJetSelection.analyzeWithoutTop(fEvent);                                                                                                
+  // if (fatjetData.fatjetMatchedToTopFound()) return;                                                                                                                                   
+  //if (!fatjetData.passedSelection()) return;
+
+
   //================================================================================================
   // Standard Selections
   //================================================================================================
   if (0) std::cout << "=== Standard Selections" << std::endl;
   //fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, bjetData.isGenuineB());
-  
+
   //================================================================================================
   // All Selections
   //================================================================================================
@@ -1276,6 +1421,7 @@ void TopRecoAnalysis::process(Long64_t entry) {
   //Before TopSelection
   AK8Jet LdgFatJet, SubldgFatJet;
   double ldgFatJet_pt = -999.999, sldgFatJet_pt = -999.999;
+  int NfatJets = 0; //multiplicity of fat jets with pt > 170 GeV
   //  double HT = jetData.HT();
 
   hCevts_HTmodif900 -> Fill(false,"HT<900GeV", 0);
@@ -1302,6 +1448,7 @@ void TopRecoAnalysis::process(Long64_t entry) {
   for(AK8Jet fatJet: fEvent.ak8jets())
     {
       if (fatJet.pt() < 170) continue;
+      NfatJets ++; //multiplicity of fat jets with pt > 170 GeV
       if (ldgFatJet_pt > fatJet.pt()) continue;
       ldgFatJet_pt = fatJet.pt();
       LdgFatJet = fatJet;
@@ -1353,11 +1500,12 @@ void TopRecoAnalysis::process(Long64_t entry) {
 	}
     }
 
-
   if (!topData.passedSelection()) return;
   if (0) std::cout << "=== All Selections" << std::endl;
   cSelected.increment();
-  
+//   return;
+// }
+
   //After Top Selection
   if (HT_modif > 900)
     {
@@ -1423,6 +1571,7 @@ void TopRecoAnalysis::process(Long64_t entry) {
   std::vector<genParticle> GenChargedHiggs;
   std::vector<genParticle> GenChargedHiggs_BQuark;
   std::vector<genParticle> GenTops;
+  genParticle              GenHTop;
   std::vector<genParticle> GenTops_BQuark;
   std::vector<genParticle> GenTops_SubldgQuark;
   std::vector<genParticle> GenTops_LdgQuark;
@@ -1438,7 +1587,9 @@ void TopRecoAnalysis::process(Long64_t entry) {
   
   int nGenuineTops = 0;
   GenTops = GetGenParticles(fEvent.genparticles().getGenParticles(), 6);
-  
+  for (auto& top: GenTops){
+    if (HasMother(fEvent, top, 37)) GenHTop = top;
+  }
 
   hCevts_FatJet_Pt450 -> Fill("All", 1);
   bool foundFatJet_Pt450 =false;
@@ -1778,8 +1929,12 @@ void TopRecoAnalysis::process(Long64_t entry) {
 
   bool haveMatchedChargedHiggsBJet    = HBjet.size() > 0;
   bool haveMatchedTopFromChargedHiggs = HiggsTop_Bjet.size() > 0;
+
+  bool haveMatchedChargedHiggs        = haveMatchedChargedHiggsBJet && haveMatchedTopFromChargedHiggs;
   bool haveMatchedAssocTop            = AssocTop_Bjet.size() > 0; 
   
+  bool haveOnlyMatchedAssocTop        = (!haveMatchedTopFromChargedHiggs)&&(haveMatchedAssocTop);
+
   if (0) std::cout<<haveMatchedAssocTop<<std::endl;
   
   if (doMatching){
@@ -1930,51 +2085,11 @@ void TopRecoAnalysis::process(Long64_t entry) {
       
     }
   }// if (doMatching){                              
-  /*  
-  if (haveMatchedTopFromChargedHiggs)
-    {
-      Jet bjet = HiggsTop_Bjet.at(0);
-      Jet jet1 = HiggsTop_LdgJet.at(0);
-      Jet jet2 = HiggsTop_SubldgJet.at(0);
-      
-      math::XYZTLorentzVector higgs_dijet_p4, higgs_trijet_p4;
-      higgs_dijet_p4 = jet1.p4() + jet2.p4();
-      higgs_trijet_p4 = jet1.p4() + jet2.p4() + bjet.p4();
-
-      double dR_j1j2 = ROOT::Math::VectorUtil::DeltaR(jet1.p4(), jet2.p4());
-      double dR_j1b  = ROOT::Math::VectorUtil::DeltaR(jet1.p4(), bjet);
-      double dR_j2b  = ROOT::Math::VectorUtil::DeltaR(jet2.p4(), bjet);
-
-      bool mergedDijet  = dR_j1j2 < 0.8 && dR_j1b > 0.8 && dR_j2b > 0.8 && max(jet1.bjetDiscriminator(), jet2.bjetDiscriminator()) < 0.5426;
-      bool mergedTrijet_untaggedW = max(dR_j1j2, max(dR_j1b, dR_j2b)) < 0.8 && max(jet1.bjetDiscriminator(), jet2.bjetDiscriminator()) < 0.5426;
-      bool mergedTrijet = max(dR_j1j2, max(dR_j1b, dR_j2b)) < 0.8;
-      bool mergedJB     = dR_j1j2 > 0.8 && max(dR_j1b, dR_j2b) > 0.8 && min(dR_j1b, dR_j2b) < 0.8;
-
-      hHiggsTop_DijetDeltaR -> Fill(dR_j1j2);
-      hHiggsTop_DeltaR_DijetBjet -> Fill(mergedDijet, ROOT::Math::VectorUtil::DeltaR(higgs_dijet_p4, bjet.p4()));
-      hHiggsTop_DijetMass -> Fill(mergedDijet, higgs_dijet_p4.M());
-      hHiggsTop_DijetPt -> Fill(mergedDijet, higgs_dijet_p4.Pt());
-
-      hCEvts_mergedDijet -> Fill(0.5);
-      hCEvts_mergedTrijet -> Fill(0.5);
-      hCEvts_mergedTrijet_untaggedW -> Fill(0.5);
-
-      if (mergedDijet) hCEvts_mergedDijet -> Fill(1.5);
-      if (mergedDijet && (higgs_dijet_p4.Pt() < 200)) hCEvts_mergedDijet -> Fill(2.5);
-
-      if (mergedTrijet_untaggedW) hCEvts_mergedTrijet_untaggedW -> Fill(1.5);
-      if (mergedTrijet_untaggedW && (higgs_trijet_p4.Pt() < 200)) hCEvts_mergedTrijet_untaggedW -> Fill(2.5);
-
-      if (mergedTrijet) hCEvts_mergedTrijet -> Fill(1.5);
-      if (mergedTrijet && (higgs_trijet_p4.Pt() < 200)) hCEvts_mergedTrijet -> Fill(2.5);
-      
-    }
-  */
+  
   //================================================================================================================================================//
 
     
   //================================================================================================================================================//
-
   bool isBfromH = false;
   if (haveMatchedChargedHiggsBJet) isBfromH = areSameJets(HBjet.at(0), topData.getTetrajetBJet());
 
@@ -2015,8 +2130,7 @@ void TopRecoAnalysis::process(Long64_t entry) {
   //Create text bins 
 
   //Require HT_modif >900GeV
-  if (HT_modif < 900) return;
-
+  //if (HT_modif < 900) return;
   const double  ptcut_min = 200;
   double ptcut = ptcut_min;
 
@@ -2024,36 +2138,17 @@ void TopRecoAnalysis::process(Long64_t entry) {
   //Find the fraction of events in a wide range of fatjet.pt values (from 200 to 600+ - step 50)
   for (size_t i=0; i< hCEvts_LdgTrijetMatchedToFatJet_Ptcuts.size() ; i++)
     {
-      std::cout<<"ptcut "<<ptcut<<std::endl;
+      //std::cout<<"ptcut "<<ptcut<<std::endl;
       ptcuts.push_back(ptcut);
       ptcut += 50;
     }
   
-  hCEvts_LdgTrijetMatchedToFatJet_categories -> Fill("t1b", 0);
-  hCEvts_LdgTrijetMatchedToFatJet_categories -> Fill("wb", 0);
-  hCEvts_LdgTrijetMatchedToFatJet_categories -> Fill("jb", 0);
-  hCEvts_LdgTrijet_MergedResolved -> Fill("merged", 0);
-  hCEvts_LdgTrijet_MergedResolved -> Fill("resolved", 0);
-  
-  hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Ldg", 0);
-  hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Subldg", 0);
-  hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Other", 0);
-  
-  for (size_t i =0; i< ptcuts.size(); i++)
-    {
-      hCEvts_LdgTrijetMatchedToFatJet_Ptcuts.at(i) -> Fill("t1b", 0);
-      hCEvts_LdgTrijetMatchedToFatJet_Ptcuts.at(i) -> Fill("wb", 0);
-      hCEvts_LdgTrijetMatchedToFatJet_Ptcuts.at(i) -> Fill("jb", 0);
-      //      hCEvts_LdgTrijetMatchedToFatJet_Ptcuts.at(i) -> Fill("resolved", 0);
-    }
-  
-
   bool haveLdgFatTop = false,    haveLdgFatW = false,    haveLdgFatJB = false;
-  bool haveSubldgFatTop = false, haveSubldgFatW = false, haveSubldgFatBJ = false;
+  //  bool haveSubldgFatTop = false, haveSubldgFatW = false, haveSubldgFatBJ = false;
   AK8Jet FatJet_ldgFatTop, FatJet_ldgFatW, FatJet_ldgFatJB, FatJet;
 
   bool isLdgTrijetW_untagged    = true; //max(LdgTrijet.Jet1.bjetDiscriminator(), LdgTrijet.Jet2.bjetDiscriminator()) < 0.5426;
-  bool isSubldgTrijetW_untagged = true; //max(SubldgTrijet.Jet1.bjetDiscriminator(), SubldgTrijet.Jet2.bjetDiscriminator()) < 0.5426;
+  //bool isSubldgTrijetW_untagged = true; //max(SubldgTrijet.Jet1.bjetDiscriminator(), SubldgTrijet.Jet2.bjetDiscriminator()) < 0.5426;
 
 
   //Match ldgTrijet to fat jets
@@ -2065,9 +2160,9 @@ void TopRecoAnalysis::process(Long64_t entry) {
       double ldg_dR2fat =  ROOT::Math::VectorUtil::DeltaR( LdgTrijet.Jet2.p4(), fatJet.p4());
       double ldg_dRbfat =  ROOT::Math::VectorUtil::DeltaR( LdgTrijet.BJet.p4(), fatJet.p4());
       
-      double sldg_dR1fat =  ROOT::Math::VectorUtil::DeltaR( SubldgTrijet.Jet1.p4(), fatJet.p4());
-      double sldg_dR2fat =  ROOT::Math::VectorUtil::DeltaR( SubldgTrijet.Jet2.p4(), fatJet.p4());
-      double sldg_dRbfat =  ROOT::Math::VectorUtil::DeltaR( SubldgTrijet.BJet.p4(), fatJet.p4());
+      // double sldg_dR1fat =  ROOT::Math::VectorUtil::DeltaR( SubldgTrijet.Jet1.p4(), fatJet.p4());
+      // double sldg_dR2fat =  ROOT::Math::VectorUtil::DeltaR( SubldgTrijet.Jet2.p4(), fatJet.p4());
+      // double sldg_dRbfat =  ROOT::Math::VectorUtil::DeltaR( SubldgTrijet.BJet.p4(), fatJet.p4());
       
       // bool isLdgTrijetW_untagged    = max(LdgTrijet.Jet1.bjetDiscriminator(), LdgTrijet.Jet2.bjetDiscriminator()) < 0.5426;
       //bool isSubldgTrijetW_untagged = max(SubldgTrijet.Jet1.bjetDiscriminator(), SubldgTrijet.Jet2.bjetDiscriminator()) < 0.5426;
@@ -2090,150 +2185,14 @@ void TopRecoAnalysis::process(Long64_t entry) {
 	  FatJet_ldgFatJB = fatJet;
 	  FatJet = fatJet;
 	}
-      if (max(sldg_dRbfat, max(sldg_dR1fat, sldg_dR2fat)) < 0.8)                         haveSubldgFatTop = true;
-      else if (max(sldg_dR1fat, sldg_dR2fat) < 0.8)                                      haveSubldgFatW = true;
-      else if (max(sldg_dRbfat, sldg_dR1fat)< 0.8 || max(sldg_dRbfat, sldg_dR2fat)< 0.8) haveSubldgFatBJ = true;
+      // if (max(sldg_dRbfat, max(sldg_dR1fat, sldg_dR2fat)) < 0.8)                         haveSubldgFatTop = true;
+      // else if (max(sldg_dR1fat, sldg_dR2fat) < 0.8)                                      haveSubldgFatW = true;
+      // else if (max(sldg_dRbfat, sldg_dR1fat)< 0.8 || max(sldg_dRbfat, sldg_dR2fat)< 0.8) haveSubldgFatBJ = true;
     }
-  // if (haveLdgFatTop+haveLdgFatW+haveLdgFatJB > 0)
-  // 	{
-  // 	  std::cout<<"DeltaR "<<ldg_dR1fat<<" "<<ldg_dR2fat<<" "<<ldg_dRbfat<<std::endl;
-  // 	  std::cout<<haveLdgFatTop<<" "<<haveLdgFatW<<" "<<haveLdgFatJB<<std::endl;
-  // 	}
+
+
+  //  NjettinessAK8tau1
   
-  // if (haveLdgFatTop || haveLdgFatW || haveLdgFatJB) Fat_ldgTrijet = fatJet;
-  // if (haveSubldgFatTop || haveSubldgFatW || haveSubldgFatBJ) Fat_sldgTrijet = fatJet;
-
-      // double tau21 = fatJet.NjettinessAK8tau2()/fatJet.NjettinessAK8tau1();
-      // double tau32 = fatJet.NjettinessAK8tau3()/fatJet.NjettinessAK8tau2();
-
-
-  
-  if (haveLdgFatTop || haveLdgFatW || haveLdgFatJB)
-    {
-      hCEvts_LdgTrijet_MergedResolved -> Fill("merged", 1);
-      if (haveLdgFatTop)      hCEvts_LdgTrijetMatchedToFatJet_categories -> Fill("t1b", 1);
-      else if (haveLdgFatW)   hCEvts_LdgTrijetMatchedToFatJet_categories -> Fill("wb", 1);
-      else if (haveLdgFatJB)  hCEvts_LdgTrijetMatchedToFatJet_categories -> Fill("jb", 1);
-      
-      for (size_t i =0; i< ptcuts.size(); i++)
-	{
-	  if (FatJet.pt() < ptcuts.at(i)) continue;
-	  if (haveLdgFatTop) hCEvts_LdgTrijetMatchedToFatJet_Ptcuts.at(i) -> Fill("t1b", 1);
-	  if (haveLdgFatW)   hCEvts_LdgTrijetMatchedToFatJet_Ptcuts.at(i) -> Fill("wb", 1);
-	  if (haveLdgFatJB)  hCEvts_LdgTrijetMatchedToFatJet_Ptcuts.at(i) -> Fill("jb", 1);
-	}
-    }
-  else
-    {
-      hCEvts_LdgTrijet_MergedResolved -> Fill("resolved", 1);
-      // for (size_t i =0; i< ptcuts.size(); i++)
-      // 	{
-      // 	  //if (FatJet.pt() < ptcuts.at(i)) continue;
-      // 	  hCEvts_LdgTrijetMatchedToFatJet_Ptcuts.at(i) -> Fill("resolved", 1);
-	  
-      // 	}
-    }
-  if (haveLdgFatTop)
-    {
-      hFatTop_LdgTrijet_Pt -> Fill(isLdgTrijetW_untagged, FatJet_ldgFatTop.pt());
-
-      if (LdgFatJet.index() == FatJet_ldgFatTop.index())         hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Ldg", 1);
-      else if (SubldgFatJet.index() == FatJet_ldgFatTop.index()) hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Subldg", 1);
-      else if ((LdgFatJet.index() != FatJet_ldgFatTop.index()) && (SubldgFatJet.index() != FatJet_ldgFatTop.index())) hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Other", 1);
-      
-      double tau21 = FatJet_ldgFatTop.NjettinessAK8tau2()/FatJet_ldgFatTop.NjettinessAK8tau1();
-      double tau32 = FatJet_ldgFatTop.NjettinessAK8tau3()/FatJet_ldgFatTop.NjettinessAK8tau2();
-      
-
-      hFatTop_LdgTrijet_tau21 -> Fill(isLdgTrijetW_untagged, tau21);
-      hFatTop_LdgTrijet_tau32 -> Fill(isLdgTrijetW_untagged, tau32);
-      
-      if (HT_modif > 900)
-	{
-	  hFatTop_LdgTrijet_Pt_ht900 -> Fill(isLdgTrijetW_untagged, FatJet_ldgFatTop.pt());
-	  hFatTop_LdgTrijet_tau21_ht900 -> Fill(isLdgTrijetW_untagged, tau21);
-	  hFatTop_LdgTrijet_tau32_ht900 -> Fill(isLdgTrijetW_untagged, tau32);
-	}
-    }
-  else if (haveLdgFatW)
-    {
-      hFatW_LdgTrijet_Pt   -> Fill(isLdgTrijetW_untagged, FatJet_ldgFatW.pt());
-      if (LdgFatJet.index() == FatJet_ldgFatW.index())         hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Ldg", 1);
-      else if (SubldgFatJet.index() == FatJet_ldgFatW.index()) hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Subldg", 1);
-      else if ((LdgFatJet.index() != FatJet_ldgFatW.index()) && (SubldgFatJet.index() != FatJet_ldgFatTop.index())) hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Other", 1);
-
-      double tau21 = FatJet_ldgFatW.NjettinessAK8tau2()/FatJet_ldgFatW.NjettinessAK8tau1();
-      double tau32 = FatJet_ldgFatW.NjettinessAK8tau3()/FatJet_ldgFatW.NjettinessAK8tau2();
-       
-      hFatW_LdgTrijet_tau21  -> Fill(isLdgTrijetW_untagged, tau21);
-      hFatW_LdgTrijet_tau32  -> Fill(isLdgTrijetW_untagged, tau32);
-      if (HT_modif > 900)
-	{
-	  hFatW_LdgTrijet_Pt_ht900 -> Fill(isLdgTrijetW_untagged, FatJet_ldgFatW.pt());
-	  hFatW_LdgTrijet_tau21_ht900 -> Fill(isLdgTrijetW_untagged, tau21);
-	  hFatW_LdgTrijet_tau32_ht900 -> Fill(isLdgTrijetW_untagged, tau32);
-	}
-    }
-  else if (haveLdgFatJB)
-    {
-      hFatJB_LdgTrijet_Pt -> Fill(isLdgTrijetW_untagged, FatJet_ldgFatJB.pt());
-
-      if (LdgFatJet.index() == FatJet_ldgFatJB.index())         hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Ldg", 1);
-      else if (SubldgFatJet.index() == FatJet_ldgFatJB.index()) hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Subldg", 1);
-      else if ((LdgFatJet.index() != FatJet_ldgFatJB.index()) && (SubldgFatJet.index() != FatJet_ldgFatTop.index())) hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Other", 1);
-
-      double tau21 = FatJet_ldgFatJB.NjettinessAK8tau2()/FatJet_ldgFatJB.NjettinessAK8tau1();
-      double tau32 = FatJet_ldgFatJB.NjettinessAK8tau3()/FatJet_ldgFatJB.NjettinessAK8tau2();
-
-      hFatJB_LdgTrijet_tau21 -> Fill(isLdgTrijetW_untagged, tau21);
-      hFatJB_LdgTrijet_tau32 -> Fill(isLdgTrijetW_untagged, tau32);
-      if (HT_modif > 900)
-	{
-	  hFatJB_LdgTrijet_Pt_ht900 -> Fill(isLdgTrijetW_untagged, FatJet_ldgFatJB.pt());
-	  hFatJB_LdgTrijet_tau21_ht900 -> Fill(isLdgTrijetW_untagged, tau21);
-	  hFatJB_LdgTrijet_tau32_ht900 -> Fill(isLdgTrijetW_untagged, tau32);
-	}
-    }
-  
-   if (haveSubldgFatTop)
-   	{
-       	  hFatTop_SubldgTrijet_Pt -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
-       	  // hFatTop_SubldgTrijet_tau21 -> Fill(isSubldgTrijetW_untagged, tau21);
-       	  // hFatTop_SubldgTrijet_tau32 -> Fill(isSubldgTrijetW_untagged, tau32);
-       	  if (HT_modif > 900)
-       	    {
-       	      hFatTop_SubldgTrijet_Pt_ht900 -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
-       	      // hFatTop_SubldgTrijet_tau21_ht900 -> Fill(isSubldgTrijetW_untagged, tau21);
-       	      // hFatTop_SubldgTrijet_tau32_ht900 -> Fill(isSubldgTrijetW_untagged, tau32);
-       	    }
-       	}
-       if (haveSubldgFatW)
-       	{
-       	  hFatW_SubldgTrijet_Pt   -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
-       	  // hFatW_SubldgTrijet_tau21   -> Fill(isSubldgTrijetW_untagged, tau21);
-       	  // hFatW_SubldgTrijet_tau32   -> Fill(isSubldgTrijetW_untagged, tau32);
-       	  if (HT_modif > 900)
-       	    {
-       	      hFatW_SubldgTrijet_Pt_ht900   -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
-       	      // hFatW_SubldgTrijet_tau21_ht900   -> Fill(isSubldgTrijetW_untagged, tau21);
-       	      // hFatW_SubldgTrijet_tau32_ht900   -> Fill(isSubldgTrijetW_untagged, tau32);
-       	    }
-       	}
-       if (haveSubldgFatBJ)
-       	{
-       	  hFatJB_SubldgTrijet_Pt  -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
-       	  // hFatJB_SubldgTrijet_tau21  -> Fill(isSubldgTrijetW_untagged, tau21);
-       	  // hFatJB_SubldgTrijet_tau32  -> Fill(isSubldgTrijetW_untagged, tau32);
-       	  if (HT_modif > 900)
-       	    {
-       	      hFatJB_SubldgTrijet_Pt_ht900  -> Fill(isSubldgTrijetW_untagged, FatJet.pt());
-       	      // hFatJB_SubldgTrijet_tau21_ht900  -> Fill(isSubldgTrijetW_untagged, tau21);
-       	      // hFatJB_SubldgTrijet_tau32_ht900  -> Fill(isSubldgTrijetW_untagged, tau32);
-       	    }
-       	}
-
-       //  NjettinessAK8tau1
-
   
   //===Definitions
   math::XYZTLorentzVector tetrajet_p4, subldgTetrajet_p4; 
@@ -2242,8 +2201,20 @@ void TopRecoAnalysis::process(Long64_t entry) {
   
   bool LdgTopIsTopFromH = false;
   bool SubldgTopIsTopFromH = false;
+  bool LdgWIsWfromH = false;  //LdgW = W from leading Top
+
   if (haveMatchedTopFromChargedHiggs)  LdgTopIsTopFromH       = isRealMVATop(LdgTrijet.Jet1, LdgTrijet.Jet2, LdgTrijet.BJet, HiggsTop_LdgJet.at(0), HiggsTop_SubldgJet.at(0), HiggsTop_Bjet.at(0));
   if (haveMatchedTopFromChargedHiggs)  SubldgTopIsTopFromH    = isRealMVATop(SubldgTrijet.Jet1, SubldgTrijet.Jet2, SubldgTrijet.BJet, HiggsTop_LdgJet.at(0), HiggsTop_SubldgJet.at(0), HiggsTop_Bjet.at(0));
+    
+    
+  //bool IsInTopDir = ROOT::Math::VectorUtil::DeltaR(topData.getLdgTrijet(), GenHTop.p4());
+
+  if (haveMatchedTopFromChargedHiggs){
+    bool same1 = areSameJets(LdgTrijet.Jet1, HiggsTop_LdgJet.at(0)) && areSameJets(LdgTrijet.Jet2, HiggsTop_SubldgJet.at(0));
+    bool same2 = areSameJets(LdgTrijet.Jet2, HiggsTop_LdgJet.at(0)) && areSameJets(LdgTrijet.Jet1, HiggsTop_SubldgJet.at(0));
+    if (!LdgWIsWfromH) LdgWIsWfromH = (same1 || same2);  //If Ldg top not matched: check if W is matched with the W from Higgs
+  }
+      
 
   double LdgTrijet_Rapidity = 0.5*log((LdgTrijet.TrijetP4.E() + LdgTrijet.TrijetP4.Pz())/(LdgTrijet.TrijetP4.E() - LdgTrijet.TrijetP4.Pz()));
   double SubldgTrijet_Rapidity = 0.5*log((SubldgTrijet.TrijetP4.E() + SubldgTrijet.TrijetP4.Pz())/(SubldgTrijet.TrijetP4.E() - SubldgTrijet.TrijetP4.Pz()));
@@ -2295,14 +2266,12 @@ void TopRecoAnalysis::process(Long64_t entry) {
   //===Definitions
 
   //===Fill Histograms
-
+  //if (!haveMatchedChargedHiggs) return;
 
   hLdgTrijetPt         -> Fill(LdgTopIsTopFromH, LdgTrijet.TrijetP4.Pt());
   hLdgTrijetDijetPt    -> Fill(LdgTopIsTopFromH, topData.getLdgTrijetDijet().Pt());
   hSubldgTrijetPt      -> Fill(SubldgTopIsTopFromH, SubldgTrijet.TrijetP4.Pt());
   hSubldgTrijetDijetPt -> Fill(SubldgTopIsTopFromH, topData.getLdgTrijetDijet().Pt());
-
-
 
   hLdgTrijet_DeltaR_Trijet_TetrajetBjet      -> Fill(LdgTopIsTopFromH, deltaR_LdgTrijet_TetrajetBjet);
   hLdgTrijet_DeltaEta_Trijet_TetrajetBjet    -> Fill(LdgTopIsTopFromH, deltaEta_LdgTrijet_TetrajetBjet);
@@ -2345,14 +2314,27 @@ void TopRecoAnalysis::process(Long64_t entry) {
   //Boolean defines if tetrajetBjet is correctly identified
   hTetrajetMass -> Fill(isBfromH, tetrajet_p4.M());
   if (tetrajet_p4.M() < 800)  hTetrajetMass_M800            -> Fill(isBfromH, tetrajet_p4.M());
-  if (LdgTopIsTopFromH)       hTetrajetMass_LdgTopIsHTop    -> Fill(isBfromH, tetrajet_p4.M());
+  if (LdgTopIsTopFromH){
+    hTetrajetMass_LdgTopIsHTop    -> Fill(isBfromH, tetrajet_p4.M());
+  }
+  else{
+    hTetrajetMass_TopUnmatched    -> Fill(isBfromH, tetrajet_p4.M());
+  }
   if (SubldgTopIsTopFromH)    hTetrajetMass_SubldgTopIsHTop -> Fill(isBfromH, subldgTetrajet_p4.M());
+  if (LdgWIsWfromH)           hTetrajetMass_LdgWIsWfromH    -> Fill(isBfromH, tetrajet_p4.M());
+
+  
 
   bool passDeltaPhi_condition = deltaR_SubldgTrijet_TetrajetBjet >= -deltaR_LdgTrijet_TetrajetBjet + pi;
   if (passDeltaPhi_condition) hTetrajetMass_deltaPhiCond    -> Fill(tetrajet_p4.M());
   
   hTetrajetMass_isGenuineB -> Fill(bjetData.isGenuineB(), tetrajet_p4.M());
   
+  if (haveMatchedChargedHiggs) hTetrajetMass_haveMatchedH        -> Fill(isBfromH, tetrajet_p4.M());
+  if (haveMatchedAssocTop)     hTetrajetMass_haveMatchedAssocTop -> Fill(isBfromH, tetrajet_p4.M());
+  if (haveOnlyMatchedAssocTop) hTetrajetMass_haveOnlyMatchedAssocTop  -> Fill(isBfromH, tetrajet_p4.M());
+  //if (IsInTopDir)              hTetrajetMass_InTopDir        -> Fill(isBfromH, tetrajet_p4.M());
+
   hTetrajetPtDPhi -> Fill (isBfromH, tetrajet_p4.Pt()*deltaPhi_LdgTrijet_TetrajetBjet);
   if (LdgTopIsTopFromH)       hTetrajetPtDPhi_LdgTopIsHTop -> Fill(isBfromH, tetrajet_p4.Pt()*deltaPhi_LdgTrijet_TetrajetBjet);
   if (tetrajet_p4.M() < 800)  hTetrajetPtDPhi_M800         -> Fill(isBfromH, tetrajet_p4.Pt()*deltaPhi_LdgTrijet_TetrajetBjet);
@@ -2504,9 +2486,194 @@ void TopRecoAnalysis::process(Long64_t entry) {
       if (foundJetCloseToTetrajetBjet) hTetrajetMass_closeJetToTetrajetBjet -> Fill(jet.bjetDiscriminator() > 0.8484, tetrajet_p4.M());
     }
 
+
+
+
+  //=======Fat Jets Histograms
+
+  hFatJetMultiplicity -> Fill(NfatJets);
+  //Set histo labels
+  hCEvts_LdgTrijetMatchedToFatJet_categories -> Fill("t1b", 0);
+  hCEvts_LdgTrijetMatchedToFatJet_categories -> Fill("wb", 0);
+  hCEvts_LdgTrijetMatchedToFatJet_categories -> Fill("jb", 0);
+  hCEvts_LdgTrijet_MergedResolved -> Fill("merged", 0);
+  hCEvts_LdgTrijet_MergedResolved -> Fill("resolved", 0);
+  hCEvts_LdgTrijet_MergedResolved_ht900 -> Fill("merged", 0);
+  hCEvts_LdgTrijet_MergedResolved_ht900 -> Fill("resolved", 0);
   
+  hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Ldg", 0);
+  hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Subldg", 0);
+  hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Other", 0);
+  
+  for (size_t i =0; i< ptcuts.size(); i++)
+    {
+      hCEvts_LdgTrijetMatchedToFatJet_Ptcuts.at(i) -> Fill("t1b", 0);
+      hCEvts_LdgTrijetMatchedToFatJet_Ptcuts.at(i) -> Fill("wb", 0);
+      hCEvts_LdgTrijetMatchedToFatJet_Ptcuts.at(i) -> Fill("jb", 0);
+    }
+  
+  int ptcuts_less = hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less.size();
+  for (int i =0; i< ptcuts_less; i++)
+    {
+      hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less.at(i)  -> Fill("t1b", 0);
+      hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less.at(i)  -> Fill("wb", 0);
+      hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less.at(i)  -> Fill("jb", 0);
+
+      hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less_ht900.at(i)  -> Fill("t1b", 0);
+      hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less_ht900.at(i)  -> Fill("wb", 0);
+      hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less_ht900.at(i)  -> Fill("jb", 0);
+
+    }
+  
+  if (haveLdgFatTop || haveLdgFatW || haveLdgFatJB)
+    {
+      hCEvts_LdgTrijet_MergedResolved -> Fill("merged", 1);
+      if (HT_modif > 900) hCEvts_LdgTrijet_MergedResolved_ht900 -> Fill("merged", 1);
+      if (haveLdgFatTop)      hCEvts_LdgTrijetMatchedToFatJet_categories -> Fill("t1b", 1);
+      else if (haveLdgFatW)   hCEvts_LdgTrijetMatchedToFatJet_categories -> Fill("wb", 1);
+      else if (haveLdgFatJB)  hCEvts_LdgTrijetMatchedToFatJet_categories -> Fill("jb", 1);
+      
+      for (size_t i =0; i< ptcuts.size(); i++)
+	{
+	  if (FatJet.pt() < ptcuts.at(i)) continue;
+	  if (haveLdgFatTop) hCEvts_LdgTrijetMatchedToFatJet_Ptcuts.at(i) -> Fill("t1b", 1);
+	  if (haveLdgFatW)   hCEvts_LdgTrijetMatchedToFatJet_Ptcuts.at(i) -> Fill("wb", 1);
+	  if (haveLdgFatJB)  hCEvts_LdgTrijetMatchedToFatJet_Ptcuts.at(i) -> Fill("jb", 1);
+	}
+    }
+  else
+    {
+      hCEvts_LdgTrijet_MergedResolved -> Fill("resolved", 1);
+      if (HT_modif > 900) hCEvts_LdgTrijet_MergedResolved_ht900 -> Fill("resolved", 1);
+    }
+  if (haveLdgFatTop)
+    {
+      hFatTop_LdgTrijet_Pt -> Fill(isLdgTrijetW_untagged, FatJet_ldgFatTop.pt());
+
+      if (LdgFatJet.index() == FatJet_ldgFatTop.index())         hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Ldg", 1);
+      else if (SubldgFatJet.index() == FatJet_ldgFatTop.index()) hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Subldg", 1);
+      else if ((LdgFatJet.index() != FatJet_ldgFatTop.index()) && (SubldgFatJet.index() != FatJet_ldgFatTop.index())) hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Other", 1);
+      
+      double tau21 = FatJet_ldgFatTop.NjettinessAK8tau2()/FatJet_ldgFatTop.NjettinessAK8tau1();
+      double tau32 = FatJet_ldgFatTop.NjettinessAK8tau3()/FatJet_ldgFatTop.NjettinessAK8tau2();
+      
+      hFatTop_LdgTrijet_tau21 -> Fill(isLdgTrijetW_untagged, tau21);
+      hFatTop_LdgTrijet_tau32 -> Fill(isLdgTrijetW_untagged, tau32);
+
+      if (FatJet_ldgFatTop.pt() > 0.0){
+	hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_t1b.at(0) -> Fill(NfatJets);
+	hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less.at(0)  -> Fill("t1b", 1);
+	if (HT_modif > 900) hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less_ht900.at(0)  -> Fill("t1b", 1);
+      }
+      if (FatJet_ldgFatTop.pt() < 450){
+	hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_t1b.at(1) -> Fill(NfatJets);
+	hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less.at(1)  -> Fill("t1b", 1);
+	if (HT_modif > 900) hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less_ht900.at(1)  -> Fill("t1b", 1);
+      }
+      if (FatJet_ldgFatTop.pt() < 400){
+	hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_t1b.at(2) -> Fill(NfatJets);
+	hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less.at(2)  -> Fill("t1b", 1);
+	if (HT_modif > 900) hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less_ht900.at(2)  -> Fill("t1b", 1);
+      }
+      if (FatJet_ldgFatTop.pt() < 300){
+	hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_t1b.at(3) -> Fill(NfatJets);
+	hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less.at(3)  -> Fill("t1b", 1);
+	if (HT_modif > 900) hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less_ht900.at(3)  -> Fill("t1b", 1);
+      }
+      if (HT_modif > 900)
+	{
+	  hFatTop_LdgTrijet_Pt_ht900 -> Fill(isLdgTrijetW_untagged, FatJet_ldgFatTop.pt());
+	  hFatTop_LdgTrijet_tau21_ht900 -> Fill(isLdgTrijetW_untagged, tau21);
+	  hFatTop_LdgTrijet_tau32_ht900 -> Fill(isLdgTrijetW_untagged, tau32);
+	}
+    }
+  else if (haveLdgFatW)
+    {      
+      hFatW_LdgTrijet_Pt   -> Fill(isLdgTrijetW_untagged, FatJet_ldgFatW.pt());
+      if (LdgFatJet.index() == FatJet_ldgFatW.index())         hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Ldg", 1);
+      else if (SubldgFatJet.index() == FatJet_ldgFatW.index()) hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Subldg", 1);
+      else if ((LdgFatJet.index() != FatJet_ldgFatW.index()) && (SubldgFatJet.index() != FatJet_ldgFatTop.index())) hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Other", 1);
+
+      double tau21 = FatJet_ldgFatW.NjettinessAK8tau2()/FatJet_ldgFatW.NjettinessAK8tau1();
+      double tau32 = FatJet_ldgFatW.NjettinessAK8tau3()/FatJet_ldgFatW.NjettinessAK8tau2();
+       
+      hFatW_LdgTrijet_tau21  -> Fill(isLdgTrijetW_untagged, tau21);
+      hFatW_LdgTrijet_tau32  -> Fill(isLdgTrijetW_untagged, tau32);
+
+      if (FatJet_ldgFatW.pt() > 0.0){
+	hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_wb.at(0) -> Fill(NfatJets);
+	hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less.at(0)  -> Fill("wb", 1);
+	if (HT_modif > 900) hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less_ht900.at(0)  -> Fill("wb", 1);
+      }
+      if (FatJet_ldgFatW.pt() < 450){
+	hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_wb.at(1) -> Fill(NfatJets);
+	hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less.at(1)  -> Fill("wb", 1);
+	if (HT_modif > 900) hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less_ht900.at(1)  -> Fill("wb", 1);
+      }
+      if (FatJet_ldgFatW.pt() < 400){
+	hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_wb.at(2) -> Fill(NfatJets);
+	hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less.at(2)  -> Fill("wb", 1);
+	if (HT_modif > 900) hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less_ht900.at(2)  -> Fill("wb", 1);
+      }
+      if (FatJet_ldgFatW.pt() < 300){
+	hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_wb.at(3) -> Fill(NfatJets);
+	hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less.at(3)  -> Fill("wb", 1);
+	if (HT_modif > 900) hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less_ht900.at(3)  -> Fill("wb", 1);
+      }
+
+      if (HT_modif > 900)
+	{
+	  hFatW_LdgTrijet_Pt_ht900 -> Fill(isLdgTrijetW_untagged, FatJet_ldgFatW.pt());
+	  hFatW_LdgTrijet_tau21_ht900 -> Fill(isLdgTrijetW_untagged, tau21);
+	  hFatW_LdgTrijet_tau32_ht900 -> Fill(isLdgTrijetW_untagged, tau32);
+	}
+    }
+  else if (haveLdgFatJB)
+    {
+      hFatJB_LdgTrijet_Pt -> Fill(isLdgTrijetW_untagged, FatJet_ldgFatJB.pt());
+
+      if (LdgFatJet.index() == FatJet_ldgFatJB.index())         hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Ldg", 1);
+      else if (SubldgFatJet.index() == FatJet_ldgFatJB.index()) hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Subldg", 1);
+      else if ((LdgFatJet.index() != FatJet_ldgFatJB.index()) && (SubldgFatJet.index() != FatJet_ldgFatTop.index())) hCEvts_LdgTrijetMatchedtoFatJet_LdgSbldgOther -> Fill("Other", 1);
+
+      double tau21 = FatJet_ldgFatJB.NjettinessAK8tau2()/FatJet_ldgFatJB.NjettinessAK8tau1();
+      double tau32 = FatJet_ldgFatJB.NjettinessAK8tau3()/FatJet_ldgFatJB.NjettinessAK8tau2();
+
+      hFatJB_LdgTrijet_tau21 -> Fill(isLdgTrijetW_untagged, tau21);
+      hFatJB_LdgTrijet_tau32 -> Fill(isLdgTrijetW_untagged, tau32);
+
+      if (FatJet_ldgFatJB.pt() > 0.0){
+	hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_jb.at(0) -> Fill(NfatJets);
+	hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less.at(0)  -> Fill("jb", 1);
+	if (HT_modif > 900) hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less_ht900.at(0)  -> Fill("jb", 1);
+      }
+      if (FatJet_ldgFatJB.pt() < 450){ 
+	hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_jb.at(1) -> Fill(NfatJets);
+	hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less.at(1)  -> Fill("jb", 1);
+	if (HT_modif > 900) hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less_ht900.at(1)  -> Fill("jb", 1);
+      }
+      if (FatJet_ldgFatJB.pt() < 400){
+	hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_jb.at(2) -> Fill(NfatJets);
+	hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less.at(2)  -> Fill("jb", 1);
+	if (HT_modif > 900) hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less_ht900.at(2)  -> Fill("jb", 1);
+      }
+      if (FatJet_ldgFatJB.pt() < 300){
+	hFatJetMult_LdgTrijetMatchedToFatJet_Ptcuts_less_jb.at(3) -> Fill(NfatJets);
+	hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less.at(3)  -> Fill("jb", 1);
+	if (HT_modif > 900) hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less_ht900.at(3)  -> Fill("jb", 1);
+      }
+      if (HT_modif > 900)
+	{
+	  hFatJB_LdgTrijet_Pt_ht900 -> Fill(isLdgTrijetW_untagged, FatJet_ldgFatJB.pt());
+	  hFatJB_LdgTrijet_tau21_ht900 -> Fill(isLdgTrijetW_untagged, tau21);
+	  hFatJB_LdgTrijet_tau32_ht900 -> Fill(isLdgTrijetW_untagged, tau32);
+	}
+    }
 
   
+
+
+
  //================================================================================================
   // Fill final plots
   //===============================================================================================
@@ -2515,7 +2682,7 @@ void TopRecoAnalysis::process(Long64_t entry) {
   //================================================================================================
   // Finalize
   //================================================================================================
-  fEventSaver.save();
-
-  return;
-}
+  fEventSaver.save();  //fixme
+  
+  return;              //fixme
+}                      //fixme

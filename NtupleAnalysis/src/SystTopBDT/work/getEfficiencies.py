@@ -24,15 +24,18 @@ We call the ratio f=(CR1/CR2) the transfer factor that gets us from VR to the SR
 is needed to ensure the normalisation of the sample obtained from VR is corrected.
 
 USAGE:
-./getEfficiencies_withQCDdd.py -num <pseudo_nummcrab_directory> -den <pseudo_dencrab_directory> [opts]
+./getEfficiencies.py -num <pseudo_nummcrab_directory> -den <pseudo_dencrab_directory> [opts]
 
 
 EXAMPLES: 
-./getEfficiencies_withQCDdd.py --noSF SystTopBDT_180422_MET50_MuIso0p1_InvMET30_InvMuIso0p2_noSF --withQCDSF SystTopBDT_180424_104907_with_EWK_QCD_ST_SF --withEWKFakeTTSF SystTopBDT_180424_175913_withFakeTTSF_new/ -e "TTWJetsToLNu|TTWJetsToQQ" --url
-./getEfficiencies_withQCDdd.py --noSF SystTopBDT_180422_MET50_MuIso0p1_InvMET30_InvMuIso0p2_noSF --withQCDSF SystTopBDT_180424_104907_with_EWK_QCD_ST_SF --withEWKFakeTTSF SystTopBDT_180424_175913_withFakeTTSF_new/ --url -e "TTWJets"
+./getEfficiencies.py --noSF SystTopBDT_180422_MET50_MuIso0p1_InvMET30_InvMuIso0p2_noSF --withQCDSF SystTopBDT_180424_104907_with_EWK_QCD_ST_SF --withEWKFakeTTSF SystTopBDT_180424_175913_withFakeTTSF_new/ -e "TTWJetsToLNu|TTWJetsToQQ" --url
+./getEfficiencies.py --noSF SystTopBDT_180422_MET50_MuIso0p1_InvMET30_InvMuIso0p2_noSF --withQCDSF SystTopBDT_180424_104907_with_EWK_QCD_ST_SF --withEWKFakeTTSF SystTopBDT_180424_175913_withFakeTTSF_new/ --url -e "TTWJets"
+./getEfficiencies.py --noSF SystTopBDT_180425_063552_MET50_MuIso0p1_InvMET30_InvMuIso0p2_noSF_NEW --withQCDSF SystTopBDT_180426_131358_MET50_MuIso0p1_InvMET30_InvMuIso0p2_QCDEWKSTSF --withEWKFakeTTSF SystTopBDT_180426_130544_MET50_MuIso0p1_InvMET30_InvMuIso0p2_FakeTTSF
+
 
 LAST USED:
-./getEfficiencies_withQCDdd.py --noSF SystTopBDT_180425_063552_MET50_MuIso0p1_InvMET30_InvMuIso0p2_noSF_NEW --withQCDSF SystTopBDT_180426_131358_MET50_MuIso0p1_InvMET30_InvMuIso0p2_QCDEWKSTSF --withEWKFakeTTSF SystTopBDT_180426_130544_MET50_MuIso0p1_InvMET30_InvMuIso0p2_FakeTTSF
+./getEfficiencies.py --noSF SystTopBDT_180430_070218_MET50_MuIso0p16_InvMET40_InvMuIso0p2_noSF --withEWKFakeTTSF SystTopBDT_180430_123513_MET50_MuIso0p16_InvMET40_InvMuIso0p2_FakeTTSF --withQCDSF SystTopBDT_180430_123122_MET50_MuIso0p16_InvMET40_InvMuIso0p2_QCDEWKSTSF
+
 
 '''
 
@@ -639,6 +642,7 @@ def PlotHistos(noSF_datasetsMgr, withQCDSF_datasetsMgr, withEWKFakeTTSF_datasets
     rhDict_den_noSF["NormQCD-SR-Inclusive"] = rhDict_den_noSF["QCD-SR-Inclusive"].Clone("NormQCD-SR-Inclusive")
     rhDict_den_noSF["NormQCD-SR-Inclusive"].Scale(f1)
 
+
     # ============================================================
     # Get the normalization of TT in SR = Data- (EWK + f1*QCD + SingleTop)
     # ===========================================================
@@ -692,7 +696,56 @@ def PlotHistos(noSF_datasetsMgr, withQCDSF_datasetsMgr, withEWKFakeTTSF_datasets
     # Save the the TT in denominator (normalized to Data-EWK-SingleTop-QCD) to the root-histo dictionary
     rhDict_den_noSF["NormTT-SR-Fake"] = rhDict_den_noSF["TT-SR-Fake"].Clone("NormTT-SR-Fake")
     rhDict_den_noSF["NormTT-SR-Fake"].Scale(f2)
-    
+
+    '''
+    # test
+    region = "VR"
+    region = "SR"
+    region = "CR1"
+
+    key    = "Data-%s-Inclusive" % (region)
+    h1 = histograms.Histo(rhDict_den_noSF[key], "Data")
+    h1.setIsDataMC(isData=True, isMC=False)
+
+    key= "TT-%s-Inclusive" % (region)
+    #rhDict_den_noSF[key].Scale(f2)
+    h2 = histograms.Histo(rhDict_den_noSF[key], "TT")
+    h2.setIsDataMC(isData=False, isMC=True)
+
+    key  = "QCD-%s-Inclusive" % (region)
+    hQCD = rhDict_den_noSF[key].Clone()
+    hQCD.Scale(f1)
+    # h3 = histograms.Histo(rhDict_den_noSF["NormQCD-SR-Inclusive"], "QCD")
+    h3 = histograms.Histo(hQCD, "QCD")
+    h3.setIsDataMC(isData=False, isMC=True)
+
+    key = "SingleTop-%s-Inclusive" % (region)
+    h4  = histograms.Histo(rhDict_den_noSF[key], "SingleTop")
+    h4.setIsDataMC(isData=False, isMC=True)
+
+    key = "EWK-%s-Inclusive" % (region)
+    h5  = histograms.Histo(rhDict_den_noSF[key], "EWK")
+    h5.setIsDataMC(isData=False, isMC=True)
+
+    if region == "VR":
+        p = plots.DataMCPlot2([h1, h3, h2, h4, h5], saveFormats=[])
+    else:
+        p = plots.DataMCPlot2([h1, h2, h3, h4, h5], saveFormats=[])
+
+    p = plots.DataMCPlot2([h1, h2, h3, h4, h5], saveFormats=[])
+
+    #p = plots.ComparisonManyPlot(h1, [h2], saveFormats=[])
+    p.setLuminosity(opts.intLumi)
+    p.setDefaultStyles()
+    _kwargs["stackMCHistograms"] = True
+    _kwargs["ratioYlabel"]       = "Data/MC "
+    _kwargs["ratioInvert"]       = False
+    hName = "LeadingTrijet_Pt_%s" % (region)
+    plots.drawPlot(p, hName, **_kwargs)
+    SavePlot(p, hName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png"])
+    #sys.exit()
+    # test
+    '''    
 
     #=========================================================================================
     # Get all the denominators histograms for the efficiency calculation
@@ -1341,4 +1394,4 @@ if __name__ == "__main__":
     main(opts)
 
     if not opts.batchMode:
-        raw_input("=== getEfficiencies_withQCDdd.py: Press any key to quit ROOT ...")
+        raw_input("=== getEfficiencies.py: Press any key to quit ROOT ...")
