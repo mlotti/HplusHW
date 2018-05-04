@@ -481,11 +481,14 @@ private:
   WrappedTH1 *hGenTop_Pt_partons_beforeTopSelection;
   WrappedTH1 *hGenW_Pt_partons_beforeTopSelection;
   WrappedTH1 *hGenBtop_Pt_partons_beforeTopSelection;
+  WrappedTH1 *hGenQuarks_Pt_partons_beforeTopSelection;
   WrappedTH1 *hGenBh_Pt_partons_beforeTopSelection;
   WrappedTH1 *hDeltaR_W_Btop_partons_beforeTopSelection;
   WrappedTH1 *hDeltaR_W_partons_beforeTopSelection;
+  
 
   WrappedTH1 *hHiggsTopPt_beforeTopSelection;
+  WrappedTH1 *hHiggsTop_JetsPt_beforeTopSelection;
   WrappedTH1 *hHiggsTopDijetPt_beforeTopSelection;
   WrappedTH1 *hHiggsTopBjetPt_beforeTopSelection;
   WrappedTH1 *hHiggsTop_TetrajetBjetPt_beforeTopSelection;
@@ -1063,6 +1066,7 @@ void TopRecoAnalysis::book(TDirectory *dir) {
   hGenH_Pt_partons_beforeTopSelection       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "GenH_Pt_partons_beforeTopSelection", ";p_{T} (GeV/c)", 100, 0, 1000);
   hGenTop_Pt_partons_beforeTopSelection     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "GenTop_Pt_partons_beforeTopSelection", ";p_{T} (GeV/c)", 100, 0, 1000);
   hGenW_Pt_partons_beforeTopSelection       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "GenW_Pt_partons_beforeTopSelection", ";p_{T} (GeV/c)", 100, 0, 1000);
+  hGenQuarks_Pt_partons_beforeTopSelection    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "GenQuarks_Pt_partons_beforeTopSelection", ";p_{T} (GeV/c)", 100, 0, 1000);
   hGenBtop_Pt_partons_beforeTopSelection    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "GenBtop_Pt_partons_beforeTopSelection", ";p_{T} (GeV/c)", 100, 0, 1000);
   hGenBh_Pt_partons_beforeTopSelection      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "GenBh_Pt_partons_beforeTopSelection", ";p_{T} (GeV/c)", 100, 0, 1000);
   hDeltaR_W_Btop_partons_beforeTopSelection = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "DeltaR_W_Btop_partons_beforeTopSelection", "; #Delta R(W,b)", nDRBins     , fDRMin     , 6);
@@ -1075,6 +1079,7 @@ void TopRecoAnalysis::book(TDirectory *dir) {
 										    ";#Delta R(j1,j2)",  nDRBins     , fDRMin     , 6);
   
   hHiggsTopPt_beforeTopSelection      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "HiggsTopPt_beforeTopSelection", ";p_{T} (GeV/c)", 100, 0, 1000);
+  hHiggsTop_JetsPt_beforeTopSelection = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "HiggsTop_JetsPt_beforeTopSelection", ";p_{T} (GeV/c)", 100, 0, 1000);
   hHiggsTopDijetPt_beforeTopSelection = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "HiggsTopDijetPt_beforeTopSelection", ";p_{T} (GeV/c)", 100, 0, 1000);
   hHiggsTopBjetPt_beforeTopSelection  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "HiggsTopBjetPt_beforeTopSelection", ";p_{T} (GeV/c)", 100, 0, 1000);
   hHiggsTop_TetrajetBjetPt_beforeTopSelection = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "HiggsTop_TetrajetBjetPt_beforeTopSelection", ";p_{T} (GeV/c)", 100, 0, 1000);
@@ -2156,6 +2161,11 @@ void TopRecoAnalysis::process(Long64_t entry) {
       hHiggsTop_DeltaR_Dijet_beforeTopSelection            -> Fill(ROOT::Math::VectorUtil::DeltaR( HiggsTop_LdgJet.at(0).p4(),   HiggsTop_SubldgJet.at(0).p4()));
 
       hHiggsTopPt_beforeTopSelection                -> Fill(trijet_matched_beforeTopSelection_p4.Pt());
+
+      hHiggsTop_JetsPt_beforeTopSelection           -> Fill(HiggsTop_LdgJet.at(0).pt());
+      hHiggsTop_JetsPt_beforeTopSelection           -> Fill(HiggsTop_SubldgJet.at(0).pt());
+      hHiggsTop_JetsPt_beforeTopSelection           -> Fill(HiggsTop_Bjet.at(0).pt());
+
       hHiggsTopDijetPt_beforeTopSelection           -> Fill(dijet_matched_beforeTopSelection_p4.Pt());
       hHiggsTopBjetPt_beforeTopSelection            -> Fill(HiggsTop_Bjet.at(0).pt());
       if (HBjet.size() > 0){
@@ -2169,6 +2179,11 @@ void TopRecoAnalysis::process(Long64_t entry) {
     hGenW_Pt_partons_beforeTopSelection     -> Fill((GenH_LdgQuark.at(0).p4() + GenH_SubldgQuark.at(0).p4()).Pt());
     hGenBtop_Pt_partons_beforeTopSelection  -> Fill(GenH_BQuark.at(0).pt());
     hGenBh_Pt_partons_beforeTopSelection    -> Fill(GenChargedHiggs_BQuark.at(0).pt());
+
+    hGenQuarks_Pt_partons_beforeTopSelection -> Fill(GenH_LdgQuark.at(0).pt());
+    hGenQuarks_Pt_partons_beforeTopSelection -> Fill(GenH_SubldgQuark.at(0).pt());
+    hGenQuarks_Pt_partons_beforeTopSelection -> Fill(GenH_BQuark.at(0).pt());
+
     math::XYZTLorentzVector Wpartons_beforeTopSelection_p4;
     Wpartons_beforeTopSelection_p4 = GenH_LdgQuark.at(0).p4() + GenH_SubldgQuark.at(0).p4();
     hDeltaR_W_Btop_partons_beforeTopSelection -> Fill(ROOT::Math::VectorUtil::DeltaR(Wpartons_beforeTopSelection_p4, GenH_BQuark.at(0).p4()));
