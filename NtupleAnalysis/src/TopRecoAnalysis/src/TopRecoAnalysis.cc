@@ -490,15 +490,16 @@ private:
   WrappedTH1 *hGenAW_Pt_partons_beforeTopSelection;
 
   WrappedTH1 *hHiggsTopPt_beforeTopSelection;
-  WrappedTH1 *hHiggsTop_JetsPt_beforeTopSelection;
   WrappedTH1 *hHiggsTopDijetPt_beforeTopSelection;
+  WrappedTH1 *hHiggsTop_JetsPt_beforeTopSelection;
   WrappedTH1 *hHiggsTopBjetPt_beforeTopSelection;
   WrappedTH1 *hHiggsTop_TetrajetBjetPt_beforeTopSelection;
   WrappedTH1 *hHiggsTop_TetrajetPt_beforeTopSelection;
   WrappedTH1 *hHiggsTop_DeltaR_Dijet_TrijetBjet_beforeTopSelection;
   WrappedTH1 *hHiggsTop_DeltaR_Dijet_beforeTopSelection;
 
-
+  WrappedTH1 *hAssocTopPt_beforeTopSelection;
+  WrappedTH1 *hAssocTopDijetPt_beforeTopSelection;
 
   //fraction of trijets matched to fat jets for different fatjet.pt values
   vector<WrappedTH1*> hCEvts_LdgTrijetMatchedToFatJet_Ptcuts;
@@ -1090,6 +1091,8 @@ void TopRecoAnalysis::book(TDirectory *dir) {
   hHiggsTop_TetrajetBjetPt_beforeTopSelection = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "HiggsTop_TetrajetBjetPt_beforeTopSelection", ";p_{T} (GeV/c)", 100, 0, 1000);
   hHiggsTop_TetrajetPt_beforeTopSelection  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "HiggsTop_TetrajetPt_beforeTopSelection", ";p_{T} (GeV/c)", 100, 0, 1000);
     
+  hAssocTopPt_beforeTopSelection      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "AssocTopPt_beforeTopSelection", ";p_{T} (GeV/c)", 100, 0, 1000);
+  hAssocTopDijetPt_beforeTopSelection = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "AssocTopDijetPt_beforeTopSelection", ";p_{T} (GeV/c)", 100, 0, 1000);
 	
   //===============
 
@@ -2177,6 +2180,17 @@ void TopRecoAnalysis::process(Long64_t entry) {
 	hHiggsTop_TetrajetPt_beforeTopSelection     -> Fill( (trijet_matched_beforeTopSelection_p4+HBjet.at(0).p4()).Pt());
       }
     }
+
+  if (AssocTop_Bjet.size() > 0)
+    {
+      math::XYZTLorentzVector dijet_matched_beforeTopSelection_p4, trijet_matched_beforeTopSelection_p4;
+      dijet_matched_beforeTopSelection_p4  = (HiggsTop_LdgJet.at(0).p4() + HiggsTop_SubldgJet.at(0).p4());
+      trijet_matched_beforeTopSelection_p4 = (HiggsTop_LdgJet.at(0).p4() + HiggsTop_SubldgJet.at(0).p4() + HiggsTop_Bjet.at(0).p4());
+
+      hAssocTopDijetPt_beforeTopSelection -> Fill(dijet_matched_beforeTopSelection_p4.Pt());
+      hAssocTopPt_beforeTopSelection      -> Fill(trijet_matched_beforeTopSelection_p4.Pt());
+    }
+    
   if (GenH_BQuark.size() > 0){
     hGenH_Pt_partons_beforeTopSelection     -> Fill((GenH_LdgQuark.at(0).p4() + GenH_SubldgQuark.at(0).p4() + GenH_BQuark.at(0).p4() + GenChargedHiggs_BQuark.at(0).p4()).Pt());
     hGenTop_Pt_partons_beforeTopSelection   -> Fill((GenH_LdgQuark.at(0).p4() + GenH_SubldgQuark.at(0).p4() + GenH_BQuark.at(0).p4()).Pt());
