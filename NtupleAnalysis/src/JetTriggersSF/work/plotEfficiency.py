@@ -188,7 +188,7 @@ def GetHistoKwargs(histoName, opts):
     yMax2 = 1.21 #1.3
     _kwargs     = {
         "xlabel"           : "x-axis",
-        "ylabel"           : "HLT Efficiency",
+        "ylabel"           : "L1+HLT Efficiency",
         "ratioYlabel"      : "Ratio",
         "ratio"            : True, 
         "stackMCHistograms": False,
@@ -654,7 +654,7 @@ def main(opts):
             histograms.addText(0.65, 0.10, "2016", 17)
 
             # Save the canvas to a file
-            SavePlot(p, plotName, os.path.join(opts.saveDir, opts.optMode), saveFormats=[".pdf", ".png", ".C"] )
+            SavePlot(p, plotName, os.path.join(opts.saveDir, opts.optMode), saveFormats=[".pdf", ".png", ".C", ".eps"] )
 
     Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)
     return
