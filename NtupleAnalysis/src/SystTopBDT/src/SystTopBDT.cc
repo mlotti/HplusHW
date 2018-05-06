@@ -1227,12 +1227,12 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
     // ==================================================================================
     //    Apply Mis-ID SF
     // ==================================================================================
-    if (fEvent.isMC())
-      {
-	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
-	//std::cout<<"SR:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
-	fEventWeight.multiplyWeight(MisIDweight);
-      }
+    // if (fEvent.isMC())
+    //   {
+    // 	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
+    // 	//std::cout<<"SR:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
+    // 	fEventWeight.multiplyWeight(MisIDweight);
+    //   }
     cMisIDSFCounter.increment();
     
     int selected_ldgTopIndex = getLeadingTopIndex(topData, "selected", mu, BJet_LeptonicBr, searchForLeptonicTop);
@@ -1381,12 +1381,12 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
     // ==================================================================================
     //    Apply Mis-ID SF
     // ==================================================================================
-    if (fEvent.isMC())
-      {
-    	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
-	//std::cout<<"VR:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
-	fEventWeight.multiplyWeight(MisIDweight);
-      }
+    // if (fEvent.isMC())
+    //   {
+    // 	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
+    // 	//std::cout<<"VR:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
+    // 	fEventWeight.multiplyWeight(MisIDweight);
+    //   }
     cMisIDSFCounter.increment();
     // ----------------------------------------------------------------------------------
     
@@ -1753,12 +1753,12 @@ void SystTopBDT::DoInvertedAnalysis(const JetSelection::Data& jetData, const BJe
     // ==================================================================================
     //    Apply Mis-ID SF
     // ==================================================================================
-    if (fEvent.isMC())
-      {
-	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
-	//std::cout<<"CR1:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
-	fEventWeight.multiplyWeight(MisIDweight);
-      }
+    // if (fEvent.isMC())
+    //   {
+    // 	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
+    // 	//std::cout<<"CR1:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
+    // 	fEventWeight.multiplyWeight(MisIDweight);
+    //   }
     cMisIDSFCounter.increment();
     // ----------------------------------------------------------------------------------
 
@@ -1902,12 +1902,12 @@ void SystTopBDT::DoInvertedAnalysis(const JetSelection::Data& jetData, const BJe
     // ==================================================================================
     //    Apply Mis-ID SF
     // ==================================================================================
-    if (fEvent.isMC())
-      {
-	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
-	//std::cout<<"CR2:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
-	fEventWeight.multiplyWeight(MisIDweight);
-      }
+    // if (fEvent.isMC())
+    //   {
+    // 	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
+    // 	//std::cout<<"CR2:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
+    // 	fEventWeight.multiplyWeight(MisIDweight);
+    //   }
     cMisIDSFCounter.increment();  
     // ----------------------------------------------------------------------------------
 
@@ -2038,7 +2038,7 @@ int SystTopBDT::getLeadingTopIndex(const TopSelectionBDT::Data& topData, string 
       //if (dR_mu_top < dRmin_mu_top) dRmin_mu_top = dR_mu_top;
 
       // Consider only top candidates that are far from the muon (back-to-back)
-      //if (dR_mu_top < 2.0) continue;	       soti: fix dR
+      if (dR_mu_top < 2.0) continue;
       if (Top_p4.pt() < LdgTrijet_MaxPt) continue;
        	LdgTrijet_MaxPt = Top_p4.pt();
 	LdgTrijet_Index = i;
@@ -2088,7 +2088,7 @@ bool SystTopBDT::IsGenuineTop(const TopSelectionBDT::Data& topData, string topTy
       double dR_mu_top = ROOT::Math::VectorUtil::DeltaR(mu.p4(), Top_p4);
       
       // Consider only top candidates that are far from the muon (back-to-back)
-      //if (dR_mu_top < 2.0) continue;	      soti: fix dR
+      if (dR_mu_top < 2.0) continue;
       if (isRealTop(jet1, jet2, bjet, MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet)) return true;
     }
   return false;
@@ -2210,7 +2210,7 @@ vector <int> SystTopBDT::GetTopsIndex( const TopSelectionBDT::Data& topData, str
       //if (dR_mu_top < dRmin_mu_top) dRmin_mu_top = dR_mu_top;
       
       // Consider only top candidates that are far from the muon (back-to-back)
-      //if (dR_mu_top < 2.0) continue;	       soti: fix dR
+      if (dR_mu_top < 2.0) continue;
       vTops.push_back(i);
     }
   return vTops;
