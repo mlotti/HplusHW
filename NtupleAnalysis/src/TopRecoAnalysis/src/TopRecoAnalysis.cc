@@ -26,6 +26,7 @@ public:
   bool foundFreeBjet(const Jet& trijet1Jet1, const Jet& trijet1Jet2, const Jet& trijet1BJet, const Jet& trijet2Jet1, const Jet& trijet2Jet2, const Jet& trijet2BJet , const std::vector<Jet>& bjets);
   TrijetSelection SortInMVAvalue(TrijetSelection TopCand);
   bool HasMother(const Event& event, const genParticle &p, const int mom_pdgId);
+  bool HasRecursivelyMother(const Event& event, const genParticle &p, const int mom_pdgId);
   Jet getLeadingSubleadingJet(const Jet& jet0, const Jet& jet1, string selectedJet);
   std::vector<int> SortInPt(std::vector<int> Vector);
 
@@ -49,7 +50,10 @@ public:
   bool isRealMVATop(const Jet& trijetJet1, const Jet& trijetJet2, const Jet& trijetBJet, const Jet& MCtrue_LdgJet, const Jet& MCtrue_SubldgJet, const Jet& MCtrue_Bjet);
   bool isRealMVATop(const Jet& trijetJet1, const Jet& trijetJet2, const Jet& trijetBJet,
 		    const std::vector<Jet>& MCtrue_LdgJet,  const std::vector<Jet>& MCtrue_SubldgJet, const std::vector<Jet>& MCtrue_Bjet);
-
+  bool FoundFatWjet_fatJetSelections(genParticle W,  const BJetSelection::Data& bjetData);
+  //bool FoundFatWjet_fatJetSelections(Jet Jet1, Jet Jet2, Jet Bjet, genParticle W);
+  bool Pass_fatWJetSelections(const BJetSelection::Data& bjetData);
+  bool Pass_fatWJetSelections(const BJetSelection::Data& bjetData, const AK8Jet& fatJet);
   /// Books histograms
   virtual void book(TDirectory *dir) override;
   /// Sets up branches for reading the TTree
@@ -78,7 +82,7 @@ private:
   METSelection fMETSelection;
   //  TopologySelection fTopologySelection;
   TopSelectionBDT fTopSelection;
-  FatJetSelection fFatJetSelection;
+  //FatJetSelection fFatJetSelection;
   Count cSelected;
     
   // Non-common histograms
@@ -501,6 +505,7 @@ private:
   WrappedTH1 *hAssocTopPt_beforeTopSelection;
   WrappedTH1 *hAssocTopDijetPt_beforeTopSelection;
 
+
   //fraction of trijets matched to fat jets for different fatjet.pt values
   vector<WrappedTH1*> hCEvts_LdgTrijetMatchedToFatJet_Ptcuts;
   vector<WrappedTH1*> hCEvts_LdgTrijetMatchedToFatJet_Ptcuts_less;
@@ -526,6 +531,15 @@ private:
 
   WrappedTH1Triplet *hHTopQuarkPt_isGenuineTop;
   WrappedTH1Triplet *hHTopQuarkPt_isGenuineJet;
+  WrappedTH1Triplet *hFatWjet_higgsTop_beforeTopSelection;
+  WrappedTH1Triplet *hFatWjet_assocTop_beforeTopSelection;
+  WrappedTH1Triplet *hFatWjet_higgsTop_beforeTopSelection_AllfatJets;
+  WrappedTH1Triplet *hFatWjet_assocTop_beforeTopSelection_AllfatJets; 
+
+  WrappedTH1Triplet *hFatWjet_bothTop_beforeTopSelection_AllfatJets;
+  WrappedTH1 *hFatWjet_bothTop_beforeTopSelection_AllfatJets_categ;
+						
+						
 
 };
 
@@ -552,7 +566,7 @@ TopRecoAnalysis::TopRecoAnalysis(const ParameterSet& config, const TH1* skimCoun
     fMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     //    fTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    fFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
+    //fFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
     cSelected(fEventCounter.addCounter("Selected Events"))
 
 { }
@@ -574,7 +588,7 @@ void TopRecoAnalysis::book(TDirectory *dir) {
   fMETSelection.bookHistograms(dir);
   //  fTopologySelection.bookHistograms(dir);
   fTopSelection.bookHistograms(dir);
-  fFatJetSelection.bookHistograms(dir);
+  //fFatJetSelection.bookHistograms(dir);
 
   const int nWMassBins    = fCommonPlots.getWMassBinSettings().bins();
   const float fWMassMin   = fCommonPlots.getWMassBinSettings().min();
@@ -1091,9 +1105,20 @@ void TopRecoAnalysis::book(TDirectory *dir) {
   hHiggsTop_TetrajetBjetPt_beforeTopSelection = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "HiggsTop_TetrajetBjetPt_beforeTopSelection", ";p_{T} (GeV/c)", 100, 0, 1000);
   hHiggsTop_TetrajetPt_beforeTopSelection  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "HiggsTop_TetrajetPt_beforeTopSelection", ";p_{T} (GeV/c)", 100, 0, 1000);
     
-  hAssocTopPt_beforeTopSelection      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "AssocTopPt_beforeTopSelection", ";p_{T} (GeV/c)", 100, 0, 1000);
-  hAssocTopDijetPt_beforeTopSelection = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "AssocTopDijetPt_beforeTopSelection", ";p_{T} (GeV/c)", 100, 0, 1000);
-	
+  hAssocTopPt_beforeTopSelection       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "AssocTopPt_beforeTopSelection", ";p_{T} (GeV/c)", 100, 0, 1000);
+  hAssocTopDijetPt_beforeTopSelection  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "AssocTopDijetPt_beforeTopSelection", ";p_{T} (GeV/c)", 100, 0, 1000);
+  hFatWjet_higgsTop_beforeTopSelection = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatWjet_higgsTop_beforeTopSelection" , ";p_{T} (GeV/c)", 100, 0, 1000);
+  hFatWjet_assocTop_beforeTopSelection = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatWjet_assocTop_beforeTopSelection" , ";p_{T} (GeV/c)", 100, 0, 1000);
+  hFatWjet_higgsTop_beforeTopSelection_AllfatJets = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatWjet_higgsTop_beforeTopSelection_AllfatJets",
+										      ";p_{T} (GeV/c)", 100, 0, 1000);
+  hFatWjet_assocTop_beforeTopSelection_AllfatJets = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatWjet_assocTop_beforeTopSelection_AllfatJets",
+										      ";p_{T} (GeV/c)", 100, 0, 1000);
+
+  hFatWjet_bothTop_beforeTopSelection_AllfatJets = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatWjet_bothTop_beforeTopSelection_AllfatJets",
+										     ";p_{T} (GeV/c)", 100, 0, 1000);										     
+  hFatWjet_bothTop_beforeTopSelection_AllfatJets_categ = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "FatWjet_bothTop_beforeTopSelection_AllfatJets_categ",
+										    ";", 2, 0, 2);
+    
   //===============
 
   hFatTop_LdgTrijet_Pt_ht900      = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "FatTop_LdgTrijet_Pt_ht900", ";p_{T} (GeV/c)", 100, 0, 1000);
@@ -1336,6 +1361,29 @@ bool TopRecoAnalysis::HasMother(const Event& event, const genParticle &p, const 
   return false;
 }
 
+
+bool TopRecoAnalysis::HasRecursivelyMother(const Event& event, const genParticle &p, const int mom_pdgId){
+  //  Description:                
+  //  Returns true if the particle has a mother with pdgId equal to mom_pdgId.
+  // Ensure the particle has a mother!                                                                                                                                                                                  
+  if (p.mothers().size() < 1) return false;
+
+  // For-loop: All mothers                                                                                                                                                                                              
+  for (size_t iMom = 0; iMom < p.mothers().size(); iMom++)
+    {
+      int mom_index =  p.mothers().at(iMom);
+      const genParticle m = event.genparticles().getGenParticles()[mom_index];
+      int motherID = m.pdgId();
+      if (std::abs(motherID) == mom_pdgId) return true;
+      else{
+	return HasRecursivelyMother(event, m, mom_pdgId);
+      }
+      //      else continue;                                                                                                                                                                                            
+    }
+
+  return false;
+}
+
 /*                                                                                                                                                                                                                      
   Get all gen particles by pdgId                                                                                                                                                                                        
 */
@@ -1451,6 +1499,110 @@ bool TopRecoAnalysis::isRealMVATop(const Jet& trijetJet1, const Jet& trijetJet2,
   return false;
 }
 
+/*
+bool TopRecoAnalysis::FoundFatWjet_fatJetSelections(Jet Jet1, Jet Jet2, Jet Bjet, genParticle W){
+  Jet jet1 = Jet1, jet2 = Jet2, bjet = Bjet;
+  //bool isFatTop = false, isFatW = false;
+  bool isFatW = false;
+  if (min(jet1.bjetDiscriminator(), jet2.bjetDiscriminator()) > 0.8484) return false;
+  for(AK8Jet fatJet: fEvent.ak8jets())
+    {
+      if (fatJet.pt() <= 200) continue;
+      if (std::abs(fatJet.eta()) >= 2.4) continue;
+      double tau_21 = fatJet.NjettinessAK8tau2()/fatJet.NjettinessAK8tau1();
+      if (tau_21 > 0.6) continue;
+      if (fatJet.ak8PFJetsCHSSoftDropMass() < 65 || fatJet.ak8PFJetsCHSSoftDropMass() > 105) continue;
+      
+      // math::XYZTLorentzVector W_p4;
+      // W_p4 = jet1.p4() + jet2.p4();
+      double dR = ROOT::Math::VectorUtil::DeltaR( W.p4(), fatJet.p4());
+      //double dR = ROOT::Math::VectorUtil::DeltaR( W_p4, fatJet.p4());
+      isFatW = dR < 0.8;
+      // double ldg_dR1fat =  ROOT::Math::VectorUtil::DeltaR( jet1.p4(), fatJet.p4());
+      // double ldg_dR2fat =  ROOT::Math::VectorUtil::DeltaR( jet2.p4(), fatJet.p4());
+      // double ldg_dRbfat =  ROOT::Math::VectorUtil::DeltaR( bjet.p4(), fatJet.p4());      
+
+      // isFatTop = (max(ldg_dRbfat, max(ldg_dR1fat, ldg_dR2fat)) < 0.8);
+      // isFatW = (!isFatTop && (max(ldg_dR1fat, ldg_dR2fat) < 0.8));
+    }
+  return isFatW;
+}
+*/
+
+
+bool TopRecoAnalysis::FoundFatWjet_fatJetSelections(genParticle W,  const BJetSelection::Data& bjetData){
+  bool isFatW = false;
+  for(AK8Jet fatJet: fEvent.ak8jets())
+    {
+      double tau_21 = fatJet.NjettinessAK8tau2()/fatJet.NjettinessAK8tau1();
+
+      bool btagged = false;
+      for (auto& bjet: bjetData.getSelectedBJets()){
+        if (ROOT::Math::VectorUtil::DeltaR( bjet.p4(), fatJet.p4()) < 0.8) btagged = true;
+      }
+
+      bool passBtagging = !btagged;
+      bool passPt = fatJet.pt() > 200;
+      bool passEta = std::abs(fatJet.eta()) < 2.4;
+      bool passTau_21 = tau_21 < 0.6;
+      bool passSDmass = fatJet.ak8PFJetsCHSSoftDropMass() >= 65 && fatJet.ak8PFJetsCHSSoftDropMass() <= 105;
+
+      bool pass = passBtagging*passPt*passEta*passTau_21*passSDmass;
+      if (!pass) continue;
+      
+      double dR = ROOT::Math::VectorUtil::DeltaR( W.p4(), fatJet.p4());
+      isFatW = dR < 0.8;
+      if (isFatW) return true;
+    }
+  return false;
+}
+
+
+bool TopRecoAnalysis::Pass_fatWJetSelections(const BJetSelection::Data& bjetData){
+
+  for(AK8Jet fatJet: fEvent.ak8jets())
+    {
+      double tau_21 = fatJet.NjettinessAK8tau2()/fatJet.NjettinessAK8tau1();
+      
+      bool btagged = false;
+      // for (auto& bjet: bjetData.getSelectedBJets()){
+      // 	if (ROOT::Math::VectorUtil::DeltaR( bjet.p4(), fatJet.p4()) < 0.8) btagged = true;
+      // }
+      
+      bool passBtagging = !btagged;
+      bool passPt = fatJet.pt() > 200;
+      bool passEta = std::abs(fatJet.eta()) < 2.4;
+      bool passTau_21 = tau_21 < 0.6;
+      bool passSDmass = fatJet.ak8PFJetsCHSSoftDropMass() >= 65 && fatJet.ak8PFJetsCHSSoftDropMass() <= 105;
+      
+      bool pass = passBtagging*passPt*passEta*passTau_21*passSDmass;
+      if (pass) return true;
+    }
+  return false;
+}
+
+bool TopRecoAnalysis::Pass_fatWJetSelections(const BJetSelection::Data& bjetData, const AK8Jet& fatJet){
+
+  double tau_21 = fatJet.NjettinessAK8tau2()/fatJet.NjettinessAK8tau1();
+  
+  bool btagged = false;
+  // for (auto& bjet: bjetData.getSelectedBJets()){
+  //   if (ROOT::Math::VectorUtil::DeltaR( bjet.p4(), fatJet.p4()) < 0.8) btagged = true;
+  // }
+  
+  bool passBtagging = !btagged;
+  bool passPt = fatJet.pt() > 200;
+  bool passEta = std::abs(fatJet.eta()) < 2.4;
+  bool passTau_21 = tau_21 < 0.6;
+  bool passSDmass = fatJet.ak8PFJetsCHSSoftDropMass() >= 65 && fatJet.ak8PFJetsCHSSoftDropMass() <= 105;
+  
+  bool pass = passBtagging*passPt*passEta*passTau_21*passSDmass;
+  if (pass) return true;
+  
+  return false;
+}
+
+
 void TopRecoAnalysis::setupBranches(BranchManager& branchManager) {
   fEvent.setupBranches(branchManager);
   return;
@@ -1558,7 +1710,7 @@ void TopRecoAnalysis::process(Long64_t entry) {
   // 12) Top selection
   //================================================================================================
   if (0) std::cout << "=== Top (BDT) selection" << std::endl;
-  const TopSelectionBDT::Data topData = fTopSelection.analyze(fEvent, jetData, bjetData);
+  const TopSelectionBDT::Data topData = fTopSelection.analyze(fEvent, jetData, bjetData); 
 
   //================================================================================================
   // Standard Selections
@@ -1708,14 +1860,14 @@ void TopRecoAnalysis::process(Long64_t entry) {
     }
   
   if (foundFatJet_Pt450) hCevts_FatJet_Pt450 -> Fill("p_{T}>450GeV", 1);
-  
+  genParticle Gen_Wh, Gen_Wa;
+  bool have_Wh = false, have_Wa = false;
   // For-loop: All top quarks                                                                                                      
   for (auto& top: GenTops){
     
     bool FoundBQuark = false;
     std::vector<genParticle> quarks;
     genParticle bquark;
-    
     // For-loop: Top quark daughters (Nested)                                                                   
     for (size_t i=0; i<top.daughters().size(); i++)
       {
@@ -1735,6 +1887,14 @@ void TopRecoAnalysis::process(Long64_t entry) {
           {
 	    // Get the last copy                                               
 	    genParticle W = GetLastCopy(fEvent.genparticles().getGenParticles(), dau);
+	    if (HasRecursivelyMother(fEvent, W, 37)){
+	      Gen_Wh = W;
+	      have_Wh = true;
+	    }
+	    else{
+	      Gen_Wa = W;
+	      have_Wa = true;
+	    }
             // For-loop: W-boson daughters                                                                    
 	    for (size_t idau=0; idau<W.daughters().size(); idau++)
               {
@@ -2064,12 +2224,142 @@ void TopRecoAnalysis::process(Long64_t entry) {
         }
     } //if (doMatching)
 
+
+  bool haveMatchedChargedHiggsBJet    = HBjet.size() > 0;
+  bool haveMatchedTopFromChargedHiggs = HiggsTop_Bjet.size() > 0;
+
+  bool haveMatchedChargedHiggs        = haveMatchedChargedHiggsBJet && haveMatchedTopFromChargedHiggs;
+  bool haveMatchedAssocTop            = AssocTop_Bjet.size() > 0; 
+  
+  bool haveOnlyMatchedAssocTop        = (!haveMatchedTopFromChargedHiggs)&&(haveMatchedAssocTop);
+
+
+  //Reco DeltaR(W, b), DeltaR(j1, j2) before BDT
+  //HiggsTop_LdgJet, HiggsTop_SubldgJet, HiggsTop_Bjet
+  if (HiggsTop_Bjet.size() > 0)
+    {
+      math::XYZTLorentzVector dijet_matched_beforeTopSelection_p4, trijet_matched_beforeTopSelection_p4;
+      dijet_matched_beforeTopSelection_p4  =  (HiggsTop_LdgJet.at(0).p4() + HiggsTop_SubldgJet.at(0).p4());
+      trijet_matched_beforeTopSelection_p4 = (HiggsTop_LdgJet.at(0).p4() + HiggsTop_SubldgJet.at(0).p4() + HiggsTop_Bjet.at(0).p4());
+
+      hHiggsTop_DeltaR_Dijet_TrijetBjet_beforeTopSelection -> Fill(ROOT::Math::VectorUtil::DeltaR( dijet_matched_beforeTopSelection_p4, HiggsTop_Bjet.at(0).p4()));
+      hHiggsTop_DeltaR_Dijet_beforeTopSelection            -> Fill(ROOT::Math::VectorUtil::DeltaR( HiggsTop_LdgJet.at(0).p4(),   HiggsTop_SubldgJet.at(0).p4()));
+
+      hHiggsTopPt_beforeTopSelection                -> Fill(trijet_matched_beforeTopSelection_p4.Pt());
+
+      hHiggsTop_JetsPt_beforeTopSelection           -> Fill(HiggsTop_LdgJet.at(0).pt());
+      hHiggsTop_JetsPt_beforeTopSelection           -> Fill(HiggsTop_SubldgJet.at(0).pt());
+      hHiggsTop_JetsPt_beforeTopSelection           -> Fill(HiggsTop_Bjet.at(0).pt());
+
+      hHiggsTopDijetPt_beforeTopSelection           -> Fill(dijet_matched_beforeTopSelection_p4.Pt());
+      hHiggsTopBjetPt_beforeTopSelection            -> Fill(HiggsTop_Bjet.at(0).pt());
+      if (HBjet.size() > 0){
+	hHiggsTop_TetrajetBjetPt_beforeTopSelection -> Fill(HBjet.at(0).pt());
+	hHiggsTop_TetrajetPt_beforeTopSelection     -> Fill( (trijet_matched_beforeTopSelection_p4+HBjet.at(0).p4()).Pt());
+      }
+
+      if (GenH_BQuark.size() > 0){
+	hGenH_Pt_partons_beforeTopSelection     -> Fill((GenH_LdgQuark.at(0).p4() + GenH_SubldgQuark.at(0).p4() + GenH_BQuark.at(0).p4() + GenChargedHiggs_BQuark.at(0).p4()).Pt());
+	hGenTop_Pt_partons_beforeTopSelection   -> Fill((GenH_LdgQuark.at(0).p4() + GenH_SubldgQuark.at(0).p4() + GenH_BQuark.at(0).p4()).Pt());
+	hGenW_Pt_partons_beforeTopSelection     -> Fill((GenH_LdgQuark.at(0).p4() + GenH_SubldgQuark.at(0).p4()).Pt());
+	hGenBtop_Pt_partons_beforeTopSelection  -> Fill(GenH_BQuark.at(0).pt());
+	hGenBh_Pt_partons_beforeTopSelection    -> Fill(GenChargedHiggs_BQuark.at(0).pt());
+	
+	hGenQuarks_Pt_partons_beforeTopSelection -> Fill(GenH_LdgQuark.at(0).pt());
+	hGenQuarks_Pt_partons_beforeTopSelection -> Fill(GenH_SubldgQuark.at(0).pt());
+	hGenQuarks_Pt_partons_beforeTopSelection -> Fill(GenH_BQuark.at(0).pt());
+	
+	math::XYZTLorentzVector Wpartons_beforeTopSelection_p4;
+	Wpartons_beforeTopSelection_p4 = GenH_LdgQuark.at(0).p4() + GenH_SubldgQuark.at(0).p4();
+	hDeltaR_W_Btop_partons_beforeTopSelection -> Fill(ROOT::Math::VectorUtil::DeltaR(Wpartons_beforeTopSelection_p4, GenH_BQuark.at(0).p4()));
+	hDeltaR_W_partons_beforeTopSelection      -> Fill(ROOT::Math::VectorUtil::DeltaR(GenH_LdgQuark.at(0).p4(), GenH_SubldgQuark.at(0).p4()));
+      }
+      
+    }
+
+  if (AssocTop_Bjet.size() > 0)
+    {
+      math::XYZTLorentzVector dijet_matched_beforeTopSelection_p4, trijet_matched_beforeTopSelection_p4;
+      dijet_matched_beforeTopSelection_p4  = (AssocTop_LdgJet.at(0).p4() + AssocTop_SubldgJet.at(0).p4());
+      trijet_matched_beforeTopSelection_p4 = (AssocTop_LdgJet.at(0).p4() + AssocTop_SubldgJet.at(0).p4() + AssocTop_Bjet.at(0).p4());
+
+      hAssocTopDijetPt_beforeTopSelection -> Fill(dijet_matched_beforeTopSelection_p4.Pt());
+      hAssocTopPt_beforeTopSelection      -> Fill(trijet_matched_beforeTopSelection_p4.Pt());
+
+      if (GenA_BQuark.size() > 0){
+	hGenATop_Pt_partons_beforeTopSelection   -> Fill((GenA_LdgQuark.at(0).p4() + GenA_SubldgQuark.at(0).p4() + GenA_BQuark.at(0).p4()).Pt());
+	hGenAW_Pt_partons_beforeTopSelection     -> Fill((GenA_LdgQuark.at(0).p4() + GenA_SubldgQuark.at(0).p4()).Pt());
+      }
+    }
+    
+
+  bool foundFatWjet_higgsTop = false, foundFatWjet_assocTop = false;
+  if (Pass_fatWJetSelections(bjetData)){
+    if (have_Wh){
+      foundFatWjet_higgsTop = FoundFatWjet_fatJetSelections( Gen_Wh, bjetData);
+      hFatWjet_higgsTop_beforeTopSelection -> Fill(foundFatWjet_higgsTop, Gen_Wh.pt());
+    }
+    if (have_Wa){
+      foundFatWjet_assocTop = FoundFatWjet_fatJetSelections( Gen_Wa, bjetData);
+      hFatWjet_assocTop_beforeTopSelection -> Fill(foundFatWjet_assocTop, Gen_Wa.pt());
+    }
+  }
+
+  //How many ak8 jets are matched to a genW?
+  
+  double fatW_candidate_mass = 999.9;
+  AK8Jet FatW_candidate;
+  bool haveFatW_candidate = false;
+  for(AK8Jet fatJet: fEvent.ak8jets()){
+    if (!Pass_fatWJetSelections(bjetData, fatJet)) continue;
+    if (std::abs(fatJet.p4().M() - 80.385) > std::abs(fatW_candidate_mass - 80.385)) continue;
+    fatW_candidate_mass = fatJet.p4().M();
+    FatW_candidate = fatJet;
+    haveFatW_candidate = true;
+  }
+										      
+  if (haveFatW_candidate){
+    if (have_Wh){
+      double dR_W = ROOT::Math::VectorUtil::DeltaR(Gen_Wh.p4(), FatW_candidate.p4());
+      bool isfW = dR_W < 0.8;
+      hFatWjet_higgsTop_beforeTopSelection_AllfatJets -> Fill(isfW, Gen_Wh.pt());
+    }
+    if (have_Wa){
+      double dR_W = ROOT::Math::VectorUtil::DeltaR(Gen_Wa.p4(), FatW_candidate.p4());
+      bool isfW = dR_W < 0.8;
+      hFatWjet_assocTop_beforeTopSelection_AllfatJets -> Fill(isfW, Gen_Wa.pt());
+    }
+    
+    if (have_Wh && have_Wa){
+      double dR_Wh = ROOT::Math::VectorUtil::DeltaR(Gen_Wh.p4(), FatW_candidate.p4());
+      double dR_Wa = ROOT::Math::VectorUtil::DeltaR(Gen_Wa.p4(), FatW_candidate.p4());
+      bool isfW = min(dR_Wh, dR_Wa) < 0.8;
+      
+      if (dR_Wh < dR_Wa){
+	hFatWjet_bothTop_beforeTopSelection_AllfatJets -> Fill(isfW, Gen_Wh.pt());
+	if (isfW){
+	  hFatWjet_bothTop_beforeTopSelection_AllfatJets_categ -> Fill(0.5);
+	}
+      }
+      else{
+	hFatWjet_bothTop_beforeTopSelection_AllfatJets -> Fill(isfW, Gen_Wa.pt());
+	if (isfW){
+	  hFatWjet_bothTop_beforeTopSelection_AllfatJets_categ -> Fill(1.5);
+	}
+      }      
+    }
+  }
+
+
+  //FIXME!
   //================================================================================================
   //Before Top Selection: For Efficiency plots
   //================================================================================================
   // bool realtop1    = false;
   // bool realtop2    = false;
   // bool realtopBoth = false;
+  // if (topData.getSelectedCleanedTopsBJet().size() < 2) std::cout<<"topData.getSelectedCleanedTopsBJet().size() < 2"<<std::endl;
+  // if (!topData.hasFreeBJet()) std::cout<<"!topData.hasFreeBJet()"<<std::endl;
   if (topData.getSelectedCleanedTopsBJet().size() < 2) return;
   if (!topData.hasFreeBJet()) return;
   if (doMatching){
@@ -2156,61 +2446,23 @@ void TopRecoAnalysis::process(Long64_t entry) {
     }
   }// if (doMatching)
 
-  //Reco DeltaR(W, b), DeltaR(j1, j2) before BDT
-  //HiggsTop_LdgJet, HiggsTop_SubldgJet, HiggsTop_Bjet
-  if (HiggsTop_Bjet.size() > 0)
-    {
-      math::XYZTLorentzVector dijet_matched_beforeTopSelection_p4, trijet_matched_beforeTopSelection_p4;
-      dijet_matched_beforeTopSelection_p4 = (HiggsTop_LdgJet.at(0).p4() + HiggsTop_SubldgJet.at(0).p4());
-      trijet_matched_beforeTopSelection_p4 = (HiggsTop_LdgJet.at(0).p4() + HiggsTop_SubldgJet.at(0).p4() + HiggsTop_Bjet.at(0).p4());
 
-      hHiggsTop_DeltaR_Dijet_TrijetBjet_beforeTopSelection -> Fill(ROOT::Math::VectorUtil::DeltaR( dijet_matched_beforeTopSelection_p4, HiggsTop_Bjet.at(0).p4()));
-      hHiggsTop_DeltaR_Dijet_beforeTopSelection            -> Fill(ROOT::Math::VectorUtil::DeltaR( HiggsTop_LdgJet.at(0).p4(),   HiggsTop_SubldgJet.at(0).p4()));
+    //std::cout<<"============="<<std::endl;
+  //soti
 
-      hHiggsTopPt_beforeTopSelection                -> Fill(trijet_matched_beforeTopSelection_p4.Pt());
-
-      hHiggsTop_JetsPt_beforeTopSelection           -> Fill(HiggsTop_LdgJet.at(0).pt());
-      hHiggsTop_JetsPt_beforeTopSelection           -> Fill(HiggsTop_SubldgJet.at(0).pt());
-      hHiggsTop_JetsPt_beforeTopSelection           -> Fill(HiggsTop_Bjet.at(0).pt());
-
-      hHiggsTopDijetPt_beforeTopSelection           -> Fill(dijet_matched_beforeTopSelection_p4.Pt());
-      hHiggsTopBjetPt_beforeTopSelection            -> Fill(HiggsTop_Bjet.at(0).pt());
-      if (HBjet.size() > 0){
-	hHiggsTop_TetrajetBjetPt_beforeTopSelection -> Fill(HBjet.at(0).pt());
-	hHiggsTop_TetrajetPt_beforeTopSelection     -> Fill( (trijet_matched_beforeTopSelection_p4+HBjet.at(0).p4()).Pt());
-      }
-    }
-
-  if (AssocTop_Bjet.size() > 0)
-    {
-      math::XYZTLorentzVector dijet_matched_beforeTopSelection_p4, trijet_matched_beforeTopSelection_p4;
-      dijet_matched_beforeTopSelection_p4  = (HiggsTop_LdgJet.at(0).p4() + HiggsTop_SubldgJet.at(0).p4());
-      trijet_matched_beforeTopSelection_p4 = (HiggsTop_LdgJet.at(0).p4() + HiggsTop_SubldgJet.at(0).p4() + HiggsTop_Bjet.at(0).p4());
-
-      hAssocTopDijetPt_beforeTopSelection -> Fill(dijet_matched_beforeTopSelection_p4.Pt());
-      hAssocTopPt_beforeTopSelection      -> Fill(trijet_matched_beforeTopSelection_p4.Pt());
-    }
-    
-  if (GenH_BQuark.size() > 0){
-    hGenH_Pt_partons_beforeTopSelection     -> Fill((GenH_LdgQuark.at(0).p4() + GenH_SubldgQuark.at(0).p4() + GenH_BQuark.at(0).p4() + GenChargedHiggs_BQuark.at(0).p4()).Pt());
-    hGenTop_Pt_partons_beforeTopSelection   -> Fill((GenH_LdgQuark.at(0).p4() + GenH_SubldgQuark.at(0).p4() + GenH_BQuark.at(0).p4()).Pt());
-    hGenW_Pt_partons_beforeTopSelection     -> Fill((GenH_LdgQuark.at(0).p4() + GenH_SubldgQuark.at(0).p4()).Pt());
-    hGenBtop_Pt_partons_beforeTopSelection  -> Fill(GenH_BQuark.at(0).pt());
-    hGenBh_Pt_partons_beforeTopSelection    -> Fill(GenChargedHiggs_BQuark.at(0).pt());
-
-    hGenQuarks_Pt_partons_beforeTopSelection -> Fill(GenH_LdgQuark.at(0).pt());
-    hGenQuarks_Pt_partons_beforeTopSelection -> Fill(GenH_SubldgQuark.at(0).pt());
-    hGenQuarks_Pt_partons_beforeTopSelection -> Fill(GenH_BQuark.at(0).pt());
-
-    hGenATop_Pt_partons_beforeTopSelection   -> Fill((GenA_LdgQuark.at(0).p4() + GenA_SubldgQuark.at(0).p4() + GenA_BQuark.at(0).p4()).Pt());
-    hGenAW_Pt_partons_beforeTopSelection     -> Fill((GenA_LdgQuark.at(0).p4() + GenA_SubldgQuark.at(0).p4()).Pt());
-
-
-    math::XYZTLorentzVector Wpartons_beforeTopSelection_p4;
-    Wpartons_beforeTopSelection_p4 = GenH_LdgQuark.at(0).p4() + GenH_SubldgQuark.at(0).p4();
-    hDeltaR_W_Btop_partons_beforeTopSelection -> Fill(ROOT::Math::VectorUtil::DeltaR(Wpartons_beforeTopSelection_p4, GenH_BQuark.at(0).p4()));
-    hDeltaR_W_partons_beforeTopSelection      -> Fill(ROOT::Math::VectorUtil::DeltaR(GenH_LdgQuark.at(0).p4(), GenH_SubldgQuark.at(0).p4()));
-  }
+  // bool foundFatWjet_higgsTop = false, foundFatWjet_assocTop = false;
+  // if (haveMatchedTopFromChargedHiggs){
+  //   foundFatWjet_higgsTop = FoundFatWjet_fatJetSelections(HiggsTop_LdgJet.at(0), HiggsTop_SubldgJet.at(0), HiggsTop_Bjet.at(0), Gen_Wh);
+  //   //math::XYZTLorentzVector W_p4;
+  //   //W_p4 = HiggsTop_LdgJet.at(0).p4() + HiggsTop_SubldgJet.at(0).p4();
+  //   hFatWjet_higgsTop_beforeTopSelection -> Fill(foundFatWjet_higgsTop, Gen_Wh.pt());
+  // }
+  // if (haveMatchedAssocTop){
+  //   foundFatWjet_assocTop = FoundFatWjet_fatJetSelections(AssocTop_LdgJet.at(0), AssocTop_SubldgJet.at(0), AssocTop_Bjet.at(0), Gen_Wa);
+  //   //math::XYZTLorentzVector W_p4;
+  //   //W_p4 = AssocTop_LdgJet.at(0).p4() + AssocTop_SubldgJet.at(0).p4();
+  //   hFatWjet_assocTop_beforeTopSelection -> Fill(foundFatWjet_assocTop, Gen_Wa.pt());
+  // }
 
   //================================================================================================
   // 12) Top selection
@@ -2257,14 +2509,7 @@ void TopRecoAnalysis::process(Long64_t entry) {
 	}
     }
 
-  bool haveMatchedChargedHiggsBJet    = HBjet.size() > 0;
-  bool haveMatchedTopFromChargedHiggs = HiggsTop_Bjet.size() > 0;
-
-  bool haveMatchedChargedHiggs        = haveMatchedChargedHiggsBJet && haveMatchedTopFromChargedHiggs;
-  bool haveMatchedAssocTop            = AssocTop_Bjet.size() > 0; 
-  
-  bool haveOnlyMatchedAssocTop        = (!haveMatchedTopFromChargedHiggs)&&(haveMatchedAssocTop);
-
+  ////
   if (0) std::cout<<haveMatchedAssocTop<<std::endl;
   
   if (doMatching){
@@ -2496,7 +2741,7 @@ void TopRecoAnalysis::process(Long64_t entry) {
 
   //===Definitions
   math::XYZTLorentzVector tetrajet_p4, subldgTetrajet_p4; 
-  tetrajet_p4       = LdgTrijet.TrijetP4 + topData.getTetrajetBJet().p4();
+  tetrajet_p4       = LdgTrijet.TrijetP4    + topData.getTetrajetBJet().p4();
   subldgTetrajet_p4 = SubldgTrijet.TrijetP4 + topData.getTetrajetBJet().p4();
   
   bool LdgTopIsTopFromH    = false;
@@ -2561,7 +2806,6 @@ void TopRecoAnalysis::process(Long64_t entry) {
   double deltaY_SubldgTrijet_TetrajetBjet = std::abs(SubldgTrijet_Rapidity - TetrajetBjet_Rapidity);
   
   //Calculate the p_{T,rel}: p_{T,rel} = p_{T,b} - a*p_{T,t}, where a = p_{T,b}*p_{T,t}/(p_{T,t}*p_{T,t})
-
   double px_bt = LdgTrijet.TrijetP4.Px()*LdgTrijet.BJet.p4().Px();
   double py_bt = LdgTrijet.TrijetP4.Py()*LdgTrijet.BJet.p4().Py();
   double px_tt = LdgTrijet.TrijetP4.Px()*LdgTrijet.TrijetP4.Px();
@@ -3042,3 +3286,4 @@ void TopRecoAnalysis::process(Long64_t entry) {
   
   return;
 }        
+
