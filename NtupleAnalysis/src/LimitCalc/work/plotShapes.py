@@ -13,7 +13,8 @@ EXAMPLES:
 
 
 LAST USED:
-../plotShapes.py --dirName shapeSyst --xmax 3000 --logy
+cd datacards_Hplus2tb_13TeV_EraRun2016_DataDriven_mH180to3000_Systematics_BDT0p40_Binning12_28Apr2018
+../plotShapes.py --dirName shapeSyst --xmax 3000 --logy --h2tb
 
 '''
 
@@ -31,6 +32,7 @@ ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
+import HiggsAnalysis.NtupleAnalysis.tools.systematics as systematics
 import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
@@ -56,13 +58,27 @@ class RatioPlotContainer:
         self._systNameList  = []
         return
 
+    def _GetName(self):
+        return __file__.split("/")[-1].replace(".pyc", ".py")
+
     def Print(self, msg, printHeader=False):
-        fName = __file__.split("/")[-1]
+        fName = self._GetName()
         if printHeader==True:
             print "=== ", fName
             print "\t", msg
         else:
             print "\t", msg
+        return
+
+    def PrintFlushed(self, msg, printHeader=True):
+        '''
+        Useful when printing progress in a loop
+        '''
+        msg = "\r\t" + msg + " "*20
+        if printHeader:
+            print "=== ", self._GetFName()
+            sys.stdout.write(msg)
+        sys.stdout.flush()
         return
 
     def Verbose(self, msg, printHeader=True, verbose=False):
@@ -235,13 +251,30 @@ class DatasetContainer:
         self._cardReader = cardReader
         return
 
+    def _GetName(self):
+        return __file__.split("/")[-1].replace(".pyc", ".py")
+
+    def GetName(self):
+        return self._name
+
     def Print(self, msg, printHeader=False):
-        fName = __file__.split("/")[-1]
+        fName = self._GetName()
         if printHeader==True:
             print "=== ", fName
             print "\t", msg
         else:
             print "\t", msg
+        return
+
+    def PrintFlushed(self, msg, printHeader=True):
+        '''
+        Useful when printing progress in a loop
+        '''
+        msg = "\r\t" + msg + " "*20
+        if printHeader:
+            print "=== ", self._GetFName()
+            sys.stdout.write(msg)
+        sys.stdout.flush()
         return
 
     def Verbose(self, msg, printHeader=True, verbose=False):
@@ -288,10 +321,16 @@ class DatasetContainer:
         x = 0.6
         size = 20
         myRatioContainer = RatioPlotContainer(self._label)
+    
         # For-loop: All uncertainties
         for i, uncName in enumerate(self._uncertaintyShapes, 1):
             myShortName = uncName
-            self.Print("{:>3} {:^1} {:<3} {:<1} {:<40}".format(i, "/", len(self._uncertaintyShapes), ":", myShortName), i==1)
+            self.Verbose("{:>3} {:^1} {:<3} {:<1} {:<40}".format(i, "/", len(self._uncertaintyShapes), ":", myShortName), i==1)
+
+            #msg = "{:<10} {:<15} {:<20}".format("m = %s GeV"  % (mass), "Shape %s (%d/%d) " % (uncName, len(self._uncertaintyShapes)))
+            msg = "{:>5} {:>2} {:^1} {:>3} {:<20}".format("Shape", i, "/", str(len(self._uncertaintyShapes))+":", uncName)
+            #PrintFlushed(msg, False)
+            Print(msg, False)
 
             myLongName = self._cardReader.getHistoNameForNuisance(self._name, uncName)
 
@@ -341,7 +380,7 @@ class DatasetContainer:
             myParams["ylabel"] = "Events"
             myParams["log"]    = opts.logy
             myParams["opts"]   = {"xmin": opts.xmin, "xmax": opts.xmax, "ymin": 0.0}
-            myParams["opts2"]  = {"ymin": 0.7, "ymax": 1.3}
+            myParams["opts2"]  = {"ymin": 0.60, "ymax": 1.40}
             myParams["ratio"]  = True
             myParams["ratioType"]   = "errorScale"
             myParams["ratioYlabel"] = "Var./Nom."
@@ -406,7 +445,8 @@ def customizeMarker(p):
             th1.SetPointEYlow(i, 0)
 
 def doPlot(opts,mass,nameList,allShapeNuisances,luminosity,myDatacardPattern,rootFilePattern,signalTable):
-    f = ROOT.TFile.Open(rootFilePattern%mass)
+    fName = rootFilePattern % mass
+    f = ROOT.TFile.Open(fName)
 
     content = f.GetListOfKeys()
     # Suppress the warning message of missing dictionary for some iterator
@@ -443,19 +483,37 @@ def doPlot(opts,mass,nameList,allShapeNuisances,luminosity,myDatacardPattern,roo
                 shapes.append(n)
 
     rebinList = None
-    #rebinList = [0,200,250,300,350,400,450,500,550,600,700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400,2500]
+    if opts.h2tb:
+        rebinList = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetMass_AfterAllSelections"] 
 
     ## Do the actual plots
-    for d in datasets:
-        #d.debug()
-        d.doPlot(opts,shapes,f,mass,luminosity,signalTable,rebinList)
-    # Close the file
+    for i, d in enumerate(datasets, 1):
+        if opts.verbose:
+            d.debug()
+        msg = "{:>10}, {:<20}".format("m = %d GeV" % (mass), d.GetName())
+        if i < len(datasets):
+            Print(ShellStyles.HighlightAltStyle() + msg + ShellStyles.NormalStyle(), False)
+        else:
+            Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), False)
+        
+        d.doPlot(opts, shapes, f, mass, luminosity, signalTable, rebinList)
+    Verbose("Closing ROOT file %s" % (fName), True)
     f.Close()
 
 def _integral(h):
     # return h.Integral(0, h.GetNbinsX()+1)
     return h.Integral()
 
+def PrintFlushed(msg, printHeader=True):
+    '''
+    Useful when printing progress in a loop
+    '''
+    msg = "\r\t" + msg + " "*20
+    if printHeader:
+        print "=== ",  __file__.split("/")[-1]
+    sys.stdout.write(msg)
+    sys.stdout.flush()
+    return
 
 def Print(msg, printHeader=False):
     fName = __file__.split("/")[-1]
@@ -507,7 +565,7 @@ def main(opts):
     Print("The following masses will be considered: %s" % (ShellStyles.HighlightAltStyle() + ", ".join(massPoints) + ShellStyles.NormalStyle() ), True)
 
     # For-loop: All mass points
-    for m in massPoints:
+    for i, m in enumerate(massPoints, 1):
         # Obtain luminosity from the datacard
         myLuminosity = float(limitTools.readLuminosityFromDatacard(".", myDatacardPattern % m ) )
 
@@ -515,11 +573,27 @@ def main(opts):
         doPlot(opts, int(m), nameList, allShapeNuisances, myLuminosity, myDatacardPattern, myRootfilePattern, signalTable)
 
     # Print signal table
-    Print("Max contracted uncertainty for signal:", True)
-    # For-loop: All signal
-    for k in enumerate(signalTable.keys(), 1):
+    Print("Max contracted uncertainty for signal:", True)    
+    table = []
+    align = "{:>15} {:>15} {:>15}"
+    hLine = "="*50
+    table.append(hLine)
+    table.append(align.format("Systematic", "Minimum", "Maximum"))
+    table.append(hLine)
+    # For-loop: All signal    
+    for i, k in enumerate(signalTable.keys(), 1):
         # Print("Key = %s" % (k), False)
-        Print("%s, %.3f--%.3f"%(k, signalTable[k]["min"],signalTable[k]["max"]), i==1)
+        minVal = "%.3f" % (signalTable[k]["min"])
+        maxVal = "%.3f" % (signalTable[k]["max"])
+        msg    = align.format(k, minVal, maxVal)
+        table.append(msg)
+    table.append(hLine)
+    for row in table:
+        Print(row, False)
+
+    msg = "All results under directory %s" % (ShellStyles.SuccessStyle() + opts.dirName + ShellStyles.NormalStyle())
+    Print(msg, True)
+
     return
 
 #================================================================================================
@@ -556,7 +630,8 @@ if __name__ == "__main__":
     INDIVIDUAL  = False
     CARDPATTERN = None
     ROOTPATTERN = None
-    
+    HToTB       = False
+
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]",add_help_option=False,conflict_handler="resolve")
 
@@ -598,6 +673,9 @@ if __name__ == "__main__":
 
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true",  default=VERBOSE,
                       help="Enable verbosity (for debugging) [default: %s]" % (VERBOSE) )
+
+    parser.add_option("--h2tb", dest="h2tb", action="store_true", default=HToTB,
+                      help="Flag to indicate that settings should reflect h2tb analysis [default: %s]" % (HToTB) )
 
     (opts, args) = parser.parse_args()
 

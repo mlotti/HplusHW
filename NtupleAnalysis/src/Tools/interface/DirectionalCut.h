@@ -38,6 +38,25 @@ public:
       throw hplus::Exception("config") << "DirectionalCut: invalid cut direction (" << direction << ")! Options are: ==, !=, >, >=, <, <=";
     }
   }
+  DirectionalCut(const std::string direction, const double value)
+    : fValue(value) {
+    // Check that direction option is valid
+    if (direction == "EQ" || direction == "==")
+      fCutDirection = kEQ;
+    else if (direction == "NEQ" || direction == "!=")
+      fCutDirection = kNEQ;
+    else if (direction == "GT" || direction == ">")
+      fCutDirection = kGT;
+    else if (direction == "GEQ" || direction == ">=")
+      fCutDirection = kGEQ;
+    else if (direction == "LT" || direction == "<")
+      fCutDirection = kLT;
+    else if (direction == "LEQ" || direction == "<=")
+      fCutDirection = kLEQ;
+    else {
+      throw hplus::Exception("config") << "DirectionalCut: invalid cut direction (" << direction << ")! Options are: ==, !=, >, >=, <, <=";
+    }
+  }
   ~DirectionalCut() { }
 
   /// Check if cut has been passed

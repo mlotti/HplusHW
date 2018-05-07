@@ -1,493 +1,256 @@
 '''
-
 \package CombineTools
 
 
-
 DESCRIPTION:
-
 Python interface for running Combine with multicrab
-
-
-
 The interface for casual user is provided by the functions
-
-generateMultiCrab() (for LEP-CLs and LHC-CLs) and
-
+generateMultiCrab() (for LEP-CLs and LHC-CLs) and 
 produceLHCAsymptotic (for LHC-CLs asymptotic).
 
-
-
 The multicrab configuration generation saves various parameters to
-
 taskdir/configuration.json, to be used in by combineMergeHistograms.py
-
 script. The script uses tools from this module, which write the
-
 limit results to taskdir/limits.json. I preferred simple text format
-
 over ROOT files due to the ability to read/modify the result files
-
 easily. Since the amount of information in the result file is
-
 relatively small, the performance penalty should be negligible.
-
-
-
-
-
-INSTRUCTIONS:
-
-
-
-
-
-EXAMPLE:
-
-
-
-
-
-LAST USED:
-
-
 
 '''
 
-#================================================================================================ 
-
+#================================================================================================
 # Imports
-
 #================================================================================================ 
-
 import HiggsAnalysis.LimitCalc.CommonLimitTools as commonLimitTools
-
-
-
 import os
-
 import re
-
 import sys
-
 import glob
-
 import json
-
 import time
-
 import random
-
 import shutil
-
 import tarfile
-
 import subprocess
 
-
-
 import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
-
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
-
 #import HiggsAnalysis.NtupleAnalysis.tools.multicrabWorkflows
-
 import HiggsAnalysis.NtupleAnalysis.tools.git as git
-
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
-
 import array
-
-
 
 import ROOT
 
-
-
 #================================================================================================
-
 # Temporary Global variables
-
 #================================================================================================ 
-
 VERBOSE = False
 
-
-
 #================================================================================================ 
-
 # Function Definition
-
 #================================================================================================ 
-
 def Verbose(msg, printHeader=False):
-
     #if not opts.verbose:
-
     if not VERBOSE:
-
         return
 
-    
-
     if printHeader:
-
         print "=== CombineTools.py:"
 
-        
-
     if msg !="":
-
         print "\t", msg
-
     return
-
-
 
 def Print(msg, printHeader=True):
-
     if printHeader:
-
         print "=== CombineTools.py:"
 
-        
-
     if msg !="":
-
         print "\t", msg
-
     return
 
-
-
 def atoi(text):
-
     return int(text) if text.isdigit() else text
 
-
-
 def natural_keys(text):
-
     '''
-
     alist.sort(key=natural_keys) sorts in human order
-
     http://nedbatchelder.com/blog/200712/human_sorting.html
-
     (See Toothy's implementation in the comments)
-
     '''
-
     return [ atoi(c) for c in re.split('(\d+)', text) ]
 
-
-
-
-
 #================================================================================================ 
-
 # Options
-
 #================================================================================================ 
-
 # The Combine git tag to be used (see https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideHiggsAnalysisCombinedLimit)
-
 Combine_tag = "v7.0.1" # 31.8.2017
-
 validCMSSWversions = ["/CMSSW_8_0_26_patch1"]
 
-
-
 # Command line options for creating Combine workspace
-
 workspacePattern = "combineWorkspaceM%s.root"
-
 workspaceOptionsBrLimitTemplate = "text2workspace.py %s -P HiggsAnalysis.CombinedLimit.ChargedHiggs:brChargedHiggs -o %s"%("%s",workspacePattern)
-
 workspaceOptionsSigmaBrLimit    = "text2workspace.py %s -o %s"%("%s",workspacePattern%"%s")
-
 taskDirprefix = "CombineResults"
 
-
-
 # Command line options for running Combine
-
 if 0:
-
     asymptoticLimit = "combine -M Asymptotic --picky"
-
     asymptoticLimitOptionExpectedOnly = " --run expected"
-
-
 
 #hybridLimit = "combine -M HybridNew --freq --hintMethod Asymptotic" # --testStat LHC
 
-
-
 # Default number of crab jobs
-
 defaultNumberOfJobs = 20
-
-
 
 ## Default command line options for LHC-CLs (asymptotic, observed limit) 
 
 ## NB! # For final limits, one should consider using --cminDefaultMinimizerStrategy 1: it is slower and more error-prone but more accurate 
-
 Verbose("Edit #1", True)
 
 ### COMBINE SETTINGS ###
 # For tau nu analysis:
 #lhcAsymptoticOptionsObserved = '-M AsymptoticLimits -v 3 --cminDefaultMinimizerStrategy 0 --rAbsAcc 0.0001 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --X-rtd MINIMIZER_analytic --cminDefaultMinimizerTolerance=0.1 --cminFallbackAlgo "Minuit,0:0.001"' #default
 #For tau nu analysis with lumi scaling (set to 1.0, for lumi scaling set lumiscale=<current_lumi>/<new_lumi>, see https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsWG/SWGuideHiggsProjections
-l#hcAsymptoticOptionsObserved = '-M AsymptoticLimits -v 3 --cminDefaultMinimizerStrategy 0 --rAbsAcc 0.0001 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --X-rtd MINIMIZER_analytic --cminDefaultMinimizerTolerance=0.1 --cminFallbackAlgo "Minuit,0:0.001" --setParameters lumiscale=1.0'#default
+#lhcAsymptoticOptionsObserved = '-M AsymptoticLimits -v 3 --cminDefaultMinimizerStrategy 0 --rAbsAcc 0.0001 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --X-rtd MINIMIZER_analytic --cminDefaultMinimizerTolerance=0.1 --cminFallbackAlgo "Minuit,0:0.001" --setParameters lumiscale=1.0'#default
 # For tb analysis, default_v1:
 #lhcAsymptoticOptionsObserved = '-M AsymptoticLimits -v 3 --cminDefaultMinimizerStrategy 0 --rAbsAcc 0.1 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --cminDefaultMinimizerTolerance=1.0' 
 # For tb analysis, default_v2:
 lhcAsymptoticOptionsObserved = '-M AsymptoticLimits -v 3 --cminDefaultMinimizerStrategy 0 --rAbsAcc 0.001 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --cminDefaultMinimizerTolerance=1.0' 
 ########################
 
-
-# If you use Barlow-Beeston-lite approach for statistical uncertainties, uncomment the next line:
-
 lhcAsymptoticOptionsBlinded = lhcAsymptoticOptionsObserved + " --run blind"
 
+# If you use Barlow-Beeston-lite approach for statistical uncertainties, uncomment the next line:
 # lhcAsymptoticOptionsObserved += " --X-rtd MINIMIZER_analytic"
 
-
-
 ## Default "Rmin" parameter for LHC-CLs (asymptotic)
-
 lhcAsymptoticRminSigmaBr = "0.0" # pb
-
 lhcAsymptoticRminBrLimit = "0.0" # plain number
 
-
-
 ## Default "Rmax" parameter for LHC-CLs (asymptotic)
-
 lhcAsymptoticRmaxSigmaBr = "1.0" # pb
-
 lhcAsymptoticRmaxBrLimit = "0.03" # plain number (updated to 0.05 from 0.03 in 2014 paper due to higher limits)
 
-
-
 ## Default command line options for observed significance
-
 lhcFreqSignificanceObserved = "-M ProfileLikelihood --significance --scanPoints 1000"
-
 lhcFreqSignificanceExpected = lhcFreqSignificanceObserved + " -t -1 --toysFreq"
-
 lhcFreqSignificanceExpectedSignalSigmaBr = "0.1" # pb
-
 lhcFreqSignificanceExpectedSignalBrLimit = "0.01" # %
-
 lhcFreqRmaxSigmaBr = "1.0" # pb
-
 lhcFreqRmaxBrLimit = "0.1" # %
 
 
-
 def createOptionParser(lepDefault=None, lhcDefault=None, lhcasyDefault=None):
-
     '''
-
     Create OptionParser, and add common LandS options to OptionParser object
-
-    
-
     \param lepDefault     Boolean for the default value of --lep switch (if None, switch is not added)
 
     \param lhcDefault     Boolean for the default value of --lhc switch (if None, switch is not added)
 
     \param lhcasyDefault  Boolean for the default value of --lhcasy switch (if None, switch is not added)
 
-    
-
     \return optparse.OptionParser object
-
     '''
-
     return commonLimitTools.createOptionParser(lepDefault, lhcDefault, lhcasyDefault)
 
 
-
 def parseOptionParser(parser):
-
     '''
-
     Parse OptionParser object
-
-    
-
     \param parser   optparse.OptionParser object
 
-    
-
     \return Options object
-
     '''
-
     commonLimitTools.parseOptionParser(parser)
-
     return
 
 
-
 def produceLHCAsymptotic(opts, directory,
-
                          massPoints,
-
                          datacardPatterns,
-
                          rootfilePatterns,
-
                          clsType = None,
-
                          postfix="",
-
                          quietStatus=False
-
                          ):
-
     '''
-
     Run Combine for the LHC-CLs asymptotic limit
-
     \param opts               optparse.OptionParser object, constructed with createOptionParser()
 
     \param massPoints         List of mass points to calculate the limit for (list of strings)
 
-
-
     \param datacardPatterns   List of datacard patterns to include in the limit calculation (list 
-
     of strings, each string should have '%s' to denote the  position of the mass)
 
-
-
     \param rootfilePatterns   List of shape ROOT file patterns to include in the limit calculation
-
                               (list of strings, each string should have '%s' to denote the position of the mass)
 
-
-
     \param clsType            Object defining the CLs flavour (should be LHCTypeAsymptotic). 
-
                               If None, the default (LHCTypeAsymptotic) is used
-
-    
 
     \param postfix            String to be added to the multicrab task directory  name
 
-
-
     The options of LHCTypeAsymptotic are controlled by the constructor.
-
     '''
-
     cls = clsType
 
     if clsType == None:
-
         cls = LHCTypeAsymptotic(opts.brlimit, opts.sigmabrlimit)
 
-
-
     # Multicrab object to generate (LEP-CLs, LHC-CLs) multicrab configuration, or run (LHC-CLs asymptotic) LandS
-
     massPoints.sort(key=natural_keys)
-
     Verbose("Computing limits with %s CLs flavour" % cls.nameHuman(), True)
-
     mcc = MultiCrabCombine(opts, directory, massPoints, datacardPatterns, rootfilePatterns, cls)
-
     mcc.createMultiCrabDir(postfix)
 
-        
-
     myStatus = True
-
     if hasattr(opts, "creategridjobs") and opts.creategridjobs:
-
         myStatus = False
 
-
-
     if myStatus:
-
         mcc.copyInputFiles()
 
-
-
     myScripts = mcc.writeScripts()
-
     if opts.injectSignal:
-
         mcc.writeCrabCfg("arc", [], ["dummy"])
-
         mcc.writeMultiCrabCfg(aux.ValuePerMass(opts.injectNumberJobs))
-
         if opts.multicrabCreate:
-
             mcc.createMultiCrab()
-
     elif hasattr(opts, "creategridjobs") and opts.creategridjobs:
-
         # Works only on CRAB2 and intented for tan beta scans
-
         # Produce running script for each mass point
-
         myWorkspaces = []
 
         for m in massPoints:
-
             # Create list of input files
-
             myInputFiles = []
-
             for item in datacardPatterns:
-
                 if item != None:
-
                     if "%s" in item:
-
                         name = item%m
-
                         if not name in myInputFiles:
-
                             myInputFiles.append(name)
-
                     else:
-
                         if not item in myInputFiles:
-
                             myInputFiles.append(item)
 
             # Create input workspace for combine
-
             print "Merging datacards for m=%s"%m
-
             combinedCardName = "combinedCardsM%s.txt"%m
 
             if os.path.exists(combinedCardName):
-
                 os.system("rm %s"%combinedCardName)
 
             combineCardsCommand = "combineCards.py %s > %s"%(" ".join(map(str, myInputFiles)), combinedCardName)
-
             print combineCardsCommand
 
             os.system(combineCardsCommand)
-
             print "Creating combine workspace for m=%s"%m
-
             workspaceCommand = workspaceOptionsSigmaBrLimit%(combinedCardName,m)
-
             print workspaceCommand
-
             os.system(workspaceCommand)
-
             os.system("mv %s %s/."%(workspacePattern%m, mcc.dirname))
 
             #for i in range(len(myInputFiles)):
@@ -499,135 +262,82 @@ def produceLHCAsymptotic(opts, directory,
             myWorkspaces.append(workspacePattern%m)
 
             # Copy combine binary here
-
             os.system("cp %s/bin/%s/combine %s/."%(os.environ["CMSSW_BASE"], os.environ["SCRAM_ARCH"], mcc.dirname))
 
         if opts.gridRunAllMassesInOneJob:
-
             # Create crab task config
-
             mcc.writeCrabCfg("remoteglidein", {"GRID": ["SE_white_list = T2_FI_HIP", "maxtarballsize = 50", "virtual_organization = cms"],
-
-                                                "USER": ["script_exe = runGridJob", "additional_input_files = %s, combine"%(", ".join(map(str, myWorkspaces)))]},
-
-                            ["output.tgz"])
+                                               "USER": ["script_exe = runGridJob", "additional_input_files = %s, combine"%(", ".join(map(str, myWorkspaces)))]},
+                             ["output.tgz"])
 
             os.system("mv %s %s/."%(" ".join(map(str,myWorkspaces)), mcc.dirname))
 
             # Create script for running the grid job
-
             command = ["#!/bin/sh", "", "# Run combine"]
 
             for m in massPoints:
-
                 f = open(os.path.join(mcc.dirname, myScripts[m]))
-
                 myLines = f.readlines()
-
                 f.close()
 
                 for line in myLines:
-
                     if line.startswith("combine "):
-
                         command.append("./%s"%line.replace("\n","").replace("combinedCardsM%s.txt"%m,workspacePattern%m))
 
             command.append("")
-
             command.append("# Collect output")
-
             command.append("ls -la")
-
             command.append("tar cfz output.tgz higgsCombine*.root")
-
             command.append("")
-
             command.append("# Do job report does not work")
-
             command.append("#cmsRun -j $RUNTIME_AREA/crab_fjr_$NJob.xml -p pset.py")
-
-
 
             filePath = os.path.join(mcc.dirname, "runGridJob")
 
             Print("Creating script \"%s\" for mass points %s" % (filePath, massPoints), True)
-
             aux.writeScript(filePath, "\n".join(command)+"\n")
-
         else:
-
             for m in massPoints:
-
                 # Create crab task config
-
                 mcc.writeCrabCfg("remoteglidein", {"GRID": ["SE_white_list = T2_FI_HIP", "maxtarballsize = 50", "virtual_organization = cms"],
-
                                                     "USER": ["script_exe = runGridJobM%s"%m, "additional_input_files = %s, combine"%(workspacePattern%m)]},
-
                                 ["output.tgz"])
 
                 os.system("mv %s %s/."%(workspacePattern%m, mcc.dirname))
 
                 # Create script for running the grid job
-
                 command = ["#!/bin/sh", "", "# Run combine"]
-
                 f = open(os.path.join(mcc.dirname, myScripts[m]))
-
                 myLines = f.readlines()
-
                 f.close()
 
                 for line in myLines:
-
                     if line.startswith("combine "):
-
                         command.append("./%s"%line.replace("\n","").replace("combinedCardsM%s.txt"%m,workspacePattern%m))
 
                 command.append("")
-
                 command.append("# Collect output")
-
                 command.append("tar cfz output.tgz higgsCombine*.root")
-
                 command.append("ls -la")
-
                 command.append("")
-
                 command.append("# Do job report does not work")
-
                 command.append("#cmsRun -j $RUNTIME_AREA/crab_fjr_$NJob.xml -p pset.py")
-
                 filePath = os.path.join(mcc.dirname, "runGridJobM%s" % m)
-
                 Print("Creating script \"%s\" for mass point %s" % (filePath, m), True)
-
                 aux.writeScript(filePath, "\n".join(command)+"\n")
 
     else:
-
         Verbose("Run Combine locally for the asymptotic limit", True)
-
         mcc.runCombineForAsymptotic(quietStatus=quietStatus)
-
         return mcc.getResults()
 
 
-
 class MultiCrabCombine(commonLimitTools.LimitMultiCrabBase):
-
     '''
-
     Class to generate (LEP-CLs, LHC-CLs) multicrab configuration, or run (LHC-CLs asymptotic) LandS
-
-    
-
     The class is not intended to be used directly by casual user, but
-
     from generateMultiCrab() and produceLHCAsymptotic()
-
     '''
-
     def __init__(self, opts, directory, massPoints, datacardPatterns, rootfilePatterns, clsType):
 
         '''

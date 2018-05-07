@@ -5,9 +5,6 @@ Analysis configuration, with ability to create the main analyzer
 and the analyzers for the N systematic uncertainty variations 
 and other variations based on the config.
 
-TODO:
-- Need to figure out how to set scale factors (does this still apply?)
-
 '''
 
 #================================================================================================  
@@ -58,11 +55,6 @@ class AnalysisConfig:
 		    self._config.METSelection.systematicVariation = "_"+value.replace("Plus_y","down_y").replace("Minus_y","up_y").replace("UES","MET_Type1_UnclusteredEn")
 		# Fake tau 
 		elif value.startswith("FakeTau"):
-                    etaRegion = "full"
-                    if "Barrel" in value:
-                        etaRegion = "barrel"
-                    elif "Endcap" in value:
-                        etaRegion = "endcap"
                     partonFakingTau = None
                     if "Electron" in value:
                         partonFakingTau = "eToTau"
@@ -71,7 +63,7 @@ class AnalysisConfig:
                     elif "Jet" in value:
                         partonFakingTau = "jetToTau"
                     scaleFactors.assignTauMisidentificationSF(self._config.TauSelection, 
-                                                              partonFakingTau, etaRegion, 
+                                                              partonFakingTau, 
                                                               self._getDirectionString(value))
 		# Trigger
 		elif value.startswith("TauTrgEff"):
@@ -265,9 +257,13 @@ class AnalysisBuilder:
         items.extend(["METTrgEffData", "METTrgEffMC"])
 
         # Tau ID variation systematics
-        items.extend(["FakeTauElectron", "FakeTauMuon", "FakeTauJet", "TauIDSyst"])
+        items.extend(["TauIDSyst"])
+
+        # Tau mis-ID systematics
+        items.extend(["FakeTauElectron", "FakeTauMuon"])
 
         # Energy scales and JER systematics
+#        items.extend(["TauES", "JES", "UES"]) # use in case of problems with JER
         items.extend(["TauES", "JES", "JER", "UES"])
 
         # b quark systematics
@@ -287,14 +283,14 @@ class AnalysisBuilder:
         items.extend(["JES", "JER"])
         
         # b quark systematics
-        # items.extend(["BTagSF"])
+        items.extend(["BTagSF"])
 
         # top quark systematics
-        #if self._useTopPtReweighting:
-        #    items.append("TopPt") 
+        if self._useTopPtReweighting:
+            items.append("TopPt") 
 
         # PU weight systematics
-        #items.extend(["PUWeight"])
+        items.extend(["PUWeight"])
         return items
 
     def _processSystematicsVariations(self):

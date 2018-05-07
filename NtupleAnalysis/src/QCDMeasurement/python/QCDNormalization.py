@@ -230,15 +230,15 @@ def getFormattedBinLabelString(binLabel):
 
 ## Helper function to plot template names in a more understandable way
 def getFormattedTemplateName(name):
-    formattedNames = {'EWKFakeTaus_Baseline': '#splitline{EWK+t#bar{t} fake taus}{Baseline selection}', 
-                      'EWKGenuineTaus_Baseline': '#splitline{EWK+t#bar{t} genuine taus}{Baseline selection}', 
-                      'EWKFakeTaus_Inverted': '#splitline{EWK+t#bar{t} fake taus}{Inverted selection}',
-                      'EWKGenuineTaus_Inverted': '#splitline{EWK+t#bar{t} genuine taus}{Inverted selection}',
-                      'EWKInclusive_Baseline': '#splitline{EWK+t#bar{t} inclusive}{Baseline selection}',
-                      'EWKInclusive_Inverted': '#splitline{EWK+t#bar{t} inclusive}{Inverted selection}',
-                      'QCD_Baseline': '#splitline{Fake taus}{Baseline selection}',
-                      'QCD_Inverted': '#splitline{Fake taus}{Inverted selection}',
-                      'data': '#splitline{Data}{Baseline selection}'}
+    formattedNames = {'EWKFakeTaus_Baseline': '#splitline{EWK+t#bar{t} fake taus}{Nominal selection}', 
+                      'EWKGenuineTaus_Baseline': '#splitline{EWK+t#bar{t} genuine taus}{Nominal selection}', 
+                      'EWKFakeTaus_Inverted': '#splitline{EWK+t#bar{t} fake taus}{Altered selection}',
+                      'EWKGenuineTaus_Inverted': '#splitline{EWK+t#bar{t} genuine taus}{Altered selection}',
+                      'EWKInclusive_Baseline': '#splitline{EWK+t#bar{t} inclusive}{Nominal selection}',
+                      'EWKInclusive_Inverted': '#splitline{EWK+t#bar{t} inclusive}{Altered selection}',
+                      'QCD_Baseline': '#splitline{QCD (Data - EWK+t#bar{t} inclusive)}{Nominal selection}',
+                      'QCD_Inverted': '#splitline{QCD (Data - EWK+t#bar{t} inclusive)}{Altered selection}',
+                      'data': '#splitline{Data}{Nominal selection}'}
     if name in formattedNames.keys():
         return formattedNames[name]
     else:

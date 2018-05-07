@@ -274,6 +274,91 @@ backgroundCrossSections = CrossSectionList(
             "8": 245.8, # [10]
             "13": 831.76, # [18] 
             }),
+    # Marina
+    CrossSection("TTGJets", {            
+            "13": 1.0, # FIXME
+            }),
+    
+    CrossSection("TT_fsrdown", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_fsrup", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_isrdown", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_isrup", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_hdampDOWN", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_hdampUP", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_mtop1665", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_mtop1695", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_mtop1715", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_mtop1735", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_mtop1755", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_mtop1785", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_widthx0p2", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_widthx0p5", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_widthx0p8", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_widthx2", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_widthx4", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_widthx8", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_evtgen", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_erdON", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_TuneEE5C", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_TuneCUETP8M2T4up", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_TuneCUETP8M2T4down", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_GluonMoveCRTune", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_QCDbasedCRTune_erdON", {
+            "13": 831.76, # [18] 
+            }),
+    
+    
+
+    #========================================================== Marina
+    
     CrossSection("TTJets_HT600to800", {
             "13": 0.0, 
             }),
@@ -580,6 +665,9 @@ backgroundCrossSections = CrossSectionList(
             }),
     CrossSection("TTWJetsToQQ", {
             "13": 4.034e-01, #4.034e-01 +- 2.493e-03 pb [16] (inputFiles="2211E19A-CC1E-E611-97CC-44A84225C911.root")
+            }),
+    CrossSection("TTWJetsToLNu", {
+            "13": 0.2043, #+/- 0.0020 [17]]
             }),
     CrossSection("TTZToQQ", {
             "13": 5.297e-01, #5.297e-01 +- 7.941e-04 pb [16] (inputFiles="204FB864-5D1A-E611-9BA7-001E67A3F49D.root")
