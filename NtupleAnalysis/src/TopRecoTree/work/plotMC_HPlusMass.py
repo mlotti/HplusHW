@@ -36,7 +36,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
 import HiggsAnalysis.NtupleAnalysis.tools.counter as counter
 import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
-import HiggsAnalysis.NtupleAnalysis.tools.styles_Soti as styles
+import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
@@ -466,14 +466,21 @@ def PlotSignalBackground(datasetsMgr, hG, hF, intLumi):
     HF = h.getHistogram()
 
 
+    altSignalBDTGStyle  = styles.StyleCompound([styles.StyleMarker(markerSize=1.2, markerColor=ROOT.kAzure+9, markerSizes=None, markerStyle=ROOT.kFullDiamond),
+                                                styles.StyleLine(lineColor=ROOT.kAzure+9, lineStyle=ROOT.kSolid, lineWidth=3),
+                                                styles.StyleFill(fillColor=ROOT.kAzure+9)])
+    altBackgroundBDTGStyle = styles.StyleCompound([styles.StyleMarker(markerSize=1.2, markerColor=ROOT.kRed-4, markerSizes=None, markerStyle=ROOT.kFullDiamond),
+                                                   styles.StyleLine(lineColor=ROOT.kRed-4, lineStyle=ROOT.kSolid, lineWidth=3),
+                                                   styles.StyleFill(fillColor=ROOT.kRed-4, fillStyle=3001)])
+
 
     p = plots.ComparisonPlot(histograms.Histo(HF,"Fake", "p", "P"), histograms.Histo(HG,"Genuine", "pl", "PL"),) 
     p.histoMgr.setHistoLegendLabelMany({"Fake": "Unmatched", "Genuine": "Truth-matched"}) 
-    p.histoMgr.forHisto("Fake", styles.getAltBackgroundBDTGStyle() ) 
+    p.histoMgr.forHisto("Fake", altBackgroundBDTGStyle ) 
     p.histoMgr.setHistoDrawStyle("Fake", "LP") 
     p.histoMgr.setHistoLegendStyle("Fake", "LP") #F
     
-    p.histoMgr.forHisto("Genuine", styles.getAltSignalBDTGStyle()) 
+    p.histoMgr.forHisto("Genuine", altSignalBDTGStyle) 
     p.histoMgr.setHistoDrawStyle("Genuine" , "HIST") 
     p.histoMgr.setHistoLegendStyle("Genuine", "LP") #LP
 

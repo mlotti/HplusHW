@@ -3,10 +3,10 @@
 Description:
 
 Usage:
-./plotMC_HPlusMass.py -r <TMVAoutput_rootFile> --reff mvaeffs.root [opts]
+./plot_BDTG_Efficiency.py -r <TMVAoutput_rootFile> --reff mvaeffs.root [opts]
 
 Examples:
-./plot_BDTG_Efficiency.py --url -r TopReco_DR0p3_DPtOverPt0p32.root --reff mvaeffs.root
+./plot_BDTG_Efficiency.py -r TopReco_DR0p3_DPtOverPt0p32.root --reff mvaeffs.root --url
 
 '''
 
