@@ -2167,7 +2167,7 @@ const genParticle SystTopBDT::GetLastCopy(const vector<genParticle> genParticles
 
 
 vector <int> SystTopBDT::GetTopsIndex( const TopSelectionBDT::Data& topData, string topType, Jet BJet_LeptonicBr, Muon mu, bool searchForLeptonicTop, bool askTopFarFromMu){
-  double dRmin_mu_top = 999.999;
+  //double dRmin_mu_top = 999.999;
 
   size_t nTops = -1;
   vector <int> vTops;
