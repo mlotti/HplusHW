@@ -1586,9 +1586,9 @@ bool TopRecoAnalysis::Pass_fatWJetSelections(const BJetSelection::Data& bjetData
   double tau_21 = fatJet.NjettinessAK8tau2()/fatJet.NjettinessAK8tau1();
   
   bool btagged = false;
-  // for (auto& bjet: bjetData.getSelectedBJets()){
-  //   if (ROOT::Math::VectorUtil::DeltaR( bjet.p4(), fatJet.p4()) < 0.8) btagged = true;
-  // }
+  for (auto& bjet: bjetData.getSelectedBJets()){
+    if (ROOT::Math::VectorUtil::DeltaR( bjet.p4(), fatJet.p4()) < 0.8) btagged = true;
+  }
   
   bool passBtagging = !btagged;
   bool passPt = fatJet.pt() > 200;
@@ -2360,8 +2360,9 @@ void TopRecoAnalysis::process(Long64_t entry) {
   // bool realtopBoth = false;
   // if (topData.getSelectedCleanedTopsBJet().size() < 2) std::cout<<"topData.getSelectedCleanedTopsBJet().size() < 2"<<std::endl;
   // if (!topData.hasFreeBJet()) std::cout<<"!topData.hasFreeBJet()"<<std::endl;
-  if (topData.getSelectedCleanedTopsBJet().size() < 2) return;
-  if (!topData.hasFreeBJet()) return;
+    if (topData.getSelectedCleanedTopsBJet().size() < 2) return;
+    if (!topData.hasFreeBJet()) return;
+
   if (doMatching){
     for (size_t j=0; j<GenTops.size(); j++){    
       // Get the genParicle
@@ -2423,6 +2424,7 @@ void TopRecoAnalysis::process(Long64_t entry) {
     bool realtop2    = isRealMVATop(topData.getTrijet2Jet1(), topData.getTrijet2Jet2(), topData.getTrijet2BJet(), MCtrue_LdgJet,  MCtrue_SubldgJet, MCtrue_Bjet);
     bool realtopBoth = realtop1*realtop2;
     bool passBDTboth = cfg_PrelimTopMVACut.passedCut(topData.getMVAmax2());
+
     // All the top quarks have been matched                                                                                                                 
     if (MCtrue_Bjet.size() == GenTops.size())
       {
