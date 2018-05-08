@@ -66,6 +66,18 @@ def _assignJetToTauSF(tauSelectionPset, dirNumber):
     tauSelectionPset.tauMisidetificationJetToTauEndcapSF = 1.0 + dirNumber*0.20
 #    tauSelectionPset.tauMisidetificationJetToTauSF = 1.0 + dirNumber*0.20
 
+# Marina
+def assignMisIDSF(pset, direction, jsonfile, variationType="MC"):
+    reader = TriggerSFJsonReader("2016", "runs_273150_284044", jsonfile)
+    result = reader.getResult()
+    if variationType == "MC":
+        _assignTrgSF("MisIDSF", result["binEdges"], result["SF"], result["SFmcUp"], result["SFmcDown"], pset, direction)
+    elif variationType == "Data":
+        _assignTrgSF("MisIDSF", result["binEdges"], result["SF"], result["SFdataUp"], result["SFdataDown"], pset, direction)
+    else:
+        raise Exception("Error: Unsupported variation type '%s'! Valid options are: 'MC', 'data'"%variationType)
+    return
+
 ##===== tau trigger SF (SF as function of pT)
 # \param tauSelectionPset  the tau config PSet
 # \param direction         "nominal, "up", "down"
