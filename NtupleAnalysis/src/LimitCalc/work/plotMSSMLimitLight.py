@@ -48,7 +48,11 @@ def main():
             jsonfile = match.group(0)
 #    jsonfile = "limits_light2016.json"
 #    jsonfile = "limits2016/limitsForMSSMplots_ICHEP_v2_light.json"
-    jsonfile = "limits2016/limits_light_20171011.json"
+#    jsonfile = "limits2016/limits_light_20171011.json"
+#    jsonfile = "limits2016/limits_light_180131.json"
+#    jsonfile = "limits2016/limits_light_180205.json"
+#    jsonfile = "limits2016/limits_light_180318.json"
+    jsonfile = "limits2016/limits_light_180417.json"
 #    limits = limit.BRLimits(limitsfile=jsonfile,configfile="limitdata/lightHplus_configuration.json")
     limits = limit.BRLimits(limitsfile=jsonfile,configfile="limits2016/lightHplus_configuration.json")
 
