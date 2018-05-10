@@ -10,10 +10,11 @@ USAGE:
 EXAMPLES:
 ./plotMC_EffVsCutflow.py -m Hplus2tbAnalysis_Preapproval_MVA0p40_Syst_28Apr2018/ -r "passed trigger" 
 ./plotMC_EffVsCutflow.py  -m Hplus2tbAnalysis_Preapproval_MVA0p40_Syst_28Apr2018/ -r "passed PV" --gridX --yMin 0.00001
+./plotMC_EffVsCutflow.py  -m Hplus2tbAnalysis_Preapproval_MVA0p40_Syst_28Apr2018/ --refCounter "passed PV" --yMin 0.00001
 
 
 LAST USED:
-./plotMC_EffVsCutflow.py  -m Hplus2tbAnalysis_Preapproval_MVA0p40_Syst_28Apr2018/ --refCounter "passed PV" --yMin 0.00001
+./plotMC_EffVsCutflow.py -m Hplus2tbAnalysis_Preapproval_MVA0p40_Syst_28Apr2018/ --refCounter "passed PV" --yMin 0.00001
 hplusPrintCounters.py --mainCounterOnly --dataEra "Run2016" --mergeData Hplus2tbAnalysis_Preapproval_MVA0p40_Syst_28Apr2018 --includeTasks "2016|M_500"
 
 '''
@@ -136,8 +137,13 @@ def main(opts):
 
         # Set/Overwrite cross-sections
         for d in datasetsMgr.getAllDatasets():
+            if "ZJetsToQQ_HT600toInf" in d.getName():
+                datasetsMgr.remove(d.getName())
+
             if "ChargedHiggs" in d.getName():
-                datasetsMgr.getDataset(d.getName()).setCrossSection(10.0)
+                datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
+                if d.getName() not in opts.signal:
+                    datasetsMgr.remove(d.getName())
 
         if opts.verbose:
             datasetsMgr.PrintCrossSections()
@@ -184,19 +190,25 @@ def GetEfficiencyHistoGraphs(datasetsMgr, folder, hName):
     _kwargs  = GetHistoKwargs(opts)
 
     # Get histos (Data, EWK) for Inclusive
-    p1 = plots.DataMCPlot(datasetsMgr, hName )
+    p1 = plots.DataMCPlot(datasetsMgr, hName, saveFormats=[])
+    kwargs = copy.deepcopy(_kwargs)
+    kwargs["opts"]       = {"ymin": 1.0, "ymaxfactor": 10.0}
+    kwargs["xlabelsize"] = 10
+    kwargs["ratio"]      = False
+    plots.drawPlot(p1, hName, **kwargs)
+    SavePlot(p1, hName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".C", ".png", ".pdf"] )
 
     # Clone histograms 
     histoList = []
     graphList = []
     hgList    = []
 
-    opts.signal.append("EWK")
-    opts.signal.append("QCD")
+    # Append some bkg samples as well
+    opts.datasets = opts.signal
+    opts.datasets.extend(opts.backgrounds)
 
-    for s in opts.signal:
-        h = p1.histoMgr.getHisto(s).getRootHisto().Clone(s)
-        #p1.histoMgr.setHistoLegendStyles(s, "AP")
+    for d in opts.datasets:
+        h = p1.histoMgr.getHisto(d).getRootHisto().Clone(d)
         histoList.append(h)
 
     # Create the Efficiency histos
@@ -249,12 +261,10 @@ def PlotHistoGraphs(hGraphList, _kwargs):
         p.getPad2().SetLogy(True)
 
     # Add some text
-    if opts.refCounter == "passed trigger":
+    if opts.refCounter == "passed PV":
         xPos  = [0.15, 0.24, 0.37, 0.50, 0.65, 0.77, 0.90] #does not work for every reference counter!
     else:
         xPos = [0.15 + float(i)/(float(len(opts.binLabels))) for i in range(0, len(opts.binLabels))]
-
-    print xPos 
 
     # For-loop: All bin labels
     for i, b in enumerate(opts.binLabels, 0):        
@@ -575,9 +585,10 @@ if __name__ == "__main__":
     SAVEDIR      = None
     SAVENAME     = "EfficiencyVsCutflow"
     VERBOSE      = False
-    #FOLDER       = "counters/weighted/"
-    FOLDER       = "counters"
-    SIGNALMASS   = [200, 500]
+    FOLDER       = "counters/weighted/"
+    #FOLDER       = "counters"
+    SIGNALMASS   = [180, 300, 500]
+    BACKGROUNDS  = ["EWK", "QCD"]
     REFCOUNTER   = "ttree: skimCounterAll"   #"passed trigger"
     SKIPLIST     = ["Passed tau selection and genuine (Veto)", "b tag SF", "passed fat jet selection (Veto)", "Selected Events",  "passed METFilter selection ()"]
     GRIDX        = False
@@ -680,6 +691,10 @@ if __name__ == "__main__":
         signal = "ChargedHiggs_HplusTB_HplusToTB_M_%i" % m
         opts.signal.append(signal)
 
+    # Bkg list
+    opts.backgrounds = []
+    for b in BACKGROUNDS:
+        opts.backgrounds.append(b)
 
     # Call the main function
     main(opts)
