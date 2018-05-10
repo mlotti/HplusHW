@@ -4,16 +4,17 @@ DESCRIPTION:
 
 
 USAGE:
-./plotMC_Acceptance.py -m <pseudo_mcrab_directory> [opts]
+./plotMC_EffVsCutflow.py -m <pseudo_mcrab_directory> [opts]
 
 
 EXAMPLES:
-./plotMC_Acceptance.py -m Hplus2tbAnalysis_Preapproval_MVA0p40_Syst_28Apr2018/ -r "passed trigger" 
-./plotMC_Acceptance.py  -m Hplus2tbAnalysis_Preapproval_MVA0p40_Syst_28Apr2018/ -r "passed PV" --gridX --yMin 0.00001
+./plotMC_EffVsCutflow.py -m Hplus2tbAnalysis_Preapproval_MVA0p40_Syst_28Apr2018/ -r "passed trigger" 
+./plotMC_EffVsCutflow.py  -m Hplus2tbAnalysis_Preapproval_MVA0p40_Syst_28Apr2018/ -r "passed PV" --gridX --yMin 0.00001
 
 
 LAST USED:
-./plotMC_Acceptance.py  -m Hplus2tbAnalysis_Preapproval_MVA0p40_Syst_28Apr2018/ -r "passed PV" --yMin 0.00001
+./plotMC_EffVsCutflow.py  -m Hplus2tbAnalysis_Preapproval_MVA0p40_Syst_28Apr2018/ --refCounter "passed PV" --yMin 0.00001
+hplusPrintCounters.py --mainCounterOnly --dataEra "Run2016" --mergeData Hplus2tbAnalysis_Preapproval_MVA0p40_Syst_28Apr2018 --includeTasks "2016|M_500"
 
 '''
 
@@ -56,6 +57,7 @@ def Print(msg, printHeader=False):
     else:
         print "\t", msg
     return
+
 
 def Verbose(msg, printHeader=True, verbose=False):
     if not opts.verbose:
@@ -135,7 +137,7 @@ def main(opts):
         # Set/Overwrite cross-sections
         for d in datasetsMgr.getAllDatasets():
             if "ChargedHiggs" in d.getName():
-                datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
+                datasetsMgr.getDataset(d.getName()).setCrossSection(10.0)
 
         if opts.verbose:
             datasetsMgr.PrintCrossSections()
@@ -156,12 +158,6 @@ def main(opts):
         if 0:
             datasetsMgr.remove(filter(lambda name: "Charged" not in name, datasetsMgr.getAllDatasetNames()))
 
-        # Re-order datasets (different for inverted than default=baseline)
-        if 0:
-            newOrder = ["Data"]
-            newOrder.extend(aux.GetListOfEwkDatasets())
-            datasetsMgr.selectAndReorder(newOrder)
-
         # Merge EWK samples
         if 1:
             datasetsMgr.merge("EWK", aux.GetListOfEwkDatasets())
@@ -178,22 +174,7 @@ def main(opts):
         # Plot the efficiencies
         PlotHistoGraphs(hGraphList, _kwargs)
 
-    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)
-    return
-
-
-def PlotHistoGraph(hGraphList, _kwargs):
-
-    # Make the plots
-    #p = plots.PlotBase( [histoGraphList], saveFormats=[])
-    p = plots.ComparisonManyPlot(hGraphList[0], hGraphList[1:], saveFormats=[])
-
-    # Draw the plots
-    histoName = "SignalAcceptance"
-    plots.drawPlot(p, histoName,  **_kwargs)
-    
-    # Save the plots
-    SavePlot(p, histoName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf"] )
+    # Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)
     return
 
 
@@ -248,11 +229,8 @@ def GetEfficiencyHistoGraphs(datasetsMgr, folder, hName):
 
 
 def PlotHistoGraphs(hGraphList, _kwargs):
-
-    histoName = "SignalAcceptance"
-
+    
     # Create & draw the plot    
-    #p = plots.PlotBase( hGraphList, saveFormats=[])
     p = plots.ComparisonManyPlot(hGraphList[0], hGraphList[1:], saveFormats=[])
     p.setLuminosity(opts.intLumi)
 
@@ -264,15 +242,19 @@ def PlotHistoGraphs(hGraphList, _kwargs):
     # Draw the plot
     p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineStyle(ROOT.kSolid))
     p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineWidth(3))
-    # p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetMarkerStyle(ROOT.kOpenCircle))
     p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetMarkerSize(1.2))
-    plots.drawPlot(p, histoName, **_kwargs)
+    plots.drawPlot(p, opts.saveName, **_kwargs)
 
     if 1:
         p.getPad2().SetLogy(True)
 
     # Add some text
-    xPos  = [0.15, 0.24, 0.37, 0.50, 0.65, 0.77, 0.90] #does not work for every reference counter!
+    if opts.refCounter == "passed trigger":
+        xPos  = [0.15, 0.24, 0.37, 0.50, 0.65, 0.77, 0.90] #does not work for every reference counter!
+    else:
+        xPos = [0.15 + float(i)/(float(len(opts.binLabels))) for i in range(0, len(opts.binLabels))]
+
+    print xPos 
 
     # For-loop: All bin labels
     for i, b in enumerate(opts.binLabels, 0):        
@@ -303,7 +285,7 @@ def PlotHistoGraphs(hGraphList, _kwargs):
             histograms.addText(x, 0.08+dy, label, 19)
 
     # Save the plot
-    SavePlot(p, histoName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf"] )
+    SavePlot(p, opts.saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".C", ".png", ".pdf"] )
     return
 
 
@@ -312,9 +294,10 @@ def GetHistoKwargs(opts):
     _kwargs     = {
         "xlabel"           : None,
         "ylabel"           : "Efficiency",
-        "ratioYlabel"      : "1/Ratio ",
+        #"ratioYlabel"      : "1/Ratio ",
+        "ratioYlabel"      : "Ratio ",
         "ratio"            : True,
-        "ratioInvert"      : True,
+        "ratioInvert"      : False,
         "stackMCHistograms": False,
         "addMCUncertainty" : True,
         "addLuminosityText": True,
@@ -322,7 +305,8 @@ def GetHistoKwargs(opts):
         "errorBarsX"       : False,
         "cmsExtraText"     : "Preliminary",
         "opts"             : {"ymin": opts.yMin, "ymax": opts.yMax},
-        "opts2"            : {"ymin": 1e-1, "ymax": 1e3},
+        #"opts2"            : {"ymin": 1e-1, "ymax": 1e3},
+        "opts2"            : {"ymin": 5e-4, "ymax": 10},
         "log"              : True,
         "moveLegend"       : {"dx": -0.53, "dy": -0.1, "dh": -0.10},
         "cutBox"           : {"cutValue": 1.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True},
@@ -358,7 +342,7 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     for i, ext in enumerate(saveFormats):
         saveNameURL = saveName + ext
         saveNameURL = aux.convertToURL(saveNameURL, opts.url)
-        Verbose(saveNameURL, i==0)
+        Print(saveNameURL, i==0)
         plot.saveAs(saveName, formats=saveFormats)
     return
 
@@ -436,7 +420,7 @@ def convertHisto2TGraph(histo, printValues=False):
     
     # For-loop: All values x-y and their errors
     for i, xV in enumerate(x, 0):
-        row = align.format(i+1, "%.2f" % xerrl[i], "%.2f" %  x[i], "%.2f" %  xerrh[i], "%.3f" %  y[i], "+/-", "%.3f" %  yerrh[i])
+        row = align.format(i+1, "%.2f" % xerrl[i], "%.2f" %  x[i], "%.2f" %  xerrh[i], "%.5f" %  y[i], "+/-", "%.5f" %  yerrh[i])
         table.append(row)
     table.append(hLine)
 
@@ -456,7 +440,7 @@ def GetEfficiencyHisto(histo, refCounter, kwargs, printValues=False, hideZeros=T
 
     # Construct info table (debugging)
     table  = []
-    align  = "{:>6} {:^20} {:<40} {:>15} {:>15} {:>10} {:^3} {:<10}"
+    align  = "{:>6} {:^20} {:<35} {:>15} {:>15} {:>10} {:^3} {:<10}"
     header = align.format("Bin", "Range", "Selection", "Numerator", "Denominator", "Eff Value", "+/-", "Eff Error")
     hLine  = "="*120
     nBinsX = histo.GetNbinsX()
@@ -541,7 +525,7 @@ def GetEfficiencyHisto(histo, refCounter, kwargs, printValues=False, hideZeros=T
         opts.binLabels.append(binLabel)
 
         # Save information in table
-        row = align.format(binCounter, binRange, binLabel, "%.1f" % numValue, "%.1f" % denValue, "%.3f" % effValue, "+/-", "%.3f" % effError)
+        row = align.format(binCounter, binRange, binLabel, "%.1f" % numValue, "%.1f" % denValue, "%.5f" % effValue, "+/-", "%.5f" % effError)
         table.append(row)
 
         # Reset histos 
@@ -589,11 +573,12 @@ if __name__ == "__main__":
     INTLUMI      = -1.0
     URL          = False
     SAVEDIR      = None
+    SAVENAME     = "EfficiencyVsCutflow"
     VERBOSE      = False
-    FOLDER       = "counters/weighted/"
-    #SIGNALMASS   = [200, 300, 500]
+    #FOLDER       = "counters/weighted/"
+    FOLDER       = "counters"
     SIGNALMASS   = [200, 500]
-    REFCOUNTER   = "passed trigger"
+    REFCOUNTER   = "ttree: skimCounterAll"   #"passed trigger"
     SKIPLIST     = ["Passed tau selection and genuine (Veto)", "b tag SF", "passed fat jet selection (Veto)", "Selected Events",  "passed METFilter selection ()"]
     GRIDX        = False
     GRIDY        = False
@@ -642,6 +627,9 @@ if __name__ == "__main__":
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR, 
                       help="Directory where all pltos will be saved [default: %s]" % SAVEDIR)
 
+    parser.add_option("--saveName", dest="saveName", type="string", default=SAVENAME, 
+                      help="The Name of the histogram as it will be saved [default: %s]" % SAVENAME)
+
     parser.add_option("--url", dest="url", action="store_true", default=URL, 
                       help="Don't print the actual save path the histogram is saved, but print the URL instead [default: %s]" % URL)
     
@@ -675,7 +663,7 @@ if __name__ == "__main__":
 
     # Define save directory
     if opts.saveDir == None:
-        opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="Acceptance")
+        opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="MC")
         
     # Sanity check
     allowedFolders = ["counters", "counters/weighted/"]
@@ -697,4 +685,4 @@ if __name__ == "__main__":
     main(opts)
 
     if not opts.batchMode:
-        raw_input("=== plot_Eff.py: Press any key to quit ROOT ...")
+        raw_input("=== plot_EffVsCutflow.py: Press any key to quit ROOT ...")
