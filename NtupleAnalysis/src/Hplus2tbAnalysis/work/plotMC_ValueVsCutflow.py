@@ -283,7 +283,9 @@ def PlotHistoGraphs(hGraphList, _kwargs):
     # Draw the plot
     p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineStyle(ROOT.kSolid))
     p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineWidth(3))
-    p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetMarkerSize(1.2))
+    p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetMarkerSize(1.3)) #1.2 
+    if opts.acceptance:
+        p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetMarkerStyle(ROOT.kFullCircle))
     plots.drawPlot(p, opts.saveName, **_kwargs)
 
     if not opts.acceptance:
