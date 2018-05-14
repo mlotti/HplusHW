@@ -207,7 +207,7 @@ commonPlotsOptions = PSet(
   # Bin settings (final bin setting done in datacardGenerator, there also variable bin width is supported)
        nVerticesBins = PSet(nBins=60, axisMin=0., axisMax=60.),
               ptBins = PSet(nBins=500, axisMin=0., axisMax=5000.),
-             etaBins = PSet(nBins=60, axisMin=-3.0, axisMax=3.0),
+             etaBins = PSet(nBins=100, axisMin=-5.0, axisMax=5.0),
              phiBins = PSet(nBins=72, axisMin=-3.1415926, axisMax=3.1415926),
         deltaEtaBins = PSet(nBins=50, axisMin=0., axisMax=10.0),
         deltaPhiBins = PSet(nBins=18, axisMin=0., axisMax=180.), # used in 2D plots, i.e. putting high number of bins here will cause troubles

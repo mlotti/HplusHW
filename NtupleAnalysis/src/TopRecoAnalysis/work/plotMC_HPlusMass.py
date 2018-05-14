@@ -499,6 +499,26 @@ def PlotMC(datasetsMgr, histo, intLumi):
     if "ldgfatjetpt" in histo.lower():
         _opts["xmax"] = 1000
 
+    if "deltar_w" in histo.lower():
+        _rebinX = 2
+        _xlabel = "#Delta R"
+        _format = "%0.1f "
+        _opts["xmax"] = 5
+        logY = True
+
+    if "ldgtrijet_deltar" in histo.lower():
+        _rebinX = 2
+        _xlabel = "#Delta R"
+        _format = "%0.1f "
+        _opts["xmax"] = 5
+        logY = True
+
+    if "higgstop_deltar" in histo.lower():
+        _rebinX = 2
+        _xlabel = "#Delta R"
+        _format = "%0.1f "
+        _opts["xmax"] = 5
+        logY = True
 
 
     else:
@@ -506,7 +526,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
 
 
     if opts.normaliseToOne:
-        logY    = False
+        logY    = True
         Ylabel  = "Arbitrary Units / %s" % (_format)
     else:
         logY    = True
@@ -644,7 +664,7 @@ if __name__ == "__main__":
     OPTMODE      = ""
     BATCHMODE    = True
     PRECISION    = 3
-    SIGNALMASS   = [500]
+    SIGNALMASS   = [1000, 400]
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False

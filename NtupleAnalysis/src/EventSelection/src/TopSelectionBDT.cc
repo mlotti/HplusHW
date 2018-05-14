@@ -40,7 +40,12 @@ TopSelectionBDT::Data::Data()
   fAllTopsJet1(),
   fAllTopsJet2(),
   fAllTopsBJet(),
-  fAllTopsMVA()
+  fAllTopsMVA(),
+  fSelectedCleanedTopsJet1(),
+  fSelectedCleanedTopsJet2(),
+  fSelectedCleanedTopsBJet(),
+  fSelectedCleanedTopsMVA()
+
 { }
 
 TopSelectionBDT::Data::~Data() { }
@@ -630,7 +635,15 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
       output.fAllTopsBJet.push_back(fAllTops.BJet.at(i));
       output.fAllTopsMVA.push_back(fAllTops.MVA.at(i));
     }
-	
+
+  for (size_t i = 0; i < fSelectedCleanedTops.MVA.size(); i++)
+    {
+      output.fSelectedCleanedTopsJet1.push_back(fSelectedCleanedTops.Jet1.at(i));
+      output.fSelectedCleanedTopsJet2.push_back(fSelectedCleanedTops.Jet2.at(i));
+      output.fSelectedCleanedTopsBJet.push_back(fSelectedCleanedTops.BJet.at(i));
+      output.fSelectedCleanedTopsMVA.push_back(fSelectedCleanedTops.MVA.at(i));
+    }
+
    //================================================================================================
   // Increment counters
   //================================================================================================
