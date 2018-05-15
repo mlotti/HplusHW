@@ -22,6 +22,7 @@ public:
 private:
   std::string fName;
 
+  METFilterSelection fMETFilterSelection;
   const std::string fOfflineSelection;
   std::vector<int> fbinning;
   std::string fxLabel;
@@ -43,6 +44,7 @@ private:
   TrgBaseSelection* selection;
 
   Count cAllEvents;
+  Count cMetFilters;
   Count cRunRange;
   Count cSelection;
   Count cCtrlTrigger;
@@ -74,6 +76,7 @@ REGISTER_SELECTOR(TriggerEfficiency);
 TriggerEfficiency::TriggerEfficiency(const ParameterSet& config, const TH1* skimCounters):
   BaseSelector(config, skimCounters),
   fName(config.getParameter<std::string>("name")),
+  fMETFilterSelection(config.getParameter<ParameterSet>("METFilter")),
   fOfflineSelection(config.getParameter<std::string>("offlineSelection")),
   fbinning(config.getParameter<std::vector<int>>("binning")),
   fxLabel(config.getParameter<std::string>("xLabel")),
@@ -91,9 +94,10 @@ TriggerEfficiency::TriggerEfficiency(const ParameterSet& config, const TH1* skim
   fsignalTriggers2(config.getParameter<std::vector<std::string>>("signalTriggers2")),
   */
 
-  fcontrolTriggers(config.getParameter<ParameterSet>("Trigger")),                                                                       
+  fcontrolTriggers(config.getParameter<ParameterSet>("Trigger")),
 
   cAllEvents(fEventCounter.addCounter("All events")),
+  cMetFilters(fEventCounter.addCounter("MET filters")),
   cRunRange(fEventCounter.addCounter("RunRange")),
   cSelection(fEventCounter.addCounter("OfflineSelection")),
   cCtrlTrigger(fEventCounter.addCounter("CtrlTrigger")),
@@ -114,6 +118,7 @@ TriggerEfficiency::~TriggerEfficiency(){
   std::cout << std::endl;
   std::cout << "    Analyzer " << fName << std::endl;
   std::cout << "    All events    " << cAllEvents.value() << std::endl;
+  std::cout << "    MET filters   " << cMetFilters.value() << std::endl;
   std::cout << "    Run range     " << cRunRange.value() << std::endl;
   std::cout << "    CtrlTrigger   " << cCtrlTrigger.value() << std::endl;
   selection->print();
@@ -175,6 +180,9 @@ void TriggerEfficiency::setupBranches(BranchManager& branchManager) {
 void TriggerEfficiency::process(Long64_t entry) {
 
   cAllEvents.increment();
+
+  if (!fMETFilterSelection.analyze(fEvent).passedSelection()) return;
+  cMetFilters.increment();
 
   if(!selection->passedRunRange(fEvent,this->isData())) return;
   cRunRange.increment();
