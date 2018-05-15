@@ -692,7 +692,7 @@ def doPlot(limits, legendLabels, graphs, name, ylabel, _opts={}, yTitle=None):
     addPhysicsText(histograms, limit, x=0.53)
 
     # Save plots and return
-    #SavePlot(plot, _opts.saveDir, saveName, [".png", ".C", ".eps"])
+    #SavePlot(plot, _opts.saveDir, saveName, [".png", ".C", ".pdf"])
     SavePlot(plot, _opts.saveDir, saveName, [".png", ".C", ".pdf"])
     return
 
@@ -837,19 +837,10 @@ def doPlotSigmaBands(limits, legendLabels, saveName, _opts={}):
     addPhysicsText(histograms, limit, x=0.53)
 
     # Save the plots & return
-    SavePlot(plot, _opts.saveDir, saveName, [".png", ".C", ".eps"])
+    SavePlot(plot, _opts.saveDir, saveName, [".png", ".C", ".pdf"])
     return
 
 def doPlotSigmaBandsAlt(limits, legendLabels, saveName, _opts={}):
-
-#     graphs = [
-#         histograms.HistoGraph(limits[1].expectedGraph(), "Resolved-Median", drawStyle="L"),
-#         histograms.HistoGraph(limits[0].expectedGraph(), "Boosted-Median", drawStyle="L"),
-#         histograms.HistoGraph(limits[1].expectedBandGraph(sigma=1), "Resolved-1Sigma", drawStyle="F", legendStyle="F"),
-#         histograms.HistoGraph(limits[1].expectedBandGraph(sigma=2), "Resolved-2Sigma", drawStyle="F", legendStyle="F"),
-#         histograms.HistoGraph(limits[0].expectedBandGraph(sigma=1), "Boosted-1Sigma", drawStyle="F", legendStyle="F"),
-#         histograms.HistoGraph(limits[0].expectedBandGraph(sigma=2), "Boosted-2Sigma", drawStyle="F", legendStyle="F"),
-#         ]
 
     graphs = [
         histograms.HistoGraph(limits[1].expectedGraph(), "Resolved-Median", drawStyle="L"),
@@ -861,7 +852,12 @@ def doPlotSigmaBandsAlt(limits, legendLabels, saveName, _opts={}):
         ]
     
     # Create plot base object
-    plot = plots.PlotBase(graphs)
+    if 0:
+        plot = plots.PlotBase(graphs)
+    else:
+        plot = plots.ComparisonManyPlot(graphs[0], graphs[1:])
+
+    # Customise legend
     ll = {
         "Resolved-Median": "Resolved Median",
         "Boosted-Median" : "Boosted  Median",
@@ -871,12 +867,9 @@ def doPlotSigmaBandsAlt(limits, legendLabels, saveName, _opts={}):
         "Resolved-2Sigma": "#pm 2#sigma",
          }
 
-    nLimits = len(limits)
-
     # For-loop: All limits
-    #for i in xrange(1, nLimits):
     for i, gr in enumerate(graphs, 1):
-        name = gr.getName().lower() #  g.getRootHisto().GetName()
+        name = gr.getName().lower()
         gr.getRootHisto().SetLineWidth(3)
 
         if "resolved" in name:
@@ -894,9 +887,6 @@ def doPlotSigmaBandsAlt(limits, legendLabels, saveName, _opts={}):
 
     # Set histo labels
     plot.histoMgr.setHistoLegendLabelMany(ll)
-
-    # Create & set legend
-    nGraphs = len(graphs)
 
     # If sigma bands are drawn each legend entry is plotted twice. Correct this in the count
     legend = getLegend(0, limit)
@@ -922,9 +912,8 @@ def doPlotSigmaBandsAlt(limits, legendLabels, saveName, _opts={}):
         plot.addCutBoxAndLineY(cutValue=_opts.cutLineY, fillColor=ROOT.kRed, box=False, line=True, **kwargs)
 
     # Set axes titles
-    limit.useSubscript(True) #changes y-label to correct as well
+    limit.useSubscript(True) # convert H->tau nu to H->t b
     plot.frame.GetXaxis().SetTitle(limit.mHplus())
-    #plot.frame.GetYaxis().SetTitle(limit.BRlimit)
     plot.frame.GetYaxis().SetTitle(limit.sigmaBRlimit)
 
     # Enable/Disable logscale for axes 
@@ -932,13 +921,14 @@ def doPlotSigmaBandsAlt(limits, legendLabels, saveName, _opts={}):
     ROOT.gPad.SetLogx(_opts.logX)
 
     # Draw the plot with standard texts
+    plot.setLuminosity(limits[0].getLuminosity())
     plot.draw()
     plot.addStandardTexts(cmsTextPosition="outframe")
     plot.setLuminosity(limits[0].getLuminosity())
     addPhysicsText(histograms, limit, x=0.53)
 
     # Save the plots & return
-    SavePlot(plot, _opts.saveDir, saveName, [".png", ".C", ".eps"])
+    SavePlot(plot, _opts.saveDir, saveName, [".png", ".C", ".pdf"])
     return
 
 def getYMinMaxAndName(limits, name, minIsMedian=False):
