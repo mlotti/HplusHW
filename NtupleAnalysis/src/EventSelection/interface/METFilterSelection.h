@@ -70,6 +70,9 @@ private:
   std::vector<Count> cSubPassedFilter;
   Count cPassedMETFilterSelection;
   // Histograms
+
+  bool dataOnly(std::string);
+  std::vector<std::string> runOnlyData;
 };
 
 #endif
