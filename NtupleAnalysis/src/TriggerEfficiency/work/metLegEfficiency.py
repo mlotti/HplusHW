@@ -80,6 +80,7 @@ def createAnalyzer(dataVersion,era,onlineSelection = "MET80"):
             triggerOR  = [],
             triggerOR2 = []
         ),
+        METFilter = signalAnalysis.metFilter,
         usePileupWeights = True,
 #        usePileupWeights = False,
         onlineSelection = onlineSelection,
