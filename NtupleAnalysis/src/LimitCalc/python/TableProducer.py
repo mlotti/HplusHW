@@ -1229,6 +1229,7 @@ class TableProducer:
         if light:
             signalColumn="HW"
         myColumnOrder = [signalColumn, 
+                         "CMS_Hptntj_QCDandFakeTau", 
                          "ttbar_CMS_Hptntj", 
                          "CMS_Hptntj_W", 
                          "CMS_Hptntj_singleTop",
@@ -1293,7 +1294,7 @@ class TableProducer:
                                ["pdf_VV", "diboson pdf"],
                                ["lumi_13TeV","luminosity (13 TeV)"],
                                ["CMS_Hptntj_fake_t_fit","Fake tau template fit"],
-                               ["CMS_Hptntj_fake_t_shape","Fake tau MET shape"]
+                               ["CMS_Hptntj_fake_t_shape","Fake tau mT shape"]
                                ]
             
         # Make table - The horror!
