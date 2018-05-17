@@ -119,8 +119,8 @@ def main():
     blackList    = GetDatasetBlackList(completeList, whiteList)
     maxEvents = {}
     for d in whiteList:
-        maxEvents[d] = 100
-        #maxEvents[d] = -1
+        #maxEvents[d] = 100
+        maxEvents[d] = -1
     process = Process(prefix, postfix, maxEvents)
                 
     # ================================================================================================
@@ -160,7 +160,7 @@ def main():
     #==========================
 
     # MET
-    allSelections.METSelection.METCutValue = 30.0
+    allSelections.METSelection.METCutValue = 50.0
     
     # Muon
     allSelections.MuonSelection.muonPtCut = 30
@@ -169,11 +169,12 @@ def main():
     allSelections.JetSelection.numberOfJetsCutValue = 4
     allSelections.JetSelection.jetPtCuts = [40.0, 40.0, 40.0, 30.0]
     
-    
-    
-    
-    
-    ##print allSelections.BJetSelection
+    # Triggers 
+    allSelections.Trigger.triggerOR = ["HLT_Mu50"]
+    # Bjets
+    allSelections.BJetSelection.jetPtCuts = [40.0, 30.0]
+    allSelections.BJetSelection.numberOfBJetsCutValue = 2
+
     
     # allSelections.BjetSelection.triggerMatchingApply = True
     # allSelections.TopSelection.ChiSqrCutValue = 100.0
@@ -539,6 +540,8 @@ def GetDatasetWhitelist(opts):
         myWhitelist.append("ZZ")        
     elif opts.group == "K":
         myWhitelist.append("WWToLNuQQ")        
+        myWhitelist.append("WW")
+        myWhitelist.append("WW_ext1")
     elif opts.group == "L":
         myWhitelist.append("WZ_ext1")
         myWhitelist.append("WZ")

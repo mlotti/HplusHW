@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
+from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import metFilter
 
 import os
 import re
@@ -71,6 +72,7 @@ def createAnalyzer(dataVersion,era):
             triggerOR  = [],
             triggerOR2 = []
         ),
+        METFilter = metFilter,
         usePileupWeights = True,
         offlineSelection = leg,
         MuonSelection = PSet(

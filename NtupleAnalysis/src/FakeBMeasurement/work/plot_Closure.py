@@ -500,9 +500,11 @@ def GetHistoKwargs(histoName, ext, opts):
     if "eta" in hName:
         _format = "%0.2f"
         _cutBox = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmin"] = -2.6 #-3.0
-        _opts["xmax"] = +2.6 #+3.0
-        ROOT.gStyle.SetNdivisions(10, "X")
+        #_opts["xmin"] = -2.6 #-3.0
+        _opts["xmin"] =  0.0 #iro
+        _opts["xmax"] = +2.4 #+3.0
+        _rebinX = 1
+        #ROOT.gStyle.SetNdivisions(10, "X")
     if "deltaeta" in hName:
         _format = "%0.2f"
         _opts["xmin"] = 0.0

@@ -1,4 +1,4 @@
-//-*- c++ -*-
+// -*- c++ -*-
 #include "Framework/interface/BaseSelector.h"
 #include "Framework/interface/makeTH.h"
 
@@ -7,11 +7,10 @@
 
 #include "TDirectory.h"
 
-
 class JetTriggersSF: public BaseSelector {
 public:
   explicit JetTriggersSF(const ParameterSet& config, const TH1* skimCounters);
-  virtual ~JetTriggersSF();// {}
+  virtual ~JetTriggersSF();
 
   /// Books histograms
   virtual void book(TDirectory *dir) override;
@@ -24,16 +23,15 @@ public:
   double DeltaPhi(double phi1, double phi2);
 
   double DeltaR(double eta1, double eta2,
-                  double phi1, double phi2);
-
-  
+		double phi1, double phi2);
+    
 private:
   // Input parameters
-  const HistogramSettings cfg_PtBinSetting;
-  const HistogramSettings cfg_EtaBinSetting;
-
+  const DirectionalCut<double> cfg_PrelimTopMVACut;
+  
   // Common plots
   CommonPlots fCommonPlots;
+  
   // Event selection classes and event counters (in same order like they are applied)
   Count cAllEvents;
   Count cControlTrigger; 
@@ -46,14 +44,19 @@ private:
   BJetSelection fBJetSelection;
   Count cBTaggingSFCounter;
   METSelection fMETSelection;
-  TopologySelection fTopologySelection;
-  TopSelection fTopSelection;
+  QuarkGluonLikelihoodRatio fQGLRSelection;
+  TopSelectionBDT fTopSelection;
+  FatJetSelection fFatJetSelection;
   Count cSelected;
   Count cTrigger_1BTag;
   Count cTrigger_2BTag;
   Count cTrigger_OR;
   Count cTrigger_OR_PFJet450;
   
+  // Histogram Settings
+  const HistogramSettings cfg_PtBinSetting;
+  const HistogramSettings cfg_EtaBinSetting;
+    
   // Strings to store trigger names
   std::string TriggerName;
 
@@ -201,8 +204,7 @@ REGISTER_SELECTOR(JetTriggersSF);
 
 JetTriggersSF::JetTriggersSF(const ParameterSet& config, const TH1* skimCounters)
   : BaseSelector(config, skimCounters),
-    cfg_PtBinSetting(config.getParameter<ParameterSet>("CommonPlots.ptBins")),
-    cfg_EtaBinSetting(config.getParameter<ParameterSet>("CommonPlots.etaBins")),
+    cfg_PrelimTopMVACut(config, "FakeBMeasurement.minTopMVACut"),
     fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kHplus2tbAnalysis, fHistoWrapper), 
     cAllEvents(fEventCounter.addCounter("all events")),
     cControlTrigger(fEventCounter.addCounter("passed cntrl trg")),
@@ -214,16 +216,18 @@ JetTriggersSF::JetTriggersSF(const ParameterSet& config, const TH1* skimCounters
     fJetSelection(config.getParameter<ParameterSet>("JetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cBTaggingSFCounter(fEventCounter.addCounter("b tag SF")),
-    fMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    fTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    fTopSelection(config.getParameter<ParameterSet>("TopSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fMETSelection(config.getParameter<ParameterSet>("METSelection")), // no subcounter in main counter 
+    fQGLRSelection(config.getParameter<ParameterSet>("QGLRSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
     cSelected(fEventCounter.addCounter("Selected Events")),
     cTrigger_1BTag(fEventCounter.addCounter("passed sig 1BTag")),
     cTrigger_2BTag(fEventCounter.addCounter("passed sig 2BTag")),
     cTrigger_OR(fEventCounter.addCounter("passed sig OR")),
-    cTrigger_OR_PFJet450(fEventCounter.addCounter("passed sig OR + PFJet450"))
+    cTrigger_OR_PFJet450(fEventCounter.addCounter("passed sig OR + PFJet450")),
+    cfg_PtBinSetting(config.getParameter<ParameterSet>("CommonPlots.ptBins")),
+    cfg_EtaBinSetting(config.getParameter<ParameterSet>("CommonPlots.etaBins"))
 {
-
 }
 
 JetTriggersSF::~JetTriggersSF()
@@ -244,17 +248,16 @@ void JetTriggersSF::book(TDirectory *dir) {
   fJetSelection.bookHistograms(dir);
   fBJetSelection.bookHistograms(dir);
   fMETSelection.bookHistograms(dir);
-  fTopologySelection.bookHistograms(dir);
+  fQGLRSelection.bookHistograms(dir);
   fTopSelection.bookHistograms(dir);
+  fFatJetSelection.bookHistograms(dir);
   
   // Book non-common histograms
-
-  //---------------------------------------------------------------------
-  // Binning
-  //---------------------------------------------------------------------
+  
+  // Fixed Binning
   double xbins_pt[25] = {20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 55, 60, 65, 70, 80, 90, 100, 110, 120};
   int nxbins_pt       = 24;
-  double xbins_ht[38] = {200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400, 420, 440, 460, 480, 500,  520,  540,  560, 580,  600, 620, 640, 660, 680, 700, 725, 750, 775, 800, 850, 900, 950, 1000, 1100, 1400, 1700, 2000};
+  double xbins_ht[38] = {200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,520,540,560,580,600,620,640,660,680,700,725,750,775,800,850,900,950,1000,1100,1400,1700,2000};
   int nxbins_ht       = 37;
   double xbins_b[7]   = {-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 9.5};
   int nxbins_b        = 6;
@@ -262,10 +265,9 @@ void JetTriggersSF::book(TDirectory *dir) {
   int nxbins_eta = 30;
   double phiMax = 4.0;
   int nxbins_phi = 30;
-  //---------------------------------------------------------------------
-
+  
   hdRminJetM = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hdRminJetM" , "dR", 250, 0, 5);
-
+  
   //---------------------------------------------------------------------
   //   Denominators  
   //---------------------------------------------------------------------
@@ -278,7 +280,6 @@ void JetTriggersSF::book(TDirectory *dir) {
   hDen_CSV_RefTrg_OfflineSel = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hDen_CSV_RefTrg_OfflineSel", "CSV", 20, 0, 1); 
   hDen_JetMulti_RefTrg_OfflineSel = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hDen_JetMulti_RefTrg_OfflineSel", "nJets", 10, 4.5, 14.5);
   hDen_BJetMulti_RefTrg_OfflineSel = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hDen_BJetMulti_RefTrg_OfflineSel", "nBJets", 7, 0.5, 7.5);
-
   //---------------------------------------------------------------------
   // Numerators
   //---------------------------------------------------------------------
@@ -287,7 +288,7 @@ void JetTriggersSF::book(TDirectory *dir) {
   hNum_pt6thJet_RefTrg_OfflineSel_Signal2BTag       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hNum_pt6thJet_RefTrg_OfflineSel_Signal2BTag", "pt", nxbins_pt, xbins_pt);
   hNum_pt6thJet_RefTrg_OfflineSel_SignalOR          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hNum_pt6thJet_RefTrg_OfflineSel_SignalOR", "pt", nxbins_pt, xbins_pt);
   hNum_pt6thJet_RefTrg_OfflineSel_SignalOR_PFJet450 = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hNum_pt6thJet_RefTrg_OfflineSel_SignalOR_PFJet450", "pt", nxbins_pt, xbins_pt);
-
+  
   //6th Jet eta
   hNum_eta6thJet_RefTrg_OfflineSel_Signal1BTag       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hNum_eta6thJet_RefTrg_OfflineSel_Signal1BTag", "eta", nxbins_eta, -1*etaMax , etaMax);
   hNum_eta6thJet_RefTrg_OfflineSel_Signal2BTag       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hNum_eta6thJet_RefTrg_OfflineSel_Signal2BTag", "eta", nxbins_eta, -1*etaMax , etaMax);
@@ -299,7 +300,7 @@ void JetTriggersSF::book(TDirectory *dir) {
   hNum_phi6thJet_RefTrg_OfflineSel_Signal2BTag       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hNum_phi6thJet_RefTrg_OfflineSel_Signal2BTag", "phi", nxbins_phi, -1*phiMax , phiMax);
   hNum_phi6thJet_RefTrg_OfflineSel_SignalOR          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hNum_phi6thJet_RefTrg_OfflineSel_SignalOR", "phi", nxbins_phi, -1*phiMax , phiMax);
   hNum_phi6thJet_RefTrg_OfflineSel_SignalOR_PFJet450 = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hNum_phi6thJet_RefTrg_OfflineSel_SignalOR_PFJet450", "phi", nxbins_phi, -1*phiMax , phiMax);
-
+  
   //HT
   hNum_Ht_RefTrg_OfflineSel_Signal1BTag = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hNum_Ht_RefTrg_OfflineSel_Signal1BTag", "Ht", nxbins_ht, xbins_ht);
   hNum_Ht_RefTrg_OfflineSel_Signal2BTag = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hNum_Ht_RefTrg_OfflineSel_Signal2BTag", "Ht", nxbins_ht, xbins_ht);
@@ -318,25 +319,25 @@ void JetTriggersSF::book(TDirectory *dir) {
   hNum_nBTagJets_RefTrg_OfflineSel_SignalOR = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hNum_nBTagJets_RefTrg_OfflineSel_SignalOR", "nbtagjets", nxbins_b, xbins_b);
   hNum_nBTagJets_RefTrg_OfflineSel_SignalOR_PFJet450 = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hNum_nBTagJets_RefTrg_OfflineSel_SignalOR_PFJet450", "nbtagjets", nxbins_b, xbins_b);
 
-   //Jet CSV
+  //Jet CSV
   hNum_CSV_RefTrg_OfflineSel_Signal1BTag = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hNum_CSV_RefTrg_OfflineSel_Signal1BTag", "CSV", 20, 0, 1);
   hNum_CSV_RefTrg_OfflineSel_Signal2BTag = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hNum_CSV_RefTrg_OfflineSel_Signal2BTag", "CSV", 20, 0, 1);
   hNum_CSV_RefTrg_OfflineSel_SignalOR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hNum_CSV_RefTrg_OfflineSel_SignalOR"   , "CSV", 20, 0, 1);
   hNum_CSV_RefTrg_OfflineSel_SignalOR_PFJet450    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hNum_CSV_RefTrg_OfflineSel_SignalOR_PFJet450"   , "CSV", 20, 0, 1);
-
+  
   //Jet Multi
   hNum_JetMulti_RefTrg_OfflineSel_Signal1BTag = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hNum_JetMulti_RefTrg_OfflineSel_Signal1BTag", "nJets", 10, 4.5, 14.5);
   hNum_JetMulti_RefTrg_OfflineSel_Signal2BTag = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hNum_JetMulti_RefTrg_OfflineSel_Signal2BTag", "nJets", 10, 4.5, 14.5);
   hNum_JetMulti_RefTrg_OfflineSel_SignalOR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hNum_JetMulti_RefTrg_OfflineSel_SignalOR"   , "nJets", 10, 4.5, 14.5);
   hNum_JetMulti_RefTrg_OfflineSel_SignalOR_PFJet450    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hNum_JetMulti_RefTrg_OfflineSel_SignalOR_PFJet450"   , "nJets", 10, 4.5, 14.5);
-
+  
   //b-Jet Multi
   hNum_BJetMulti_RefTrg_OfflineSel_Signal1BTag = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hNum_BJetMulti_RefTrg_OfflineSel_Signal1BTag", "nBJets", 7, 0.5, 7.5);
   hNum_BJetMulti_RefTrg_OfflineSel_Signal2BTag = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hNum_BJetMulti_RefTrg_OfflineSel_Signal2BTag", "nBJets", 7, 0.5, 7.5);
   hNum_BJetMulti_RefTrg_OfflineSel_SignalOR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hNum_BJetMulti_RefTrg_OfflineSel_SignalOR"   , "nBJets", 7, 0.5, 7.5);
   hNum_BJetMulti_RefTrg_OfflineSel_SignalOR_PFJet450    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "hNum_BJetMulti_RefTrg_OfflineSel_SignalOR_PFJet450"   , "nBJets", 7, 0.5, 7.5);
-  //---------------------------------------------------------------------
-
+  
+  
   //---------------------------------------------------------------------
   // In slices of HT and the pt of the 6th Jet
   //---------------------------------------------------------------------
@@ -413,68 +414,125 @@ void JetTriggersSF::setupBranches(BranchManager& branchManager) {
 
 
 void JetTriggersSF::process(Long64_t entry) {
-
+  
   //====== Initialize
   fCommonPlots.initialize();
   fCommonPlots.setFactorisationBinForEvent(std::vector<float> {});
-
   cAllEvents.increment();
 
   // ===============================================================================================
   //  1) Apply Reference Trigger
   // ===============================================================================================
-  TriggerName = "HLT_IsoMu24";
-  bool Passed_HLT_IsoMu24 = fEvent.passHLTDecisionByName(TriggerName);
-  if (!Passed_HLT_IsoMu24) return;
+  if (0) std::cout<<"=== Control Trigger" << std::endl;
+  if ( !(fEvent.passTriggerDecision()) ) return;
   cControlTrigger.increment();
-  //================================================================================================   
   
-  // ===============================================================================================
-  //  2) Offline Selection
-  // ===============================================================================================
-  // ---------------- MET filters (to remove events with spurious sources of fake MET) -------------
+  //================================================================================================
+  // 2) MET filters (to remove events with spurious sources of fake MET)
+  //================================================================================================
   if (0) std::cout << "=== MET Filter" << std::endl;
   const METFilterSelection::Data metFilterData = fMETFilterSelection.analyze(fEvent);
   if (!metFilterData.passedSelection()) return;
-  fCommonPlots.fillControlPlotsAfterMETFilter(fEvent);  
-
-  //  ----------------------------- Primarty Vertex (Check that a PV exists) -----------------------
+  fCommonPlots.fillControlPlotsAfterMETFilter(fEvent);
+  
+  //================================================================================================
+  // 3) Primarty Vertex (Check that a PV exists)
+  //================================================================================================
   if (0) std::cout << "=== Vertices" << std::endl;
   int nVertices = fEvent.vertexInfo().value();
-  fCommonPlots.setNvertices(nVertices);
   if (nVertices < 1) return;
   cVertexSelection.increment();
   fCommonPlots.fillControlPlotsAtVertexSelection(fEvent);
-
-  // -------------------------------------- Electron Veto --------------------------------------------
-  // Electron veto (Orthogonality)
+  
+  //================================================================================================
+  // 4) Electron veto (Fully hadronic + orthogonality)
+  //================================================================================================
   if (0) std::cout << "=== Electron veto" << std::endl;
   const ElectronSelection::Data eData = fElectronSelection.analyze(fEvent);
   if (eData.hasIdentifiedElectrons()) return;
-
-  // Tau Veto (HToTauNu Orthogonality)
-  if (0) std::cout << "=== Tau-Veto" << std::endl;
-  const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
-  if (tauData.hasIdentifiedTaus() ) return;
-
-  // -------------------------------------- Muon Selection --------------------------------------------
-  if (0) std::cout << "=== Muon veto/selection" << std::endl;
+  
+  //================================================================================================
+  // 5) Muon selection
+  //================================================================================================
+  if (0) std::cout << "=== Muon selection" << std::endl;
   const MuonSelection::Data muData = fMuonSelection.analyze(fEvent);
   if (!muData.hasIdentifiedMuons()) return;
   if (muData.getSelectedMuons().size()>1) return;
-
   
-  // ------------------------------------- Jet Selection -------------------------------------------
+  //================================================================================================
+  // 6) Tau veto (HToTauNu Orthogonality)
+  //================================================================================================
+  if (0) std::cout << "=== Tau Veto" << std::endl;
+  const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
+  if (tauData.hasIdentifiedTaus() ) return;
+  
+  //================================================================================================ 
+  // 7) Jet selection
+  //================================================================================================
   if (0) std::cout << "=== Jet selection" << std::endl;
   const JetSelection::Data jetData = fJetSelection.analyzeWithoutTau(fEvent);
   if (!jetData.passedSelection()) return;
-
-  // ------------------------------------ BJet selection -------------------------------------------
+  fCommonPlots.fillControlPlotsAfterTopologicalSelections(fEvent, true);
+  
+  //================================================================================================
+  // 8) BJet selection
+  //================================================================================================
   if (0) std::cout << "=== BJet selection" << std::endl;
   const BJetSelection::Data bjetData = fBJetSelection.analyze(fEvent, jetData);
   if (!bjetData.passedSelection()) return;
+  // fCommonPlots.fillControlPlotsAfterBJetSelection(fEvent, bjetData); 
+  
+  //================================================================================================
+  // 9) BJet SF
+  //================================================================================================
+  if (0) std::cout << "=== BJet SF" << std::endl;
+  if (fEvent.isMC())
+    {
+      fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
+    }
+  cBTaggingSFCounter.increment();
+  
+  //================================================================================================
+  // - MET selection
+  //================================================================================================
+  if (0) std::cout << "=== MET selection" << std::endl;
+  const METSelection::Data METData = fMETSelection.silentAnalyze(fEvent, nVertices);
+  // if (!METData.passedSelection()) return; 
+  
   //================================================================================================   
-
+  // Mu Isolation from selected jets.  
+  //================================================================================================
+  Double_t dRMin = 100.0;
+  
+  for(Size_t imu =0; imu < muData.getSelectedMuons().size(); imu++)
+    {
+      Double_t MuEta = muData.getSelectedMuons().at(imu).eta();
+      Double_t MuPhi = muData.getSelectedMuons().at(imu).phi();	
+      for(Size_t ijet = 0; ijet<jetData.getSelectedJets().size(); ijet++)
+	{
+	  Double_t JetEta = jetData.getSelectedJets().at(ijet).eta();
+	  Double_t JetPhi = jetData.getSelectedJets().at(ijet).phi();
+	  
+	  Double_t dRJetMu =  DeltaR(MuEta, JetEta, MuPhi, JetPhi);
+	  
+	  if(dRJetMu < dRMin)
+	    {
+	      dRMin = dRJetMu;
+	    }
+	}//loop on jets
+    }//loop on Mu
+  
+  hdRminJetM->Fill(dRMin);
+  
+  // comment these out to run withouf dR cut
+  if(dRMin < 0.4) return;
+  
+  //======================================================================================================
+  // All Selections: TopSelection & QGLR Selection & FatJetSelection not needed for the eff. measurement
+  //======================================================================================================
+  if (0) std::cout << "=== All Selections" << std::endl;
+  cSelected.increment();
+  
   //================================================================================================
   // Measurement dependent offline selection 
   //================================================================================================   
@@ -485,93 +543,54 @@ void JetTriggersSF::process(Long64_t entry) {
   
   Bool_t isEffvsPT = false;
   Bool_t isEffvsHT = false;
-
+  
+  Double_t HT_selJets = jetData.HT(); 
   Double_t pt_6thJet = jetData.getSelectedJets().at(5).pt();
   Double_t pt_7thJet = jetData.getSelectedJets().at(6).pt();
-
-  if(pt_6thJet > 40.0 && pt_7thJet > 30.0) // when measuring Eff w.r.t Ht, standard jet pt cut applied on events. pt cut  [40.0, 40.0, 40.0, 40.0, 40.0, 40.0, 30.0] 
+  
+  // Measuring Eff Vs. Ht, standard jet pt cut applied on events. pt cut  [40.0, 40.0, 40.0, 40.0, 40.0, 40.0, 30.0] 
+  if(pt_6thJet > 40.0 && pt_7thJet > 30.0)
     isEffvsHT= true;
   
-  Double_t HT_selJets = jetData.HT(); // when measuring Eff w.r.t pt6thJet, standard Ht cut applied on events. Ht cut 500.0 
+  // Measuring Eff Vs. pt6thJet, standard Ht cut applied on events. Ht cut 500.0 
   if(HT_selJets >= 500.0)
     isEffvsPT = true;
-
-  Bool_t isEffvsOthers = isEffvsPT and isEffvsHT; // for other variables, standard cut on pt and Ht is applied on the events.
-  //================================================================================================   
-
-
   
-  //================================================================================================   
-  // 3)  Mu Isolation from selected jets.  
-  //================================================================================================
-   Double_t dRMin = 100.0;
-
-   for(Size_t imu =0; imu < muData.getSelectedMuons().size(); imu++)
-     {
-       Double_t MuEta = muData.getSelectedMuons().at(imu).eta();
-       Double_t MuPhi = muData.getSelectedMuons().at(imu).phi();	
-       for(Size_t ijet = 0; ijet<jetData.getSelectedJets().size(); ijet++)
-	 {
-	   Double_t JetEta = jetData.getSelectedJets().at(ijet).eta();
-	   Double_t JetPhi = jetData.getSelectedJets().at(ijet).phi();
-	   
-	   Double_t dRJetMu =  DeltaR(MuEta, JetEta,
-				      MuPhi, JetPhi);
-	   
-	   if(dRJetMu < dRMin)
-	     {
-	       dRMin = dRJetMu;
-	     }
-	 }//loop on jets
-     }//loop on Mu
-   
-   hdRminJetM->Fill(dRMin);
-   
-   if(dRMin < 0.4) // comment these out to run withouf dR cut
-     return;
-   //================================================================================================  
-   
+  // Measuring Eff Vs. other variables, standard cut on pt and Ht is applied on the events.
+  Bool_t isEffvsOthers = isEffvsPT and isEffvsHT; 
   
-  //================================================================================================
-  // All cuts passed
-  //================================================================================================
-  if (0) std::cout << "=== All cuts passed" << std::endl;
-  cSelected.increment();
-
-
-
+  
     
   //================================================================================================   
-  // 4)  Signal triggers  
+  // Signal triggers  
   //================================================================================================   
-  if (0) std::cout << "=== Trigger" << std::endl;
-
+  if (0) std::cout << "=== Signal Trigger" << std::endl;
+  
   // Triggers
   TriggerName = "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056";
   bool Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056 = fEvent.passHLTDecisionByName(TriggerName);
   
   TriggerName = "HLT_PFHT450_SixJet40_BTagCSV_p056";
   bool Passed_HLT_PFHT450_SixJet40_BTagCSV_p056 = fEvent.passHLTDecisionByName(TriggerName);
-
+  
   TriggerName = "HLT_PFJet450";                                           
   bool Passed_HLT_PFJet450 = fEvent.passHLTDecisionByName(TriggerName);
   
-  bool Passed_OR                            = Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056 or Passed_HLT_PFHT450_SixJet40_BTagCSV_p056;
-  bool Passed_OR_PFJet450                   = Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056 or Passed_HLT_PFHT450_SixJet40_BTagCSV_p056 or Passed_HLT_PFJet450;
-
+  bool Passed_OR           = Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056 or Passed_HLT_PFHT450_SixJet40_BTagCSV_p056;
+  bool Passed_OR_PFJet450  = Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056 or Passed_HLT_PFHT450_SixJet40_BTagCSV_p056 or Passed_HLT_PFJet450;
+  
   if (Passed_HLT_PFHT450_SixJet40_BTagCSV_p056)       cTrigger_1BTag.increment();
   if (Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056) cTrigger_2BTag.increment();
   if (Passed_OR)                                      cTrigger_OR.increment();
   if (Passed_OR_PFJet450)                             cTrigger_OR_PFJet450.increment();
-  //================================================================================================   
+  
 
   // ===============================================================================================
   //   Accessing variables to measure Trigger Efficiency
   // ===============================================================================================
-  
   double Pt6thJet  = jetData.getSelectedJets().at(5).pt();
-  double Eta6thJet  = jetData.getSelectedJets().at(5).eta();
-  double Phi6thJet  = jetData.getSelectedJets().at(5).phi();
+  double Eta6thJet = jetData.getSelectedJets().at(5).eta();
+  double Phi6thJet = jetData.getSelectedJets().at(5).phi();
   double HT        = jetData.HT();
   int    PU        = nVertices;
   int    nBTagJets = bjetData.getNumberOfSelectedBJets();
@@ -581,337 +600,369 @@ void JetTriggersSF::process(Long64_t entry) {
   // ===============================================================================================
   // Measurement Trigger Efficiencies
   // ===============================================================================================
-
-  //------------------------------------------
+  
   // Fill Denominator Plots
-  //-------------------------------------------
   if(isEffvsPT)
-    hDen_pt6thJet_RefTrg_OfflineSel   -> Fill(Pt6thJet);
+    {
+      hDen_pt6thJet_RefTrg_OfflineSel   -> Fill(Pt6thJet);
+    }
+  
   if(isEffvsHT)
-    hDen_Ht_RefTrg_OfflineSel         -> Fill(HT);
-  if(isEffvsOthers){
-    hDen_eta6thJet_RefTrg_OfflineSel  -> Fill(Eta6thJet);
-    hDen_phi6thJet_RefTrg_OfflineSel  -> Fill(Phi6thJet);
-    hDen_pu_RefTrg_OfflineSel         -> Fill(PU);
-    hDen_nBTagJets_RefTrg_OfflineSel  -> Fill(nBTagJets);
-    hDen_JetMulti_RefTrg_OfflineSel   -> Fill(nJets);
-    hDen_BJetMulti_RefTrg_OfflineSel  -> Fill(nBJets);
-  }
-  //------------------------------------------
-
-  //------------------------------------------
+    {
+      hDen_Ht_RefTrg_OfflineSel         -> Fill(HT);
+    }
+  
+  if(isEffvsOthers)
+    {
+      hDen_eta6thJet_RefTrg_OfflineSel  -> Fill(Eta6thJet);
+      hDen_phi6thJet_RefTrg_OfflineSel  -> Fill(Phi6thJet);
+      hDen_pu_RefTrg_OfflineSel         -> Fill(PU);
+      hDen_nBTagJets_RefTrg_OfflineSel  -> Fill(nBTagJets);
+      hDen_JetMulti_RefTrg_OfflineSel   -> Fill(nJets);
+      hDen_BJetMulti_RefTrg_OfflineSel  -> Fill(nBJets);
+    }
+    
+  
   // Fill Numerator Plots
-  //------------------------------------------
-  //1-B Tag Trigger 
-  //------------------------------------------
-  if (Passed_HLT_PFHT450_SixJet40_BTagCSV_p056){
-    if(isEffvsPT)
-      hNum_pt6thJet_RefTrg_OfflineSel_Signal1BTag  -> Fill(Pt6thJet);
-    if(isEffvsHT)
-      hNum_Ht_RefTrg_OfflineSel_Signal1BTag        -> Fill(HT);
-    if(isEffvsOthers){
-      hNum_eta6thJet_RefTrg_OfflineSel_Signal1BTag -> Fill(Eta6thJet);
-      hNum_phi6thJet_RefTrg_OfflineSel_Signal1BTag -> Fill(Phi6thJet);
-      hNum_pu_RefTrg_OfflineSel_Signal1BTag        -> Fill(PU);
-      hNum_nBTagJets_RefTrg_OfflineSel_Signal1BTag -> Fill(nBTagJets);
-      hNum_JetMulti_RefTrg_OfflineSel_Signal1BTag  -> Fill(nJets);
-      hNum_BJetMulti_RefTrg_OfflineSel_Signal1BTag -> Fill(nBJets);
-    }
-    
-  }
-  //------------------------------------------
-  //2-B Tag Trigger 
-  //------------------------------------------
-  if (Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056){
-    if(isEffvsPT)
-      hNum_pt6thJet_RefTrg_OfflineSel_Signal2BTag  -> Fill(Pt6thJet);
-    if(isEffvsHT)
-      hNum_Ht_RefTrg_OfflineSel_Signal2BTag        -> Fill(HT);
-    if(isEffvsOthers){
-      hNum_eta6thJet_RefTrg_OfflineSel_Signal2BTag -> Fill(Eta6thJet);
-      hNum_phi6thJet_RefTrg_OfflineSel_Signal2BTag -> Fill(Phi6thJet);
-      hNum_pu_RefTrg_OfflineSel_Signal2BTag        -> Fill(PU);
-      hNum_nBTagJets_RefTrg_OfflineSel_Signal2BTag -> Fill(nBTagJets);
-      hNum_JetMulti_RefTrg_OfflineSel_Signal2BTag  -> Fill(nJets);
-      hNum_BJetMulti_RefTrg_OfflineSel_Signal2BTag -> Fill(nBJets);
-    }
-    
-  }
-  //------------------------------------------
-  //OR Trigger 
-  //------------------------------------------
-  if (Passed_OR){
-    if(isEffvsPT)
-      hNum_pt6thJet_RefTrg_OfflineSel_SignalOR   -> Fill(Pt6thJet);
-    if(isEffvsHT)
-      hNum_Ht_RefTrg_OfflineSel_SignalOR         -> Fill(HT);
-    if(isEffvsOthers){
-      hNum_eta6thJet_RefTrg_OfflineSel_SignalOR  -> Fill(Eta6thJet);
-      hNum_phi6thJet_RefTrg_OfflineSel_SignalOR  -> Fill(Phi6thJet);
-      hNum_pu_RefTrg_OfflineSel_SignalOR         -> Fill(PU);
-      hNum_nBTagJets_RefTrg_OfflineSel_SignalOR  -> Fill(nBTagJets);
-      hNum_JetMulti_RefTrg_OfflineSel_SignalOR   -> Fill(nJets);
-      hNum_BJetMulti_RefTrg_OfflineSel_SignalOR  -> Fill(nBJets);
-    }
-  }
-  //------------------------------------------
-  //Or + PFJet450 Trigger 
-  //------------------------------------------
-  if(Passed_OR_PFJet450)
+  
+  // Single B-Tag Trigger 
+  if (Passed_HLT_PFHT450_SixJet40_BTagCSV_p056)
     {
       if(isEffvsPT)
-	hNum_pt6thJet_RefTrg_OfflineSel_SignalOR_PFJet450   -> Fill(Pt6thJet);
+	{
+	  hNum_pt6thJet_RefTrg_OfflineSel_Signal1BTag -> Fill(Pt6thJet);
+	}
+      
       if(isEffvsHT)
-	hNum_Ht_RefTrg_OfflineSel_SignalOR_PFJet450         -> Fill(HT);
-      if(isEffvsOthers){
-	hNum_eta6thJet_RefTrg_OfflineSel_SignalOR_PFJet450  -> Fill(Eta6thJet);
-	hNum_phi6thJet_RefTrg_OfflineSel_SignalOR_PFJet450  -> Fill(Phi6thJet);
-	hNum_pu_RefTrg_OfflineSel_SignalOR_PFJet450         -> Fill(PU);
-	hNum_nBTagJets_RefTrg_OfflineSel_SignalOR_PFJet450  -> Fill(nBTagJets);
-	hNum_JetMulti_RefTrg_OfflineSel_SignalOR_PFJet450   -> Fill(nJets);
-	hNum_BJetMulti_RefTrg_OfflineSel_SignalOR_PFJet450  -> Fill(nBJets);
-      }
+	{
+	  hNum_Ht_RefTrg_OfflineSel_Signal1BTag -> Fill(HT);
+	}
+      
+      if(isEffvsOthers)
+	{
+	  hNum_eta6thJet_RefTrg_OfflineSel_Signal1BTag -> Fill(Eta6thJet);
+	  hNum_phi6thJet_RefTrg_OfflineSel_Signal1BTag -> Fill(Phi6thJet);
+	  hNum_pu_RefTrg_OfflineSel_Signal1BTag        -> Fill(PU);
+	  hNum_nBTagJets_RefTrg_OfflineSel_Signal1BTag -> Fill(nBTagJets);
+	  hNum_JetMulti_RefTrg_OfflineSel_Signal1BTag  -> Fill(nJets);
+	  hNum_BJetMulti_RefTrg_OfflineSel_Signal1BTag -> Fill(nBJets);
+	}
     }
-  //------------------------------------------
+ 
+  // Double B-Tag Trigger 
+  if (Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056)
+    {
+      if (isEffvsPT)
+	{
+	  hNum_pt6thJet_RefTrg_OfflineSel_Signal2BTag  -> Fill(Pt6thJet);
+	}
+      
+      if (isEffvsHT)
+	{
+	  hNum_Ht_RefTrg_OfflineSel_Signal2BTag        -> Fill(HT);
+	}
+      
+      if (isEffvsOthers)
+	{
+	  hNum_eta6thJet_RefTrg_OfflineSel_Signal2BTag -> Fill(Eta6thJet);
+	  hNum_phi6thJet_RefTrg_OfflineSel_Signal2BTag -> Fill(Phi6thJet);
+	  hNum_pu_RefTrg_OfflineSel_Signal2BTag        -> Fill(PU);
+	  hNum_nBTagJets_RefTrg_OfflineSel_Signal2BTag -> Fill(nBTagJets);
+	  hNum_JetMulti_RefTrg_OfflineSel_Signal2BTag  -> Fill(nJets);
+	  hNum_BJetMulti_RefTrg_OfflineSel_Signal2BTag -> Fill(nBJets);
+	}
+    }
   
+  
+  // OR Trigger
+  if (Passed_OR)
+    {
+      if (isEffvsPT){
+	hNum_pt6thJet_RefTrg_OfflineSel_SignalOR   -> Fill(Pt6thJet);
+      }
+      
+      if (isEffvsHT){
+	hNum_Ht_RefTrg_OfflineSel_SignalOR         -> Fill(HT);
+      }
+      
+      if (isEffvsOthers)
+	{
+	  hNum_eta6thJet_RefTrg_OfflineSel_SignalOR  -> Fill(Eta6thJet);
+	  hNum_phi6thJet_RefTrg_OfflineSel_SignalOR  -> Fill(Phi6thJet);
+	  hNum_pu_RefTrg_OfflineSel_SignalOR         -> Fill(PU);
+	  hNum_nBTagJets_RefTrg_OfflineSel_SignalOR  -> Fill(nBTagJets);
+	  hNum_JetMulti_RefTrg_OfflineSel_SignalOR   -> Fill(nJets);
+	  hNum_BJetMulti_RefTrg_OfflineSel_SignalOR  -> Fill(nBJets);
+	}
+    }
+  
+  // OR + PFJet450 Trigger 
+  if (Passed_OR_PFJet450)
+    {
+      if (isEffvsPT)
+	{
+	  hNum_pt6thJet_RefTrg_OfflineSel_SignalOR_PFJet450   -> Fill(Pt6thJet);
+	}
+      if (isEffvsHT)
+	{
+	  hNum_Ht_RefTrg_OfflineSel_SignalOR_PFJet450         -> Fill(HT);
+	}
+      if (isEffvsOthers)
+	{
+	  hNum_eta6thJet_RefTrg_OfflineSel_SignalOR_PFJet450  -> Fill(Eta6thJet);
+	  hNum_phi6thJet_RefTrg_OfflineSel_SignalOR_PFJet450  -> Fill(Phi6thJet);
+	  hNum_pu_RefTrg_OfflineSel_SignalOR_PFJet450         -> Fill(PU);
+	  hNum_nBTagJets_RefTrg_OfflineSel_SignalOR_PFJet450  -> Fill(nBTagJets);
+	  hNum_JetMulti_RefTrg_OfflineSel_SignalOR_PFJet450   -> Fill(nJets);
+	  hNum_BJetMulti_RefTrg_OfflineSel_SignalOR_PFJet450  -> Fill(nBJets);
+	}
+    }
+
   
   // ----------------------------------------------------------
   //  Fill Plots with slices in HT and the Pt of the 6th Jet
   // ----------------------------------------------------------
-  //Slices of HT
-  if(HT>=450 && HT<600)
+  
+  // Slices of HT
+  if (HT>=450 && HT<600)
     {
       if(0) std::cout<<"\n\tHT>=450 && HT<600\t"<<HT<<std::endl;
       
       // Fill Denominator Plots
-      h_Den_pt6thJet_Vs_450ht600_RefTrg_OfflineSel  -> Fill(Pt6thJet);
+      h_Den_pt6thJet_Vs_450ht600_RefTrg_OfflineSel -> Fill(Pt6thJet);
       
       // Fill Numerator Plots
-      if (Passed_HLT_PFHT450_SixJet40_BTagCSV_p056){
-	h_Num_pt6thJet_Vs_450ht600_RefTrg_OfflineSel_1BTag -> Fill(Pt6thJet);
-      }
-      if (Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056){
-        h_Num_pt6thJet_Vs_450ht600_RefTrg_OfflineSel_2BTag -> Fill(Pt6thJet);
-      }
-      if (Passed_OR){
-	h_Num_pt6thJet_Vs_450ht600_RefTrg_OfflineSel_OR    -> Fill(Pt6thJet);
-      } 
-
-    } // end   if(HT>=450 && HT<600)
-  
-  else if(HT>=600 && HT<800)
+      if (Passed_HLT_PFHT450_SixJet40_BTagCSV_p056)
+	{
+	  h_Num_pt6thJet_Vs_450ht600_RefTrg_OfflineSel_1BTag -> Fill(Pt6thJet);
+	}
+      if (Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056)
+	{
+	  h_Num_pt6thJet_Vs_450ht600_RefTrg_OfflineSel_2BTag -> Fill(Pt6thJet);
+	}
+      if (Passed_OR)
+	{
+	  h_Num_pt6thJet_Vs_450ht600_RefTrg_OfflineSel_OR -> Fill(Pt6thJet);
+	} 
+    }
+  else if (HT>=600 && HT<800)
     {
       if(0) std::cout<<"\n\tHT>=600 && HT<800\t"<<HT<<std::endl;
-
+      
       // Fill Denominator Plots
-      h_Den_pt6thJet_Vs_600ht800_RefTrg_OfflineSel  -> Fill(Pt6thJet);
+      h_Den_pt6thJet_Vs_600ht800_RefTrg_OfflineSel -> Fill(Pt6thJet);
       
       // Fill Numerator Plots
-      if (Passed_HLT_PFHT450_SixJet40_BTagCSV_p056){
-	h_Num_pt6thJet_Vs_600ht800_RefTrg_OfflineSel_1BTag -> Fill(Pt6thJet);
-      }
-      if (Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056){
-        h_Num_pt6thJet_Vs_600ht800_RefTrg_OfflineSel_2BTag -> Fill(Pt6thJet);
-      }
-      if (Passed_OR){
-	h_Num_pt6thJet_Vs_600ht800_RefTrg_OfflineSel_OR    -> Fill(Pt6thJet);
-      } 
-
-      
-    } // end   if(HT>=600 && HT<800)
-  
-  else if(HT>=800 && HT<1000)
+      if (Passed_HLT_PFHT450_SixJet40_BTagCSV_p056)
+	{
+	  h_Num_pt6thJet_Vs_600ht800_RefTrg_OfflineSel_1BTag -> Fill(Pt6thJet);
+	}
+      if (Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056)
+	{
+	  h_Num_pt6thJet_Vs_600ht800_RefTrg_OfflineSel_2BTag -> Fill(Pt6thJet);
+	}
+      if (Passed_OR)
+	{
+	  h_Num_pt6thJet_Vs_600ht800_RefTrg_OfflineSel_OR -> Fill(Pt6thJet);
+	} 
+    }
+  else if (HT>=800 && HT<1000)
     {
       if(0) std::cout<<"\n\tHT>=800 && HT<1000\t"<<HT<<std::endl;
-
+      
       // Fill Denominator Plots
       h_Den_pt6thJet_Vs_800ht1000_RefTrg_OfflineSel  -> Fill(Pt6thJet);
       
       // Fill Numerator Plots
-      if (Passed_HLT_PFHT450_SixJet40_BTagCSV_p056){
-	h_Num_pt6thJet_Vs_800ht1000_RefTrg_OfflineSel_1BTag -> Fill(Pt6thJet);
-      }
-      if (Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056){
-        h_Num_pt6thJet_Vs_800ht1000_RefTrg_OfflineSel_2BTag -> Fill(Pt6thJet);
-      }
-      if (Passed_OR){
-	h_Num_pt6thJet_Vs_800ht1000_RefTrg_OfflineSel_OR    -> Fill(Pt6thJet);
-      } 
-
-    } // end   if(HT>=800 && HT<1000)
-  
-  else if(HT>=1000 && HT<1250)
+      if (Passed_HLT_PFHT450_SixJet40_BTagCSV_p056)
+	{
+	  h_Num_pt6thJet_Vs_800ht1000_RefTrg_OfflineSel_1BTag -> Fill(Pt6thJet);
+	}
+      if (Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056)
+	{
+	  h_Num_pt6thJet_Vs_800ht1000_RefTrg_OfflineSel_2BTag -> Fill(Pt6thJet);
+	}
+      if (Passed_OR)
+	{
+	  h_Num_pt6thJet_Vs_800ht1000_RefTrg_OfflineSel_OR -> Fill(Pt6thJet);
+	} 
+    }  
+  else if (HT>=1000 && HT<1250)
     {
       if(0) std::cout<<"\n\tHT>=1000 && HT<1250\t"<<HT<<std::endl;
-
+      
       // Fill Denominator Plots
       h_Den_pt6thJet_Vs_1000ht1250_RefTrg_OfflineSel  -> Fill(Pt6thJet);
       
       // Fill Numerator Plots
-      if (Passed_HLT_PFHT450_SixJet40_BTagCSV_p056){
-	h_Num_pt6thJet_Vs_1000ht1250_RefTrg_OfflineSel_1BTag -> Fill(Pt6thJet);
-      }
-      if (Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056){
-        h_Num_pt6thJet_Vs_1000ht1250_RefTrg_OfflineSel_2BTag -> Fill(Pt6thJet);
-      }
-      if (Passed_OR){
-	h_Num_pt6thJet_Vs_1000ht1250_RefTrg_OfflineSel_OR    -> Fill(Pt6thJet);
-      } 
-      
-      
-    } // end   if(HT>=1000 && HT<1250)
-  
-  else if(HT>=1250 && HT<1500)
+      if (Passed_HLT_PFHT450_SixJet40_BTagCSV_p056)
+	{
+	  h_Num_pt6thJet_Vs_1000ht1250_RefTrg_OfflineSel_1BTag -> Fill(Pt6thJet);
+	}
+      if (Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056)
+	{
+	  h_Num_pt6thJet_Vs_1000ht1250_RefTrg_OfflineSel_2BTag -> Fill(Pt6thJet);
+	}
+      if (Passed_OR)
+	{
+	  h_Num_pt6thJet_Vs_1000ht1250_RefTrg_OfflineSel_OR -> Fill(Pt6thJet);
+	} 
+    }   
+  else if (HT>=1250 && HT<1500)
     {
       if(0) std::cout<<"\n\tHT>=1250 && HT<1500\t"<<HT<<std::endl;
       
       // Fill Denominator Plots
-      h_Den_pt6thJet_Vs_1250ht1500_RefTrg_OfflineSel  -> Fill(Pt6thJet);
+      h_Den_pt6thJet_Vs_1250ht1500_RefTrg_OfflineSel -> Fill(Pt6thJet);
       
       // Fill Numerator Plots
-      if (Passed_HLT_PFHT450_SixJet40_BTagCSV_p056){
-	h_Num_pt6thJet_Vs_1250ht1500_RefTrg_OfflineSel_1BTag -> Fill(Pt6thJet);
-      }
-      if (Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056){
-        h_Num_pt6thJet_Vs_1250ht1500_RefTrg_OfflineSel_2BTag -> Fill(Pt6thJet);
-      }
-      if (Passed_OR){
-	h_Num_pt6thJet_Vs_1250ht1500_RefTrg_OfflineSel_OR    -> Fill(Pt6thJet);
-      } 
-     
-      
-    } // end   if(HT>=1250 && HT<1500)
-  
-  else if(HT>=1500 && HT<2000)
+      if (Passed_HLT_PFHT450_SixJet40_BTagCSV_p056)
+	{
+	  h_Num_pt6thJet_Vs_1250ht1500_RefTrg_OfflineSel_1BTag -> Fill(Pt6thJet);
+	}
+      if (Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056)
+	{
+	  h_Num_pt6thJet_Vs_1250ht1500_RefTrg_OfflineSel_2BTag -> Fill(Pt6thJet);
+	}
+      if (Passed_OR)
+	{
+	  h_Num_pt6thJet_Vs_1250ht1500_RefTrg_OfflineSel_OR -> Fill(Pt6thJet);
+	} 
+    }  
+  else if (HT>=1500 && HT<2000)
     {
       if(0) std::cout<<"\n\tHT>=1500 && HT<2000\t"<<HT<<std::endl;
-
-
+            
       // Fill Denominator Plots
-      h_Den_pt6thJet_Vs_1500ht2000_RefTrg_OfflineSel  -> Fill(Pt6thJet);
+      h_Den_pt6thJet_Vs_1500ht2000_RefTrg_OfflineSel -> Fill(Pt6thJet);
       
       // Fill Numerator Plots
-      if (Passed_HLT_PFHT450_SixJet40_BTagCSV_p056){
-	h_Num_pt6thJet_Vs_1500ht2000_RefTrg_OfflineSel_1BTag -> Fill(Pt6thJet);
-      }
-      if (Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056){
-        h_Num_pt6thJet_Vs_1500ht2000_RefTrg_OfflineSel_2BTag -> Fill(Pt6thJet);
-      }
-      if (Passed_OR){
-	h_Num_pt6thJet_Vs_1500ht2000_RefTrg_OfflineSel_OR    -> Fill(Pt6thJet);
-      }
-      
-    } // end   if(HT>=1500 && HT<2000)
-
-
-
+      if (Passed_HLT_PFHT450_SixJet40_BTagCSV_p056)
+	{
+	  h_Num_pt6thJet_Vs_1500ht2000_RefTrg_OfflineSel_1BTag -> Fill(Pt6thJet);
+	}
+      if (Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056)
+	{
+	  h_Num_pt6thJet_Vs_1500ht2000_RefTrg_OfflineSel_2BTag -> Fill(Pt6thJet);
+	}
+      if (Passed_OR)
+	{
+	  h_Num_pt6thJet_Vs_1500ht2000_RefTrg_OfflineSel_OR -> Fill(Pt6thJet);
+	}
+    }
+  
+  
   if(Pt6thJet>=40 && Pt6thJet<50)
     {
       if(0) std::cout<<"\n\tPt6thJet>=40 && Pt6thJet<50\t"<<Pt6thJet<<std::endl;      
       
       // Fill Denominator Plots
-      h_Den_ht_Vs_40pt50_RefTrg_OfflineSel        -> Fill(HT);
+      h_Den_ht_Vs_40pt50_RefTrg_OfflineSel -> Fill(HT);
       
       // Fill Numerator Plots
-      if (Passed_HLT_PFHT450_SixJet40_BTagCSV_p056){
-	h_Num_ht_Vs_40pt50_RefTrg_OfflineSel_1BTag       -> Fill(HT);
-      }
-      if (Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056){
-        h_Num_ht_Vs_40pt50_RefTrg_OfflineSel_2BTag       -> Fill(HT);
-      }
-      if (Passed_OR){
-        h_Num_ht_Vs_40pt50_RefTrg_OfflineSel_OR          -> Fill(HT);
-      }
-
-
+      if (Passed_HLT_PFHT450_SixJet40_BTagCSV_p056)
+	{
+	  h_Num_ht_Vs_40pt50_RefTrg_OfflineSel_1BTag -> Fill(HT);
+	}
+      if (Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056)
+	{
+	  h_Num_ht_Vs_40pt50_RefTrg_OfflineSel_2BTag -> Fill(HT);
+	}
+      if (Passed_OR)
+	{
+	  h_Num_ht_Vs_40pt50_RefTrg_OfflineSel_OR -> Fill(HT);
+	}
     }
+  
   if(Pt6thJet>=50 && Pt6thJet<60)
     {
       if(0) std::cout<<"\n\tPt6thJet>=50 && Pt6thJet<60\t"<<Pt6thJet<<std::endl;      
-
-            
+                  
       // Fill Denominator Plots
-      h_Den_ht_Vs_50pt60_RefTrg_OfflineSel        -> Fill(HT);
+      h_Den_ht_Vs_50pt60_RefTrg_OfflineSel -> Fill(HT);
       
       // Fill Numerator Plots
-      if (Passed_HLT_PFHT450_SixJet40_BTagCSV_p056){
-	h_Num_ht_Vs_50pt60_RefTrg_OfflineSel_1BTag       -> Fill(HT);
-      }
-      if (Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056){
-        h_Num_ht_Vs_50pt60_RefTrg_OfflineSel_2BTag       -> Fill(HT);
-      }
-      if (Passed_OR){
-        h_Num_ht_Vs_50pt60_RefTrg_OfflineSel_OR          -> Fill(HT);
-      }
-
-
-
+      if (Passed_HLT_PFHT450_SixJet40_BTagCSV_p056)
+	{
+	  h_Num_ht_Vs_50pt60_RefTrg_OfflineSel_1BTag -> Fill(HT);
+	}
+      if (Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056)
+	{
+	  h_Num_ht_Vs_50pt60_RefTrg_OfflineSel_2BTag -> Fill(HT);
+	}
+      if (Passed_OR)
+	{
+	  h_Num_ht_Vs_50pt60_RefTrg_OfflineSel_OR -> Fill(HT);
+	}
     }
+  
   if(Pt6thJet>=60 && Pt6thJet<70)
     {
       if(0) std::cout<<"\n\tPt6thJet>=60 && Pt6thJet<70\t"<<Pt6thJet<<std::endl;      
-
-                  
+                        
       // Fill Denominator Plots
-      h_Den_ht_Vs_60pt70_RefTrg_OfflineSel        -> Fill(HT);
+      h_Den_ht_Vs_60pt70_RefTrg_OfflineSel -> Fill(HT);
       
       // Fill Numerator Plots
-      if (Passed_HLT_PFHT450_SixJet40_BTagCSV_p056){
-	h_Num_ht_Vs_60pt70_RefTrg_OfflineSel_1BTag       -> Fill(HT);
-      }
-      if (Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056){
-        h_Num_ht_Vs_60pt70_RefTrg_OfflineSel_2BTag       -> Fill(HT);
-      }
-      if (Passed_OR){
-        h_Num_ht_Vs_60pt70_RefTrg_OfflineSel_OR          -> Fill(HT);
-      }
-
-
-
+      if (Passed_HLT_PFHT450_SixJet40_BTagCSV_p056)
+	{
+	  h_Num_ht_Vs_60pt70_RefTrg_OfflineSel_1BTag -> Fill(HT);
+	}
+      if (Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056)
+	{
+	  h_Num_ht_Vs_60pt70_RefTrg_OfflineSel_2BTag -> Fill(HT);
+	}
+      if (Passed_OR)
+	{
+	  h_Num_ht_Vs_60pt70_RefTrg_OfflineSel_OR -> Fill(HT);
+	}
     }
+ 
   if(Pt6thJet>=70 && Pt6thJet<90)
     {
       if(0) std::cout<<"\n\tPt6thJet>=70 && Pt6thJet<90\t"<<Pt6thJet<<std::endl;      
-
-                  
+                        
       // Fill Denominator Plots
-      h_Den_ht_Vs_70pt90_RefTrg_OfflineSel        -> Fill(HT);
+      h_Den_ht_Vs_70pt90_RefTrg_OfflineSel -> Fill(HT);
       
       // Fill Numerator Plots
-      if (Passed_HLT_PFHT450_SixJet40_BTagCSV_p056){
-	h_Num_ht_Vs_70pt90_RefTrg_OfflineSel_1BTag       -> Fill(HT);
-      }
-      if (Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056){
-        h_Num_ht_Vs_70pt90_RefTrg_OfflineSel_2BTag       -> Fill(HT);
-      }
-      if (Passed_OR){
-        h_Num_ht_Vs_70pt90_RefTrg_OfflineSel_OR          -> Fill(HT);
-      }
-
-      
+      if (Passed_HLT_PFHT450_SixJet40_BTagCSV_p056)
+	{
+	  h_Num_ht_Vs_70pt90_RefTrg_OfflineSel_1BTag -> Fill(HT);
+	}
+      if (Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056)
+	{
+	  h_Num_ht_Vs_70pt90_RefTrg_OfflineSel_2BTag -> Fill(HT);
+	}
+      if (Passed_OR)
+	{
+	  h_Num_ht_Vs_70pt90_RefTrg_OfflineSel_OR -> Fill(HT);
+	}
     }
+  
   if(Pt6thJet>=90 && Pt6thJet<120)
     {
       if(0) std::cout<<"\n\tPt6thJet>=90 && Pt6thJet<120\t"<<Pt6thJet<<std::endl;      
-                        
+      
       // Fill Denominator Plots
-      h_Den_ht_Vs_90pt120_RefTrg_OfflineSel        -> Fill(HT);
+      h_Den_ht_Vs_90pt120_RefTrg_OfflineSel -> Fill(HT);
       
       // Fill Numerator Plots
-      if (Passed_HLT_PFHT450_SixJet40_BTagCSV_p056){
-	h_Num_ht_Vs_90pt120_RefTrg_OfflineSel_1BTag       -> Fill(HT);
-      }
-      if (Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056){
-        h_Num_ht_Vs_90pt120_RefTrg_OfflineSel_2BTag       -> Fill(HT);
-      }
-      if (Passed_OR){
-        h_Num_ht_Vs_90pt120_RefTrg_OfflineSel_OR          -> Fill(HT);
-      }
+      if (Passed_HLT_PFHT450_SixJet40_BTagCSV_p056)
+	{
+	  h_Num_ht_Vs_90pt120_RefTrg_OfflineSel_1BTag -> Fill(HT);
+	}
+      if (Passed_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056)
+	{
+	  h_Num_ht_Vs_90pt120_RefTrg_OfflineSel_2BTag -> Fill(HT);
+	}
+      if (Passed_OR)
+	{
+	  h_Num_ht_Vs_90pt120_RefTrg_OfflineSel_OR -> Fill(HT);
+	}
+    }
   
-
-      }
-  //---------------------
-
+  
   //================================================================================================
   // Finalize
   //================================================================================================
@@ -921,8 +972,7 @@ void JetTriggersSF::process(Long64_t entry) {
 
 double JetTriggersSF::DeltaEta(double eta1, double eta2)
 {
-
-  // See: https://cmssdt.cern.ch/SDT/doxygen/CMSSW_4_4_2/doc/html/d1/d92/DataFormats_2Math_2interface_2deltaPhi_8h_source.html                                                                                             
+  // See: https://cmssdt.cern.ch/SDT/doxygen/CMSSW_4_4_2/doc/html/d1/d92/DataFormats_2Math_2interface_2deltaPhi_8h_source.html       
   double deltaEta = fabs ( eta1 - eta2 );
   return deltaEta;
 
@@ -930,7 +980,7 @@ double JetTriggersSF::DeltaEta(double eta1, double eta2)
 
 double JetTriggersSF::DeltaPhi(double phi1, double phi2)
 {
-  // See: https://cmssdt.cern.ch/SDT/doxygen/CMSSW_4_4_2/doc/html/d1/d92/DataFormats_2Math_2interface_2deltaPhi_8h_source.html                                                                                             
+  // See: https://cmssdt.cern.ch/SDT/doxygen/CMSSW_4_4_2/doc/html/d1/d92/DataFormats_2Math_2interface_2deltaPhi_8h_source.html
   double PI = 3.14159265;
   double result = phi1 - phi2;
   while (result > PI) result -= 2*PI;

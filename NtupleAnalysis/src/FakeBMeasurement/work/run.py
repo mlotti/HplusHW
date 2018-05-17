@@ -194,11 +194,19 @@ def main():
         ## PSet(label="TetrajetBjetPt" , binLowEdges=[80], useAbsoluteValues=False),
         ## PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0], useAbsoluteValues=True), 
         ### Default binning
+        #PSet(label="TetrajetBjetPt" , binLowEdges=[60, 80, 160], useAbsoluteValues=False), # Alexandros (40-60, and 60-80 bins off. others v. good)
+        #PSet(label="TetrajetBjetEta", binLowEdges=[1.0, 1.8], useAbsoluteValues=True), # Alexandros good!
+        #PSet(label="TetrajetBjetPt" , binLowEdges=[80, 160], useAbsoluteValues=False), # Alexandros (40-60, and 60-80 bins off. others good)
+        #PSet(label="TetrajetBjetEta", binLowEdges=[1.0, 1.8], useAbsoluteValues=True), # Alexandros good!
+        #
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[80, 200], useAbsoluteValues=False), # Fotis
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True), # Fotis
+        #
         # PSet(label="TetrajetBjetPt" , binLowEdges=[60, 80, 140, 200], useAbsoluteValues=False), #Fotis
         # PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.5, 2.1], useAbsoluteValues=True),  #Fotis
-        #PSet(label="TetrajetBjetPt" , binLowEdges=[50, 60, 80, 100, 160], useAbsoluteValues=False),
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[50, 60, 80, 100, 160], useAbsoluteValues=False),
         # PSet(label="TetrajetBjetEta", binLowEdges=[0.2, 0.4, 0.6, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True), 
-        PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True), 
+        PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True),  #AN v4
         ### Other attempts
         # PSet(label="TetrajetBjetEta", binLowEdges=[-2.2, -2.0, -1.6, -0.8, -0.4, +0.4, +0.8, +1.6, +2.0, +2.2], useAbsoluteValues=False), 
         # PSet(label="TetrajetBjetPt" , binLowEdges=[100], useAbsoluteValues=False), # C) 

@@ -281,7 +281,6 @@ class ControlPlotMakerHToTB:
             widthSuffix = "%s-%s" % (minBinWidthString, maxBinWidthString)
             if abs(minBinWidth-maxBinWidth) < 0.001:
                 widthSuffix = "%s" % (minBinWidthString)
-
             if (myParams["unit"] == "" and widthSuffix == "1"):
                 return
             else:
@@ -334,6 +333,8 @@ class ControlPlotMakerHToTB:
                 myParams["moveLegend"] = {"dx": -0.53, "dy": -0.40, "dh": 0.14}
             elif myParams["legendPosition"] == "NW":
                 myParams["moveLegend"] = {"dx": -0.53, "dy": -0.02, "dh": 0.14}
+            elif myParams["legendPosition"] == "RM":
+                myParams["moveLegend"] = {"dx": +10.0, "dy": +10.0, "dh": -100.0}
             else:
                 raise Exception("Unknown value for option legendPosition: %s!", myParams["legendPosition"])
             del myParams["legendPosition"]
