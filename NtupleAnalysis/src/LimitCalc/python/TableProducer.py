@@ -1156,9 +1156,10 @@ class TableProducer:
             myOutputLatex += "\\GenuineB background              & %s \\\\ \n" % self.getLatexResultString(Embedding, self.formatStr, self.myPrecision)
         myOutputLatex += "  \\hline\n"
         myOutputLatex += "  Total expected from the SM              & %s \\\\ \n" % self.getLatexResultString(TotalExpected, self.formatStr, self.myPrecision)
-        if self._config.BlindAnalysis*0:
-            myOutputLatex += "  Observed: & BLINDED \\\\ \n"
-        myOutputLatex += "  Observed & %5d \\\\ \n"%self._observation.getCachedShapeRootHistogramWithUncertainties().getRate()
+        if self._config.BlindAnalysis:
+            myOutputLatex += "  Observed & BLINDED \\\\ \n"
+        else:
+            myOutputLatex += "  Observed & %5d \\\\ \n"%self._observation.getCachedShapeRootHistogramWithUncertainties().getRate()
         myOutputLatex += "  \\hline\n"
         myOutputLatex += "  \\end{tabular}\n"
         #myOutputLatex += "\\end{table}\n"
@@ -1248,7 +1249,7 @@ class TableProducer:
                                ["CMS_eff_b", "b-tagging eff."],
                                ["CMS_scale_j", "jet energy scale"],
                                ["CMS_res_j", "jet energy resolution"],
-                               # ["CMS_topPtReweight","top $p_T$ reweighting"],
+                               ["CMS_topPtReweight","top $p_T$ reweighting"],
                                ["CMS_pileup", "pileup reweighting"],
                                ["CMS_topTagging", "top tagging"],
                                ["CMS_scale_ttbar", "$t\\bar{t}$ scale"],
@@ -1410,7 +1411,7 @@ class TableProducer:
                 myRow[0]+=" (S)"
             myTable.append(myRow)
 
-        # Make systematics table & save to file
+        # Make systematics table & save to file        
         myOutput = self.getSystematicsTable(myTable)
         fileName = self.getSystematicsFileName(light)
         myFile   = open(fileName, "w")
