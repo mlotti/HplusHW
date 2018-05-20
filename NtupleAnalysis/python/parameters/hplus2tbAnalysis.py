@@ -28,12 +28,14 @@ trigger = PSet(
 #================================================================================================
 metFilter = PSet(
     discriminators = [
-        "hbheNoiseTokenRun2Loose",
+        "Flag_HBHENoiseFilter",
         "Flag_HBHENoiseIsoFilter",
         "Flag_EcalDeadCellTriggerPrimitiveFilter",
-        "Flag_CSCTightHaloFilter",
         "Flag_eeBadScFilter",
-        "Flag_goodVertices"]
+        "Flag_goodVertices",
+        "Flag_globalTightHalo2016Filter",
+        "badPFMuonFilter",
+        "badChargedCandidateFilter"]
     )
 
 #================================================================================================
@@ -206,7 +208,7 @@ fakeBTopSelectionBDT = PSet(
     MVACutValue            = -1.0,   # [default: -1.0] NOTE: defines SR, VR, CR1, and CR2
     MVACutDirection        = ">",    # [default: ">"] (NOTE: Crashes if set to ">=" -1)
     LdgTopDefinition       = "MVA",  # [default: "MVA"] (options: "MVA", "Pt")
-    MassCutValue           = 600.0,  # topSelectionBDT.MassCutValue, (800.0 is way too much. TTbar takes > 24 hours)
+    MassCutValue           = 600.0,  # [default: 600.0] #topSelectionBDT.MassCutValue, (800.0 is way too much. TTbar takes > 24 hours)
     MassCutDirection       = topSelectionBDT.MassCutDirection,
     CSV_bDiscCutValue      = topSelectionBDT.CSV_bDiscCutValue,
     CSV_bDiscCutDirection  = topSelectionBDT.CSV_bDiscCutDirection,
