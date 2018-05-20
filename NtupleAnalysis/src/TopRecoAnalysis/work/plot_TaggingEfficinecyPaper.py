@@ -14,8 +14,7 @@ EXAMPLES:
 
 
 LAST USED:
-./plot_TaggingEfficinecyPaper.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400/TopRecoAnalysis_180320_BDT85
-
+./plot_TaggingEfficinecyPaper.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400/TopRecoAnalysis_180320_BDT85 --ratio
 
 
 STATISTICS OPTIONS:
@@ -207,7 +206,7 @@ def GetHistoKwargs(opts):
         # "ylabel"           : "Misidentification rate / " + units,
         # "rebinX"           : 1,
         "ratioYlabel"      : "Ratio ",
-        "ratio"            : True,
+        "ratio"            : opts.ratio,
         "ratioInvert"      : True,
         "stackMCHistograms": False,
         "addMCUncertainty" : False,
@@ -466,6 +465,7 @@ if __name__ == "__main__":
     DATAERA      = "Run2016"
     OPTMODE      = ""
     BATCHMODE    = True
+    RATIO        = False
     INTLUMI      = -1.0
     URL          = False
     SAVEDIR      = "/publicweb/%s/%s/%s" % (getpass.getuser()[0], getpass.getuser(), ANALYSISNAME)
@@ -485,6 +485,9 @@ if __name__ == "__main__":
 
     parser.add_option("-b", "--batchMode", dest="batchMode", action="store_false", default=BATCHMODE, 
                       help="Enables batch mode (canvas creation does NOT generate a window) [default: %s]" % BATCHMODE)
+
+    parser.add_option("--ratio", dest="ratio", action="store_true", default=RATIO, 
+                      help="Enables ratio pad [default: %s]" % RATIO)
 
     parser.add_option("--analysisName", dest="analysisName", type="string", default=ANALYSISNAME,
                       help="Override default analysisName [default: %s]" % ANALYSISNAME)

@@ -11,9 +11,11 @@ USAGE:
 EXAMPLES:
 ./plotMC_InvMassSmearing.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400_wSignal/TopRecoAnalysis_180422_BDT40/ --signalMass  500
 ./plotMC_InvMassSmearing.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400_wSignal/TopRecoAnalysis_180422_BDT40/ --signalMass 1000
+./plotMC_InvMassSmearing.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400_wSignal/TopRecoAnalysis_180422_BDT40/ --signalMass 1000
+
 
 LAST USED:
-./plotMC_InvMassSmearing.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400_wSignal/TopRecoAnalysis_180422_BDT40/ --signalMass 1000
+/plotMC_InvMassSmearing.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400_wSignal/TopRecoAnalysis_180422_BDT40/ --signalMass 500 --url -n
 
 '''
 
@@ -311,7 +313,7 @@ def PlotHistograms(datasetsMgr):
     return
 
 
-def SavePlot(plot, saveName, saveDir, saveFormats = [".pdf", ".png"]):
+def SavePlot(plot, saveName, saveDir, saveFormats = [".C", ".pdf", ".png"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
     
     # Check that path exists
