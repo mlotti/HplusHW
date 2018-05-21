@@ -532,9 +532,9 @@ _datasetMerge = {
     }
 
 for mass in _intermediateHplusMasses:
-    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTB_M%d"%mass
-#    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTBintermediate_M%d"%mass
-#    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassWithNeutral_M_%d"%(mass)] = "HplusTB_M%d"%mass # NB! Commented out to avoid merging of the WithNeutral samples that have been dropped out of the analysis
+#    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTB_M%d"%mass
+    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTBintermediate_M%d"%mass
+    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassWithNeutral_M_%d"%(mass)] = "HplusTBintermediate_withNeutral_M%d"%mass # NB! Commented out to avoid merging of the WithNeutral samples that have been dropped out of the analysis
 
 #================================================================================================
 # Dataset ordering (default)
@@ -761,6 +761,18 @@ _plotStyles = {
     "ChargedHiggs_HplusTB_HplusToTB_M_5000" : styles.signal5000Style,
     "ChargedHiggs_HplusTB_HplusToTB_M_7000" : styles.signal7000Style,
     "ChargedHiggs_HplusTB_HplusToTB_M_10000": styles.signal1000Style,
+
+    "HplusTBintermediate_M145": styles.mcStyle,
+    "HplusTBintermediate_withNeutral_M145": styles.mcStyle2,
+    "HplusTBintermediate_M165": styles.mcStyle,
+    "HplusTBintermediate_withNeutral_M165": styles.mcStyle2,
+    "HplusTBintermediate_M170": styles.mcStyle,
+    "HplusTBintermediate_withNeutral_M170": styles.mcStyle2,
+    "HplusTBintermediate_M175": styles.mcStyle,
+    "HplusTBintermediate_withNeutral_M175": styles.mcStyle2,
+    "HplusTBintermediate_M200": styles.mcStyle,
+    "HplusTBintermediate_withNeutral_M200": styles.mcStyle2,
+
 
     "DYJetsToLL"    : styles.dyStyle,
     "DYJetsToLLHT"  : styles.dyStyle,
