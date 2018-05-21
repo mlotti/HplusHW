@@ -106,7 +106,7 @@ void BaseSelector::processInternal(Long64_t entry) {
 
   //====== Intermediate H+ NoNeutral reweighting
   if (fEvent.isMC() && isIntermediateNN()) {
-    fEventWeight.multiplyWeight(0.65);
+    fEventWeight.multiplyWeight(0.4);
   }
 
   //====== Combining of W+jets and Z+jets inclusive and exclusive samples // not needed right now
