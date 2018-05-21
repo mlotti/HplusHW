@@ -84,6 +84,8 @@ OptionLimitOnBrBr=False # Automatically set to true for light H+, set to true if
 MinimumStatUncertainty=0.5 # Minimum stat. uncertainty to set to bins with zero events
 UseAutomaticMinimumStatUncertainty = True # Do NOT use the MinimumStatUncertainty value above for ~empty bins, but determine the value from the lowest non-zero rate for each dataset
 ToleranceForMinimumRate=0.0 # Tolerance for almost zero rate (columns with smaller rate are suppressed)
+#OptionBinByBinLabel="_RtauGt0p75_" # Label to be attached to stat. uncert. shape nuisances, needed to decorrelate stat. uncertainty variations in case of categorization
+#OptionBinByBinLabel="_RtauLt0p75_" # Label to be attached to stat. uncert. shape nuisances, needed to decorrelate stat. uncertainty variations in case of categorization
 
 # Nuisances
 OptionConvertFromShapeToConstantList=[] # Convert the following nuisances from shape to constant
