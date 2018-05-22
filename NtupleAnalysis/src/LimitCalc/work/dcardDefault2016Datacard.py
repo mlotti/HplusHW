@@ -23,8 +23,8 @@ import re
 # Define mass points
 #================================================================================================  
 
-LightAnalysis = True 
-IntermediateAnalysis = True
+LightAnalysis = False 
+IntermediateAnalysis = False
 HeavyAnalysis = True
 
 # Set mass points according to the chosen ranges
@@ -40,8 +40,8 @@ if LightAnalysis:
 if IntermediateAnalysis:
     MassPoints+=IntermediateMassPoints[:]    
 if HeavyAnalysis:
-    MassPoints+=LightMassPoints[:]+HeavyMassPoints[:]
-WJetsHT
+    MassPoints+=HeavyMassPoints[:]
+
 # For intermediate-only generation, use all intermediate samples (also overlapping)
 IntermediateAnalysisOnly = not LightAnalysis and not HeavyAnalysis and IntermediateAnalysis
 if IntermediateAnalysisOnly:
@@ -184,6 +184,9 @@ myTauMisIDSystematics=["CMS_fake_e_to_t","CMS_fake_m_to_t"] # tau mis-ID, "CMS_f
 myESSystematics=["CMS_scale_t","CMS_scale_j","CMS_res_j","CMS_scale_met"] # TES, JES, CMS_res_j, UES
 myBtagSystematics=["CMS_eff_b","CMS_fake_b"] # b tag and mistag
 myTopSystematics=["CMS_topPtReweight"] # top pt reweighting
+myTopAcceptanceSystematics=["CMS_Hptn_mu_RF_top","CMS_Hptn_pdf_top"]
+myTopAcceptanceSystematicsForQCD=["CMS_Hptn_mu_RF_top_forQCD","CMS_Hptn_pdf_top_forQCD"]
+myEWKAcceptanceSystematics=["CMS_Hptn_mu_RF_ewk","CMS_Hptn_pdf_ewk"]
 myPileupSystematics=["CMS_pileup"] # CMS_pileup
 myLeptonVetoSystematics=["CMS_eff_e_veto","CMS_eff_m_veto"] # CMS_pileup
 
@@ -233,7 +236,16 @@ for mass in HeavyMassPoints+IntermediateMassPoints:
     hx.setLabel("CMS_Hptntj_Hp"+str(mass))
     hx.setLandSProcess(0)
     hx.setValidMassPoints(myMassList)
+    # Add nuisances
     hxNuisanceList = myTrgSystematics[:]+myTauIDSystematics[:]+myTauMisIDSystematics[:]+myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]+["lumi_13TeV"]
+    # Add QCDscale acceptance nuisance
+    if mass < 760:
+        hxNuisanceList += ["CMS_Hptn_mu_RF_Hptn"]
+    else:
+        hxNuisanceList += ["CMS_Hptn_mu_RF_Hptn_heavy"]
+    # Add PDF acceptance nuisance
+    hxNuisanceList += ["CMS_Hptn_pdf_Hptn"]
+    # Add intermediate region nuisances
     if IntermediateAnalysisOnly:
         if mass in IntermediateMassPointsAll:
             hxNuisanceList += ["CMS_Hptntj_NLO_vs_LO"]
@@ -244,7 +256,7 @@ for mass in HeavyMassPoints+IntermediateMassPoints:
     hx.setDatasetDefinition("HplusTB_M"+str(mass))
     DataGroups.append(hx)
 
-myQCDSystematics = myTrgSystematics[:]+myESSystematics[:]+myBtagSystematics[:]+myTopSystematics[:]+myPileupSystematics[:]
+myQCDSystematics = myTrgSystematics[:]+myESSystematics[:]+myBtagSystematics[:]+myTopSystematics[:]+myTopAcceptanceSystematicsForQCD+myPileupSystematics[:]
 #approximation 1: only ttbar xsect uncertinty applied to QCD, as ttbar dominates the EWK BG (but uncertainty is scaled according to 1-purity, i.e. #all_ttbar+EWK_events_in_QCDandFakeTau/#all_events_in_QCDandFakeTau)
 myQCDSystematics+=["QCDscale_ttbar_forQCD","pdf_ttbar_forQCD","mass_ttbar_forQCD","lumi_13TeV_forQCD","CMS_eff_t_forQCD"]
 #approximation 2: myLeptonVetoSystematics neglected for QCD
@@ -293,14 +305,14 @@ else:
                                 validMassPoints=MassPoints,
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]+myTauMisIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
-                                  +myTopSystematics+["QCDscale_ttbar","pdf_ttbar","mass_ttbar","lumi_13TeV"]))
+                                  +myTopSystematics+myTopAcceptanceSystematics+["QCDscale_ttbar","pdf_ttbar","mass_ttbar","lumi_13TeV"]))
     DataGroups.append(DataGroup(label=labelPrefix+"W", landsProcess=4,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
                                 datasetType="Embedding", 
                                 datasetDefinition=WJetsDataset, # can be WJets or WJetsHT
                                 validMassPoints=MassPoints,
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]+myTauMisIDSystematics[:]
-                                  +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
+                                  +myESSystematics[:]+myBtagSystematics[:]+myEWKAcceptanceSystematics+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                                   +["QCDscale_Wjets","pdf_Wjets","lumi_13TeV"]))
     DataGroups.append(DataGroup(label=labelPrefix+"singleTop", landsProcess=5,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
@@ -308,7 +320,7 @@ else:
                                 datasetDefinition="SingleTop",
                                 validMassPoints=MassPoints,
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]+myTauMisIDSystematics[:]
-                                  +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
+                                  +myESSystematics[:]+myBtagSystematics[:]+myTopAcceptanceSystematics+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                                   +["QCDscale_singleTop","pdf_singleTop","lumi_13TeV"]))
     DataGroups.append(DataGroup(label=labelPrefix+"DY", landsProcess=6,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
@@ -317,7 +329,7 @@ else:
                                 datasetDefinition="DYJetsToLL",
                                 validMassPoints=MassPoints,
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]+myTauMisIDSystematics[:]
-                                  +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
+                                  +myESSystematics[:]+myBtagSystematics[:]+myEWKAcceptanceSystematics+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                                   +["QCDscale_DY","pdf_DY","lumi_13TeV"]))
     DataGroups.append(DataGroup(label=labelPrefix+"VV", landsProcess=7,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus, 
@@ -325,7 +337,7 @@ else:
                                 datasetDefinition="Diboson",
                                 validMassPoints=MassPoints,
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]+myTauMisIDSystematics[:]
-                                  +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
+                                  +myESSystematics[:]+myBtagSystematics[:]+myEWKAcceptanceSystematics+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                                   +["QCDscale_VV","pdf_VV","lumi_13TeV"]))
 
     # Example of how to merge columns
@@ -481,6 +493,37 @@ else:
     Nuisances.append(Nuisance(id="CMS_pileup", label="APPROXIMATION for CMS_pileup",
         distr="lnN", function="Constant",value=0.05))
 
+#==== Acceotance uncertainties / QCDscale
+
+Nuisances.append(Nuisance(id="CMS_Hptn_mu_RF_top", label="QCDscale acceptance uncertainty for top backgrounds",
+        distr="lnN", function="Constant",value=0.02))
+
+Nuisances.append(Nuisance(id="CMS_Hptn_mu_RF_ewk", label="QCDscale acceptance uncertainty for EWK backgrounds",
+        distr="lnN", function="Constant",value=0.05))
+
+Nuisances.append(Nuisance(id="CMS_Hptn_mu_RF_Hptn", label="QCDscale acceptance uncertainty for signal",
+        distr="lnN", function="Constant",value=0.048))
+
+Nuisances.append(Nuisance(id="CMS_Hptn_mu_RF_Hptn_heavy", label="QCDscale acceptance uncertainty for signal",
+        distr="lnN", function="Constant",value=0.012))
+
+Nuisances.append(Nuisance(id="CMS_Hptn_mu_RF_top_forQCD", label="QCDscale acceptance uncertainty for fake tau background",
+        distr="lnN", function="ConstantForQCD",value=0.02))
+
+#==== Acceptance uncertainties / pdf
+
+Nuisances.append(Nuisance(id="CMS_Hptn_pdf_top", label="PDF acceptance uncertainty for top backgrounds",
+        distr="lnN", function="Constant",value=0.02,upperValue=0.0027))
+
+Nuisances.append(Nuisance(id="CMS_Hptn_pdf_ewk", label="PDF acceptance uncertainty for EWK backgrounds",
+        distr="lnN", function="Constant",value=0.033,upperValue=0.046))
+
+Nuisances.append(Nuisance(id="CMS_Hptn_pdf_Hptn", label="PDF acceptance uncertainty for signal",
+        distr="lnN", function="Constant",value=0.004,upperValue=0.017))
+
+Nuisances.append(Nuisance(id="CMS_Hptn_pdf_top_forQCD", label="PDF acceptance uncertainty for fake tau background",
+        distr="lnN", function="ConstantForQCD",value=0.02,upperValue=0.0027))
+
 #===== Cross section uncertainties
 
 # ttbar
@@ -632,6 +675,8 @@ MergeNuisances.append(["CMS_eff_t","CMS_eff_t_forQCD"])
 #MergeNuisances.append(["xsect_ttbar", "xsect_ttbar_forQCD"])
 MergeNuisances.append(["QCDscale_ttbar", "QCDscale_ttbar_forQCD"])
 MergeNuisances.append(["pdf_ttbar", "pdf_ttbar_forQCD"])
+MergeNuisances.append(["CMS_Hptn_mu_RF_top", "CMS_Hptn_mu_RF_top_forQCD"])
+MergeNuisances.append(["CMS_Hptn_pdf_top", "CMS_Hptn_pdf_top_forQCD"])
 MergeNuisances.append(["mass_ttbar", "mass_ttbar_forQCD"])
 MergeNuisances.append(["lumi_13TeV", "lumi_13TeV_forQCD"])
 
