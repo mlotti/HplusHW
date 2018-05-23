@@ -154,27 +154,41 @@ def main():
     from HiggsAnalysis.NtupleAnalysis.parameters.jetTriggers import allSelections
     allSelections.verbose = opts.verbose
     allSelections.histogramAmbientLevel = opts.histoLevel
-
+    import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
     #==========================
     #  Systematics selections
     #==========================
 
-    # MET
-    allSelections.METSelection.METCutValue = 50.0
-    
+
+    # BDT MisID SF
+    MisIDSF = PSet(
+        MisIDSFJsonName = "Efficiency_SystBDT_CR2.json", # For Fake TT:  Efficiency_SystBDT_CR1.json",   # For QCD, EWK & SingleTop:  Efficiency_SystBDT_CR2.json
+        ApplyMisIDSF    = False,
+        )
+    scaleFactors.assignMisIDSF(MisIDSF, "nominal", MisIDSF.MisIDSFJsonName)
+    allSelections.MisIDSF = MisIDSF
+
+    allSelections.SystTopBDTSelection.MiniIsoCutValue    = 0.1
+    allSelections.SystTopBDTSelection.MiniIsoInvCutValue = 0.1
+    allSelections.SystTopBDTSelection.METCutValue        = 50.0
+    allSelections.SystTopBDTSelection.METInvCutValue     = 20.0
+
     # Muon
     allSelections.MuonSelection.muonPtCut = 30
-    
+
     # Jets
     allSelections.JetSelection.numberOfJetsCutValue = 4
     allSelections.JetSelection.jetPtCuts = [40.0, 40.0, 40.0, 30.0]
-    
-    # Triggers 
+
+    # Trigger
     allSelections.Trigger.triggerOR = ["HLT_Mu50"]
+
     # Bjets
     allSelections.BJetSelection.jetPtCuts = [40.0, 30.0]
     allSelections.BJetSelection.numberOfBJetsCutValue = 2
 
+    #Top
+    #allSelections.TopSelectionBDT.WeightFile             = "BDTG_DeltaR0p3.weights.xml"
     
     # allSelections.BjetSelection.triggerMatchingApply = True
     # allSelections.TopSelection.ChiSqrCutValue = 100.0

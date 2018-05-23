@@ -27,7 +27,6 @@ LAST USED:
 ./plot_EfficiencySystTop.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/SystTopBDT/SystTopBDT_180412_TTs/ --folder SystTopBDT_Genuine --type highPtRadiation
 ./plot_EfficiencySystTop.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/SystTopBDT/SystTopBDT_180412_TTs/ --folder SystTopBDT_Genuine --type colourReconnection
 ./plot_EfficiencySystTop.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/SystTopBDT/SystTopBDT_180412_TTs/ --folder SystTopBDT_Genuine --type mTop
-./plot_EfficiencySystTop.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/SystTopBDT/SystTopBDT_180412_TTs/ --folder SystTopBDT_Genuine --type evtGen
 
 STATISTICS OPTIONS:
 https://iktp.tu-dresden.de/~nbarros/doc/root/TEfficiency.html
@@ -189,9 +188,12 @@ def GetHistoKwargs(histoName, opts):
         kwargs["xlabel"]  = "p_{T} (%s)" % (units)
         bins              = [i for i in range(0, 1000+50, 50)]
         if opts.folder == "SystTopBDT_":
-            bins          = [0, 100] + [i for i in range(100, 500, 50)] + [i for i in range(500, 1000, 100)]
-        elif opts.folder == "SystTopBDT_Genuine":
+            #bins          = [0, 100] + [i for i in range(100, 500, 50)] + [i for i in range(500, 1000, 100)]
+            bins  = [0, 100, 150, 200, 300, 400, 500, 600, 800]
             bins          = [i for i in range(50, 500+50, 50)] + [600, 800]
+        elif opts.folder == "SystTopBDT_Genuine":
+            bins  = [0, 100, 150, 200, 300, 400, 500, 600, 800]
+            #bins          = [i for i in range(50, 500+50, 50)] + [600, 800]
             #bins          = [0, 100] + [i for i in range(100, 500+50, 50)]# + [500, 600]#, 1000]
             #bins          = [0, 100] + [i for i in range(100, 500+50, 50)]# + [500, 600]#, 1000]
             #bins          = [i for i in range(0, 500+50, 50)]# + [500, 600]#, 1000]
@@ -282,13 +284,17 @@ def main(opts):
             hNumerator   = "AfterAllSelections_" + var + "_SR"
             hDenominator = "AfterStandardSelections_" +var + "_SR"
             numerator    = os.path.join(opts.folder, hNumerator)
-            denominator  = os.path.join(opts.folder, hDenominator)
+            denFolder    = opts.folder
+            #denFolder    = denFolder.replace("Genuine", "")
+            #print "denFolder", denFolder
+            denominator  = os.path.join(denFolder, hDenominator)
 
             counter+=1
             msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % counter, "/", "%s:" % (nPlots), "%s" % (var))
             Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), counter==1)
             
-            PlotEfficiency(datasetsMgr, numerator, denominator)
+            PlotEfficiency(datasetsMgr, numerator, denominator)            
+            
     Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)
     return
 
@@ -350,9 +356,6 @@ def PlotEfficiency(datasetsMgr, numPath, denPath):
     # For-loop: All datasets
     for dataset in datasetsMgr.getAllDatasets():
 
-        if "Fake" in numPath and "TT" in dataset.getName():
-            continue
-
         if dataset.isMC():
             n   = dataset.getDatasetRootHisto(numPath)
             d   = dataset.getDatasetRootHisto(denPath)
@@ -375,7 +378,7 @@ def PlotEfficiency(datasetsMgr, numPath, denPath):
 
         if 0:
             print "Numerical Efficiency", numPath, dataset.getName(), ":", round(selected/total, 3)
-
+            
         # Sanity checks
         if den.GetEntries() == 0 or num.GetEntries() == 0:
             continue
@@ -391,16 +394,32 @@ def PlotEfficiency(datasetsMgr, numPath, denPath):
         numTT = datasetTT.getDatasetRootHisto(numPath).getHistogram()
         denTT = datasetTT.getDatasetRootHisto(denPath).getHistogram()
         if nx > 0:
-            numTT = num.Rebin(nx, "", xBins)
-            denTT = den.Rebin(nx, "", xBins)
-                
-        eff_ref = ROOT.TEfficiency(numTT, denTT) # fixme: investigate warnings
+            numTT = numTT.Rebin(nx, "", xBins) #num.Rebin(nx, "", xBins)
+            denTT = denTT.Rebin(nx, "", xBins) #den.Rebin(nx, "", xBins)
+
+
+        print "dataset: ", dataset.getName()
+        '''
+        for i in range(1, num.GetNbinsX()+1):
+            nbin = num.GetBinContent(i)
+            dbin = den.GetBinContent(i)
+            nbinTT = numTT.GetBinContent(i)
+            dbinTT = denTT.GetBinContent(i)
+            eps = nbin/dbin
+            epsTT = nbinTT/dbinTT
+            ratioTT = eps/epsTT
+            if ratioTT > 1:
+                ratioTT = 1/ratioTT
+            #print "bin: ", i, "eps: ", round(eps,5) , "epsTT: ", round(epsTT,5)
+            #print "bin: ", i, "eps/epsTT: ", (1.0 - round(ratioTT, 3))*100
+        '''
+        eff_ref = ROOT.TEfficiency(numTT, denTT) 
         eff_ref.SetStatisticOption(ROOT.TEfficiency.kFCP) #FCP
 
         # Convert to TGraph
         gEff    = convert2TGraph(eff)
         gEffRef = convert2TGraph(eff_ref)
-
+            
         # Style definitions
         stylesDef = styles.ttStyle
         styles0 = styles.signalStyleHToTB300                                            
@@ -415,7 +434,12 @@ def PlotEfficiency(datasetsMgr, numPath, denPath):
 
         if dataset.getName() == "TT":
             styles.ttStyle.apply(gEffRef)
-            refGraph = histograms.HistoGraph(gEffRef, "t#bar{t}", "p", "P")
+            legend_ref = "t#bar{t}"
+            if opts.type == "partonShower":
+                legend_ref = "t#bar{t} (Pythia8)"
+            elif opts.type == "evtGen": 
+                legend_ref = "t#bar{t} (Powheg)"
+            refGraph = histograms.HistoGraph(gEffRef, legend_ref, "p", "P")
         else:
             styles.markerStyles[counter].apply(gEff)
             legend  = dataset.getName().replace("TT_", "t#bar{t} (").replace("isr", "ISR ").replace("fsr", "FSR ")
@@ -426,6 +450,7 @@ def PlotEfficiency(datasetsMgr, numPath, denPath):
             legend  = legend.replace("mtop1735", "m_{t} = 173.5 GeV")
             legend  = legend.replace("mtop1755", "m_{t} = 175.5 GeV")
             legend  = legend.replace("mtop1785", "m_{t} = 178.5 GeV")
+            legend  = legend.replace("TuneEE5C", "Herwig++")
             legend += ")"
             counter+=1
             #myList.append(histograms.HistoGraph(gEff, legend, "lp", "P"))
@@ -440,9 +465,9 @@ def PlotEfficiency(datasetsMgr, numPath, denPath):
 
     # Save plot in all formats
     #savePath = os.path.join(opts.saveDir, numPath.split("/")[0], opts.optMode)
-    savePath = os.path.join(opts.saveDir, opts.optMode)
+    savePath = os.path.join(opts.saveDir, opts.optMode)    
     plots.drawPlot(p, savePath, **_kwargs)
-    SavePlot(p, saveName, savePath, saveFormats = [".png", ".pdf"])
+    SavePlot(p, saveName, savePath, saveFormats = [".png", ".pdf", ".C"])
     return
 
 def convert2TGraph(tefficiency):
@@ -593,7 +618,7 @@ if __name__ == "__main__":
     opts.saveDir = os.path.join(opts.saveDir, opts.folder)
 
     # See: https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopSystematics
-    allowedTypes = ["showerScales", "highPtRadiation", "colourReconnection", "mTop", "evtGen"]
+    allowedTypes = ["showerScales", "highPtRadiation", "colourReconnection", "mTop", "evtGen", "partonShower"]
     if opts.type not in allowedTypes:
         Print("Invalid type \"%s\" selected. Please choose one of the following: %s" % (opts.type, ", ".join(allowedTypes)), True)
         sys.exit()
@@ -601,15 +626,17 @@ if __name__ == "__main__":
     # Apply type-related changes
     opts.saveDir = os.path.join(opts.saveDir, opts.type)
     if opts.type == "showerScales": #ISR/FSR
-        opts.excludeTasks = "mtop|hdamp|evtgen|erdON"
+        opts.excludeTasks = "mtop|hdamp|evtgen|erdON|EE5C"
     elif opts.type == "highPtRadiation": #hdamp (TOP-16-021)
-        opts.excludeTasks = "mtop|evtgen|erdON|fsr|isr"
+        opts.excludeTasks = "mtop|evtgen|erdON|fsr|isr|EE5C"
     elif opts.type == "colourReconnection": #erdON
-        opts.excludeTasks = "mtop|hdamp|evtgen|fsr|isr"
+        opts.excludeTasks = "mtop|hdamp|evtgen|fsr|isr|EE5C"
     elif opts.type == "mTop": #top mass
-        opts.excludeTasks = "hdamp|evtgen|erdON|fsr|isr"
+        opts.excludeTasks = "hdamp|evtgen|erdON|fsr|isr|EE5C"
     elif opts.type == "evtGen": #EvtGen is a MC event generator that simulates the decays of heavy flavour particles
-        opts.excludeTasks = "mtop|hdamp|erdON|fsr|isr"
+        opts.excludeTasks = "mtop|hdamp|erdON|fsr|isr|EE5C"
+    elif opts.type == "partonShower": #EE5C
+        opts.excludeTasks = "mtop|hdamp|erdON|fsr|isr|evtgen"
     else:
         raise Exception("This should NEVER be reached!")
     # Call the main function

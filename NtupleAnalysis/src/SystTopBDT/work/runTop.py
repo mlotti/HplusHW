@@ -183,17 +183,16 @@ def main():
 
     # BDT MisID SF
     MisIDSF = PSet(
-        MisIDSFJsonName = "Efficiency_LdgTrijet2016_bin_CR1.json", # For Fake TT:  Efficiency_LdgTrijet2016_bin_CR1.json",   # For QCD, EWK & SingleTop:  Efficiency_LdgTrijet2016_bin.json",
-        ApplyMisIDSF    = True, 
+        MisIDSFJsonName = "Efficiency_SystBDT_CR2.json", # For Fake TT:  Efficiency_SystBDT_CR1.json",   # For QCD, EWK & SingleTop:  Efficiency_SystBDT_CR2.json
+        ApplyMisIDSF    = False, 
         )
     scaleFactors.assignMisIDSF(MisIDSF, "nominal", MisIDSF.MisIDSFJsonName)
-    
     allSelections.MisIDSF = MisIDSF
     
-    print allSelections
-    
-    # MET
-    allSelections.METSelection.METCutValue = 50.0
+    allSelections.SystTopBDTSelection.MiniIsoCutValue    = 0.1
+    allSelections.SystTopBDTSelection.MiniIsoInvCutValue = 0.1
+    allSelections.SystTopBDTSelection.METCutValue        = 50.0
+    allSelections.SystTopBDTSelection.METInvCutValue     = 20.0
     
     # Muon
     allSelections.MuonSelection.muonPtCut = 30
@@ -208,15 +207,10 @@ def main():
     # Bjets
     allSelections.BJetSelection.jetPtCuts = [40.0, 30.0]
     allSelections.BJetSelection.numberOfBJetsCutValue = 2
-
-    #print allSelections.BJetSelection
-
-    # allSelections.BjetSelection.triggerMatchingApply = True
-    # allSelections.TopSelection.ChiSqrCutValue = 100.0
-    # allSelections.BJetSelection.numberOfBJetsCutValue = 0
-    # allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
-
     
+    #Top 
+    #allSelections.TopSelectionBDT.WeightFile             = "BDTG_DeltaR0p3.weights.xml"
+
     # ================================================================================================
     # Add Analysis Variations
     # ================================================================================================

@@ -165,8 +165,8 @@ def main(opts):
             s = newOrder.pop( newOrder.index(opts.signal) )
             newOrder.insert(0, s)
             
-        s = newOrder.pop(newOrder.index("QCD"))
-        newOrder.insert(2, s)
+        #s = newOrder.pop(newOrder.index("QCD"))
+        #newOrder.insert(2, s)
         s = newOrder.pop(newOrder.index("WJetsHT"))
         newOrder.insert(2, s)
 
@@ -201,8 +201,16 @@ def main(opts):
 
         # For-loop: All histograms
         for i, h in enumerate(histoPaths2, 1):
-            if  "_LeadingTrijet_BDT" not in h:
+            #if  "_LeadingTrijet_BDT" not in h:
+            if  "_SR" in h:
                 continue
+            if "Vs" in h:
+                continue
+            if "vs" in h:
+                continue
+            if "VS" in h:
+                continue
+
             msg   = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % i, "/", "%s:" % (nHistos), h)
             Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), i==1)
             PlotHistograms(datasetsMgr, h, intLumi)
@@ -396,6 +404,17 @@ def GetHistoKwargs(h, opts):
             kwargs["xlabel"] = "E_{T}^{miss} #phi (%s)" % (units)
             kwargs["ylabel"] = _yLabel + units
             kwargs["opts"]   = {"xmin": -3.2, "xmax": 3.2, "ymin": yMin, "ymaxfactor": yMaxF}
+
+    if "deltaphimin_metjet" in h.lower():
+        kwargs["ylabel"] = "Events / %.2f "
+        kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": 0, "xmax": +3.5, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["xlabel"] = "#Delta #phi"
+    if "deltaphimax_metjet" in h.lower():
+        kwargs["ylabel"] = "Events / %.2f "
+        kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": 0, "xmax": +3.5, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["xlabel"] = "#Delta #phi"
 
     if "AlphaT" in h:
         kwargs["ylabel"] = "Events / %.2f "
