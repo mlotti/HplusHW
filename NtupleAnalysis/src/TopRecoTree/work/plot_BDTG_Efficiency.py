@@ -97,7 +97,6 @@ def main(opts, signalMass):
     style.setOptStat(True)
     style.setGridX(True)
     style.setGridY(False)
-    #style.tdrStyle.SetPadLeftMargin(0.17)
     style.tdrStyle.SetPadRightMargin(0.11)
 
         # Do the topSelection histos
@@ -488,7 +487,7 @@ def SavePlot(plot, saveName, saveDir, saveFormats = [".pdf"]):
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
         saveNameURL = savePath + ext
-        saveNameURL = saveNameURL.replace("/publicweb/s/skonstan/", "http://home.fnal.gov/~skonstan/")
+        saveNameURL = saveNameURL.replace(opts.saveDir, "http://home.fnal.gov/~%s/" % (getpass.getuser()))
         if opts.url:
             Print(saveNameURL, i==0)
         else:
@@ -534,7 +533,7 @@ if __name__ == "__main__":
     MERGEEWK     = False
     URL          = False
     NOERROR      = True
-    SAVEDIR      = "/publicweb/s/skonstan/" + ANALYSISNAME
+    SAVEDIR      = "/publicweb/%s/%s/%s" % (getpass.getuser()[0], getpass.getuser(), ANALYSISNAME)
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
     NORMALISE    = False

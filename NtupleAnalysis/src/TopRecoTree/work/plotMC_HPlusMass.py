@@ -219,7 +219,7 @@ def main(opts, signalMass):
         # Apply TDR style
         style = tdrstyle.TDRStyle()
         style.setOptStat(True)
-        style.setGridX(True)
+        style.setGridX(False)
         style.setGridY(False)
 
         # Do the topSelection histos
@@ -347,7 +347,7 @@ def PlotSignalBackground(datasetsMgr, hG, hF, intLumi):
             _xlabel = "Subleading jet mult"
             
     if "cvsl" in hG.lower():
-        _format = "%0.0f"
+        _format = "%0.2f"
         _xlabel = "Leading jet CvsL"
         if "subldg" in hG.lower():
              _xlabel = "Subleading jet CvsL"
@@ -551,7 +551,7 @@ def PlotSignalBackground(datasetsMgr, hG, hF, intLumi):
     #plots.drawPlot(p, saveName, **_kwargs)
     savePath = os.path.join(opts.saveDir, "HplusMasses", hG.split("/")[0], opts.optMode)
     plots.drawPlot(p, savePath, **_kwargs)
-    SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf"])
+    SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf", ".C"])
 
     #SavePlot(p, saveName, savePath) 
 
