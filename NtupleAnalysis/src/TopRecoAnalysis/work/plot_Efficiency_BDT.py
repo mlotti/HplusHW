@@ -4,15 +4,16 @@ DESCRIPTION:
 
 
 USAGE:
-./plot_Efficiency.py -m <pseudo_mcrab> [opts]
+./plot_Efficiency_BDT.py -m <pseudo_mcrab> [opts]
 
 
 EXAMPLES:
-./plot_Efficiency.py -m MyHplusAnalysis_180202_fullSignalQCDtt --folder topbdtSelection_ --url
+./plot_Efficiency_BDT.py -m MyHplusAnalysis_180202_fullSignalQCDtt --folder topbdtSelection_ --url
 
 
-LAST USD:
-./plot_Efficiency.py -m MyHplusAnalysis_180202_fullSignalQCDtt --folder topbdtSelection_ --url
+LAST USED:
+./plot_Efficiency_BDT.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400/TopRecoAnalysis_180320_BDT40/ --folder topbdtSelection_ 
+
 
 STATISTICS OPTIONS:
 https://iktp.tu-dresden.de/~nbarros/doc/root/TEfficiency.html
@@ -951,7 +952,7 @@ if __name__ == "__main__":
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
     NORMALISE    = False
-    FOLDER       = "" #"topSelection_" #"ForDataDrivenCtrlPlots" #"topologySelection_"
+    FOLDER       = "topbdtSelection_"
     MVACUT       = "MVA"
 
     # Define the available script options
@@ -1031,4 +1032,4 @@ if __name__ == "__main__":
     main(opts, signalMass)
 
     if not opts.batchMode:
-        raw_input("=== plot_Efficiency.py: Press any key to quit ROOT ...")
+        raw_input("=== plot_Efficiency_BDT.py: Press any key to quit ROOT ...")

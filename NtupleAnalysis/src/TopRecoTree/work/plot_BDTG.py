@@ -5,16 +5,16 @@ Reproduces the TMVA BDTG classifier output and ROC curves in CMS style
 
 
 USAGE:
-./plot_BDTG_Efficiency.py -r <TMVAoutput_rootFile> --reff mvaeffs.root [opts]
+./plot_BDTG.py -r <TMVAoutput_rootFile> --reff mvaeffs.root [opts]
 
 
 EXAMPLES:
-./plot_BDTG_Efficiency.py -r TopReco_DR0p3_DPtOverPt0p32.root --reff mvaeffs.root --url
-./plot_BDTG_Efficiency.py -r /uscms_data/d3/skonstan/workspace/rootfiles/TopReco_DR0p3_DPtOverPt0p32.root --reff /uscms_data/d3/skonstan/workspace/rootfiles/mvaeffs.root --url
+./plot_BDTG.py -r TopReco_DR0p3_DPtOverPt0p32.root --reff mvaeffs.root --url
+./plot_BDTG.py -r /uscms_data/d3/skonstan/workspace/rootfiles/TopReco_DR0p3_DPtOverPt0p32.root --reff /uscms_data/d3/skonstan/workspace/rootfiles/mvaeffs.root --url
 
 
 LAST USED:
-./plot_BDTG_Efficiency.py -r /uscms_data/d3/aattikis/workspace/rootfiles/TopReco_DR0p3_DPtOverPt0p32.root --reff /uscms_data/d3/aattikis/workspace/rootfiles/mvaeffs.root --url
+./plot_BDTG.py -r /uscms_data/d3/aattikis/workspace/rootfiles/TopReco_DR0p3_DPtOverPt0p32.root --reff /uscms_data/d3/aattikis/workspace/rootfiles/mvaeffs.root --url
 
 '''
 
@@ -207,8 +207,13 @@ def main(opts, signalMass):
     rightAxis.SetLabelColor( signifColor )
     rightAxis.SetTitleColor( signifColor )
 
-    #rightAxis.SetTitleSize( info->sSig->GetXaxis()->GetTitleSize() )
-    rightAxis.SetTitle( "Significance" )
+    # rightAxis.SetTitleSize( info->sSig->GetXaxis()->GetTitleSize() )
+    # rightAxis.SetLabelOffset(0.9)
+    # This will only be be visible if we use a wide canvas (but we don't want that)
+    if 0:
+        style.setWide(True, 0.15) #to make way for significane label
+        rightAxis.SetTitle( "Significance" )
+        # rightAxis.SetTitleOffset(1.1)
 
     #=== BDTG output ========================================================
     histo_BDTs         = histograms.Histo(h_BDTs,         "bdtS",     legendStyle = "LP", drawStyle="LP")
@@ -268,8 +273,7 @@ def main(opts, signalMass):
         "log"              : False,
         "createLegend"     : {"x1": 0.45, "y1": 0.45, "x2": 0.70, "y2": 0.70},
         }
-    ROOT.gStyle.SetNdivisions(8, "X")
-    style.setWide(True, 0.15) #to make way for significane label
+    ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X") #ROOT.gStyle.SetNdivisions(8, "X")
     plots.drawPlot(p_Eff, savePath, **_kwargs)
     rightAxis.Draw()
     SavePlot(p_Eff, saveName_eff, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf", ".C"])
@@ -281,7 +285,7 @@ def main(opts, signalMass):
     _kwargs["ylabel"] = "(1/N) dN/dx"
     _kwargs["createLegend"] = {"x1": 0.25, "y1": 0.75, "x2": 0.50, "y2": 0.9}
     style.setWide(False, 0.15)
-    ROOT.gStyle.SetNdivisions(8, "X")
+    ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
     plots.drawPlot(p_BDT, savePath, **_kwargs)
     SavePlot(p_BDT, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf", ".C"])
     return

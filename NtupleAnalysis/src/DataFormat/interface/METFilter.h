@@ -23,6 +23,9 @@ public:
       v.push_back(disc->value());
     return v;
   }
+  std::vector<std::string> getConfigurableDiscriminatorNames() const {
+    return fConfigurableDiscriminatorNames;
+  }
   
 protected:
   std::vector<const Branch<bool> *> fConfigurableDiscriminators;

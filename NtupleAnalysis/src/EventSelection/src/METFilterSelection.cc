@@ -35,6 +35,9 @@ METFilterSelection::METFilterSelection(const ParameterSet& config)
 METFilterSelection::~METFilterSelection() { }
 
 void METFilterSelection::initialize(const ParameterSet& config) {
+  // Discriminators for data only
+  if(config.exists("runOnlyData")) runOnlyData = config.getParameter<std::vector<std::string>>("runOnlyData");
+
   // Create sub counters
   for (auto p: config.getParameter<std::vector<std::string>>("discriminators")) {
     cSubPassedFilter.push_back(fEventCounter.addSubCounter("METFilter selection", "Passed "+p) );
@@ -43,6 +46,14 @@ void METFilterSelection::initialize(const ParameterSet& config) {
 
 void METFilterSelection::bookHistograms(TDirectory* dir) {
   
+}
+
+bool METFilterSelection::dataOnly(std::string discrName) {
+  bool found = false;
+  for (auto p: runOnlyData){
+    if (p == discrName) found = true; 
+  }
+  return found;
 }
 
 METFilterSelection::Data METFilterSelection::silentAnalyze(const Event& event) {
@@ -69,10 +80,14 @@ METFilterSelection::Data METFilterSelection::privateAnalyze(const Event& iEvent)
   output.bPassedSelection = true;
   size_t i = 0;
   while (i < iEvent.metFilter().getConfigurableDiscriminatorValues().size() && output.bPassedSelection) {
-    if (iEvent.metFilter().getConfigurableDiscriminatorValues()[i]) {
+    if (iEvent.isMC() && dataOnly(iEvent.metFilter().getConfigurableDiscriminatorNames()[i])){
       cSubPassedFilter[i].increment();
-    } else {
-      output.bPassedSelection = false;
+    }else{
+      if (iEvent.metFilter().getConfigurableDiscriminatorValues()[i]) {
+	cSubPassedFilter[i].increment();
+      } else {
+	output.bPassedSelection = false;
+      }
     }
     ++i;
   }

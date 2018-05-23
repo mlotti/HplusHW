@@ -259,15 +259,10 @@ def main(argv, dsetMgr, moduleInfoString):
         # par[1] = mean
         # par[3] = sigma
         # par[4] = beta in the exponential tail
-        boundary = 160
-#        template_EWKInclusive_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=boundary, norm=1, rejectPoints=1),
-#                                                 FITMIN, FITMAX)
-#        template_EWKInclusive_Baseline.setDefaultFitParam(defaultLowerLimit=[0.5,  90, 30, 0.0001],
-#                                                          defaultUpperLimit=[ 30, 250, 60,    1.0])
-
-        # Fake tau and QCD
-        template_EWKGenuineTaus_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=boundary, norm=1, rejectPoints=1),FITMIN, FITMAX)
-        template_EWKGenuineTaus_Baseline.setDefaultFitParam(defaultLowerLimit=[0.5,  90, 30, 0.0001],
+        boundary = 190
+        # QCD
+        template_EWKInclusive_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=boundary, norm=1, rejectPoints=1),FITMIN, FITMAX)
+        template_EWKInclusive_Baseline.setDefaultFitParam(defaultLowerLimit=[0.5,  90, 30, 0.0001],
                                                             defaultUpperLimit=[ 30, 250, 60,    1.0])
         # Note that the same function is used for QCD only and QCD+EWK fakes (=Fake Tau)
 
@@ -286,8 +281,8 @@ def main(argv, dsetMgr, moduleInfoString):
         # par[5] mean for Gaussian term
         # par[6] sigma2 for Gaussian term
         # par[7] beta for exponential tail
-        template_FakeTau_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunctionWithPeakShiftClear", norm=1), FITMIN, FITMAX)
-        template_FakeTau_Inverted.setDefaultFitParam(defaultLowerLimit=[ 30, 0.1, -10,   0,  -20,  10,   0.0001, 0.0001], 
+        template_QCD_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunctionWithPeakShiftClear", norm=1), FITMIN, FITMAX)
+        template_QCD_Inverted.setDefaultFitParam(defaultLowerLimit=[ 30, 0.1, -10,   0,  -20,  10,   0.0001, 0.0001], 
                                                      defaultUpperLimit=[ 130, 20,  10,  20,  200, 100,     1.0,   0.05]) 
 
 

@@ -640,10 +640,10 @@ hplus2tbAnalysisDatasets = []
 #hplus2tbAnalysisDatasets.extend(datasetsJetHTData_18Apr2017)
 hplus2tbAnalysisDatasets.extend(datasetsJetHTData_03Feb2017)
 hplus2tbAnalysisDatasets.extend(datasetsSignalTB)
-# hplus2tbAnalysisDatasets.extend(datasetsSignalTB_ext1)
+hplus2tbAnalysisDatasets.extend(datasetsSignalTB_ext1)
 hplus2tbAnalysisDatasets.extend(datasetsTop)
 #hplus2tbAnalysisDatasets.extend(datasetsTTJets) #-ve weights
-hplus2tbAnalysisDatasets.extend(datasetsTTJets_SingleLeptFromT)
+#hplus2tbAnalysisDatasets.extend(datasetsTTJets_SingleLeptFromT)
 hplus2tbAnalysisDatasets.extend(datasetsSingleTop)
 hplus2tbAnalysisDatasets.extend(datasetsDYJetsToQQ)
 hplus2tbAnalysisDatasets.extend(datasetsWJetsToQQ)
