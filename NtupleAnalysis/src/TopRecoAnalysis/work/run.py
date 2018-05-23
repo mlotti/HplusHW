@@ -145,7 +145,6 @@ def main():
     # allSelections.TopSelection.ChiSqrCutValue = 100.0
     # allSelections.BJetSelection.numberOfBJetsCutValue = 0
     # allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
-
     
     # ================================================================================================
     # Add Analysis Variations

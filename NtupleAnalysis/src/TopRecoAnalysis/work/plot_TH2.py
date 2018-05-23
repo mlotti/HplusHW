@@ -768,7 +768,7 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png"]):
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
         saveNameURL = saveName + ext
-        saveNameURL = saveNameURL.replace("/publicweb/s/skonstan/", "http://home.fnal.gov/~skonstan/")
+        saveNameURL = saveNameURL.replace(opts.saveDir, "http://home.fnal.gov/~%s/" % (getpass.getuser()))
         if opts.url:
             Print(saveNameURL, i==0)
         else:
@@ -809,7 +809,7 @@ if __name__ == "__main__":
     LOGY         = False
     LOGZ         = False
     URL          = False
-    SAVEDIR      = "/publicweb/s/skonstan/TH2/"
+    SAVEDIR      = "/publicweb/%s/%s/%s" % (getpass.getuser()[0], getpass.getuser(), ANALYSISNAME)
     VERBOSE      = False
     FOLDER       = "topbdtSelection_" #"topbdtSelection_" #jetSelection_
     DATASET      = "Data"

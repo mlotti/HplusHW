@@ -811,7 +811,7 @@ void TopRecoAnalysis::book(TDirectory *dir) {
   hSubldgTrijet_DeltaEta_Trijet_TetrajetBjet_trueBjet = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "SubldgTrijet_DeltaEta_Trijet_TetrajetBjet_trueBjet"  , ";#Delta Eta(Trijet,b_{free})", nDEtaBins, fDEtaMin, fDEtaMax/2.);
   hSubldgTrijet_DeltaPhi_Trijet_TetrajetBjet_trueBjet = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "SubldgTrijet_DeltaPhi_Trijet_TetrajetBjet_trueBjet"  , ";#Delta Phi(Trijet,b_{free})", nDPhiBins, fDPhiMin, fDPhiMax);
   hSubldgTrijet_DeltaY_Trijet_TetrajetBjet_trueBjet   = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "SubldgTrijet_DeltaY_Trijet_TetrajetBjet_trueBjet"  , ";#Delta Y(Trijet,b_{free})"  , nDRBins     , fDRMin     , 5.);
-
+  //
   hLdgTrijet_DeltaR_Trijet_TetrajetBjet_trueBoth   = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "LdgTrijet_DeltaR_Trijet_TetrajetBjet_trueBoth"  , ";#Delta R(Trijet,b_{free})"  , nDRBins     , fDRMin     , 6.);
   hLdgTrijet_DeltaEta_Trijet_TetrajetBjet_trueBoth = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "LdgTrijet_DeltaEta_Trijet_TetrajetBjet_trueBoth"  , ";#Delta Eta(Trijet,b_{free})", nDEtaBins, fDEtaMin, fDEtaMax/2.);
   hLdgTrijet_DeltaPhi_Trijet_TetrajetBjet_trueBoth = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "LdgTrijet_DeltaPhi_Trijet_TetrajetBjet_trueBoth"  , ";#Delta Phi(Trijet,b_{free})", nDPhiBins, fDPhiMin, fDPhiMax);
@@ -2349,122 +2349,6 @@ void TopRecoAnalysis::process(Long64_t entry) {
       }      
     }
   }
-
-
-  //FIXME!
-  //================================================================================================
-  //Before Top Selection: For Efficiency plots
-  //================================================================================================
-  // bool realtop1    = false;
-  // bool realtop2    = false;
-  // bool realtopBoth = false;
-  // if (topData.getSelectedCleanedTopsBJet().size() < 2) std::cout<<"topData.getSelectedCleanedTopsBJet().size() < 2"<<std::endl;
-  // if (!topData.hasFreeBJet()) std::cout<<"!topData.hasFreeBJet()"<<std::endl;
-    if (topData.getSelectedCleanedTopsBJet().size() < 2) return;
-    if (!topData.hasFreeBJet()) return;
-
-  if (doMatching){
-    for (size_t j=0; j<GenTops.size(); j++){    
-      // Get the genParicle
-      genParticle top;
-      top = GenTops.at(j);  
-      hTopQuarkPt ->Fill(top.pt());
-      // Find index of matched trijets                                                                                                                                                                       
-      bool isMatched     = FoundTop.at(j);
-      bool isOnlyMatched = (MCtrue_Bjet.size() == 1);
-      bool sizesAgree    = (MCtrue_Bjet.size() == GenTops.size());
-      bool genuineTop    = false;
-      //bool genuineTop_passBDT = false;
-      //bool fakeTop       = true;    
-      for (size_t i = 0; i < topData.getAllTopsBJet().size(); i++){      	
-	if ( isMatched*isOnlyMatched )
-	  {
-	    if (isRealMVATop(topData.getAllTopsJet1().at(i), topData.getAllTopsJet2().at(i), topData.getAllTopsBJet().at(i), MCtrue_LdgJet.at(0), MCtrue_SubldgJet.at(0), MCtrue_Bjet.at(0)))
-	      {
-		genuineTop = true;
-	      }
-	  }// if ( isMatched*isOnlyMatched )
-	if ( isMatched*sizesAgree )
-	  {
-	    if (isRealMVATop(topData.getAllTopsJet1().at(i), topData.getAllTopsJet2().at(i), topData.getAllTopsBJet().at(i), MCtrue_LdgJet.at(j), MCtrue_SubldgJet.at(j), MCtrue_Bjet.at(j)))
-	      {
-		genuineTop = true;
-	      }//if (same1 || same2)
-	  }//if ( isMatched*sizesAgree )  
-      } //for (int i = 0; i < topData.getAllTopsBJet().size(); i++)
-
-      if (genuineTop){
-	hAllTopQuarkPt_Matched-> Fill(top.pt());
-	continue;
-      }
-
-      for (size_t i = 0; i < topData.getSelectedTopsBJet().size(); i++){
-        if ( isMatched*isOnlyMatched )
-          {
-            if (isRealMVATop(topData.getSelectedTopsJet1().at(i), topData.getSelectedTopsJet2().at(i), topData.getSelectedTopsBJet().at(i), MCtrue_LdgJet.at(0), MCtrue_SubldgJet.at(0), MCtrue_Bjet.at(0)))
-              {
-		genuineTop = true;
-              }
-          }// if ( isMatched*isOnlyMatched )
-        if ( isMatched*sizesAgree )
-          {
-            if (isRealMVATop(topData.getSelectedTopsJet1().at(i), topData.getSelectedTopsJet2().at(i), topData.getSelectedTopsBJet().at(i), MCtrue_LdgJet.at(j), MCtrue_SubldgJet.at(j), MCtrue_Bjet.at(j)))
-              {
-		genuineTop = true;
-              }//if (same1 || same2)
-          }//if ( isMatched*sizesAgree )
-      }//for (int i = 0; i < topData.getSelectedTopsBJet().size(); i++) 
-      if (genuineTop){
-	hAllTopQuarkPt_MatchedBDT -> Fill(top.pt());
-	continue;
-      }
-    }//for (size_t j=0; j<GenTops.size(); j++)
-
-    bool realtop1    = isRealMVATop(topData.getTrijet1Jet1(), topData.getTrijet1Jet2(), topData.getTrijet1BJet(), MCtrue_LdgJet,  MCtrue_SubldgJet, MCtrue_Bjet);
-    bool realtop2    = isRealMVATop(topData.getTrijet2Jet1(), topData.getTrijet2Jet2(), topData.getTrijet2BJet(), MCtrue_LdgJet,  MCtrue_SubldgJet, MCtrue_Bjet);
-    bool realtopBoth = realtop1*realtop2;
-    bool passBDTboth = cfg_PrelimTopMVACut.passedCut(topData.getMVAmax2());
-
-    // All the top quarks have been matched                                                                                                                 
-    if (MCtrue_Bjet.size() == GenTops.size())
-      {
-	//Efficiency: Both Trijets Matched && Pass BDT
-	hEventTrijetPt2T -> Fill(topData.getLdgTrijet().Pt());              //Trijet.pt -- Inclusive
-	if (realtopBoth) hEventTrijetPt2T_Matched -> Fill(topData.getLdgTrijet().Pt()); //Trijet.pt(Matched)  -- Inclusive
-	if (passBDTboth){
-	  hEventTrijetPt2T_BDT -> Fill(topData.getLdgTrijet().Pt());        //Trijet.pt(passBDT) -- Inclusive
-	  if (realtopBoth) hEventTrijetPt2T_MatchedBDT -> Fill(topData.getLdgTrijet().Pt()); //Trijet.pt(passBDT&&Matched) -- Inclusive
-	}
-      }
-    //Fake trijets: Unmatched
-    for (size_t i = 0; i < topData.getAllTopsBJet().size(); i++){
-      bool isFakeTop = (!isRealMVATop(topData.getAllTopsJet1().at(i), topData.getAllTopsJet2().at(i), topData.getAllTopsBJet().at(i), MCtrue_LdgJet,  MCtrue_SubldgJet, MCtrue_Bjet));
-      math::XYZTLorentzVector trijetP4;
-      trijetP4 = topData.getAllTopsJet1().at(i).p4() + topData.getAllTopsJet2().at(i).p4() + topData.getAllTopsBJet().at(i).p4();
-      if (isFakeTop){
-	hTrijetFakePt                 -> Fill (trijetP4.Pt());
-	if (cfg_PrelimTopMVACut.passedCut(topData.getAllTopsMVA().at(i))) hTrijetFakePt_BDT -> Fill (trijetP4.Pt());
-      }
-    }
-  }// if (doMatching)
-
-
-    //std::cout<<"============="<<std::endl;
-  //soti
-
-  // bool foundFatWjet_higgsTop = false, foundFatWjet_assocTop = false;
-  // if (haveMatchedTopFromChargedHiggs){
-  //   foundFatWjet_higgsTop = FoundFatWjet_fatJetSelections(HiggsTop_LdgJet.at(0), HiggsTop_SubldgJet.at(0), HiggsTop_Bjet.at(0), Gen_Wh);
-  //   //math::XYZTLorentzVector W_p4;
-  //   //W_p4 = HiggsTop_LdgJet.at(0).p4() + HiggsTop_SubldgJet.at(0).p4();
-  //   hFatWjet_higgsTop_beforeTopSelection -> Fill(foundFatWjet_higgsTop, Gen_Wh.pt());
-  // }
-  // if (haveMatchedAssocTop){
-  //   foundFatWjet_assocTop = FoundFatWjet_fatJetSelections(AssocTop_LdgJet.at(0), AssocTop_SubldgJet.at(0), AssocTop_Bjet.at(0), Gen_Wa);
-  //   //math::XYZTLorentzVector W_p4;
-  //   //W_p4 = AssocTop_LdgJet.at(0).p4() + AssocTop_SubldgJet.at(0).p4();
-  //   hFatWjet_assocTop_beforeTopSelection -> Fill(foundFatWjet_assocTop, Gen_Wa.pt());
-  // }
 
   //================================================================================================
   // 12) Top selection
