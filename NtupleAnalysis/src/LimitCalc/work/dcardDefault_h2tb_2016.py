@@ -392,7 +392,7 @@ bTagSF_Const    = Nuisance(id="CMS_eff_b"        , label="b tagging (Approx.)", 
 JES_Const       = Nuisance(id="CMS_scale_j"      , label="Jet Energy Scale (JES) (Approx.)"     , distr="lnN", function="Constant", value=0.03)
 JER_Const       = Nuisance(id="CMS_res_j"        , label="Jet Energy Resolution (JER) (Approx.)", distr="lnN", function="Constant", value=0.04)
 topPt_Const     = Nuisance(id="CMS_topPtReweight", label="Top pT reweighting (Approx.)", distr="lnN", function="Constant", value=0.25)
-topTag_Const    = Nuisance(id="CMS_topTagging"   , label="Top tagging (Approx.)", distr="lnN", function="Constant", value=0.10) #fixme
+topTag_Const    = Nuisance(id="CMS_topTagging"   , label="Top tagging (Approx.)", distr="lnN", function="Constant", value=0.10)
 
 # Cross section uncertainties
 ttbar_scale_Const    = Nuisance(id="CMS_scale_ttbar"    , label="TTbar XSection scale uncertainty", distr="lnN", function="Constant", value=tt_scale_down, upperValue=tt_scale_up)

@@ -654,7 +654,8 @@ def GetHistoKwargs(histoName, ext, opts):
 
     _kwargs = {
         "ratioCreateLegend": True,
-        "ratioType"        : "errorScale", # None, "errorScale", "binomial", "errorPropagation"
+        "ratioType"        : "errorPropagation",
+        # "ratioType"        : "errorScale",
         "ratioErrorOptions": {"numeratorStatSyst": False, "denominatorStatSyst": False}, # Include stat.+syst. to numerator (if syst globally enabled)
         "ratioMoveLegend"  : {"dx": -0.51, "dy": 0.03, "dh": -0.05},
         "errorBarsX"       : True,

@@ -31,7 +31,8 @@ metFilter = PSet(
                     "Flag_goodVertices",
                     "Flag_globalTightHalo2016Filter",
                     "badPFMuonFilter",
-                    "badChargedCandidateFilter"]
+                    "badChargedCandidateFilter"],
+    runOnlyData = ["Flag_eeBadScFilter"]
 )
 
 #====== Tau selection

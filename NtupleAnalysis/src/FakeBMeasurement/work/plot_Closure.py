@@ -318,6 +318,7 @@ def PlotComparison(datasetsMgr, hBaseline, hInverted, ext):
 
     # Create the final plot object
     p = plots.ComparisonManyPlot(baseline_FakeB, [inverted_FakeB], saveFormats=[])
+    #p = plots.ComparisonPlot(baseline_FakeB, inverted_FakeB, saveFormats=[]) #also works!
     p.setLuminosity(opts.intLumi)
 
     # Apply histogram styles
@@ -552,10 +553,10 @@ def GetHistoKwargs(histoName, ext, opts):
 
     _kwargs = {
         "ratioCreateLegend": True,
-        #"ratioType"        : None, #"errorScale", #"errorScale", #binomial #errorPropagation
-        "ratioType"        : "errorScale",
-        "ratioErrorOptions": {"numeratorStatSyst": False, "denominatorStatSyst": False}, # Include stat.+syst. to numerator (if syst globally enabled)
-        "ratioMoveLegend"  : {"dx": -0.51, "dy": 0.03, "dh": -0.05},
+        "ratioType"        : opts.ratioType, #"errorPropagation", "errorScale", "binomial"
+        "divideByBinWidth" : False,
+        "ratioErrorOptions": {"numeratorStatSyst": False, "denominatorStatSyst": False}, # Include "stat.+syst." in legend? (if False just "stat.")
+        "ratioMoveLegend"  : {"dx": -0.51, "dy": 0.03, "dh": -0.08},
         "errorBarsX"       : True,
         "xlabel"           : _xlabel,
         "ylabel"           : _ylabel,
@@ -563,7 +564,7 @@ def GetHistoKwargs(histoName, ext, opts):
         "rebinY"           : None,
         "ratioYlabel"      : ext.split("v")[0] + "/" + ext.split("v")[1],
         "ratio"            : _ratio,
-        "ratioInvert"      : True, 
+        "ratioInvert"      : False, 
         "addMCUncertainty" : True,
         "addLuminosityText": True,
         "addCmsText"       : True,
@@ -652,6 +653,7 @@ if __name__ == "__main__":
     USEMC        = False
     SIGNALMASS   = 500
     FOLDER       = "ForFakeBMeasurement"
+    RATIOTYPE    = "errorPropagation" # "errorPropagation", "errorScale", "binomial"
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -707,6 +709,10 @@ if __name__ == "__main__":
     parser.add_option("--folder", dest="folder", type="string", default = FOLDER,
                       help="ROOT file folder under which all histograms to be plotted are located [default: %s]" % (FOLDER) )
 
+    parser.add_option("--ratioType", dest="ratioType", type="string", default = RATIOTYPE,
+                      help="Error type for to be used for the ratio [default: %s]" % (RATIOTYPE) )
+
+
     (opts, parseArgs) = parser.parse_args()
 
     # Require at least two arguments (script-name, path to multicrab)
@@ -747,6 +753,10 @@ if __name__ == "__main__":
         sys.exit()
     else:
         opts.signal = "ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass
+
+    ratioTypes = ["errorPropagation", "errorScale", "binomial"]
+    if opts.ratioType not in ratioTypes:
+        raise Exception("Invalid ration type \"%s\". Please select from:%s" % (opts.ratioType, ", ".join(ratioTypes)  ))
 
     # Call the main function
     main(opts)

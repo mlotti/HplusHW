@@ -15,10 +15,12 @@ EXAMPLES:
 ./plotMC_MassVsBDT.py -m Hplus2tbAnalysis_Preapproval_MVA0p30to0p70_Syst_22Apr2018 --signalMass 300
 ./plotMC_MassVsBDT.py -m Hplus2tbAnalysis_Preapproval_MVA0p30to0p70_Syst_22Apr2018 --signalMass 500
 ./plotMC_MassVsBDT.py -m Hplus2tbAnalysis_Preapproval_MVA0p30to0p70_Syst_22Apr2018 --signalMass 1000
+./plotMC_MassVsBDT.py -m Hplus2tbAnalysis_Preapproval_MVA0p30to0p70_Syst_22Apr2018 --signalMass 500
 
 
 LAST USED:
-./plotMC_MassVsBDT.py -m Hplus2tbAnalysis_Preapproval_MVA0p30to0p70_Syst_22Apr2018 --signalMass 500
+%./plotMC_MassVsBDT.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400_wSignal  --signalMass 500
+./plotMC_MassVsBDT.py -m Hplus2tbAnalysis_Preapproval_MVA0p40_Syst_28Apr2018 --signalMass 500 --url
 
 '''
 
@@ -130,10 +132,15 @@ def main(opts):
         # Set/Overwrite cross-sections
         datasetsToRemove = []
         for d in datasetsMgr.getAllDatasets():
-            if "M_%s" % (opts.signalMass) in d.getName():
-                datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
+            mass = "M_%s" % (opts.signalMass)
+            if mass in d.getName():
+                if ("%s" % opts.signalMass) != d.getName().split("M_")[-1]:
+                    datasetsMgr.remove(d.getName())
+                else:
+                    datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
             else:
-                datasetsToRemove.append(d.getName())
+                #datasetsToRemove.append(d.getName())
+                datasetsMgr.remove(d.getName())
 
         if opts.verbose:
             datasetsMgr.PrintCrossSections()
@@ -142,11 +149,11 @@ def main(opts):
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
 
-        # Custom Filtering of datasets 
-        for i, d in enumerate(datasetsToRemove, 0):
-            msg = "Removing dataset %s" % d
-            Verbose(ShellStyles.WarningLabel() + msg + ShellStyles.NormalStyle(), i==0)
-            datasetsMgr.remove(filter(lambda name: d == name, datasetsMgr.getAllDatasetNames()))
+#         # Custom Filtering of datasets 
+#         for i, d in enumerate(datasetsToRemove, 0):
+#             msg = "Removing dataset %s" % d
+#             Verbose(ShellStyles.WarningLabel() + msg + ShellStyles.NormalStyle(), i==0)
+#             datasetsMgr.remove(filter(lambda name: d == name, datasetsMgr.getAllDatasetNames()))
 
         if opts.verbose:
             datasetsMgr.PrintInfo()
@@ -282,7 +289,7 @@ def PlotHistograms(datasetsMgr, histoName):
 
 
     # Overwite signal style?
-    style  = [200, 500, 800, 1000, 2000, 5000]
+    style  = [200, 500, 800, 1000, 2000, 3000, 5000]
     lstyle = [ROOT.kSolid, ROOT.kDashed, ROOT.kDashDotted, ROOT.kDotted, ROOT.kDotted, ROOT.kSolid]
     for i, d in enumerate(datasetsMgr.getAllDatasets(), 0):
         p.histoMgr.forHisto(d.getName(), styles.getSignalStyleHToTB_M(style[i]))
