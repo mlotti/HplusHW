@@ -102,7 +102,6 @@ fakeBTopSelectionBDT = hplus2tbAnalysis.fakeBTopSelectionBDT
 
 fakeBMeasurement = hplus2tbAnalysis.fakeBMeasurement
 
-#Soti
 systTopBDTSelection = PSet(
     MuTrijetDRCutValue       = "2.0",
     MuTrijetDRCutDirection   = ">",
@@ -110,11 +109,11 @@ systTopBDTSelection = PSet(
     MuBJetDRCutDirection     = "<=",
     MiniIsoCutValue          = "0.1",
     MiniIsoCutDirection      = "<=",
-    MiniIsoInvCutValue       = "0.2",
+    MiniIsoInvCutValue       = "0.1",
     MiniIsoInvCutDirection   = ">",
     METCutValue              = "50",
     METCutDirection          = ">=",
-    METInvCutValue           = "30",
+    METInvCutValue           = "20",
     METInvCutDirection       = "<",
     MVACutValue              = "0.4",
     MVACutDirection          = ">=",

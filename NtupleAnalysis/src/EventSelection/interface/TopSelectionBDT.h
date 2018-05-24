@@ -195,6 +195,10 @@ public:
     const std::vector<Jet>& getAllTopsJet2() const { return fAllTopsJet2; }
     const std::vector<Jet>& getAllTopsBJet() const { return fAllTopsBJet; }
     const std::vector<float>& getAllTopsMVA() const { return fAllTopsMVA; }
+    const std::vector<Jet>& getSelectedCleanedTopsJet1() const { return fSelectedCleanedTopsJet1; }
+    const std::vector<Jet>& getSelectedCleanedTopsJet2() const { return fSelectedCleanedTopsJet2; }
+    const std::vector<Jet>& getSelectedCleanedTopsBJet() const { return fSelectedCleanedTopsBJet; }
+    const std::vector<float>& getSelectedCleanedTopsMVA() const { return fSelectedCleanedTopsMVA; }
 
     friend class TopSelectionBDT;
 
@@ -239,6 +243,11 @@ public:
     std::vector<Jet> fAllTopsJet2;
     std::vector<Jet> fAllTopsBJet;
     std::vector<float> fAllTopsMVA;
+
+    std::vector<Jet> fSelectedCleanedTopsJet1;
+    std::vector<Jet> fSelectedCleanedTopsJet2;
+    std::vector<Jet> fSelectedCleanedTopsBJet;
+    std::vector<float> fSelectedCleanedTopsMVA;
 
   };
   

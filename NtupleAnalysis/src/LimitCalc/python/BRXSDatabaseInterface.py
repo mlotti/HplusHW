@@ -418,6 +418,7 @@ class BRXSDatabaseInterface:
             #print "yselection",yselection
             yval = graph.GetY()[i]
             ylimit = self.getTanbFromLightHpBR(yval,yselection,highTanbRegion)
+            #print "check ylimit",ylimit
             if highTanbRegion and ylimit <= 1:
 		#print "    highTanbRegion and ylimit <= 1"
                 ylimit = 80
@@ -427,8 +428,8 @@ class BRXSDatabaseInterface:
         if limitBRtoMin:
             graph = self.graphToMinTanb(graph,xVariableName,selection,highTanbRegion)
 
-        #for i in xrange(0, graph.GetN()):
-        #    print "    ",graph.GetX()[i],graph.GetY()[i]
+        for i in xrange(0, graph.GetN()):
+            print "    ",graph.GetX()[i],graph.GetY()[i]
         return graph
 
     def graphToTanBetaCombined(self,graph,xVariableName,selection):
@@ -2285,6 +2286,8 @@ class BRXSDatabaseInterface:
         for tgb in tanbs:
             if tgb < 1:
                 continue
+            if tgb > 65:
+                continue
             value = self.get("tanb",variable,selection+"&&tanb==%s"%tgb)
             if value < min and value > 0:
                 min = value
@@ -2304,6 +2307,8 @@ class BRXSDatabaseInterface:
             for i in range(graph.GetN()):
                 x = graph.GetX()[i]
                 y = graph.GetY()[i]
+                if x > 65:
+                    continue
                 if x < minTanb:
                     continue
                 #print "    hightanb region x,y,target",x,y,target
@@ -2642,6 +2647,16 @@ class BRXSDatabaseInterface:
                 return regexp + " " + match.group("version")
         return None
 
+    def getScenario(self):
+        scenario_re = re.compile("Scenario *= *(?P<version>\S+)")
+        keys = self.fIN.GetListOfKeys()
+        for i in range(len(keys)):
+            keyName = keys.At(i).GetName()
+            match = scenario_re.search(keyName)
+            if match:
+                return match.group("version")
+        return None
+
 def usage():
     print
     print "### Usage:  ",sys.argv[0],"<root file>"
@@ -2668,8 +2683,9 @@ def test():
 #        db.Print(variable="BR_tHpb*BR_Hp_taunu",selection="mHp==155 && mu==200")
 #        db.Print(variable="mHp",selection="mA==110 && mu==3300")
 #        db.Print(variable="mHp")
-        db.Print(variable="mh",selection="mHp==180&&mu==500")
+        db.Print(variable="mh",selection="mHp==400")
 #        db.Print(variable="0.001*2*tHp_xsec*BR_Hp_taunu",selection="mHp==300&&mu==200")
+#        db.Print(variable="0.001*2*tHp_xsec*BR_Hp_tb",selection="mHp==300&&mu==200")
 #        db.Print(variable="tHp_xsec",selection="mHp==200 && tanb== 40")
 
 #        db.getExpLimitInterpolated(120,"")

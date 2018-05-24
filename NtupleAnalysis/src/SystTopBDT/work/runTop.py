@@ -170,7 +170,6 @@ def main():
     # Overwrite Default Settings  
     # ================================================================================================
     from HiggsAnalysis.NtupleAnalysis.parameters.jetTriggers import allSelections
-    # Marina
     from HiggsAnalysis.NtupleAnalysis.main import PSet
     import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
 
@@ -183,14 +182,14 @@ def main():
 
     # BDT MisID SF
     MisIDSF = PSet(
-        MisIDSFJsonName = "Efficiency_SystBDT_CR1.json", # For Fake TT:  Efficiency_SystBDT_CR1.json",   # For QCD, EWK & SingleTop:  Efficiency_SystBDT_CR2.json
-        ApplyMisIDSF    = True, 
+        MisIDSFJsonName = "Efficiency_SystBDT_CR2_MET50_MuIso0p1_InvMET20_InvMuIso0p1.json", # For Fake TT:  CR1, qcd+ewk+st CR2
+        ApplyMisIDSF    = False, 
         )
     scaleFactors.assignMisIDSF(MisIDSF, "nominal", MisIDSF.MisIDSFJsonName)
     allSelections.MisIDSF = MisIDSF
     
-    allSelections.SystTopBDTSelection.MiniIsoCutValue    = 0.2
-    allSelections.SystTopBDTSelection.MiniIsoInvCutValue = 0.2
+    allSelections.SystTopBDTSelection.MiniIsoCutValue    = 0.1
+    allSelections.SystTopBDTSelection.MiniIsoInvCutValue = 0.1
     allSelections.SystTopBDTSelection.METCutValue        = 50.0
     allSelections.SystTopBDTSelection.METInvCutValue     = 20.0
     
