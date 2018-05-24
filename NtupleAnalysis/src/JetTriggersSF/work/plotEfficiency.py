@@ -13,10 +13,10 @@ EXAMPLES:
 ./plotEfficiency.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/Trigger/JetTriggersSF_170921_053850_FinalWithCut/ --url
 ./plotEfficiency.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/Trigger/JetTriggersSF_170921_053850_FinalWithCut/ --url -e ext
 ./plotEfficiency.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/JetTriggersSF/multicrab_Hplus2tbAnalysis_v8030_20180223T0905/JetTriggersSF_180308_194450/ -e "MuEnriched" --url
-
+./plotEfficiency.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/JetTriggersSF/multicrab_Hplus2tbAnalysis_v8030_20180223T0905/JetTriggersSF_LepVeto_TauVeto_7JetPt30_2BjetsPt40Pt30_180308_194450/ -e "MuEnriched" --url
 
 LAST USED:
-./plotEfficiency.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/JetTriggersSF/multicrab_Hplus2tbAnalysis_v8030_20180223T0905/JetTriggersSF_LepVeto_TauVeto_7JetPt30_2BjetsPt40Pt30_180308_194450/ -e "MuEnriched" --url
+./plotEfficiency.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/JetTriggersSF/multicrab_Hplus2tbAnalysis_v8030_20180223T0905/JetTriggersSF_LepVeto_TauVeto_7JetPt30_2BjetsPt40Pt30_180308_194450/ -e "MuEnriched" --url --paper 
 
 
 '''
@@ -188,7 +188,7 @@ def GetHistoKwargs(histoName, opts):
     yMax2 = 1.21 #1.3
     _kwargs     = {
         "xlabel"           : "x-axis",
-        "ylabel"           : "L1+HLT Efficiency",
+        "ylabel"           : "L1 + HLT Efficiency",
         "ratioYlabel"      : "Ratio",
         "ratio"            : True, 
         "stackMCHistograms": False,
@@ -201,6 +201,7 @@ def GetHistoKwargs(histoName, opts):
         "opts2"            : {"ymin": yMin2, "ymax": yMax2},
         "log"              : False,
         "moveLegend"       : _moveLegend,
+        "cutBox"           : {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True},
         "cutBoxY"          : {"cutValue": 0.95, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": False, "ratioCanvas": True},
         }
 
@@ -259,7 +260,12 @@ def GetHistoKwargs(histoName, opts):
         kwargs["opts"]   = {"xmin": 0.0, "ymin": yMin1, "ymax": yMax1}
         kwargs["cutBox"] = {"cutValue": 3.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
 
-    return kwargs
+    if opts.paper:
+        kwargs["cutBox"]["line"]  = False
+        kwargs["cutBox"]["box"]   = False
+        kwargs["cutBoxY"]["line"] = False
+        kwargs["cutBoxY"]["box"]  = False
+    return kwargs 
 
 
 def GetDatasetsFromDir(opts):
@@ -561,9 +567,11 @@ def main(opts):
     # Setup ROOT and style
     ROOT.gROOT.SetBatch(opts.batchMode)
     style = tdrstyle.TDRStyle()
-    style.setOptStat(True)
-    style.setGridX(True)
-    style.setGridY(True)
+    style.setGridX(opts.gridX)
+    style.setGridY(opts.gridY)
+    if opts.paper:
+        style.setGridX(False)
+        style.setGridY(False)
     
     # Setup & configure the dataset manager
     datasetsMgr = GetDatasetsFromDir(opts)
@@ -654,7 +662,7 @@ def main(opts):
             histograms.addText(0.65, 0.10, "2016", 17)
 
             # Save the canvas to a file
-            SavePlot(p, plotName, os.path.join(opts.saveDir, opts.optMode), saveFormats=[".pdf", ".png", ".C", ".eps"] )
+            SavePlot(p, plotName, os.path.join(opts.saveDir, opts.optMode), saveFormats=[".pdf", ".png", ".C"] )
 
     Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)
     return
@@ -689,8 +697,11 @@ if __name__ == "__main__":
     SAVEDIR      = None
     OPTMODE      = None
     FAST         = False
-    ANALYSISNAME = "JetTriggersSF"
     URL          = False
+    GRIDX        = False
+    GRIDY        = False
+    PAPER        = False
+    ANALYSISNAME = "JetTriggersSF"
 
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
     
@@ -730,6 +741,15 @@ if __name__ == "__main__":
     parser.add_option("--fast", dest="fast", action="store_true", default=FAST,
                       help="Only plots the OR trigger for 2 variables (testing purposes)  [default: %s]" % FAST)
     
+    parser.add_option("--gridX", dest="gridX", default=GRIDX, action="store_true",
+                      help="Enable the grid for the x-axis [default: %s]" % (GRIDX) )
+
+    parser.add_option("--gridY", dest="gridY", default=GRIDY, action="store_true",
+                      help="Enable the grid for the y-axis [default: %s]" % (GRIDY) )
+
+    parser.add_option("--paper", dest="paper", default=PAPER, action="store_true",
+                      help="Apply paper stylings [default: %s]" % (PAPER) )
+
     (opts, parseArgs) = parser.parse_args()
 
     # Sanity check
