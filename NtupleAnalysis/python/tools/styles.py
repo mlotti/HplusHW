@@ -502,7 +502,7 @@ stylesCompound = [
     StyleCompound([
             StyleMarker(markerSize=1.2, markerColor=ROOT.kAzure-1, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
             StyleLine(lineColor=ROOT.kAzure-1, lineStyle=ROOT.kSolid, lineWidth=3),  #ROOT.kDashDotted
-            StyleFill(fillColor=ROOT.kAzure-1, fillStyle=3002)]),
+            StyleFill(fillColor=ROOT.kAzure-1, fillStyle=3003)]), #iro
     ]
 
 
