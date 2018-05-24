@@ -53,6 +53,9 @@ from ROOT import *
 
 import getpass
 
+from PythonWriter import PythonWriter
+pythonWriter = PythonWriter()
+
 import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
 import HiggsAnalysis.NtupleAnalysis.tools.counter as counter
@@ -519,7 +522,6 @@ def PlotHistos(noSF_datasetsMgr, withCR2SF_datasetsMgr, num_histoList, den_histo
     #=========================================================================================
     f1 = 0.602756; f2=0.902921;
 
-
     # =========================================================================================
     # (A) Apply Normalization Factors (see: getNormalizations.py)
     # =========================================================================================
@@ -677,7 +679,18 @@ def PlotHistos(noSF_datasetsMgr, withCR2SF_datasetsMgr, num_histoList, den_histo
     plots.drawPlot(p, savePath, **_kwargs)
     SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf", ".C"])
 
-
+    # =============================
+    #    Export JSON file
+    # =============================
+    jsonName = "Efficiency_InclusiveTT_SR_MET50_MuIso0p1_InvMET20_InvMuIso0p1.json"
+    runRange = "273150-284044"
+    analysis = opts.analysisName
+    label = "2016"
+    plotDir =  os.path.join(opts.folder, jsonName)
+    pythonWriter.addParameters(plotDir, label, runRange, opts.intLumi, geff_data)
+    pythonWriter.addMCParameters(label, geff_mc)
+    pythonWriter.writeJSON(jsonName)
+    
     
     return
 
