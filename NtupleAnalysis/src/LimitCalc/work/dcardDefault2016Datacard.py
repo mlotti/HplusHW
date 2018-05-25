@@ -30,22 +30,30 @@ HeavyAnalysis = True
 # Set mass points according to the chosen ranges
 LightMassPoints=[80,90,100,120,140,150,155,160]
 IntermediateMassPoints=[165,170,175]
-IntermediateMassPointsAll=[145,150,155,160,156,170,175,180,190,200]
+IntermediateMassPointsAll=[145,150,155,160,165,170,175,180,190,200]
 HeavyMassPoints=[180,200,220,250,300,400,500,750,800,1000,2000,2500,3000] #, 5000, 7000, 10000]
 
 # Set mass points
 MassPoints = []
 if LightAnalysis:
     MassPoints+=LightMassPoints[:]
+else:
+    LightMassPoints = []
 if IntermediateAnalysis:
     MassPoints+=IntermediateMassPoints[:]    
+else:
+    IntermediateMassPoints = []
 if HeavyAnalysis:
     MassPoints+=HeavyMassPoints[:]
+else:
+    HeavyMassPoints = []
 
 # For intermediate-only generation, use all intermediate samples (also overlapping)
 IntermediateAnalysisOnly = not LightAnalysis and not HeavyAnalysis and IntermediateAnalysis
 if IntermediateAnalysisOnly:
-    MassPoints+=IntermediateMassPointsAll[:]    
+    MassPoints=IntermediateMassPointsAll[:]
+else:
+    IntermediateMassPointsAll=[]
 
 # Set mass points for control plots (overriding the previous settings):
 #MassPoints = [200]
@@ -71,6 +79,8 @@ OptionCombineSingleColumnUncertainties = False # (approxmation that makes limit 
 # Datasets
 OptionUseWJetsHT = True # Use HT binned WJets samples instead of inclusive for WJets background
 OptionGenuineTauBackgroundSource="MC_FakeAndGenuineTauNotSeparated" # Use "DataDriven" to get EWK+tt genuine taus from embedded samples
+IntSFuncertainty = 0.227 # for SF 0.41 (light region)
+#IntSFuncertainty = 0.106 # for SF 0.65 (heavy region)
 
 # Summary tables
 OptionDisplayEventYieldSummary=False
@@ -85,7 +95,7 @@ MinimumStatUncertainty=0.5 # Minimum stat. uncertainty to set to bins with zero 
 UseAutomaticMinimumStatUncertainty = True # Do NOT use the MinimumStatUncertainty value above for ~empty bins, but determine the value from the lowest non-zero rate for each dataset
 ToleranceForMinimumRate=0.0 # Tolerance for almost zero rate (columns with smaller rate are suppressed)
 #OptionBinByBinLabel="_RtauGt0p75_" # Label to be attached to stat. uncert. shape nuisances, needed to decorrelate stat. uncertainty variations in case of categorization
-#OptionBinByBinLabel="_RtauLt0p75_" # Label to be attached to stat. uncert. shape nuisances, needed to decorrelate stat. uncertainty variations in case of categorization
+OptionBinByBinLabel="_RtauLt0p75_" # Label to be attached to stat. uncert. shape nuisances, needed to decorrelate stat. uncertainty variations in case of categorization
 
 # Nuisances
 OptionConvertFromShapeToConstantList=[] # Convert the following nuisances from shape to constant
@@ -227,10 +237,10 @@ if not IntermediateAnalysisOnly:
         hwx.setNuisances(myTrgSystematics[:]+myTauIDSystematics[:]+myTauMisIDSystematics[:]
                          +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
 #                         +["xsect_ttbar","lumi_13TeV"])
-                         +["QCDscale_ttbar","pdf_ttbar","mass_ttbar","lumi_13TeV"])
+                         +["QCDscale_ttbar","pdf_ttbar","mass_top","lumi_13TeV"])
         hwx.setDatasetDefinition("TTToHplusBWB_M"+str(mass))
         DataGroups.append(hwx)
-for mass in HeavyMassPoints+IntermediateMassPoints:
+for mass in HeavyMassPoints+IntermediateMassPoints+IntermediateMassPointsAll:
     myMassList=[mass]
     hx=signalTemplate.clone()
     hx.setLabel("CMS_Hptntj_Hp"+str(mass))
@@ -246,19 +256,22 @@ for mass in HeavyMassPoints+IntermediateMassPoints:
     # Add PDF acceptance nuisance
     hxNuisanceList += ["CMS_Hptn_pdf_Hptn"]
     # Add intermediate region nuisances
+    intString=""
     if IntermediateAnalysisOnly:
         if mass in IntermediateMassPointsAll:
-            hxNuisanceList += ["CMS_Hptntj_NLO_vs_LO"]
+            hxNuisanceList += ["CMS_Hptn_int_SF_stat","CMS_Hptn_int_neutral"]
+            intString="intermediate"
     else:
         if mass in IntermediateMassPoints:
-            hxNuisanceList += ["CMS_Hptntj_NLO_vs_LO"]
+            hxNuisanceList += ["CMS_Hptn_int_SF_stat","CMS_Hptn_int_neutral"]
+            intString="intermediate"
     hx.setNuisances(hxNuisanceList)
-    hx.setDatasetDefinition("HplusTB_M"+str(mass))
+    hx.setDatasetDefinition("HplusTB"+intString+"_M"+str(mass))
     DataGroups.append(hx)
 
 myQCDSystematics = myTrgSystematics[:]+myESSystematics[:]+myBtagSystematics[:]+myTopSystematics[:]+myTopAcceptanceSystematicsForQCD+myPileupSystematics[:]
 #approximation 1: only ttbar xsect uncertinty applied to QCD, as ttbar dominates the EWK BG (but uncertainty is scaled according to 1-purity, i.e. #all_ttbar+EWK_events_in_QCDandFakeTau/#all_events_in_QCDandFakeTau)
-myQCDSystematics+=["QCDscale_ttbar_forQCD","pdf_ttbar_forQCD","mass_ttbar_forQCD","lumi_13TeV_forQCD","CMS_eff_t_forQCD"]
+myQCDSystematics+=["QCDscale_ttbar_forQCD","pdf_ttbar_forQCD","mass_top_forQCD","lumi_13TeV_forQCD","CMS_eff_t_forQCD"]
 #approximation 2: myLeptonVetoSystematics neglected for QCD
 
 if OptionIncludeSystematics: 
@@ -305,7 +318,7 @@ else:
                                 validMassPoints=MassPoints,
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]+myTauMisIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
-                                  +myTopSystematics+myTopAcceptanceSystematics+["QCDscale_ttbar","pdf_ttbar","mass_ttbar","lumi_13TeV"]))
+                                  +myTopSystematics+myTopAcceptanceSystematics+["QCDscale_ttbar","pdf_ttbar","mass_top","lumi_13TeV"]))
     DataGroups.append(DataGroup(label=labelPrefix+"W", landsProcess=4,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
                                 datasetType="Embedding", 
@@ -320,7 +333,7 @@ else:
                                 datasetDefinition="SingleTop",
                                 validMassPoints=MassPoints,
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]+myTauMisIDSystematics[:]
-                                  +myESSystematics[:]+myBtagSystematics[:]+myTopAcceptanceSystematics+myPileupSystematics[:]+myLeptonVetoSystematics[:]
+                                  +myESSystematics[:]+myBtagSystematics[:]+["mass_top_forSingleTop"]+myTopAcceptanceSystematics+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                                   +["QCDscale_singleTop","pdf_singleTop","lumi_13TeV"]))
     DataGroups.append(DataGroup(label=labelPrefix+"DY", landsProcess=6,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
@@ -357,8 +370,10 @@ ReservedNuisances=[]
 Nuisances=[]
 
 #====signal acceptance
-Nuisances.append(Nuisance(id="CMS_Hptntj_NLO_vs_LO", label="acceptance uncertainty for intermediate signal",
-    distr="lnN", function="Constant", value=0.10))
+Nuisances.append(Nuisance(id="CMS_Hptn_int_SF_stat", label="uncertainty for NLO vs. LO SF in intermediate region",
+    distr="lnN", function="Constant", value=IntSFuncertainty))
+Nuisances.append(Nuisance(id="CMS_Hptn_int_neutral", label="effect of WithNeutral samples in intermediate region",
+    distr="lnN", function="Constant", value=0.1, upperValue=0.0))
 
 #=====tau ID and mis-ID
 # tau ID
@@ -539,7 +554,7 @@ Nuisances.append(Nuisance(id="pdf_ttbar", label="ttbar pdf uncertainty",
     distr="lnN", function="Constant",
     value=systematics.getCrossSectionUncertainty("TTJets_pdf").getUncertaintyDown(),
     upperValue=systematics.getCrossSectionUncertainty("TTJets_pdf").getUncertaintyUp()))
-Nuisances.append(Nuisance(id="mass_ttbar", label="ttbar top mass uncertainty",
+Nuisances.append(Nuisance(id="mass_top", label="ttbar top mass uncertainty",
     distr="lnN", function="Constant",
     value=systematics.getCrossSectionUncertainty("TTJets_mass").getUncertaintyDown(),
     upperValue=systematics.getCrossSectionUncertainty("TTJets_mass").getUncertaintyUp()))
@@ -556,7 +571,7 @@ Nuisances.append(Nuisance(id="QCDscale_ttbar_forQCD", label="ttbar cross section
 Nuisances.append(Nuisance(id="pdf_ttbar_forQCD", label="ttbar pdf uncertainty",
     distr="lnN", function="ConstantForQCD",
     value=systematics.getCrossSectionUncertainty("TTJets_pdf").getUncertaintyDown()))
-Nuisances.append(Nuisance(id="mass_ttbar_forQCD", label="ttbar top mass uncertainty",
+Nuisances.append(Nuisance(id="mass_top_forQCD", label="ttbar top mass uncertainty",
     distr="lnN", function="ConstantForQCD",
     value=systematics.getCrossSectionUncertainty("TTJets_mass").getUncertaintyDown(),
     upperValue=systematics.getCrossSectionUncertainty("TTJets_mass").getUncertaintyUp()))
@@ -584,6 +599,10 @@ Nuisances.append(Nuisance(id="QCDscale_singleTop", label="single top cross secti
 Nuisances.append(Nuisance(id="pdf_singleTop", label="single top pdf ucnertainty",
     distr="lnN", function="Constant",
     value=systematics.getCrossSectionUncertainty("SingleTop_pdf").getUncertaintyDown()))
+Nuisances.append(Nuisance(id="mass_top_forSingleTop", label="single top mass uncertainty",
+    distr="lnN", function="Constant",
+    value=0.022))
+
 
 # DY
 #Nuisances.append(Nuisance(id="xsect_DYtoll", label="Z->ll cross section",
@@ -667,8 +686,8 @@ MergeNuisances=[]
 #MergeNuisances.append(["CMS_eff_b","CMS_fake_b"]) #FIXME: mergning should add uncerteinties quadratically
 
 # Correlate ttbar and single top xsect uncertainties
-MergeNuisances.append(["QCDscale_ttbar","QCDscale_singleTop"])
-MergeNuisances.append(["pdf_ttbar","pdf_singleTop"])
+#MergeNuisances.append(["QCDscale_ttbar","QCDscale_singleTop"])
+#MergeNuisances.append(["pdf_ttbar","pdf_singleTop"])
 
 # Merge QCDandFakeTau nuisances to corresponding t_genuine nuisances
 MergeNuisances.append(["CMS_eff_t","CMS_eff_t_forQCD"])
@@ -677,7 +696,7 @@ MergeNuisances.append(["QCDscale_ttbar", "QCDscale_ttbar_forQCD"])
 MergeNuisances.append(["pdf_ttbar", "pdf_ttbar_forQCD"])
 MergeNuisances.append(["CMS_Hptn_mu_RF_top", "CMS_Hptn_mu_RF_top_forQCD"])
 MergeNuisances.append(["CMS_Hptn_pdf_top", "CMS_Hptn_pdf_top_forQCD"])
-MergeNuisances.append(["mass_ttbar", "mass_ttbar_forQCD"])
+MergeNuisances.append(["mass_top", "mass_top_forQCD","mass_top_forSingleTop"])
 MergeNuisances.append(["lumi_13TeV", "lumi_13TeV_forQCD"])
 
 #================================================================================================ 
