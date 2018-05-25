@@ -113,7 +113,7 @@ systTopBDTSelection = PSet(
     MiniIsoInvCutDirection   = ">",
     METCutValue              = "50",
     METCutDirection          = ">=",
-    METInvCutValue           = "20",
+    METInvCutValue           = "30",
     METInvCutDirection       = "<",
     MVACutValue              = "0.4",
     MVACutDirection          = ">=",

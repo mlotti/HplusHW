@@ -179,7 +179,7 @@ metSelection = PSet(
 topSelectionBDT = PSet(
     MVACutValue            = 0.40,    # [default: 0.40]
     MVACutDirection        =  ">=",   # [default: ">="]
-    MassCutValue           = 400.0,   # [default: 500.0]  # Do not evaluate top candidate if mass greater than this cut
+    MassCutValue           = 300.0,   # [default: 400 or 500.0]  # Do not evaluate top candidate if mass greater than this cut
     MassCutDirection       = "<=",    # [default: "<"]
     CSV_bDiscCutValue      = 0.8484,  # [default: 0.8484] # Do not evaluate top candidate if b-jet assigned as b from top fails this cut
     CSV_bDiscCutDirection  = ">=",    # [default: ">="]

@@ -714,24 +714,6 @@ void TopRecoTree::process(Long64_t entry) {
   const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
   if (tauData.hasIdentifiedTaus() ) return;
 
-  // Fake-Tau SF
-  if (fEvent.isMC()) 
-    {      
-      // Not needed unless a tau is used!
-      // fEventWeight.multiplyWeight(tauData.getTauMisIDSF());
-      // cFakeTauSFCounter.increment();
-    }
-  
-
-  // Tau-Trigger SF
-  if (fEvent.isMC())
-    {
-      // Not needed unless a tau is used!
-      // fEventWeight.multiplyWeight(tauData.getTauTriggerSF());
-      // cTauTriggerSFCounter.increment();
-    }
-
-  
   //================================================================================================
   // 8) Jet selection
   //================================================================================================
@@ -771,7 +753,7 @@ void TopRecoTree::process(Long64_t entry) {
   //================================================================================================
   if(0) std::cout << "=== MET selection" << std::endl;
   const METSelection::Data METData = fMETSelection.analyze(fEvent, nVertices);
-  if (!METData.passedSelection()) return;
+  //if (!METData.passedSelection()) return;
   
 
   //================================================================================================
@@ -892,7 +874,7 @@ void TopRecoTree::process(Long64_t entry) {
   //================================================================================================//
 
   //START
-  const double twoSigma = 9999.99;
+  const double twoSigma = 0.32;
   const double dRcut    = 0.3;
   if (fEvent.isMC()){
 

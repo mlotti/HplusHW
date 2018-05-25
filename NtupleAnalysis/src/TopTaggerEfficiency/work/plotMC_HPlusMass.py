@@ -10,12 +10,12 @@ Examples:
 ./plotMC_HPlusMass.py -m <peudo_mcrab> --folder topologySelection_ --url --normaliseToOne
 ./plotMC_HPlusMass.py -m <peudo_mcrab> --normaliseToOne --url
 ./plotMC_HPlusMass.py -m <peudo_mcrab> --normaliseToOne --url --signalMass 500
-./plotMC_HPlusMass.py -m <peudo_mcrab> --normaliseToOne --url --signalsMass 500
+./plotMC_HPlusMass.py -m <peudo_mcrab> --normaliseToOne --url --signalMass 500
 
 Last Used:
-./plotMC_HPlusMass.py -m MyHplusAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --normaliseToOne --url --mergeEWK
-./plotMC_HPlusMass.py -m MyHplusAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --normaliseToOne --folder ""
-./plotMC_HPlusMass.py -m MyHplusAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --folder topSelection_ --url --normaliseToOne
+./plotMC_HPlusMass.py -m TopTaggerEfficiency_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --normaliseToOne --url --mergeEWK
+./plotMC_HPlusMass.py -m TopTaggerEfficiency_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --normaliseToOne --folder ""
+./plotMC_HPlusMass.py -m TopTaggerEfficiency_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --folder topSelection_ --url --normaliseToOne
 
 '''
 
@@ -71,34 +71,6 @@ def GetLumi(datasetsMgr):
             lumi += d.getLuminosity()
     Verbose("Luminosity = %s (pb)" % (lumi), True)
     return lumi
-
-
-def GetListOfQCDatasets():
-    Verbose("Getting list of QCD datasets")
-    return ["QCD_bEnriched_HT200to300",
-            "QCD_bEnriched_HT300to500",
-            "QCD_bEnriched_HT500to700",
-            "QCD_bEnriched_HT700to1000",
-            "QCD_HT1000to1500",
-            "QCD_bEnriched_HT1000to1500",
-            "QCD_bEnriched_HT1500to2000",
-            "QCD_bEnriched_HT2000toInf",
-            "QCD_HT1500to2000_ext1",
-            "QCD_HT2000toInf",
-            "QCD_HT2000toInf_ext1",
-            "QCD_HT200to300",
-            "QCD_HT200to300_ext1",
-            "QCD_HT1000to1500_ext1",
-            "QCD_HT100to200",
-            "QCD_HT1500to2000",
-            "QCD_HT500to700_ext1",
-            "QCD_HT50to100",
-            "QCD_HT700to1000",
-            "QCD_HT700to1000_ext1",
-            "QCD_HT300to500",
-            "QCD_HT300to500_ext1",
-            "QCD_HT500to700"
-            ]
 
 
 def GetListOfEwkDatasets():
@@ -160,26 +132,13 @@ def main(opts, signalMass):
                        
         # Determine integrated Lumi before removing data
 #        intLumi = datasetsMgr.getDataset("Data").getLuminosity()
-        intLumi = 35920
-        datasetsMgr.PrintInfo()
-
-    
-        #datasetsMgr.merge("QCD", GetListOfQCDatasets())
-        #plots._plotStyles["QCD"] = styles.getQCDLineStyle()
-
-        
-        #if opts.noQCD:
-            #datasetsMgr.remove(filter(lambda name: "QCD_b" in name, datasetsMgr.getAllDatasetNames()))  
-            #datasetsMgr.remove(filter(lambda name: "QCD_HT" in name, datasetsMgr.getAllDatasetNames()))
-            #datasetsMgr.remove(filter(lambda name: "QCD" in name, datasetsMgr.getAllDatasetNames()))
-
+        intLumi = 35200
 
         # Remove datasets
         if 1:
             datasetsMgr.remove(filter(lambda name: "Data" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "Diboson" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "QCD_b" in name, datasetsMgr.getAllDatasetNames()))
-            #datasetsMgr.remove(filter(lambda name: "QCD_HT" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "QCD_b" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr.remove(filter(lambda name: "QCD_HT" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "SingleTop" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "DYJetsToQQHT" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "TTZToQQ" in name, datasetsMgr.getAllDatasetNames()))
@@ -187,18 +146,15 @@ def main(opts, signalMass):
             datasetsMgr.remove(filter(lambda name: "WJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "Diboson" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "TTTT" in name, datasetsMgr.getAllDatasetNames()))
-            #datasetsMgr.remove(filter(lambda name: "TT" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "FakeBMeasurementTrijetMass" in name, datasetsMgr.getAllDatasetNames()))
             #datasetsMgr.remove(filter(lambda name: "M_" in name and "M_" + str(opts.signalMass) not in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "ZJets" in name, datasetsMgr.getAllDatasetNames()))
-            
+        
+        if opts.noQCD:
+            datasetsMgr.remove(filter(lambda name: "QCD_b" in name, datasetsMgr.getAllDatasetNames()))  
+            datasetsMgr.remove(filter(lambda name: "QCD_HT" in name, datasetsMgr.getAllDatasetNames()))
+
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
-
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
-
-        # Determine integrated Lumi before removing data
-        intLumi = 35920
-        #intLumi = datasetsMgr.getDataset("Data").getLuminosity()
 
         # Merge EWK samples
         if opts.mergeEWK:
@@ -209,11 +165,9 @@ def main(opts, signalMass):
         datasetOrder = []
         for d in datasetsMgr.getAllDatasets():
             if "M_" in d.getName():
-#            if "M_" in d.getName() and "200" not in d.getName():
                 if d not in signalMass:
                     continue
             datasetOrder.append(d.getName())
-
             #newOrder = ["TT", "QCD"]
             #newOrder = ["TT", "QCD"]
         for m in signalMass:
@@ -233,10 +187,13 @@ def main(opts, signalMass):
 
         # Do the topSelection histos
         folder      = opts.folder 
-        histoPaths1 = []
-
+        histoPaths1 = ["H2"]
         if folder != "":
             histoList  = datasetsMgr.getDataset(datasetOrder[0]).getDirectoryContent(folder)
+            # hList0     = [x for x in histoList if "TrijetMass" in x]
+            # hList1     = [x for x in histoList if "TetrajetMass" in x]
+            # hList2     = [x for x in histoList if "TetrajetBJetPt" in x]
+            # histoPaths1 = [os.path.join(folder, h) for h in hList0+hList1+hList2]
             histoPaths1 = [os.path.join(folder, h) for h in histoList]
         
         folder     = ""
@@ -247,15 +204,11 @@ def main(opts, signalMass):
         histoPaths2 = [os.path.join(folder, h) for h in hList0+hList1+hList2]
 
         histoPaths = histoPaths1 + histoPaths2
-
         for h in histoPaths:
             if "Vs" in h: # Skip TH2D
                 continue
-            if "VS" in h: # Skip TH2D
-                continue
-
             PlotMC(datasetsMgr, h, intLumi)
-        ROOT.gStyle.SetNdivisions(10, "X")
+
 
         
     return
@@ -271,7 +224,7 @@ def getHistos(datasetsMgr, histoName):
 
 
 
-def SavePlot(plot, saveName, saveDir, saveFormats = [".pdf", ".png"]):
+def SavePlot(plot, saveName, saveDir, saveFormats = [".pdf"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
     
     # Check that path exists
@@ -307,124 +260,45 @@ def PlotMC(datasetsMgr, histo, intLumi):
     # Draw the histograms
     _cutBox = None
     _rebinX = 1
-    _format = "%0.1f"
+    _format = "%0.0f"
     _xlabel = None
 
     _opts   = {"ymin": 1e-3, "ymaxfactor": 1.0}
 
-
     if "ChiSqr" in histo:
         _rebinX = 1
-        #logY    = True
+#        logY    = True
         _units  = ""
         _format = "%0.1f " + _units
         _xlabel = "#chi^{2}"
         _cutBox = {"cutValue": 10.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _opts["xmax"] = 100
 
-    elif "trijetjets_deltarmin" in histo.lower():
-        _xlabel = "#Delta R_{min}"
-        _rebinX = 2
-        _opts["xmax"] = 3
-        _units = ""
-        _format = "%0.1f "
-        _cutBox = {"cutValue": 0.8, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        
-        
-    elif "trijetjets_deltarmax" in histo.lower():
-        _xlabel = "#Delta R_{max}"
-        _rebinX = 2
-        _opts["xmax"] = 3.5
-        _units = ""
-        _format = "%0.1f "
-        _cutBox = {"cutValue": 0.8, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-
-    elif "trijetdijetdr" in histo.lower():
-        _rebinX = 1
-        units = ""
-        _format = "%0.1f "
-        _opts["xmax"] = 3.5
-        _cutBox = {"cutValue": 0.8, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-
-    elif "trijetdijetpt" in histo.lower():
-        _rebinX = 2
-        _units = "GeV/c"
-        _format = "%0.0f " + _units
-        _opts["xmax"] = 800
-
-    elif "trijetdijetmass" in histo.lower():
-        _rebinX = 1
-        _units = "GeV/c^{2}"
-        _format = "%0.0f " + _units
-        _opts["xmax"] = 200
-        _xlabel = "m_{w} (%s)" % _units
-        _cutBox = {"cutValue": 80.39, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-
-
-    if "cevts_ldgtrijetmatchedtofatjet_fatjetpt" in histo.lower():
-        _rebin = 1
-        _opts["xmax"] = 3
-
-    elif "pt" in histo.lower():
-        _rebinX = 2
-        _units  = "GeV/c"
-        _format = "%0.0f " + _units
-        _opts["xmax"] = 800
-
-
-
     elif "trijetmass" in histo.lower():
-        _rebinX = 1
+        _rebinX = 2
 #        logY    = False
         _units  = "GeV/c^{2}"
-#        _format = "%0.0f " + _units
-        _format = "%0.0f" + (_units)
+        _format = "%0.0f " + _units
         _xlabel = "m_{jjb} (%s)" % _units
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 305 #1005
-        _opts["xmin"] = 55 #1005
-
-
-    elif "topcandmass" in histo.lower():
-        _rebinX = 1
-#        logY    = False
-        _units  = "GeV/c^{2}"
-#        _format = "%0.0f " + _units
-        _format = "%0.0f" + (_units)
-        _xlabel = "m_{jjb}^{BDTG} (%s)" % _units
-        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _opts["xmax"] = 505 #1005
-        _opts["xmin"] = 0 #1005
 
-
-#    elif "ht" in histo.lower():
-#        _rebinX = 2
-##        logY    = False
-#        _units  = "GeV"
-#        _format = "%0.0f " + _units
-#        _xlabel = "H_{T} (%s)" % _units
-#        _cutBox = {"cutValue": 500, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-#        _opts["xmax"] = 2000
-
-    elif "tetrajetptd" in histo.lower():
-        _rebinX = 2 #5 #10 #4
-        _units  = "GeV/c^{2}"
-#        _xlabel = "m_{jjbb} (%s)" % (_units)
+    elif "ht" in histo.lower():
+        _rebinX = 2
+#        logY    = False
+        _units  = "GeV"
         _format = "%0.0f " + _units
-        _opts["xmax"] = 2000 #3500.0
-        _cutBox = {"cutValue": 400, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _xlabel = "H_{T} (%s)" % _units
+        _cutBox = {"cutValue": 500, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _opts["xmax"] = 2000
 
-    elif "tetrajetmass" in histo.lower() or "tetrajetmass_" in histo.lower():
-        #ROOT.gStyle.SetNdivisions(10, "X")
-#        h = dataset.getDatasetRootHisto(histo).getHistogram()
-#        h.SetTickLength(100, "X")
+    elif "tetrajetmass" in histo.lower():
         _rebinX = 5 #5 #10 #4
         _units  = "GeV/c^{2}"
         _format = "%0.0f " + _units
         _xlabel = "m_{jjbb} (%s)" % (_units)
         _format = "%0.0f " + _units
         _opts["xmax"] = 1500 #3500.0
-        _cutBox = {"cutValue": 500, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
 
     elif "dijetmass" in histo.lower():
         _rebinX = 1 #5 #10 #4
@@ -435,100 +309,64 @@ def PlotMC(datasetsMgr, histo, intLumi):
         _format = "%0.0f " + _units
         _opts["xmax"] = 800 #3500.0
         _cutBox = {"cutValue": 80.4, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 205
+        _opts["xmax"] = 300
 
-    elif "trijetmultiplicitypassbdt" in histo.lower():
-        _rebinX = 1
-        _opts["xmax"] = 5
-        _format = "%0.0f "
-
-    elif "bdtg" or "bdtvalue" in histo.lower():
-        _rebinX = 1 
-        _format = "%0.2f "
+    elif "tetrajetbjetpt" in histo.lower():
+        _rebinX = 2
+#        logY    = False
+        _units  = "GeV/c"
+        _format = "%0.0f " + _units
+        _xlabel = "p_{T}  (%s)" % (_units)
+        _format = "%0.0f " + _units
+        _opts["xmax"] = 800
+    elif "ldgtrijetpt" in histo.lower():
+        _rebinX = 2
+#        logY    = False
+        _units  = "GeV/c"
+        _format = "%0.0f " + _units
+        _xlabel = "p_{T}  (%s)" % (_units)
+        _format = "%0.0f " + _units
+        _opts["xmax"] = 800
 
     elif "trijetbdt_mass" in histo.lower():
         _rebinX = 2
         _units  = "GeV/c^{2}"
         _format = "%0.0f " + _units
         _xlabel = "m_{jjb} (%s)" % _units
-        _opts["xmax"] = 800
-
-
-#    if "eta" or "phi" or "delta" in histo.lower():
-        #_rebinX = 1 #5 #10 #4
-#        _units  = ""
-#        _format = "%0.1f " 
-
-#    if "eta" in histo.lower():
-#        _xlabel = "#eta"
-#    if "phi" in histo.lower():
-#        _xlabel = "#phi"
-#    if "pt" in histo.lower():
-#        _opts["xmax"] = 800
-    elif "boosted" in histo.lower():
-        _xlabel = "Trijet Counter"
-    elif "matched_dijetpt" in histo.lower():
-        _units = "(GeV/c)"
-        _xlabel = "p_{T}" +_units
-
-    elif "deltar_bdttrijets_tetrajetbjet" in  histo.lower():
-        _xlabel = "#Delta R(Trijet,b_{free})"
-
-
-
-    elif "tetrajetbjetbdisc" in histo.lower():
-        _rebinX = 2
-        _opts["xmax"] = 1.05
-
-#    if "matched_dijetmass" in histo.lower():
+        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _opts["xmax"] = 505 
+#    elif "topcandmass" in histo.lower():
 #        _rebinX = 2
-#    if "higgstop_dijetmass" in histo.lower():
-#        _rebinX = 2
-        
-    elif "trijet_deltaeta_trijet_tetrajetbjet" in histo.lower():
-        _rebinX = 2
-        _xlabel = "#Delta #eta (Trijet, b_{free})"
+#        _units  = "GeV/c^{2}"
+#        _format = "%0.0f " + _units
+#        _xlabel = "m_{jjb} (%s)" % _units
+#        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+#        _opts["xmax"] = 505 
 
-    elif "trijet_deltaphi_trijet_tetrajetbjet" in histo.lower():
-        _xlabel = "#Delta #phi (Trijet, b_{free})"
-    elif "cevts_closejettotetrajetbjet_isbtagged" in histo.lower():
-        _units = ""
+    elif "matched_mass" in histo.lower():
+        _rebinX = 2
+        _units  = "GeV/c^{2}"
         _format = "%0.0f " + _units
-#    if "higgstop_" in histo.lower():
-#        _rebinX = 2
-    if "eventtrijetpt2t" in histo.lower():
-        _rebinX = 2
+        _xlabel = "m_{jjb} (%s)" % _units
+        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _opts["xmax"] = 505 
 
-    if "ldgfatjetpt" in histo.lower():
-        _opts["xmax"] = 1000
+    elif "bdtvalue" in histo.lower():
+        _format = "%0.1f"
 
-    if "deltar_w" in histo.lower():
-        _rebinX = 2
-        _xlabel = "#Delta R"
-        _format = "%0.1f "
-        _opts["xmax"] = 5
-        logY = True
+    elif "foxwolframmoment" in histo.lower():
+        _format = "%0.1f"
+        _cutBox = {"cutValue": 0.5, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
 
-    if "ldgtrijet_deltar" in histo.lower():
-        _rebinX = 2
-        _xlabel = "#Delta R"
-        _format = "%0.1f "
-        _opts["xmax"] = 5
-        logY = True
+    elif "absdeltamvamax_mctruth_sameobjfakes" in histo.lower():
+        _format = "%0.1f"
+        _xlabel = "|#Delta BDTG| response"
 
-    if "higgstop_deltar" in histo.lower():
-        _rebinX = 2
-        _xlabel = "#Delta R"
-        _format = "%0.1f "
-        _opts["xmax"] = 5
-        logY = True
-
-
-    if "allfatjet" in histo.lower():
-        _rebinX = 2
-        _units  = "GeV/c"
-        _format = "%0.0f " + _units
-        _opts["xmax"] = 800
+    elif "deltamvamin_mctruth_sameobjfakespassbdt" in histo.lower():
+        _opts["xmax"] = 1
+        _opts["xmin"] = -1
+    elif "bdtmultiplicity" in histo.lower():
+        _opts["xmax"] = 15
 
 
     else:
@@ -536,7 +374,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
 
 
     if opts.normaliseToOne:
-        logY    = True
+        logY    = False
         Ylabel  = "Arbitrary Units / %s" % (_format)
     else:
         logY    = True
@@ -546,7 +384,6 @@ def PlotMC(datasetsMgr, histo, intLumi):
         yMaxFactor = 2.0
     else:
         yMaxFactor = 1.2
-
 
     _opts["ymaxfactor"] = yMaxFactor
     if opts.normaliseToOne:
@@ -560,24 +397,14 @@ def PlotMC(datasetsMgr, histo, intLumi):
     # Customise styling
     p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineStyle(ROOT.kSolid))
 
-    if "QCD" in datasetsMgr.getAllDatasets():        
+    if "QCD" in datasetsMgr.getAllDatasets():
         p.histoMgr.forHisto("QCD", styles.getQCDFillStyle() )
         p.histoMgr.setHistoDrawStyle("QCD", "HIST")
         p.histoMgr.setHistoLegendStyle("QCD", "F")
 
     if "TT" in datasetsMgr.getAllDatasets():
-        p.histoMgr.setHistoDrawStyle("TT", "HIST")
+        p.histoMgr.setHistoDrawStyle("TT", "AP")
         p.histoMgr.setHistoLegendStyle("TT", "LP")
-
-#    if "M_200" in datasetsMgr.getAllDatasets() or "M_300" in datasetsMgr.getAllDatasets():        
-#        p.histoMgr.forHisto("QCD", styles.getQCDFillStyle() )
-#        p.histoMgr.setHistoDrawStyle("QCD", "P")
-#        p.histoMgr.setHistoLegendStyle("QCD", "F")
-
-#    elif d.getName() == "TT" or d.getName() == "QCD" or d.getName() == "Data":
-#            otherHisto = histograms.Histo(histo, legName, "LP", "P")
-#            otherHistos.append(otherHisto)
-
 
     # Customise style
     signalM = []
@@ -585,22 +412,16 @@ def PlotMC(datasetsMgr, histo, intLumi):
         signalM.append(m.rsplit("M_")[-1])
     for m in signalM:
         p.histoMgr.forHisto("ChargedHiggs_HplusTB_HplusToTB_M_%s" %m, styles.getSignalStyleHToTB_M(m))
-#soti
-#        p.histoMgr.setHistoDrawStyle("ChargedHiggs_HplusTB_HplusToTB_M_%s" %m, "LP")
-#        p.histoMgr.setHistoLegendStyle("ChargedHiggs_HplusTB_HplusToTB_M_%s" %m, "P")
         
 
     plots.drawPlot(p, 
                    histo,  
                    xlabel       = _xlabel,
                    ylabel       = Ylabel,#"Arbitrary Units / %s" % (_format), #"Events / %s" % (_format), #"Arbitrary Units / %s" % (_format),
-#                   ylabel       = "Arbitrary Units / %s" % (_format), #"Events / %s" % (_format), #"Arbitrary Units / %s" % (_format),
                    log          = logY,
-                   rebinX       = _rebinX, cmsExtraText = "Preliminary", #_rebinX
-                   #createLegend = {"x1": 0.48, "y1": 0.45, "x2": 0.92, "y2": 0.92}, #All datasets
-#                   createLegend = {"x1": 0.58, "y1": 0.7, "x2": 0.92, "y2": 0.92},
-                   createLegend = {"x1": 0.58, "y1": 0.65, "x2": 0.92, "y2": 0.87},
-                   #createLegend = {"x1": 0.73, "y1": 0.85, "x2": 0.97, "y2": 0.77},   #One dataset
+                   rebinX       = _rebinX, cmsExtraText = "Preliminary", 
+                   createLegend = {"x1": 0.58, "y1": 0.65, "x2": 0.92, "y2": 0.92},
+#                   createLegend = {"x1": 0.73, "y1": 0.85, "x2": 0.97, "y2": 0.77},
                    opts         = _opts,
                    opts2        = {"ymin": 0.6, "ymax": 1.4},
                    cutBox       = _cutBox,
@@ -615,7 +436,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
         if opts.noQCD:
             save_path = savePath + opts.MVAcut + "/noQCD/"
     else:
-        save_path = savePath + opts.MVAcut + "/normToLumi/TT/"
+        save_path = savePath + opts.MVAcut + "/normToLumi/"
         if opts.noQCD:
             save_path = savePath + opts.MVAcut + "/noQCD/"
 
@@ -625,7 +446,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
     return
 
 
-def SavePlot(plot, saveName, saveDir, saveFormats = [".pdf", ".png"]):
+def SavePlot(plot, saveName, saveDir, saveFormats = [".pdf"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
     
     # Check that path exists
@@ -667,14 +488,15 @@ if __name__ == "__main__":
     '''
     
     # Default Settings
-    ANALYSISNAME = "TopRecoAnalysis"
-    MVACUT       = "TH1plots"
+    ANALYSISNAME = "TopTaggerEfficiency"
+    MVACUT       = "MVA"
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
     OPTMODE      = ""
     BATCHMODE    = True
     PRECISION    = 3
-    SIGNALMASS   = [500, 400]
+    #SIGNALMASS   = [200, 500, 800, 2000]
+    SIGNALMASS   = []
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False
