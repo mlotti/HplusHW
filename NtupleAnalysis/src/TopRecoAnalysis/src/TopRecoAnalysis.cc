@@ -1846,6 +1846,7 @@ void TopRecoAnalysis::process(Long64_t entry) {
   int nGenuineTops = 0;
   GenTops = GetGenParticles(fEvent.genparticles().getGenParticles(), 6);
   for (auto& top: GenTops){
+    hTopQuarkPt -> Fill(top.pt());
     if (HasMother(fEvent, top, 37)){
       haveGenHTop = true;
       GenHTop = top;
