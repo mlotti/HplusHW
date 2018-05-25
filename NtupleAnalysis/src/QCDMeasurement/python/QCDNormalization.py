@@ -614,6 +614,8 @@ class QCDNormalizationManagerBase:
         self._qcdNormalizationError = {}
         self._ewkFakesNormalization = {}
         self._ewkFakesNormalizationError = {}
+        self._qcdmcNormalization = {}
+        self._qcdmcNormalizationError = {}
         self._combinedFakesNormalization = {}
         self._combinedFakesNormalizationError = {}
         self._combinedFakesNormalizationUp = {}
@@ -736,6 +738,12 @@ class QCDNormalizationManagerBase:
         for k in self._combinedFakesNormalizationUp:
             s += '    "%s": %f,\n'%(k, self._combinedFakesNormalizationUp[k])
         s += "}\n"
+        if len(self._qcdmcNormalization) > 0:
+            s += "##QCDMCNormalization = {\n"
+            for k in self._qcdmcNormalization:
+                s += '##    "%s": %f,\n'%(k, self._qcdmcNormalization[k])
+            s += "##}\n"
+        s += "\n"
         s += "# Log of fake rate calculation:\n"
         fOUT = open(filename,"w")
         fOUT.write(s)
@@ -966,6 +974,7 @@ class QCDNormalizationManagerBase:
         lines.append("   Normalization factor (QCD): %f +- %f"%(self._qcdNormalization[binLabel], self._qcdNormalizationError[binLabel]))
         lines.append("   Normalization factor (EWK fake taus): %f +- %f"%(self._ewkFakesNormalization[binLabel], self._ewkFakesNormalizationError[binLabel]))
         lines.append("   Combined norm. factor: %f +- %f"%(self._combinedFakesNormalization[binLabel], self._combinedFakesNormalizationError[binLabel]))
+        lines.append("   Normalization factor (QCDMC, not to be used, only for cross check): %f +- %f"%(self._qcdmcNormalization[binLabel], self._qcdmcNormalizationError[binLabel]))
         self._commentLines.extend(lines)
         return lines
 
@@ -1068,6 +1077,20 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
         self._ewkFakesNormalization[binLabel] = ewkFakesNormFactor
         self._ewkFakesNormalizationError[binLabel] = ewkFakesNormFactorError
 
+        #===== Normalization factor for QCD MC (not used, only for cross checking)
+        qcdmcNormFactor = None
+        qcdmcNormFactorError = None
+        nQCDMCBaseline = 0
+        nQCDMCInverted = 0
+        if "QCDMC_Baseline" in self._templates.keys():
+            nQCDMCBaseline = self._templates["QCDMC_Baseline"].getNeventsFromHisto(False)
+            nQCDMCInverted = self._templates["QCDMC_Inverted"].getNeventsFromHisto(False)
+            if nQCDMCInverted > 0.0:
+                qcdmcNormFactor = nQCDMCBaseline/nQCDMCInverted
+                qcdmcNormFactorError = errorPropagation.errorPropagationForDivision(nQCDMCBaseline, self._templates["QCDMC_Baseline"].getNeventsErrorFromHisto(False),
+                                                                                nQCDMCInverted, self._templates["QCDMC_Inverted"].getNeventsErrorFromHisto(False))
+            self._qcdmcNormalization[binLabel] = qcdmcNormFactor
+            self._qcdmcNormalizationError[binLabel] = qcdmcNormFactorError
 
 # Unit tests
 if __name__ == "__main__":
