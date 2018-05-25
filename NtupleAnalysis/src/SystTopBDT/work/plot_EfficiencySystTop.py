@@ -169,6 +169,7 @@ def GetHistoKwargs(histoName, opts):
         "ylabel"           : "Efficiency", #/ %.1f ",
         "ratioYlabel"      : "Ratio ", #"TT/TT_X",
         "binList"          : [],
+        "errorType"        : "errorPropagation", 
         "ratio"            : True,
         "ratioInvert"      : False,
         "stackMCHistograms": False,
@@ -180,8 +181,8 @@ def GetHistoKwargs(histoName, opts):
         "opts2"            : {"ymin": 0.6, "ymax": 1.4},
         "log"              : False,
         "moveLegend"       : {"dx": -0.12, "dy": -0.40, "dh": +0.05*(-4+opts.nDatasets)},  #"dh": +0.18}, 
-        # "cutBoxY"          : {"cutValue": 1.10, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": False, "ratioCanvas": True}
-        }    
+        "cutBoxY"          : {"cutValue": 1.10, "fillColor": 16, "box": True, "line": True, "greaterThan": True, "mainCanvas": False, "ratioCanvas": True, "mirror": True}
+        }
     
     if "pt" in h:
         ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X") 
@@ -189,18 +190,18 @@ def GetHistoKwargs(histoName, opts):
         kwargs["xlabel"]  = "p_{T} (%s)" % (units)
         bins              = [i for i in range(0, 1000+50, 50)]
         if opts.folder == "SystTopBDT_":
-            bins          = [0, 100] + [i for i in range(100, 500, 50)] + [i for i in range(500, 1000, 100)]
+            #bins          = [0, 100] + [i for i in range(100, 500, 50)] + [i for i in range(500, 1000, 100)]
+            bins          = [i for i in range(50, 500+50, 50)] + [600]#, 800]
+            #bins          = [i for i in range(0, 600+100, 100)] + [800]
         elif opts.folder == "SystTopBDT_Genuine":
-            bins          = [i for i in range(50, 500+50, 50)] + [600, 800]
+            #bins          = [i for i in range(0, 600+100, 100)] + [800]
+            bins          = [i for i in range(50, 500+50, 50)] + [600]#, 800]
+            #bins          = [i for i in range(50, 500+50, 50)] + [600, 800]
             #bins          = [0, 100] + [i for i in range(100, 500+50, 50)]# + [500, 600]#, 1000]
             #bins          = [0, 100] + [i for i in range(100, 500+50, 50)]# + [500, 600]#, 1000]
             #bins          = [i for i in range(0, 500+50, 50)]# + [500, 600]#, 1000]
         else:
             bins          = []
-    elif "eta" in h:
-        kwargs["xlabel"] = "#eta"
-        kwargs["opts"]   = {"xmin": -2.5, "xmax": 2.5, "ymin": 0.0, "ymaxfactor": 1.2}
-        kwargs["cutBox"] = {"cutValue": 100.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
 
     if units != "":
         kwargs["ylabel"] += (" / " + units)
