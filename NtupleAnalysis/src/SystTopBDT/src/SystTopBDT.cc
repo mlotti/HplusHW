@@ -40,7 +40,7 @@ public:
   bool IsGenuineTop(const TopSelectionBDT::Data& topData, string topType, Muon mu, Jet BJet_LeptonicBr, bool searchForLeptonicTop,
 		    const std::vector<Jet>& MCtrue_LdgJet,  const std::vector<Jet>& MCtrue_SubldgJet, const std::vector<Jet>& MCtrue_Bjet);
   vector <int> GetTopsIndex( const TopSelectionBDT::Data& topData, string topType, Jet BJet_LeptonicBr, Muon mu, bool searchForLeptonicTop, bool askTopFarFromMu);
-  Jet getLeadingSubleadingJet(const Jet& jet0, const Jet& jet1, string selectedJet);
+
 private:
   // Input parameters
   const DirectionalCut<double> cfg_PrelimTopMVACut;
@@ -49,9 +49,7 @@ private:
   const DirectionalCut<double> cfg_MiniIsoInvCut;
   const DirectionalCut<double> cfg_METCut;
   const DirectionalCut<double> cfg_METInvCut;
-  const DirectionalCut<double> cfg_MuTrijetDRCut;
-  const DirectionalCut<double> cfg_MuBJetDRCut;
-
+  
   const float cfg_MuonPtCut;
   const float cfg_MuonEtaCut;
   
@@ -111,10 +109,6 @@ private:
   WrappedTH1Triplet* h_AfterStandardSelections_Trijets_Pt_SR;
   WrappedTH1Triplet* h_AfterStandardSelections_Trijets_Eta_SR;
   WrappedTH1Triplet* h_AfterStandardSelections_Trijets_Phi_SR;
-
-  WrappedTH1Triplet* h_AfterStandardSelections_DeltaPhiMin_METJet_SR;
-  WrappedTH1Triplet* h_AfterStandardSelections_DeltaPhiMax_METJet_SR;
-
   //
   WrappedTH1Triplet* h_AfterAllSelections_MET_SR;
   WrappedTH1Triplet* h_AfterAllSelections_HT_SR;
@@ -143,13 +137,9 @@ private:
   WrappedTH1Triplet* h_AfterAllSelections_Trijets_Pt_SR;
   WrappedTH1Triplet* h_AfterAllSelections_Trijets_Eta_SR;
   WrappedTH1Triplet* h_AfterAllSelections_Trijets_Phi_SR;
-
-  WrappedTH1Triplet* h_AfterAllSelections_DeltaPhiMin_METJet_SR;
-  WrappedTH1Triplet* h_AfterAllSelections_DeltaPhiMax_METJet_SR;
     
   WrappedTH1 *hCEvts_TopPassBDT_SR;
   WrappedTH1 *hCEvts_PassSelections_SR;
-
 
   //====================================================================
   //Control Region 1
@@ -182,10 +172,6 @@ private:
   WrappedTH1Triplet* h_AfterStandardSelections_Trijets_Pt_CR1;
   WrappedTH1Triplet* h_AfterStandardSelections_Trijets_Eta_CR1;
   WrappedTH1Triplet* h_AfterStandardSelections_Trijets_Phi_CR1;
-
-  WrappedTH1Triplet* h_AfterStandardSelections_DeltaPhiMin_METJet_CR1;
-  WrappedTH1Triplet* h_AfterStandardSelections_DeltaPhiMax_METJet_CR1;
-
   //
   WrappedTH1Triplet* h_AfterAllSelections_MET_CR1;
   WrappedTH1Triplet* h_AfterAllSelections_HT_CR1;
@@ -214,10 +200,7 @@ private:
   WrappedTH1Triplet* h_AfterAllSelections_Trijets_Pt_CR1;
   WrappedTH1Triplet* h_AfterAllSelections_Trijets_Eta_CR1;
   WrappedTH1Triplet* h_AfterAllSelections_Trijets_Phi_CR1;
-  
-  WrappedTH1Triplet* h_AfterAllSelections_DeltaPhiMin_METJet_CR1;
-  WrappedTH1Triplet* h_AfterAllSelections_DeltaPhiMax_METJet_CR1;
-    
+     
   //====================================================================
   //Control Region 2
   //====================================================================
@@ -250,9 +233,6 @@ private:
   WrappedTH1Triplet* h_AfterStandardSelections_Trijets_Eta_CR2;
   WrappedTH1Triplet* h_AfterStandardSelections_Trijets_Phi_CR2;
 
-  WrappedTH1Triplet* h_AfterStandardSelections_DeltaPhiMin_METJet_CR2;
-  WrappedTH1Triplet* h_AfterStandardSelections_DeltaPhiMax_METJet_CR2;
-
   //
   WrappedTH1Triplet* h_AfterAllSelections_MET_CR2;
   WrappedTH1Triplet* h_AfterAllSelections_HT_CR2;
@@ -281,9 +261,6 @@ private:
   WrappedTH1Triplet* h_AfterAllSelections_Trijets_Pt_CR2;
   WrappedTH1Triplet* h_AfterAllSelections_Trijets_Eta_CR2;
   WrappedTH1Triplet* h_AfterAllSelections_Trijets_Phi_CR2;
-
-  WrappedTH1Triplet* h_AfterAllSelections_DeltaPhiMin_METJet_CR2;
-  WrappedTH1Triplet* h_AfterAllSelections_DeltaPhiMax_METJet_CR2;
       
   //====================================================================
   //Verification Region
@@ -316,10 +293,6 @@ private:
   WrappedTH1Triplet* h_AfterStandardSelections_Trijets_Pt_VR;
   WrappedTH1Triplet* h_AfterStandardSelections_Trijets_Eta_VR;
   WrappedTH1Triplet* h_AfterStandardSelections_Trijets_Phi_VR;
-
-  WrappedTH1Triplet* h_AfterStandardSelections_DeltaPhiMin_METJet_VR;
-  WrappedTH1Triplet* h_AfterStandardSelections_DeltaPhiMax_METJet_VR;
-
   //
   WrappedTH1Triplet* h_AfterAllSelections_MET_VR;
   WrappedTH1Triplet* h_AfterAllSelections_HT_VR;
@@ -348,18 +321,11 @@ private:
   WrappedTH1Triplet* h_AfterAllSelections_Trijets_Pt_VR;
   WrappedTH1Triplet* h_AfterAllSelections_Trijets_Eta_VR;
   WrappedTH1Triplet* h_AfterAllSelections_Trijets_Phi_VR;
-  //
-  WrappedTH1Triplet* h_AfterAllSelections_DeltaPhiMin_METJet_VR;
-  WrappedTH1Triplet* h_AfterAllSelections_DeltaPhiMax_METJet_VR;
   
   WrappedTH1Triplet* h_AfterStandardSelections_LeadingTrijet_Pt_lowMET;
   WrappedTH1Triplet* h_AfterAllSelections_LeadingTrijet_Pt_lowMET;
-
+  WrappedTH1Triplet* h_AfterStandardSelections_Muon_LeadingTrijetDR_Inclusive;
   WrappedTH2* hMET_vs_MuonMiniIso;
-  WrappedTH2Triplet* h_AfterStandardSelections_DPhiJ1MET_vs_DPhiJ2MET_SR;   //J1(J2): Leading(Subleading) in pT jet composing the top
-  WrappedTH2Triplet* h_AfterStandardSelections_DPhiJ1MET_vs_DPhiJ2MET_CR1;  //J1(J2): Leading(Subleading) in pT jet composing the top
-  WrappedTH2Triplet* h_AfterStandardSelections_DPhiJ1MET_vs_DPhiJ2MET_CR2;  //J1(J2): Leading(Subleading) in pT jet composing the top
-  WrappedTH2Triplet* h_AfterStandardSelections_DPhiJ1MET_vs_DPhiJ2MET_VR;   //J1(J2): Leading(Subleading) in pT jet composing the top
 };
 
 #include "Framework/interface/SelectorFactory.h"
@@ -373,8 +339,6 @@ SystTopBDT::SystTopBDT(const ParameterSet& config, const TH1* skimCounters)
     cfg_MiniIsoInvCut(config, "SystTopBDTSelection.MiniIsoInvCut"),
     cfg_METCut(config, "SystTopBDTSelection.METCut"),
     cfg_METInvCut(config, "SystTopBDTSelection.METInvCut"),
-    cfg_MuTrijetDRCut(config, "SystTopBDTSelection.MuTrijetDRCut"),
-    cfg_MuBJetDRCut(config, "SystTopBDTSelection.MuBJetDRCut"),
     
     // Muon Selection Cuts
     cfg_MuonPtCut(config.getParameter<float>("MuonSelection.muonPtCut")),
@@ -398,7 +362,7 @@ SystTopBDT::SystTopBDT(const ParameterSet& config, const TH1* skimCounters)
     cSelected(fEventCounter.addCounter("Selected Events")),
     fMisIDSFReader(config.getParameterOptional<ParameterSet>("MisIDSF.MisIDSF")),
     cMisIDSFCounter(fEventCounter.addCounter("Mis-ID SF")),
-    cfg_ApplyMisIDSF(config.getParameter<bool>("MisIDSF.ApplyMisIDSF"))
+    cfg_ApplyMisIDSF(config.getParameterOptional<ParameterSet>("ApplyMisIDSF"))
 { }
 
 
@@ -483,20 +447,7 @@ void SystTopBDT::book(TDirectory *dir) {
   std::vector<TDirectory*> myDirs = {myInclusiveDir, myFakeDir, myGenuineDir};
 
   hMET_vs_MuonMiniIso = fHistoWrapper.makeTH<TH2F>(HistoLevel::kInformative, dirTH2, "MET_vs_MuonMiniIso", ";E_{T, miss};miniIsolation", 
-						   nMetBins, fMetMin, fMetMax, 100000, 0, 1000);
-
-  h_AfterStandardSelections_DPhiJ1MET_vs_DPhiJ2MET_SR   = fHistoWrapper.makeTHTriplet<TH2F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_DPhiJ1MET_vs_DPhiJ2MET_SR",
-											  ";#Delta #phi_{min}(jet_{1}, E_{T, miss});#Delta #phi_{min}(jet_{2}, E_{T, miss})", 
-											  nDPhiBins, fDPhiMin, fDPhiMax, nDPhiBins, fDPhiMin, fDPhiMax);
-  h_AfterStandardSelections_DPhiJ1MET_vs_DPhiJ2MET_CR1  = fHistoWrapper.makeTHTriplet<TH2F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_DPhiJ1MET_vs_DPhiJ2MET_CR1",
-											   ";#Delta #phi_{min}(jet_{1}, E_{T, miss});#Delta #phi_{min}(jet_{2}, E_{T, miss})", 
-											   nDPhiBins, fDPhiMin, fDPhiMax, nDPhiBins, fDPhiMin, fDPhiMax);
-  h_AfterStandardSelections_DPhiJ1MET_vs_DPhiJ2MET_CR2  = fHistoWrapper.makeTHTriplet<TH2F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_DPhiJ1MET_vs_DPhiJ2MET_CR2",
-											  ";#Delta #phi_{min}(jet_{1}, E_{T, miss});#Delta #phi_{min}(jet_{2}, E_{T, miss})", 
-											  nDPhiBins, fDPhiMin, fDPhiMax, nDPhiBins, fDPhiMin, fDPhiMax);
-  h_AfterStandardSelections_DPhiJ1MET_vs_DPhiJ2MET_VR   = fHistoWrapper.makeTHTriplet<TH2F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_DPhiJ1MET_vs_DPhiJ2MET_VR",
-											  ";#Delta #phi_{min}(jet_{1}, E_{T, miss});#Delta #phi_{min}(jet_{2}, E_{T, miss})", 
-											  nDPhiBins, fDPhiMin, fDPhiMax, nDPhiBins, fDPhiMin, fDPhiMax);
+						   nMetBins, fMetMin, fMetMax, 10000, 0, 100);
 
   // Book non-common histograms
   h_AfterStandardSelections_MET_SR = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_MET_SR", "MET", nMetBins, fMetMin, fMetMax);
@@ -529,11 +480,6 @@ void SystTopBDT::book(TDirectory *dir) {
   h_AfterStandardSelections_Trijets_Eta_SR  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_Trijets_Eta_SR", "Trijets #eta", nEtaBins, fEtaMin, fEtaMax);
   h_AfterStandardSelections_Trijets_Phi_SR  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_Trijets_Phi_SR", "Trijets #phi", nPhiBins, fPhiMin, fPhiMax);
 
-  h_AfterStandardSelections_DeltaPhiMin_METJet_SR = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_DeltaPhiMin_METJet_SR", 
-										      "#Delta #phi_{min}(jet, E_{T, miss})", nDPhiBins, fDPhiMin, fDPhiMax);
-  h_AfterStandardSelections_DeltaPhiMax_METJet_SR = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_DeltaPhiMax_METJet_SR",
-										      "#Delta #phi_{max}(jet, E_{T, miss})", nDPhiBins, fDPhiMin, fDPhiMax);
-
   // After All Selections
   h_AfterAllSelections_MET_SR = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_MET_SR", "MET", nMetBins, fMetMin, fMetMax);
   h_AfterAllSelections_HT_SR = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_HT_SR", "H_{T} (GeV/c)", nHtBins, fHtMin, fHtMax);
@@ -564,13 +510,6 @@ void SystTopBDT::book(TDirectory *dir) {
   h_AfterAllSelections_Trijets_Eta_SR  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_Trijets_Eta_SR", "Trijets #eta", nEtaBins, fEtaMin, fEtaMax);
   h_AfterAllSelections_Trijets_Phi_SR  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_Trijets_Phi_SR", "Trijets #phi", nPhiBins, fPhiMin, fPhiMax);
     
-
-  h_AfterAllSelections_DeltaPhiMin_METJet_SR = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_DeltaPhiMin_METJet_SR", 
-										      "#Delta #phi_{min}(jet, E_{T, miss})", nDPhiBins, fDPhiMin, fDPhiMax);
-  h_AfterAllSelections_DeltaPhiMax_METJet_SR = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_DeltaPhiMax_METJet_SR",
-										      "#Delta #phi_{max}(jet, E_{T, miss})", nDPhiBins, fDPhiMin, fDPhiMax);
-
-
   hCEvts_TopPassBDT_SR        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dirTH1, "CEvts_TopPassBDT",       ";"                        , 2,       0,      2     );
   hCEvts_PassSelections_SR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dirTH1, "CEvts_PassSelections",   ";"                        , 5,       0,      5     );
 
@@ -608,11 +547,6 @@ void SystTopBDT::book(TDirectory *dir) {
   h_AfterStandardSelections_Trijets_Eta_CR1  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_Trijets_Eta_CR1", "Trijets #eta", nEtaBins, fEtaMin, fEtaMax);
   h_AfterStandardSelections_Trijets_Phi_CR1  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_Trijets_Phi_CR1", "Trijets #phi", nPhiBins, fPhiMin, fPhiMax);
 
-  h_AfterStandardSelections_DeltaPhiMin_METJet_CR1 = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_DeltaPhiMin_METJet_CR1", 
-										      "#Delta #phi_{min}(jet, E_{T, miss})", nDPhiBins, fDPhiMin, fDPhiMax);
-  h_AfterStandardSelections_DeltaPhiMax_METJet_CR1 = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_DeltaPhiMax_METJet_CR1",
-										      "#Delta #phi_{max}(jet, E_{T, miss})", nDPhiBins, fDPhiMin, fDPhiMax);
-
   // After All Selections
   h_AfterAllSelections_MET_CR1 = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_MET_CR1", "MET", nMetBins, fMetMin, fMetMax);
   h_AfterAllSelections_HT_CR1 = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_HT_CR1", "H_{T} (GeV/c)", nHtBins, fHtMin, fHtMax);
@@ -641,12 +575,7 @@ void SystTopBDT::book(TDirectory *dir) {
   h_AfterAllSelections_Trijets_Pt_CR1  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_Trijets_Pt_CR1", "Trijets p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
   h_AfterAllSelections_Trijets_Eta_CR1  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_Trijets_Eta_CR1", "Trijets #eta", nEtaBins, fEtaMin, fEtaMax);
   h_AfterAllSelections_Trijets_Phi_CR1  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_Trijets_Phi_CR1", "Trijets #phi", nPhiBins, fPhiMin, fPhiMax);
-
-  h_AfterAllSelections_DeltaPhiMin_METJet_CR1 = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_DeltaPhiMin_METJet_CR1", 
-										      "#Delta #phi_{min}(jet, E_{T, miss})", nDPhiBins, fDPhiMin, fDPhiMax);
-  h_AfterAllSelections_DeltaPhiMax_METJet_CR1 = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_DeltaPhiMax_METJet_CR1",
-										      "#Delta #phi_{max}(jet, E_{T, miss})", nDPhiBins, fDPhiMin, fDPhiMax);
-
+   
   //====================================================================
   //Control Region 2
   //====================================================================
@@ -678,12 +607,6 @@ void SystTopBDT::book(TDirectory *dir) {
   h_AfterStandardSelections_Trijets_Pt_CR2  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_Trijets_Pt_CR2", "Trijets p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
   h_AfterStandardSelections_Trijets_Eta_CR2  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_Trijets_Eta_CR2", "Trijets #eta", nEtaBins, fEtaMin, fEtaMax);
   h_AfterStandardSelections_Trijets_Phi_CR2  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_Trijets_Phi_CR2", "Trijets #phi", nPhiBins, fPhiMin, fPhiMax);
-
-  h_AfterStandardSelections_DeltaPhiMin_METJet_CR2 = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_DeltaPhiMin_METJet_CR2", 
-										      "#Delta #phi_{min}(jet, E_{T, miss})", nDPhiBins, fDPhiMin, fDPhiMax);
-  h_AfterStandardSelections_DeltaPhiMax_METJet_CR2 = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_DeltaPhiMax_METJet_CR2",
-										      "#Delta #phi_{max}(jet, E_{T, miss})", nDPhiBins, fDPhiMin, fDPhiMax);
-
  
   // After All Selections
   h_AfterAllSelections_MET_CR2 = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_MET_CR2", "MET", nMetBins, fMetMin, fMetMax);
@@ -713,11 +636,6 @@ void SystTopBDT::book(TDirectory *dir) {
   h_AfterAllSelections_Trijets_Pt_CR2  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_Trijets_Pt_CR2", "Trijets p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
   h_AfterAllSelections_Trijets_Eta_CR2  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_Trijets_Eta_CR2", "Trijets #eta", nEtaBins, fEtaMin, fEtaMax);
   h_AfterAllSelections_Trijets_Phi_CR2  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_Trijets_Phi_CR2", "Trijets #phi", nPhiBins, fPhiMin, fPhiMax);
-
-  h_AfterAllSelections_DeltaPhiMin_METJet_CR2 = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_DeltaPhiMin_METJet_CR2", 
-										      "#Delta #phi_{min}(jet, E_{T, miss})", nDPhiBins, fDPhiMin, fDPhiMax);
-  h_AfterAllSelections_DeltaPhiMax_METJet_CR2 = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_DeltaPhiMax_METJet_CR2",
-										      "#Delta #phi_{max}(jet, E_{T, miss})", nDPhiBins, fDPhiMin, fDPhiMax);
   
   //====================================================================
   //Verification Region
@@ -751,11 +669,6 @@ void SystTopBDT::book(TDirectory *dir) {
   h_AfterStandardSelections_Trijets_Eta_VR  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_Trijets_Eta_VR", "Trijets #eta", nEtaBins, fEtaMin, fEtaMax);
   h_AfterStandardSelections_Trijets_Phi_VR  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_Trijets_Phi_VR", "Trijets #phi", nPhiBins, fPhiMin, fPhiMax);
 
-  h_AfterStandardSelections_DeltaPhiMin_METJet_VR = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_DeltaPhiMin_METJet_VR", 
-										      "#Delta #phi_{min}(jet, E_{T, miss})", nDPhiBins, fDPhiMin, fDPhiMax);
-  h_AfterStandardSelections_DeltaPhiMax_METJet_VR = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_DeltaPhiMax_METJet_VR",
-										      "#Delta #phi_{max}(jet, E_{T, miss})", nDPhiBins, fDPhiMin, fDPhiMax);
-
   // After All Selections
   h_AfterAllSelections_MET_VR = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_MET_VR", "MET", nMetBins, fMetMin, fMetMax);
   h_AfterAllSelections_HT_VR = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_HT_VR", "H_{T} (GeV/c)", nHtBins, fHtMin, fHtMax);
@@ -784,16 +697,13 @@ void SystTopBDT::book(TDirectory *dir) {
   h_AfterAllSelections_Trijets_Pt_VR  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_Trijets_Pt_VR", "Trijets p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
   h_AfterAllSelections_Trijets_Eta_VR  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_Trijets_Eta_VR", "Trijets #eta", nEtaBins, fEtaMin, fEtaMax);
   h_AfterAllSelections_Trijets_Phi_VR  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_Trijets_Phi_VR", "Trijets #phi", nPhiBins, fPhiMin, fPhiMax);
-
-  h_AfterAllSelections_DeltaPhiMin_METJet_VR = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_DeltaPhiMin_METJet_VR", 
-										      "#Delta #phi_{min}(jet, E_{T, miss})", nDPhiBins, fDPhiMin, fDPhiMax);
-  h_AfterAllSelections_DeltaPhiMax_METJet_VR = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_DeltaPhiMax_METJet_VR",
-										      "#Delta #phi_{max}(jet, E_{T, miss})", nDPhiBins, fDPhiMin, fDPhiMax);
   
   //====================================================================
 
   h_AfterStandardSelections_LeadingTrijet_Pt_lowMET = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_LeadingTrijet_Pt_lowMET", "Leading top p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
   h_AfterAllSelections_LeadingTrijet_Pt_lowMET = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_LeadingTrijet_Pt_lowMET", "Leading top p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
+
+  h_AfterStandardSelections_Muon_LeadingTrijetDR_Inclusive = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_Muon_LeadingTrijetDR_Inclusive", "#Delta R(#mu, leading top)", nDRBins, fDRMin, fDRMax);
 
   return;
 }
@@ -987,23 +897,36 @@ void SystTopBDT::process(Long64_t entry) {
 	{
 	  // DeltaR(mu, bjet)
 	  double dR = ROOT::Math::VectorUtil::DeltaR(mu.p4(), bjet.p4());
-	  
+      
 	  if (dR < dRmin_mu_bjet){
 	    BJet_LeptonicBr = bjet;
 	    dRmin_mu_bjet  = dR;
 	  }
 	}
       // Apply DR cut selection between b-jet and muon
-      if (!cfg_MuBJetDRCut.passedCut(dRmin_mu_bjet)) return;
+      if (dRmin_mu_bjet > 1.5) return;
     }
 
   hCEvts_PassSelections_SR -> Fill("B from mu", 1);
+  //if (Debug) std::cout<<"Muon pT = "<<mu.pt()<<"  BJet index="<<BJet_LeptonicBr.index()<<"  BJet pT="<<BJet_LeptonicBr.pt()<<"   ΔR( μ, bjet) = "<<dRmin_mu_bjet<<std::endl;
 
+  /*  
+  int nTopCandidates = 0;
+  int nTopCandidatesFarFromMuon = 0;
+  
+  nTopCandidates            = TopCandMultiplicity(topData, "all", BJet_LeptonicBr, mu, searchForLeptonicTop, false);
+  nTopCandidatesFarFromMuon = TopCandMultiplicity(topData, "all", BJet_LeptonicBr, mu, searchForLeptonicTop, true);
+  
+  if (0){
+    std::cout<<" Found "<<nTopCandidates            <<" candidates"<<std::endl;
+    std::cout<<" Found "<<nTopCandidatesFarFromMuon <<" candidates far from muon"<<std::endl;
+  }
+  */
   vector<int> vAllTops_index      = GetTopsIndex(topData, "all", BJet_LeptonicBr, mu, searchForLeptonicTop, true);
   vector<int> vSelectedTops_index = GetTopsIndex(topData, "selected", BJet_LeptonicBr, mu, searchForLeptonicTop, true);
   
   int nTopCandidatesFarFromMuon = vAllTops_index.size();
-  
+
   // At least 1 top candidate far from muon
   if (nTopCandidatesFarFromMuon < 1) return;
   hCEvts_PassSelections_SR -> Fill("Top far from Mu", 1);
@@ -1031,6 +954,9 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
 
   int Debug = 0;
   double met    = METData.getMET().R();
+  // double dRmin_mu_bjet = 999.999;
+  // double dRmin_mu_top  = 999.999;
+  // size_t nTops = topData.getAllTopsMVA().size();
   
   // Calculate transverse W mass
   double deltaPhi_mu_met = std::abs(ROOT::Math::VectorUtil::DeltaPhi(mu.p4(), METData.getMET()));
@@ -1041,6 +967,11 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
 
   int ldgTopIndex = getLeadingTopIndex(topData, "all", mu, BJet_LeptonicBr, searchForLeptonicTop);
   int nTopCandidatesFarFromMuonPassBDT = vSelectedTops_index.size();
+
+  /*
+  // Search for Tops passing the BDT cut
+  int nTopCandidatesFarFromMuonPassBDT = TopCandMultiplicity(topData, "selected", BJet_LeptonicBr, mu, searchForLeptonicTop, true);
+  */
 
   Jet  ldgTop_Jet1 =  topData.getAllTopsJet1().at(ldgTopIndex);
   Jet  ldgTop_Jet2 =  topData.getAllTopsJet2().at(ldgTopIndex);
@@ -1060,19 +991,7 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
   double DR_mu_LdgTrijet    = dR_mu_top;
   double LdgTrijet_BJet_Pt  = ldgTop_BJet.pt();
   double LdgTrijet_BJet_CSV = ldgTop_BJet.bjetDiscriminator();
-
-  double dPhi_met1 = std::abs(ROOT::Math::VectorUtil::DeltaPhi(ldgTop_Jet1.p4(), METData.getMET()));
-  double dPhi_met2 = std::abs(ROOT::Math::VectorUtil::DeltaPhi(ldgTop_Jet2.p4(), METData.getMET()));
-  double dPhi_metb = std::abs(ROOT::Math::VectorUtil::DeltaPhi(ldgTop_BJet.p4(), METData.getMET()));
-  double dPhi_met_min  = min(dPhi_metb, min(dPhi_met1, dPhi_met2));
-  double dPhi_met_max  = max(dPhi_metb, max(dPhi_met1, dPhi_met2));
-    
-  Jet ldgTop_ldgPtJet   = getLeadingSubleadingJet(ldgTop_BJet, ldgTop_Jet1, "leading");
-  Jet ldgTop_sbldgPtJet = getLeadingSubleadingJet(ldgTop_BJet, ldgTop_Jet1, "subleading");
-  double dPhi_met1_ldgPtJet   = std::abs(ROOT::Math::VectorUtil::DeltaPhi(ldgTop_ldgPtJet.p4(), METData.getMET()));
-  double dPhi_met1_sbldgPtJet = std::abs(ROOT::Math::VectorUtil::DeltaPhi(ldgTop_sbldgPtJet.p4(), METData.getMET()));
-
-
+  
   if (Debug)
     {
       std::cout<<"leading top index = "<<ldgTopIndex<<std::endl;
@@ -1081,7 +1000,7 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
   
   bool MuPass_Iso       = cfg_MiniIsoCut.passedCut(mu.effAreaMiniIso());
   bool MuPass_InvIso    = cfg_MiniIsoInvCut.passedCut(mu.effAreaMiniIso()) && !MuPass_Iso;
-  
+
   
   //Matching
   const double twoSigma = 0.32;
@@ -1118,7 +1037,7 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
           }
         }
       }
-      // If top does not decay into W+b return
+      //Soti: If top does not decay into W+b return
       if (!foundB) return;   
       // Fill vectors for b-quarks, leading and subleading quarks coming from tops 
       GenTops_BQuark.push_back(bquark);
@@ -1226,7 +1145,11 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
 	MCtrue_Bjet.push_back(BJetCand.at(i));
       }
     }
-    
+
+    //At least one trijet matched to partons
+    // isGenuineTop_StandardSelections = IsGenuineTop(topData, "all", mu, BJet_LeptonicBr, searchForLeptonicTop, MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet);
+    // isGenuineTop_AllSelections      = IsGenuineTop(topData, "selected", mu, BJet_LeptonicBr, searchForLeptonicTop, MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet);
+
     //Leading in pt trijet matched to partons
     isGenuineTop_StandardSelections = isRealTop(ldgTop_Jet1, ldgTop_Jet2, ldgTop_BJet, MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet);
     isGenuineTop_AllSelections      = isRealTop(ldgTop_Jet1, ldgTop_Jet2, ldgTop_BJet, MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet);
@@ -1238,6 +1161,7 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
       if (haveGenTop && !haveMatchedTrijet) return;
     }
   }//if (fEvent.isMC())
+
 
   if (MuPass_Iso){ 
     if (Debug) std::cout<<"Signal R"<<std::endl;    
@@ -1281,39 +1205,34 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
     h_AfterStandardSelections_DeltaPhi_MuMET_SR    -> Fill(isGenuineTop_StandardSelections, deltaPhi_mu_met);
     //h_AfterStandardSelections_Muon_BJetMinDR         -> Fill(isGenuineTop_StandardSelections, dRmin_mu_bjet);
     h_AfterStandardSelections_Muon_LeadingTrijetDR_SR   -> Fill(isGenuineTop_StandardSelections, DR_mu_LdgTrijet);
+    h_AfterStandardSelections_Muon_LeadingTrijetDR_Inclusive   -> Fill(isGenuineTop_StandardSelections, DR_mu_LdgTrijet);
     h_AfterStandardSelections_LeadingTrijet_Pt_SR       -> Fill(isGenuineTop_StandardSelections, LdgTrijet_MaxPt);
     h_AfterStandardSelections_LeadingTrijet_Eta_SR      -> Fill(isGenuineTop_StandardSelections, LdgTrijet_Eta);
     h_AfterStandardSelections_LeadingTrijet_Phi_SR      -> Fill(isGenuineTop_StandardSelections, LdgTrijet_Phi);
     h_AfterStandardSelections_LeadingTrijet_BJet_Pt_SR  -> Fill(isGenuineTop_StandardSelections, LdgTrijet_BJet_Pt);
     h_AfterStandardSelections_LeadingTrijet_BJet_CSV_SR -> Fill(isGenuineTop_StandardSelections, LdgTrijet_BJet_CSV);
     
-    h_AfterStandardSelections_DeltaPhiMin_METJet_SR    -> Fill(isGenuineTop_StandardSelections, dPhi_met_min);
-    h_AfterStandardSelections_DeltaPhiMax_METJet_SR    -> Fill(isGenuineTop_StandardSelections, dPhi_met_max);
-
     if (Debug){
       std::cout<<" "<<std::endl;
       std::cout<<" Top candidates passing BDT:  "<< topData.getSelectedTopsBJet().size()<< std::endl;
       std::cout<<" "<<std::endl;
     }    
-    
-    //TH2
-    h_AfterStandardSelections_DPhiJ1MET_vs_DPhiJ2MET_SR -> Fill(isGenuineTop_StandardSelections, dPhi_met1_ldgPtJet, dPhi_met1_sbldgPtJet);
-
+       
     //=======================================================================
     // Final Selection
     //=======================================================================
     if (nTopCandidatesFarFromMuonPassBDT < 1) return;
     hCEvts_PassSelections_SR -> Fill("Top pass BDT", 1);
-        
+    
     // ==================================================================================
     //    Apply Mis-ID SF
     // ==================================================================================
-    if (fEvent.isMC() && cfg_ApplyMisIDSF)
-      {
-	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
-	//std::cout<<"SR:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
-	fEventWeight.multiplyWeight(MisIDweight);
-      }
+    // if (fEvent.isMC())
+    //   {
+    // 	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
+    // 	//std::cout<<"SR:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
+    // 	fEventWeight.multiplyWeight(MisIDweight);
+    //   }
     cMisIDSFCounter.increment();
     
     int selected_ldgTopIndex = getLeadingTopIndex(topData, "selected", mu, BJet_LeptonicBr, searchForLeptonicTop);
@@ -1396,10 +1315,6 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
       h_AfterAllSelections_LeadingTrijet_BJet_Pt_SR  -> Fill(isGenuineTop_AllSelections, LdgTrijet_BJet_Pt);
       h_AfterAllSelections_LeadingTrijet_BJet_CSV_SR -> Fill(isGenuineTop_AllSelections, LdgTrijet_BJet_CSV);
     }
-
-    h_AfterAllSelections_DeltaPhiMin_METJet_SR    -> Fill(isGenuineTop_AllSelections, dPhi_met_min);
-    h_AfterAllSelections_DeltaPhiMax_METJet_SR    -> Fill(isGenuineTop_AllSelections, dPhi_met_max);
-
     // We need another plot with the LeadingTrijet BDT
     if (Debug) std::cout<<"End of Signal R"<<std::endl;    
   } //Signal Region
@@ -1445,21 +1360,19 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
     h_AfterStandardSelections_DeltaPhi_MuMET_VR         -> Fill(isGenuineTop_StandardSelections, deltaPhi_mu_met);
     //h_AfterStandardSelections_Muon_BJetMinDR          -> Fill(isGenuineTop_StandardSelections, dRmin_mu_bjet);
     h_AfterStandardSelections_Muon_LeadingTrijetDR_VR   -> Fill(isGenuineTop_StandardSelections, DR_mu_LdgTrijet);
+    h_AfterStandardSelections_Muon_LeadingTrijetDR_Inclusive   -> Fill(isGenuineTop_StandardSelections, DR_mu_LdgTrijet);
     h_AfterStandardSelections_LeadingTrijet_Pt_VR       -> Fill(isGenuineTop_StandardSelections, LdgTrijet_MaxPt);
     h_AfterStandardSelections_LeadingTrijet_Eta_VR      -> Fill(isGenuineTop_StandardSelections, LdgTrijet_Eta);
     h_AfterStandardSelections_LeadingTrijet_Phi_VR      -> Fill(isGenuineTop_StandardSelections, LdgTrijet_Phi);
     h_AfterStandardSelections_LeadingTrijet_BJet_Pt_VR  -> Fill(isGenuineTop_StandardSelections, LdgTrijet_BJet_Pt);
     h_AfterStandardSelections_LeadingTrijet_BJet_CSV_VR -> Fill(isGenuineTop_StandardSelections, LdgTrijet_BJet_CSV);
     
-    h_AfterStandardSelections_DeltaPhiMin_METJet_VR    -> Fill(isGenuineTop_StandardSelections, dPhi_met_min);
-    h_AfterStandardSelections_DeltaPhiMax_METJet_VR    -> Fill(isGenuineTop_StandardSelections, dPhi_met_max);
-
     if (Debug){
       std::cout<<" "<<std::endl;
       std::cout<<" Top candidates passing BDT:  "<< topData.getSelectedTopsBJet().size()<< std::endl;
       std::cout<<" "<<std::endl;
     }    
-    h_AfterStandardSelections_DPhiJ1MET_vs_DPhiJ2MET_VR -> Fill(isGenuineTop_StandardSelections, dPhi_met1_ldgPtJet, dPhi_met1_sbldgPtJet);
+       
     //=======================================================================
     // Final Selection
     //=======================================================================
@@ -1468,12 +1381,12 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
     // ==================================================================================
     //    Apply Mis-ID SF
     // ==================================================================================
-    if (fEvent.isMC() && cfg_ApplyMisIDSF)
-      {
-      	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
-	//std::cout<<"VR:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
-	fEventWeight.multiplyWeight(MisIDweight);
-      }
+    // if (fEvent.isMC())
+    //   {
+    // 	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
+    // 	//std::cout<<"VR:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
+    // 	fEventWeight.multiplyWeight(MisIDweight);
+    //   }
     cMisIDSFCounter.increment();
     // ----------------------------------------------------------------------------------
     
@@ -1553,11 +1466,6 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
       h_AfterAllSelections_LeadingTrijet_BJet_CSV_VR -> Fill(isGenuineTop_AllSelections, LdgTrijet_BJet_CSV);
     }
     // We need another plot with the LeadingTrijet BDT
-
-    h_AfterAllSelections_DeltaPhiMin_METJet_VR    -> Fill(isGenuineTop_AllSelections, dPhi_met_min);
-    h_AfterAllSelections_DeltaPhiMax_METJet_VR    -> Fill(isGenuineTop_AllSelections, dPhi_met_max);
-
-
   } //Verification Region
 
   return;
@@ -1608,17 +1516,6 @@ void SystTopBDT::DoInvertedAnalysis(const JetSelection::Data& jetData, const BJe
   double LdgTrijet_BJet_Pt  = ldgTop_BJet.pt();
   double LdgTrijet_BJet_CSV = ldgTop_BJet.bjetDiscriminator();
   
-  double dPhi_met1 = std::abs(ROOT::Math::VectorUtil::DeltaPhi(ldgTop_Jet1.p4(), METData.getMET()));
-  double dPhi_met2 = std::abs(ROOT::Math::VectorUtil::DeltaPhi(ldgTop_Jet2.p4(), METData.getMET()));
-  double dPhi_metb = std::abs(ROOT::Math::VectorUtil::DeltaPhi(ldgTop_BJet.p4(), METData.getMET()));
-  double dPhi_met_min  = min(dPhi_metb, min(dPhi_met1, dPhi_met2));
-  double dPhi_met_max  = max(dPhi_metb, max(dPhi_met1, dPhi_met2));  
-
-  Jet ldgTop_ldgPtJet   = getLeadingSubleadingJet(ldgTop_BJet, ldgTop_Jet1, "leading");
-  Jet ldgTop_sbldgPtJet = getLeadingSubleadingJet(ldgTop_BJet, ldgTop_Jet1, "subleading");
-  double dPhi_met1_ldgPtJet   = std::abs(ROOT::Math::VectorUtil::DeltaPhi(ldgTop_ldgPtJet.p4(), METData.getMET()));
-  double dPhi_met1_sbldgPtJet = std::abs(ROOT::Math::VectorUtil::DeltaPhi(ldgTop_sbldgPtJet.p4(), METData.getMET()));
-
   if (Debug)
     {
       std::cout<<"leading top index = "<<ldgTopIndex<<std::endl;
@@ -1663,7 +1560,7 @@ void SystTopBDT::DoInvertedAnalysis(const JetSelection::Data& jetData, const BJe
           }
         }
       }
-      //If top does not decay into W+b return
+      //Soti: If top does not decay into W+b return
       if (!foundB) return;   
       // Fill vectors for b-quarks, leading and subleading quarks coming from tops 
       GenTops_BQuark.push_back(bquark);
@@ -1835,24 +1732,19 @@ void SystTopBDT::DoInvertedAnalysis(const JetSelection::Data& jetData, const BJe
     h_AfterStandardSelections_DeltaPhi_MuMET_CR1         -> Fill(isGenuineTop_StandardSelections, deltaPhi_mu_met);
     //h_AfterStandardSelections_Muon_BJetMinDR         -> Fill(isGenuineTop_StandardSelections, dRmin_mu_bjet);
     h_AfterStandardSelections_Muon_LeadingTrijetDR_CR1   -> Fill(isGenuineTop_StandardSelections, DR_mu_LdgTrijet);
+    h_AfterStandardSelections_Muon_LeadingTrijetDR_Inclusive   -> Fill(isGenuineTop_StandardSelections, DR_mu_LdgTrijet);
     h_AfterStandardSelections_LeadingTrijet_Pt_CR1       -> Fill(isGenuineTop_StandardSelections, LdgTrijet_MaxPt);
     h_AfterStandardSelections_LeadingTrijet_Eta_CR1      -> Fill(isGenuineTop_StandardSelections, LdgTrijet_Eta);
     h_AfterStandardSelections_LeadingTrijet_Phi_CR1      -> Fill(isGenuineTop_StandardSelections, LdgTrijet_Phi);
     h_AfterStandardSelections_LeadingTrijet_BJet_Pt_CR1  -> Fill(isGenuineTop_StandardSelections, LdgTrijet_BJet_Pt);
     h_AfterStandardSelections_LeadingTrijet_BJet_CSV_CR1 -> Fill(isGenuineTop_StandardSelections, LdgTrijet_BJet_CSV);
     
-    h_AfterStandardSelections_DeltaPhiMin_METJet_CR1    -> Fill(isGenuineTop_StandardSelections, dPhi_met_min);
-    h_AfterStandardSelections_DeltaPhiMax_METJet_CR1    -> Fill(isGenuineTop_StandardSelections, dPhi_met_max);
-
     if (Debug){
       std::cout<<" "<<std::endl;
       std::cout<<" Top candidates passing BDT:  "<< topData.getSelectedTopsBJet().size()<< std::endl;
       std::cout<<" "<<std::endl;
     }    
        
-    //TH2
-    h_AfterStandardSelections_DPhiJ1MET_vs_DPhiJ2MET_CR1 -> Fill(isGenuineTop_StandardSelections, dPhi_met1_ldgPtJet, dPhi_met1_sbldgPtJet);
-    
     //=======================================================================
     // Final Selection
     //=======================================================================
@@ -1861,12 +1753,12 @@ void SystTopBDT::DoInvertedAnalysis(const JetSelection::Data& jetData, const BJe
     // ==================================================================================
     //    Apply Mis-ID SF
     // ==================================================================================
-    if (fEvent.isMC() && cfg_ApplyMisIDSF)
-      {
-	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
-	//std::cout<<"CR1:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
-	fEventWeight.multiplyWeight(MisIDweight);
-      }
+    // if (fEvent.isMC())
+    //   {
+    // 	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
+    // 	//std::cout<<"CR1:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
+    // 	fEventWeight.multiplyWeight(MisIDweight);
+    //   }
     cMisIDSFCounter.increment();
     // ----------------------------------------------------------------------------------
 
@@ -1944,10 +1836,6 @@ void SystTopBDT::DoInvertedAnalysis(const JetSelection::Data& jetData, const BJe
       h_AfterAllSelections_LeadingTrijet_BJet_Pt_CR1  -> Fill(isGenuineTop_AllSelections, LdgTrijet_BJet_Pt);
       h_AfterAllSelections_LeadingTrijet_BJet_CSV_CR1 -> Fill(isGenuineTop_AllSelections, LdgTrijet_BJet_CSV);
     }
-
-    h_AfterAllSelections_DeltaPhiMin_METJet_CR1    -> Fill(isGenuineTop_AllSelections, dPhi_met_min);
-    h_AfterAllSelections_DeltaPhiMax_METJet_CR1    -> Fill(isGenuineTop_AllSelections, dPhi_met_max);
-
     // We need another plot with the LeadingTrijet BDT
     if (Debug) std::cout<<"End of Control Region 1"<<std::endl;    
   } //cONTROL Region 1
@@ -1993,24 +1881,19 @@ void SystTopBDT::DoInvertedAnalysis(const JetSelection::Data& jetData, const BJe
     h_AfterStandardSelections_DeltaPhi_MuMET_CR2         -> Fill(isGenuineTop_StandardSelections, deltaPhi_mu_met);
     //h_AfterStandardSelections_Muon_BJetMinDR         -> Fill(isGenuineTop_StandardSelections, dRmin_mu_bjet);
     h_AfterStandardSelections_Muon_LeadingTrijetDR_CR2   -> Fill(isGenuineTop_StandardSelections, DR_mu_LdgTrijet);
+    h_AfterStandardSelections_Muon_LeadingTrijetDR_Inclusive   -> Fill(isGenuineTop_StandardSelections, DR_mu_LdgTrijet);
     h_AfterStandardSelections_LeadingTrijet_Pt_CR2       -> Fill(isGenuineTop_StandardSelections, LdgTrijet_MaxPt);
     h_AfterStandardSelections_LeadingTrijet_Eta_CR2      -> Fill(isGenuineTop_StandardSelections, LdgTrijet_Eta);
     h_AfterStandardSelections_LeadingTrijet_Phi_CR2      -> Fill(isGenuineTop_StandardSelections, LdgTrijet_Phi);
     h_AfterStandardSelections_LeadingTrijet_BJet_Pt_CR2  -> Fill(isGenuineTop_StandardSelections, LdgTrijet_BJet_Pt);
     h_AfterStandardSelections_LeadingTrijet_BJet_CSV_CR2 -> Fill(isGenuineTop_StandardSelections, LdgTrijet_BJet_CSV);
     
-    h_AfterStandardSelections_DeltaPhiMin_METJet_CR2    -> Fill(isGenuineTop_StandardSelections, dPhi_met_min);
-    h_AfterStandardSelections_DeltaPhiMax_METJet_CR2    -> Fill(isGenuineTop_StandardSelections, dPhi_met_max);
-
     if (Debug){
       std::cout<<" "<<std::endl;
       std::cout<<" Top candidates passing BDT:  "<< topData.getSelectedTopsBJet().size()<< std::endl;
       std::cout<<" "<<std::endl;
     }    
        
-    //TH2
-    h_AfterStandardSelections_DPhiJ1MET_vs_DPhiJ2MET_CR2 -> Fill(isGenuineTop_StandardSelections, dPhi_met1_ldgPtJet, dPhi_met1_sbldgPtJet);
-    
     //=======================================================================
     // Final Selection
     //=======================================================================
@@ -2019,12 +1902,12 @@ void SystTopBDT::DoInvertedAnalysis(const JetSelection::Data& jetData, const BJe
     // ==================================================================================
     //    Apply Mis-ID SF
     // ==================================================================================
-    if (fEvent.isMC() && cfg_ApplyMisIDSF)
-      {
-	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
-	//std::cout<<"CR2:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
-	fEventWeight.multiplyWeight(MisIDweight);
-      }
+    // if (fEvent.isMC())
+    //   {
+    // 	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
+    // 	//std::cout<<"CR2:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
+    // 	fEventWeight.multiplyWeight(MisIDweight);
+    //   }
     cMisIDSFCounter.increment();  
     // ----------------------------------------------------------------------------------
 
@@ -2104,10 +1987,6 @@ void SystTopBDT::DoInvertedAnalysis(const JetSelection::Data& jetData, const BJe
       h_AfterAllSelections_LeadingTrijet_BJet_CSV_CR2 -> Fill(isGenuineTop_AllSelections, LdgTrijet_BJet_CSV);
     }
     // We need another plot with the LeadingTrijet BDT
-
-    h_AfterAllSelections_DeltaPhiMin_METJet_CR2    -> Fill(isGenuineTop_AllSelections, dPhi_met_min);
-    h_AfterAllSelections_DeltaPhiMax_METJet_CR2    -> Fill(isGenuineTop_AllSelections, dPhi_met_max);
-
   } //Control Region 2
 
   return;
@@ -2159,10 +2038,10 @@ int SystTopBDT::getLeadingTopIndex(const TopSelectionBDT::Data& topData, string 
       //if (dR_mu_top < dRmin_mu_top) dRmin_mu_top = dR_mu_top;
 
       // Consider only top candidates that are far from the muon (back-to-back)
-      if (!cfg_MuTrijetDRCut.passedCut(dR_mu_top)) continue;	      
+      if (dR_mu_top < 2.0) continue;
       if (Top_p4.pt() < LdgTrijet_MaxPt) continue;
-      LdgTrijet_MaxPt = Top_p4.pt();
-      LdgTrijet_Index = i;
+       	LdgTrijet_MaxPt = Top_p4.pt();
+	LdgTrijet_Index = i;
     }
   return LdgTrijet_Index;
 }
@@ -2209,7 +2088,7 @@ bool SystTopBDT::IsGenuineTop(const TopSelectionBDT::Data& topData, string topTy
       double dR_mu_top = ROOT::Math::VectorUtil::DeltaR(mu.p4(), Top_p4);
       
       // Consider only top candidates that are far from the muon (back-to-back)
-      if (!cfg_MuTrijetDRCut.passedCut(dR_mu_top)) continue;	      
+      if (dR_mu_top < 2.0) continue;
       if (isRealTop(jet1, jet2, bjet, MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet)) return true;
     }
   return false;
@@ -2288,7 +2167,7 @@ const genParticle SystTopBDT::GetLastCopy(const vector<genParticle> genParticles
 
 
 vector <int> SystTopBDT::GetTopsIndex( const TopSelectionBDT::Data& topData, string topType, Jet BJet_LeptonicBr, Muon mu, bool searchForLeptonicTop, bool askTopFarFromMu){
-  double dRmin_mu_top = 999.999;
+  //double dRmin_mu_top = 999.999;
 
   size_t nTops = -1;
   vector <int> vTops;
@@ -2328,27 +2207,11 @@ vector <int> SystTopBDT::GetTopsIndex( const TopSelectionBDT::Data& topData, str
       double dR_mu_top = ROOT::Math::VectorUtil::DeltaR(mu.p4(), Top_p4);
       
       // Find min and max DR(mu, top candidate)
-      if (dR_mu_top < dRmin_mu_top) dRmin_mu_top = dR_mu_top;
+      //if (dR_mu_top < dRmin_mu_top) dRmin_mu_top = dR_mu_top;
       
       // Consider only top candidates that are far from the muon (back-to-back)
-      if (!cfg_MuTrijetDRCut.passedCut(dR_mu_top)) continue;	      
+      if (dR_mu_top < 2.0) continue;
       vTops.push_back(i);
     }
   return vTops;
-}
-
-
-Jet SystTopBDT::getLeadingSubleadingJet(const Jet& jet0, const Jet& jet1, string selectedJet){
-  if (selectedJet != "leading" && selectedJet!="subleading") std::cout<<"WARNING! Unknown option "<<selectedJet<<". Function getLeadingSubleadingJet returns leading Jet"<<std::endl;
-  Jet leadingJet, subleadingJet;
-  if (jet0.pt() > jet1.pt()){
-    leadingJet    = jet0;
-    subleadingJet = jet1;
-  }
-  else{
-    leadingJet    = jet1;
-    subleadingJet = jet0;
-  }
-  if (selectedJet == "subleading") return subleadingJet;
-  return leadingJet;
 }
