@@ -722,13 +722,25 @@ class QCDNormalizationManagerBase:
         for k in self._qcdNormalization:
             s += '    "%s": %f,\n'%(k, self._qcdNormalization[k])
         s += "}\n"
+        s += "QCDNormalizationError = {\n"
+        for k in self._qcdNormalizationError:
+            s += '    "%s": %f,\n'%(k, self._qcdNormalizationError[k])
+        s += "}\n"
         s += "EWKFakeTausNormalization = {\n"
         for k in self._ewkFakesNormalization:
             s += '    "%s": %f,\n'%(k, self._ewkFakesNormalization[k])
         s += "}\n"
+        s += "EWKFakeTausNormalizationError = {\n"
+        for k in self._ewkFakesNormalizationError:
+            s += '    "%s": %f,\n'%(k, self._ewkFakesNormalizationError[k])
+        s += "}\n"
         s += "QCDPlusEWKFakeTausNormalization = {\n"
         for k in self._combinedFakesNormalization:
             s += '    "%s": %f,\n'%(k, self._combinedFakesNormalization[k])
+        s += "}\n"
+        s += "QCDPlusEWKFakeTausNormalizationError = {\n"
+        for k in self._combinedFakesNormalizationError:
+            s += '    "%s": %f,\n'%(k, self._combinedFakesNormalizationError[k])
         s += "}\n"
         s += "QCDPlusEWKFakeTausNormalizationSystFakeWeightingVarDown = {\n"
         for k in self._combinedFakesNormalizationDown:
@@ -742,6 +754,10 @@ class QCDNormalizationManagerBase:
             s += "##QCDMCNormalization = {\n"
             for k in self._qcdmcNormalization:
                 s += '##    "%s": %f,\n'%(k, self._qcdmcNormalization[k])
+            s += "##}\n"
+            s += "##QCDMCNormalizationError = {\n"
+            for k in self._qcdmcNormalizationError:
+                s += '##    "%s": %f,\n'%(k, self._qcdmcNormalizationError[k])
             s += "##}\n"
         s += "\n"
         s += "# Log of fake rate calculation:\n"
