@@ -251,7 +251,7 @@ def PlotHistograms(datasetsMgr):
     # Overwite signal style?
     style  = [200, 500, 800, 1000, 2000, 5000]
     lstyle = [ROOT.kSolid, ROOT.kDashed, ROOT.kDashDotted, ROOT.kDotted, ROOT.kDotted, ROOT.kSolid]
-    p.histoMgr.forHisto("Matched-LdgTrijet-Bjet" , styles.getFakeBStyle())
+    p.histoMgr.forHisto("Matched-LdgTrijet-Bjet" , styles.getFakeBLineStyle()) #styles.getFakeBStyle())
     p.histoMgr.forHisto("Matched-Bjet"           , styles.mcStyle) #getInvertedLineStyle()) 
     p.histoMgr.forHisto("Matched-LdgTrijet"      , styles.stylesCompound[-1])
     p.histoMgr.forHisto("Inclusive"              , styles.getGenuineBLineStyle())
@@ -268,14 +268,14 @@ def PlotHistograms(datasetsMgr):
     p.histoMgr.setHistoLegendStyle("Inclusive", "LP")
     p.histoMgr.setHistoLegendStyle("Matched-Bjet", "LP")
     p.histoMgr.setHistoLegendStyle("Matched-LdgTrijet", "F")
-    p.histoMgr.setHistoLegendStyle("Matched-LdgTrijet-Bjet", "F")
+    p.histoMgr.setHistoLegendStyle("Matched-LdgTrijet-Bjet", "L")
     p.histoMgr.setHistoLegendStyle("Unmatched", "F")
 
     p.histoMgr.setHistoLegendLabelMany({
             "Inclusive"              : "Inclusive",
             "Matched-Bjet"           : "b-jet match",
             "Matched-LdgTrijet"      : "top match",
-            "Matched-LdgTrijet-Bjet" : "top + b-jet match",
+            "Matched-LdgTrijet-Bjet" : "full match", #"top + b-jet match",
             "Unmatched"              : "Combinatoric",
             })
     
@@ -293,15 +293,24 @@ def PlotHistograms(datasetsMgr):
     else:
         yLabel = "Events / %0.0f " + _units
 
+    if opts.logY:
+        ymin  = 1e-3
+        ymaxf = 5
+    else:
+        ymin  = 0.0
+        ymaxf = 1.2
+
+    ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
+
     plots.drawPlot(p, 
                    saveName,
                    xlabel       = "m_{jjbb} (%s)" % (_units),
                    ylabel       = yLabel,
-                   log          = False,
-                   rebinX       = 5,
+                   log          = opts.logY,
+                   rebinX       = 5, #2, 5
                    cmsExtraText = "Preliminary",
                    createLegend = _leg,
-                   opts         = {"xmin": 0.0, "xmax": 1500.0, "ymin": 0.0, "ymaxfactor": 1.2},
+                   opts         = {"xmin": 0.0, "xmax": 1400.0, "ymin": ymin, "ymaxfactor": ymaxf},
                    opts2        = {"ymin": 0.6, "ymax": 1.4},
                    cutBox       = {"cutValue": opts.signalMass, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
                    )
@@ -368,8 +377,8 @@ if __name__ == "__main__":
     NORMALISE    = False
     ANALYSISNAME = "TopRecoAnalysis"
     SAVEDIR      = "/publicweb/a/aattikis/" + ANALYSISNAME
-
-
+    LOGY         = False
+    
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
 
@@ -417,6 +426,9 @@ if __name__ == "__main__":
 
     parser.add_option("-n", "--normaliseToOne", dest="normaliseToOne", action="store_true", 
                       help="Normalise the histograms to one? [default: %s]" % (NORMALISE) )
+
+    parser.add_option("--logY", dest="logY", action="store_true", 
+                      help="Set y-axis to log scale [default: %s]" % (LOGY) )
 
     (opts, parseArgs) = parser.parse_args()
 
