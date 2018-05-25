@@ -23,7 +23,7 @@
   ./getMisIdRateCR2.py -m <pseudo-multicrab> --folder <folder> 
 
  LAST USED:
- ./getMisIdRateCR2.py -m SystTopBDT_180513_101101_MET50_MuIso0p1_InvMET20_InvMuIso0p1_noSF -e "TTW|TTZ"
+ ./getMisIdRateCR2.py -m SystTopBDT_180524_074141_MET50_MuIso0p1_InvMET20_InvMuIso0p1_noSF -e "TTW|TTZ"
  
  OTHER SELECTIONS:
   Selection A) ./getMisIdRateCR2.py -m SystTopBDT_180513_100633_MET50_MuIso0p2_InvMET20_InvMuIso0p2_noSF -e "TTW|TTZ"
@@ -533,7 +533,7 @@ def GetScaleFactors(datasetsMgr, num_pathList, den_pathList, intLumi):
     rhDict_den = GetRootHistos(datasetsMgr, den_pathList, regions)
 
     # Normalization Factors (see: getNormalization.py)
-    f1=0.602756; f2=0.902921;
+    f1=0.596314; f2=0.899518;
     
     # ------------------------------------------------------------------------------
     # (A) Normalize QCD and TT (MC) in all regions

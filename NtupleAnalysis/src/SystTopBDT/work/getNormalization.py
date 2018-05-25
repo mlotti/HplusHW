@@ -34,7 +34,7 @@
    ./getNormalization.py -m <pseudo-multicrab> --url
     
    LAST USED:
-   ./getNormalization.py -m SystTopBDT_180513_101101_MET50_MuIso0p1_InvMET20_InvMuIso0p1_noSF -e "TTW|TTZ"
+   ./getNormalization.py -m SystTopBDT_180524_074141_MET50_MuIso0p1_InvMET20_InvMuIso0p1_noSF -e "TTW|TTZ"
    
    USED for AN plots:
    ./getNormalization.py -m SystTopBDT_180513_101101_MET50_MuIso0p1_InvMET20_InvMuIso0p1_noSF -e "TTW|TTZ"

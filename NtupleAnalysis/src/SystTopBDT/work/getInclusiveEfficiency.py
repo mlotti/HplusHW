@@ -23,6 +23,7 @@
  ./getInclusiveEfficiency.py -num <pseudo_nummcrab_directory> -den <pseudo_dencrab_directory> [opts]
 
  LAST USED:
+ ./getInclusiveEfficiency.py --noSF SystTopBDT_180524_074141_MET50_MuIso0p1_InvMET20_InvMuIso0p1_noSF --withCR2SF SystTopBDT_180525_022130_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR2SF --url -e "TTW"
  ./getInclusiveEfficiency.py --noSF SystTopBDT_180513_101101_MET50_MuIso0p1_InvMET20_InvMuIso0p1_noSF --withCR2SF SystTopBDT_180513_155700_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR2SF --url -e "TTW"
  
  OTHER SELECTIONS:
@@ -520,7 +521,7 @@ def PlotHistos(noSF_datasetsMgr, withCR2SF_datasetsMgr, num_histoList, den_histo
     #=========================================================================================
     # Normalization Factors (see: getNormalization.py)
     #=========================================================================================
-    f1 = 0.602756; f2=0.902921;
+    f1=0.596314; f2=0.899518;
 
     # =========================================================================================
     # (A) Apply Normalization Factors (see: getNormalizations.py)

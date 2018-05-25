@@ -442,7 +442,7 @@ def PlotHistos(noSF_datasetsMgr, withCR2SF_datasetsMgr, num_histoList, den_histo
     #=========================================================================================
     # Normalization Factors (see: getNormalization.py)
     #=========================================================================================
-    f1=0.602756; f2=0.902921; 
+    f1=0.596314; f2=0.899518;
     
     # =========================================================================================
     # (A) Apply Normalization Factors (see: getNormalizations.py)
