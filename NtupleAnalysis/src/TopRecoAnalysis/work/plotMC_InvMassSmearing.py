@@ -12,11 +12,18 @@ EXAMPLES:
 ./plotMC_InvMassSmearing.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400_wSignal/TopRecoAnalysis_180422_BDT40/ --signalMass  500
 ./plotMC_InvMassSmearing.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400_wSignal/TopRecoAnalysis_180422_BDT40/ --signalMass 1000
 ./plotMC_InvMassSmearing.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400_wSignal/TopRecoAnalysis_180422_BDT40/ --signalMass 1000
+./plotMC_InvMassSmearing.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400_wSignal/TopRecoAnalysis_180422_BDT40/ --signalMass 500 --url -n
 
 
 LAST USED:
-/plotMC_InvMassSmearing.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400_wSignal/TopRecoAnalysis_180422_BDT40/ --signalMass 500 --url -n
+./plotMC_InvMassSmearing.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/TopRecoAnalysis_180524_052417_Mcrab644_BDT_DR0p3_DPtOverPt0p32_PtReweighting/--signalMass 500 --url -n
 
+
+New training:
+/uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/TopRecoAnalysis_180524_052417_Mcrab644_BDT_DR0p3_DPtOverPt0p32_PtReweighting/
+
+Old training:
+/uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/TopRecoAnalysis_180524_051147_Mcrab644_BDT_DR0p3_DPtOverPt0p32/
 '''
 
 #================================================================================================ 
@@ -307,7 +314,7 @@ def PlotHistograms(datasetsMgr):
                    xlabel       = "m_{jjbb} (%s)" % (_units),
                    ylabel       = yLabel,
                    log          = opts.logY,
-                   rebinX       = 5, #2, 5
+                   rebinX       = 2, #2, 5
                    cmsExtraText = "Preliminary",
                    createLegend = _leg,
                    opts         = {"xmin": 0.0, "xmax": 1400.0, "ymin": ymin, "ymaxfactor": ymaxf},
@@ -448,7 +455,7 @@ if __name__ == "__main__":
         Print("Merging EWK samples into a single Datasets \"EWK\"", True)
 
     # Sanity check
-    allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 2000, 3000]
+    allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 2000, 3000]
     if opts.signalMass not in allowedMass:
         raise Exception("Signal mass invalid")
 

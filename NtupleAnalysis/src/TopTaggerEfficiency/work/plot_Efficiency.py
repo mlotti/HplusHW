@@ -1,32 +1,18 @@
 #!/usr/bin/env python
 '''
 DESCRIPTION:
-This scipt is used to investigate 
-the top tagging differences when using 
-different MC samples and generators to account
-for various effects such as:
-- ISR/FSR
-- Event Generator
-- ME-PS matching (high-pT radiation)
-- Colour Reconnection
-etc...
 
 
 USAGE:
-./plot_EfficiencySystTop.py -m <pseudo_mcrab> [opts]
+./plot_Efficiency.py -m <pseudo_mcrab> [opts]
 
 
 EXAMPLES:
-./plot_EfficiencySystTop.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/SystTopBDT/SystTopBDT_180412_TTs/ --folder SystTopBDT_
-./plot_EfficiencySystTop.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/SystTopBDT/SystTopBDT_180412_TTs/ --folder SystTopBDT_ -e "TT_m|TT_f|TT_h|TT_e" --url
-./plot_EfficiencySystTop.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/SystTopBDT/SystTopBDT_180412_TTs/ --folder SystTopBDT_Genuine -e "TT_m|TT_f|TT_h|TT_e" --url
+./plot_Efficiency.py -m MyHplusAnalysis_180202_fullSignalQCDtt --folder topbdtSelection_ --url
 
 
-LAST USED:
-./plot_EfficiencySystTop.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/SystTopBDT/SystTopBDT_180412_TTs/ --folder SystTopBDT_Genuine --type showerScales
-./plot_EfficiencySystTop.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/SystTopBDT/SystTopBDT_180412_TTs/ --folder SystTopBDT_Genuine --type highPtRadiation
-./plot_EfficiencySystTop.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/SystTopBDT/SystTopBDT_180412_TTs/ --folder SystTopBDT_Genuine --type colourReconnection
-./plot_EfficiencySystTop.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/SystTopBDT/SystTopBDT_180412_TTs/ --folder SystTopBDT_Genuine --type mTop
+LAST USD:
+./plot_Efficiency.py -m MyHplusAnalysis_180202_fullSignalQCDtt --folder topbdtSelection_ --url
 
 STATISTICS OPTIONS:
 https://iktp.tu-dresden.de/~nbarros/doc/root/TEfficiency.html
@@ -38,7 +24,6 @@ statOption = ROOT.TEfficiency.kFFC       # Feldman-Cousins
 statOption = ROOT.TEfficiency.kBJeffrey # Jeffrey
 statOption = ROOT.TEfficiency.kBUniform # Uniform Prior
 statOption = ROOT.TEfficiency.kBayesian # Custom Prior
-
 '''
 #================================================================================================ 
 # Imports
@@ -65,10 +50,13 @@ import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
-import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
-import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
+
+# Ignore Runtime warnings: Base category for warnings about dubious runtime features.
+import warnings
+warnings.filterwarnings("ignore")
 
 ROOT.gErrorIgnoreLevel = ROOT.kError
+
 #================================================================================================ 
 # Function Definition
 #================================================================================================ 
@@ -101,30 +89,12 @@ def GetLumi(datasetsMgr):
 
 def GetListOfQCDatasets():
     Verbose("Getting list of QCD datasets")
-    return ["QCD_bEnriched_HT200to300",
-            "QCD_bEnriched_HT300to500",
-            "QCD_bEnriched_HT500to700",
-            "QCD_bEnriched_HT700to1000",
-            #"QCD_HT1000to1500",
-            "QCD_bEnriched_HT1000to1500",
-            "QCD_bEnriched_HT1500to2000",
-            "QCD_bEnriched_HT2000toInf",
-            #"QCD_HT1500to2000_ext1",
-            #"QCD_HT2000toInf",
-            #"QCD_HT2000toInf_ext1",
-            #"QCD_HT200to300",
-            #"QCD_HT200to300_ext1",
-            #"QCD_HT1000to1500_ext1",
-            #"QCD_HT100to200",
-            #"QCD_HT1500to2000",
-            #"QCD_HT500to700_ext1",
-            #"QCD_HT50to100",
-            #"QCD_HT700to1000",
-            #"QCD_HT700to1000_ext1",
-            #"QCD_HT300to500",
-            #"QCD_HT300to500_ext1",
-            #"QCD_HT500to700"
-            ]
+    return ["QCD_HT1000to1500", "QCD_HT1500to2000","QCD_HT2000toInf","QCD_HT300to500","QCD_HT500to700","QCD_HT700to1000"]
+
+def GetListOfEwkDatasets():
+    Verbose("Getting list of EWK datasets")
+    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+
 
 def GetDatasetsFromDir(opts):
     Verbose("Getting datasets")
@@ -160,58 +130,69 @@ def GetHistoKwargs(histoName, opts):
     key   = histogram name
     value = kwargs
     '''
-    h     = histoName.lower()
-    bins  = []
-    units = ""
+    h = histoName.lower()
     kwargs     = {
         "xlabel"           : "x-axis",
-        "ylabel"           : "Efficiency", #/ %.1f ",
-        "ratioYlabel"      : "Ratio ", #"TT/TT_X",
-        "binList"          : [],
-        "errorType"        : "errorPropagation", 
-        "ratio"            : True,
+        "ylabel"           : "Efficiency / ", #/ %.1f ",
+        # "rebinX"           : 1,
+        "ratioYlabel"      : "Ratio",
+        "ratio"            : False,
         "ratioInvert"      : False,
         "stackMCHistograms": False,
         "addMCUncertainty" : False,
         "addLuminosityText": False,
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
+        #"opts"             : {"ymin": 0.0, "ymax": 1.09},
         "opts"             : {"ymin": 0.0, "ymaxfactor": 1.2},
         "opts2"            : {"ymin": 0.6, "ymax": 1.4},
         "log"              : False,
-        "moveLegend"       : {"dx": -0.12, "dy": -0.40, "dh": +0.05*(-4+opts.nDatasets)},  #"dh": +0.18}, 
-        "cutBoxY"          : {"cutValue": 1.10, "fillColor": 16, "box": True, "line": True, "greaterThan": True, "mainCanvas": False, "ratioCanvas": True, "mirror": True}
+#        "moveLegend"       : {"dx": -0.08, "dy": -0.01, "dh": -0.08},
+        "moveLegend"       : {"dx": -0.05, "dy": -0.005, "dh": -0.08},
+#        "moveLegend"       : {"dx": -0.57, "dy": -0.007, "dh": -0.18},
+        "cutBoxY"          : {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
         }
-    
-    if "pt" in h:
-        ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X") 
-        units             = "GeV/c"
-        kwargs["xlabel"]  = "p_{T} (%s)" % (units)
-        bins              = [i for i in range(0, 1000+50, 50)]
-        if opts.folder == "SystTopBDT_":
-            #bins          = [0, 100] + [i for i in range(100, 500, 50)] + [i for i in range(500, 1000, 100)]
-            bins          = [i for i in range(50, 500+50, 50)] + [600]#, 800]
-            #bins          = [i for i in range(0, 600+100, 100)] + [800]
-        elif opts.folder == "SystTopBDT_Genuine":
-            #bins          = [i for i in range(0, 600+100, 100)] + [800]
-            bins          = [i for i in range(50, 500+50, 50)] + [600]#, 800]
-        else:
-            bins          = []
 
-    if units != "":
-        kwargs["ylabel"] += (" / " + units)
-    if len(bins) > 0:
-        kwargs["binList"] = array.array('d', bins)
+    if "pt" in h:
+        units   = "GeV/c"
+        xlabel  = "candidate p_{T} (%s)" % (units)
+        #myBins  = [0, 100, 150, 200, 250, 300, 400, 500, 800]
+        myBins  = [0, 100, 150, 200, 300, 400, 500, 600, 800]
+        #myBins  = [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800]
+        kwargs["cutBox"] = {"cutValue": 100.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        
+        if "topquark" in h:
+            #kwargs["moveLegend"] = {"dx": -0.55, "dy": -0.55, "dh": -0.08}
+            kwargs["moveLegend"] = {"dx": -0.05, "dy": -0.55, "dh": -0.08}
+            xlabel = "generated top p_{T} (%s)" % (units)
+        if 0:
+            ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
+
+        if "fake" in h:
+            xlabel = "candidate p_{T} (%s)" % (units)
+            kwargs["ylabel"] = "Misidentification rate / " #+ units
+
+        if "event" in h:
+            #kwargs["moveLegend"] = {"dx": -0.55, "dy": -0.55, "dh": -0.08}
+            kwargs["moveLegend"] = {"dx": -0.05, "dy": -0.55, "dh": -0.08}
+            myBins  = [0, 100, 200, 300, 400, 500, 800]
+        if 0:
+            ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
+
+    kwargs["xlabel"]  = xlabel
+    kwargs["ylabel"] += units
+    if len(myBins) > 0:
+        kwargs["binList"] = array.array('d', myBins)
     return kwargs
 
 
-def main(opts):
+def main(opts, signalMass):
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
-    style.setOptStat(False)
-    style.setGridX(False)
-    style.setGridY(False)
+    style.setOptStat(True)
+    style.setGridX(True)
+    style.setGridY(True)
     
     # If user does not define optimisation mode do all of them
     if opts.optMode == None:
@@ -231,7 +212,7 @@ def main(opts):
         datasetsMgr = GetDatasetsFromDir(opts)
         datasetsMgr.updateNAllEventsToPUWeighted()
         datasetsMgr.loadLuminosities() # from lumi.json
-        
+
         if opts.verbose:
             datasetsMgr.PrintCrossSections()
             datasetsMgr.PrintLuminosities()
@@ -242,54 +223,57 @@ def main(opts):
                 datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
 
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
-        if 0:
-            plots.mergeRenameReorderForDataMC(datasetsMgr) 
-
+        plots.mergeRenameReorderForDataMC(datasetsMgr) 
+        
         # Print dataset information before removing anything?
         if 0:
             datasetsMgr.PrintInfo()
 
-        # Print datasets info summary
-        datasetsMgr.PrintInfo()
+        # Determine integrated Lumi before removing data
+        if "Data" in datasetsMgr.getAllDatasetNames():
+            intLumi = datasetsMgr.getDataset("Data").getLuminosity()
+
+        else:
+            intLumi = 35920
+        # Remove datasets
+        filterKeys = ["Data", "QCD", "TTZToQQ", "TTWJets", "TTTT", "ZJetsToQQ_HT600toInf", "DYJetsToQQHT", "SingleTop", "WJetsToQQ_HT_600ToInf", "Diboson"]
+        for key in filterKeys:
+            datasetsMgr.remove(filter(lambda name: key in name, datasetsMgr.getAllDatasetNames()))
 
         # Re-order datasets
         datasetOrder = []
-        haveQCD = False
         for d in datasetsMgr.getAllDatasets():
-            if "QCD" in d.getName():
-                haveQCD = True
+            if "M_" in d.getName():
+                if d not in signalMass:
+                    continue
             datasetOrder.append(d.getName())
             
         # Append signal datasets
+        for m in signalMass:
+            datasetOrder.insert(0, m)
         datasetsMgr.selectAndReorder(datasetOrder)
 
+        # Print dataset information
+        datasetsMgr.PrintInfo()
+
         # Define the mapping histograms in numerator->denominator pairs
-        VariableList = ["LeadingTrijet_Pt"]
-        # VariableList = ["LeadingTrijet_Pt", "LeadingTrijet_Eta", "LeadingTrijet_Phi"]
-
-        # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
-        plots.mergeRenameReorderForDataMC(datasetsMgr) 
+        HistoMap = {
+            "AllTopQuarkPt_MatchedBDT"  : "AllTopQuarkPt_Matched",
+            "TrijetFakePt_BDT"          : "TrijetFakePt",
+            "AllTopQuarkPt_Matched"     : "TopQuarkPt",
+            "EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T_BDT",
+            "EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T_Matched",
+            "EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T",
+            "AllTopQuarkPt_MatchedBDT"  : "TopQuarkPt",
+            #"SelectedTrijetsPt_BjetPassCSVdisc_afterCuts": "SelectedTrijetsPt_afterCuts",
+            #"TrijetPt_PassBDT_BJetPassCSV": "TrijetPt_PassBDT",
+            }
         
-        counter =  0
-        opts.nDatasets = len(datasetsMgr.getAllDatasets())
-        nPlots  = len(VariableList)
         # For-loop: All numerator-denominator pairs
-        for var in VariableList:
-            hNumerator   = "AfterAllSelections_" + var + "_SR"
-            hDenominator = "AfterStandardSelections_" +var + "_SR"
-            numerator    = os.path.join(opts.folder, hNumerator)
-            denFolder    = opts.folder
-            #denFolder    = denFolder.replace("Genuine", "")
-            #print "denFolder", denFolder
-            denominator  = os.path.join(denFolder, hDenominator)
-
-            counter+=1
-            msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % counter, "/", "%s:" % (nPlots), "%s" % (var))
-            Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), counter==1)
-            
-            PlotEfficiency(datasetsMgr, numerator, denominator)            
-            
-    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)
+        for key in HistoMap:
+            numerator   = os.path.join(opts.folder, key)
+            denominator = os.path.join(opts.folder, HistoMap[key])
+            PlotEfficiency(datasetsMgr, numerator, denominator, intLumi)
     return
 
 
@@ -337,132 +321,82 @@ def RemoveNegatives(histo):
     return
 
 
-def PlotEfficiency(datasetsMgr, numPath, denPath):  
+def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
+  
     # Definitions
-    myList      = []
-    _kwargs     = GetHistoKwargs(numPath, opts)        
-    nx          = 0
-    if len(_kwargs["binList"]) > 0:
-        xBins   = _kwargs["binList"]
-        nx      = len(xBins)-1
-    counter     = 0
+    myList  = []
+    index   = 0
+    _kwargs = GetHistoKwargs(numPath, opts)        
 
     # For-loop: All datasets
     for dataset in datasetsMgr.getAllDatasets():
 
-        if dataset.isMC():
-            n   = dataset.getDatasetRootHisto(numPath)
-            d   = dataset.getDatasetRootHisto(denPath)
-            num = n.getHistogram()
-            den = d.getHistogram()
+        # Get the histograms
+        #num = dataset.getDatasetRootHisto(numPath).getHistogram()
+        #den = dataset.getDatasetRootHisto(denPath).getHistogram()
+        
+        
+        n = dataset.getDatasetRootHisto(numPath)
+        n.normalizeToLuminosity(intLumi)
+        num = n.getHistogram()
+        d = dataset.getDatasetRootHisto(denPath)
+        d.normalizeToLuminosity(intLumi)
+        den = d.getHistogram()
 
-            if nx > 0:
-                num = num.Rebin(nx, "", xBins)
-                den = den.Rebin(nx, "", xBins)
-        else:
-            num = dataset.getDatasetRootHisto(numPath).getHistogram()
-            den = dataset.getDatasetRootHisto(denPath).getHistogram()
-            if nx > 0:
-                num = num.Rebin(nx, "", xBins)
-                den = den.Rebin(nx, "", xBins)
 
-        # Calculations    
-        total    = den.Integral(0, den.GetXaxis().GetNbins()+1)
-        selected = num.Integral(0, num.GetXaxis().GetNbins()+1)
+        if "binList" in _kwargs:
+            xBins   = _kwargs["binList"]
+            nx      = len(xBins)-1
+            num     = num.Rebin(nx, "", xBins)
+            den     = den.Rebin(nx, "", xBins)
 
-        if 0:
-            print "Numerical Efficiency", numPath, dataset.getName(), ":", round(selected/total, 3)
-            
         # Sanity checks
         if den.GetEntries() == 0 or num.GetEntries() == 0:
             continue
         if num.GetEntries() > den.GetEntries():
             continue
+
+        # Remove negative bins and ensure numerator bin <= denominator bin
+        CheckNegatives(num, den, True)
+        # RemoveNegatives(num)
+        # RemoveNegatives(den)
+                
+        # Sanity check (Histograms are valid and consistent) - Always false!
+        # if not ROOT.TEfficiency.CheckConsistency(num, den):
+        #    continue
         
         # Create Efficiency plots with Clopper-Pearson stats
-        eff = ROOT.TEfficiency(num, den) 
-        eff.SetStatisticOption(ROOT.TEfficiency.kFCP) #FCP
+        eff = ROOT.TEfficiency(num, den) # fixme: investigate warnings
+        eff.SetStatisticOption(ROOT.TEfficiency.kFCP) #
         
-        datasetTT = datasetsMgr.getDataset("TT")
-        # Get the histograms
-        numTT = datasetTT.getDatasetRootHisto(numPath).getHistogram()
-        denTT = datasetTT.getDatasetRootHisto(denPath).getHistogram()
-        if nx > 0:
-            numTT = numTT.Rebin(nx, "", xBins) #num.Rebin(nx, "", xBins)
-            denTT = denTT.Rebin(nx, "", xBins) #den.Rebin(nx, "", xBins)
-
-
-        print "dataset: ", dataset.getName()
-        '''
-        for i in range(1, num.GetNbinsX()+1):
-            nbin = num.GetBinContent(i)
-            dbin = den.GetBinContent(i)
-            nbinTT = numTT.GetBinContent(i)
-            dbinTT = denTT.GetBinContent(i)
-            eps = nbin/dbin
-            epsTT = nbinTT/dbinTT
-            ratioTT = eps/epsTT
-            if ratioTT > 1:
-                ratioTT = 1/ratioTT
-            #print "bin: ", i, "eps: ", round(eps,5) , "epsTT: ", round(epsTT,5)
-            #print "bin: ", i, "eps/epsTT: ", (1.0 - round(ratioTT, 3))*100
-        '''
-        eff_ref = ROOT.TEfficiency(numTT, denTT) 
-        eff_ref.SetStatisticOption(ROOT.TEfficiency.kFCP) #FCP
-
+        # Set the weights - Why is this needed?
+        if 0:
+            weight = 1
+            if dataset.isMC():
+                weight = dataset.getCrossSection()
+                eff.SetWeight(weight)
+                
         # Convert to TGraph
-        gEff    = convert2TGraph(eff)
-        gEffRef = convert2TGraph(eff_ref)
+        eff = convert2TGraph(eff)
+    
+        # Apply default style (according to dataset name)
+        plots._plotStyles[dataset.getName()].apply(eff)
+
+        # Append in list
+        myList.append(histograms.HistoGraph(eff, plots._legendLabels[dataset.getName()], "lp", "P"))
             
-        # Style definitions
-        stylesDef = styles.ttStyle
-        styles0 = styles.signalStyleHToTB300                                            
-        styles1 = styles.signalStyleHToTB500
-        styles2 = styles.signalStyleHToTB800
-        styles3 = styles.signalStyleHToTB500
-        styles4 = styles.signalStyleHToTB1000
-        styles5 = styles.signalStyleHToTB2000
-        styles6 = styles.signalStyleHToTB180
-        styles7 = styles.signalStyleHToTB3000
-        styles8 = styles.signalStyleHToTB200
-
-        if dataset.getName() == "TT":
-            styles.ttStyle.apply(gEffRef)
-            legend_ref = "t#bar{t}"
-            if opts.type == "partonShower":
-                legend_ref = "t#bar{t} (Pythia8)"
-            elif opts.type == "evtGen": 
-                legend_ref = "t#bar{t} (Powheg)"
-            refGraph = histograms.HistoGraph(gEffRef, legend_ref, "p", "P")
-        else:
-            styles.markerStyles[counter].apply(gEff)
-            legend  = dataset.getName().replace("TT_", "t#bar{t} (").replace("isr", "ISR ").replace("fsr", "FSR ")
-            legend  = legend.replace("hdamp", "hdamp ").replace("DOWN", "down").replace("UP", "up")
-            legend  = legend.replace("mtop1665", "m_{t} = 166.5 GeV")
-            legend  = legend.replace("mtop1695", "m_{t} = 169.5 GeV")
-            legend  = legend.replace("mtop1715", "m_{t} = 171.5 GeV")
-            legend  = legend.replace("mtop1735", "m_{t} = 173.5 GeV")
-            legend  = legend.replace("mtop1755", "m_{t} = 175.5 GeV")
-            legend  = legend.replace("mtop1785", "m_{t} = 178.5 GeV")
-            legend  = legend.replace("TuneEE5C", "Herwig++")
-            legend += ")"
-            counter+=1
-            #myList.append(histograms.HistoGraph(gEff, legend, "lp", "P"))
-            myList.append(histograms.HistoGraph(gEff, legend, "p", "P"))
-
-    # Define stuff
-    numPath  = numPath.replace("AfterAllSelections_","")
-    saveName = "Eff_" + numPath.split("/")[-1]
+    # Define save name
+    saveName = "Eff_" + numPath.split("/")[-1] + "Over" + denPath.split("/")[-1]
 
     # Plot the efficiency
-    p = plots.ComparisonManyPlot(refGraph, myList, saveFormats=[])
+    p = plots.PlotBase(datasetRootHistos=myList, saveFormats=[])
+    plots.drawPlot(p, saveName, **_kwargs)
 
     # Save plot in all formats
-    #savePath = os.path.join(opts.saveDir, numPath.split("/")[0], opts.optMode)
-    savePath = os.path.join(opts.saveDir, opts.optMode)    
-    plots.drawPlot(p, savePath, **_kwargs)
-    SavePlot(p, saveName, savePath, saveFormats = [".png", ".pdf", ".C"])
+    savePath = os.path.join(opts.saveDir, numPath.split("/")[0], opts.optMode)
+    SavePlot(p, saveName, savePath, saveFormats = [".png"])#, ".pdf"])
     return
+
 
 def convert2TGraph(tefficiency):
     x     = []
@@ -490,7 +424,7 @@ def convert2TGraph(tefficiency):
         
     graph = ROOT.TGraphAsymmErrors(n, array.array("d",x), array.array("d",y),
                                    array.array("d",xerrl), array.array("d",xerrh),
-                                   array.array("d",yerrl), array.array("d",yerrh)) 
+                                  array.array("d",yerrl), array.array("d",yerrh)) 
     return graph
 
 
@@ -500,14 +434,15 @@ def SavePlot(plot, saveName, saveDir, saveFormats = [".png"]):
         os.makedirs(saveDir)
         
     savePath = os.path.join(saveDir, saveName)
+
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
         saveNameURL = savePath + ext
-        saveNameURL = saveNameURL.replace("/publicweb/%s/%s" % (getpass.getuser()[0], getpass.getuser()), "http://home.fnal.gov/~%s" % (getpass.getuser()))
+        saveNameURL = saveNameURL.replace(opts.saveDir, "http://home.fnal.gov/~%s" % (getpass.getuser()))
         if opts.url:
-            Verbose(saveNameURL, i==0)
+            Print(saveNameURL, i==0)
         else:
-            Verbose(savePath + ext, i==0)
+            Print(savePath + ext, i==0)
         plot.saveAs(savePath, formats=saveFormats)
     return
 
@@ -533,19 +468,25 @@ if __name__ == "__main__":
     '''
     
     # Default Settings
-    ANALYSISNAME = "SystTopBDT"
+    ANALYSISNAME = "TopTaggerEfficiency"
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
     OPTMODE      = ""
     BATCHMODE    = True
     PRECISION    = 3
+    #SIGNALMASS   = [300, 500, 1000]
+    SIGNALMASS   = []
     INTLUMI      = -1.0
+    SUBCOUNTERS  = False
+    LATEX        = False
     URL          = False
-    SAVEDIR      = "/publicweb/%s/%s" % (getpass.getuser()[0], getpass.getuser())
+    NOERROR      = True
+    SAVEDIR      = "/publicweb/%s/%s/%s" % (getpass.getuser()[0], getpass.getuser(), ANALYSISNAME)
     VERBOSE      = False
+    HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
     NORMALISE    = False
-    FOLDER       = "SystTopBDT_"
-    TYPE         = "mtop"
+    FOLDER       = "" #"topSelection_" #"ForDataDrivenCtrlPlots" #"topologySelection_"
+    MVACUT       = "MVA"
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -571,17 +512,20 @@ if __name__ == "__main__":
     parser.add_option("--dataEra", dest="dataEra", type="string", default=DATAERA, 
                       help="Override default dataEra [default: %s]" % DATAERA)
 
+    #parser.add_option("--signalMass", dest="signalMass", type=float, default=SIGNALMASS, 
+                      #help="Mass value of signal to use [default: %s]" % SIGNALMASS)
+
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR, 
                       help="Directory where all pltos will be saved [default: %s]" % SAVEDIR)
-
-    parser.add_option("--type", dest="type", type="string", default=TYPE, 
-                      help="The type of comparison to perform wrt the default ttbar sample (showerScales, highPtRadiation, colourReconnection, mTop) [default: %s]" % TYPE)
 
     parser.add_option("--url", dest="url", action="store_true", default=URL, 
                       help="Don't print the actual save path the histogram is saved, but print the URL instead [default: %s]" % URL)
     
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE, 
                       help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
+
+    parser.add_option("--histoLevel", dest="histoLevel", action="store", default = HISTOLEVEL,
+                      help="Histogram ambient level (default: %s)" % (HISTOLEVEL))
 
     parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
                       help="List of datasets in mcrab to include")
@@ -594,6 +538,9 @@ if __name__ == "__main__":
 
     parser.add_option("--folder", dest="folder", type="string", default = FOLDER,
                       help="ROOT file folder under which all histograms to be plotted are located [default: %s]" % (FOLDER) )
+
+    parser.add_option("--MVAcut", dest="MVAcut", type="string", default = MVACUT,
+                      help="Save plots to directory in respect of the MVA cut value [default: %s]" % (MVACUT) )
 
     (opts, parseArgs) = parser.parse_args()
 
@@ -608,33 +555,14 @@ if __name__ == "__main__":
         #print __doc__
         sys.exit(1)
 
-    # Append folder to save directory path
-    opts.saveDir = os.path.join(opts.saveDir, opts.folder)
+    # Sanity check
+    allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 2000, 3000]
+    signalMass = []
+    for m in sorted(SIGNALMASS, reverse=True):
+        signalMass.append("ChargedHiggs_HplusTB_HplusToTB_M_%.f" % m)
 
-    # See: https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopSystematics
-    allowedTypes = ["showerScales", "highPtRadiation", "colourReconnection", "mTop", "evtGen", "partonShower"]
-    if opts.type not in allowedTypes:
-        Print("Invalid type \"%s\" selected. Please choose one of the following: %s" % (opts.type, ", ".join(allowedTypes)), True)
-        sys.exit()
-    
-    # Apply type-related changes
-    opts.saveDir = os.path.join(opts.saveDir, opts.type)
-    if opts.type == "showerScales": #ISR/FSR
-        opts.excludeTasks = "mtop|hdamp|evtgen|erdON|EE5C"
-    elif opts.type == "highPtRadiation": #hdamp (TOP-16-021)
-        opts.excludeTasks = "mtop|evtgen|erdON|fsr|isr|EE5C"
-    elif opts.type == "colourReconnection": #erdON
-        opts.excludeTasks = "mtop|hdamp|evtgen|fsr|isr|EE5C"
-    elif opts.type == "mTop": #top mass
-        opts.excludeTasks = "hdamp|evtgen|erdON|fsr|isr|EE5C"
-    elif opts.type == "evtGen": #EvtGen is a MC event generator that simulates the decays of heavy flavour particles
-        opts.excludeTasks = "mtop|hdamp|erdON|fsr|isr|EE5C"
-    elif opts.type == "partonShower": #EE5C
-        opts.excludeTasks = "mtop|hdamp|erdON|fsr|isr|evtgen"
-    else:
-        raise Exception("This should NEVER be reached!")
     # Call the main function
-    main(opts)
+    main(opts, signalMass)
 
     if not opts.batchMode:
-        raw_input("=== plot_EfficiencySystTop.py: Press any key to quit ROOT ...")
+        raw_input("=== plot_Efficiency.py: Press any key to quit ROOT ...")
