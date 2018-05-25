@@ -157,8 +157,8 @@ def main():
         #PSet(label="TetrajetBjetPt" , binLowEdges=[80, 200], useAbsoluteValues=False), # Fotis
         #PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True), # Fotis
         #
-        #PSet(label="TetrajetBjetEta", binLowEdges=[0.2, 0.4, 0.6, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True), 
-        PSet(label="TetrajetBjetEta", binLowEdges=[-2.2, -2.0, -1.6, -0.8, -0.6, -0.4, -0.2, +0.2, +0.4, +0.6, +0.8, +1.6, +2.0, +2.2], useAbsoluteValues=False), 
+        PSet(label="TetrajetBjetEta", binLowEdges=[0.2, 0.4, 0.6, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True), 
+        #PSet(label="TetrajetBjetEta", binLowEdges=[-2.2, -2.0, -1.6, -0.8, -0.6, -0.4, -0.2, +0.2, +0.4, +0.6, +0.8, +1.6, +2.0, +2.2], useAbsoluteValues=False), 
         ### Other attempts
         # PSet(label="TetrajetBjetPt" , binLowEdges=[100], useAbsoluteValues=False), # C) 
         # PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 1.2, 1.8, 2.1], useAbsoluteValues=True), # C) 

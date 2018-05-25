@@ -179,7 +179,7 @@ def GetHistoKwargs(h, opts):
         "ylabel"           : _yLabel,
         "rebinX"           : 1,
         "rebinY"           : None,
-        "ratioYlabel"      : "Data/Bkg. ",
+        "ratioYlabel"      : "Ratio",
         "ratio"            : True,
         "ratioCreateLegend": True,
         "ratioType"        : "errorScale",
@@ -312,7 +312,8 @@ def main(opts, signalMass):
         EWKlist = [
             "WJetsHT",
             "DYJetsToLL",
-            "Diboson"
+            "Diboson",
+            #"SingleTop"
             ]
 
         datasetsMgr.merge("EWK", EWKlist)
@@ -428,10 +429,16 @@ def PlotEfficiency(datasetsMgr, num, den, intLumi):
         num     = num.Rebin(nx, "", xBins)
         den     = den.Rebin(nx, "", xBins)
 
+    i = 1
+    while i < nx+1:
+        print den.GetBinContent(i), num.GetBinContent(i), num.GetBinContent(i)/den.GetBinContent(i)
+        i+=1
     # Sanity checks
     if den.GetEntries() == 0 or num.GetEntries() == 0:
+        print "here 1"
         return#continue
     if num.Integral(0, num.GetXaxis().GetNbins()) > den.Integral(0, den.GetXaxis().GetNbins()):
+        print "here 2"
         return
 
     # Create Efficiency plots with Clopper-Pearson stats
@@ -451,6 +458,49 @@ def RemoveNegatives(histo):
             histo.SetBinContent(binX, 0.0)
     return
 
+def GetHisto(datasetsMgr, dataset, hName, intLumi):
+    n = datasetsMgr.getDataset(dataset).getDatasetRootHisto(hName)
+    n.normalizeToLuminosity(intLumi)
+    histo = n.getHistogram()
+    #histo.Rebin(2)
+    return histo
+
+def GetBackgroundCR1_Data(rhDict, histoType, f1, f2):
+        #Data - f1*QCD - f2*tt_genuine 
+    if histoType == "denom":
+        rhDict["normQCD-CR1"]    = rhDict["QCD-CR1"].Clone("normQCD-CR1")                                                                                                            
+        rhDict["normQCD-CR1"].Scale(f1)                                                  
+        rhDict["normTT-CR1-genuine"] = rhDict["TT-CR1-genuine"].Clone("normTT-CR1-genuine")                                                
+        rhDict["normTT-CR1-genuine"].Scale(f2)   
+        rhDict["TT_EWK_ST_data-CR1-fake"] = rhDict["Data-CR1"].Clone("TT_EWK_ST_data-CR1-fake")
+        rhDict["TT_EWK_ST_data-CR1-fake"].Add(rhDict["normQCD-CR1"], -1)
+        rhDict["TT_EWK_ST_data-CR1-fake"].Add(rhDict["normTT-CR1-genuine"], -1)
+        histo = rhDict["TT_EWK_ST_data-CR1-fake"]
+    elif histoType == "num":
+        rhDict["normQCD-CR1-num"]    = rhDict["QCD-CR1-num"].Clone("normQCD-CR1-num")                 
+        rhDict["normQCD-CR1-num"].Scale(f1)                                                  
+        rhDict["normTT-CR1-genuine-num"] = rhDict["TT-CR1-genuine-num"].Clone("normTT-CR1-genuine-num")                                                
+        rhDict["normTT-CR1-genuine-num"].Scale(f2)   
+        rhDict["TT_EWK_ST_data-CR1-fake-num"] = rhDict["Data-CR1-num"].Clone("TT_EWK_ST_data-CR1-fake-num")
+        rhDict["TT_EWK_ST_data-CR1-fake-num"].Add(rhDict["normQCD-CR1-num"], -1)
+        rhDict["TT_EWK_ST_data-CR1-fake-num"].Add(rhDict["normTT-CR1-genuine-num"], -1)
+        histo = rhDict["TT_EWK_ST_data-CR1-fake-num"]
+    return histo
+    
+def GetBackgroundCR1_MC(rhDict, histoType, f1, f2):
+    if histoType == "denom":
+        rhDict["TT_EWK_ST-CR1-fake"] = rhDict["TT-CR1-fake"].Clone("TT_EWK_ST-CR1-fake")
+        rhDict["TT_EWK_ST-CR1-fake"].Scale(f2)
+        rhDict["TT_EWK_ST-CR1-fake"].Add(rhDict["SingleTop-CR1"], +1)
+        rhDict["TT_EWK_ST-CR1-fake"].Add(rhDict["EWK-CR1"], +1)
+        histo = rhDict["TT_EWK_ST-CR1-fake"]
+    elif histoType == "num":
+        rhDict["TT_EWK_ST-CR1-fake-num"] = rhDict["TT-CR1-fake-num"].Clone("TT_EWK_ST-CR1-fake-num")
+        rhDict["TT_EWK_ST-CR1-fake-num"].Scale(f2)
+        rhDict["TT_EWK_ST-CR1-fake-num"].Add(rhDict["SingleTop-CR1-num"], +1)
+        rhDict["TT_EWK_ST-CR1-fake-num"].Add(rhDict["EWK-CR1-num"], +1)
+        histo = rhDict["TT_EWK_ST-CR1-fake-num"]
+    return histo
 
 def GetScaleFactors(datasetsMgr, hName_CR2, intLumi):  
     _kwargs = GetHistoKwargs(hName_CR2, opts)        
@@ -471,7 +521,6 @@ def GetScaleFactors(datasetsMgr, hName_CR2, intLumi):
     hName_SR_sel     = hName_SR_sel.replace("CR2","SR")
     hName_SR_fake_sel    = hName_SR_fake.replace("Standard", "All")
     hName_SR_genuine_sel = hName_SR_genuine.replace("Standard", "All")
-
 
     #Define histo names in control region 1
     hName_CR1         = hName_CR2
@@ -497,116 +546,50 @@ def GetScaleFactors(datasetsMgr, hName_CR2, intLumi):
     hPathDict["Data-SR-num"]  = datasetsMgr.getDataset("Data").getDatasetRootHisto(hName_SR_sel).getHistogram()
 
     #===EWK===
-    n = datasetsMgr.getDataset("EWK").getDatasetRootHisto(hName_CR2)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["EWK-CR2"] = n.getHistogram()
+    hPathDict["EWK-CR2"] = GetHisto(datasetsMgr, "EWK", hName_CR2, intLumi)
+    hPathDict["EWK-CR1"] = GetHisto(datasetsMgr, "EWK", hName_CR1, intLumi)
+    hPathDict["EWK-SR"] = GetHisto(datasetsMgr, "EWK", hName_SR, intLumi)
 
-    n = datasetsMgr.getDataset("EWK").getDatasetRootHisto(hName_CR1)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["EWK-CR1"] = n.getHistogram()
-
-    n = datasetsMgr.getDataset("EWK").getDatasetRootHisto(hName_SR)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["EWK-SR"] = n.getHistogram()
-
-    n = datasetsMgr.getDataset("EWK").getDatasetRootHisto(hName_CR2_sel)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["EWK-CR2-num"] = n.getHistogram()
-
-    n = datasetsMgr.getDataset("EWK").getDatasetRootHisto(hName_CR1_sel)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["EWK-CR1-num"] = n.getHistogram()
-
-    n = datasetsMgr.getDataset("EWK").getDatasetRootHisto(hName_SR_sel)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["EWK-SR-num"] = n.getHistogram()
-
+    hPathDict["EWK-CR2-num"] = GetHisto(datasetsMgr, "EWK", hName_CR2_sel, intLumi)
+    hPathDict["EWK-CR1-num"] = GetHisto(datasetsMgr, "EWK", hName_CR1_sel, intLumi)
+    hPathDict["EWK-SR-num"] = GetHisto(datasetsMgr, "EWK", hName_SR_sel, intLumi)
 
     #===QCD===
-    n = datasetsMgr.getDataset("QCD").getDatasetRootHisto(hName_CR2)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["QCD-CR2"] = n.getHistogram()
+    hPathDict["QCD-CR2"] = GetHisto(datasetsMgr, "QCD", hName_CR2, intLumi)
+    hPathDict["QCD-CR1"] = GetHisto(datasetsMgr, "QCD", hName_CR1, intLumi)
+    hPathDict["QCD-SR"] = GetHisto(datasetsMgr, "QCD", hName_SR, intLumi)
 
-    n = datasetsMgr.getDataset("QCD").getDatasetRootHisto(hName_CR1)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["QCD-CR1"] = n.getHistogram()
+    hPathDict["QCD-CR2-num"] = GetHisto(datasetsMgr, "QCD", hName_CR2_sel, intLumi)
+    hPathDict["QCD-CR1-num"] = GetHisto(datasetsMgr, "QCD", hName_CR1_sel, intLumi)
+    hPathDict["QCD-SR-num"] = GetHisto(datasetsMgr, "QCD", hName_SR_sel, intLumi)
 
-    n = datasetsMgr.getDataset("QCD").getDatasetRootHisto(hName_SR)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["QCD-SR"] = n.getHistogram()
+    #===SingleTop===
+    hPathDict["SingleTop-CR2"] = GetHisto(datasetsMgr, "SingleTop", hName_CR2, intLumi)
+    hPathDict["SingleTop-CR1"] = GetHisto(datasetsMgr, "SingleTop", hName_CR1, intLumi)
+    hPathDict["SingleTop-SR"] = GetHisto(datasetsMgr, "SingleTop", hName_SR, intLumi)
 
-    n = datasetsMgr.getDataset("QCD").getDatasetRootHisto(hName_CR2_sel)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["QCD-CR2-num"] = n.getHistogram()
-
-    n = datasetsMgr.getDataset("QCD").getDatasetRootHisto(hName_CR1_sel)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["QCD-CR1-num"] = n.getHistogram()
-
-    n = datasetsMgr.getDataset("QCD").getDatasetRootHisto(hName_SR_sel)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["QCD-SR-num"] = n.getHistogram()
-
-
+    hPathDict["SingleTop-CR2-num"] = GetHisto(datasetsMgr, "SingleTop", hName_CR2_sel, intLumi)
+    hPathDict["SingleTop-CR1-num"] = GetHisto(datasetsMgr, "SingleTop", hName_CR1_sel, intLumi)
+    hPathDict["SingleTop-SR-num"] = GetHisto(datasetsMgr, "SingleTop", hName_SR_sel, intLumi)
     #===TT===
-    n = datasetsMgr.getDataset("TT").getDatasetRootHisto(hName_CR2)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["TT-CR2"] = n.getHistogram()
+    hPathDict["TT-CR2"] = GetHisto(datasetsMgr, "TT", hName_CR2, intLumi)
+    hPathDict["TT-CR1"] = GetHisto(datasetsMgr, "TT", hName_CR1, intLumi)
+    hPathDict["TT-SR"] = GetHisto(datasetsMgr, "TT", hName_SR, intLumi)
 
-    n = datasetsMgr.getDataset("TT").getDatasetRootHisto(hName_CR1)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["TT-CR1"] = n.getHistogram()
-
-    n = datasetsMgr.getDataset("TT").getDatasetRootHisto(hName_SR)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["TT-SR"] = n.getHistogram()
+    hPathDict["TT-CR2-num"] = GetHisto(datasetsMgr, "TT", hName_CR2_sel, intLumi)
+    hPathDict["TT-CR1-num"] = GetHisto(datasetsMgr, "TT", hName_CR1_sel, intLumi)
+    hPathDict["TT-SR-num"] = GetHisto(datasetsMgr, "TT", hName_SR_sel, intLumi)
 
     # Genuine - Fake TT
-    n = datasetsMgr.getDataset("TT").getDatasetRootHisto(hName_CR1_fake)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["TT-CR1-fake"] = n.getHistogram()
+    hPathDict["TT-CR1-fake"] = GetHisto(datasetsMgr, "TT", hName_CR1_fake, intLumi)
+    hPathDict["TT-SR-fake"] = GetHisto(datasetsMgr, "TT", hName_SR_fake, intLumi)
+    hPathDict["TT-CR1-genuine"] = GetHisto(datasetsMgr, "TT", hName_CR1_genuine, intLumi)
+    hPathDict["TT-SR-genuine"] = GetHisto(datasetsMgr, "TT", hName_SR_genuine, intLumi)
 
-    n = datasetsMgr.getDataset("TT").getDatasetRootHisto(hName_SR_fake)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["TT-SR-fake"] = n.getHistogram()
-
-    n = datasetsMgr.getDataset("TT").getDatasetRootHisto(hName_CR1_genuine)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["TT-CR1-genuine"] = n.getHistogram()
-
-    n = datasetsMgr.getDataset("TT").getDatasetRootHisto(hName_SR_genuine)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["TT-SR-genuine"] = n.getHistogram()
-
-
-    n = datasetsMgr.getDataset("TT").getDatasetRootHisto(hName_CR2_sel)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["TT-CR2-num"] = n.getHistogram()
-
-    n = datasetsMgr.getDataset("TT").getDatasetRootHisto(hName_CR1_sel)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["TT-CR1-num"] = n.getHistogram()
-
-    n = datasetsMgr.getDataset("TT").getDatasetRootHisto(hName_SR_sel)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["TT-SR-num"] = n.getHistogram()
-
-    # Genuine - Fake TT
-    n = datasetsMgr.getDataset("TT").getDatasetRootHisto(hName_CR1_fake_sel)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["TT-CR1-fake-num"] = n.getHistogram()
-
-    n = datasetsMgr.getDataset("TT").getDatasetRootHisto(hName_SR_fake_sel)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["TT-SR-fake-num"] = n.getHistogram()
-
-    n = datasetsMgr.getDataset("TT").getDatasetRootHisto(hName_CR1_genuine_sel)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["TT-CR1-genuine-num"] = n.getHistogram()
-
-    n = datasetsMgr.getDataset("TT").getDatasetRootHisto(hName_SR_genuine_sel)
-    n.normalizeToLuminosity(intLumi)
-    hPathDict["TT-SR-genuine-num"] = n.getHistogram()
+    hPathDict["TT-CR1-fake-num"] = GetHisto(datasetsMgr, "TT", hName_CR1_fake_sel, intLumi)
+    hPathDict["TT-SR-fake-num"] = GetHisto(datasetsMgr, "TT", hName_SR_fake_sel, intLumi)
+    hPathDict["TT-CR1-genuine-num"] = GetHisto(datasetsMgr, "TT", hName_CR1_genuine_sel, intLumi)
+    hPathDict["TT-SR-genuine-num"] = GetHisto(datasetsMgr, "TT", hName_SR_genuine_sel, intLumi)
 
     #=======
     
@@ -639,6 +622,15 @@ def GetScaleFactors(datasetsMgr, hName_CR2, intLumi):
     rhDict["QCD-CR1-num"] = hPathDict["QCD-CR1-num"].Clone("QCD-CR1-num")
     rhDict["QCD-SR-num"]  = hPathDict["QCD-SR-num"].Clone("QCD-SR-num")
 
+    #SingleTop
+    rhDict["SingleTop-CR2"] = hPathDict["SingleTop-CR2"].Clone("SingleTop-CR2")
+    rhDict["SingleTop-CR1"] = hPathDict["SingleTop-CR1"].Clone("SingleTop-CR1")
+    rhDict["SingleTop-SR"]  = hPathDict["SingleTop-SR"].Clone("SingleTop-SR")
+
+    rhDict["SingleTop-CR2-num"] = hPathDict["SingleTop-CR2-num"].Clone("SingleTop-CR2-num")
+    rhDict["SingleTop-CR1-num"] = hPathDict["SingleTop-CR1-num"].Clone("SingleTop-CR1-num")
+    rhDict["SingleTop-SR-num"]  = hPathDict["SingleTop-SR-num"].Clone("SingleTop-SR-num")
+
     #TT
     rhDict["TT-CR2"] = hPathDict["TT-CR2"].Clone("TT-CR2")
     rhDict["TT-CR1"] = hPathDict["TT-CR1"].Clone("TT-CR1")
@@ -662,14 +654,16 @@ def GetScaleFactors(datasetsMgr, hName_CR2, intLumi):
     #===============================================================
     # QCD Normalization Factor: CR2
     #===============================================================
-    #Subtract EWK, ttbar (MC) from Data to get QCD (= Data - EWK - ttbar)
+    #Subtract EWK, ttbar (MC) from Data to get QCD (= Data - EWK - ttbar - singleTop)
     #Define QCD_data
     rhDict["QCD_data-CR2"] = rhDict["Data-CR2"].Clone("QCD_data-CR2")
-    rhDict["EWK_TT-CR2"] = rhDict["EWK-CR2"].Clone("EWK_TT-CR2")
+
+    rhDict["EWK_TT_ST-CR2"] = rhDict["EWK-CR2"].Clone("EWK_TT-CR2")
     # Add tt in EWK (CR2)
-    rhDict["EWK_TT-CR2"].Add(rhDict["TT-CR2"], +1)
-    #Subtract EWK inclusive from data                                                                                                                                                  
-    rhDict["QCD_data-CR2"].Add( rhDict["EWK_TT-CR2"], -1 )
+    rhDict["EWK_TT_ST-CR2"].Add(rhDict["TT-CR2"], +1)
+    rhDict["EWK_TT_ST-CR2"].Add(rhDict["SingleTop-CR2"], +1)
+    #Subtract from data                                                                                                                                                  
+    rhDict["QCD_data-CR2"].Add( rhDict["EWK_TT_ST-CR2"], -1 )
 
     plots._plotStyles["Data"].apply(hPathDict["Data-CR2"])
     plots._plotStyles["EWK"].apply(hPathDict["EWK-CR2"])
@@ -683,14 +677,11 @@ def GetScaleFactors(datasetsMgr, hName_CR2, intLumi):
     plots._plotStyles["WJets"].apply(rhDict["QCD_data-CR2"])
     rhDict["QCD_data-CR2"].SetMarkerSize(1.2)
 
-    #stylesEWK_TT.apply(rhDict["EWK_TT-CR2"])
-    #stylesQCD_data.apply(rhDict["QCD_data-CR2"])
-
     if 1:
         #p = plots.ComparisonManyPlot(rhDict["Data-CR2"], [rhDict["EWK-CR2"], rhDict["QCD_data-CR2"], rhDict["QCD-CR2"]], saveFormats=[])
 
         #Compare (Data-EWK-TT in CR2) to QCD-MC in CR2
-        p_QCD = plots.ComparisonManyPlot(histograms.Histo(rhDict["QCD_data-CR2"], "Data-EWK-TT", drawStyle = "l"), 
+        p_QCD = plots.ComparisonManyPlot(histograms.Histo(rhDict["QCD_data-CR2"], "Data-EWK-TT-ST", drawStyle = "l"), 
                                         [histograms.Histo(rhDict["QCD-CR2"], "QCD", drawStyle = "l")], saveFormats=[])
 
         p_QCD.setLuminosity(intLumi)
@@ -705,18 +696,19 @@ def GetScaleFactors(datasetsMgr, hName_CR2, intLumi):
         print "==============================================================="
 
         # Apply QCD normalization factor (CR2)
-        rhDict["QCD-CR2"].Scale(f1)
+        rhDict["normQCD-CR2"] = rhDict["QCD-CR2"].Clone("normQCD-CR2")
+        rhDict["normQCD-CR2"].Scale(f1)
 
         # Create empty histogram stack list
         myStackList_CR2 = []
 
         # Add the (Data - EWK - TT) MC background to the histogram list (CR2)
-        hQCD_data_CR2 = histograms.Histo(rhDict["QCD_data-CR2"], "QCD (Data-EWK)", "QCD-data")
+        hQCD_data_CR2 = histograms.Histo(rhDict["QCD_data-CR2"], "QCD (Data-EWK-TT-ST)", "QCD-data")
         hQCD_data_CR2.setIsDataMC(isData=False, isMC=True)
         #myStackList.append(hQCD_data_CR2)
 
         # Add the Normalizes QCD MC background to the histogram list (CR2)
-        hQCD_CR2 = histograms.Histo(rhDict["QCD-CR2"], "QCD (Norm)", "QCD-MC")
+        hQCD_CR2 = histograms.Histo(rhDict["normQCD-CR2"], "QCD (Norm)", "QCD-MC")
         hQCD_CR2.setIsDataMC(isData=False, isMC=True)
         myStackList_CR2.append(hQCD_CR2)
 
@@ -724,6 +716,11 @@ def GetScaleFactors(datasetsMgr, hName_CR2, intLumi):
         hTT_CR2 = histograms.Histo(rhDict["TT-CR2"], "TT", "TT")
         hTT_CR2.setIsDataMC(isData=False, isMC=True)
         myStackList_CR2.append(hTT_CR2)
+
+        # Add the ST MC background to the histogram list
+        hST_CR2 = histograms.Histo(rhDict["SingleTop-CR2"], "ST", "ST")
+        hST_CR2.setIsDataMC(isData=False, isMC=True)
+        myStackList_CR2.append(hST_CR2)
 
         # Add the EWK MC background to the histogram list
         hEWK_CR2 = histograms.Histo(rhDict["EWK-CR2"], "EWK", "EWK")
@@ -769,18 +766,19 @@ def GetScaleFactors(datasetsMgr, hName_CR2, intLumi):
     # TT Normalization Factor: SR
     #===============================================================
 
-    #Subtract normQCD, EWK from Data to get TT (TT = Data - f1*QCD - EWK)
+    #Subtract normQCD, EWK from Data to get TT (TT = Data - f1*QCD - EWK - Single Top)
     #Define QCD_data
-    rhDict["TT_data-SR"]     = rhDict["Data-SR"].Clone("TT_data-SR")
-    rhDict["EWK_normQCD-SR"] = rhDict["EWK-SR"].Clone("EWK_normQCD-SR")
-    rhDict["normQCD-SR"]     = rhDict["QCD-SR"].Clone("normQCD-SR")
+    rhDict["TT_data-SR"]       = rhDict["Data-SR"].Clone("TT_data-SR")
+    rhDict["EWK_normQCD_ST-SR"] = rhDict["EWK-SR"].Clone("EWK_normQCD-SR")
+    rhDict["normQCD-SR"]       = rhDict["QCD-SR"].Clone("normQCD-SR")
 
     #Apply QCD normalizatio factor in QCD-MC (SR)
     rhDict["normQCD-SR"].Scale(f1)
-    #Add EWK and normalized QCD (SR)
-    rhDict["EWK_normQCD-SR"].Add(rhDict["normQCD-SR"], +1)
-    #Subtract EWK, norm QCD inclusive from data
-    rhDict["TT_data-SR"].Add(rhDict["EWK_normQCD-SR"], -1)
+    #Add EWK, ST and normalized QCD (SR)
+    rhDict["EWK_normQCD_ST-SR"].Add(rhDict["normQCD-SR"], +1)
+    rhDict["EWK_normQCD_ST-SR"].Add(rhDict["SingleTop-SR"], +1)
+    #Subtract EWK, ST, norm QCD inclusive from data
+    rhDict["TT_data-SR"].Add(rhDict["EWK_normQCD_ST-SR"], -1)
 
     plots._plotStyles["Data"].apply(hPathDict["Data-SR"])
     plots._plotStyles["EWK"].apply(hPathDict["EWK-SR"])
@@ -805,7 +803,7 @@ def GetScaleFactors(datasetsMgr, hName_CR2, intLumi):
         #p = plots.ComparisonManyPlot(rhDict["Data-SR"], [rhDict["EWK-SR"], rhDict["QCD_data-SR"], rhDict["QCD-SR"]], saveFormats=[])
         
         #Compare (Data-EWK-TT in SR) to QCD-MC in SR
-        p_TT = plots.ComparisonManyPlot(histograms.Histo(rhDict["TT_data-SR"], "Data-EWK-QCD(norm)", drawStyle = "l"), 
+        p_TT = plots.ComparisonManyPlot(histograms.Histo(rhDict["TT_data-SR"], "Data-EWK-ST-QCD(norm)", drawStyle = "l"), 
                                         [histograms.Histo(rhDict["TT-SR"], "TT", drawStyle = "l")], saveFormats=[])
 
         p_TT.setLuminosity(intLumi)
@@ -820,34 +818,26 @@ def GetScaleFactors(datasetsMgr, hName_CR2, intLumi):
         print "==============================================================="
 
         # Apply TT normalization factor (SR)
-        rhDict["TT-SR"].Scale(f2)
-        rhDict["TT-SR-fake"].Scale(f2)
+        rhDict["normTT-SR"] = rhDict["TT-SR"].Clone("normTT-SR")
+        rhDict["normTT-SR-fake"] = rhDict["TT-SR-fake"].Clone("normTT-SR-fake")
+        rhDict["normTT-SR"].Scale(f2)
+        rhDict["normTT-SR-fake"].Scale(f2)
 
         # Create empty histogram stack list
         myStackList_SR = []
 
-        # Add the (Data - EWK - f1*QCD) MC background to the histogram list (SR)
+        # Add the (Data - EWK - ST - f1*QCD) MC background to the histogram list (SR)
         hTT_data_SR = histograms.Histo(rhDict["TT_data-SR"], "TT (Data-EWK-QCD(norm))", "TT-data")
         hTT_data_SR.setIsDataMC(isData=False, isMC=True)
         #myStackList.append(hQCD_data_SR)
 
-        # Add the TT MC background to the histogram list
-        hTT_SR = histograms.Histo(rhDict["TT-SR"], "TT (Norm)", "TT (Norm)")
-        hTT_SR.setIsDataMC(isData=False, isMC=True)
-        #myStackList_SR.append(hTT_SR)
-
-        hTT_fake_SR = histograms.Histo( rhDict["TT-SR-fake"], "TT (fake)", "TT (fake)")
+        hTT_fake_SR = histograms.Histo( rhDict["normTT-SR-fake"], "TT (fake)", "TT (fake)")
         hTT_fake_SR.setIsDataMC(isData=False, isMC=True)
         myStackList_SR.append(hTT_fake_SR)
 
         hTT_genuine_SR = histograms.Histo(rhDict["TT-SR-genuine"], "TT", "TT (genuine)")
         hTT_genuine_SR.setIsDataMC(isData=False, isMC=True)
         myStackList_SR.append(hTT_genuine_SR)
-
-
-        hTT_SR = histograms.Histo(rhDict["TT-SR"], "TT (Norm)", "TT (Norm)")
-        hTT_SR.setIsDataMC(isData=False, isMC=True)
-        #myStackList_SR.append(hTT_SR)
 
 
         # Add the Normalizes QCD MC background to the histogram list (SR)
@@ -859,6 +849,12 @@ def GetScaleFactors(datasetsMgr, hName_CR2, intLumi):
         hEWK_SR = histograms.Histo(rhDict["EWK-SR"], "EWK", "EWK")
         hEWK_SR.setIsDataMC(isData=False, isMC=True)
         myStackList_SR.append(hEWK_SR)
+
+        # Add the Single Top MC background to the histogram list
+        hST_SR = histograms.Histo(rhDict["SingleTop-SR"], "ST", "ST")
+        hST_SR.setIsDataMC(isData=False, isMC=True)
+        myStackList_SR.append(hST_SR)
+
         
         # Add the collision datato the histogram list
         hData_SR = histograms.Histo(rhDict["Data-SR"], "Data", "Data")
@@ -899,17 +895,15 @@ def GetScaleFactors(datasetsMgr, hName_CR2, intLumi):
     # =========================================================================================
     # Mistag rate: CR2:
     # =========================================================================================
-    f2 = 0.906115  #Soti remove me 
     #======= QCD efficiency
-    denom_QCD_CR2 = rhDict["QCD-CR2"]
+    denom_QCD_CR2 = rhDict["normQCD-CR2"]
     #Get numerator plot
     rhDict["normQCD-CR2-num"]    = hPathDict["QCD-CR2-num"].Clone("QCD-CR2-num")
     rhDict["normQCD-CR2-num"].Scale(f1)
     numer_QCD_CR2 = rhDict["normQCD-CR2-num"]
     
     
-    #======= Data efficiency (Data - EWK - f2*TT = QCD-data)
-
+    #======= Data efficiency (Data - EWK - f2*TT -ST = QCD-data)
     rhDict["QCD_data-CR2"] = rhDict["Data-CR2"].Clone("QCD_data-CR2")
     ###############################################################################
     #Test: Normalize EWK with QCD normalization factor (f1)
@@ -918,6 +912,7 @@ def GetScaleFactors(datasetsMgr, hName_CR2, intLumi):
     #rhDict["QCD_data-CR2"].Add(rhDict["normEWK-CR2"], -1)
     # Subtract EWK from data
     rhDict["QCD_data-CR2"].Add(rhDict["EWK-CR2"], -1)    
+    rhDict["QCD_data-CR2"].Add(rhDict["SingleTop-CR2"], -1)    
     ###############################################################################
 
     # Normalize TT
@@ -937,9 +932,14 @@ def GetScaleFactors(datasetsMgr, hName_CR2, intLumi):
     rhDict["normEWK-CR2-num"].Scale(f1)
     #rhDict["QCD_data-CR2-num"].Add(rhDict["normEWK-CR2-num"], -1)
     # Subtract EWK from data
-    rhDict["Data-CR2-num"].Add(hPathDict["EWK-CR2-num"], -1)
+    rhDict["QCD_data-CR2-num"].Add(rhDict["EWK-CR2-num"], -1)
+    rhDict["QCD_data-CR2-num"].Add(rhDict["SingleTop-CR2-num"], -1)
     ###############################################################################
-    rhDict["QCD_data-CR2-num"].Add(hPathDict["TT-CR2-num"], -1)
+    # Normalize TT
+    rhDict["normTT-CR2-num"] = rhDict["TT-CR2-num"].Clone("normTT-CR2-num")
+    rhDict["normTT-CR2-num"].Scale(f2)
+
+    rhDict["QCD_data-CR2-num"].Add(rhDict["normTT-CR2-num"], -1)
 
     numer_data_CR2 = rhDict["QCD_data-CR2-num"]
 
@@ -990,23 +990,92 @@ def GetScaleFactors(datasetsMgr, hName_CR2, intLumi):
     # =========================================================================================
     # Mistag rate: CR1:
     # =========================================================================================
-  
-    #======= EWK + f2*TTfake efficiency
+    # fake TT + SingleTop + EWK
     #Denominator MC:
-    rhDict["EWK_TT-CR1-fake"] =  rhDict["EWK-CR1"].Clone("EWK_TT_CR1-fake")
+        
+    denom_CR1 = GetBackgroundCR1_MC(rhDict, "denom", f1, f2)
+    numer_CR1 = GetBackgroundCR1_MC(rhDict, "num", f1, f2)
+    
+    denom_data_CR1 = GetBackgroundCR1_Data(rhDict, "denom", f1, f2)
+    numer_data_CR1 = GetBackgroundCR1_Data(rhDict, "num", f1, f2)
+
+    styles.mcStyle.apply(denom_data_CR1)
+    p_test = plots.ComparisonManyPlot(histograms.Histo(denom_data_CR1, "denom", drawStyle = "l"),
+                                     [histograms.Histo(numer_data_CR1, "num", drawStyle = "l")], saveFormats=[])
+    
+    p_test.setLuminosity(intLumi)
+    saveName = "test_" + hName_CR1.split("/")[-1]
+    plots.drawPlot(p_test, saveName, **_kwargs)
+    #SavePlot(p, saveName, save_path, saveFormats = [".png", ".pdf"])                                                                                                                   
+    SavePlot(p_test, saveName, save_path, saveFormats = [".png", ".pdf"])
+
+    # Calculate Efficiencies
+    eff_TTfake_CR1  = PlotEfficiency(datasetsMgr, numer_CR1,  denom_CR1,  intLumi)
+    print "DATA"
+    eff_data_CR1 = PlotEfficiency(datasetsMgr, numer_data_CR1, denom_data_CR1, intLumi)
+
+
+    #Apply Styles
+    styles.mcStyle.apply(eff_TTfake_CR1)
+    styles.dataStyle.apply(eff_data_CR1)
+    
+    #Create the plot
+    p_eff_CR1 = plots.ComparisonPlot(histograms.HistoGraph(eff_data_CR1,   "eff_data_CR1"  , "p", "P"),
+                                     histograms.HistoGraph(eff_TTfake_CR1,    "eff_TTfake_CR1", "p", "P"),
+                                     saveFormats=[])
+
+
+    # Define legend entries
+    p_eff_CR1.histoMgr.setHistoLegendLabelMany(
+        {
+            "eff_TTfake_CR1"   : "MC",
+            "eff_data_CR1"  : "Data"
+            }
+        )
+
+    # Draw and save the plot
+    plotName     = "Eff_" + hName_CR1.replace("AfterStandardSelections_", "").split("/")[-1]
+
+
+
+    p_eff_CR1.setLuminosity(intLumi)
+    _kwargs_eff = GetHistoKwargs_Efficiency(hName_CR1, opts)
+    _kwargs_eff["ratio"] = True
+    _kwargs_eff["cutBoxY"] = {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": True}
+    
+    plots.drawPlot(p_eff_CR1, plotName, **_kwargs_eff)
+    savePath = os.path.join(opts.saveDir, "MistagRate", opts.optMode)
+    SavePlot(p_eff_CR1, plotName, savePath, saveFormats = [".png", ".pdf"])
+
+    runRange = "273150-284044"
+
+    analysis = opts.analysisName
+    label = "2016"
+    plotDir =  os.path.join(opts.folder, "Efficiency_LdgTrijet"+label+"_bin.json")
+    pythonWriter.addParameters(plotDir, label, runRange, intLumi, eff_data_CR1)
+    pythonWriter.addMCParameters(label, eff_TTfake_CR1)
+    fileName_json = "Efficiency_LdgTrijet"+label+"_bin_CR1.json"
+    pythonWriter.writeJSON(fileName_json)
+
+
+
+    '''
+    rhDict["EWK_TT_ST-CR1-fake"] =  rhDict["EWK-CR1"].Clone("EWK_TT_ST_CR1-fake")
     rhDict["normTT-CR1-fake"] =  rhDict["TT-CR1-fake"].Clone("normTT_CR1-fake")
     rhDict["normTT-CR1-fake"].Scale(f2)
-    rhDict["EWK_TT-CR1-fake"].Add(rhDict["normTT-CR1-fake"], +1)
+    rhDict["EWK_TT_ST-CR1-fake"].Add(rhDict["normTT-CR1-fake"], +1)
+    rhDict["EWK_TT_ST-CR1-fake"].Add(rhDict["SingleTop-CR1"], +1)
     
-    denom_EWK_TTfake_CR1 = rhDict["EWK_TT-CR1-fake"]
+    denom_EWK_TTfake_CR1 = rhDict["EWK_TT_ST-CR1-fake"]
 
     #Get numerator plot
-    rhDict["EWK_TT-CR1-fake-num"] =  rhDict["EWK-CR1"].Clone("EWK_TT_CR1-fake-num")
-    rhDict["normTT-CR1-fake-num"]    = hPathDict["TT-CR1-fake-num"].Clone("normTT-CR1-fake-num")
+    rhDict["EWK_TT_ST-CR1-fake-num"] =  rhDict["EWK-CR1-num"].Clone("EWK_TT_ST_CR1-fake-num")
+    rhDict["normTT-CR1-fake-num"] =  rhDict["TT-CR1-fake-num"].Clone("normTT_CR1-fake-num")
     rhDict["normTT-CR1-fake-num"].Scale(f2)
-    rhDict["EWK_TT-CR1-fake-num"].Add(rhDict["normTT-CR1-fake-num"], +1)
+    rhDict["EWK_TT_ST-CR1-fake-num"].Add(rhDict["normTT-CR1-fake-num"], +1)
+    rhDict["EWK_TT_ST-CR1-fake-num"].Add(rhDict["SingleTop-CR1-num"], +1)
 
-    numer_EWK_TTfake_CR1 = rhDict["EWK_TT-CR1-fake-num"]
+    numer_EWK_TTfake_CR1 = rhDict["EWK_TT_ST-CR1-fake-num"]
 
     #======= Data efficiency (Data - f1*QCD - f2*tt_genuine)
     rhDict["EWK_TT_data-CR1-fake"] = rhDict["Data-CR1"].Clone("EWK_TT_data-CR1-fake")
@@ -1018,7 +1087,7 @@ def GetScaleFactors(datasetsMgr, hName_CR2, intLumi):
     #rhDict["EWK_TTfake_data-CR1"].Add(
 
     # Normalize TT
-    rhDict["normTT-CR1-genuine"]    = hPathDict["TT-CR1-genuine"].Clone("normTT-CR1-genuine")    
+    rhDict["normTT-CR1-genuine"]    = rhDict["TT-CR1-genuine"].Clone("normTT-CR1-genuine")    
     rhDict["normTT-CR1-genuine"].Scale(f2)
 
     # Subtract TT from data
@@ -1026,12 +1095,12 @@ def GetScaleFactors(datasetsMgr, hName_CR2, intLumi):
     
     # Num
     rhDict["EWK_TT_data-CR1-fake-num"] =    rhDict["Data-CR1-num"].Clone("EWK_TT_data-CR1-fake-num")
-    rhDict["normQCD-CR1-num"] = hPathDict["QCD-CR1-num"].Clone("normQCD-CR1-num")
+    rhDict["normQCD-CR1-num"] = rhDict["QCD-CR1-num"].Clone("normQCD-CR1-num")
 
     rhDict["normQCD-CR1-num"].Scale(f1)
     rhDict["EWK_TT_data-CR1-fake-num"].Add(rhDict["normQCD-CR1-num"], -1)
 
-    rhDict["normTT-CR1-genuine-num"] = hPathDict["TT-CR1-genuine-num"].Clone("normTT-CR1-genuine-num")
+    rhDict["normTT-CR1-genuine-num"] = rhDict["TT-CR1-genuine-num"].Clone("normTT-CR1-genuine-num")
 
     rhDict["normTT-CR1-genuine-num"].Scale(f2)
     rhDict["EWK_TT_data-CR1-fake-num"].Add(rhDict["normTT-CR1-genuine-num"], -1)
@@ -1062,6 +1131,7 @@ def GetScaleFactors(datasetsMgr, hName_CR2, intLumi):
     p_eff_CR1 = plots.ComparisonPlot(histograms.HistoGraph(eff_data_CR1,   "eff_data_CR1"  , "p", "P"),
                                      histograms.HistoGraph(eff_EWK_TTfake_CR1,    "eff_EWK_TTfake_CR1", "p", "P"),
                                      saveFormats=[])
+
 
     # Define legend entries
     p_eff_CR1.histoMgr.setHistoLegendLabelMany(
@@ -1094,8 +1164,7 @@ def GetScaleFactors(datasetsMgr, hName_CR2, intLumi):
     pythonWriter.addMCParameters(label, eff_EWK_TTfake_CR1)
     fileName_json = "Efficiency_LdgTrijet"+label+"_bin_CR1.json"
     pythonWriter.writeJSON(fileName_json)
-
-
+    '''
     return
 
 

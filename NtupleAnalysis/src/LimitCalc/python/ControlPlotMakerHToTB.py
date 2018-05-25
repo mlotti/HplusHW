@@ -283,6 +283,8 @@ class ControlPlotMakerHToTB:
                 widthSuffix = "%s" % (minBinWidthString)
             if (myParams["unit"] == "" and widthSuffix == "1"):
                 return
+            elif "< Events / " in myParams["ylabel"]: # e.g. < Events / GeV >
+                return                
             else:
                 myParams["ylabel"] = "%s / %s %s" % (myParams["ylabel"], widthSuffix, myParams["unit"])
             return

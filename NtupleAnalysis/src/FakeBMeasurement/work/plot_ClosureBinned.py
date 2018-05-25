@@ -171,9 +171,11 @@ def GetHistoKwargs(histoName):
             #_rebinX       = systematics.getBinningForTetrajetMass(0)
             #_rebinX       = systematics.getBinningForTetrajetMass(2)
             #_rebinX       = systematics.getBinningForTetrajetMass(9)
-            _rebinX       = 10 #5
+            _rebinX       = 10
+            #_rebinX       = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetMass_AfterAllSelections"]
             _opts["xmin"] =    0
             _opts["xmax"] = 3000
+            #ROOT.gStyle.SetNdivisions(8, "X")
 
     if "met" in histoName.lower():
         _units        = "GeV"
@@ -215,7 +217,7 @@ def GetHistoKwargs(histoName):
     # Define plotting options
     kwargs = {
         "ratioCreateLegend": True,
-        "ratioType"        : "errorScale", #"errorScale", #binomial #errorPropagation
+        "ratioType"        : opts.ratioType, #"errorPropagation", "errorScale", "binomial"        
         "ratioErrorOptions": {"numeratorStatSyst": False, "denominatorStatSyst": False}, # Include stat.+syst. to numerator (if syst globally enabled)      
         "ratioMoveLegend"  : {"dx": -0.51, "dy": 0.03, "dh": -0.05},
         "errorBarsX"       : True,
@@ -230,7 +232,7 @@ def GetHistoKwargs(histoName):
         "addLuminosityText": True,
         "ratio"            : opts.ratio, 
         "ratioYlabel"      : "CR1/CR2",
-        "ratioInvert"      : True, 
+        "ratioInvert"      : False, 
         "cutBox"           : _cutBox,
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
@@ -707,6 +709,7 @@ if __name__ == "__main__":
     RATIO        = False
     FOLDER       = "ForFakeBMeasurement"
     NORMALISE    = False
+    RATIOTYPE    = "errorPropagation" # "errorPropagation", "errorScale", "binomial"
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -756,6 +759,9 @@ if __name__ == "__main__":
     parser.add_option("--folder", dest="folder", default=FOLDER,
                       help="Folder in ROOT files under which all necessary histograms are located [default: %s]" % (FOLDER) )
 
+    parser.add_option("--ratioType", dest="ratioType", type="string", default = RATIOTYPE,
+                      help="Error type for to be used for the ratio [default: %s]" % (RATIOTYPE) )    
+
     (opts, parseArgs) = parser.parse_args()
 
     # Require at least two arguments (script-name, path to multicrab)
@@ -772,6 +778,10 @@ if __name__ == "__main__":
     
     if opts.saveDir == None:
         opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="Closure/Binned")
+
+    ratioTypes = ["errorPropagation", "errorScale", "binomial"]
+    if opts.ratioType not in ratioTypes:
+        raise Exception("Invalid ration type \"%s\". Please select from:%s" % (opts.ratioType, ", ".join(ratioTypes)  ))
 
     main(opts)
 
