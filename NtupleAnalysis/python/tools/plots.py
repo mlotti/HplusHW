@@ -1609,24 +1609,19 @@ def _createCutBoxAndLine(frame, cutValue, fillColor=18, box=True, line=True, **k
 # \param box        If true, draw cut box
 # \param line       If true, draw cut line
 # \param kwargs     Keyword arguments (\a lessThan or \a greaterThan, forwarded to histograms.isLessThan())
-def _createCutBoxAndLineY(frame, cutValue, fillColor=18, fillStyle=3001, box=True, line=True, **kwargs):
+def _createCutBoxAndLineY(frame, cutValue, fillColor=18, fillStyle=3001, box=True, line=True, mirror=False, **kwargs):
     xmin = frame.GetXaxis().GetXmin()
     xmax = frame.GetXaxis().GetXmax()
     ymin = cutValue
     ymax = cutValue
     ret  = []
 
-    if box:
-        if histograms.isLessThan(**kwargs):
-            ymin = frame.GetYaxis().GetXmin()
-            ymax = cutValue
-        else:
-            ymin = cutValue
-            ymax = frame.GetYaxis().GetXmax()
-        b = ROOT.TBox(xmin, ymin, xmax, ymax)
-        b.SetFillColor(fillColor)
-        b.SetFillStyle(fillStyle)
-        ret.append(b)
+    # Mirror calculations
+    dy = 1.0-cutValue
+    if dy < 0:
+        cutValueMirror = 1.0-abs(dy)
+    else:
+        cutValueMirror = 1.0+abs(dy)
 
     if line:
         l = ROOT.TLine(xmin, cutValue, xmax, cutValue)
@@ -1634,7 +1629,19 @@ def _createCutBoxAndLineY(frame, cutValue, fillColor=18, fillStyle=3001, box=Tru
         l.SetLineStyle(ROOT.kDashed)
         l.SetLineColor(ROOT.kBlack)
         ret.append(l)
+        if mirror:
+            l = ROOT.TLine(xmin, cutValueMirror, xmax, cutValueMirror)
+            l.SetLineWidth(3)
+            l.SetLineStyle(ROOT.kDashed)
+            l.SetLineColor(ROOT.kBlack)
+            ret.append(l)            
 
+    if box:
+        b = ROOT.TBox(xmin, cutValue, xmax, cutValueMirror)
+        b.SetFillColor(fillColor)
+        b.SetFillStyle(fillStyle)
+        ret.append(b)
+        
     return ret
 
 ## Helper function for creating a histograms.Histo object from a ROOT object based on the ROOT object type
