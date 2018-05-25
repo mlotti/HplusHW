@@ -50,6 +50,7 @@ Setting histogramAmbientLevel=kSystematics will include kSystematics AND kNever.
 #================================================================================================
 import sys
 from optparse import OptionParser
+import time
 
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
 from HiggsAnalysis.NtupleAnalysis.AnalysisBuilder import AnalysisBuilder
@@ -60,7 +61,7 @@ import ROOT
 #================================================================================================
 # Options
 #================================================================================================
-prefix      = "TopRecoAnalysis"
+prefix      = "TopTaggerEfficiency"
 postfix     = ""
 dataEras    = ["2016"]
 searchModes = ["80to1000"]
@@ -97,6 +98,10 @@ def Print(msg, printHeader=True):
 #================================================================================================
 def main():
 
+    # Save start time (epoch seconds)
+    tStart = time.time()
+    Verbose("Started @ " + str(tStart), True)
+
     # Require at least two arguments (script-name, path to multicrab)      
     if len(sys.argv) < 2:
         Print("Not enough arguments passed to script execution. Printing docstring & EXIT.")
@@ -117,14 +122,40 @@ def main():
     # Add the datasets (according to user options)
     # ================================================================================================
     if (opts.includeOnlyTasks):
-        Print("Adding only dataset %s from multiCRAB directory %s" % (opts.includeOnlyTasks, opts.mcrab))
+        Verbose("Adding only dataset %s from multiCRAB directory %s" % (opts.includeOnlyTasks, opts.mcrab))
         process.addDatasetsFromMulticrab(opts.mcrab, includeOnlyTasks=opts.includeOnlyTasks)
     elif (opts.excludeTasks):
-        Print("Adding all datasets except %s from multiCRAB directory %s" % (opts.excludeTasks, opts.mcrab))
-        Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
+        Verbose("Adding all datasets except %s from multiCRAB directory %s" % (opts.excludeTasks, opts.mcrab))
+        Verbose("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
         process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=opts.excludeTasks)
     else:
-        #myBlackList = ["QCD_b"]
+        myBlackList = ["QCD_b"
+                       "ChargedHiggs_HplusTB_HplusToTB_M_180_ext1", 
+                       "ChargedHiggs_HplusTB_HplusToTB_M_200_ext1", 
+                       "ChargedHiggs_HplusTB_HplusToTB_M_220_ext1", 
+                       "ChargedHiggs_HplusTB_HplusToTB_M_250_ext1", 
+                       "ChargedHiggs_HplusTB_HplusToTB_M_300_ext1", 
+                       "ChargedHiggs_HplusTB_HplusToTB_M_350_ext1", 
+                       "ChargedHiggs_HplusTB_HplusToTB_M_400_ext1", 
+                       "ChargedHiggs_HplusTB_HplusToTB_M_500_ext1", 
+                       #"ChargedHiggs_HplusTB_HplusToTB_M_650",  #10M events!
+                       "ChargedHiggs_HplusTB_HplusToTB_M_800_ext1", 
+                       "ChargedHiggs_HplusTB_HplusToTB_M_1000_ext1", 
+                       "ChargedHiggs_HplusTB_HplusToTB_M_2000_ext1"
+                       "ChargedHiggs_HplusTB_HplusToTB_M_2500_ext1", 
+                       "ChargedHiggs_HplusTB_HplusToTB_M_3000_ext1", 
+                       # "ChargedHiggs_HplusTB_HplusToTB_M_1000",
+                       # "ChargedHiggs_HplusTB_HplusToTB_M_1500",   # Speeed things up
+                       # "ChargedHiggs_HplusTB_HplusToTB_M_2000",   # Speeed things up
+                       # "ChargedHiggs_HplusTB_HplusToTB_M_2500",   # Speeed things up
+                       # "ChargedHiggs_HplusTB_HplusToTB_M_3000",   # Speeed things up
+                       "ChargedHiggs_HplusTB_HplusToTB_M_5000",   # Speeed things up
+                       "ChargedHiggs_HplusTB_HplusToTB_M_7000",   # Speeed things up  
+                       "ChargedHiggs_HplusTB_HplusToTB_M_10000",  # Speeed things up
+                       ]
+        #if opts.doSystematics:
+        #    myBlackList.append("QCD")
+
         Print("Adding all datasets from multiCRAB directory %s" % (opts.mcrab))
         Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
         regex =  "|".join(myBlackList)
@@ -141,11 +172,17 @@ def main():
     from HiggsAnalysis.NtupleAnalysis.parameters.hplus2tbAnalysis import allSelections
     allSelections.verbose = opts.verbose
     allSelections.histogramAmbientLevel = opts.histoLevel
+
+
+    allSelections.TopSelectionBDT.MVACutValue            = 0.40
+    allSelections.TopSelectionBDT.MVACutDirection        =  ">="
+    allSelections.TopSelectionBDT.WeightFile             = "TopRecoTree_180523_DeltaR0p3_DeltaPtOverPt0p32_TopPtReweighting_BDTG.weights.xml"
     # allSelections.BjetSelection.triggerMatchingApply = True
     # allSelections.TopSelection.ChiSqrCutValue = 100.0
     # allSelections.BJetSelection.numberOfBJetsCutValue = 0
     # allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
-    allSelections.TopSelectionBDT.WeightFile             = "TopRecoTree_180523_DeltaR0p3_DeltaPtOverPt0p32_TopPtReweighting_BDTG.weights.xml"
+
+    
     # ================================================================================================
     # Add Analysis Variations
     # ================================================================================================
@@ -169,7 +206,9 @@ def main():
                               searchModes,
                               usePUreweighting       = opts.usePUreweighting,
                               useTopPtReweighting    = opts.useTopPtReweighting,
-                              doSystematicVariations = opts.doSystematics)
+                              doSystematicVariations = opts.doSystematics,
+                              analysisType="HToTB",
+                              verbose=opts.verbose)
 
     # Add variations (e.g. for optimisation)
     # builder.addVariation("METSelection.METCutValue", [100,120,140])
@@ -205,14 +244,23 @@ def main():
         Print("Running process with PROOF (proofWorkes=%s)" % ( str(opts.jCores) ) )
         process.run(proof=True, proofWorkers=opts.jCores)
     else:
-        Print("Running process")
+        Verbose("Running process")
         process.run()
 
+    # Print total time elapsed
+    tFinish = time.time()
+    dt      = int(tFinish) - int(tStart)
+    days    = divmod(dt,86400)      # days
+    hours   = divmod(days[1],3600)  # hours
+    mins    = divmod(hours[1],60)   # minutes
+    secs    = mins[1]               # seconds
+    Print("Total elapsed time is %s days, %s hours, %s mins, %s secs" % (days[0], hours[0], mins[0], secs), True)
+    return
 
 #================================================================================================
 def PrintOptions(opts):
-    '''
-    '''
+    if not opts.verbose:
+        return
     table    = []
     msgAlign = "{:<20} {:<10} {:<10}"
     title    =  msgAlign.format("Option", "Value", "Default")
@@ -235,6 +283,7 @@ def PrintOptions(opts):
     # Print("Will run on multicrab directory %s" % (opts.mcrab), True)     
     for i, line in enumerate(table):
         Print(line, i==0)
+
     return
 
 
@@ -259,7 +308,7 @@ if __name__ == "__main__":
     # Default Values
     VERBOSE       = False
     NEVTS         = -1
-    HISTOLEVEL    = "Vital" #"Informative" #"Debug"
+    HISTOLEVEL    = "Debug" #"Informative" #"Debug"
     PUREWEIGHT    = True
     TOPPTREWEIGHT = True
     DOSYSTEMATICS = False
@@ -289,8 +338,8 @@ if __name__ == "__main__":
     parser.add_option("--noPU", dest="usePUreweighting", action="store_false", default = PUREWEIGHT, 
                       help="Do NOT apply Pileup re-weighting (default: %s)" % (PUREWEIGHT) )
 
-    parser.add_option("--noTopPt", dest="useTopPtReweighting", action="store_false", default = TOPPTREWEIGHT, 
-                      help="Do NOT apply top-pt re-weighting (default: %s)" % (TOPPTREWEIGHT) )
+    parser.add_option("--topPt", dest="useTopPtReweighting", action="store_true", default = TOPPTREWEIGHT, 
+                      help="Do apply top-pt re-weighting (default: %s)" % (TOPPTREWEIGHT) )
 
     parser.add_option("--doSystematics", dest="doSystematics", action="store_true", default = DOSYSTEMATICS, 
                       help="Do systematics variations  (default: %s)" % (DOSYSTEMATICS) )
