@@ -8,11 +8,11 @@ USAGE:
 
 
 EXAMPLES:
-./plot_Efficiency.py -m TopTaggerEfficiency_180202_fullSignalQCDtt --folder topbdtSelection_ --url
+./plot_Efficiency.py -m MyHplusAnalysis_180202_fullSignalQCDtt --folder topbdtSelection_ --url
 
 
 LAST USD:
-./plot_Efficiency.py -m TopTaggerEfficiency_180202_fullSignalQCDtt --folder topbdtSelection_ --url
+./plot_Efficiency.py -m MyHplusAnalysis_180202_fullSignalQCDtt --folder topbdtSelection_ --url
 
 STATISTICS OPTIONS:
 https://iktp.tu-dresden.de/~nbarros/doc/root/TEfficiency.html
@@ -51,12 +51,12 @@ import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 
-
 # Ignore Runtime warnings: Base category for warnings about dubious runtime features.
 import warnings
 warnings.filterwarnings("ignore")
 
 ROOT.gErrorIgnoreLevel = ROOT.kError
+
 #================================================================================================ 
 # Function Definition
 #================================================================================================ 
@@ -147,18 +147,35 @@ def GetHistoKwargs(histoName, opts):
         "opts"             : {"ymin": 0.0, "ymaxfactor": 1.2},
         "opts2"            : {"ymin": 0.6, "ymax": 1.4},
         "log"              : False,
-        "moveLegend"       : {"dx": -0.08, "dy": -0.01, "dh": -0.18},
+#        "moveLegend"       : {"dx": -0.08, "dy": -0.01, "dh": -0.08},
+        "moveLegend"       : {"dx": -0.05, "dy": -0.005, "dh": -0.08},
+#        "moveLegend"       : {"dx": -0.57, "dy": -0.007, "dh": -0.18},
         "cutBoxY"          : {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
         }
 
     if "pt" in h:
         units   = "GeV/c"
-        xlabel  = "p_{T} (%s)" % (units)
-        myBins  = [0, 50, 100, 150, 200, 250, 300, 400, 500, 600, 800]
+        xlabel  = "candidate p_{T} (%s)" % (units)
+        #myBins  = [0, 100, 150, 200, 250, 300, 400, 500, 800]
+        myBins  = [0, 100, 150, 200, 300, 400, 500, 600, 800]
+        #myBins  = [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800]
         kwargs["cutBox"] = {"cutValue": 100.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         
         if "topquark" in h:
+            #kwargs["moveLegend"] = {"dx": -0.55, "dy": -0.55, "dh": -0.08}
+            kwargs["moveLegend"] = {"dx": -0.05, "dy": -0.55, "dh": -0.08}
             xlabel = "generated top p_{T} (%s)" % (units)
+        if 0:
+            ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
+
+        if "fake" in h:
+            xlabel = "candidate p_{T} (%s)" % (units)
+            kwargs["ylabel"] = "Misidentification rate / " #+ units
+
+        if "event" in h:
+            #kwargs["moveLegend"] = {"dx": -0.55, "dy": -0.55, "dh": -0.08}
+            kwargs["moveLegend"] = {"dx": -0.05, "dy": -0.55, "dh": -0.08}
+            myBins  = [0, 100, 200, 300, 400, 500, 800]
         if 0:
             ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
 
@@ -216,8 +233,10 @@ def main(opts, signalMass):
         if "Data" in datasetsMgr.getAllDatasetNames():
             intLumi = datasetsMgr.getDataset("Data").getLuminosity()
 
+        else:
+            intLumi = 35920
         # Remove datasets
-        filterKeys = ["Data", "QCD", "TTZToQQ", "TTWJets", "TTTT"]
+        filterKeys = ["Data", "QCD", "TTZToQQ", "TTWJets", "TTTT", "ZJetsToQQ_HT600toInf", "DYJetsToQQHT", "SingleTop", "WJetsToQQ_HT_600ToInf", "Diboson"]
         for key in filterKeys:
             datasetsMgr.remove(filter(lambda name: key in name, datasetsMgr.getAllDatasetNames()))
 
@@ -240,22 +259,21 @@ def main(opts, signalMass):
         # Define the mapping histograms in numerator->denominator pairs
         HistoMap = {
             "AllTopQuarkPt_MatchedBDT"  : "AllTopQuarkPt_Matched",
-            "TrijetFakePt_BDT"          : "TrijetFakePt", #
-            "AllTopQuarkPt_Matched"     : "TopQuarkPt",   #
-            "EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T_BDT", #
-            #"EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T_Matched",
-            #"EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T",
-            #"AllTopQuarkPt_MatchedBDT"  : "TopQuarkPt",
+            "TrijetFakePt_BDT"          : "TrijetFakePt",
+            "AllTopQuarkPt_Matched"     : "TopQuarkPt",
+            "EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T_BDT",
+            "EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T_Matched",
+            "EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T",
+            "AllTopQuarkPt_MatchedBDT"  : "TopQuarkPt",
             #"SelectedTrijetsPt_BjetPassCSVdisc_afterCuts": "SelectedTrijetsPt_afterCuts",
             #"TrijetPt_PassBDT_BJetPassCSV": "TrijetPt_PassBDT",
             }
-
-
+        
         # For-loop: All numerator-denominator pairs
         for key in HistoMap:
             numerator   = os.path.join(opts.folder, key)
             denominator = os.path.join(opts.folder, HistoMap[key])
-            PlotEfficiency(datasetsMgr, numerator, denominator)
+            PlotEfficiency(datasetsMgr, numerator, denominator, intLumi)
     return
 
 
@@ -303,7 +321,7 @@ def RemoveNegatives(histo):
     return
 
 
-def PlotEfficiency(datasetsMgr, numPath, denPath):
+def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
   
     # Definitions
     myList  = []
@@ -314,9 +332,18 @@ def PlotEfficiency(datasetsMgr, numPath, denPath):
     for dataset in datasetsMgr.getAllDatasets():
 
         # Get the histograms
-        num = dataset.getDatasetRootHisto(numPath).getHistogram()
-        den = dataset.getDatasetRootHisto(denPath).getHistogram()
+        #num = dataset.getDatasetRootHisto(numPath).getHistogram()
+        #den = dataset.getDatasetRootHisto(denPath).getHistogram()
         
+        
+        n = dataset.getDatasetRootHisto(numPath)
+        n.normalizeToLuminosity(intLumi)
+        num = n.getHistogram()
+        d = dataset.getDatasetRootHisto(denPath)
+        d.normalizeToLuminosity(intLumi)
+        den = d.getHistogram()
+
+
         if "binList" in _kwargs:
             xBins   = _kwargs["binList"]
             nx      = len(xBins)-1
@@ -366,9 +393,8 @@ def PlotEfficiency(datasetsMgr, numPath, denPath):
     plots.drawPlot(p, saveName, **_kwargs)
 
     # Save plot in all formats
-    savePath = os.path.join(opts.saveDir, "HplusMasses", numPath.split("/")[0], opts.optMode)
-    save_path = savePath + opts.MVAcut
-    SavePlot(p, saveName, save_path, saveFormats = [".png"])#, ".pdf"])
+    savePath = os.path.join(opts.saveDir, numPath.split("/")[0], opts.optMode)
+    SavePlot(p, saveName, savePath, saveFormats = [".png"])#, ".pdf"])
     return
 
 
@@ -412,7 +438,7 @@ def SavePlot(plot, saveName, saveDir, saveFormats = [".png"]):
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
         saveNameURL = savePath + ext
-        saveNameURL = saveNameURL.replace(opts.saveDir, "http://home.fnal.gov/~%s/" % (getpass.getuser()))
+        saveNameURL = saveNameURL.replace(opts.saveDir, "http://home.fnal.gov/~%s" % (getpass.getuser()))
         if opts.url:
             Print(saveNameURL, i==0)
         else:
