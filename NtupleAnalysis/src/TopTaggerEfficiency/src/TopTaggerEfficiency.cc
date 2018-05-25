@@ -44,6 +44,13 @@ public:
 		    const std::vector<Jet>& MCtrue_LdgJet,  const std::vector<Jet>& MCtrue_SubldgJet, const std::vector<Jet>& MCtrue_Bjet);
 
 
+
+  int GetTrijet1(const TopSelectionBDT::Data& topData,  const std::vector<Jet>& bjets);
+  int GetTrijet2(const TopSelectionBDT::Data& topData, const std::vector<Jet>& bjets, const Jet& trijetJet1, const Jet& trijetJet2, const Jet& trijetBJet);
+  bool foundFreeBjet(const Jet& trijet1Jet1, const Jet& trijet1Jet2, const Jet& trijet1BJet, const Jet& trijet2Jet1, const Jet& trijet2Jet2, const Jet& trijet2BJet , const std::vector<Jet>& bjets);
+
+  bool TrijetPassBDT_crossCleaned(int Index, const TopSelectionBDT::Data& topData, const std::vector<Jet>& bjets);
+
   /// Called for each event
   virtual void process(Long64_t entry) override;
 
@@ -428,6 +435,103 @@ bool TopTaggerEfficiency::isRealMVATop(const Jet& trijetJet1, const Jet& trijetJ
   return false;
 }
 
+
+int TopTaggerEfficiency::GetTrijet1(const TopSelectionBDT::Data& topData,  const std::vector<Jet>& bjets){
+  //  Description:
+  //  Returns the leading in BDT trijet
+  int trijet1_index = -1;
+
+  for (size_t i = 0; i < topData.getAllTopsBJet().size(); i++){
+    Jet jet1 = topData.getAllTopsJet1().at(i);
+    Jet jet2 = topData.getAllTopsJet2().at(i);
+    Jet bjet = topData.getAllTopsBJet().at(i);
+    
+    //Skip Trijet combination if no free bjets left in the event
+      if ( (size_t)( isBJet(jet1,bjets) + isBJet(jet2,bjets) + isBJet(bjet,bjets)) ==  bjets.size()) continue;
+      trijet1_index = i;
+      return trijet1_index;
+    }
+  return trijet1_index;
+}
+
+
+int TopTaggerEfficiency::GetTrijet2(const TopSelectionBDT::Data& topData, const std::vector<Jet>& bjets, const Jet& trijetJet1, const Jet& trijetJet2, const Jet& trijetBJet){
+  //  Description:
+  //  Returns the subleading in BDT trijet
+  double MVAmax2 = -999.999;
+  std::vector<Jet> Trijet1;
+  Trijet1.push_back(trijetJet1); Trijet1.push_back(trijetJet2); Trijet1.push_back(trijetBJet);
+  int trijet2_index = -1;
+
+  for (size_t i = 0; i < topData.getAllTopsBJet().size(); i++){
+    Jet jet1 = topData.getAllTopsJet1().at(i);
+    Jet jet2 = topData.getAllTopsJet2().at(i);
+    Jet bjet = topData.getAllTopsBJet().at(i);
+    
+    // Skip top candidates with same jets as Leading in BDT trijet
+    if (isMatchedJet(bjet, Trijet1) || isMatchedJet(jet1, Trijet1) || isMatchedJet(jet2, Trijet1)) continue;
+    //Skip if there are no free bjets left
+    if (!foundFreeBjet(trijetJet1, trijetJet2, trijetBJet, jet1, jet2, bjet, bjets)) continue;
+    
+    double mvaValue = topData.getAllTopsMVA().at(i);
+    // Find subleading in BDT value trijet
+    if (mvaValue < MVAmax2) continue;
+    
+    trijet2_index = i;
+    return trijet2_index;
+  }
+  return trijet2_index;
+}
+
+bool TopTaggerEfficiency::isBJet(const Jet& jet, const std::vector<Jet>& bjets) {
+  for (auto bjet: bjets)
+    {
+      if (areSameJets(jet, bjet)) return true;
+    }
+  return false;
+}
+
+bool TopTaggerEfficiency::foundFreeBjet(const Jet& trijet1Jet1, const Jet& trijet1Jet2, const Jet& trijet1BJet, const Jet& trijet2Jet1, const Jet& trijet2Jet2, const Jet& trijet2BJet , const std::vector<Jet>& bjets){
+  //Description:
+  //Returns false if two trijet combinations use all the bjets of the event
+  //Used to select the best two top candidates which are not formed by all the bjets off the event
+  //One free bjet is required for the tetrajet reconstruction
+  int SumTrijet1 = isBJet(trijet1Jet1, bjets) + isBJet(trijet1Jet2, bjets) + isBJet(trijet1BJet, bjets);
+  int SumTrijet2 = isBJet(trijet2Jet1, bjets) + isBJet(trijet2Jet2, bjets) + isBJet(trijet2BJet, bjets);
+  if ((size_t)(SumTrijet1 + SumTrijet2) != bjets.size()) return true;
+  return false;
+}
+
+
+
+bool TopTaggerEfficiency::TrijetPassBDT_crossCleaned(int Index, const TopSelectionBDT::Data& topData, const std::vector<Jet>& bjets){
+  //Descriptions: Used to find the cross-cleaned trijet multiplicity. The function takes as input the index of a trijet and the total trijet collection and returns
+  //False: (a) If the trijet uses all the bjets of the event
+  //       (b) If at least one of the subjets of the trijets are used by the trijets with Higher BDT value (Higher BDT value -> smaller index: Trijets sorted in BDT value)
+  //True: If cross-cleaned trijet                                                                                                                                                                                                                                     
+  if ( (size_t)( isBJet(topData.getAllTopsJet1().at(Index),bjets) + isBJet(topData.getAllTopsJet2().at(Index),bjets) + isBJet(topData.getAllTopsBJet().at(Index),bjets)) ==  bjets.size()) return false;
+  if (Index > 0)
+    {
+      for (size_t i=0; i<(size_t)Index; i++)
+        {
+          if ( (size_t)( isBJet(topData.getAllTopsJet1().at(i),bjets) + isBJet(topData.getAllTopsJet2().at(i),bjets) + isBJet(topData.getAllTopsBJet().at(i),bjets)) ==  bjets.size()) continue;
+          //Vector includes the 3 subjets of a trijet                                                                                                                                                                                                                 
+	  std::vector<Jet> Trijet;
+          Trijet.push_back(topData.getAllTopsJet1().at(i)); Trijet.push_back(topData.getAllTopsJet2().at(i)); Trijet.push_back(topData.getAllTopsBJet().at(i));
+          // Skip top candidates with same jets as Trijets with higher BDDT value                                                                                                                                                                                     
+
+          bool sharedJets = isMatchedJet(topData.getAllTopsBJet().at(Index), Trijet) || isMatchedJet(topData.getAllTopsJet1().at(Index), Trijet) || isMatchedJet(topData.getAllTopsJet2().at(Index), Trijet);
+	  if (TrijetPassBDT_crossCleaned(i, topData, bjets) && sharedJets ){
+            return false;
+          }
+        }
+    }
+
+  return true;
+}
+
+
+
 void TopTaggerEfficiency::setupBranches(BranchManager& branchManager) {
   fEvent.setupBranches(branchManager);
   return;
@@ -539,13 +643,12 @@ void TopTaggerEfficiency::process(Long64_t entry) {
   //================================================================================================           
   if (!fEvent.isMC()) return;
 
-  std::vector<genParticle> GenTops_test;  
-  GenTops_test = GetGenParticles(fEvent.genparticles().getGenParticles(), 6);
+  std::vector<genParticle> GenTops;  
+  GenTops = GetGenParticles(fEvent.genparticles().getGenParticles(), 6);
   // For-loop: All top quarks
   
   std::vector<genParticle> GenChargedHiggs;
   std::vector<genParticle> GenChargedHiggs_BQuark;
-  std::vector<genParticle> GenTops;
   genParticle              GenHTop;
   std::vector<genParticle> GenTops_BQuark;
   std::vector<genParticle> GenTops_SubldgQuark;
@@ -795,7 +898,6 @@ void TopTaggerEfficiency::process(Long64_t entry) {
 	  
           // Check if TOP is genuine                                                                                                            
 	  bool isGenuine = (dR1min<= dRcut && dR2min <= dRcut && dRminB.at(i) <= dRcut);
-	  
           if (isGenuine)
             {
               // Increase the counter of genuine tops                                                                                                        
@@ -854,6 +956,13 @@ void TopTaggerEfficiency::process(Long64_t entry) {
     std::cout<<GenHTop.pt()<<have_Wa<<have_Wh<<std::endl;
   }
 
+  int ncleaned = 0;
+  for (size_t i = 0; i < topData.getAllTopsBJet().size(); i++){
+    int index = i;
+    if (TrijetPassBDT_crossCleaned(index, topData, bjetData.getSelectedBJets())) ncleaned++;
+  }
+
+  if (ncleaned < 2) return;
   if (doMatching){
     //======================================
     //Denominator: Tagging Efficidency
@@ -886,7 +995,7 @@ void TopTaggerEfficiency::process(Long64_t entry) {
 	  {
 	    if (isRealMVATop(jet1, jet2, bjet, MCtrue_LdgJet.at(j), MCtrue_SubldgJet.at(j), MCtrue_Bjet.at(j))) genuineTop = true;
 	  }//if ( isMatched*sizesAgree )  
-	if (genuineTop) continue;
+	//if (genuineTop) continue;
       } //for (int i = 0; i < topData.getAllTopsBJet().size(); i++)
 
       if (genuineTop){
@@ -908,7 +1017,7 @@ void TopTaggerEfficiency::process(Long64_t entry) {
           {
             if (isRealMVATop(jet1, jet2, bjet, MCtrue_LdgJet.at(j), MCtrue_SubldgJet.at(j), MCtrue_Bjet.at(j))) genuineTopPass = true;
           }//if ( isMatched*sizesAgree )
-	if (genuineTop) continue;
+	//if (genuineTopPass) continue;
       }//for (int i = 0; i < topData.getSelectedTopsBJet().size(); i++) 
       if (genuineTopPass){
 	hAllTopQuarkPt_MatchedBDT -> Fill(top.pt());
@@ -946,10 +1055,14 @@ void TopTaggerEfficiency::process(Long64_t entry) {
       {
 	//Efficiency: Both Trijets Matched && Pass BDT
 	hEventTrijetPt2T -> Fill(topData.getLdgTrijet().Pt());
-	if (realtopBoth) hEventTrijetPt2T_Matched -> Fill(topData.getLdgTrijet().Pt());
+	if (realtopBoth){
+	  hEventTrijetPt2T_Matched -> Fill(topData.getLdgTrijet().Pt());
+	}
 	if (passBDTboth){
 	  hEventTrijetPt2T_BDT -> Fill(topData.getLdgTrijet().Pt());
-	  if (realtopBoth) hEventTrijetPt2T_MatchedBDT -> Fill(topData.getLdgTrijet().Pt());
+	  if (realtopBoth){
+	    hEventTrijetPt2T_MatchedBDT -> Fill(topData.getLdgTrijet().Pt());
+	  }
 	}
       }
   }// if (doMatching)
