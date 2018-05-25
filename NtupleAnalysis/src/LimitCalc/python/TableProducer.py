@@ -1317,8 +1317,8 @@ class TableProducer:
 
                     # if column name matches to dataset group label
                     foundMatch = columnName in c.getLabel()
-                    if self._h2tb and not "Hp": # dirty but works (for now)
-                        foundMatch = (columnName == c.getLabel()) # exact match needed
+                    if self._h2tb and not "Hp" in c.getLabel():
+                        foundMatch = (columnName == c.getLabel())
                     if foundMatch: 
                         # if this column+nuisance combination matches to a list, loop over the list
                         if isinstance(n[0], list): 
