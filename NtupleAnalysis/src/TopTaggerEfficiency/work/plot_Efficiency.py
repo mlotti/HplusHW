@@ -258,15 +258,13 @@ def main(opts, signalMass):
 
         # Define the mapping histograms in numerator->denominator pairs
         HistoMap = {
-            "AllTopQuarkPt_MatchedBDT"  : "AllTopQuarkPt_Matched",
+            #"AllTopQuarkPt_MatchedBDT"  : "AllTopQuarkPt_Matched",
             "TrijetFakePt_BDT"          : "TrijetFakePt",
             "AllTopQuarkPt_Matched"     : "TopQuarkPt",
-            "EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T_BDT",
-            "EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T_Matched",
-            "EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T",
-            "AllTopQuarkPt_MatchedBDT"  : "TopQuarkPt",
-            #"SelectedTrijetsPt_BjetPassCSVdisc_afterCuts": "SelectedTrijetsPt_afterCuts",
-            #"TrijetPt_PassBDT_BJetPassCSV": "TrijetPt_PassBDT",
+            #"EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T_BDT",
+            #"EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T_Matched",
+            #"EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T",
+            #"AllTopQuarkPt_MatchedBDT"  : "TopQuarkPt",
             }
         
         # For-loop: All numerator-denominator pairs
@@ -274,6 +272,7 @@ def main(opts, signalMass):
             numerator   = os.path.join(opts.folder, key)
             denominator = os.path.join(opts.folder, HistoMap[key])
             PlotEfficiency(datasetsMgr, numerator, denominator, intLumi)
+            #CalcEfficiency(datasetsMgr, numerator, denominator, intLumi)
     return
 
 
@@ -287,27 +286,40 @@ def CheckNegatives(hNum, hDen, verbose=False):
     txtAlign = "{:<5} {:>20} {:>20}"
     hLine    = "="*50
     table.append(hLine)
-    table.append(txtAlign.format("Bin #", "Numerator (8f)", "Denominator (8f)"))
+    table.append("{:^50}".format(hNum.GetName()))
+    table.append(txtAlign.format("Bin #", "Numerator (4f)", "Denominator (4f)"))
     table.append(hLine)
 
     # For-loop: All bins in x-axis
     for i in range(1, hNum.GetNbinsX()+1):
         nbin = hNum.GetBinContent(i)
         dbin = hDen.GetBinContent(i)
-        table.append(txtAlign.format(i, "%0.8f" % (nbin), "%0.8f" % (dbin) ))
+        #table.append(txtAlign.format(i, "%0.8f" % (nbin), "%0.8f" % (dbin) ))
 
         # Numerator > Denominator
         if nbin > dbin:
             hNum.SetBinContent(i, dbin)
-
+            print "here1"
         # Numerator < 0 
         if nbin < 0:
-            hNum.SetBinContent(i,0)
-            
+            #hNum.SetBinContent(i,0)
+            hNum.SetBinContent(i, abs(nbin) )
+            print "here2"
         # Denominator < 0
         if dbin < 0:
-            hNum.SetBinContent(i,0)
-            hDen.SetBinContent(i,0)
+            #hNum.SetBinContent(i,0)
+            #hDen.SetBinContent(i,0)
+            hDen.SetBinContent(i, abs(dbin))
+            print "here3"
+        # Save updated info to table
+        nbin = hNum.GetBinContent(i)
+        dbin = hDen.GetBinContent(i)
+        table.append(txtAlign.format(i, "%0.4f" % (nbin), "%0.4f" % (dbin) ))
+
+    if verbose:
+        for i,row in enumerate(table, 1):
+            Print(row, i==1)
+
     return
 
 
@@ -343,12 +355,19 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
         d.normalizeToLuminosity(intLumi)
         den = d.getHistogram()
 
-
         if "binList" in _kwargs:
             xBins   = _kwargs["binList"]
             nx      = len(xBins)-1
             num     = num.Rebin(nx, "", xBins)
             den     = den.Rebin(nx, "", xBins)
+
+
+        for i in range(1, num.GetNbinsX()+1):
+            nbin = num.GetBinContent(i)
+            dbin = den.GetBinContent(i)
+            print dataset.getName(), nbin, dbin
+            if (nbin > dbin):
+                print "error"
 
         # Sanity checks
         if den.GetEntries() == 0 or num.GetEntries() == 0:
@@ -357,10 +376,10 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
             continue
 
         # Remove negative bins and ensure numerator bin <= denominator bin
+        CheckNegatives(num, den, False)
         CheckNegatives(num, den, True)
-        # RemoveNegatives(num)
-        # RemoveNegatives(den)
-                
+        RemoveNegatives(num)
+        RemoveNegatives(den)
         # Sanity check (Histograms are valid and consistent) - Always false!
         # if not ROOT.TEfficiency.CheckConsistency(num, den):
         #    continue
@@ -381,6 +400,11 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
     
         # Apply default style (according to dataset name)
         plots._plotStyles[dataset.getName()].apply(eff)
+        # Apply random histo styles and append
+        if "charged" in dataset.getName().lower():
+            mass = dataset.getName().split("M_")[-1]
+            s = styles.getSignalStyleHToTB_M(mass)
+            s.apply(eff)
 
         # Append in list
         myList.append(histograms.HistoGraph(eff, plots._legendLabels[dataset.getName()], "lp", "P"))
@@ -397,6 +421,76 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
     SavePlot(p, saveName, savePath, saveFormats = [".png"])#, ".pdf"])
     return
 
+
+
+
+def CalcEfficiency(datasetsMgr, numPath, denPath, intLumi):
+    # Definitions
+    myList  = []
+    index   = 0
+    _kwargs = GetHistoKwargs(numPath, opts)        
+
+    # For-loop: All datasets
+    for dataset in datasetsMgr.getAllDatasets():
+        x = []
+        y = []
+
+        n = dataset.getDatasetRootHisto(numPath)
+        n.normalizeToLuminosity(intLumi)
+        num = n.getHistogram()
+        d = dataset.getDatasetRootHisto(denPath)
+        d.normalizeToLuminosity(intLumi)
+        den = d.getHistogram()
+
+        if "binList" in _kwargs:
+            xBins   = _kwargs["binList"]
+            nx      = len(xBins)-1
+            num     = num.Rebin(nx, "", xBins)
+            den     = den.Rebin(nx, "", xBins)
+
+
+        for i in range(1, num.GetNbinsX()+1):
+            nbin = num.GetBinContent(i)
+            dbin = den.GetBinContent(i)
+
+            if nbin < 0:
+                nbin = 0
+            if dbin < 0:
+                nbin = 0
+                dbin = 1
+            if nbin > dbin:
+                nbin = dbin
+
+            x.append(num.GetBinLowEdge(i)+0.5*num.GetBinWidth(i))
+            y.append(nbin/dbin)
+
+        n     = num.GetNbinsX()
+        eff = ROOT.TGraph(n, array.array("d",x), array.array("d",y))
+
+        # Apply default style (according to dataset name)
+        plots._plotStyles[dataset.getName()].apply(eff)
+                          
+        # Apply random histo styles and append
+                          
+        if "charged" in dataset.getName().lower():                              
+            mass = dataset.getName().split("M_")[-1]
+            s = styles.getSignalStyleHToTB_M(mass)
+            s.apply(eff)
+
+        # Append in list
+        myList.append(histograms.HistoGraph(eff, plots._legendLabels[dataset.getName()], "lp", "P"))
+            
+    # Define save name
+    saveName = "Eff_" + numPath.split("/")[-1] + "Over" + denPath.split("/")[-1]
+
+    # Plot the efficiency
+    p = plots.PlotBase(datasetRootHistos=myList, saveFormats=[])
+    plots.drawPlot(p, saveName, **_kwargs)
+
+    # Save plot in all formats
+    savePath = os.path.join(opts.saveDir, numPath.split("/")[0], opts.optMode)
+    SavePlot(p, saveName, savePath, saveFormats = [".png"])#, ".pdf"])
+    return
 
 def convert2TGraph(tefficiency):
     x     = []
@@ -475,7 +569,7 @@ if __name__ == "__main__":
     BATCHMODE    = True
     PRECISION    = 3
     #SIGNALMASS   = [300, 500, 1000]
-    SIGNALMASS   = []
+    SIGNALMASS   = [500]
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False
