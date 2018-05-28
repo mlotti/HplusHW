@@ -780,7 +780,7 @@ class QCDNormalizationManagerBase:
                 g.SetPoint(i, i+0.5, valueDict[binList[i]])
                 g.SetPointEYhigh(i, upDict[binList[i]])
                 g.SetPointEYlow(i, downDict[binList[i]])
-            g.SetMarkerSize(1.6)
+            g.SetMarkerSize(0.6)
             g.SetMarkerStyle(markerStyle)
             g.SetLineColor(color)
             g.SetLineWidth(2)
@@ -791,16 +791,56 @@ class QCDNormalizationManagerBase:
         keys = self._qcdNormalization.keys()
         keys.sort()
         for k in keys:
-            if "lt" in k:
-                keyList.append(k)
+            if "Etalt" in k and not k in keyList:
+                if "Ptlt" in k:
+                    keyList.append(k)
         for k in keys:
-            if "eq" in k:
-                keyList.append(k)
+            if "Etalt" in k and not k in keyList:
+                if "Pteq" in k:
+                    keyList.append(k)
         for k in keys:
-            if "gt" in k:
-                keyList.append(k)
-        if "Inclusive" in keys:
+            if "Etalt" in k and not k in keyList:
+                if "Ptgt" in k:
+                    keyList.append(k)
+
+        for k in keys:
+            if "Etaeq" in k and not k in keyList:
+                if "Ptlt" in k:
+                    keyList.append(k)
+        for k in keys:
+            if "Etaeq" in k and not k in keyList:
+                if "Pteq" in k:
+                    keyList.append(k)
+        for k in keys:
+            if "Etaeq" in k and not k in keyList:
+                if "Ptgt" in k:
+                    keyList.append(k)
+
+        for k in keys:
+            if "Etagt" in k and not k in keyList:
+                if "Ptlt" in k:
+                    keyList.append(k)
+        for k in keys:
+            if "Etagt" in k and not k in keyList:
+                if "Pteq" in k:
+                    keyList.append(k)
+        for k in keys:
+            if "Etagt" in k and not k in keyList:
+                if "Ptgt" in k:
+                    keyList.append(k)
+
+#        for k in keys:
+#            if "lt" in k:
+#                keyList.append(k)
+#        for k in keys:
+#            if "eq" in k:
+#                keyList.append(k)
+#        for k in keys:
+#            if "gt" in k:
+#                keyList.append(k)
+        if "Inclusive" in keys and "Inclusive" not in keyList:
             keyList.append("Inclusive")
+
         # Create graphs
         gQCD = makeGraph(24, ROOT.kRed, keyList, self._qcdNormalization, self._qcdNormalizationError, self._qcdNormalizationError)
         gFake = makeGraph(27, ROOT.kBlue, keyList, self._ewkFakesNormalization, self._ewkFakesNormalizationError, self._ewkFakesNormalizationError)
