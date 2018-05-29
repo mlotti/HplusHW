@@ -13,6 +13,7 @@ EXAMPLES:
 
 LAST USD:
 ./plot_Efficiency.py -m TopTaggerEfficiency_180529_TopEfficiency_vs_mass --folder topbdtSelection_ -v -e "220"
+./plot_Efficiency.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopTaggerEfficiency_180529_TopEfficiency_vs_mass --folder topbdtSelection_ -v -e "220|250|350"
 
 STATISTICS OPTIONS:
 https://iktp.tu-dresden.de/~nbarros/doc/root/TEfficiency.html
