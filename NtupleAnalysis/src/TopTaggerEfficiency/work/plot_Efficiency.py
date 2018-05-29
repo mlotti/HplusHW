@@ -33,7 +33,7 @@ import math
 import copy
 import os
 from optparse import OptionParser
-
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import getpass
 
 import ROOT
@@ -157,10 +157,13 @@ def GetHistoKwargs(histoName, opts):
         units   = "GeV/c"
         xlabel  = "candidate p_{T} (%s)" % (units)
         #myBins  = [0, 100, 150, 200, 250, 300, 400, 500, 800]
-        myBins  = [0, 100, 150, 200, 300, 400, 500, 600, 800]
+        myBins  = [0, 50, 100, 150, 250, 350, 450]
+        #myBins  = [0, 100, 150, 200, 300, 400, 500, 600, 800]
         #myBins  = [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800]
         kwargs["cutBox"] = {"cutValue": 100.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         
+        if "all" in h:
+            myBins  = [0, 50, 100, 150, 250, 350, 450, 550]
         if "topquark" in h:
             #kwargs["moveLegend"] = {"dx": -0.55, "dy": -0.55, "dh": -0.08}
             kwargs["moveLegend"] = {"dx": -0.05, "dy": -0.55, "dh": -0.08}
@@ -171,11 +174,13 @@ def GetHistoKwargs(histoName, opts):
         if "fake" in h:
             xlabel = "candidate p_{T} (%s)" % (units)
             kwargs["ylabel"] = "Misidentification rate / " #+ units
-
+            #myBins  = [0, 50, 100, 150, 250, 350, 450, 550]
+            #myBins  = [0, 300, 550, 1000] #soti
         if "event" in h:
             #kwargs["moveLegend"] = {"dx": -0.55, "dy": -0.55, "dh": -0.08}
             kwargs["moveLegend"] = {"dx": -0.05, "dy": -0.55, "dh": -0.08}
-            myBins  = [0, 100, 200, 300, 400, 500, 800]
+            #myBins  = [0, 50, 100, 150, 250, 350, 400, 500]
+            #myBins  = [0, 100, 200, 300, 400, 500, 800]
         if 0:
             ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
 
@@ -222,6 +227,7 @@ def main(opts, signalMass):
             if "ChargedHiggs" in d.getName():
                 datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
 
+        datasetsMgr.PrintInfo()
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
         
@@ -243,6 +249,8 @@ def main(opts, signalMass):
         # Re-order datasets
         datasetOrder = []
         for d in datasetsMgr.getAllDatasets():
+            if "_ext1"in d.getName():
+                continue
             if "M_" in d.getName():
                 if d not in signalMass:
                     continue
@@ -250,27 +258,62 @@ def main(opts, signalMass):
             
         # Append signal datasets
         for m in signalMass:
+            if "_ext1"in signalMass:
+                continue
             datasetOrder.insert(0, m)
-        datasetsMgr.selectAndReorder(datasetOrder)
+        #datasetsMgr.selectAndReorder(datasetOrder) soti
 
         # Print dataset information
         datasetsMgr.PrintInfo()
 
-        # Define the mapping histograms in numerator->denominator pairs
-        HistoMap = {
-            #"AllTopQuarkPt_MatchedBDT"  : "AllTopQuarkPt_Matched",
-            "TrijetFakePt_BDT"          : "TrijetFakePt",
-            "AllTopQuarkPt_Matched"     : "TopQuarkPt",
-            #"EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T_BDT",
-            #"EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T_Matched",
-            #"EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T",
-            #"AllTopQuarkPt_MatchedBDT"  : "TopQuarkPt",
-            }
-        
+        # Define list with Numerators - Denominators
+        Numerator = ["AllTopQuarkPt_MatchedBDT",
+                     "TrijetFakePt_BDT",
+                     "AssocTopQuarkPt_MatchedBDT",
+                     "HiggsTopQuarkPt_MatchedBDT",
+                     ]
+        Denominator = ["AllTopQuarkPt_Matched",
+                       "TrijetFakePt",
+                       "AssocTopQuarkPt_Matched",                       
+                       "HiggsTopQuarkPt_Matched",                       
+                       ]
+
+        '''
+        Numerator = ["AllTopQuarkPt_MatchedBDT",
+                     "TrijetFakePt_BDT",
+                     "AllTopQuarkPt_Matched",
+                     "AllTopQuarkPt_MatchedBDT",
+                     #"AssocTopQuarkPt_Matched",
+                     #"AssocTopQuarkPt_MatchedBDT",
+                     "AssocTopQuarkPt_MatchedBDT",
+                     #"HiggsTopQuarkPt_Matched",
+                     #"HiggsTopQuarkPt_MatchedBDT",
+                     "HiggsTopQuarkPt_MatchedBDT",
+                     #"BothTopQuarkPt_MatchedBDT", #Debug                    
+                     #"AllTopQuarkPt_Matched",     #Debug
+                     #"AllTopQuarkPt_MatchedBDT",  #Debug
+                     ]
+        Denominator = ["AllTopQuarkPt_Matched",
+                       "TrijetFakePt",
+                       "TopQuarkPt",
+                       "TopQuarkPt",
+                       #"AssocTopQuarkPt",
+                       #"AssocTopQuarkPt",
+                       "AssocTopQuarkPt_Matched",                       
+                       #"HiggsTopQuarkPt",
+                       #"HiggsTopQuarkPt",
+                       "HiggsTopQuarkPt_Matched",                       
+                       "BothTopQuarkPt",
+                       "BothTopQuarkPt",        
+                       #"BothTopQuarkPt_Matched",    #Debug
+                       #"AllTopQuarkPt_Matched",     #Debug
+                       #"BothTopQuarkPt_MatchedBDT", #Debug
+                       ]
+        '''
         # For-loop: All numerator-denominator pairs
-        for key in HistoMap:
-            numerator   = os.path.join(opts.folder, key)
-            denominator = os.path.join(opts.folder, HistoMap[key])
+        for i in range(len(Numerator)):
+            numerator   = os.path.join(opts.folder, Numerator[i])
+            denominator = os.path.join(opts.folder, Denominator[i])
             PlotEfficiency(datasetsMgr, numerator, denominator, intLumi)
             #CalcEfficiency(datasetsMgr, numerator, denominator, intLumi)
     return
@@ -365,7 +408,7 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
         for i in range(1, num.GetNbinsX()+1):
             nbin = num.GetBinContent(i)
             dbin = den.GetBinContent(i)
-            print dataset.getName(), nbin, dbin
+            #print dataset.getName(), nbin, dbin
             if (nbin > dbin):
                 print "error"
 
@@ -376,10 +419,10 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
             continue
 
         # Remove negative bins and ensure numerator bin <= denominator bin
-        CheckNegatives(num, den, False)
-        CheckNegatives(num, den, True)
-        RemoveNegatives(num)
-        RemoveNegatives(den)
+        #CheckNegatives(num, den, False)
+        #CheckNegatives(num, den, True)
+        #RemoveNegatives(num)
+        #RemoveNegatives(den)
         # Sanity check (Histograms are valid and consistent) - Always false!
         # if not ROOT.TEfficiency.CheckConsistency(num, den):
         #    continue
@@ -403,6 +446,7 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
         # Apply random histo styles and append
         if "charged" in dataset.getName().lower():
             mass = dataset.getName().split("M_")[-1]
+            mass = mass.replace("650", "1000")
             s = styles.getSignalStyleHToTB_M(mass)
             s.apply(eff)
 
@@ -418,7 +462,7 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
 
     # Save plot in all formats
     savePath = os.path.join(opts.saveDir, numPath.split("/")[0], opts.optMode)
-    SavePlot(p, saveName, savePath, saveFormats = [".png"])#, ".pdf"])
+    SavePlot(p, saveName, savePath, saveFormats = [".png"])#, ".C", ".pdf"])#, ".pdf"])
     return
 
 
@@ -522,24 +566,45 @@ def convert2TGraph(tefficiency):
     return graph
 
 
-def SavePlot(plot, saveName, saveDir, saveFormats = [".png"]):
+#def SavePlot(plot, saveName, saveDir, saveFormats = [".png"]):
     # Check that path exists
-    if not os.path.exists(saveDir):
-        os.makedirs(saveDir)
+#    if not os.path.exists(saveDir):
+#        os.makedirs(saveDir)
         
-    savePath = os.path.join(saveDir, saveName)
+#    savePath = os.path.join(saveDir, saveName)
 
     # For-loop: All save formats
-    for i, ext in enumerate(saveFormats):
-        saveNameURL = savePath + ext
-        saveNameURL = saveNameURL.replace(opts.saveDir, "http://home.fnal.gov/~%s" % (getpass.getuser()))
-        if opts.url:
-            Print(saveNameURL, i==0)
-        else:
-            Print(savePath + ext, i==0)
-        plot.saveAs(savePath, formats=saveFormats)
-    return
+#    for i, ext in enumerate(saveFormats):
+#        saveNameURL = savePath + ext        
+#        saveNameURL = saveNameURL.replace("/publicweb/%s/%s" % (getpass.getuser()[0], getpass.getuser()), "http://home.fnal.gov/~%s" % (getpass.getuser()))
+#        if opts.url:
+#            Print(saveNameURL, i==0)
+#        else:
+#            Print(savePath + ext, i==0)
+#        plot.saveAs(savePath, formats=saveFormats)
+#    return
 
+
+def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
+    Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
+
+     # Check that path exists                                                                                                                                                                               
+    if not os.path.exists(saveDir):
+        os.makedirs(saveDir)
+
+    # Create the name under which plot will be saved                                                                                                                                                        
+    saveName = os.path.join(saveDir, plotName.replace("/", "_"))
+    saveName = saveName.replace("(", "_")
+    saveName = saveName.replace(")", "")
+    saveName = saveName.replace(" ", "")
+
+    # For-loop: All save formats                                                                                                                                                                            
+    for i, ext in enumerate(saveFormats):
+        saveNameURL = saveName + ext
+        saveNameURL = aux.convertToURL(saveNameURL, opts.url)
+        Verbose(saveNameURL, i==0)
+        plot.saveAs(saveName, formats=saveFormats)
+    return
 
 #================================================================================================ 
 # Main
@@ -568,14 +633,14 @@ if __name__ == "__main__":
     OPTMODE      = ""
     BATCHMODE    = True
     PRECISION    = 3
-    #SIGNALMASS   = [300, 500, 1000]
-    SIGNALMASS   = [500]
+    SIGNALMASS   = [300, 500]
+    #SIGNALMASS   = [500]
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False
     URL          = False
     NOERROR      = True
-    SAVEDIR      = "/publicweb/%s/%s/%s" % (getpass.getuser()[0], getpass.getuser(), ANALYSISNAME)
+    SAVEDIR      = None #"/publicweb/%s/%s/%s" % (getpass.getuser()[0], getpass.getuser(), ANALYSISNAME)
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
     NORMALISE    = False
@@ -649,10 +714,14 @@ if __name__ == "__main__":
         #print __doc__
         sys.exit(1)
 
+    if opts.saveDir == None:
+        opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="")
+
     # Sanity check
     allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 2000, 3000]
     signalMass = []
     for m in sorted(SIGNALMASS, reverse=True):
+        signalMass.append("ChargedHiggs_HplusTB_HplusToTB_M_%.f_ext1" % m)
         signalMass.append("ChargedHiggs_HplusTB_HplusToTB_M_%.f" % m)
 
     # Call the main function
