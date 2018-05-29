@@ -8,11 +8,11 @@ USAGE:
 
 
 EXAMPLES:
-./plot_Efficiency.py -m MyHplusAnalysis_180202_fullSignalQCDtt --folder topbdtSelection_ --url
+./plot_Efficiency.py -m TopTaggerEfficiency_180529_TopEfficiency_vs_mass --folder topbdtSelection_ -v -e "220"
 
 
 LAST USD:
-./plot_Efficiency.py -m MyHplusAnalysis_180202_fullSignalQCDtt --folder topbdtSelection_ --url
+./plot_Efficiency.py -m TopTaggerEfficiency_180529_TopEfficiency_vs_mass --folder topbdtSelection_ -v -e "220"
 
 STATISTICS OPTIONS:
 https://iktp.tu-dresden.de/~nbarros/doc/root/TEfficiency.html
@@ -148,7 +148,7 @@ def GetHistoKwargs(histoName, opts):
         "opts2"            : {"ymin": 0.6, "ymax": 1.4},
         "log"              : False,
 #        "moveLegend"       : {"dx": -0.08, "dy": -0.01, "dh": -0.08},
-        "moveLegend"       : {"dx": -0.05, "dy": -0.005, "dh": -0.08},
+        "moveLegend"       : {"dx": -0.08, "dy": -0.005, "dh": -0.08},
 #        "moveLegend"       : {"dx": -0.57, "dy": -0.007, "dh": -0.18},
         "cutBoxY"          : {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
         }
@@ -158,15 +158,15 @@ def GetHistoKwargs(histoName, opts):
         xlabel  = "candidate p_{T} (%s)" % (units)
         #myBins  = [0, 100, 150, 200, 250, 300, 400, 500, 800]
         myBins  = [0, 50, 100, 150, 250, 350, 450]
+        #myBins  = [0, 50, 100, 150, 200, 300, 400, 500]
         #myBins  = [0, 100, 150, 200, 300, 400, 500, 600, 800]
-        #myBins  = [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800]
         kwargs["cutBox"] = {"cutValue": 100.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         
-        if "all" in h:
-            myBins  = [0, 50, 100, 150, 250, 350, 450, 550]
+        #if "all" in h:
+            #myBins  = [0, 50, 100, 150, 200, 300, 400, 500]
         if "topquark" in h:
             #kwargs["moveLegend"] = {"dx": -0.55, "dy": -0.55, "dh": -0.08}
-            kwargs["moveLegend"] = {"dx": -0.05, "dy": -0.55, "dh": -0.08}
+            kwargs["moveLegend"] = {"dx": -0.08, "dy": -0.55, "dh": -0.08}
             xlabel = "generated top p_{T} (%s)" % (units)
         if 0:
             ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
@@ -174,11 +174,11 @@ def GetHistoKwargs(histoName, opts):
         if "fake" in h:
             xlabel = "candidate p_{T} (%s)" % (units)
             kwargs["ylabel"] = "Misidentification rate / " #+ units
+            kwargs["opts"]   = {"ymin": 0.0, "ymaxfactor": 1.3}
             #myBins  = [0, 50, 100, 150, 250, 350, 450, 550]
-            #myBins  = [0, 300, 550, 1000] #soti
         if "event" in h:
             #kwargs["moveLegend"] = {"dx": -0.55, "dy": -0.55, "dh": -0.08}
-            kwargs["moveLegend"] = {"dx": -0.05, "dy": -0.55, "dh": -0.08}
+            kwargs["moveLegend"] = {"dx": -0.08, "dy": -0.55, "dh": -0.08}
             #myBins  = [0, 50, 100, 150, 250, 350, 400, 500]
             #myBins  = [0, 100, 200, 300, 400, 500, 800]
         if 0:
@@ -382,21 +382,27 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
     myList  = []
     index   = 0
     _kwargs = GetHistoKwargs(numPath, opts)        
-
+    counter = 0
     # For-loop: All datasets
     for dataset in datasetsMgr.getAllDatasets():
-
+        name_N = numPath
+        name_D = denPath
         # Get the histograms
         #num = dataset.getDatasetRootHisto(numPath).getHistogram()
         #den = dataset.getDatasetRootHisto(denPath).getHistogram()
-        
-        
+        if "TT" in dataset.getName():
+            numPath = numPath.replace("HiggsTop", "AllTop")
+            denPath = denPath.replace("HiggsTop", "AllTop")
+            numPath = numPath.replace("AssocTop", "AllTop")
+            denPath = denPath.replace("AssocTop", "AllTop")
+                
         n = dataset.getDatasetRootHisto(numPath)
         n.normalizeToLuminosity(intLumi)
         num = n.getHistogram()
         d = dataset.getDatasetRootHisto(denPath)
         d.normalizeToLuminosity(intLumi)
         den = d.getHistogram()
+
 
         if "binList" in _kwargs:
             xBins   = _kwargs["binList"]
@@ -445,24 +451,28 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
         plots._plotStyles[dataset.getName()].apply(eff)
         # Apply random histo styles and append
         if "charged" in dataset.getName().lower():
+            counter +=1
+            '''
             mass = dataset.getName().split("M_")[-1]
             mass = mass.replace("650", "1000")
             s = styles.getSignalStyleHToTB_M(mass)
             s.apply(eff)
+            '''
+            styles.markerStyles[counter].apply(eff)
 
         # Append in list
         myList.append(histograms.HistoGraph(eff, plots._legendLabels[dataset.getName()], "lp", "P"))
             
     # Define save name
-    saveName = "Eff_" + numPath.split("/")[-1] + "Over" + denPath.split("/")[-1]
+    saveName = "Eff_" + name_N.split("/")[-1] + "Over"+ name_D.split("/")[-1]
 
     # Plot the efficiency
     p = plots.PlotBase(datasetRootHistos=myList, saveFormats=[])
     plots.drawPlot(p, saveName, **_kwargs)
 
     # Save plot in all formats
-    savePath = os.path.join(opts.saveDir, numPath.split("/")[0], opts.optMode)
-    SavePlot(p, saveName, savePath, saveFormats = [".png"])#, ".C", ".pdf"])#, ".pdf"])
+    savePath = os.path.join(opts.saveDir, name_N.split("/")[0], opts.optMode)
+    SavePlot(p, saveName, savePath, saveFormats = [".png", ".C", ".pdf"])#, ".pdf"])
     return
 
 
