@@ -331,17 +331,21 @@ def PlotHistograms(datasetsMgr_Mcrab644_TopPtRew, datasetsMgr_Mcrab644_noTopPtRe
 
     plots.drawPlot(p, 
                    saveName,
-                   xlabel       = "generated top p_{T} (%s)" % (_units),
-                   ylabel       = yLabel,
-                   log          = False,
-                   rebinX       = 2,
-                   cmsExtraText = "Preliminary",
-                   ratio        = True,
-                   ratioYlabel  = "Ratio ",
-                   createLegend = _leg,
-                   opts         = {"xmin": 0.0, "xmax": 800.0, "ymin": 0.0, "ymaxfactor": 1.2},
-                   opts2        = {"ymin": 0.6, "ymax": 1.4},
-                   cutBox       = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+                   xlabel            = "generated top p_{T} (%s)" % (_units),
+                   ylabel            = yLabel,
+                   log               = False,
+                   rebinX            = 2,
+                   cmsExtraText      = "Preliminary",
+                   ratio             = True,
+                   ratioType         = "errorPropagation", #"errorScale", "binomial"
+                   divideByBinWidth  =  False,
+                   ratioErrorOptions = {"numeratorStatSyst": False, "denominatorStatSyst": True},
+                   ratioMoveLegend   =  {"dx": +0.21, "dy": 0.03, "dh": -0.08},
+                   ratioYlabel       = "Ratio ",
+                   createLegend      = _leg,
+                   opts              = {"xmin": 0.0, "xmax": 800.0, "ymin": 0.0, "ymaxfactor": 1.2},
+                   opts2             = {"ymin": 0.6, "ymax": 1.4},
+                   cutBox            = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
                    )
 
     # Save plot in all formats    
