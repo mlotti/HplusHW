@@ -452,13 +452,21 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
         # Apply random histo styles and append
         if "charged" in dataset.getName().lower():
             counter +=1
+            mass = dataset.getName().split("M_")[-1]    
+            styles.markerStyles[counter].apply(eff)
+            if "300" in mass or "650" in mass:
+                s = styles.getSignalStyleHToTB_M(mass)
+                s.apply(eff)
+                eff.SetLineStyle(ROOT.kSolid)
+                eff.SetLineWidth(3)
+                eff.SetMarkerSize(1.2)
             '''
             mass = dataset.getName().split("M_")[-1]
             mass = mass.replace("650", "1000")
             s = styles.getSignalStyleHToTB_M(mass)
             s.apply(eff)
             '''
-            styles.markerStyles[counter].apply(eff)
+
 
         # Append in list
         myList.append(histograms.HistoGraph(eff, plots._legendLabels[dataset.getName()], "lp", "P"))
