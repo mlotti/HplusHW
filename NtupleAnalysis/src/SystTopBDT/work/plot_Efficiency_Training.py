@@ -738,7 +738,7 @@ if __name__ == "__main__":
     LATEX        = False
     URL          = False
     NOERROR      = True
-    SAVEDIR      = "/publicweb/%s/%s" % (getpass.getuser()[0], getpass.getuser()) + "/TopSystematics/Efficiencies" #/publicweb/s/skonstan/TopSystematics
+    SAVEDIR      = "/publicweb/%s/%s" % (getpass.getuser()[0], getpass.getuser()) + "/TopSystematics/Efficiencies"
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
     NORMALISE    = False
