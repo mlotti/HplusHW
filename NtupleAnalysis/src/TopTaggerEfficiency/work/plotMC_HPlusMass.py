@@ -404,27 +404,6 @@ def PlotMC(datasetsMgr, histo, intLumi):
     return
 
 
-def SavePlot(plot, saveName, saveDir, saveFormats = [".pdf"]):
-    Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
-    
-    # Check that path exists
-    if not os.path.exists(saveDir):
-        os.makedirs(saveDir)
-        
-    savePath = os.path.join(saveDir, saveName)
-
-    # For-loop: All save formats
-    for i, ext in enumerate(saveFormats):
-        saveNameURL = savePath + ext
-        saveNameURL = saveNameURL.replace(opts.saveDir, "http://home.fnal.gov/~%s/" % (getpass.getuser()))
-        if opts.url:
-            Print(saveNameURL, i==0)
-        else:
-            Print(savePath + ext, i==0)
-        plot.saveAs(savePath, formats=saveFormats)
-    return
-
-
 #================================================================================================ 
 # Main
 #================================================================================================ 
