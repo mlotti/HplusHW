@@ -1624,17 +1624,23 @@ def _createCutBoxAndLineY(frame, cutValue, fillColor=18, fillStyle=3001, box=Tru
         cutValueMirror = 1.0+abs(dy)
 
     if line:
-        l = ROOT.TLine(xmin, cutValue, xmax, cutValue)
-        l.SetLineWidth(3)
-        l.SetLineStyle(ROOT.kDashed)
-        l.SetLineColor(ROOT.kBlack)
-        ret.append(l)
+        l1 = ROOT.TLine(xmin, cutValue, xmax, cutValue)
+        l1.SetLineWidth(3)
+        l1.SetLineStyle(ROOT.kDashed)
+        l1.SetLineColor(ROOT.kBlack)
         if mirror:
-            l = ROOT.TLine(xmin, cutValueMirror, xmax, cutValueMirror)
-            l.SetLineWidth(3)
-            l.SetLineStyle(ROOT.kDashed)
-            l.SetLineColor(ROOT.kBlack)
-            ret.append(l)            
+            l2 = ROOT.TLine(xmin, cutValueMirror, xmax, cutValueMirror)
+            l2.SetLineWidth(0)
+            l1.SetLineWidth(0)
+            #l.SetLineStyle(ROOT.kDashed)
+            #l.SetLineColor(ROOT.kBlack)
+            l2.SetLineStyle(ROOT.kSolid)
+            l2.SetLineColor(fillColor)
+
+        # Append objects to list for drawing
+        ret.append(l1)
+        if mirror:
+            ret.append(l2)
 
     if box:
         b = ROOT.TBox(xmin, cutValue, xmax, cutValueMirror)
@@ -1865,18 +1871,14 @@ class PlotBase:
     # \param kwargs  Keyword arguments (forwarded to plots._createCutBoxAndLine())
     def addCutBoxAndLineY(self, *args, **kwargs):
         objs = _createCutBoxAndLineY(self.getFrame(), *args, **kwargs)
-        for o in objs:
+        for o in objs:            
             if "mainCanvas" in kwargs:
                 if kwargs["mainCanvas"]:
-                    self.appendPlotObject(o)
-            else:
-                self.appendPlotObject(o)
+                    self.appendPlotObject(o)                                   
             if "ratioCanvas" in kwargs:
                 if kwargs["ratioCanvas"]:
-                    self.prependPlotObjectToRatio(o)
-            else:
-                self.prependPlotObjectToRatio(o) 
-                
+                    #self.prependPlotObjectToRatio(o)
+                    self.appendPlotObjectToRatio(o)
 
     ## Add MC uncertainty histogram
     def addMCUncertainty(self):

@@ -124,6 +124,18 @@ def main():
     if (opts.includeOnlyTasks):
         Verbose("Adding only dataset %s from multiCRAB directory %s" % (opts.includeOnlyTasks, opts.mcrab))
         process.addDatasetsFromMulticrab(opts.mcrab, includeOnlyTasks=opts.includeOnlyTasks)
+        myBlackList = ["ChargedHiggs_HplusTB_HplusToTB_M_2000_ext1"
+                       "ChargedHiggs_HplusTB_HplusToTB_M_2500_ext1", 
+                       "ChargedHiggs_HplusTB_HplusToTB_M_3000_ext1", 
+                       "ChargedHiggs_HplusTB_HplusToTB_M_1500",   # Speeed things up
+                       "ChargedHiggs_HplusTB_HplusToTB_M_2000",   # Speeed things up
+                       "ChargedHiggs_HplusTB_HplusToTB_M_2500",   # Speeed things up
+                       "ChargedHiggs_HplusTB_HplusToTB_M_3000",   # Speeed things up
+                       "ChargedHiggs_HplusTB_HplusToTB_M_5000",   # Speeed things up
+                       "ChargedHiggs_HplusTB_HplusToTB_M_7000",   # Speeed things up  
+                       "ChargedHiggs_HplusTB_HplusToTB_M_10000",  # Speeed things up
+                       ]
+
     elif (opts.excludeTasks):
         Verbose("Adding all datasets except %s from multiCRAB directory %s" % (opts.excludeTasks, opts.mcrab))
         Verbose("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
@@ -153,6 +165,8 @@ def main():
                        "ChargedHiggs_HplusTB_HplusToTB_M_7000",   # Speeed things up  
                        "ChargedHiggs_HplusTB_HplusToTB_M_10000",  # Speeed things up
                        ]
+
+
         #if opts.doSystematics:
         #    myBlackList.append("QCD")
 
