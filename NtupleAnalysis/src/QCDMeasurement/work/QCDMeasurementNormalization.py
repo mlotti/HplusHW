@@ -64,6 +64,9 @@ def main(argv, dsetMgr, moduleInfoString):
     COMBINEDHISTODIR = "ForQCDNormalization"
     FAKEHISTODIR = "ForQCDNormalizationEWKFakeTaus"
     GENUINEHISTODIR = "ForQCDNormalizationEWKGenuineTaus"
+    #QCDMCHISTODIR = "ForQCDNormalizationEWKFakeTaus"
+    QCDMCHISTODIR = "ForQCDNormalization"
+
     comparisonList = ["AfterStdSelections"]
 
     dirs = []
@@ -164,6 +167,12 @@ def main(argv, dsetMgr, moduleInfoString):
             raise Exception("Error: tried to use dataset '%s' as part of the merged EWK dataset, but the dataset '%s' does not exist!"%(item,item))
     dsetMgr.merge("EWK", myMergeList)
 
+    myQCDMergeList = []
+    if "QCD" in dsetMgr.getMCDatasetNames():
+        myQCDMergeList.append("QCD")
+        dsetMgr.merge("QCDMC", myQCDMergeList)
+
+
     if verbose:
         print "\nFinal merged dataset list:\n"
         print dsetMgr.getMCDatasetNames()
@@ -247,6 +256,9 @@ def main(argv, dsetMgr, moduleInfoString):
         template_QCD_Inverted = manager.createTemplate("QCD_Inverted")
         template_FakeTau_Baseline = manager.createTemplate("FakeTau_Baseline")
         template_FakeTau_Inverted = manager.createTemplate("FakeTau_Inverted")
+        if "QCDMC" in dsetMgr.getMCDatasetNames():
+            template_QCDMC_Baseline = manager.createTemplate("QCDMC_Baseline")
+            template_QCDMC_Inverted = manager.createTemplate("QCDMC_Inverted")
                 
         #===== Define fit functions and fit parameters
         # The available functions are defined in the FitFunction class in the QCDMeasurement/python/QCDNormalization.py file
@@ -322,6 +334,16 @@ def main(argv, dsetMgr, moduleInfoString):
             hmetInverted_EWKinclusive = hmetInverted_EWK_GenuineTaus.Clone("EWKinclusiveInv")
             hmetInverted_EWKinclusive.Add(hmetInverted_EWK_FakeTaus, 1.0)
 
+            #===== Obtain QCDMC histograms (not used, only for cross check)
+            histoName = QCDMCHISTODIR+"/"+BASELINETAUHISTONAME+binStr
+            hmetBase_QCDMC = None
+            if plots.DataMCPlot(dsetMgr, histoName).histoMgr.hasHisto("QCDMC"):
+                hmetBase_QCDMC = plots.DataMCPlot(dsetMgr, histoName).histoMgr.getHisto("QCDMC").getRootHisto().Clone(histoName)
+            histoName = QCDMCHISTODIR+"/"+INVERTEDTAUHISTONAME+binStr
+            hmetInverted_QCDMC = None
+            if plots.DataMCPlot(dsetMgr, histoName).histoMgr.hasHisto("QCDMC"):
+                hmetInverted_QCDMC = plots.DataMCPlot(dsetMgr, histoName).histoMgr.getHisto("QCDMC").getRootHisto().Clone(histoName)
+
             # Finalize histograms by rebinning
             for histogram in [hmetBase_data, hmetInverted_data, hmetBase_EWK_GenuineTaus, hmetInverted_EWK_GenuineTaus, hmetBase_EWKinclusive, hmetBase_EWK_FakeTaus, hmetInverted_EWK_FakeTaus, hmetInverted_EWKinclusive]:
                  histogram.Rebin(_rebinFactor)
@@ -340,6 +362,7 @@ def main(argv, dsetMgr, moduleInfoString):
             
             hmetInverted_FakeTau = hmetInverted_data.Clone("QCDinv")
             hmetInverted_FakeTau.Add(hmetInverted_EWK_GenuineTaus,-1)
+
             
             #===== Set histograms to the templates
             template_EWKFakeTaus_Inverted.setHistogram(hmetInverted_EWK_FakeTaus, binLabels[i])
@@ -347,13 +370,17 @@ def main(argv, dsetMgr, moduleInfoString):
             template_EWKInclusive_Inverted.setHistogram(hmetInverted_EWKinclusive, binLabels[i])
             template_QCD_Inverted.setHistogram(hmetInverted_QCD, binLabels[i])
             template_FakeTau_Inverted.setHistogram(hmetInverted_FakeTau, binLabels[i])
-            
+            if hmetInverted_QCDMC:
+                template_QCDMC_Inverted.setHistogram(hmetInverted_QCDMC, binLabels[i])
+
             template_EWKFakeTaus_Baseline.setHistogram(hmetBase_EWK_FakeTaus, binLabels[i])
             template_EWKGenuineTaus_Baseline.setHistogram(hmetBase_EWK_GenuineTaus, binLabels[i])
             template_EWKInclusive_Baseline.setHistogram(hmetBase_EWKinclusive, binLabels[i])
             template_QCD_Baseline.setHistogram(hmetBase_QCD, binLabels[i])
             template_FakeTau_Baseline.setHistogram(hmetBase_FakeTau, binLabels[i])
-            
+            if hmetBase_QCDMC:
+                template_QCDMC_Baseline.setHistogram(hmetBase_QCDMC, binLabels[i])
+
             #===== Make plots of templates
             manager.plotTemplates()
             

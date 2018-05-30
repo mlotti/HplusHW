@@ -142,7 +142,8 @@ def GetHistoKwargs(histoName):
         _rebinX       = 2
         if "tetrajetbjet" in histoName.lower():
             _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            _rebinX = 1
+            _rebinX = 2
+            _opts["xmax"] = 800
 
     if "mass" in histoName.lower():
         _units        = "GeV/c^{2}"
@@ -379,8 +380,8 @@ def main(opts):
         #folderList1 = [h for h in folderList if "TetrajetPt" in h]
         #folderList1 = [h for h in folderList if "TetrajetMass" in h]
         #folderList1 = [h for h in folderList if "MET" in h]
-        #folderList1 = [h for h in folderList if "TetrajetBJetPt" in h]
-        folderList1 = [h for h in folderList if "TetrajetBJetEta" in h]
+        folderList1 = [h for h in folderList if "TetrajetBJetPt" in h]
+        #folderList1 = [h for h in folderList if "TetrajetBJetEta" in h] #iro
         folderList2 = [h for h in folderList1 if "VR" in h or "SR" in h or "CRone" in h or "CRtwo" in h  or "CRthree" in h  or "CRfour" in h]
 
         # For-loop: All folders
