@@ -89,6 +89,19 @@ private:
   WrappedTH1 *hEventTrijetPt2T_MatchedBDT;
   WrappedTH1 *hTrijetFakePt_BDT;
   WrappedTH1 *hTrijetFakePt;
+  
+  WrappedTH1 *hAssocTopQuarkPt;
+  WrappedTH1 *hAssocTopQuarkPt_Matched;
+  WrappedTH1 *hAssocTopQuarkPt_MatchedBDT;
+
+  WrappedTH1 *hHiggsTopQuarkPt;           
+  WrappedTH1 *hHiggsTopQuarkPt_Matched;   
+  WrappedTH1 *hHiggsTopQuarkPt_MatchedBDT;
+
+  WrappedTH1 *hBothTopQuarkPt;           
+  WrappedTH1 *hBothTopQuarkPt_Matched;   
+  WrappedTH1 *hBothTopQuarkPt_MatchedBDT;
+
 
   // Non-common histograms
   WrappedTH1Triplet* hTetrajetMass;
@@ -237,15 +250,33 @@ void TopTaggerEfficiency::book(TDirectory *dir) {
 
   // Book non-common histograms
   //For Efficiency plots                                                                                                                                                                                             
+  //const int nPtBins       = 2*fCommonPlots.getPtBinSettings().bins();
+  //const double fPtMin     = 2 *fCommonPlots.getPtBinSettings().min();
+  //const double fPtMax     = 2* fCommonPlots.getPtBinSettings().max();
+
+
   hTopQuarkPt                   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TopQuarkPt"                  , ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
   hAllTopQuarkPt_Matched        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "AllTopQuarkPt_Matched"       , ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
   hAllTopQuarkPt_MatchedBDT     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "AllTopQuarkPt_MatchedBDT"    , ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
-  hEventTrijetPt2T_Matched      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "EventTrijetPt2T_Matched"     , ";p_{T} (GeV/c)", 2*nPtBins, fPtMin, fPtMax);
-  hEventTrijetPt2T              = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "EventTrijetPt2T"             ,";p_{T} (GeV/c)" , 2*nPtBins, fPtMin, fPtMax);
-  hEventTrijetPt2T_BDT          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "EventTrijetPt2T_BDT"         , ";p_{T} (GeV/c)", 2*nPtBins, fPtMin, fPtMax);
-  hEventTrijetPt2T_MatchedBDT   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "EventTrijetPt2T_MatchedBDT"  , ";p_{T} (GeV/c)", 2*nPtBins, fPtMin, fPtMax);
+  hEventTrijetPt2T_Matched      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "EventTrijetPt2T_Matched"     , ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
+  hEventTrijetPt2T              = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "EventTrijetPt2T"             ,";p_{T} (GeV/c)" , nPtBins, fPtMin, fPtMax);
+  hEventTrijetPt2T_BDT          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "EventTrijetPt2T_BDT"         , ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
+  hEventTrijetPt2T_MatchedBDT   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "EventTrijetPt2T_MatchedBDT"  , ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
   hTrijetFakePt                 = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TrijetFakePt"                ,";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
   hTrijetFakePt_BDT             = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TrijetFakePt_BDT"            ,";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
+
+  hAssocTopQuarkPt              = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "AssocTopQuarkPt"                  , ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
+  hAssocTopQuarkPt_Matched      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "AssocTopQuarkPt_Matched"       , ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
+  hAssocTopQuarkPt_MatchedBDT   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "AssocTopQuarkPt_MatchedBDT"    , ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
+
+  hHiggsTopQuarkPt              = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "HiggsTopQuarkPt"                  , ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
+  hHiggsTopQuarkPt_Matched      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "HiggsTopQuarkPt_Matched"       , ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
+  hHiggsTopQuarkPt_MatchedBDT   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "HiggsTopQuarkPt_MatchedBDT"    , ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
+
+  hBothTopQuarkPt              = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "BothTopQuarkPt"                  , ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
+  hBothTopQuarkPt_Matched      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "BothTopQuarkPt_Matched"       , ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
+  hBothTopQuarkPt_MatchedBDT   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "BothTopQuarkPt_MatchedBDT"    , ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
+
 
 
   //Distances
@@ -645,11 +676,10 @@ void TopTaggerEfficiency::process(Long64_t entry) {
 
   std::vector<genParticle> GenTops;  
   GenTops = GetGenParticles(fEvent.genparticles().getGenParticles(), 6);
-  // For-loop: All top quarks
   
   std::vector<genParticle> GenChargedHiggs;
   std::vector<genParticle> GenChargedHiggs_BQuark;
-  genParticle              GenHTop;
+  genParticle              GenHTop, GenATop;
   std::vector<genParticle> GenTops_BQuark;
   std::vector<genParticle> GenTops_SubldgQuark;
   std::vector<genParticle> GenTops_LdgQuark;
@@ -661,6 +691,20 @@ void TopTaggerEfficiency::process(Long64_t entry) {
   std::vector<genParticle> GenH_LdgQuark, GenH_SubldgQuark, GenH_BQuark;
   std::vector<genParticle> GenA_LdgQuark, GenA_SubldgQuark, GenA_BQuark;
   std::vector<bool> FoundTop;
+
+  bool haveGenHTop = false, haveGenATop = false;
+  //Find Assoc Top, Top from Higgs
+  for (auto& top: GenTops){
+    if (HasMother(fEvent, top, 37)){
+      haveGenHTop = true;
+      GenHTop = top;
+    }
+    else {
+      haveGenATop = true;
+      GenATop = top;
+    }
+  }
+
   
 
   const double twoSigmaDpt = 0.32;
@@ -956,14 +1000,72 @@ void TopTaggerEfficiency::process(Long64_t entry) {
     std::cout<<GenHTop.pt()<<have_Wa<<have_Wh<<std::endl;
   }
 
+  bool haveMatchedHiggsTop = HiggsTop_Bjet.size() > 0;
+  bool haveMatchedAssocTop = AssocTop_Bjet.size() > 0;
   int ncleaned = 0;
   for (size_t i = 0; i < topData.getAllTopsBJet().size(); i++){
     int index = i;
     if (TrijetPassBDT_crossCleaned(index, topData, bjetData.getSelectedBJets())) ncleaned++;
   }
 
+  //============================================================
+  //============================================================
+  //Return if less than two top candidates found in the event!!!
   if (ncleaned < 2) return;
+  //============================================================
+  //============================================================
+
   if (doMatching){
+    bool TopPassBDT_h = false;
+    bool TopPassBDT_a = false;
+    bool TopMatched_h = false;
+    bool TopMatched_a = false;
+    //Top from Higgs pt
+    if (haveGenHTop){
+      hHiggsTopQuarkPt -> Fill(GenHTop.pt());
+      hBothTopQuarkPt -> Fill(GenHTop.pt());
+    }
+    //Associated Top pt
+    if (haveGenATop){
+      hAssocTopQuarkPt -> Fill(GenATop.pt());
+      hBothTopQuarkPt -> Fill(GenATop.pt());
+    }
+
+    if (haveMatchedHiggsTop) TopMatched_h = isRealMVATop(HiggsTop_LdgJet.at(0), HiggsTop_SubldgJet.at(0), HiggsTop_Bjet.at(0),
+							 topData.getAllTopsJet1(), topData.getAllTopsJet2(), topData.getAllTopsBJet());
+    if (haveMatchedAssocTop) TopMatched_a = isRealMVATop(AssocTop_LdgJet.at(0), AssocTop_SubldgJet.at(0), AssocTop_Bjet.at(0),
+							 topData.getAllTopsJet1(), topData.getAllTopsJet2(), topData.getAllTopsBJet());
+    
+    //Matched top from Higgs
+    if (TopMatched_h){
+      hHiggsTopQuarkPt_Matched -> Fill(GenHTop.pt());
+      hBothTopQuarkPt_Matched -> Fill(GenHTop.pt());
+    }
+    //Matched assiciated top
+    if (TopMatched_a){
+      hAssocTopQuarkPt_Matched -> Fill(GenATop.pt());
+      hBothTopQuarkPt_Matched -> Fill(GenATop.pt());
+    }
+
+    if (haveMatchedHiggsTop) TopPassBDT_h = isRealMVATop(HiggsTop_LdgJet.at(0), HiggsTop_SubldgJet.at(0), HiggsTop_Bjet.at(0),
+						      topData.getSelectedTopsJet1(), topData.getSelectedTopsJet2(), topData.getSelectedTopsBJet());
+    if (haveMatchedAssocTop) TopPassBDT_a = isRealMVATop(AssocTop_LdgJet.at(0), AssocTop_SubldgJet.at(0), AssocTop_Bjet.at(0),
+						      topData.getSelectedTopsJet1(), topData.getSelectedTopsJet2(), topData.getSelectedTopsBJet());
+
+    //Top from Higgs passes BDT
+    if (TopPassBDT_h){
+      hHiggsTopQuarkPt_MatchedBDT -> Fill(GenHTop.pt());
+      hBothTopQuarkPt_MatchedBDT -> Fill(GenHTop.pt());
+    }
+    //Associated Top passes BDT
+    if (TopPassBDT_a){
+      hAssocTopQuarkPt_MatchedBDT -> Fill(GenATop.pt());
+      hBothTopQuarkPt_MatchedBDT -> Fill(GenATop.pt());
+    }
+
+    //This is a test
+    
+    
     //======================================
     //Denominator: Tagging Efficidency
     //======================================
@@ -998,9 +1100,7 @@ void TopTaggerEfficiency::process(Long64_t entry) {
 	//if (genuineTop) continue;
       } //for (int i = 0; i < topData.getAllTopsBJet().size(); i++)
 
-      if (genuineTop){
-	hAllTopQuarkPt_Matched-> Fill(top.pt());
-      }
+      if (genuineTop) hAllTopQuarkPt_Matched -> Fill(top.pt());
     
       //======================================
       //Numerator: Tagging Efficiency
@@ -1023,7 +1123,7 @@ void TopTaggerEfficiency::process(Long64_t entry) {
 	hAllTopQuarkPt_MatchedBDT -> Fill(top.pt());
       }
     }//for (size_t j=0; j<GenTops.size(); j++)
-
+  
     //======================================
     //Fake trijets: Unmatched
     //======================================
