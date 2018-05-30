@@ -20,9 +20,24 @@
    A json file with the Efficiencies in Data & MC is created.
    
  USAGE:
-  ./getMisIdRateCR2.py -m <pseudo-multicrab> --folder <folder> 
-
+ ./getMisIdRateCR2.py -m <pseudo-multicrab> --folder <folder> 
+ 
+ # Marina
  LAST USED:
+ (1)  ./getMisIdRateCR2.py -m SystTopBDT_180528_151309_MET30_MuIso0p1_InvMET30_InvMuIso0p2_noSF -e "TTW|TTZ"                                                                                                     
+ (2)  ./getMisIdRateCR2.py -m SystTopBDT_180528_151533_MET30_MuIso0p1_InvMET30_InvMuIso0p2_noSF -e "TTW|TTZ"                                                                                                      
+ (3)  ./getMisIdRateCR2.py -m SystTopBDT_180528_152141_MET50_MuIso0p1_InvMET20_InvMuIso0p2_noSF -e "TTW|TTZ"                                                                                                      
+ (4)  ./getMisIdRateCR2.py -m SystTopBDT_180528_152310_MET40_MuIso0p1_InvMET30_InvMuIso0p2_noSF -e "TTW|TTZ"                                                                                                      
+ (5)  ./getMisIdRateCR2.py -m SystTopBDT_180528_152540_MET30_MuIso0p1_InvMET15_InvMuIso0p2_noSF -e "TTW|TTZ"                                                                                                      
+ (6)  ./getMisIdRateCR2.py -m SystTopBDT_180528_152944_MET30_MuIso0p2_InvMET20_InvMuIso0p4_noSF -e "TTW|TTZ"      
+ (7)  ./getMisIdRateCR2.py -m SystTopBDT_180529_093052_MET50_MuIso0p1_InvMET20_InvMuIso0p1_noSF -e "TTW|TTZ"
+ (8)  ./getMisIdRateCR2.py -m SystTopBDT_180529_165537_MET30_MuIso0p1_InvMET30_InvMuIso0p1_noSF -e "TTW|TTZ"
+ (9)  ./getMisIdRateCR2.py -m SystTopBDT_180529_170402_MET30_MuIso0p1_InvMET20_InvMuIso0p1_noSF -e "TTW|TTZ"
+ (10) ./getMisIdRateCR2.py -m SystTopBDT_180529_094433_MET30_MuIso0p1_InvMET15_InvMuIso0p1_noSF -e "TTW|TTZ"
+ (11) ./getMisIdRateCR2.py -m SystTopBDT_180529_094647_MET50_MuIso0p2_InvMET30_InvMuIso0p2_noSF -e "TTW|TTZ"
+ (12) ./getMisIdRateCR2.py -m SystTopBDT_180529_094856_MET30_MuIso0p1_InvMET20_InvMuIso0p3_noSF -e "TTW|TTZ"
+ 
+ 
  ./getMisIdRateCR2.py -m SystTopBDT_180524_074141_MET50_MuIso0p1_InvMET20_InvMuIso0p1_noSF -e "TTW|TTZ"
  
  OTHER SELECTIONS:
@@ -389,7 +404,6 @@ def GetHisto(datasetsMgr, dataset, hName, intLumi):
      n = datasetsMgr.getDataset(dataset).getDatasetRootHisto(hName)
      n.normalizeToLuminosity(intLumi)
      histo = n.getHistogram()
-     #histo.Rebin(2)
      return histo
 
 def GetHistoPathDict(histoList, printList=False):
@@ -531,10 +545,23 @@ def GetScaleFactors(datasetsMgr, num_pathList, den_pathList, intLumi):
     # Get Dictionaries 
     rhDict_num = GetRootHistos(datasetsMgr, num_pathList, regions)
     rhDict_den = GetRootHistos(datasetsMgr, den_pathList, regions)
-
-    # Normalization Factors (see: getNormalization.py)
-    f1=0.596314; f2=0.899518;
     
+    # Marina
+    # Normalization Factors (see: getNormalization.py)
+    #f1=0.610901; f2=0.889906; # (1)
+    #f1=0.610901; f2=0.906343; # (2)
+    #f1=0.610963; f2=0.903020; # (3)
+    #f1=0.610901; f2=0.901711; # (4)
+    #f1=0.603648; f2=0.907290; # (5)
+    #f1=0.611682; f2=0.889619; # (6)
+    #f1=0.613102; f2=0.902808; # (7)
+    # (8)
+    # (9)
+    #f1=0.608068; f2=0.906716; # (10)
+    #f1=0.610901; f2=0.906713; # (11)
+    f1=0.616422; f2=0.905622; # (12)
+
+
     # ------------------------------------------------------------------------------
     # (A) Normalize QCD and TT (MC) in all regions
     # -------------------------------------------------------------------------------
@@ -695,7 +722,8 @@ def GetScaleFactors(datasetsMgr, num_pathList, den_pathList, intLumi):
     plots.drawPlot(p2, hName, **_kwargs)
     SavePlot(p2, hName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".C", ".pdf"])
     
-    jsonName = "Efficiency_SystBDT_CR2_MET50_MuIso0p1_InvMET20_InvMuIso0p1.json"
+    # Marina
+    jsonName = "Efficiency_SystBDT_CR2_MET30_MuIso0p1_InvMET20_InvMuIso0p3.json"
 
     # Dump results in a JSON File
     runRange = "273150-284044"
