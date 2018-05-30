@@ -28,6 +28,7 @@ import copy
 import os
 import getpass
 from optparse import OptionParser
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -223,25 +224,25 @@ def getHistos(datasetsMgr, histoName):
     return [h1, h2]
 
 
-
-def SavePlot(plot, saveName, saveDir, saveFormats = [".pdf"]):
+def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
-    
-    # Check that path exists
+
+     # Check that path exists
     if not os.path.exists(saveDir):
         os.makedirs(saveDir)
-        
-    savePath = os.path.join(saveDir, saveName)
+
+    # Create the name under which plot will be saved
+    saveName = os.path.join(saveDir, plotName.replace("/", "_"))
+    saveName = saveName.replace("(", "_")
+    saveName = saveName.replace(")", "")
+    saveName = saveName.replace(" ", "")
 
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
-        saveNameURL = savePath + ext
-        saveNameURL = saveNameURL.replace(opts.saveDir, "http://home.fnal.gov/~%s/" % (getpass.getuser()))
-        if opts.url:
-            Print(saveNameURL, i==0)
-        else:
-            Print(savePath + ext, i==0)
-        plot.saveAs(savePath, formats=saveFormats)
+        saveNameURL = saveName + ext
+        saveNameURL = aux.convertToURL(saveNameURL, opts.url)
+        Verbose(saveNameURL, i==0)
+        plot.saveAs(saveName, formats=saveFormats)
     return
 
 
@@ -256,7 +257,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
         p = plots.MCPlot(datasetsMgr, histo, normalizeToOne=True, saveFormats=[], **kwargs)
     else:
         p = plots.MCPlot(datasetsMgr, histo, normalizeToLumi=intLumi, saveFormats=[], **kwargs)
-#    p = plots.MCPlot(datasetsMgr, histo, normalizeToLumi=intLumi, saveFormats=[], **kwargs)
+
     # Draw the histograms
     _cutBox = None
     _rebinX = 1
@@ -265,32 +266,22 @@ def PlotMC(datasetsMgr, histo, intLumi):
 
     _opts   = {"ymin": 1e-3, "ymaxfactor": 1.0}
 
-    if "ChiSqr" in histo:
-        _rebinX = 1
-#        logY    = True
-        _units  = ""
-        _format = "%0.1f " + _units
-        _xlabel = "#chi^{2}"
-        _cutBox = {"cutValue": 10.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 100
 
-    elif "trijetmass" in histo.lower():
+    if "pt" in histo.lower():
         _rebinX = 2
-#        logY    = False
+        _units  = "GeV/c"
+        _format = "%0.0f " + _units
+        _xlabel = "p_{T} (%s)" % _units
+        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        #_opts["xmax"] = 505 #1005
+
+    if "trijetmass" in histo.lower():
+        _rebinX = 2
         _units  = "GeV/c^{2}"
         _format = "%0.0f " + _units
         _xlabel = "m_{jjb} (%s)" % _units
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _opts["xmax"] = 505 #1005
-
-    elif "ht" in histo.lower():
-        _rebinX = 2
-#        logY    = False
-        _units  = "GeV"
-        _format = "%0.0f " + _units
-        _xlabel = "H_{T} (%s)" % _units
-        _cutBox = {"cutValue": 500, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 2000
 
     elif "tetrajetmass" in histo.lower():
         _rebinX = 5 #5 #10 #4
@@ -302,7 +293,6 @@ def PlotMC(datasetsMgr, histo, intLumi):
 
     elif "dijetmass" in histo.lower():
         _rebinX = 1 #5 #10 #4
-#        logY    = False
         _units  = "GeV/c^{2}"
         _format = "%0.0f " + _units
         _xlabel = "m_{W} (%s)" % (_units)
@@ -313,12 +303,12 @@ def PlotMC(datasetsMgr, histo, intLumi):
 
     elif "tetrajetbjetpt" in histo.lower():
         _rebinX = 2
-#        logY    = False
         _units  = "GeV/c"
         _format = "%0.0f " + _units
         _xlabel = "p_{T}  (%s)" % (_units)
         _format = "%0.0f " + _units
         _opts["xmax"] = 800
+
     elif "ldgtrijetpt" in histo.lower():
         _rebinX = 2
 #        logY    = False
@@ -328,46 +318,9 @@ def PlotMC(datasetsMgr, histo, intLumi):
         _format = "%0.0f " + _units
         _opts["xmax"] = 800
 
-    elif "trijetbdt_mass" in histo.lower():
-        _rebinX = 2
-        _units  = "GeV/c^{2}"
-        _format = "%0.0f " + _units
-        _xlabel = "m_{jjb} (%s)" % _units
-        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 505 
-#    elif "topcandmass" in histo.lower():
-#        _rebinX = 2
-#        _units  = "GeV/c^{2}"
-#        _format = "%0.0f " + _units
-#        _xlabel = "m_{jjb} (%s)" % _units
-#        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-#        _opts["xmax"] = 505 
-
-    elif "matched_mass" in histo.lower():
-        _rebinX = 2
-        _units  = "GeV/c^{2}"
-        _format = "%0.0f " + _units
-        _xlabel = "m_{jjb} (%s)" % _units
-        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 505 
 
     elif "bdtvalue" in histo.lower():
         _format = "%0.1f"
-
-    elif "foxwolframmoment" in histo.lower():
-        _format = "%0.1f"
-        _cutBox = {"cutValue": 0.5, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-
-    elif "absdeltamvamax_mctruth_sameobjfakes" in histo.lower():
-        _format = "%0.1f"
-        _xlabel = "|#Delta BDTG| response"
-
-    elif "deltamvamin_mctruth_sameobjfakespassbdt" in histo.lower():
-        _opts["xmax"] = 1
-        _opts["xmin"] = -1
-    elif "bdtmultiplicity" in histo.lower():
-        _opts["xmax"] = 15
-
 
     else:
         pass
@@ -397,15 +350,19 @@ def PlotMC(datasetsMgr, histo, intLumi):
     # Customise styling
     p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineStyle(ROOT.kSolid))
 
-    if "QCD" in datasetsMgr.getAllDatasets():
+    if "QCD" in datasetsMgr.getAllDatasetNames():
         p.histoMgr.forHisto("QCD", styles.getQCDFillStyle() )
         p.histoMgr.setHistoDrawStyle("QCD", "HIST")
         p.histoMgr.setHistoLegendStyle("QCD", "F")
 
-    if "TT" in datasetsMgr.getAllDatasets():
-        p.histoMgr.setHistoDrawStyle("TT", "AP")
-        p.histoMgr.setHistoLegendStyle("TT", "LP")
-
+    if "TT" in datasetsMgr.getAllDatasetNames():
+        TTStyle           = styles.StyleCompound([styles.StyleFill(fillColor=ROOT.kMagenta-2), styles.StyleLine(lineColor=ROOT.kMagenta-2, lineStyle=ROOT.kSolid, lineWidth=3),
+                                                  styles.StyleMarker(markerSize=1.2, markerColor=ROOT.kMagenta-2, markerSizes=None, markerStyle=ROOT.kFullTriangleUp)])
+        p.histoMgr.forHisto("TT", TTStyle)
+        p.histoMgr.setHistoDrawStyle("TT", "HIST") #AP
+        p.histoMgr.setHistoLegendStyle("TT", "F")  #LP
+        
+        
     # Customise style
     signalM = []
     for m in signalMass:
@@ -417,11 +374,11 @@ def PlotMC(datasetsMgr, histo, intLumi):
     plots.drawPlot(p, 
                    histo,  
                    xlabel       = _xlabel,
-                   ylabel       = Ylabel,#"Arbitrary Units / %s" % (_format), #"Events / %s" % (_format), #"Arbitrary Units / %s" % (_format),
+                   ylabel       = Ylabel,
                    log          = logY,
                    rebinX       = _rebinX, cmsExtraText = "Preliminary", 
                    createLegend = {"x1": 0.58, "y1": 0.65, "x2": 0.92, "y2": 0.92},
-#                   createLegend = {"x1": 0.73, "y1": 0.85, "x2": 0.97, "y2": 0.77},
+                   #createLegend = {"x1": 0.73, "y1": 0.85, "x2": 0.97, "y2": 0.77},
                    opts         = _opts,
                    opts2        = {"ymin": 0.6, "ymax": 1.4},
                    cutBox       = _cutBox,
@@ -429,8 +386,9 @@ def PlotMC(datasetsMgr, histo, intLumi):
 
     # Save plot in all formats    
     saveName = histo.split("/")[-1]
-    savePath = os.path.join(opts.saveDir, "HplusMasses", histo.split("/")[0], opts.optMode)
+    savePath = os.path.join(opts.saveDir, histo.split("/")[0], opts.optMode)
 
+    '''
     if opts.normaliseToOne:
         save_path = savePath + opts.MVAcut
         if opts.noQCD:
@@ -439,9 +397,9 @@ def PlotMC(datasetsMgr, histo, intLumi):
         save_path = savePath + opts.MVAcut + "/normToLumi/"
         if opts.noQCD:
             save_path = savePath + opts.MVAcut + "/noQCD/"
-
-#    SavePlot(p, saveName, savePath) 
-    SavePlot(p, saveName, save_path) 
+     '''
+    
+    SavePlot(p, saveName, savePath) 
 
     return
 
@@ -495,8 +453,8 @@ if __name__ == "__main__":
     OPTMODE      = ""
     BATCHMODE    = True
     PRECISION    = 3
-    #SIGNALMASS   = [200, 500, 800, 2000]
-    SIGNALMASS   = []
+    SIGNALMASS   = [200, 400, 500, 650, 1000]
+    #SIGNALMASS   = []
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False
@@ -504,11 +462,7 @@ if __name__ == "__main__":
     URL          = False
     NOERROR      = True
     NOQCD        = False
-#    if (1): #opts.normaliseToOne:
-#        DIR = MVACUT
-#    else:
-#        DIR = MVACUT+ "/normToLumi/"
-    SAVEDIR      = "/publicweb/%s/%s/%s" % (getpass.getuser()[0], getpass.getuser(), ANALYSISNAME)
+    SAVEDIR      = None #"/publicweb/%s/%s/%s" % (getpass.getuser()[0], getpass.getuser(), ANALYSISNAME)
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
     NORMALISE    = False
@@ -591,6 +545,9 @@ if __name__ == "__main__":
     # Sanity check
     if opts.mergeEWK:
         Print("Merging EWK samples into a single Datasets \"EWK\"", True)
+
+    if opts.saveDir == None:
+        opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="")
 
     # Sanity check
     allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 2000, 3000]

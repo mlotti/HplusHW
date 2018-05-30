@@ -137,7 +137,7 @@ def GetHistoKwargs(histoName, opts):
         "ylabel"           : "Efficiency / ", #/ %.1f ",
         # "rebinX"           : 1,
         "ratioYlabel"      : "Ratio",
-        "ratio"            : False,
+        "ratio"            : True,
         "ratioInvert"      : False,
         "stackMCHistograms": False,
         "addMCUncertainty" : False,
@@ -151,7 +151,7 @@ def GetHistoKwargs(histoName, opts):
 #        "moveLegend"       : {"dx": -0.08, "dy": -0.01, "dh": -0.08},
         "moveLegend"       : {"dx": -0.08, "dy": -0.005, "dh": -0.08},
 #        "moveLegend"       : {"dx": -0.57, "dy": -0.007, "dh": -0.18},
-        "cutBoxY"          : {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
+        #"cutBoxY"          : {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": True}
         }
 
     if "pt" in h:
@@ -164,10 +164,10 @@ def GetHistoKwargs(histoName, opts):
         kwargs["cutBox"] = {"cutValue": 100.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         
         #if "all" in h:
-            #myBins  = [0, 50, 100, 150, 200, 300, 400, 500]
+        #    myBins  = [0, 50, 100, 150, 200, 300, 450]
         if "topquark" in h:
             #kwargs["moveLegend"] = {"dx": -0.55, "dy": -0.55, "dh": -0.08}
-            kwargs["moveLegend"] = {"dx": -0.08, "dy": -0.55, "dh": -0.08}
+            kwargs["moveLegend"] = {"dx": -0.08, "dy": -0.65, "dh": -0.08}
             xlabel = "generated top p_{T} (%s)" % (units)
         if 0:
             ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
@@ -175,11 +175,12 @@ def GetHistoKwargs(histoName, opts):
         if "fake" in h:
             xlabel = "candidate p_{T} (%s)" % (units)
             kwargs["ylabel"] = "Misidentification rate / " #+ units
-            kwargs["opts"]   = {"ymin": 0.0, "ymaxfactor": 1.3}
+            kwargs["opts"]   = {"ymin": 0.0, "ymaxfactor": 1.2}
+            kwargs["moveLegend"] = {"dx": -0.08, "dy": -0.65, "dh": -0.08}
             #myBins  = [0, 50, 100, 150, 250, 350, 450, 550]
         if "event" in h:
             #kwargs["moveLegend"] = {"dx": -0.55, "dy": -0.55, "dh": -0.08}
-            kwargs["moveLegend"] = {"dx": -0.08, "dy": -0.55, "dh": -0.08}
+            kwargs["moveLegend"] = {"dx": -0.08, "dy": -0.65, "dh": -0.08}
             #myBins  = [0, 50, 100, 150, 250, 350, 400, 500]
             #myBins  = [0, 100, 200, 300, 400, 500, 800]
         if 0:
@@ -277,11 +278,15 @@ def main(opts, signalMass):
                      "TrijetFakePt_BDT",
                      "AssocTopQuarkPt_MatchedBDT",
                      "HiggsTopQuarkPt_MatchedBDT",
+                     "AllTopQuarkPt_MatchedBDT",
+                     "AllTopQuarkPt_Matched",
                      ]
         Denominator = ["AllTopQuarkPt_Matched",
                        "TrijetFakePt",
                        "AssocTopQuarkPt_Matched",                       
                        "HiggsTopQuarkPt_Matched",                       
+                       "TopQuarkPt",
+                       "TopQuarkPt",
                        ]
 
         '''
@@ -386,6 +391,7 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
   
     # Definitions
     myList  = []
+    myBckList = []
     index   = 0
     _kwargs = GetHistoKwargs(numPath, opts)        
     counter = 0
@@ -472,23 +478,25 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
                 s = styles.getSignalStyleHToTB_M(mass)
                 s.apply(eff)
                 '''
-        if "tt" in dataset.getName().lower():
-            eff.SetLineWidth(4)
         '''
         ttStyle = styles.getEWKLineStyle()
         if "tt" in dataset.getName().lower():
             ttStyle.apply(eff)
         '''
 
-
+        
         # Append in list
-        myList.append(histograms.HistoGraph(eff, plots._legendLabels[dataset.getName()], "lp", "P"))
+        if "charged" in dataset.getName().lower():
+            myList.append(histograms.HistoGraph(eff, plots._legendLabels[dataset.getName()], "lp", "P"))
+        elif "tt" in dataset.getName().lower():
+            eff_ref = histograms.HistoGraph(eff, plots._legendLabels[dataset.getName()], "lp", "P")
             
     # Define save name
     saveName = "Eff_" + name_N.split("/")[-1] + "Over"+ name_D.split("/")[-1]
 
     # Plot the efficiency
-    p = plots.PlotBase(datasetRootHistos=myList, saveFormats=[])
+    #p = plots.PlotBase(datasetRootHistos=myList, saveFormats=[])
+    p = plots.ComparisonManyPlot(eff_ref, myList, saveFormats=[])
     plots.drawPlot(p, saveName, **_kwargs)
 
     # Save plot in all formats
@@ -596,24 +604,6 @@ def convert2TGraph(tefficiency):
                                   array.array("d",yerrl), array.array("d",yerrh)) 
     return graph
 
-
-#def SavePlot(plot, saveName, saveDir, saveFormats = [".png"]):
-    # Check that path exists
-#    if not os.path.exists(saveDir):
-#        os.makedirs(saveDir)
-        
-#    savePath = os.path.join(saveDir, saveName)
-
-    # For-loop: All save formats
-#    for i, ext in enumerate(saveFormats):
-#        saveNameURL = savePath + ext        
-#        saveNameURL = saveNameURL.replace("/publicweb/%s/%s" % (getpass.getuser()[0], getpass.getuser()), "http://home.fnal.gov/~%s" % (getpass.getuser()))
-#        if opts.url:
-#            Print(saveNameURL, i==0)
-#        else:
-#            Print(savePath + ext, i==0)
-#        plot.saveAs(savePath, formats=saveFormats)
-#    return
 
 
 def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
