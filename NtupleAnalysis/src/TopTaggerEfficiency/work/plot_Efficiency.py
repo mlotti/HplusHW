@@ -14,6 +14,7 @@ EXAMPLES:
 LAST USD:
 ./plot_Efficiency.py -m MyHplusAnalysis_180202_fullSignalQCDtt --folder topbdtSelection_ --url
 
+
 STATISTICS OPTIONS:
 https://iktp.tu-dresden.de/~nbarros/doc/root/TEfficiency.html
 statOption = ROOT.TEfficiency.kFCP       # Clopper-Pearson
@@ -134,7 +135,7 @@ def GetHistoKwargs(histoName, opts):
     kwargs     = {
         "xlabel"           : "x-axis",
         "ylabel"           : "Efficiency / ", #/ %.1f ",
-        # "rebinX"           : 1,
+        # "rebinX"           : 10,
         "ratioYlabel"      : "Ratio",
         "ratio"            : False,
         "ratioInvert"      : False,
@@ -157,7 +158,8 @@ def GetHistoKwargs(histoName, opts):
         units   = "GeV/c"
         xlabel  = "candidate p_{T} (%s)" % (units)
         #myBins  = [0, 100, 150, 200, 250, 300, 400, 500, 800]
-        myBins  = [0, 100, 150, 200, 300, 400, 500, 600, 800]
+        #myBins  = [0, 100, 150, 200, 300, 400, 500, 600, 800] #soti
+        myBins  = [0, 150, 200, 300, 400, 500, 600, 800]
         #myBins  = [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800]
         kwargs["cutBox"] = {"cutValue": 100.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         
@@ -175,7 +177,7 @@ def GetHistoKwargs(histoName, opts):
         if "event" in h:
             #kwargs["moveLegend"] = {"dx": -0.55, "dy": -0.55, "dh": -0.08}
             kwargs["moveLegend"] = {"dx": -0.05, "dy": -0.55, "dh": -0.08}
-            myBins  = [0, 100, 200, 300, 400, 500, 800]
+            #myBins  = [0, 100, 200, 300, 400, 500, 800]
         if 0:
             ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
 
@@ -258,15 +260,13 @@ def main(opts, signalMass):
 
         # Define the mapping histograms in numerator->denominator pairs
         HistoMap = {
-            "AllTopQuarkPt_MatchedBDT"  : "AllTopQuarkPt_Matched",
+            # "AllTopQuarkPt_MatchedBDT"  : "AllTopQuarkPt_Matched",
             "TrijetFakePt_BDT"          : "TrijetFakePt",
-            "AllTopQuarkPt_Matched"     : "TopQuarkPt",
-            "EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T_BDT",
-            "EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T_Matched",
-            "EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T",
-            "AllTopQuarkPt_MatchedBDT"  : "TopQuarkPt",
-            #"SelectedTrijetsPt_BjetPassCSVdisc_afterCuts": "SelectedTrijetsPt_afterCuts",
-            #"TrijetPt_PassBDT_BJetPassCSV": "TrijetPt_PassBDT",
+            # "AllTopQuarkPt_Matched"     : "TopQuarkPt",
+            # "EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T_BDT",
+            # "EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T_Matched",
+            # "EventTrijetPt2T_MatchedBDT": "EventTrijetPt2T",
+            # "AllTopQuarkPt_MatchedBDT"  : "TopQuarkPt",
             }
         
         # For-loop: All numerator-denominator pairs
@@ -287,14 +287,14 @@ def CheckNegatives(hNum, hDen, verbose=False):
     txtAlign = "{:<5} {:>20} {:>20}"
     hLine    = "="*50
     table.append(hLine)
-    table.append(txtAlign.format("Bin #", "Numerator (8f)", "Denominator (8f)"))
+    table.append("{:^50}".format(hNum.GetName()))
+    table.append(txtAlign.format("Bin #", "Numerator (4f)", "Denominator (4f)"))
     table.append(hLine)
 
     # For-loop: All bins in x-axis
     for i in range(1, hNum.GetNbinsX()+1):
         nbin = hNum.GetBinContent(i)
         dbin = hDen.GetBinContent(i)
-        table.append(txtAlign.format(i, "%0.8f" % (nbin), "%0.8f" % (dbin) ))
 
         # Numerator > Denominator
         if nbin > dbin:
@@ -302,12 +302,23 @@ def CheckNegatives(hNum, hDen, verbose=False):
 
         # Numerator < 0 
         if nbin < 0:
-            hNum.SetBinContent(i,0)
-            
+            # hNum.SetBinContent(i,0)
+            hNum.SetBinContent(i, abs(nbin) ) #iro
+
         # Denominator < 0
         if dbin < 0:
-            hNum.SetBinContent(i,0)
-            hDen.SetBinContent(i,0)
+            #hNum.SetBinContent(i,0)
+            #hDen.SetBinContent(i,0)
+            hDen.SetBinContent(i, abs(dbin))
+
+        # Save updated info to table
+        nbin = hNum.GetBinContent(i)
+        dbin = hDen.GetBinContent(i)
+        table.append(txtAlign.format(i, "%0.4f" % (nbin), "%0.4f" % (dbin) ))
+
+    if verbose:
+        for i,row in enumerate(table, 1):
+            Print(row, i==1)
     return
 
 
@@ -357,13 +368,17 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
             continue
 
         # Remove negative bins and ensure numerator bin <= denominator bin
+        CheckNegatives(num, den, False)
         CheckNegatives(num, den, True)
-        # RemoveNegatives(num)
-        # RemoveNegatives(den)
+        RemoveNegatives(num)
+        RemoveNegatives(den)
                 
-        # Sanity check (Histograms are valid and consistent) - Always false!
-        # if not ROOT.TEfficiency.CheckConsistency(num, den):
-        #    continue
+        #Checks the consistence of the given histograms (both have the same dimension, both have the same binning)
+        if not ROOT.TEfficiency.CheckConsistency(num, den):
+            Print("Numerator \"%s\" (nBinsX = %d) is not consistent with the denominator \"%s\" (nBinsX = %d). EXIT" % (num.GetName(), num.GetNbinsX(), den.GetName(), den.GetNbinsX() ), True)
+            for i in range(0, num.GetNbinsX()+1):
+                Print("Numerator(%d) = %.3f ; Denominator(%d) = %.3f" % (i, num.GetBinContent(i), i, den.GetBinContent(i) ), False)
+            continue
         
         # Create Efficiency plots with Clopper-Pearson stats
         eff = ROOT.TEfficiency(num, den) # fixme: investigate warnings
@@ -381,6 +396,12 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
     
         # Apply default style (according to dataset name)
         plots._plotStyles[dataset.getName()].apply(eff)
+
+        # Apply random histo styles and append
+        if "charged" in dataset.getName().lower():
+            mass = dataset.getName().split("M_")[-1]
+            s = styles.getSignalStyleHToTB_M(mass)
+            s.apply(eff)
 
         # Append in list
         myList.append(histograms.HistoGraph(eff, plots._legendLabels[dataset.getName()], "lp", "P"))
@@ -475,7 +496,8 @@ if __name__ == "__main__":
     BATCHMODE    = True
     PRECISION    = 3
     #SIGNALMASS   = [300, 500, 1000]
-    SIGNALMASS   = []
+    SIGNALMASS   = [500]
+    #SIGNALMASS   = []
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False

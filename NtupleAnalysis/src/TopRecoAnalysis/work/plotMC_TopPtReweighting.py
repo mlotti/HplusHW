@@ -275,18 +275,20 @@ def PlotHistograms(datasetsMgr_Mcrab644_TopPtRew, datasetsMgr_Mcrab644_noTopPtRe
 
     # Make comparison plot
     if opts.eight:
-        p = plots.ComparisonManyPlot(h_Mcrab905_TopPtRew, [ h_Mcrab905_noTopPtRew], saveFormats=[])
+        #p = plots.ComparisonManyPlot(h_Mcrab905_TopPtRew, [ h_Mcrab905_noTopPtRew], saveFormats=[])
+        p = plots.ComparisonManyPlot(h_Mcrab905_noTopPtRew, [ h_Mcrab905_TopPtRew], saveFormats=[])
     else:
-        p = plots.ComparisonManyPlot(h_Mcrab644_TopPtRew, [h_Mcrab644_noTopPtRew], saveFormats=[])
+        #p = plots.ComparisonManyPlot(h_Mcrab644_TopPtRew, [h_Mcrab644_noTopPtRew], saveFormats=[])
+        p = plots.ComparisonManyPlot(h_Mcrab644_noTopPtRew, [h_Mcrab644_TopPtRew], saveFormats=[])
     p.setLuminosity(opts.intLumi)
 
     # Overwite signal style?
     if opts.eight:
-        p.histoMgr.forHisto("Mcrab905-ptRew"  , styles.getABCDStyle("SR"))
-        p.histoMgr.forHisto("Mcrab905-noptRew", styles.getABCDStyle("VR"))
+        p.histoMgr.forHisto("Mcrab905-ptRew"  , styles.getABCDStyle("VR"))
+        p.histoMgr.forHisto("Mcrab905-noptRew", styles.getFakeBLineStyle())
     else:
-        p.histoMgr.forHisto("Mcrab644-ptRew"  , styles.getABCDStyle("SR"))
-        p.histoMgr.forHisto("Mcrab644-noptRew", styles.getABCDStyle("VR"))
+        p.histoMgr.forHisto("Mcrab644-ptRew"  , styles.getABCDStyle("VR"))
+        p.histoMgr.forHisto("Mcrab644-noptRew", styles.getFakeBLineStyle())
         
     # Set draw style
     if opts.eight:
@@ -298,10 +300,10 @@ def PlotHistograms(datasetsMgr_Mcrab644_TopPtRew, datasetsMgr_Mcrab644_noTopPtRe
 
     # Set legend style
     if opts.eight:
-        p.histoMgr.setHistoLegendStyle("Mcrab905-noptRew", "F")
+        p.histoMgr.setHistoLegendStyle("Mcrab905-noptRew", "L") #"F"
         p.histoMgr.setHistoLegendStyle("Mcrab905-ptRew", "LP")
     else:
-        p.histoMgr.setHistoLegendStyle("Mcrab644-noptRew", "F")
+        p.histoMgr.setHistoLegendStyle("Mcrab644-noptRew", "L") #"F"
         p.histoMgr.setHistoLegendStyle("Mcrab644-ptRew", "LP")
 
     if opts.eight:
@@ -335,12 +337,12 @@ def PlotHistograms(datasetsMgr_Mcrab644_TopPtRew, datasetsMgr_Mcrab644_noTopPtRe
                    ylabel            = yLabel,
                    log               = False,
                    rebinX            = 2,
-                   cmsExtraText      = "Preliminary",
+                   cmsExtraText      = "Simulation", #"Preliminary",
                    ratio             = True,
                    ratioType         = "errorPropagation", #"errorScale", "binomial"
-                   divideByBinWidth  =  False,
+                   divideByBinWidth  = False,
                    ratioErrorOptions = {"numeratorStatSyst": False, "denominatorStatSyst": True},
-                   ratioMoveLegend   =  {"dx": +0.21, "dy": 0.03, "dh": -0.08},
+                   ratioMoveLegend   = {"dx": +0.21, "dy": 0.03, "dh": -0.08},
                    ratioYlabel       = "Ratio ",
                    createLegend      = _leg,
                    opts              = {"xmin": 0.0, "xmax": 800.0, "ymin": 0.0, "ymaxfactor": 1.2},
