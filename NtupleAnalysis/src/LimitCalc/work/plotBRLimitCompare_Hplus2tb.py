@@ -902,7 +902,7 @@ def doPlotSigmaBandsAlt(limits, legendLabels, saveName, _opts={}):
 
     # Create the frame and set axes titles
     plot.createFrame(saveName, opts={"ymin": _opts.yMin, "ymax": _opts.yMax})
-
+    
     # Add cut line?
     if _opts.cutLine != 999.9:
         kwargs = {"greaterThan": True}
@@ -921,10 +921,10 @@ def doPlotSigmaBandsAlt(limits, legendLabels, saveName, _opts={}):
     ROOT.gPad.SetLogx(_opts.logX)
 
     # Draw the plot with standard texts
-    plot.setLuminosity(limits[0].getLuminosity())
     plot.draw()
-    plot.addStandardTexts(cmsTextPosition="outframe")
+ 
     plot.setLuminosity(limits[0].getLuminosity())
+    plot.addStandardTexts(addLuminosityText=True, cmsTextPosition="outframe")
     addPhysicsText(histograms, limit, x=0.53)
 
     # Save the plots & return
