@@ -123,7 +123,8 @@ lhcAsymptoticOptionsObserved = '-M AsymptoticLimits -v 3 --cminDefaultMinimizerS
 lhcAsymptoticOptionsBlinded = lhcAsymptoticOptionsObserved + " --run blind"
 
 # If you use Barlow-Beeston-lite approach for statistical uncertainties, uncomment the next line:
-# lhcAsymptoticOptionsObserved += " --X-rtd MINIMIZER_analytic"
+if 0:
+    lhcAsymptoticOptionsObserved += " --X-rtd MINIMIZER_analytic"
 
 ## Default "Rmin" parameter for LHC-CLs (asymptotic)
 lhcAsymptoticRminSigmaBr = "0.0" # pb
