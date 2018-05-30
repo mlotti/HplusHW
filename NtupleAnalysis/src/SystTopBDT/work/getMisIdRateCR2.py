@@ -555,11 +555,14 @@ def GetScaleFactors(datasetsMgr, num_pathList, den_pathList, intLumi):
     #f1=0.603648; f2=0.907290; # (5)
     #f1=0.611682; f2=0.889619; # (6)
     #f1=0.613102; f2=0.902808; # (7)
-    # (8)
-    # (9)
+    #f1=0.613102; f2=0.902808; # (8)
+    #f1=0.609202; f2=0.906565; # (9)
     #f1=0.608068; f2=0.906716; # (10)
     #f1=0.610901; f2=0.906713; # (11)
     f1=0.616422; f2=0.905622; # (12)
+
+    # Marina
+    jsonName = "Efficiency_SystBDT_CR2_MET30_MuIso0p1_InvMET20_InvMuIso0p3.json"
 
 
     # ------------------------------------------------------------------------------
@@ -722,8 +725,6 @@ def GetScaleFactors(datasetsMgr, num_pathList, den_pathList, intLumi):
     plots.drawPlot(p2, hName, **_kwargs)
     SavePlot(p2, hName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".C", ".pdf"])
     
-    # Marina
-    jsonName = "Efficiency_SystBDT_CR2_MET30_MuIso0p1_InvMET20_InvMuIso0p3.json"
 
     # Dump results in a JSON File
     runRange = "273150-284044"
