@@ -13,7 +13,7 @@ EXAMPLES:
 
 LAST USD:
 ./plot_Efficiency.py -m TopTaggerEfficiency_180529_TopEfficiency_vs_mass --folder topbdtSelection_ -v -e "220"
-./plot_Efficiency.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopTaggerEfficiency_180529_TopEfficiency_vs_mass --folder topbdtSelection_ -v -e "220|250|350"
+./plot_Efficiency.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopTaggerEfficiency_180529_TopEfficiency_vs_mass --folder topbdtSelection_ -v -e "220|250|350|180|300"
 
 STATISTICS OPTIONS:
 https://iktp.tu-dresden.de/~nbarros/doc/root/TEfficiency.html
@@ -250,19 +250,24 @@ def main(opts, signalMass):
         # Re-order datasets
         datasetOrder = []
         for d in datasetsMgr.getAllDatasets():
-            if "_ext1"in d.getName():
+            if "TT" in d.getName():
                 continue
             if "M_" in d.getName():
                 if d not in signalMass:
                     continue
             datasetOrder.append(d.getName())
             
-        # Append signal datasets
+            
         for m in signalMass:
-            if "_ext1"in signalMass:
-                continue
             datasetOrder.insert(0, m)
-        #datasetsMgr.selectAndReorder(datasetOrder) soti
+            #datasetsMgr.selectAndReorder(datasetOrder)
+
+        # Append signal datasets
+        #for m in signalMass:
+        #    if "_ext1"in signalMass:
+        #        continue
+        datasetOrder.insert(0, "TT")
+        #datasetsMgr.selectAndReorder(datasetOrder)
 
         # Print dataset information
         datasetsMgr.PrintInfo()
@@ -461,12 +466,19 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
                 eff.SetLineStyle(ROOT.kSolid)
                 eff.SetLineWidth(3)
                 eff.SetMarkerSize(1.2)
-            '''
-            mass = dataset.getName().split("M_")[-1]
-            mass = mass.replace("650", "1000")
-            s = styles.getSignalStyleHToTB_M(mass)
-            s.apply(eff)
-            '''
+                '''
+                mass = dataset.getName().split("M_")[-1]
+                mass = mass.replace("650", "1000")
+                s = styles.getSignalStyleHToTB_M(mass)
+                s.apply(eff)
+                '''
+        if "tt" in dataset.getName().lower():
+            eff.SetLineWidth(4)
+        '''
+        ttStyle = styles.getEWKLineStyle()
+        if "tt" in dataset.getName().lower():
+            ttStyle.apply(eff)
+        '''
 
 
         # Append in list
