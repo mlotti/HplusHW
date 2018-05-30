@@ -4,16 +4,14 @@ DESCRIPTION:
 
 
 USAGE:
-./plot_Efficiency_BDT.py -m <pseudo_mcrab> [opts]
+./plot_Efficiency_Training.py -m <pseudo_mcrab> [opts]
 
 
 EXAMPLES:
-./plot_Efficiency_BDT.py -m MyHplusAnalysis_180202_fullSignalQCDtt --folder topbdtSelection_ --url
+./plot_Efficiency_Training.py -m SystTopBDT_180517_TT_Training_DR0p3_DptOverPt0p32/ --folder SystTopBDT_Genuine --url
 
-
-LAST USED:
-./plot_Efficiency_BDT.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400/TopRecoAnalysis_180320_BDT40/ --folder topbdtSelection_ 
-
+LAST USD:
+./plot_Efficiency_Training.py -m SystTopBDT_180517_TT_Training_DR0p3_DptOverPt0p32/ --folder SystTopBDT_Genuine --url
 
 STATISTICS OPTIONS:
 https://iktp.tu-dresden.de/~nbarros/doc/root/TEfficiency.html
@@ -92,14 +90,14 @@ def GetLumi(datasetsMgr):
 #    return ["QCD_HT1000to1500", "QCD_HT1500to2000","QCD_HT2000toInf","QCD_HT300to500","QCD_HT500to700","QCD_HT700to1000"]
 def GetListOfQCDatasets():
     Verbose("Getting list of QCD datasets")
-    return [#"QCD_bEnriched_HT200to300",
-            #"QCD_bEnriched_HT300to500",
-            #"QCD_bEnriched_HT500to700",
-            #"QCD_bEnriched_HT700to1000",
+    return ["QCD_bEnriched_HT200to300",
+            "QCD_bEnriched_HT300to500",
+            "QCD_bEnriched_HT500to700",
+            "QCD_bEnriched_HT700to1000",
             "QCD_HT1000to1500",
-            #"QCD_bEnriched_HT1000to1500",
-            #"QCD_bEnriched_HT1500to2000",
-            #"QCD_bEnriched_HT2000toInf",
+            "QCD_bEnriched_HT1000to1500",
+            "QCD_bEnriched_HT1500to2000",
+            "QCD_bEnriched_HT2000toInf",
             "QCD_HT1500to2000_ext1",
             "QCD_HT2000toInf",
             "QCD_HT2000toInf_ext1",
@@ -193,7 +191,7 @@ def GetHistoKwargs(histoName, opts):
         "ylabel"           : "Efficiency / ", #/ %.1f ",
         # "rebinX"           : 1,
         "ratioYlabel"      : "Ratio",
-        "ratio"            : False,
+        "ratio"            : True,
         "ratioInvert"      : False,
         "stackMCHistograms": False,
         "addMCUncertainty" : False,
@@ -201,28 +199,29 @@ def GetHistoKwargs(histoName, opts):
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
         #"opts"             : {"ymin": 0.0, "ymax": 1.09},
-        "opts"             : {"ymin": 0.0, "ymaxfactor": 1.1},
+        "opts"             : {"ymin": 0.0, "ymaxfactor": 1.2},
         "opts2"            : {"ymin": 0.6, "ymax": 1.4},
         "log"              : False,
 #        "moveLegend"       : {"dx": -0.08, "dy": -0.01, "dh": -0.08},
-        "moveLegend"       : {"dx": -0.05, "dy": -0.005, "dh": -0.1},
+        #"moveLegend"       : {"dx": -0.05, "dy": -0.005, "dh": -0.08},
+        "moveLegend"       : {"dx": -0.25, "dy": -0.725, "dh": -0.13},
 #        "moveLegend"       : {"dx": -0.57, "dy": -0.007, "dh": -0.18},
-        "cutBoxY"          : {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
+        "cutBoxY"          : {"cutValue": 1.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
         }
 
     if "pt" in h:
         units   = "GeV/c"
         xlabel  = "candidate p_{T} (%s)" % (units)
         #myBins  = [0, 100, 150, 200, 250, 300, 400, 500, 800]
-        myBins  = [0, 100, 150, 200, 300, 400, 500, 600, 800]
+        myBins  = [0, 100, 150, 200, 300, 400, 500, 600, 900]
         #myBins  = [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800]
         kwargs["cutBox"] = {"cutValue": 100.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         
         if "topquark" in h:
             #kwargs["moveLegend"] = {"dx": -0.55, "dy": -0.55, "dh": -0.08}
-            kwargs["moveLegend"] = {"dx": -0.05, "dy": -0.59, "dh": -0.11}
+            kwargs["moveLegend"] = {"dx": -0.05, "dy": -0.55, "dh": -0.08}
             xlabel = "generated top p_{T} (%s)" % (units)
-        if 0:
+        if 1:
             ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
 
         if "fake" in h:
@@ -231,7 +230,7 @@ def GetHistoKwargs(histoName, opts):
 
         if "event" in h:
             #kwargs["moveLegend"] = {"dx": -0.55, "dy": -0.55, "dh": -0.08}
-            kwargs["moveLegend"] = {"dx": -0.05, "dy": -0.57, "dh": -0.11}
+            kwargs["moveLegend"] = {"dx": -0.05, "dy": -0.55, "dh": -0.08}
             myBins  = [0, 100, 200, 300, 400, 500, 800]
         if 0:
             ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
@@ -270,57 +269,22 @@ def main(opts, signalMass):
         datasetsMgr.updateNAllEventsToPUWeighted()
         datasetsMgr.loadLuminosities() # from lumi.json
 
-        dir = opts.mcrab.replace("_BDT85", "_BDT")
+        dir = opts.mcrab.replace("_DptOverPt0p32","")
         print dir
 
-        datasetsMgr30 = GetDatasetsFromDir_second(opts, dir+"30")
-        datasetsMgr30.updateNAllEventsToPUWeighted()
-        datasetsMgr30.loadLuminosities() # from lumi.json                                                                                      
-
-        datasetsMgr40 = GetDatasetsFromDir_second(opts, dir+"40")
-        datasetsMgr40.updateNAllEventsToPUWeighted()
-        datasetsMgr40.loadLuminosities() # from lumi.json                                                                                                                           
-
-        datasetsMgr50 = GetDatasetsFromDir_second(opts, dir+"50")
-        datasetsMgr50.updateNAllEventsToPUWeighted()
-        datasetsMgr50.loadLuminosities() # from lumi.json                                                                                                                           
- 
-        datasetsMgr60 = GetDatasetsFromDir_second(opts, dir+"60")
-        datasetsMgr60.updateNAllEventsToPUWeighted()
-        datasetsMgr60.loadLuminosities() # from lumi.json                                                                                                                               
-
-        datasetsMgr70 = GetDatasetsFromDir_second(opts, dir+"70")
-        datasetsMgr70.updateNAllEventsToPUWeighted()
-        datasetsMgr70.loadLuminosities() # from lumi.json                                                                                                                               
-
-        datasetsMgr80 = GetDatasetsFromDir_second(opts, dir+"80")
-        datasetsMgr80.updateNAllEventsToPUWeighted()
-        datasetsMgr80.loadLuminosities() # from lumi.json                                                                                                                               
-
-        datasetsMgr90 = GetDatasetsFromDir_second(opts, dir+"90")
-        datasetsMgr90.updateNAllEventsToPUWeighted()
-        datasetsMgr90.loadLuminosities() # from lumi.json                                                                                                                               
-
-        datasetsMgr95 = GetDatasetsFromDir_second(opts, dir+"95")
-        datasetsMgr95.updateNAllEventsToPUWeighted()
-        datasetsMgr95.loadLuminosities() # from lumi.json             
+        datasetsMgr_DR = GetDatasetsFromDir_second(opts, dir)
+        datasetsMgr_DR.updateNAllEventsToPUWeighted()
+        datasetsMgr_DR.loadLuminosities() # from lumi.json                                                                                      
 
         if opts.verbose:
             datasetsMgr.PrintCrossSections()
             datasetsMgr.PrintLuminosities()
 
         # Set/Overwrite cross-sections
-        for datasetsMgr_ in [datasetsMgr, datasetsMgr30, datasetsMgr40, datasetsMgr50, datasetsMgr60, datasetsMgr70, datasetsMgr80, datasetsMgr90, datasetsMgr95]:
+        for datasetsMgr_ in [datasetsMgr, datasetsMgr_DR]:
             for d in datasetsMgr_.getAllDatasets():
                 if "ChargedHiggs" in d.getName():
                     datasetsMgr_.getDataset(d.getName()).setCrossSection(1.0)
-                    #datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
-                    #datasetsMgr50.getDataset(d.getName()).setCrossSection(1.0)
-                    #datasetsMgr60.getDataset(d.getName()).setCrossSection(1.0)
-                    #datasetsMgr70.getDataset(d.getName()).setCrossSection(1.0)
-                    #datasetsMgr80.getDataset(d.getName()).setCrossSection(1.0)
-                    #datasetsMgr90.getDataset(d.getName()).setCrossSection(1.0)
-                    #datasetsMgr95.getDataset(d.getName()).setCrossSection(1.0)
 
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         #plots.mergeRenameReorderForDataMC(datasetsMgr) 
@@ -339,14 +303,7 @@ def main(opts, signalMass):
         #filterKeys = ["Data", "TTZToQQ", "TTWJets", "TTTT"]
         for key in filterKeys:
             datasetsMgr.remove(filter(lambda name: key in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr30.remove(filter(lambda name: key in name, datasetsMgr30.getAllDatasetNames()))
-            datasetsMgr40.remove(filter(lambda name: key in name, datasetsMgr40.getAllDatasetNames()))
-            datasetsMgr50.remove(filter(lambda name: key in name, datasetsMgr50.getAllDatasetNames()))
-            datasetsMgr60.remove(filter(lambda name: key in name, datasetsMgr60.getAllDatasetNames()))
-            datasetsMgr70.remove(filter(lambda name: key in name, datasetsMgr70.getAllDatasetNames()))
-            datasetsMgr80.remove(filter(lambda name: key in name, datasetsMgr80.getAllDatasetNames()))
-            datasetsMgr90.remove(filter(lambda name: key in name, datasetsMgr90.getAllDatasetNames()))
-            datasetsMgr95.remove(filter(lambda name: key in name, datasetsMgr95.getAllDatasetNames()))
+            datasetsMgr_DR.remove(filter(lambda name: key in name, datasetsMgr_DR.getAllDatasetNames()))
         # Re-order datasets
         datasetOrder = []
         for d in datasetsMgr.getAllDatasets():
@@ -359,14 +316,7 @@ def main(opts, signalMass):
         for m in signalMass:
             datasetOrder.insert(0, m)
         datasetsMgr.selectAndReorder(datasetOrder)
-        datasetsMgr30.selectAndReorder(datasetOrder)
-        datasetsMgr40.selectAndReorder(datasetOrder)
-        datasetsMgr50.selectAndReorder(datasetOrder)
-        datasetsMgr60.selectAndReorder(datasetOrder)
-        datasetsMgr70.selectAndReorder(datasetOrder)
-        datasetsMgr80.selectAndReorder(datasetOrder)
-        datasetsMgr90.selectAndReorder(datasetOrder)
-        datasetsMgr95.selectAndReorder(datasetOrder)
+        datasetsMgr_DR.selectAndReorder(datasetOrder)
 
         # Print dataset information
         datasetsMgr.PrintInfo()
@@ -393,16 +343,9 @@ def main(opts, signalMass):
                         ]
 
         
-        if 1:
+        if 0:
             datasetsMgr.merge("QCD", GetListOfQCDatasets())
-            datasetsMgr30.merge("QCD", GetListOfQCDatasets())
-            datasetsMgr40.merge("QCD", GetListOfQCDatasets())
-            datasetsMgr50.merge("QCD", GetListOfQCDatasets())
-            datasetsMgr60.merge("QCD", GetListOfQCDatasets())
-            datasetsMgr70.merge("QCD", GetListOfQCDatasets())
-            datasetsMgr80.merge("QCD", GetListOfQCDatasets())
-            datasetsMgr90.merge("QCD", GetListOfQCDatasets())
-            datasetsMgr95.merge("QCD", GetListOfQCDatasets())
+            datasetsMgr_DR.merge("QCD", GetListOfQCDatasets())
             
             plots._plotStyles["QCD"] = styles.getQCDLineStyle()
         #Background1_Dataset = datasetsMgr.getDataset("QCD")
@@ -411,10 +354,12 @@ def main(opts, signalMass):
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
         
         # For-loop: All numerator-denominator pairs
-        for i in range(len(Numerators)):
-            numerator = os.path.join(opts.folder, Numerators[i])
-            denominator = os.path.join(opts.folder, Denominators[i])
-            PlotEfficiency_comparison(datasetsMgr, datasetsMgr30, datasetsMgr40, datasetsMgr50, datasetsMgr60, datasetsMgr70, datasetsMgr80, datasetsMgr90, datasetsMgr95, numerator, denominator, intLumi)
+        #for i in range(len(Numerators)):
+        if 1:
+            numerator = os.path.join(opts.folder, "AfterAllSelections_LeadingTrijet_Pt_SR")
+            denominator = os.path.join(opts.folder, "AfterStandardSelections_LeadingTrijet_Pt_SR")
+            #PlotEfficiency_comparison(datasetsMgr, datasetsMgr_DR, intLumi)
+            PlotEfficiency_comparison(datasetsMgr, numerator, denominator,  datasetsMgr_DR, intLumi)
     return
 
 
@@ -471,8 +416,8 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
 
     # For-loop: All datasets
     for dataset in datasetsMgr.getAllDatasets():
-        if "Fake" in numPath and "TT" in dataset.getName():
-            continue
+        #if "Fake" in numPath and "TT" in dataset.getName():
+        #    continue
         # Get the histograms
         #num = dataset.getDatasetRootHisto(numPath).getHistogram()
         #den = dataset.getDatasetRootHisto(denPath).getHistogram()
@@ -533,7 +478,7 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
 
 
     # Save plot in all formats
-    savePath = os.path.join(opts.saveDir, numPath.split("/")[0], opts.optMode)
+    savePath = os.path.join(opts.saveDir, "HplusMasses", numPath.split("/")[0], opts.optMode)
     #savePath = os.path.join(opts.saveDir, numPath.split("/")[0], opts.optMode)
     save_path = savePath + opts.MVAcut
     SavePlot(p, saveName, save_path, saveFormats = [".png", ".pdf", ".C"])
@@ -541,7 +486,7 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
 
 
 
-def PlotEfficiency_comparison(datasetsMgr,  datasetsMgr30, datasetsMgr40, datasetsMgr50, datasetsMgr60, datasetsMgr70, datasetsMgr80, datasetsMgr90, datasetsMgr95, numPath, denPath, intLumi):
+def PlotEfficiency_comparison(datasetsMgr, numPath, denPath,  datasetsMgr_DR, intLumi):
   
     # Definitions
     myList  = []
@@ -554,60 +499,24 @@ def PlotEfficiency_comparison(datasetsMgr,  datasetsMgr30, datasetsMgr40, datase
         #if "Fake" in numPath:
         #    return
         dataset = datasetsMgr.getDataset("TT")
-        dataset30 = datasetsMgr30.getDataset("TT")
-        dataset40 = datasetsMgr40.getDataset("TT")
-        dataset50 = datasetsMgr50.getDataset("TT")
-        dataset60 = datasetsMgr60.getDataset("TT")
-        dataset70 = datasetsMgr70.getDataset("TT")
-        dataset80 = datasetsMgr80.getDataset("TT")
-        dataset90 = datasetsMgr90.getDataset("TT")
-        dataset95 = datasetsMgr95.getDataset("TT")
-
+        dataset_DR = datasetsMgr_DR.getDataset("TT")
         
-        if "Fake" in numPath:
-            dataset = datasetsMgr.getDataset("QCD")
-            dataset30 = datasetsMgr30.getDataset("QCD")
-            dataset40 = datasetsMgr40.getDataset("QCD")
-            dataset50 = datasetsMgr50.getDataset("QCD")
-            dataset60 = datasetsMgr60.getDataset("QCD")
-            dataset70 = datasetsMgr70.getDataset("QCD")
-            dataset80 = datasetsMgr80.getDataset("QCD")
-            dataset90 = datasetsMgr90.getDataset("QCD")
-            dataset95 = datasetsMgr95.getDataset("QCD")
+        #if "Fake" in numPath:
+        #    dataset = datasetsMgr.getDataset("QCD")
+        #    dataset_DR = datasetsMgr_DR.getDataset("QCD")
 
-        legend = "BDTG > 0.85"
-        legend30 = "BDTG > 0.30"
-        legend40 = "BDTG > 0.40"
-        legend50 = "BDTG > 0.50"
-        legend60 = "BDTG > 0.60"
-        legend70 = "BDTG > 0.70"
-        legend80 = "BDTG > 0.80"
-        legend90 = "BDTG > 0.90"
-        legend95 = "BDTG > 0.95"
+        legend = "t#bar{t} (#Delta R < 0.30, #Delta p_{T} / p_{T} < 0.32)"
+        legend_DR = "t#bar{t} (#Delta R < 0.30)"
 
         styleDef = styles.ttStyle
-        style30 = styles.ttStyle #styles.signalStyleHToTB180 
-        style40 = styles.signalStyleHToTB500 #800
-        style50 = styles.signalStyleHToTB500
-        style60 = styles.signalStyleHToTB1000
-        style70 = styles.signalStyleHToTB2000
-        style80 = styles.signalStyleHToTB300
-        style90 = styles.signalStyleHToTB3000
-        style95 = styles.signalStyleHToTB200
+        style_DR = styles.signalStyleHToTB500 #800
         
-        n = dataset30.getDatasetRootHisto(numPath)
+        n = dataset_DR.getDatasetRootHisto(numPath)
         n.normalizeToLuminosity(intLumi)
-        num30 = n.getHistogram()  
-        d = dataset30.getDatasetRootHisto(denPath) 
+        num_DR = n.getHistogram()  
+        d = dataset_DR.getDatasetRootHisto(denPath) 
         d.normalizeToLuminosity(intLumi)
-        den30 = d.getHistogram()    
-        #=========================================                                                 
-        n = dataset40.getDatasetRootHisto(numPath)
-        n.normalizeToLuminosity(intLumi)
-        num40 = n.getHistogram()  
-        d = dataset40.getDatasetRootHisto(denPath) 
-        d.normalizeToLuminosity(intLumi)
-        den40 = d.getHistogram()    
+        den_DR = d.getHistogram()    
         #=========================================                                                 
         n = dataset.getDatasetRootHisto(numPath)
         n.normalizeToLuminosity(intLumi)
@@ -615,67 +524,7 @@ def PlotEfficiency_comparison(datasetsMgr,  datasetsMgr30, datasetsMgr40, datase
         d = dataset.getDatasetRootHisto(denPath) 
         d.normalizeToLuminosity(intLumi)
         den = d.getHistogram()    
-        #=========================================                                                                 
-        n = dataset50.getDatasetRootHisto(numPath)
-        n.normalizeToLuminosity(intLumi)
-        num50 = n.getHistogram()  
-        d = dataset50.getDatasetRootHisto(denPath) 
-        d.normalizeToLuminosity(intLumi)
-        den50 = d.getHistogram()    
-        #=========================================                                                                                                                                   
-        n = dataset60.getDatasetRootHisto(numPath)
-        n.normalizeToLuminosity(intLumi)
-        num60 = n.getHistogram()
-        d = dataset60.getDatasetRootHisto(denPath)                                                                                                           
-        d.normalizeToLuminosity(intLumi)
-        den60 = d.getHistogram()
-        #=========================================                                                                                                                 
-        n = dataset70.getDatasetRootHisto(numPath)
-        n.normalizeToLuminosity(intLumi)
-        num70 = n.getHistogram()
-        d = dataset70.getDatasetRootHisto(denPath)
-        d.normalizeToLuminosity(intLumi)
-        den70 = d.getHistogram()
-        #=========================================                                                                                                                                    
-        n = dataset80.getDatasetRootHisto(numPath)
-        n.normalizeToLuminosity(intLumi)                                                                                                                 
-        num80 = n.getHistogram()                   
-        d = dataset80.getDatasetRootHisto(denPath)
-        d.normalizeToLuminosity(intLumi)
-        den80 = d.getHistogram()
-        #=========================================                                                                                                                                   
-        n = dataset90.getDatasetRootHisto(numPath)
-        n.normalizeToLuminosity(intLumi)
-        num90 = n.getHistogram()
-        d = dataset90.getDatasetRootHisto(denPath)
-        d.normalizeToLuminosity(intLumi)
-        den90 = d.getHistogram() 
-        #=========================================                                                                                                                                   
-        n = dataset95.getDatasetRootHisto(numPath)
-        n.normalizeToLuminosity(intLumi)
-        num95 = n.getHistogram()
-        d = dataset95.getDatasetRootHisto(denPath)
-        d.normalizeToLuminosity(intLumi)
-        den95 = d.getHistogram() 
-        
-
-
-
-        #num = dataset.getDatasetRootHisto(numPath).getHistogram()                
-        #den = dataset.getDatasetRootHisto(denPath).getHistogram()  
-        #num50 = dataset50.getDatasetRootHisto(numPath).getHistogram()                       
-        #den50 = dataset50.getDatasetRootHisto(denPath).getHistogram()  
-        #num60 = dataset60.getDatasetRootHisto(numPath).getHistogram()                       
-        #den60 = dataset60.getDatasetRootHisto(denPath).getHistogram()  
-        #num70 = dataset70.getDatasetRootHisto(numPath).getHistogram()                       
-        #den70 = dataset70.getDatasetRootHisto(denPath).getHistogram()  
-        #num80 = dataset80.getDatasetRootHisto(numPath).getHistogram()                       
-        #den80 = dataset80.getDatasetRootHisto(denPath).getHistogram()  
-        #num90 = dataset90.getDatasetRootHisto(numPath).getHistogram()                       
-        #den90 = dataset90.getDatasetRootHisto(denPath).getHistogram()  
-        #num95 = dataset95.getDatasetRootHisto(numPath).getHistogram()                       
-        #den95 = dataset95.getDatasetRootHisto(denPath).getHistogram()  
-
+        #=========================================                                                 
 
 
         if "binList" in _kwargs:
@@ -683,23 +532,21 @@ def PlotEfficiency_comparison(datasetsMgr,  datasetsMgr30, datasetsMgr40, datase
             nx      = len(xBins)-1
             num     = num.Rebin(nx, "", xBins)
             den     = den.Rebin(nx, "", xBins)
-            num30     = num30.Rebin(nx, "", xBins)
-            den30     = den30.Rebin(nx, "", xBins)
-            num40     = num40.Rebin(nx, "", xBins)
-            den40     = den40.Rebin(nx, "", xBins)
-            num50     = num50.Rebin(nx, "", xBins)
-            den50     = den50.Rebin(nx, "", xBins)
-            num60     = num60.Rebin(nx, "", xBins)
-            den60     = den60.Rebin(nx, "", xBins)
-            num70     = num70.Rebin(nx, "", xBins)
-            den70     = den70.Rebin(nx, "", xBins)
-            num80     = num80.Rebin(nx, "", xBins)
-            den80     = den80.Rebin(nx, "", xBins)
-            num90     = num90.Rebin(nx, "", xBins)
-            den90     = den90.Rebin(nx, "", xBins)
-            num95     = num95.Rebin(nx, "", xBins)
-            den95     = den95.Rebin(nx, "", xBins)
+            num_DR     = num_DR.Rebin(nx, "", xBins)
+            den_DR     = den_DR.Rebin(nx, "", xBins)
 
+        for i in range(1, num.GetNbinsX()+1):
+            nbin = num.GetBinContent(i)
+            dbin = den.GetBinContent(i)
+            nbin_DR = num_DR.GetBinContent(i)
+            dbin_DR = den_DR.GetBinContent(i)
+            eps = nbin/dbin
+            eps_DR = nbin_DR/dbin_DR
+            ratio_DR = eps/eps_DR
+            if ratio_DR > 1:
+                ratio_DR = 1/ratio_DR
+            print "bin: ", i, "eps: ", round(eps,5) , "eps_DR: ", round(eps_DR,5)
+            print "bin: ", i, "eps/eps_DR: ", (1.0 - round(ratio_DR, 3))*100
 
         # Sanity checks
         if den.GetEntries() == 0 or num.GetEntries() == 0:
@@ -708,136 +555,78 @@ def PlotEfficiency_comparison(datasetsMgr,  datasetsMgr30, datasetsMgr40, datase
         if num.GetEntries() > den.GetEntries():
         #    continue
             return
-
-
-        # Remove negative bins and ensure numerator bin <= denominator bin
-        #CheckNegatives(num, den, True)
-        #CheckNegatives(num50, den50, True)
-        #CheckNegatives(num60, den60, True)
-        #CheckNegatives(num70, den70, True)
-        #CheckNegatives(num80, den80, True)
-        #CheckNegatives(num90, den90, True)
-        #CheckNegatives(num95, den95, True)
-        # RemoveNegatives(num)
-        # RemoveNegatives(den)
                 
         # Sanity check (Histograms are valid and consistent) - Always false!
         # if not ROOT.TEfficiency.CheckConsistency(num, den):
         #    continue
 
         # Create Efficiency plots with Clopper-Pearson stats
-        eff85 = ROOT.TEfficiency(num, den) # fixme: investigate warnings
-        eff85.SetStatisticOption(ROOT.TEfficiency.kFCP) #
+        eff = ROOT.TEfficiency(num, den) 
+        eff.SetStatisticOption(ROOT.TEfficiency.kFCP) 
 
-        eff30 = ROOT.TEfficiency(num30, den30) # fixme: investigate warnings
-        eff30.SetStatisticOption(ROOT.TEfficiency.kFCP) #
+        eff_DR = ROOT.TEfficiency(num_DR, den_DR) 
+        eff_DR.SetStatisticOption(ROOT.TEfficiency.kFCP) 
 
-        eff40 = ROOT.TEfficiency(num40, den40) # fixme: investigate warnings
-        eff40.SetStatisticOption(ROOT.TEfficiency.kFCP) #
 
-        eff50 = ROOT.TEfficiency(num50, den50) # fixme: investigate warnings
-        eff50.SetStatisticOption(ROOT.TEfficiency.kFCP) #
+        eff = convert2TGraph(eff)
+        eff_DR = convert2TGraph(eff_DR)
 
-        eff60 = ROOT.TEfficiency(num60, den60) # fixme: investigate warnings
-        eff60.SetStatisticOption(ROOT.TEfficiency.kFCP) #
-
-        eff70 = ROOT.TEfficiency(num70, den70) # fixme: investigate warnings
-        eff70.SetStatisticOption(ROOT.TEfficiency.kFCP) #
-
-        eff80 = ROOT.TEfficiency(num80, den80) # fixme: investigate warnings
-        eff80.SetStatisticOption(ROOT.TEfficiency.kFCP) #
-
-        eff90 = ROOT.TEfficiency(num90, den90) # fixme: investigate warnings
-        eff90.SetStatisticOption(ROOT.TEfficiency.kFCP) #
-
-        eff95 = ROOT.TEfficiency(num95, den95) # fixme: investigate warnings
-        eff95.SetStatisticOption(ROOT.TEfficiency.kFCP) #
-
-        eff30 = convert2TGraph(eff30)
-        eff40 = convert2TGraph(eff40)
-        eff50 = convert2TGraph(eff50)
-        eff60 = convert2TGraph(eff60)
-        eff70 = convert2TGraph(eff70)
-        eff80 = convert2TGraph(eff80)
-        eff85 = convert2TGraph(eff85)
-        eff90 = convert2TGraph(eff90)
-        eff95 = convert2TGraph(eff95)
         # Apply default style (according to dataset name)
         #plots._plotStyles[dataset.getName()].apply(eff)
-        styleDef.apply(eff85)
-        style30.apply(eff30)
-        style40.apply(eff40)
-        style50.apply(eff50)
-        style60.apply(eff60)
-        style70.apply(eff70)
-        style80.apply(eff80)
-        style90.apply(eff90)
-        style95.apply(eff95)
-
-
-        eff50.SetLineStyle(ROOT.kSolid)
-        eff50.SetLineWidth(2)
-        eff30.SetLineWidth(2)
-        eff40.SetLineWidth(2)
-        eff60.SetLineWidth(2)
-        eff70.SetLineWidth(2)
-        eff80.SetLineWidth(2)
-        eff85.SetLineWidth(2)
-        eff90.SetLineWidth(2)
-        eff95.SetLineWidth(2)
-
-        #eff30.SetLineColor(1)
-
-        eff50.SetLineStyle(ROOT.kSolid)
-        eff30.SetLineStyle(ROOT.kSolid)
-        eff40.SetLineStyle(ROOT.kSolid)
-        eff60.SetLineStyle(ROOT.kSolid)
-        eff70.SetLineStyle(ROOT.kSolid)
-        eff80.SetLineStyle(ROOT.kSolid)
-        eff85.SetLineStyle(ROOT.kSolid)
-        eff90.SetLineStyle(ROOT.kSolid)
-        eff95.SetLineStyle(ROOT.kSolid)
-
-
-        eff30.SetMarkerStyle(ROOT.kFullTriangleUp)
-        eff40.SetMarkerStyle(ROOT.kFullTriangleUp)
-        eff50.SetMarkerStyle(ROOT.kFullTriangleUp)
-        eff60.SetMarkerStyle(ROOT.kFullTriangleUp)
-        eff70.SetMarkerStyle(ROOT.kFullTriangleUp)
-        eff80.SetMarkerStyle(ROOT.kFullTriangleUp)
-        eff85.SetMarkerStyle(ROOT.kFullTriangleUp)
-        eff90.SetMarkerStyle(ROOT.kFullTriangleUp)
-        eff95.SetMarkerStyle(ROOT.kFullTriangleUp)
         
-        eff30.SetMarkerSize(1.2)
-        eff40.SetMarkerSize(1.2)
-        eff50.SetMarkerSize(1.2)
-        eff60.SetMarkerSize(1.2)
-        eff70.SetMarkerSize(1.2)
-        eff80.SetMarkerSize(1.2)
-        eff85.SetMarkerSize(1.2)
-        eff90.SetMarkerSize(1.2)
-        eff95.SetMarkerSize(1.2)
+        #styleDef.apply(eff)
+        #style_DR.apply(eff_DR)
+        
+        styles.markerStyles[0].apply(eff)
+        styles.markerStyles[1].apply(eff_DR)
+        '''
+        eff_DR.SetLineStyle(ROOT.kSolid)
+        eff.SetLineWidth(2)
+        eff_DR.SetLineWidth(2)
 
+        eff.SetLineStyle(ROOT.kSolid)
+        eff_DR.SetLineStyle(ROOT.kSolid)
+
+        eff.SetMarkerStyle(ROOT.kFullTriangleUp)
+        eff_DR.SetMarkerStyle(ROOT.kFullTriangleUp)
+        
+        eff.SetMarkerSize(1.2)
+        eff_DR.SetMarkerSize(1.2)
+        '''
         # Append in list
-#        myList.append(histograms.HistoGraph(eff, plots._legendLabels["Default"], "lp", "P"))
-        myList.append(histograms.HistoGraph(eff30, legend30, "lp", "P"))
-        myList.append(histograms.HistoGraph(eff40, legend40, "lp", "P"))
-        #myList.append(histograms.HistoGraph(eff50, legend50, "lp", "P"))
-        myList.append(histograms.HistoGraph(eff60, legend60, "lp", "P"))
-        #myList.append(histograms.HistoGraph(eff70, legend70, "lp", "P"))
-        myList.append(histograms.HistoGraph(eff80, legend80, "lp", "P"))
-        #myList.append(histograms.HistoGraph(eff85, legend, "lp", "P"))
-        myList.append(histograms.HistoGraph(eff90, legend90, "lp", "P"))
-        #myList.append(histograms.HistoGraph(eff95, legend95, "lp", "P"))
+        myList.append(histograms.HistoGraph(eff, legend, "p", "P"))
+        myList.append(histograms.HistoGraph(eff_DR, legend_DR, "p", "P"))
         
+
+    # Save plot in all formats
+    #savePath = os.path.join(opts.saveDir, opts.optMode)
+    #plots.drawPlot(p, savePath, **_kwargs)
+    #SavePlot(p, saveName, savePath, saveFormats = [".png", ".pdf"])
+
         
-    # Define save name
-    saveName = "Eff_" + numPath.split("/")[-1] + "Over" + denPath.split("/")[-1]
+        # Define stuff                                                                                                                                                                                          
+    numPath  = numPath.replace("AfterAllSelections_","")
+    numPath  = numPath.replace("LeadingTrijet_Pt", "LdgTopPt")
+    if "Genuine" in numPath:
+        TTcateg = "_TTgenuine"
+    elif "Fake" in numPath:
+        TTcateg = "_TTfake"
+    else:
+        TTcateg = "_TTinclusive"
+
+    if "SR" in numPath:
+        region = "_SR"
+    if "VR" in numPath:
+        region = "_VR"
+    if "CR1" in numPath:
+        region = "_CR1"
+    if "CR2" in numPath:
+        region = "_CR2"
+
+    saveName = "Eff_" + numPath.split("/")[-1] + TTcateg + "_BDTtraining"
 
     # Plot the efficiency
-    p = plots.PlotBase(datasetRootHistos=myList, saveFormats=[])
-    plots.drawPlot(p, saveName, **_kwargs)
+    p = plots.ComparisonManyPlot(histograms.HistoGraph(eff, legend, "p", "P"), [histograms.HistoGraph(eff_DR, legend_DR, "p", "P")], saveFormats=[".pdf", ".png", ".C"])
 
     leg = ROOT.TLegend(0.2, 0.8, 0.81, 0.87)
     leg.SetFillStyle( 0)
@@ -845,8 +634,8 @@ def PlotEfficiency_comparison(datasetsMgr,  datasetsMgr30, datasetsMgr40, datase
     leg.SetBorderSize(0)
     #{"dx": -0.55, "dy": -0.55, "dh": -0.08}
     leg.SetHeader("t#bar{t}")    
-    if "Fake" in numPath:
-        leg.SetHeader("QCD")
+    #if "Fake" in numPath:
+    #    leg.SetHeader("QCD")
 
     leg.Draw()
     #moveLegend       =  {"dx": -0.0, "dy": +0.0, "dh": +0.1}
@@ -855,10 +644,11 @@ def PlotEfficiency_comparison(datasetsMgr,  datasetsMgr30, datasetsMgr40, datase
 
 
     # Save plot in all formats
-    savePath = os.path.join(opts.saveDir, "HplusMasses", numPath.split("/")[0], opts.optMode)
+    savePath = os.path.join(SAVEDIR, "HplusMasses", numPath.split("/")[0], opts.optMode)
     #savePath = os.path.join(opts.saveDir, numPath.split("/")[0], opts.optMode)
-    save_path = savePath + opts.MVAcut
-    SavePlot(p, saveName, save_path, saveFormats = [".png", ".pdf", ".C"])
+    plots.drawPlot(p, SAVEDIR, **_kwargs)
+    #leg.Draw()
+    SavePlot(p, saveName, SAVEDIR, saveFormats = [".png", ".pdf", ".C"])
     return
 
 
@@ -935,7 +725,7 @@ if __name__ == "__main__":
     '''
     
     # Default Settings
-    ANALYSISNAME = "TopRecoAnalysis"
+    ANALYSISNAME = "SystTopBDT"
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
     OPTMODE      = ""
@@ -948,11 +738,11 @@ if __name__ == "__main__":
     LATEX        = False
     URL          = False
     NOERROR      = True
-    SAVEDIR      = "/publicweb/%s/%s/%s" % (getpass.getuser()[0], getpass.getuser(), ANALYSISNAME)
+    SAVEDIR      = "/publicweb/%s/%s" % (getpass.getuser()[0], getpass.getuser()) + "/TopSystematics/Efficiencies"
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
     NORMALISE    = False
-    FOLDER       = "topbdtSelection_"
+    FOLDER       = "" #"topSelection_" #"ForDataDrivenCtrlPlots" #"topologySelection_"
     MVACUT       = "MVA"
 
     # Define the available script options
@@ -1032,4 +822,4 @@ if __name__ == "__main__":
     main(opts, signalMass)
 
     if not opts.batchMode:
-        raw_input("=== plot_Efficiency_BDT.py: Press any key to quit ROOT ...")
+        raw_input("=== plot_Efficiency.py: Press any key to quit ROOT ...")

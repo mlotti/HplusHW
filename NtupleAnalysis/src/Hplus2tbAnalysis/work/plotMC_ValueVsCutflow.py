@@ -17,8 +17,9 @@ EXAMPLES:
 LAST USED:
 ./plotMC_ValueVsCutflow.py -m Hplus2tbAnalysis_Preapproval_MVA0p40_Syst_28Apr2018/ --refCounter "passed PV" --events
 ./plotMC_ValueVsCutflow.py -m Hplus2tbAnalysis_Preapproval_MVA0p40_Syst_28Apr2018/ --refCounter "passed PV" --efficiency
-./plotMC_ValueVsCutflow.py -m Hplus2tbAnalysis_Preapproval_MVA0p40_Syst_28Apr2018/ --acceptance -e "650|5000|10000" --gridX --gridY
-./plotMC_ValueVsCutflow.py -m Hplus2tbAnalysis_Preapproval_MVA0p40_Syst_28Apr2018/ --acceptance -e "650|5000|10000" --gridX --gridY --yMax 300 
+./plotMC_ValueVsCutflow.py -m Hplus2tbAnalysis_Preapproval_MVA0p40_Syst_28Apr2018/ --acceptance -e "5000|10000" --gridX --gridY
+./plotMC_ValueVsCutflow.py -m Hplus2tbAnalysis_Preapproval_MVA0p40_Syst_28Apr2018/ --acceptance -e "5000|10000" --gridX --gridY --yMax 400 
+
 
 USE WITH:
 hplusPrintCounters.py --mainCounterOnly --dataEra "Run2016" --mergeData Hplus2tbAnalysis_Preapproval_MVA0p40_Syst_28Apr2018 --includeTasks "2016|M_500"
@@ -350,8 +351,8 @@ def GetHistoKwargs(opts):
         #canvOpts    = {"ymin": 1, "ymaxfactor": 1.1}
         canvOpts    = {"xmin": min(opts.signalMasses), "xmax": max(opts.signalMasses), "ymin": 1, "ymax": 300, "ymaxfactor": 1.1}
         ratioOpts   = {"ymin": 1e-1, "ymax": 1.3e6}
-        mvLegend    = {"dx": -9999.9, "dy": -9999.9, "dh": -9999.9}
-        #mvLegend    = {"dx": -0.12, "dy": -0.05, "dh": +0.20}
+        #mvLegend    = {"dx": -9999.9, "dy": -9999.9, "dh": -9999.9}
+        mvLegend    = {"dx": -0.1, "dy": -0.01, "dh": +0.20}
         xlabel      = "m_{H^{+}} (GeV/c^{2})"
         ylabel      = "Events" #"Acceptance"
         ratio       = False
