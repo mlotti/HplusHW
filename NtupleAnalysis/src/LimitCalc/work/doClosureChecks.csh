@@ -11,7 +11,7 @@
 # cd HiggsAnalysis/CombinedLimit
 # cd $CMSSW_BASE/src/HiggsAnalysis/CombinedLimit
 # git fetch origin
-# git checkout v7.0.8 -v v7.0.8
+# git checkout v7.0.8 -b v7.0.8
 # scramv1 b clean; scramv1 b # always make a clean build
 #
 # In order to run this script cd to the CombineResults directory inside the datacard:
@@ -22,8 +22,10 @@
 #
 # The closure checks done with this scripts are described in the Higgs PAG preapproval TWiki [2]
 #
-# Last Used:
-# ./doClosureChecks.csh 500
+# Last Used (default seed):
+# cd <datacards_*/CombineResults*>
+# ../../.././doClosureChecks.csh 500
+#
 #
 # Relevant links:
 # [1] https://cms-hcomb.gitbooks.io/combine/content/part1/index.html#combine-tool
@@ -33,7 +35,7 @@
 #===========================================================
 # Ensure all script arguments are passed from command line
 #===========================================================
-if ($#argv != 1) then
+if ($#argv < 1) then
     echo "=== You must give the mass point you want to examine, e.g. 500"
     echo "\n=== For example:"
     echo "./doClosureChecks.csh 500"
@@ -41,39 +43,59 @@ if ($#argv != 1) then
     exit 1
 endif
 
+# Set default random seed
+if ($#argv != 2) then
+        set SEED = 123456
+else
+        set SEED = $2
+endif
+
 #===================
 # Define Variables
 #===================
 set MASS          = ${1}
+set MINOS         = "poi" # [Options: "all" "poi" "none"]
+set NUISANCES     = "diffNuisances.py"
 set DATACARD_TXT  = "combine_datacard_hplushadronic_m${1}.txt"
 set DATACARD_ROOT = "combine_datacard_hplushadronic_m${1}.root"
 
-echo "----------------------------------"
+echo "\n======================================================================================================="
 echo " Building workspace"
-echo "----------------------------------"
+echo "======================================================================================================="
 text2workspace.py $DATACARD_TXT
 
-echo "-----------------------------------------------------------------------------------------------------------"
-echo " Run combine to produce a background-only Asimob toy and fit it. The result of the fit should be r=0"
-echo "-----------------------------------------------------------------------------------------------------------"
-combine -M MaxLikelihoodFit -t -1 --expectSignal 0 $DATACARD_ROOT
+echo "\n======================================================================================================="
+echo "Step 1) Run combine to produce a background-only Asimov toy and fit it. The result of the fit should be r=0"
+echo "======================================================================================================="
+# combine -M MaxLikelihoodFit -t -1 --expectSignal 0 $DATACARD_ROOT #obsolete (30 May 2018)
+combine -M FitDiagnostics -t -1 --expectSignal 0 $DATACARD_ROOT --seed $SEED --minos $MINOS
 
-echo "----------------------------------"
-echo " Run diffNuisances.py"
-echo "----------------------------------"
-python diffNuisances.py -a fitDiagnostics.root -g plots.root
+echo "\n======================================================================================================="
+echo "Step 2) Run diffNuisances.py"
+echo "======================================================================================================="
+if ( -f $NUISANCES ) then
+    echo " Nuisances script found"
+else
+    echo " Nuisances script not found. Dowloading it with wget"
+    wget https://raw.githubusercontent.com/cms-analysis/HiggsAnalysis-CombinedLimit/master/test/$NUISANCES
+endif
+python diffNuisances.py -a fitDiagnostics.root -g pulls_BkgAsimov.root
+#python diffNuisances.py -a fitDiagnostics.root -g pulls_BkgAsimov.root --absolute
 
-echo "-----------------------------------------------------------------------------------------------------------"
-echo " Run combine to produce a signal+background Asimov toy and fit it. The result of the fit should be r=1"
-echo "-----------------------------------------------------------------------------------------------------------"
-combine -M MaxLikelihoodFit -t -1 --expectSignal 1 $DATACARD_ROOT
+echo "\n======================================================================================================="
+echo "Step 3) Run combine to produce a signal+background Asimov toy and fit it. The result of the fit should be r=1"
+echo "======================================================================================================="
+#combine -M MaxLikelihoodFit -t -1 --expectSignal 1 $DATACARD_ROOT --seed $SEED #obsolete (30 May 2018)
+combine -M FitDiagnostics -t -1 --expectSignal 1 $DATACARD_ROOT --seed $SEED --minos $MINOS
 
-echo "----------------------------------"
-echo " Run diffNuisances.py"
-echo "----------------------------------"
-python diffNuisances.py -a fitDiagnostics.root -g plots.root
+echo "\n======================================================================================================="
+echo "Step 4) Run diffNuisances.py"
+echo "======================================================================================================="
+python diffNuisances.py -a fitDiagnostics.root -g pulls_SBAsimov.root
+#python diffNuisances.py -a fitDiagnostics.root -g pulls_SBAsimov.root --absolute
 
-echo "----------------------------------"
+
+echo "\n======================================================================================================="
 echo "End of script"
-echo "----------------------------------"
+echo "======================================================================================================="
 
