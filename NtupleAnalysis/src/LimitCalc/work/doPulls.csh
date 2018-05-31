@@ -47,33 +47,42 @@ endif
 #set MASS          = ${3}
 set MASS          = ${1}
 set DATACARD_TXT  = combine_datacard_hplushadronic_m${MASS}.txt  
-set DATACARD_ROOT = higgsCombineblinded_m500.AsymptoticLimits.mH${MASS}.root
+set DATACARD_ROOT = higgsCombineblinded_m${MASS}.AsymptoticLimits.mH${MASS}.root
 set SEED          = 123456
+set BACKGROUND    = "Impacts_BkgOnly_m${MASS}.txt"
+set SIGNAL        = "Impacts_SB_m${MASS}.txt"
 
 echo "=== Building workspace"
 text2workspace.py $DATACARD_TXT -m $MASS -o $DATACARD_ROOT
 
-echo "=== Fit for each POI"
-combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS --doInitialFit --robustFit 1 -t -1 --expectSignal 0 --expectSignalMass $MASS --seed $SEED
-
-echo "=== Fit scan for each nuisance parameter"
-combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS --robustFit 1 --doFits -t -1 --expectSignal 0 --expectSignalMass $MASS --parallel 8 --seed $SEED
-
-echo "=== Collect the output and write results into a json file"
-combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS -t -1 -o impacts_BkgAsimov_$MASS.json --seed $SEED
-
-echo "=== Plot Impacts"
-plotImpacts.py -i impacts_BkgAsimov_$MASS.json -o impacts_BkgAsimov_$MASS
-
+echo "**********************"
+echo "   Background Only    "
+echo "**********************"
 
 echo "=== Fit for each POI"
-combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS --doInitialFit --robustFit 1 -t -1 --expectSignal 1 --seed $SEED
+combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS --doInitialFit --robustFit 1 -t -1 --expectSignal 0 --expectSignalMass $MASS --seed $SEED > $BACKGROUND
 
 echo "=== Fit scan for each nuisance parameter"
-combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS --robustFit 1 --doFits -t -1 --expectSignal 1 --parallel 8 --seed $SEED
+combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS --robustFit 1 --doFits -t -1 --expectSignal 0 --expectSignalMass $MASS --parallel 8 --seed $SEED >> $BACKGROUND
 
 echo "=== Collect the output and write results into a json file"
-combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS -t -1 -o impacts_SBAsimov_$MASS.json --seed $SEED
+combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS -t -1 -o impacts_BkgAsimov_$MASS.json --seed $SEED >> $BACKGROUND
 
 echo "=== Plot Impacts"
-plotImpacts.py -i impacts_SBAsimov_$MASS.json -o impacts_SBAsimov_$MASS
+plotImpacts.py -i impacts_BkgAsimov_$MASS.json -o impacts_BkgAsimov_$MASS >> $BACKGROUND
+
+echo "**********************"
+echo " Signal + Background  "
+echo "**********************"
+
+echo "=== Fit for each POI"
+combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS --doInitialFit --robustFit 1 -t -1 --expectSignal 1 --seed $SEED > $SIGNAL
+
+echo "=== Fit scan for each nuisance parameter"
+combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS --robustFit 1 --doFits -t -1 --expectSignal 1 --parallel 8 --seed $SEED >> $SIGNAL
+
+echo "=== Collect the output and write results into a json file"
+combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS -t -1 -o impacts_SBAsimov_$MASS.json --seed $SEED >> $SIGNAL
+
+echo "=== Plot Impacts"
+plotImpacts.py -i impacts_SBAsimov_$MASS.json -o impacts_SBAsimov_$MASS >> $SIGNAL

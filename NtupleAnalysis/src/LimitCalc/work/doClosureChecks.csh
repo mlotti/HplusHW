@@ -58,17 +58,18 @@ set MINOS         = "poi" # [Options: "all" "poi" "none"]
 set NUISANCES     = "diffNuisances.py"
 set DATACARD_TXT  = "combine_datacard_hplushadronic_m${1}.txt"
 set DATACARD_ROOT = "combine_datacard_hplushadronic_m${1}.root"
+set FILE          = "ClosureChecks_m${1}.txt"
 
 echo "\n======================================================================================================="
 echo " Building workspace"
 echo "======================================================================================================="
-text2workspace.py $DATACARD_TXT
+text2workspace.py $DATACARD_TXT > $FILE
 
 echo "\n======================================================================================================="
 echo "Step 1) Run combine to produce a background-only Asimov toy and fit it. The result of the fit should be r=0"
 echo "======================================================================================================="
-# combine -M MaxLikelihoodFit -t -1 --expectSignal 0 $DATACARD_ROOT #obsolete (30 May 2018)
-combine -M FitDiagnostics -t -1 --expectSignal 0 $DATACARD_ROOT --seed $SEED --minos $MINOS
+# combine -M MaxLikelihoodFit -t -1 --expectSignal 0 $DATACARD_ROOT >> $FILE #obsolete (30 May 2018)
+combine -M FitDiagnostics -t -1 --expectSignal 0 $DATACARD_ROOT --seed $SEED --minos $MINOS >> $FILE
 
 echo "\n======================================================================================================="
 echo "Step 2) Run diffNuisances.py"
@@ -79,21 +80,20 @@ else
     echo " Nuisances script not found. Dowloading it with wget"
     wget https://raw.githubusercontent.com/cms-analysis/HiggsAnalysis-CombinedLimit/master/test/$NUISANCES
 endif
-python diffNuisances.py -a fitDiagnostics.root -g pulls_BkgAsimov.root
-#python diffNuisances.py -a fitDiagnostics.root -g pulls_BkgAsimov.root --absolute
+python diffNuisances.py -a fitDiagnostics.root -g pulls_BkgAsimov_m${1}.root >> $FILE
+#python diffNuisances.py -a fitDiagnostics.root -g pulls_BkgAsimov_m${1}.root --absolute >> $FILE
 
 echo "\n======================================================================================================="
 echo "Step 3) Run combine to produce a signal+background Asimov toy and fit it. The result of the fit should be r=1"
 echo "======================================================================================================="
-#combine -M MaxLikelihoodFit -t -1 --expectSignal 1 $DATACARD_ROOT --seed $SEED #obsolete (30 May 2018)
-combine -M FitDiagnostics -t -1 --expectSignal 1 $DATACARD_ROOT --seed $SEED --minos $MINOS
+#combine -M MaxLikelihoodFit -t -1 --expectSignal 1 $DATACARD_ROOT --seed $SEED >> $FILE #obsolete (30 May 2018)
+combine -M FitDiagnostics -t -1 --expectSignal 1 $DATACARD_ROOT --seed $SEED --minos $MINOS >> $FILE
 
 echo "\n======================================================================================================="
 echo "Step 4) Run diffNuisances.py"
 echo "======================================================================================================="
-python diffNuisances.py -a fitDiagnostics.root -g pulls_SBAsimov.root
-#python diffNuisances.py -a fitDiagnostics.root -g pulls_SBAsimov.root --absolute
-
+python diffNuisances.py -a fitDiagnostics.root -g pulls_SBAsimov_m${1}.root >> $FILE
+#python diffNuisances.py -a fitDiagnostics.root -g pulls_SBAsimov_m${1}.root --absolute >> $FILE
 
 echo "\n======================================================================================================="
 echo "End of script"
