@@ -13,10 +13,7 @@ Examples:
 ./plotMC_HPlusMass.py -m <peudo_mcrab> --normaliseToOne --url --signalMass 500
 
 Last Used:
-./plotMC_HPlusMass.py -m TopTaggerEfficiency_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --normaliseToOne --url --mergeEWK
-./plotMC_HPlusMass.py -m TopTaggerEfficiency_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --normaliseToOne --folder ""
-./plotMC_HPlusMass.py -m TopTaggerEfficiency_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --folder topSelection_ --url --normaliseToOne
-
+./plotMC_HPlusMass.py -m TopTaggerEfficiency_180529_TopEfficiency_vs_mass/ --folder topbdtSelection_ --normaliseToOne -v -e "TT" --url
 '''
 
 #================================================================================================ 

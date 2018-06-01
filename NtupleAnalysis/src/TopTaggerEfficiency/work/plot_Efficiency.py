@@ -419,17 +419,27 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
         if "binList" in _kwargs:
             xBins   = _kwargs["binList"]
             nx      = len(xBins)-1
-            num     = num.Rebin(nx, "", xBins)
-            den     = den.Rebin(nx, "", xBins)
+            #num     = num.Rebin(nx, "", xBins)
+            #den     = den.Rebin(nx, "", xBins)
 
-
+        sumN = 0
+        sumD = 0
+        sumN_entries = 0
+        sumD_entries = 0
         for i in range(1, num.GetNbinsX()+1):
             nbin = num.GetBinContent(i)
             dbin = den.GetBinContent(i)
             #print dataset.getName(), nbin, dbin
             if (nbin > dbin):
                 print "error"
+            print "xvalue", num.GetBinLowEdge(i)+0.5*num.GetBinWidth(i)
+            if (num.GetBinLowEdge(i)+0.5*num.GetBinWidth(i) > 450):
+                sumN += nbin
+                sumD += dbin
+                #sumN_entries += num.GetEntries(i)
+                #sumD_entries += den.GetEntries(i)
 
+        print dataset.getName(), sumN, sumD#, sumN_entries, sumD_entries
         # Sanity checks
         if den.GetEntries() == 0 or num.GetEntries() == 0:
             continue
