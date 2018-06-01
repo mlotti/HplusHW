@@ -2330,7 +2330,7 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
 
   // Defining the splitting of phase-space as the eta of the Tetrajet b-jet
   std::vector<float> myFactorisationInfo;
-  myFactorisationInfo.push_back(topData.getTetrajetBJet().pt() ); //new
+  // myFactorisationInfo.push_back(topData.getTetrajetBJet().pt() ); //new
   myFactorisationInfo.push_back(topData.getTetrajetBJet().eta() );
   fCommonPlots.setFactorisationBinForEvent(myFactorisationInfo);
 
@@ -2889,7 +2889,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
 
   // Defining the splitting of phase-space as the eta of the Tetrajet b-jet
   std::vector<float> myFactorisationInfo;
-  myFactorisationInfo.push_back(topData.getTetrajetBJet().pt() ); //new
+  // myFactorisationInfo.push_back(topData.getTetrajetBJet().pt() ); //new
   myFactorisationInfo.push_back(topData.getTetrajetBJet().eta() );
   fCommonPlots.setFactorisationBinForEvent(myFactorisationInfo);
 
@@ -2911,8 +2911,10 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   // For-loop: All BJets (Real or Inverted) used in top fit
   for (auto bjet: invBjetData.getSelectedBJets())
     {
-      // std::cout << "bjet.bjetDiscriminator() = " << bjet.bjetDiscriminator() << std::endl;
       index++;
+      // if (index == 0) std::cout << "\n" << std::endl;
+      // std::cout << "index = " << index << ", pt = " << bjet.pt() << ", b-disc = " << bjet.bjetDiscriminator() << std::endl;
+
       if (index > 2) break;
       
       // NOTE: What is the point of using the "isGenuineB" here? Inclusive = FakeB (approx.)
