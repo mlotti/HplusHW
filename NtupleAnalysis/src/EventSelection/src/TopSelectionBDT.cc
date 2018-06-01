@@ -395,7 +395,8 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   TrijetSelection fSelectedCleanedTops;
 
   // For-loop: All b-jets
-  for (auto& bjet: jets)
+  //for (auto& bjet: jets) // Before 01 June 2018
+  for (auto& bjet: bjets) // After 01 June 2018
     {
       int index1 = 0;
 

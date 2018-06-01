@@ -275,11 +275,12 @@ def PlotHistograms(datasetsMgr_Mcrab644_TopPtRew, datasetsMgr_Mcrab644_noTopPtRe
 
     # Make comparison plot
     if opts.eight:
-        #p = plots.ComparisonManyPlot(h_Mcrab905_TopPtRew, [ h_Mcrab905_noTopPtRew], saveFormats=[])
+        # p = plots.ComparisonManyPlot(h_Mcrab905_TopPtRew, [ h_Mcrab905_noTopPtRew], saveFormats=[])
         p = plots.ComparisonManyPlot(h_Mcrab905_noTopPtRew, [ h_Mcrab905_TopPtRew], saveFormats=[])
     else:
-        #p = plots.ComparisonManyPlot(h_Mcrab644_TopPtRew, [h_Mcrab644_noTopPtRew], saveFormats=[])
-        p = plots.ComparisonManyPlot(h_Mcrab644_noTopPtRew, [h_Mcrab644_TopPtRew], saveFormats=[])
+        # p = plots.ComparisonManyPlot(h_Mcrab644_TopPtRew, [h_Mcrab644_noTopPtRew], saveFormats=[])
+        # p = plots.ComparisonManyPlot(h_Mcrab644_noTopPtRew, [h_Mcrab644_TopPtRew], saveFormats=[])
+        p = plots.ComparisonManyPlot(h_Mcrab644_noTopPtRew, [h_Mcrab644_TopPtRew, h_Mcrab905_TopPtRew], saveFormats=[])
     p.setLuminosity(opts.intLumi)
 
     # Overwite signal style?
