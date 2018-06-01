@@ -247,11 +247,13 @@ private:
   HistoSplitter::SplittedTripletTH2s hCtrlLdgTrijetPt_Vs_LdgTrijetDijetPtAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlLdgTrijetBJetPtAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlLdgTrijetBJetEtaAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlLdgTrijetBJetBdiscAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSubldgTrijetPtAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSubldgTrijetDijetPtAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSubldgTrijetDijetMassAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSubldgTrijetBJetPtAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSubldgTrijetBJetEtaAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSubldgTrijetBJetBdiscAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSubldgTrijetMassAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSubldgTrijetTopMassWMassRatioAfterStdSelections;
   HistoSplitter::SplittedTripletTH2s hCtrlSubldgTrijetPt_Vs_SubldgTrijetDijetPtAfterStdSelections;
@@ -261,6 +263,7 @@ private:
   HistoSplitter::SplittedTripletTH1s hCtrlSubldgTetrajetMassAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlTetrajetBJetPtAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlTetrajetBJetEtaAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlTetrajetBJetBdiscAfterStdSelections;
 
   // MET
   HistoSplitter::SplittedTripletTH1s hCtrlMET;
@@ -349,6 +352,7 @@ private:
   HistoSplitter::SplittedTripletTH2s hCtrlLdgTrijetPt_Vs_LdgTrijetDijetPtAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlLdgTrijetBJetPtAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlLdgTrijetBJetEtaAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlLdgTrijetBJetBdiscAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSubldgTrijetPtAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSubldgTrijetDijetPtAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSubldgTrijetDijetMassAfterAllSelections;
@@ -357,12 +361,14 @@ private:
   HistoSplitter::SplittedTripletTH2s hCtrlSubldgTrijetPt_Vs_SubldgTrijetDijetPtAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSubldgTrijetBJetPtAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSubldgTrijetBJetEtaAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSubldgTrijetBJetBdiscAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlLdgTetrajetPtAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlLdgTetrajetMassAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSubldgTetrajetPtAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSubldgTetrajetMassAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlTetrajetBJetPtAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlTetrajetBJetEtaAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlTetrajetBJetBdiscAfterAllSelections;
   
   // shape plots after all selections
   HistoSplitter::SplittedTripletTH1s hShapeTransverseMass;
