@@ -459,8 +459,8 @@ def GetHistoKwargs(histoName, ext, opts):
         else:
             _opts["xmax"] = 300.0
     if "pt" in hName:
-         _rebinX = 2
-        #_rebinX = 1        
+        #_rebinX = 2
+        _rebinX = 1        
         _format = "%0.0f GeV/c"
         _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         if "jet1" in hName:
@@ -487,14 +487,14 @@ def GetHistoKwargs(histoName, ext, opts):
             _opts["xmax"] = 800.0
         else:
             _opts["xmax"] = 600.0
-        #ROOT.gStyle.SetNdivisions(8, "X")
+        #_opts["xmax"] = 400.0
+        #ROOT.gStyle.SetNdivisions(10, "X")
 
     if "eta" in hName:
         _format = "%0.2f"
         _cutBox = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        #_opts["xmin"] = -2.6 #-3.0
-        _opts["xmin"] =  0.0 #iro
-        _opts["xmax"] = +2.4 #+3.0
+        _opts["xmin"] = -2.4
+        _opts["xmax"] = +2.4
         _rebinX = 1
         #ROOT.gStyle.SetNdivisions(10, "X")
     if "deltaeta" in hName:
@@ -555,7 +555,7 @@ def GetHistoKwargs(histoName, ext, opts):
         "rebinY"           : None,
         "ratioYlabel"      : ext.split("v")[0] + "/" + ext.split("v")[1],
         "ratio"            : _ratio,
-        "ratioInvert"      : False, 
+        "ratioInvert"      : True,  #CR1/CR2
         "addMCUncertainty" : True,
         "addLuminosityText": True,
         "addCmsText"       : True,

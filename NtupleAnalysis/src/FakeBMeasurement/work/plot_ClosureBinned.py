@@ -671,13 +671,15 @@ def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
         # Apply histogram styles          
         styles.getABCDStyle("CRone").apply(rFakeB_CRone)
         styles.getABCDStyle("CRtwo").apply(rFakeB_CRtwo)
-        styles.getABCDStyle("VR").apply(rFakeB_VR)
-        styles.getABCDStyle("SR").apply(rFakeB_SR)
+        if 0:
+            styles.getABCDStyle("VR").apply(rFakeB_VR)
+            styles.getABCDStyle("SR").apply(rFakeB_SR)
         
         # Create the plot
-        # p = plots.ComparisonManyPlot(rFakeB_CRone, [rFakeB_CRtwo], saveFormats=[]) #iro
-        p = plots.ComparisonManyPlot(rFakeB_CRone, [rFakeB_VR, rFakeB_SR, rFakeB_CRtwo], saveFormats=[]) 
-        # p = plots.ComparisonManyPlot(rFakeB_CRone, [rFakeB_VR, rFakeB_CRtwo], saveFormats=[]) 
+        if 0:
+            p = plots.ComparisonManyPlot(rFakeB_CRone, [rFakeB_VR, rFakeB_SR, rFakeB_CRtwo], saveFormats=[]) 
+        else:
+            p = plots.ComparisonManyPlot(rFakeB_CRone, [rFakeB_CRtwo], saveFormats=[]) #iro
         p.setLuminosity(opts.intLumi)
     
         # Set draw/legend style
@@ -685,17 +687,18 @@ def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
         p.histoMgr.setHistoLegendStyle(hName1, "LP")
         p.histoMgr.setHistoDrawStyle(hName2, "HIST")
         p.histoMgr.setHistoLegendStyle(hName2, "F")
-        p.histoMgr.setHistoDrawStyle(hName3, "AP")
-        p.histoMgr.setHistoLegendStyle(hName3, "LP")
-        p.histoMgr.setHistoDrawStyle(hName4, "AP")
-        p.histoMgr.setHistoLegendStyle(hName4, "LP")
+        if 0:
+            p.histoMgr.setHistoDrawStyle(hName3, "AP")
+            p.histoMgr.setHistoLegendStyle(hName3, "LP")
+            p.histoMgr.setHistoDrawStyle(hName4, "AP")
+            p.histoMgr.setHistoLegendStyle(hName4, "LP")
         
         # Set legend labels
         p.histoMgr.setHistoLegendLabelMany({
                 hName1 : "CR1",
                 hName2 : "CR2",
-                hName3 : "VR",
-                hName4 : "SR",
+                #hName3 : "VR",
+                #hName4 : "SR",
                 })
 
         # Draw the plot and save it
