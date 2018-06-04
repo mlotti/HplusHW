@@ -25,7 +25,21 @@
  LAST USED:
  ./getInclusiveEfficiency.py --noSF SystTopBDT_180524_074141_MET50_MuIso0p1_InvMET20_InvMuIso0p1_noSF --withCR2SF SystTopBDT_180525_022130_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR2SF --url -e "TTW"
  ./getInclusiveEfficiency.py --noSF SystTopBDT_180513_101101_MET50_MuIso0p1_InvMET20_InvMuIso0p1_noSF --withCR2SF SystTopBDT_180513_155700_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR2SF --url -e "TTW"
- 
+
+ # Marina
+ (1) ./getInclusiveEfficiency.py --noSF SystTopBDT_180528_151309_MET30_MuIso0p1_InvMET30_InvMuIso0p2_noSF --withCR2SF SystTopBDT_180529_083852_MET30_MuIso0p2_InvMET30_InvMuIso0p2_withCR2SF --url -e "TTW"
+ (2) ./getInclusiveEfficiency.py --noSF SystTopBDT_180528_151533_MET30_MuIso0p1_InvMET30_InvMuIso0p2_noSF --withCR2SF SystTopBDT_180529_084257_MET30_MuIso0p1_InvMET30_InvMuIso0p2_withCR2SF --url -e "TTW"
+ (3) ./getInclusiveEfficiency.py --noSF SystTopBDT_180528_152141_MET50_MuIso0p1_InvMET20_InvMuIso0p2_noSF --withCR2SF SystTopBDT_180529_084610_MET50_MuIso0p1_InvMET20_InvMuIso0p2_withCR2SF --url -e "TTW"
+ (4) ./getInclusiveEfficiency.py --noSF SystTopBDT_180528_152310_MET40_MuIso0p1_InvMET30_InvMuIso0p2_noSF --withCR2SF SystTopBDT_180529_084900_MET40_MuIso0p1_InvMET30_InvMuIso0p2_withCR2SF --url -e "TTW"
+ (5) ./getInclusiveEfficiency.py --noSF SystTopBDT_180528_152540_MET30_MuIso0p1_InvMET15_InvMuIso0p2_noSF --withCR2SF SystTopBDT_180529_085334_MET30_MuIso0p1_InvMET15_InvMuIso0p2_withCR2SF --url -e "TTW"
+ (6) ./getInclusiveEfficiency.py --noSF SystTopBDT_180528_152944_MET30_MuIso0p2_InvMET20_InvMuIso0p4_noSF --withCR2SF SystTopBDT_180529_085656_MET30_MuIso0p2_InvMET20_InvMuIso0p4_withCR2SF --url -e "TTW"
+ (7) ./getInclusiveEfficiency.py --noSF SystTopBDT_180529_093052_MET50_MuIso0p1_InvMET20_InvMuIso0p1_noSF --withCR2SF SystTopBDT_180530_075514_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR2SF --url -e "TTW"
+ (8) ./getInclusiveEfficiency.py --noSF SystTopBDT_180529_165537_MET30_MuIso0p1_InvMET30_InvMuIso0p1_noSF --withCR2SF SystTopBDT_180530_075724_MET30_MuIso0p1_InvMET30_InvMuIso0p1_withCR2SF --url -e "TTW"
+ (9) ./getInclusiveEfficiency.py --noSF SystTopBDT_180529_170402_MET30_MuIso0p1_InvMET20_InvMuIso0p1_noSF --withCR2SF SystTopBDT_180530_080019_MET30_MuIso0p1_InvMET20_InvMuIso0p1_withCR2SF --url -e "TTW"
+ (10) ./getInclusiveEfficiency.py --noSF SystTopBDT_180529_094433_MET30_MuIso0p1_InvMET15_InvMuIso0p1_noSF --withCR2SF SystTopBDT_180530_080239_MET30_MuIso0p1_InvMET15_InvMuIso0p1_withCR2SF --url -e "TTW"
+ (11) ./getInclusiveEfficiency.py --noSF SystTopBDT_180529_094647_MET50_MuIso0p2_InvMET30_InvMuIso0p2_noSF --withCR2SF SystTopBDT_180530_075159_MET50_MuIso0p2_InvMET30_InvMuIso0p2_withCR2SF --url -e "TTW"
+ (12) ./getInclusiveEfficiency.py --noSF SystTopBDT_180529_094856_MET30_MuIso0p1_InvMET20_InvMuIso0p3_noSF --withCR2SF SystTopBDT_180530_074700_MET30_MuIso0p1_InvMET20_InvMuIso0p3_withCR2SF --url -e "TTW"
+
  OTHER SELECTIONS:
  (A) ./getInclusiveEfficiency.py --noSF SystTopBDT_180513_100633_MET50_MuIso0p2_InvMET20_InvMuIso0p2_noSF --withCR2SF SystTopBDT_180513_154620_MET50_MuIso0p2_InvMET20_InvMuIso0p2_withCR2SF --url -e "TTW"
  (B) ./getInclusiveEfficiency.py --noSF SystTopBDT_180513_101101_MET50_MuIso0p1_InvMET20_InvMuIso0p1_noSF --withCR2SF SystTopBDT_180513_155700_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR2SF --url -e "TTW"
@@ -521,7 +535,19 @@ def PlotHistos(noSF_datasetsMgr, withCR2SF_datasetsMgr, num_histoList, den_histo
     #=========================================================================================
     # Normalization Factors (see: getNormalization.py)
     #=========================================================================================
-    f1=0.596314; f2=0.899518;
+    # Marina
+    #f1=0.610901; f2=0.889906; # (1)
+    #f1=0.610901; f2=0.906343; # (2)
+    #f1=0.610963; f2=0.903020; # (3)
+    #f1=0.610901; f2=0.901711; # (4)
+    #f1=0.603648; f2=0.907290; # (5)
+    #f1=0.611682; f2=0.889619; # (6)
+    #f1=0.613102; f2=0.902808; # (7)
+    #f1=0.609202; f2=0.906565; # (8)
+    #f1=0.613102; f2=0.906056; # (9)
+    #f1=0.608068; f2=0.906713; # (10)
+    #f1=0.610901; f2=0.889106; # (11)
+    f1=0.616422; f2=0.905622; # (12)
 
     # =========================================================================================
     # (A) Apply Normalization Factors (see: getNormalizations.py)
@@ -683,14 +709,14 @@ def PlotHistos(noSF_datasetsMgr, withCR2SF_datasetsMgr, num_histoList, den_histo
     # =============================
     #    Export JSON file
     # =============================
-    jsonName = "Efficiency_InclusiveTT_SR_MET50_MuIso0p1_InvMET20_InvMuIso0p1.json"
-    runRange = "273150-284044"
-    analysis = opts.analysisName
-    label = "2016"
-    plotDir =  os.path.join(opts.folder, jsonName)
-    pythonWriter.addParameters(plotDir, label, runRange, opts.intLumi, geff_data)
-    pythonWriter.addMCParameters(label, geff_mc)
-    pythonWriter.writeJSON(jsonName)
+    #jsonName = "Efficiency_InclusiveTT_SR_MET50_MuIso0p1_InvMET20_InvMuIso0p1.json"
+    #runRange = "273150-284044"
+    #analysis = opts.analysisName
+    #label = "2016"
+    #plotDir =  os.path.join(opts.folder, jsonName)
+    #pythonWriter.addParameters(plotDir, label, runRange, opts.intLumi, geff_data)
+    #pythonWriter.addMCParameters(label, geff_mc)
+    #pythonWriter.writeJSON(jsonName)
     
     
     return
