@@ -186,8 +186,10 @@ def main():
     # Set splitting of phase-space (first bin is below first edge value and last bin is above last edge value)
     allSelections.CommonPlots.histogramSplitting = [        
         ### 2D-binning (Pt, Eta)
-        PSet(label="TetrajetBjetPt" , binLowEdges=[50, 90], useAbsoluteValues=False), # 25 May 2018 (lpc26)
-        PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True), # 25 May 2018 (lpc26)
+        PSet(label="TetrajsetBjetPt" , binLowEdges=[60], useAbsoluteValues=False), 
+        #PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True),
+        PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6, 2.0], useAbsoluteValues=True),
+        #PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0], useAbsoluteValues=True),  #AN v4
         ### 1D-binning (Eta)
         #PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True),  #AN v4
         ]

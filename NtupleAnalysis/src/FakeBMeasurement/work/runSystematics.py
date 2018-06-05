@@ -153,9 +153,12 @@ def main():
         ## PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0], useAbsoluteValues=True), 
         #
         # 2D binning (Pt, Eta)
+        PSet(label="TetrajetBjetPt" , binLowEdges=[50, 100], useAbsoluteValues=False),
+        PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True),
+        #
         #  PSet(label="TetrajetBjetPt" , binLowEdges=[80, 160], useAbsoluteValues=False), # Alexandros (40-60, 60-80 off. rest good!)
-        PSet(label="TetrajetBjetPt" , binLowEdges=[50, 65, 85], useAbsoluteValues=False), # Alexandros (40-60, 60-80 off. rest good!)        
-        PSet(label="TetrajetBjetEta", binLowEdges=[1.0, 1.8], useAbsoluteValues=True), # Alexandros (good)
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[50, 65, 85], useAbsoluteValues=False), # Alexandros (40-60, 60-80 off. rest good!)        
+        # PSet(label="TetrajetBjetEta", binLowEdges=[1.0, 1.8], useAbsoluteValues=True), # Alexandros (good)
         #
         # PSet(label="TetrajetBjetPt" , binLowEdges=[80, 200], useAbsoluteValues=False), # Fotis
         # PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True), # Fotis
