@@ -139,10 +139,10 @@ def GetHistoKwargs(histoName):
         #_opts["xmin"] =  50
         #_opts["xmax"] = 300
         _cutBox       = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
-        _rebinX       = 2
+        _rebinX       = 1 #2
         if "tetrajetbjet" in histoName.lower():
             _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            _rebinX = 2
+            _rebinX = 1 #2
             _opts["xmax"] = 800
 
     if "mass" in histoName.lower():
@@ -150,14 +150,14 @@ def GetHistoKwargs(histoName):
         _xlabel       = "m_{jjb} (%s)" % (_units)
         _ylabel      += " " + _units
         _opts["xmin"] =  50
-        _opts["xmax"] = 300
+        _opts["xmax"] = 3000
         _cutBox       = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
 
         if "tetrajet" in histoName.lower():
             _xlabel       = "m_{jjbb} (%s)" % (_units)
             _opts["xmin"] =    0
             _opts["xmax"] = 3000
-            _cutBox       = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+            _cutBox       = {"cutValue": 180.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
             _rebinX       = getBinningForTetrajetMass()
             if isinstance(_rebinX, list):
                 _ylabel = "Events / bin"
@@ -379,8 +379,8 @@ def main(opts):
         folderList = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(opts.folder)
         #folderList1 = [h for h in folderList if "TetrajetPt" in h]
         #folderList1 = [h for h in folderList if "MET" in h]
-        folderList1 = [h for h in folderList if "TetrajetMass" in h]
-        #folderList1 = [h for h in folderList if "TetrajetBJetPt" in h]
+        #folderList1 = [h for h in folderList if "TetrajetMass" in h]
+        folderList1 = [h for h in folderList if "TetrajetBJetPt" in h]
         #folderList1 = [h for h in folderList if "TetrajetBJetEta" in h]
         folderList2 = [h for h in folderList1 if "VR" in h or "SR" in h or "CRone" in h or "CRtwo" in h  or "CRthree" in h  or "CRfour" in h]
 
