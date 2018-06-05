@@ -272,6 +272,14 @@ def PlotMC(datasetsMgr, histo, intLumi):
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         #_opts["xmax"] = 505 #1005
 
+    if "eta" in histo.lower():
+        _units  = ""
+        _format = "%0.1f " + _units
+        _xlabel = "#eta %s" % _units
+        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        _opts["xmax"] = 2.5
+        _opts["xmin"] = -2.5
+
     if "trijetmass" in histo.lower():
         _rebinX = 2
         _units  = "GeV/c^{2}"
