@@ -76,8 +76,8 @@ tauVeto = PSet(
     rtau                 =   0.0, # [default: 0.0] (to disable set to 0.0)
     againstElectronDiscr = "againstElectronTightMVA6",
     againstMuonDiscr     = "againstMuonLoose3",
-    #isolationDiscr       = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
-    isolationDiscr       = "byVLooseIsolationMVArun2v1DBoldDMwLT", # also used by boosted analysis
+    #isolationDiscr       = "byLooseCombinedIsolationDeltaBetaCorr3Hits", # [former default; higher signal efficiency]
+    isolationDiscr       = "byVLooseIsolationMVArun2v1DBoldDMwLT", # [boosted analysis]
     )
 
 #================================================================================================
@@ -207,7 +207,6 @@ scaleFactors.setupBtagSFInformation(btagPset               = fakeBBjetSelection,
 
 fakeBTopSelectionBDT = PSet(
     MVACutValue            = -1.0,   # [default: -1.0] NOTE: defines SR, VR, CR1, and CR2
-    #MVACutValue            = -0.60,   # [default: -1.0] NOTE: defines SR, VR, CR1, and CR2
     MVACutDirection        = ">",    # [default: ">"] (NOTE: Crashes if set to ">=" -1)
     LdgTopDefinition       = "MVA",  # [default: "MVA"] (options: "MVA", "Pt")
     MassCutValue           = 600.0,  # [default: 600.0] #topSelectionBDT.MassCutValue, (800.0 is way too much. TTbar takes > 24 hours)
