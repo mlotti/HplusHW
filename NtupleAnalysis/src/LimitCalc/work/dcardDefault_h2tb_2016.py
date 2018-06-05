@@ -10,7 +10,7 @@ USAGE:
 
 
 EXAMPLES:
-xOB./dcardGenerator_v2.py -x dcardDefault_h2tb_2016.py -d limits2016/ --h2tb
+./dcardGenerator_v2.py -x dcardDefault_h2tb_2016.py -d limits2016/ --h2tb
 
 
 LAST USED:

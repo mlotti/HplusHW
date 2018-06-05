@@ -182,6 +182,21 @@ def main():
         else:
             process.addDatasetsFromMulticrab(opts.mcrab)
 
+
+        # ***************************************
+        # Keep ONLY datasets in whitelist
+        # ***************************************
+        Verbose("Removing datasets NOT included in whitelist:")    
+        removeList = []
+        for i, d in enumerate(process.getDatasets()):
+            if d.getName() not in whiteList:
+                Verbose("Dataset to be removed: %s" % (d.getName()))
+                removeList.append(d) 
+
+        for d in removeList:
+            process._datasets.remove(d)
+        
+
     # ================================================================================================
     # Overwrite Default Settings  
     # ================================================================================================
@@ -436,6 +451,25 @@ def GetDatasetWhitelist(opts):
         #myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_5000")
         #myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_7000")
         #myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_10000")
+    elif opts.group == "U":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_180")
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_800")
+    elif opts.group == "V":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_350")
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_400")
+    elif opts.group == "W":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_500")
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_1000")
+    elif opts.group == "X":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_220")
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_250")
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_2500")
+    elif opts.group == "Y":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_300")
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_3000")
+    elif opts.group == "Z":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_200")
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_2000")
     else:
         msg = "Unknown systematics submission dataset group \"%s\"%" % (opts.group)
         raise Exception(msg)

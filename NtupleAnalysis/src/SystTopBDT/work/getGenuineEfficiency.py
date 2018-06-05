@@ -1,4 +1,4 @@
-#!/usr/bin/env pythone
+#!/usr/bin/env python
 '''
   DESCRIPTION:
   
@@ -41,30 +41,67 @@
   ./getEfficiencies.py -num <pseudo_nummcrab_directory> -den <pseudo_dencrab_directory> [opts]
   
   LAST USED:
-  ./getBDTEfficiency.py --noSF SystTopBDT_180513_101101_MET50_MuIso0p1_InvMET20_InvMuIso0p1_noSF --withCR1SF SystTopBDT_180513_184604_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR1SF \
-  --withCR2SF SystTopBDT_180513_155700_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR2SF --url -e "TTW"
+
+  (1) ./getGenuineEfficiency.py --noSF SystTopBDT_180528_151309_MET30_MuIso0p1_InvMET30_InvMuIso0p2_noSF --withCR1SF SystTopBDT_180602_113334_MET30_MuIso0p2_InvMET30_InvMuIso0p2_withCR1SF \
+  --withCR2SF SystTopBDT_180529_083852_MET30_MuIso0p2_InvMET30_InvMuIso0p2_withCR2SF --url -e "TTW"
+
+  (2) ./getGenuineEfficiency.py --noSF SystTopBDT_180528_151533_MET30_MuIso0p1_InvMET30_InvMuIso0p2_noSF --withCR1SF SystTopBDT_180602_114148_MET30_MuIso0p1_InvMET30_InvMuIso0p2_withCR1SF \
+  --withCR2SF SystTopBDT_180529_084257_MET30_MuIso0p1_InvMET30_InvMuIso0p2_withCR2SF --url -e "TTW"
+
+  (3) ./getGenuineEfficiency.py --noSF SystTopBDT_180528_152141_MET50_MuIso0p1_InvMET20_InvMuIso0p2_noSF --withCR1SF SystTopBDT_180602_114435_MET50_MuIso0p1_InvMET20_InvMuIso0p2_withCR1SF \
+  --withCR2SF SystTopBDT_180529_084610_MET50_MuIso0p1_InvMET20_InvMuIso0p2_withCR2SF --url -e "TTW"
+
+  (4) ./getGenuineEfficiency.py --noSF SystTopBDT_180528_152310_MET40_MuIso0p1_InvMET30_InvMuIso0p2_noSF --withCR1SF SystTopBDT_180602_114641_MET40_MuIso0p1_InvMET30_InvMuIso0p2_withCR1SF \
+  --withCR2SF SystTopBDT_180529_084900_MET40_MuIso0p1_InvMET30_InvMuIso0p2_withCR2SF --url -e "TTW"
+
+  (5) ./getGenuineEfficiency.py --noSF SystTopBDT_180528_152540_MET30_MuIso0p1_InvMET15_InvMuIso0p2_noSF --withCR1SF SystTopBDT_180602_114840_MET30_MuIso0p1_InvMET15_InvMuIso0p2_withCR1SF \
+  --withCR2SF SystTopBDT_180529_085334_MET30_MuIso0p1_InvMET15_InvMuIso0p2_withCR2SF --url -e "TTW"
+  
+  (6) ./getGenuineEfficiency.py --noSF SystTopBDT_180528_152944_MET30_MuIso0p2_InvMET20_InvMuIso0p4_noSF --withCR1SF SystTopBDT_180602_115034_MET30_MuIso0p2_InvMET20_InvMuIso0p4_withCR1SF \
+  --withCR2SF SystTopBDT_180529_085656_MET30_MuIso0p2_InvMET20_InvMuIso0p4_withCR2SF --url -e "TTW"
+
+  (7) ./getGenuineEfficiency.py --noSF SystTopBDT_180529_093052_MET50_MuIso0p1_InvMET20_InvMuIso0p1_noSF --withCR1SF SystTopBDT_180602_115353_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR1SF \
+  --withCR2SF SystTopBDT_180530_075514_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR2SF --url -e "TTW"
+
+  (8) ./getGenuineEfficiency.py --noSF SystTopBDT_180529_165537_MET30_MuIso0p1_InvMET30_InvMuIso0p1_noSF --withCR1SF SystTopBDT_180602_115622_MET30_MuIso0p1_InvMET30_InvMuIso0p1_withCR1SF \
+  --withCR2SF SystTopBDT_180530_075724_MET30_MuIso0p1_InvMET30_InvMuIso0p1_withCR2SF --url -e "TTW"
+  # Marina
+  (9) ./getGenuineEfficiency.py --noSF SystTopBDT_180529_170402_MET30_MuIso0p1_InvMET20_InvMuIso0p1_noSF --withCR1SF SystTopBDT_180602_115822_MET30_MuIso0p1_InvMET20_InvMuIso0p1_withCR1SF \
+  --withCR2SF SystTopBDT_180530_080019_MET30_MuIso0p1_InvMET20_InvMuIso0p1_withCR2SF --url -e "TTW"
+  
+  (10) ./getGenuineEfficiency.py --noSF SystTopBDT_180529_094433_MET30_MuIso0p1_InvMET15_InvMuIso0p1_noSF --withCR1SF SystTopBDT_180602_120116_MET30_MuIso0p1_InvMET15_InvMuIso0p1_withCR1SF \
+  --withCR2SF SystTopBDT_180530_080239_MET30_MuIso0p1_InvMET15_InvMuIso0p1_withCR2SF --url -e "TTW"
+  
+  (11) ./getGenuineEfficiency.py --noSF SystTopBDT_180529_094647_MET50_MuIso0p2_InvMET30_InvMuIso0p2_noSF --withCR1SF SystTopBDT_180602_122528_MET50_MuIso0p2_InvMET30_InvMuIso0p2_withCR1SF \
+  --withCR2SF SystTopBDT_180530_075159_MET50_MuIso0p2_InvMET30_InvMuIso0p2_withCR2SF --url -e "TTW"
+
+  (12) ./getGenuineEfficiency.py --noSF SystTopBDT_180529_094856_MET30_MuIso0p1_InvMET20_InvMuIso0p3_noSF --withCR1SF SystTopBDT_180602_123016_MET30_MuIso0p1_InvMET20_InvMuIso0p3_withCR1SF \
+  --withCR2SF SystTopBDT_180530_074700_MET30_MuIso0p1_InvMET20_InvMuIso0p3_withCR2SF --url -e "TTW"
+
+
+
+
   
   OTHER SELECTIONS:
-  
-  (A) ./getBDTEfficiency.py --noSF SystTopBDT_180513_100633_MET50_MuIso0p2_InvMET20_InvMuIso0p2_noSF --withCR1SF SystTopBDT_180513_181711_MET50_MuIso0p2_InvMET20_InvMuIso0p2_withCR1SF \
+  (A) ./getGenuineEfficiency.py --noSF SystTopBDT_180513_100633_MET50_MuIso0p2_InvMET20_InvMuIso0p2_noSF --withCR1SF SystTopBDT_180513_181711_MET50_MuIso0p2_InvMET20_InvMuIso0p2_withCR1SF \
   --withCR2SF SystTopBDT_180513_154620_MET50_MuIso0p2_InvMET20_InvMuIso0p2_withCR2SF --url -e "TTW"
-  
-  (B) ./getBDTEfficiency.py --noSF SystTopBDT_180513_101101_MET50_MuIso0p1_InvMET20_InvMuIso0p1_noSF --withCR1SF SystTopBDT_180513_184604_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR1SF \
+
+  (B) ./getGenuineEfficiency.py --noSF SystTopBDT_180513_101101_MET50_MuIso0p1_InvMET20_InvMuIso0p1_noSF --withCR1SF SystTopBDT_180513_184604_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR1SF \
   --withCR2SF SystTopBDT_180513_155700_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR2SF --url -e "TTW"
   
-  (C) ./getBDTEfficiency.py --noSF SystTopBDT_180513_101634_MET50_MuIso0p2_InvMET30_InvMuIso0p2_noSF --withCR1SF SystTopBDT_180513_185326_MET50_MuIso0p2_InvMET30_InvMuIso0p2_withCR1F \
+  (C) ./getGenuineEfficiency.py --noSF SystTopBDT_180513_101634_MET50_MuIso0p2_InvMET30_InvMuIso0p2_noSF --withCR1SF SystTopBDT_180513_185326_MET50_MuIso0p2_InvMET30_InvMuIso0p2_withCR1F \
   --withCR2SF SystTopBDT_180513_160712_MET50_MuIso0p2_InvMET30_InvMuIso0p2_withCR2SF --url -e "TTW"
   
-  (D) ./getBDTEfficiency.py --noSF SystTopBDT_180513_102112_MET50_MuIso0p1_InvMET30_InvMuIso0p1_noSF --withCR1SF SystTopBDT_180513_185942_MET50_MuIso0p1_InvMET30_InvMuIso0p1_withCR1SF \
+  (D) ./getGenuineEfficiency.py --noSF SystTopBDT_180513_102112_MET50_MuIso0p1_InvMET30_InvMuIso0p1_noSF --withCR1SF SystTopBDT_180513_185942_MET50_MuIso0p1_InvMET30_InvMuIso0p1_withCR1SF \
   --withCR2SF SystTopBDT_180513_161853_MET50_MuIso0p1_InvMET30_InvMuIso0p1_withCR2SF --url -e "TTW"
 
-  (E) ./getBDTEfficiency.py --noSF SystTopBDT_180514_110341_MET40_MuIso0p1_InvMET20_InvMuIso0p1_noSF --withCR1SF SystTopBDT_180515_034913_MET40_MuIso0p1_InvMET20_InvMuIso0p1_withCR1SF \
+  (E) ./getGenuineEfficiency.py --noSF SystTopBDT_180514_110341_MET40_MuIso0p1_InvMET20_InvMuIso0p1_noSF --withCR1SF SystTopBDT_180515_034913_MET40_MuIso0p1_InvMET20_InvMuIso0p1_withCR1SF \
   --withCR2SF SystTopBDT_180514_170239_MET40_MuIso0p1_InvMET20_InvMuIso0p1_withCR2SF --url -e "TTW"
   
-  (F) ./getBDTEfficiency.py --noSF SystTopBDT_180514_115524_MET40_MuIso0p1_InvMET30_InvMuIso0p1_noSF --withCR1SF SystTopBDT_180515_035307_MET40_MuIso0p1_InvMET30_InvMuIso0p1_withCR1SF \
+  (F) ./getGenuineEfficiency.py --noSF SystTopBDT_180514_115524_MET40_MuIso0p1_InvMET30_InvMuIso0p1_noSF --withCR1SF SystTopBDT_180515_035307_MET40_MuIso0p1_InvMET30_InvMuIso0p1_withCR1SF \
 --withCR2SF SystTopBDT_180514_174250_MET40_MuIso0p1_InvMET30_InvMuIso0p1_withCR2SF --url -e "TTW"
 
-  (G) ./getBDTEfficiency.py --noSF SystTopBDT_180514_115629_MET30_MuIso0p1_InvMET20_InvMuIso0p1_noSF --withCR1SF SystTopBDT_180515_035717_MET30_MuIso0p1_InvMET20_InvMuIso0p1_withCR1SF \
+  (G) ./getGenuineEfficiency.py --noSF SystTopBDT_180514_115629_MET30_MuIso0p1_InvMET20_InvMuIso0p1_noSF --withCR1SF SystTopBDT_180515_035717_MET30_MuIso0p1_InvMET20_InvMuIso0p1_withCR1SF \
 --withCR2SF SystTopBDT_180514_174443_MET30_MuIso0p1_InvMET20_InvMuIso0p1_withCR2SF --url -e "TTW"
 
 '''
@@ -551,7 +588,19 @@ def PlotHistos(noSF_datasetsMgr, withCR1SF_datasetsMgr, withCR2SF_datasetsMgr, n
     # =========================================================================================
     # Normalization Factors (see: getNormalization.py)
     # =========================================================================================
-    f1 = 0.602756; f2=0.902921;
+    # Marina
+    #f1=0.610901; f2=0.889906; # (1)
+    #f1=0.610901; f2=0.906343; # (2)
+    #f1=0.610963; f2=0.903020; # (3)
+    #f1=0.610901; f2=0.901711; # (4)
+    #f1=0.603648; f2=0.907290; # (5)
+    #f1=0.611682; f2=0.889619; # (6)
+    #f1=0.613102; f2=0.902808; # (7)
+    #f1=0.609202; f2=0.906565; # (8)
+    #f1=0.613102; f2=0.906056; # (9)
+    #f1=0.608068; f2=0.906713; # (10)
+    #f1=0.610901; f2=0.889106; # (11)
+    f1=0.616422; f2=0.905622; # (12)
     
     # =========================================================================================
     # (A) Apply Normalization Factors (see: getNormalizations.py)
