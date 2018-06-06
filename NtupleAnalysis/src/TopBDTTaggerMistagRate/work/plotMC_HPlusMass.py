@@ -272,7 +272,29 @@ def PlotMC(datasetsMgr, histo, intLumi):
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         #_opts["xmax"] = 505 #1005
 
-    if "trijetmass" in histo.lower():
+    if "ht" in histo.lower():
+        _rebinX = 2
+        _units  = "GeV/c"
+        _format = "%0.0f " + _units
+        _xlabel = "H_{T} (%s)" % _units
+        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        _opts["xmax"] = 3505 #1005
+
+    if "met" in histo.lower():
+        _rebinX = 1
+        _units  = "GeV"
+        _format = "%0.0f " + _units
+        _xlabel = "E_{T,missing} (%s)" % _units
+        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        _opts["xmax"] = 605 #1005
+
+    if "mult" in histo.lower():
+        _units  = ""
+        _format = "%0.0f " + _units
+        _xlabel = "jet multiplicity"
+        _opts["xmax"] = 15
+
+    if "mass" in histo.lower():
         _rebinX = 2
         _units  = "GeV/c^{2}"
         _format = "%0.0f " + _units

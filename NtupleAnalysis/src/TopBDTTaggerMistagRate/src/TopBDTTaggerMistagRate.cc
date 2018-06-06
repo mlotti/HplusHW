@@ -33,6 +33,8 @@ private:
   // const std::string            cfg_LdgTopDefinition;
   const DirectionalCut<double> cfg_MVACut;
   const unsigned int cfg_NBjets;
+  const std::vector<float> cfg_JetPtCuts; 
+
   // Common plots
   CommonPlots fCommonPlots;
 
@@ -65,6 +67,10 @@ private:
   WrappedTH1 *h_AfterStandardSelections_HT;
   WrappedTH1 *h_AfterStandardSelections_JetMult;
   WrappedTH1 *h_AfterStandardSelections_BjetMult;
+
+  WrappedTH1 *h_AfterStandardSelection_DeltaR_ldgJet_Top;
+  WrappedTH1 *h_AfterStandardSelection_DeltaR_fatJets_Top;
+
   //After All Selections
   WrappedTH1 *h_AfterAllSelections_LdgTop_Pt;
   WrappedTH1 *h_AfterAllSelections_LdgTop_Mass;
@@ -90,6 +96,7 @@ TopBDTTaggerMistagRate::TopBDTTaggerMistagRate(const ParameterSet& config, const
     // cfg_LdgTopDefinition(config.getParameter<std::string>("FakeBTopSelectionBDT.LdgTopDefinition")),
     cfg_MVACut(config, "TopSelectionBDT.MVACut"),
     cfg_NBjets(config.getParameter<unsigned int>("BJetSelection.numberOfBJetsCutValue")),
+    cfg_JetPtCuts(config.getParameter<std::vector<float>>("JetSelection.jetPtCuts")),
     fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kHplus2tbAnalysis, fHistoWrapper),
     cAllEvents(fEventCounter.addCounter("all events")),
     cTrigger(fEventCounter.addCounter("passed trigger")),
@@ -160,9 +167,14 @@ void TopBDTTaggerMistagRate::book(TDirectory *dir) {
   h_AfterStandardSelections_JetMult     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dirTH1, "AfterStandardSelections_JetMult", ";", 20, 0, 20);
   h_AfterStandardSelections_BjetMult    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dirTH1, "AfterStandardSelections_BjetMult", ";", 20, 0, 20);
 
+  h_AfterStandardSelection_DeltaR_ldgJet_Top  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dirTH1, "AfterStandardSelection_DeltaR_ldgJet_Top", ";#Delta R", 60, 0, 6.0);
+  h_AfterStandardSelection_DeltaR_fatJets_Top = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dirTH1, "AfterStandardSelection_DeltaR_fatJets_Top", ";#Delta R", 60, 0, 6.0);
+
+
+
   //After All Selection
   h_AfterAllSelections_LdgTop_Pt      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dirTH1, "AfterAllSelections_LdgTop_Pt", ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
-  h_AfterAllSelections_Tops_Pt   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dirTH1, "AfterAllSelections_Tops_Pt", ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
+  h_AfterAllSelections_Tops_Pt     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dirTH1, "AfterAllSelections_Tops_Pt", ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
   h_AfterAllSelections_LdgTop_Mass = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dirTH1, "AfterAllSelections_LdgTop_Mass", ";m_{jjb} (GeV/c^{2})", nTopMassBins, fTopMassMin, fTopMassMax);
   h_AfterAllSelections_Jet1_Pt     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dirTH1, "AfterAllSelections_Jet1_Pt", ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
   h_AfterAllSelections_Jet2_Pt     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dirTH1, "AfterAllSelections_Jet2_Pt", ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
@@ -352,8 +364,9 @@ void TopBDTTaggerMistagRate::process(Long64_t entry) {
   if (0) std::cout<<"At least "<<cfg_NBjets<<" bjets per event"<<std::endl;
   
   //If 2 jet are required: form the top candidates excluding the leadin in pt jet.
-  if (cfg_NBjets == 1){
+  if (cfg_JetPtCuts.at(0) == 100){
     
+    if (0) std::cout<<"ldg top analysis"<<std::endl;
     Jet Ldgjet = GetLdgJet(jetData.getSelectedJets());
     
     for (size_t i=0; i < topData.getAllTopsBJet().size(); i++){
@@ -370,6 +383,7 @@ void TopBDTTaggerMistagRate::process(Long64_t entry) {
       //DeltaR(ldgJet, top)
       double dR_ldgJet_Top = ROOT::Math::VectorUtil::DeltaR(Ldgjet.p4(), Top_p4);
       
+      h_AfterStandardSelection_DeltaR_ldgJet_Top -> Fill(dR_ldgJet_Top);
       //Skip if DeltaR(ldgJet, top) < 2.0
       if (dR_ldgJet_Top < 2.0) continue;
       TopCandIndex.push_back(i);
@@ -383,8 +397,58 @@ void TopBDTTaggerMistagRate::process(Long64_t entry) {
     }
   }
   
+  else if (cfg_JetPtCuts.at(0) == 40){
+    if (0) std::cout<<"fat jets analysis"<<std::endl;
+    for (size_t i=0; i < topData.getAllTopsBJet().size(); i++){
+      Jet bjet = topData.getAllTopsBJet().at(i);
+      Jet jet1 = topData.getAllTopsJet1().at(i);
+      Jet jet2 = topData.getAllTopsJet2().at(i);
+      
+      // Get 4-momentum of top (trijet)
+      math::XYZTLorentzVector Top_p4;
+      Top_p4 = bjet.p4() + jet1.p4() + jet2.p4();
+      
+      bool keepTopCandidate = false;
+      for(AK8Jet fatJet: fEvent.ak8jets()){
+	//Fatjets: definitions
+	double tau_21 = fatJet.NjettinessAK8tau2()/fatJet.NjettinessAK8tau1();
+	double tau_32 = fatJet.NjettinessAK8tau3()/fatJet.NjettinessAK8tau2();
+	//Skip if fat jet does not pass the selection criteria
+	
+	//=== Apply cut on jet ID
+	if (!fatJet.jetIDDiscriminator()) continue;
+	//=== Apply cut on jet PU ID
+	if (!fatJet.jetPUIDDiscriminator())  continue;
+	//=== Apply cut on jet eta
+	if (std::abs(fatJet.eta()) >= 2.4) continue;
+	//=== Apply cut on jet pt
+	if (fatJet.pt() < 150) continue;
+	//=== Apply cut on jet tau_21
+	if (tau_21 < 0.6)      continue;  
+	//=== Apply cut on jet tau_32
+	if (tau_32 < 0.67)     continue;  
+
+	//DeltaR(ldgJet, top)
+	double dR_fatjet_Top = ROOT::Math::VectorUtil::DeltaR(fatJet.p4(), Top_p4);
+	
+	h_AfterStandardSelection_DeltaR_fatJets_Top -> Fill(dR_fatjet_Top);
+	//Skip if DeltaR(ldgJet, top) < 2.0
+	if (dR_fatjet_Top > 2.0) keepTopCandidate = true;	
+      }
+      
+      if (!keepTopCandidate) continue;
+      TopCandIndex.push_back(i);
+      
+      //Pt of all top candidates
+      h_AfterStandardSelections_Tops_Pt  -> Fill(Top_p4.Pt());
+      
+      float mva = topData.getAllTopsMVA().at(i);
+      //Pt of all top candidates passing the BDT cut
+      if (cfg_MVACut.passedCut(mva)) h_AfterAllSelections_Tops_Pt  -> Fill(Top_p4.Pt());
+    }    
+  }
   //If 2 bjet are required (BBbar event): form the top candidates excluding the most distant bjet
-  else if (cfg_NBjets == 2){
+  else if (0){
     
     for (size_t i=0; i < topData.getAllTopsBJet().size(); i++){
       Jet bjet = topData.getAllTopsBJet().at(i);
