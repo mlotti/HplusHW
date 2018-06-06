@@ -56,7 +56,7 @@ import aux
 _lightHplusMasses        = [ 80,  90, 100, 120, 140, 150, 155, 160]
 _intermediateHplusMasses = [145,150,155,160,165,170,175,180,190,200]
 _heavyHplusToTBbarMasses = [180, 200, 220, 250, 300, 350, 400, 500, 600, 650, 800, 1000, 1500, 2000, 2500, 3000, 5000, 7000, 10000]
-_heavyHplusMasses        = [180, 200, 220, 250, 300, 350, 400, 500, 600, 700, 750,  800, 1000, 1500, 2000, 3000] #HToTauNu
+_heavyHplusMasses        = [180, 200, 220, 250, 300, 350, 400, 500, 600, 700, 750,  800, 1000, 1500, 2000, 2500, 3000] #HToTauNu
 
 ## These MC datasets must be added together before any
 ## merging/renaming. They are split to two datasets just for more
@@ -532,9 +532,9 @@ _datasetMerge = {
     }
 
 for mass in _intermediateHplusMasses:
-    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTB_M%d"%mass
-#    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTBintermediate_M%d"%mass
-#    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassWithNeutral_M_%d"%(mass)] = "HplusTB_M%d"%mass # NB! Commented out to avoid merging of the WithNeutral samples that have been dropped out of the analysis
+#    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTB_M%d"%mass
+    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTBintermediate_M%d"%mass
+    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassWithNeutral_M_%d"%(mass)] = "HplusTBintermediate_withNeutral_M%d"%mass # NB! Commented out to avoid merging of the WithNeutral samples that have been dropped out of the analysis
 
 #================================================================================================
 # Dataset ordering (default)
@@ -761,6 +761,18 @@ _plotStyles = {
     "ChargedHiggs_HplusTB_HplusToTB_M_5000" : styles.signal5000Style,
     "ChargedHiggs_HplusTB_HplusToTB_M_7000" : styles.signal7000Style,
     "ChargedHiggs_HplusTB_HplusToTB_M_10000": styles.signal1000Style,
+
+    "HplusTBintermediate_M145": styles.mcStyle,
+    "HplusTBintermediate_withNeutral_M145": styles.mcStyle2,
+    "HplusTBintermediate_M165": styles.mcStyle,
+    "HplusTBintermediate_withNeutral_M165": styles.mcStyle2,
+    "HplusTBintermediate_M170": styles.mcStyle,
+    "HplusTBintermediate_withNeutral_M170": styles.mcStyle2,
+    "HplusTBintermediate_M175": styles.mcStyle,
+    "HplusTBintermediate_withNeutral_M175": styles.mcStyle2,
+    "HplusTBintermediate_M200": styles.mcStyle,
+    "HplusTBintermediate_withNeutral_M200": styles.mcStyle2,
+
 
     "DYJetsToLL"    : styles.dyStyle,
     "DYJetsToLLHT"  : styles.dyStyle,

@@ -116,6 +116,10 @@ def plotgraph(histolist,lumi,j,name=""):
     if "markerSize" in j:
         p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetMarkerSize(j["markerSize"]))
 
+    if "useBeachPalette" in j and j["useBeachPalette"]:
+        ROOT.gStyle.SetPalette(69)
+        ROOT.TColor.InvertPalette() # invert color palette if asked
+
     p.draw()
 
     histograms.addStandardTexts(lumi=lumi)
@@ -125,9 +129,8 @@ def plotgraph(histolist,lumi,j,name=""):
     p.save(formats)
     print "Saved plot",os.path.join(plotDir, name)
 
-
-
-
+    if "useBeachPalette" in j and j["useBeachPalette"]:
+        ROOT.TColor.InvertPalette() # re-invert back to nominal, because the above line will invert for the next histogram again
 
 
 def main():
