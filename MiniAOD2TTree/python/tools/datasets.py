@@ -714,7 +714,7 @@ JetTriggersDatasets.extend(datasetsQCDMuEnriched)
 
 # Top BDT Systematics
 TopSystBDTDatasets = []
-#TopSystBDTDatasets.extend(datasetsJetHTData_03Feb2017)
+TopSystBDTDatasets.extend(datasetsJetHTData_03Feb2017)
 TopSystBDTDatasets.extend(datasetsTop)
 TopSystBDTDatasets.extend(datasetsTopSyst)
 #TopSystBDTDatasets.extend(datasetsDY)
@@ -722,6 +722,7 @@ TopSystBDTDatasets.extend(datasetsTopSyst)
 #TopSystBDTDatasets.extend(datasetsMuonData03Feb)
 #TopSystBDTDatasets.extend(datasetsTTWJetsToLNu)
 #TopSystBDTDatasets.extend(datasetsQCDMuEnriched)
+#TopSystBDTDatasets.extend(datasetsDiboson)
 #TopSystBDTDatasets.extend(datasetsDibosonWW)
 
 
