@@ -20,10 +20,11 @@ EXAMPLES:
 ./plotBRLimitCompare_Hplus2tb.py --logY --gridX --gridY --relative --url --yMax 10
 ./plotBRLimitCompare_Hplus2tb.py --logY --gridX --gridY --relative --url --xMax 1000
 ./plotBRLimitCompare_Hplus2tb.py --logY --gridX --gridY --relative --yMin 0.5 --xMax 800
-
-LAST USED:
 ./plotBRLimitCompare_Hplus2tb.py --logY --relative --yMin 0.1 --xMax 1000 --url
 
+
+LAST USED:
+./plotBRLimitCompare_Hplus2tb.py --logY --relative --yMin 0.1 --xMax 3000 --url --bandValue 5
 
 '''
 #================================================================================================
@@ -154,10 +155,16 @@ def main():
         myList    = GetHToTBCombinationMay2018v2()
         doCompare(opts.name, myList)
 
-    if 1:
+    if 0:
         opts.name = "overlap"
         myList    = GetHToTBCombinationMay2018v2()
         doOverlap(opts.name, myList)
+
+    if 1:
+        opts.name = "FakeBBinning"
+        myList    = GetHToTBFakeBBinningJune2018()
+        doCompare(opts.name, myList)
+        #doOverlap(opts.name, myList)
 
 
     # Inform user and exit
@@ -244,6 +251,32 @@ def GetStatOnlyListMar2018():
     # Add boosted results?
     if 1:
         myList.extend(GetBoostedStatOnly())
+    return myList
+
+
+def GetHToTBFakeBBinningJune2018():
+    '''
+    '''
+    myDirs = {}
+    myDirs["6AbsEtaBins"]             = "AbsEtaBins_0p4_0p8_1p6_2p0_2p2_Stat_03June2018_autoMCstats/"
+    myDirs["Pt55_3AbsEtaBins"]        = "Pt55_AbsEtaBins_0p8_1p6_Stat_06June2018_autoMCstats/"
+    myDirs["Pt60_3AbsEtaBins"]        = "Pt60_AbsEtaBins_0p8_1p6_Stat_06June2018_autoMCstats/"
+    myDirs["Pt50_80_3AbsEtaBins"]     = "Pt50_80_AbsEtaBins_0p8_1p6_Stat_06June2018_autoMCstats/"
+    myDirs["Pt50_110_3AbsEtaBins"]    = "Pt50_110_AbsEtaBins_0p8_1p6_Stat_06June2018_autoMCstats/"
+    myDirs["Pt50_80_160_3AbsEtaBins"] = "Pt50_80_160_AbsEtaBins_0p8_1p6_Stat_04June2018_autoMCstats/"
+
+    homeDir = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/"
+    for k in myDirs:
+        myDirs[k] = os.path.join(homeDir, "datacards_Hplus2tb_13TeV_AfterPreapproval_NewTop_" + myDirs[k])
+
+    myList = [
+        ("0 p_{T}, 6 |#eta| bins"     , myDirs["6AbsEtaBins"]             + "CombineResults*"),
+        ("2 p_{T}, 3 |#eta| bins (v1)", myDirs["Pt55_3AbsEtaBins"]        + "CombineResults*"),
+        ("2 p_{T}, 3 |#eta| bins (v2)", myDirs["Pt60_3AbsEtaBins"]        + "CombineResults*"),
+        ("3 p_{T}, 3 |#eta| bins (v1)", myDirs["Pt50_80_3AbsEtaBins"]     + "CombineResults*"),
+        ("3 p_{T}, 3 |#eta| bins (v2)", myDirs["Pt50_110_3AbsEtaBins"]    + "CombineResults*"),
+        ("4 p_{T}, 3 |#eta| bins"     , myDirs["Pt50_80_160_3AbsEtaBins"] + "CombineResults*"),
+        ]
     return myList
 
 
@@ -575,6 +608,8 @@ def doCompare(name, compareList, **kwargs):
     else:
         _opts.yMin    = +0.65
         _opts.yMax    = +2.05
+        #_opts.yMin    = +0.85
+        #_opts.yMax    = +1.25
 
     # 1) Relative: median
     relLimits    = GetRelativeLimits(limits)
@@ -676,7 +711,14 @@ def doPlot(limits, legendLabels, graphs, name, ylabel, _opts={}, yTitle=None):
     if opts.cutLineY != 999.9:
         kwargs = {"greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
         plot.addCutBoxAndLineY(cutValue=_opts.cutLineY, fillColor=ROOT.kRed, box=False, line=True, **kwargs)
+
+    if opts.bandValue != 0:
+        if "relative" in name.lower():
+            # https://root.cern.ch/doc/master/classTAttFill.html
+            kwargs = {"cutValue": 1.0 + float(opts.bandValue)/100.0, "fillColor": ROOT.kGray, "fillStyle": 3001, "box": True, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": False, "mirror": True}
+            plot.addCutBoxAndLineY(**kwargs)    
     
+
     # Set axes titles
     plot.frame.GetXaxis().SetTitle(limit.mHplus())
     plot.frame.GetYaxis().SetTitle(ylabel)
@@ -993,6 +1035,7 @@ if __name__ == "__main__":
     MAXY        = -1
     CUTLINE     = 999.9
     CUTLINEY    = 999.9
+    BANDVALUE   = 0
     RELATIVE    = False
     RELPAIRS    = False
     VERBOSE     = False
@@ -1057,6 +1100,9 @@ if __name__ == "__main__":
 
     parser.add_option("--cutLineY", dest="cutLineY", type="float", default=CUTLINEY,
                       help="Add TLine on the y-axis at this value  [default: %s]" % (CUTLINEY) )
+
+    parser.add_option("--bandValue", dest="bandValue", type="int", default=BANDVALUE,
+                      help="Add a symmetric band around 1.0. Value passed should be the percentage (e.g 10 or 5)  [default: %s]" % (BANDVALUE) )
 
     (opts, args) = parser.parse_args()
 
