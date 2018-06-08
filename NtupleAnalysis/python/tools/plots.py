@@ -1886,11 +1886,12 @@ class PlotBase:
         for o in objs:            
             if "mainCanvas" in kwargs:
                 if kwargs["mainCanvas"]:
-                    self.appendPlotObject(o)                                   
+                    self.prependPlotObject(o)
+                    #self.appendPlotObject(o)
             if "ratioCanvas" in kwargs:
                 if kwargs["ratioCanvas"]:
-                    #self.prependPlotObjectToRatio(o)
-                    self.appendPlotObjectToRatio(o)
+                    self.prependPlotObjectToRatio(o)
+                    #self.appendPlotObjectToRatio(o)
 
     ## Add MC uncertainty histogram
     def addMCUncertainty(self):
