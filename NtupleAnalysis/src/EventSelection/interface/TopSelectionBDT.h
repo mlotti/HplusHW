@@ -162,7 +162,7 @@ public:
     }
     const math::XYZTLorentzVector getSubldgTrijetDijet() const
     { 
-      if (fTrijet1_p4.pt() < fTrijet2_p4.pt()) return fTrijet2Dijet_p4;
+      if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) return fTrijet2Dijet_p4;
       else return fTrijet1Dijet_p4;
     }
     const double getSubldgTrijetTopMassWMassRatio() const
