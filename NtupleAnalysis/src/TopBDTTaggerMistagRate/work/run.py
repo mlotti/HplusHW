@@ -177,18 +177,18 @@ def main():
     #===============
     # Trigger
     #===============
-    allSelections.Trigger.triggerOR = [#"HLT_PFHT900"
-                                       "HLT_PFHT400_SixJet30",
-                                       "HLT_PFHT450_SixJet40",
+    allSelections.Trigger.triggerOR = ["HLT_PFHT900"
+                                       #"HLT_PFHT400_SixJet30",
+                                       #"HLT_PFHT450_SixJet40",
                                        ]
     #===============
     # Jet Selection
     #===============
-    allSelections.JetSelection.jetPtCuts                = [100, 40, 40, 40]
+    allSelections.JetSelection.jetPtCuts                = [40, 40, 40, 40]
     #allSelections.JetSelection.jetPtCuts                = [100, 40, 40, 40]
     allSelections.JetSelection.numberOfJetsCutValue     = 4
     allSelections.JetSelection.numberOfJetsCutDirection = ">="
-    allSelections.JetSelection.HTCutValue               = 500.0
+    allSelections.JetSelection.HTCutValue               = 1000.0
     allSelections.JetSelection.HTCutDirection           = ">="
 
 
@@ -197,7 +197,7 @@ def main():
     #===============
     allSelections.BJetSelection.jetPtCuts                 = [40.0]
     allSelections.BJetSelection.numberOfBJetsCutValue     = 1
-    allSelections.BJetSelection.numberOfBJetsCutDirection = ">="
+    allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
 
     #===============
     # MET Selection 
@@ -208,7 +208,7 @@ def main():
     #===============
     #Top Selection
     #===============
-    allSelections.TopSelectionBDT.MassCutValue            = 400
+    #allSelections.TopSelectionBDT.MassCutValue            = 1000
     
     # ================================================================================================
     # Add Analysis Variations
