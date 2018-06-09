@@ -76,8 +76,8 @@ tauVeto = PSet(
     rtau                 =   0.0, # [default: 0.0] (to disable set to 0.0)
     againstElectronDiscr = "againstElectronTightMVA6",
     againstMuonDiscr     = "againstMuonLoose3",
-    #isolationDiscr       = "byLooseCombinedIsolationDeltaBetaCorr3Hits", # [former default; higher signal efficiency]
-    isolationDiscr       = "byVLooseIsolationMVArun2v1DBoldDMwLT", # [boosted analysis]
+    isolationDiscr       = "byLooseCombinedIsolationDeltaBetaCorr3Hits", # [higher signal efficiency]
+    # isolationDiscr       = "byVLooseIsolationMVArun2v1DBoldDMwLT", # [boosted analysis]
     )
 
 #================================================================================================

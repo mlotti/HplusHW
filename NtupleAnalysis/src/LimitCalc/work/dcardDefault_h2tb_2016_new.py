@@ -88,7 +88,7 @@ def getFakeBSystematics(myTTBarSystematics, OptionShapeSystematics, verbose=Fals
         if "veto" in syst.lower():
             continue 
         # Only append to name if it is NOT a shape uncertainty!
-        if syst not in myJetSystematics + myPileupSystematics + myBtagSystematics + ["CMS_topPtReweight"]:
+        if syst not in myJetSystematics + myPileupSystematics + myBtagSystematics + ["CMS_topreweight"]:
             newSyst = syst + "_forFakeB"
         else:
             if OptionShapeSystematics:
@@ -98,7 +98,7 @@ def getFakeBSystematics(myTTBarSystematics, OptionShapeSystematics, verbose=Fals
         mySystematics.append(newSyst)
 
     # Add by hand the systematics related to Transfer Factors
-    mySystematics.append("CMS_FakeB_transferFactor")
+    mySystematics.append("CMS_HPTB_fakeB_transferfactor")
 
     if verbose:
         for i, s in enumerate(mySystematics, 1):
@@ -109,9 +109,9 @@ def getFakeBSystematics(myTTBarSystematics, OptionShapeSystematics, verbose=Fals
 #================================================================================================  
 # Options
 #================================================================================================  
-OptionTest                             = False
+OptionTest                             = True
 OptionPaper                            = True  # (units, ..)
-OptionIncludeSystematics               = False # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
+OptionIncludeSystematics               = True # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionShapeSystematics                 = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionDoControlPlots                   = True  # [default: True]   (Produce control plots defined at end of this file)
 MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
@@ -166,7 +166,7 @@ Observation = ObservationInput(datasetDefinition="Data", shapeHistoName=OptionMa
 #================================================================================================ 
 myLumiSystematics       = ["lumi_13TeV"]
 myPileupSystematics     = ["CMS_pileup"]
-myTopTagSystematics     = ["CMS_topTagging"]
+myTopTagSystematics     = ["CMS_HPTB_toptagging"]
 myTrgEffSystematics     = ["CMS_eff_trg_MC"]
 myLeptonVetoSystematics = ["CMS_eff_e_veto", "CMS_eff_m_veto", "CMS_eff_tau_veto"]
 myJetSystematics        = ["CMS_scale_j", "CMS_res_j"]
@@ -178,14 +178,14 @@ mySystematics["MC"]          =  myLumiSystematics + myPileupSystematics + myTrgE
 mySystematics["Signal"]      = mySystematics["MC"]
 mySystematics["FakeB"]       = []
 mySystematics["QCD"]         = mySystematics["MC"]
-mySystematics["TT"]          = mySystematics["MC"] + ["CMS_scale_ttbar", "CMS_pdf_ttbar", "CMS_mass_ttbar", "CMS_topPtReweight"]
-mySystematics["SingleTop"]   = mySystematics["MC"] + ["CMS_scale_singleTop", "CMS_pdf_singleTop"]
-mySystematics["TTZToQQ"]     = mySystematics["MC"] + ["CMS_pdf_ttZ", "CMS_scale_ttZ"]
+mySystematics["TT"]          = mySystematics["MC"] + ["QCDscale_ttbar", "pdf_ttbar", "mass_top", "CMS_topreweight"]
+mySystematics["SingleTop"]   = mySystematics["MC"] + ["QCDscale_singleTop", "pdf_singleTop"]
+mySystematics["TTZToQQ"]     = mySystematics["MC"] + ["QCDscale_ttZ", "pdf_ttZ"]
 mySystematics["TTTT"]        = mySystematics["MC"]
-mySystematics["DYJets"]      = mySystematics["MC"] + ["CMS_scale_DY", "CMS_pdf_DY"]
-mySystematics["TTWJetsToQQ"] = mySystematics["MC"] + ["CMS_pdf_ttW", "CMS_scale_ttW"]
-mySystematics["WJetsToQQ_HT_600ToInf"]  = mySystematics["MC"] + ["CMS_scale_Wjets", "CMS_pdf_Wjets"]
-mySystematics["Diboson"]     = mySystematics["MC"] + ["CMS_scale_VV", "CMS_pdf_VV"]
+mySystematics["DYJets"]      = mySystematics["MC"] + ["QCDscale_DY", "pdf_DY"]
+mySystematics["TTWJetsToQQ"] = mySystematics["MC"] + ["QCDscale_ttW", "pdf_ttW"]
+mySystematics["WJetsToQQ_HT_600ToInf"]  = mySystematics["MC"] + ["QCDscale_Wjets", "pdf_Wjets"]
+mySystematics["Diboson"]     = mySystematics["MC"] + ["QCDscale_VV", "pdf_VV"]
 mySystematics["FakeB"]       = getFakeBSystematics(mySystematics["TT"], OptionShapeSystematics, verbose=False)
 if not OptionIncludeSystematics:
     msg = "Disabled systematics for all datasets (Stat. only datacards)"
@@ -337,12 +337,12 @@ DataGroups.append(Diboson)
 from HiggsAnalysis.LimitCalc.InputClasses import Nuisance
 
 # Define all individual nuisances that can be potentially used (ShapeVariations require running with systematics flag! Defined in AnalysisBuilder.py)
-JES_Shape      = Nuisance(id="CMS_scale_j"      , label="Jet Energy Scale (JES)", distr="shapeQ", function="ShapeVariation", systVariation="JES")
-JER_Shape      = Nuisance(id="CMS_res_j"        , label="Jet Energy Resolution (JER)", distr="shapeQ", function="ShapeVariation", systVariation="JER")
-bTagSF_Shape   = Nuisance(id="CMS_eff_b"        , label="b tagging", distr="shapeQ", function="ShapeVariation", systVariation="BTagSF")
-topPt_Shape    = Nuisance(id="CMS_topPtReweight", label="Top pT reweighting", distr="shapeQ", function="ShapeVariation", systVariation="TopPt")
-PU_Shape       = Nuisance(id="CMS_pileup"       , label="Pileup", distr="shapeQ", function="ShapeVariation", systVariation="PUWeight")
-tf_FakeB_Shape = Nuisance(id="CMS_FakeB_transferFactor"  , label="Transfer Factor uncertainty",  distr="shapeQ", function="QCDShapeVariation", systVariation="TransferFactor")
+JES_Shape      = Nuisance(id="CMS_scale_j"    , label="Jet Energy Scale (JES)", distr="shapeQ", function="ShapeVariation", systVariation="JES")
+JER_Shape      = Nuisance(id="CMS_res_j"      , label="Jet Energy Resolution (JER)", distr="shapeQ", function="ShapeVariation", systVariation="JER")
+bTagSF_Shape   = Nuisance(id="CMS_eff_b"      , label="b tagging", distr="shapeQ", function="ShapeVariation", systVariation="BTagSF")
+topPt_Shape    = Nuisance(id="CMS_topreweight", label="Top pT reweighting", distr="shapeQ", function="ShapeVariation", systVariation="TopPt")
+PU_Shape       = Nuisance(id="CMS_pileup"     , label="Pileup", distr="shapeQ", function="ShapeVariation", systVariation="PUWeight")
+tf_FakeB_Shape = Nuisance(id="CMS_HPTB_fakeB_transferfactor", label="Transfer Factor uncertainty",  distr="shapeQ", function="QCDShapeVariation", systVariation="TransferFactor")
 # NOTE: systVariation key is first declared in HiggsAnalysis/NtupleAnalysis/python/AnalysisBuilder.py
 
 #================================================================================================  
@@ -381,53 +381,54 @@ ttZ_scale_up         = systematics.getCrossSectionUncertainty("TTZ_scale").getUn
 #tttt_scale_up        = systematics.getCrossSectionUncertainty("TTTT_scale").getUncertaintyUp()
 lumi_2016            = systematics.getLuminosityUncertainty("2016")
 # Default nuisances
-lumi13TeV_Const = Nuisance(id="lumi_13TeV"       , label="Luminosity 13 TeV uncertainty", distr="lnN", function="Constant", value=lumi_2016)
-trgMC_Const     = Nuisance(id="CMS_eff_trg_MC"   , label="Trigger MC efficiency (Approx.)", distr="lnN", function="Constant", value=0.05)
-PU_Const        = Nuisance(id="CMS_pileup"       , label="Pileup (Approx.)", distr="lnN", function="Constant", value=0.05)
-eVeto_Const     = Nuisance(id="CMS_eff_e_veto"   , label="e veto", distr="lnN", function="Ratio", numerator="passed e selection (Veto)", denominator="passed PV", scaling=0.02)
-muVeto_Const    = Nuisance(id="CMS_eff_m_veto"   , label="mu veto", distr="lnN", function="Ratio", numerator="passed mu selection (Veto)", denominator="passed e selection (Veto)", scaling=0.01)
-tauVeto_Const   = Nuisance(id="CMS_eff_tau_veto" , label="tau veto", distr="lnN", function="Ratio", numerator="Passed tau selection (Veto)", denominator="passed mu selection (Veto)", scaling=0.03)
-bTagSF_Const    = Nuisance(id="CMS_eff_b"        , label="b tagging (Approx.)", distr="lnN", function="Constant", value=0.05)
-JES_Const       = Nuisance(id="CMS_scale_j"      , label="Jet Energy Scale (JES) (Approx.)"     , distr="lnN", function="Constant", value=0.03)
-JER_Const       = Nuisance(id="CMS_res_j"        , label="Jet Energy Resolution (JER) (Approx.)", distr="lnN", function="Constant", value=0.04)
-topPt_Const     = Nuisance(id="CMS_topPtReweight", label="Top pT reweighting (Approx.)", distr="lnN", function="Constant", value=0.25)
-topTag_Const    = Nuisance(id="CMS_topTagging"   , label="Top tagging (Approx.)", distr="lnN", function="Constant", value=0.10)
+lumi13TeV_Const = Nuisance(id="lumi_13TeV"         , label="Luminosity 13 TeV uncertainty", distr="lnN", function="Constant", value=lumi_2016)
+trgMC_Const     = Nuisance(id="CMS_eff_trg_MC"     , label="Trigger MC efficiency (Approx.)", distr="lnN", function="Constant", value=0.05)
+PU_Const        = Nuisance(id="CMS_pileup"         , label="Pileup (Approx.)", distr="lnN", function="Constant", value=0.05)
+eVeto_Const     = Nuisance(id="CMS_eff_e_veto"     , label="e veto", distr="lnN", function="Ratio", numerator="passed e selection (Veto)", denominator="passed PV", scaling=0.02)
+muVeto_Const    = Nuisance(id="CMS_eff_m_veto"     , label="mu veto", distr="lnN", function="Ratio", numerator="passed mu selection (Veto)", denominator="passed e selection (Veto)", scaling=0.01)
+tauVeto_Const   = Nuisance(id="CMS_eff_tau_veto"   , label="tau veto", distr="lnN", function="Ratio", numerator="Passed tau selection (Veto)", denominator="passed mu selection (Veto)", scaling=0.03)
+bTagSF_Const    = Nuisance(id="CMS_eff_b"          , label="b tagging (Approx.)", distr="lnN", function="Constant", value=0.05)
+JES_Const       = Nuisance(id="CMS_scale_j"        , label="Jet Energy Scale (JES) (Approx.)"     , distr="lnN", function="Constant", value=0.03)
+JER_Const       = Nuisance(id="CMS_res_j"          , label="Jet Energy Resolution (JER) (Approx.)", distr="lnN", function="Constant", value=0.04)
+topPt_Const     = Nuisance(id="CMS_topreweight"    , label="Top pT reweighting (Approx.)", distr="lnN", function="Constant", value=0.25)
+topTag_Const    = Nuisance(id="CMS_HPTB_toptagging", label="Top tagging (Approx.)", distr="lnN", function="Constant", value=0.10)
 
 # Cross section uncertainties
-ttbar_scale_Const    = Nuisance(id="CMS_scale_ttbar"    , label="TTbar XSection scale uncertainty", distr="lnN", function="Constant", value=tt_scale_down, upperValue=tt_scale_up)
-ttbar_pdf_Const      = Nuisance(id="CMS_pdf_ttbar"      , label="TTbar XSection pdf uncertainty", distr="lnN", function="Constant", value=tt_pdf_down, upperValue=tt_pdf_up)
-ttbar_mass_Const     = Nuisance(id="CMS_mass_ttbar"     , label="TTbar XSection top mass uncertainty", distr="lnN", function="Constant", value=tt_mass_down, upperValue=tt_mass_up) 
-wjets_scale_Const    = Nuisance(id="CMS_scale_Wjets"    , label="W+jets XSection scale uncertainty", distr="lnN", function="Constant", value=wjets_scale_down, upperValue=wjets_scale_up)
-wjets_pdf_Const      = Nuisance(id="CMS_pdf_Wjets"      , label="W+jets XSection pdf uncertainty", distr="lnN", function="Constant", value=wjets_pdf_down)
-singleTop_scale_Const= Nuisance(id="CMS_scale_singleTop", label="Single top XSection sale uncertainty", distr="lnN", function="Constant", value=singleTop_scale_down)
-singleTop_pdf_Const  = Nuisance(id="CMS_pdf_singleTop"  , label="Single top XSection pdf ucnertainty", distr="lnN", function="Constant", value=singleTop_pdf_down)
-DY_scale_Const       = Nuisance(id="CMS_scale_DY"       , label="DYJets XSection scale uncertainty", distr="lnN", function="Constant", value=DY_scale_down, upperValue=DY_scale_up)
-DY_pdf_Const         = Nuisance(id="CMS_pdf_DY"         , label="DYJets XSection pdf uncertainty", distr="lnN", function="Constant", value=DY_pdf_down)
-diboson_scale_Const  = Nuisance(id="CMS_scale_VV"       , label="Diboson XSection scale uncertainty", distr="lnN", function="Constant", value=diboson_scale_down)
-diboson_pdf_Const    = Nuisance(id="CMS_pdf_VV"         , label="Diboson XSection pdf uncertainty", distr="lnN", function="Constant", value=diboson_pdf_down)
-ttW_pdf_Const        = Nuisance(id="CMS_pdf_ttW"        , label="TTW XSection pdf uncertainty", distr="lnN", function="Constant", value=ttW_pdf_down)
-ttW_scale_Const      = Nuisance(id="CMS_scale_ttW"      , label="TTW XSection scale uncertainty", distr="lnN", function="Constant", value=ttW_scale_down, upperValue=ttW_scale_up)
-ttZ_pdf_Const        = Nuisance(id="CMS_pdf_ttZ"        , label="TTZ XSection pdf uncertainty", distr="lnN", function="Constant", value=ttZ_pdf_down)
-ttZ_scale_Const      = Nuisance(id="CMS_scale_ttZ"      , label="TTZ XSection scale uncertainty", distr="lnN", function="Constant", value=ttZ_scale_down, upperValue=ttZ_scale_up)
-# tttt_pdf_Const       = Nuisance(id="CMS_pdf_tttt"       , label="TTTT XSection pdf uncertainty", distr="lnN", function="Constant", value=tttt_pdf_down)
-# tttt_scale_Const     = Nuisance(id="CMS_scale_tttt"     , label="TTTT XSection scale uncertainty", distr="lnN", function="Constant", value=tttt_scale_down)
+ttbar_scale_Const    = Nuisance(id="QCDscale_ttbar"    , label="QCD XSection uncertainties", distr="lnN", function="Constant", value=tt_scale_down, upperValue=tt_scale_up)
+ttbar_pdf_Const      = Nuisance(id="pdf_ttbar"         , label="TTbar XSection pdf uncertainty", distr="lnN", function="Constant", value=tt_pdf_down, upperValue=tt_pdf_up)
+ttbar_mass_Const     = Nuisance(id="mass_top"          , label="TTbar XSection top mass uncertainty", distr="lnN", function="Constant", value=tt_mass_down, upperValue=tt_mass_up) 
+wjets_scale_Const    = Nuisance(id="QCDscale_Wjets"    , label="QCD XSection uncertainties", distr="lnN", function="Constant", value=wjets_scale_down, upperValue=wjets_scale_up)
+wjets_pdf_Const      = Nuisance(id="pdf_Wjets"         , label="W+jets XSection pdf uncertainty", distr="lnN", function="Constant", value=wjets_pdf_down)
+singleTop_mass_Const = Nuisance(id="mass_singleTop"    , label="Single top XSection top mass uncertainty", distr="lnN", function="Constant", value=tt_mass_down, upperValue=tt_mass_up)  #FIXME: same as ttbar?
+singleTop_scale_Const= Nuisance(id="QCDscale_singleTop", label="QCD XSection uncertainties", distr="lnN", function="Constant", value=singleTop_scale_down)
+singleTop_pdf_Const  = Nuisance(id="pdf_singleTop"     , label="Single top XSection pdf ucnertainty", distr="lnN", function="Constant", value=singleTop_pdf_down)
+DY_scale_Const       = Nuisance(id="QCDscale_DY"       , label="QCD XSection uncertainties", distr="lnN", function="Constant", value=DY_scale_down, upperValue=DY_scale_up)
+DY_pdf_Const         = Nuisance(id="pdf_DY"            , label="DYJets XSection pdf uncertainty", distr="lnN", function="Constant", value=DY_pdf_down)
+diboson_scale_Const  = Nuisance(id="QCDscale_VV"       , label="QCD XSection uncertainties", distr="lnN", function="Constant", value=diboson_scale_down)
+diboson_pdf_Const    = Nuisance(id="pdf_VV"            , label="Diboson XSection pdf uncertainty", distr="lnN", function="Constant", value=diboson_pdf_down)
+ttW_pdf_Const        = Nuisance(id="pdf_ttW"           , label="TTW XSection pdf uncertainty", distr="lnN", function="Constant", value=ttW_pdf_down)
+ttW_scale_Const      = Nuisance(id="QCDscale_ttW"      , label="QCD XSection uncertainties", distr="lnN", function="Constant", value=ttW_scale_down, upperValue=ttW_scale_up)
+ttZ_pdf_Const        = Nuisance(id="pdf_ttZ"           , label="TTZ XSection pdf uncertainty", distr="lnN", function="Constant", value=ttZ_pdf_down)
+ttZ_scale_Const      = Nuisance(id="QCDscale_ttZ"      , label="QCD XSection uncertainties", distr="lnN", function="Constant", value=ttZ_scale_down, upperValue=ttZ_scale_up)
+#tttt_pdf_Const       = Nuisance(id="pdf_tttt"          , label="TTTT XSection pdf uncertainty", distr="lnN", function="Constant", value=tttt_pdf_down)
+#tttt_scale_Const     = Nuisance(id="QCDscale_tttt"     , label="TTTT XSection scale uncertainty", distr="lnN", function="Constant", value=tttt_scale_down)
 
 # Fake-b nuisances
-tf_FakeB_Const          = Nuisance(id="CMS_FakeB_transferFactor"  , label="Transfer Factor uncertainty", distr="lnN", function="Constant", value=0.10)
-lumi13TeV_FakeB_Const   = Nuisance(id="lumi_13TeV_forFakeB"       , label="Luminosity 13 TeV uncertainty", distr="lnN", function="ConstantForFakeB", value=lumi_2016)
-trgMC_FakeB_Const       = Nuisance(id="CMS_eff_trg_MC_forFakeB"   , label="Trigger MC efficiency (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.05)
-PU_FakeB_Const          = Nuisance(id="CMS_pileup_forFakeB"       , label="Pileup (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.05)
-eVeto_FakeB_Const       = Nuisance(id="CMS_eff_e_veto_forFakeB"   , label="e veto", distr="lnN", function="Ratio", numerator="passed e selection (Veto)", denominator="passed PV", scaling=0.02) 
-muVeto_FakeB_Const      = Nuisance(id="CMS_eff_m_veto_forFakeB"   , label="mu veto", distr="lnN", function="Ratio", numerator="passed mu selection (Veto)", denominator="passed e selection (Veto)", scaling=0.01)
-tauVeto_FakeB_Const     = Nuisance(id="CMS_eff_tau_veto_forFakeB" , label="tau veto", distr="lnN", function="Ratio", numerator="Passed tau selection (Veto)", denominator="passed mu selection (Veto)", scaling=0.01)
-JES_FakeB_Const         = Nuisance(id="CMS_scale_j_forFakeB"      , label="Jet Energy Scale (JES) (Approx.)"     , distr="lnN", function="ConstantForFakeB", value=0.03)
-JER_FakeB_Const         = Nuisance(id="CMS_res_j_forFakeB"        , label="Jet Energy Resolution (JER) (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.04)
-bTagSF_FakeB_Const      = Nuisance(id="CMS_eff_b_forFakeB"        , label="b tagging (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.05)
-topPt_FakeB_Const       = Nuisance(id="CMS_topPtReweight_forFakeB", label="Top pT reweighting (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.25)
-topTag_FakeB_Const      = Nuisance(id="CMS_topTagging_forFakeB"   , label="Top tagging (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.20)
-ttbar_scale_FakeB_Const = Nuisance(id="CMS_scale_ttbar_forFakeB"  , label="TTbar XSection scale uncertainty", distr="lnN", function="ConstantForFakeB", value=tt_scale_down, upperValue=tt_scale_up)
-ttbar_pdf_FakeB_Const   = Nuisance(id="CMS_pdf_ttbar_forFakeB"    , label="TTbar XSection pdf uncertainty", distr="lnN", function="ConstantForFakeB", value=tt_pdf_down, upperValue=tt_pdf_up)
-ttbar_mass_FakeB_Const  = Nuisance(id="CMS_mass_ttbar_forFakeB"   , label="TTbar XSection top mass uncertainty", distr="lnN", function="ConstantForFakeB", value=tt_mass_down, upperValue=tt_mass_up) 
+tf_FakeB_Const          = Nuisance(id="CMS_HPTB_fakeB_transferfactor", label="Transfer Factor uncertainty", distr="lnN", function="Constant", value=0.10)
+lumi13TeV_FakeB_Const   = Nuisance(id="lumi_13TeV_forFakeB"      , label="Luminosity 13 TeV uncertainty", distr="lnN", function="ConstantForFakeB", value=lumi_2016)
+trgMC_FakeB_Const       = Nuisance(id="CMS_eff_trg_MC_forFakeB"  , label="Trigger MC efficiency (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.05)
+PU_FakeB_Const          = Nuisance(id="CMS_pileup_forFakeB"      , label="Pileup (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.05)
+eVeto_FakeB_Const       = Nuisance(id="CMS_eff_e_veto_forFakeB"  , label="e veto", distr="lnN", function="Ratio", numerator="passed e selection (Veto)", denominator="passed PV", scaling=0.02) 
+muVeto_FakeB_Const      = Nuisance(id="CMS_eff_m_veto_forFakeB"  , label="mu veto", distr="lnN", function="Ratio", numerator="passed mu selection (Veto)", denominator="passed e selection (Veto)", scaling=0.01)
+tauVeto_FakeB_Const     = Nuisance(id="CMS_eff_tau_veto_forFakeB", label="tau veto", distr="lnN", function="Ratio", numerator="Passed tau selection (Veto)", denominator="passed mu selection (Veto)", scaling=0.01)
+JES_FakeB_Const         = Nuisance(id="CMS_scale_j_forFakeB"     , label="Jet Energy Scale (JES) (Approx.)"     , distr="lnN", function="ConstantForFakeB", value=0.03)
+JER_FakeB_Const         = Nuisance(id="CMS_res_j_forFakeB"       , label="Jet Energy Resolution (JER) (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.04)
+bTagSF_FakeB_Const      = Nuisance(id="CMS_eff_b_forFakeB"       , label="b tagging (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.05)
+topPt_FakeB_Const       = Nuisance(id="CMS_topreweight_forFakeB" , label="Top pT reweighting (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.25)
+topTag_FakeB_Const      = Nuisance(id="CMS_HPTB_toptagging_forFakeB", label="Top tagging (Approx.)", distr="lnN", function="ConstantForFakeB", value=0.20)
+ttbar_scale_FakeB_Const = Nuisance(id="QCDscale_ttbar_forFakeB"  , label="QCD XSection uncertainties", distr="lnN", function="ConstantForFakeB", value=tt_scale_down, upperValue=tt_scale_up)
+ttbar_pdf_FakeB_Const   = Nuisance(id="pdf_ttbar_forFakeB"       , label="TTbar XSection pdf uncertainty", distr="lnN", function="ConstantForFakeB", value=tt_pdf_down, upperValue=tt_pdf_up)
+ttbar_mass_FakeB_Const  = Nuisance(id="mass_top_forFakeB"        , label="TTbar XSection top mass uncertainty", distr="lnN", function="ConstantForFakeB", value=tt_mass_down, upperValue=tt_mass_up) 
 
 #================================================================================================ 
 # Nuisance List (If a given nuisance "name" is used in any of the DataGroups it must be appended)
@@ -493,32 +494,39 @@ PrintNuisancesTable(Nuisances, DataGroups)
 #================================================================================================ 
 # Merge nuisances to same row (first item specifies the name for the row)
 # This is for correlated uncertainties. It forces 2 nuisances to be on SAME datacard row
-# For example, ttbar xs scale and singleTop pdf should be varied togethed (up or down) but alwasy in phase
+# For example, ttbar xs scale and singleTop pdf should be varied togethed (up or down) but always
+# in phase.
 # WARNING: This mostly (or solely?) applies for constants. not shape systematics!
+# NOTE: When merging nuisances the resultant "merged" name will be the first element of the merging list
+# MergeNuisances.append(["QCDscale_ttbar", "QCDscale_singleTop"]) #resultant name will be "QCDscale_ttbar"
 #================================================================================================ 
 MergeNuisances=[]
 
 # Correlate ttbar and single top cross-section uncertainties
 if 0:
-    MergeNuisances.append(["CMS_scale_ttbar", "CMS_scale_singleTop"]) #resultant name will be "CMS_scale_ttbar"
-    MergeNuisances.append(["CMS_pdf_ttbar"  , "CMS_pdf_singleTop"])
+    MergeNuisances.append(["QCDscale_ttbar", "QCDscale_singleTop"]) #resultant name will be "QCDscale_ttbar"
+    MergeNuisances.append(["pdf_ttbar"  , "pdf_singleTop"])
 else:
-    MergeNuisances.append(["CMS_scale_ttbar", "CMS_scale_singleTop", "CMS_scale_ttbar_forFakeB", "CMS_scale_ttW", "CMS_scale_ttZ"])
-    MergeNuisances.append(["CMS_pdf_ttbar"  , "CMS_pdf_singleTop"  , "CMS_pdf_ttbar_forFakeB"  , "CMS_pdf_ttW"  , "CMS_pdf_ttZ"])    
+    #MergeNuisances.append(["QCDscale_ttbar", "QCDscale_singleTop", "QCDscale_ttbar_forFakeB", "QCDscale_ttW", "QCDscale_ttZ"])
+    #MergeNuisances.append(["pdf_ttbar"  , "pdf_singleTop"  , "pdf_ttbar_forFakeB"  , "pdf_ttW"  , "pdf_ttZ"])    
+    MergeNuisances.append(["QCDscale_ttbar", "QCDscale_ttbar_forFakeB"])
+    MergeNuisances.append(["pdf_ttbar"  , "pdf_ttbar_forFakeB"])
+
 # Correlate FakeB and GenuineB uncerainties
 MergeNuisances.append(["lumi_13TeV"       , "lumi_13TeV_forFakeB"])
 MergeNuisances.append(["CMS_eff_trg_MC"   , "CMS_eff_trg_MC_forFakeB"])
 #MergeNuisances.append(["CMS_eff_e_veto"   , "CMS_eff_e_veto_forFakeB"])
 #MergeNuisances.append(["CMS_eff_m_veto"   , "CMS_eff_m_veto_forFakeB"])
 #MergeNuisances.append(["CMS_eff_tau_veto" , "CMS_eff_tau_veto_forFakeB"])
-MergeNuisances.append(["CMS_topTagging"   , "CMS_topTagging_forFakeB"])
-MergeNuisances.append(["CMS_mass_ttbar"   , "CMS_mass_ttbar_forFakeB"])
+MergeNuisances.append(["CMS_HPTB_toptagging", "CMS_HPTB_toptagging_forFakeB"])
+MergeNuisances.append(["mass_top"   , "mass_top_forFakeB"])
+
 if not OptionShapeSystematics:
     MergeNuisances.append(["CMS_pileup"   , "CMS_pileup_forFakeB"])
     MergeNuisances.append(["CMS_eff_b"    , "CMS_eff_b_forFakeB"])
     MergeNuisances.append(["CMS_scale_j"  , "CMS_scale_j_forFakeB"])
     MergeNuisances.append(["CMS_res_j"    , "CMS_res_j_forFakeB"])
-    MergeNuisances.append(["CMS_topPtReweight", "CMS_topPtReweight_forFakeB"])
+    MergeNuisances.append(["CMS_topreweight", "CMS_topreweight_forFakeB"])
 
 #================================================================================================ 
 # Convert shape systematics to constants if asked
@@ -854,6 +862,21 @@ hTetrajetBjetEta = ControlPlotInput(
                          "legendPosition"     : "RM", #remove
                          "ratioLegendPosition": "right",
                          "opts"               : {"ymin": 1e-2, "ymaxfactor": 10, "xmin": -2.5, "xmax": 2.5} },
+    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
+    # flowPlotCaption  = "m_{jjbb}", # Leave blank if you don't want to include the item to the selection flow plot    
+    )
+
+hTetrajetBjetBdisc = ControlPlotInput(
+    title            = "TetrajetBjetBdisc_AfterAllSelections",
+    histoName        = "TetrajetBjetBdisc_AfterAllSelections",
+    details          = { "xlabel"             : "CSVv2 discriminator",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "",
+                         "log"                : True,
+                         "legendPosition"     : "NW",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-2, "ymaxfactor": 10, "xmin": 0.78, "xmax": 1.0} },
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
     # flowPlotCaption  = "m_{jjbb}", # Leave blank if you don't want to include the item to the selection flow plot    
     )
@@ -1276,7 +1299,7 @@ hBJet1Pt = ControlPlotInput(
 hBJet2Pt = ControlPlotInput(
     title            = "BJet2Pt_AfterAllSelections",
     histoName        = "BJet2Pt_AfterAllSelections",
-    details          = { "xlabel"             : "p_{T}",
+    details          = { "xlabel"             : "p_{T} / #Deltap_{T}",
                          #"ylabel"             : "Events",
                          "ylabel"             : "< Events / %s >" % (uPt),
                          "divideByBinWidth"   : True,
@@ -1348,35 +1371,36 @@ hBJet3Eta = ControlPlotInput(
 ControlPlots.append(hMET)
 ControlPlots.append(hHT)
 ControlPlots.append(hMHT)
-# ControlPlots.append(hQGLR) # not used
+### ControlPlots.append(hQGLR) # to speed-up code
 ControlPlots.append(hLdgTopPt)
 ControlPlots.append(hLdgTopMass)
-ControlPlots.append(hLdgTopBjetPt)    # No agreement expected
-ControlPlots.append(hLdgTopBjetEta)   # No agreement expected
+ControlPlots.append(hLdgTopBjetPt)  # No agreement expected
+ControlPlots.append(hLdgTopBjetEta) # No agreement expected
 ControlPlots.append(hLdgTopBjetBdisc) # No agreement expected
 ControlPlots.append(hLdgTopDijetPt)
 ControlPlots.append(hLdgTopDijetMass)
-# ControlPlots.append(hLdgTopR32)
+### ControlPlots.append(hLdgTopR32)
 ControlPlots.append(hTetrajetBjetPt)
 ControlPlots.append(hTetrajetBjetEta)
+# ControlPlots.append(hTetrajetBjetBdisc) #no agreement expected
 ControlPlots.append(hLdgHiggsPt)
 ControlPlots.append(hLdgHiggsMass)
 ControlPlots.append(hVertices)
 ControlPlots.append(hNjets)
-# ControlPlots.append(hNBjets) # No agreement expected
+### ControlPlots.append(hNBjets) #No agreement expected
 ControlPlots.append(hJetPt)
 ControlPlots.append(hJetEta)
 ControlPlots.append(hBJetPt)
 ControlPlots.append(hBJetEta)
-# ControlPlots.append(hBtagDiscriminator)
+### ControlPlots.append(hBtagDiscriminator) #No agreement expected
 ControlPlots.append(hSubldgTopPt)
 ControlPlots.append(hSubldgTopMass)
-ControlPlots.append(hSubldgTopBjetPt)
-ControlPlots.append(hSubldgTopBjetEta)
-ControlPlots.append(hSubldgTopBjetBdisc)
+ControlPlots.append(hSubldgTopBjetPt)  # No agreement expected
+ControlPlots.append(hSubldgTopBjetEta) # No agreement expected
+ControlPlots.append(hSubldgTopBjetBdisc) # No agreement expected
 ControlPlots.append(hSubldgTopDijetPt)
 ControlPlots.append(hSubldgTopDijetMass)
-# ControlPlots.append(hSubldgTopR32)
+### ControlPlots.append(hSubldgTopR32)
 ControlPlots.append(hSubldgHiggsPt)
 ControlPlots.append(hSubldgHiggsMass)
 ControlPlots.append(hJet1Pt)
@@ -1394,7 +1418,7 @@ ControlPlots.append(hJet5Eta)
 ControlPlots.append(hJet6Eta)
 ControlPlots.append(hJet7Eta)
 # No agreement expected
-if 1:
+if 0:
     ControlPlots.append(hBJet1Pt)
     ControlPlots.append(hBJet2Pt)
     ControlPlots.append(hBJet3Pt)
@@ -1407,6 +1431,7 @@ if OptionTest:
     ControlPlots.append(hLdgHiggsMass)
     ControlPlots.append(hTetrajetBjetPt)
     ControlPlots.append(hTetrajetBjetEta)
+    #ControlPlots.append(hTetrajetBjetBdisc) #no agreement expected
     ControlPlots.append(hLdgTopBjetPt)  # No agreement expected
     ControlPlots.append(hLdgTopBjetEta) # No agreement expected
     ControlPlots.append(hLdgTopBjetBdisc) # No agreement expected
