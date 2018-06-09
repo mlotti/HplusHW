@@ -150,9 +150,19 @@ public:
       if (fTrijet1_p4.pt() < fTrijet2_p4.pt()) return fTrijet1BJet;
       else return fTrijet2BJet;
     } 
+    const Jet getSubldgTrijetJet1() const 
+    { 
+      if (fTrijet1_p4.pt() < fTrijet2_p4.pt()) return fTrijet1Jet1;
+      else return fTrijet2Jet1;
+    }
+    const Jet getSubldgTrijetJet2() const 
+    { 
+      if (fTrijet1_p4.pt() < fTrijet2_p4.pt()) return fTrijet1Jet2;
+      else return fTrijet2Jet2;
+    }
     const math::XYZTLorentzVector getSubldgTrijetDijet() const
     { 
-      if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) return fTrijet2Dijet_p4;
+      if (fTrijet1_p4.pt() < fTrijet2_p4.pt()) return fTrijet2Dijet_p4;
       else return fTrijet1Dijet_p4;
     }
     const double getSubldgTrijetTopMassWMassRatio() const
