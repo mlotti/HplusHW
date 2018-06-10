@@ -164,8 +164,7 @@ def main():
         process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=opts.excludeTasks)
     else:
         myBlackList = ["M_180", "M_200" , "M_220" , "M_250" , "M_300" , "M_350" , "M_400" , "M_500" , "M_650",
-                       "M_800", 
-                       "M_1000", "M_1500", "M_2000", "M_2500", "M_3000", "M_5000", "M_7000", "M_10000", "QCD"]
+                       "M_800", "M_1000", "M_1500", "M_2000", "M_2500", "M_3000", "M_5000", "M_7000", "M_10000", "QCD"]
         Verbose("Adding all datasets from multiCRAB directory %s except %s" % (opts.mcrab, (",".join(myBlackList))) )
         Verbose("Vertex reweighting is done according to the chosen data era (%s)" % (",".join(dataEras)) )
         # process.addDatasetsFromMulticrab(opts.mcrab, blacklist=myBlackList)
@@ -187,16 +186,25 @@ def main():
     allSelections.CommonPlots.histogramSplitting = [        
         ### 2D-binning (Pt, Eta)
         PSet(label="TetrajsetBjetPt" , binLowEdges=[55], useAbsoluteValues=False),  #best
-        # PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True), # 3 bins
+        PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True), # 3 bins (default)
         # PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6, 2.0], useAbsoluteValues=True), # 4 bins v1
         # PSet(label="TetrajetBjetEta", binLowEdges=[0.6, 1.4, 1.9], useAbsoluteValues=True), # 4 bins v2
-        PSet(label="TetrajetBjetEta", binLowEdges=[0.5, 1.0, 1.5, 2.0], useAbsoluteValues=True),  # 5 bins
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.5, 1.0, 1.5, 2.0], useAbsoluteValues=True),  # 5 bins
+        # PSet(label="TetrajsetBjetPt", binLowEdges=[60, 80, 100], useAbsoluteValues=False),
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.6, 1.4], useAbsoluteValues=True),
         ### 1D-binning (Eta)
         #PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True),  #AN v4
         ]
     
     # allSelections.BJetSelection.triggerMatchingApply = True # at least 1 trg b-jet matched to offline b-jets
     # allSelections.Trigger.triggerOR = ["HLT_PFHT450_SixJet40_BTagCSV_p056", "HLT_PFJet450"]
+    #allSelections.FakeBTopSelectionBDT.MassCutValue = 5000.0  # [default: 600.0]
+    #allSelections.FakeBTopSelectionBDT.MassCutValue = allSelections.TopSelectionBDT.MassCutValue
+    #allSelections.FakeBTopSelectionBDT.MVACutValue  = -0.4    # [default: -1.0]
+    #allSelections.FakeBTopSelectionBDT.LdgTopDefinition = "Pt" # [default: "MVA"] (options: "MVA", "Pt")
+    #print "FIXME "*10
+    #print "=== run.py: Temporary overwrite of parameters"
+    #print "FIXME "*10
 
     # ================================================================================================
     # Command Line Options
