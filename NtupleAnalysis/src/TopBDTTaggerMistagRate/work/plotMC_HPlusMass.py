@@ -270,15 +270,37 @@ def PlotMC(datasetsMgr, histo, intLumi):
         _format = "%0.0f " + _units
         _xlabel = "p_{T} (%s)" % _units
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
-        #_opts["xmax"] = 505 #1005
+        _opts["xmax"] = 805 #1005
 
-    if "trijetmass" in histo.lower():
+    if "ht" in histo.lower():
+        _rebinX = 2
+        _units  = "GeV/c"
+        _format = "%0.0f " + _units
+        _xlabel = "H_{T} (%s)" % _units
+        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        _opts["xmax"] = 1505 #1005
+
+    if "met" in histo.lower():
+        _rebinX = 1
+        _units  = "GeV"
+        _format = "%0.0f " + _units
+        _xlabel = "E_{T,missing} (%s)" % _units
+        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        _opts["xmax"] = 205 #1005
+
+    if "mult" in histo.lower():
+        _units  = ""
+        _format = "%0.0f " + _units
+        _xlabel = "jet multiplicity"
+        _opts["xmax"] = 10
+
+    if "mass" in histo.lower():
         _rebinX = 2
         _units  = "GeV/c^{2}"
         _format = "%0.0f " + _units
         _xlabel = "m_{jjb} (%s)" % _units
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 505 #1005
+        _opts["xmax"] = 350 #1005
 
     elif "tetrajetmass" in histo.lower():
         _rebinX = 5 #5 #10 #4

@@ -42,6 +42,9 @@ import array
 ROOT.gROOT.SetBatch(True)
 from ROOT import *
 
+from PythonWriter import PythonWriter
+pythonWriter = PythonWriter()
+
 import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
 import HiggsAnalysis.NtupleAnalysis.tools.counter as counter
@@ -111,7 +114,7 @@ def GetRunRange(datasetsMgr):
         Verbose("Dataset   = %s" % (d.getName()), i==1)
         Verbose("Run Range = %s" % (runRange), False)
         
-    runRange = minRunRange + " - " + maxRunRange
+    runRange = minRunRange + "-" + maxRunRange
     Verbose("Run Range = %s - %s" % (minRunRange, maxRunRange), True)
     return minRunRange, maxRunRange, runRange
 
@@ -157,7 +160,8 @@ def GetHistoKwargs(histoName, opts):
         "ratioYlabel"      : "Data/MC",
         "ratio"            : True,
         "ratioInvert"      : False,
-        "ratioType"        : "errorScale",
+        #"ratioType"        : "errorScale",
+        "ratioType"        : "errorPropagation",
         "ratioCreateLegend": True,
         "ratioMoveLegend"  : {"dx": -0.51, "dy": 0.03, "dh": -0.08},
         "ratioErrorOptions": {"numeratorStatSyst": False, "denominatorStatSyst": False},
@@ -339,10 +343,10 @@ def main(opts, signalMass):
         # Define the mapping histograms in numerator->denominator pairs
         VariableList = [
             "LdgTop_Pt",
-            "Tops_Pt"
+            #"Tops_Pt"
             ]
         minRunRange, maxRunRange, runRange = GetRunRange(datasetsMgr)
-        print "This is my run range:", minRunRange, maxRunRange, runRange
+        print "run range:", minRunRange, maxRunRange, runRange
         #runRange = datasetsMgr.loadRunRange()
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
@@ -430,7 +434,9 @@ def main(opts, signalMass):
             p.setLuminosity(intLumi)
             _kwargs["ratio"] = True
             #_kwargs["ratioInvert"] = True
-            _kwargs["cutBoxY"] = {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": True}
+            _kwargs["cutBoxY"] = {"cutValue": 1.10, "fillColor": ROOT.kGray+1, "fillStyle": 3001, "box": True, "line": True, "greaterThan": True, "mainCanvas": False, 
+                                   "ratioCanvas": True, "mirror": True}
+            ##_kwargs["cutBoxY"] = {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": True}
             plots.drawPlot(p, plotName, **_kwargs)
             # Draw 
             #savePath = os.path.join(opts.saveDir, "MistagRate", opts.optMode)
@@ -438,6 +444,19 @@ def main(opts, signalMass):
             savePath = os.path.join(opts.saveDir, opts.optMode)
             SavePlot(p, plotName, savePath, saveFormats = [".png", ".pdf", ".C"])
         
+    # Save results in JSON
+    name = opts.mcrab.split("/")[0]
+    name = name.replace(opts.analysisName, "")
+    jsonName = "Efficiency"+ name +".json"
+    #runRange = "273150-284044"
+    analysis = opts.analysisName
+    label = "2016"
+    plotDir =  os.path.join(opts.folder, jsonName)
+    pythonWriter.addParameters(plotDir, label, runRange, opts.intLumi, eff_Data)
+    pythonWriter.addMCParameters(label, eff_MC)
+    fileName_json = jsonName
+    pythonWriter.writeJSON(fileName_json)
+
 
         
     return
