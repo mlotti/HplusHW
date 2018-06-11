@@ -194,8 +194,8 @@ def main():
         # PSet(label="TetrajetBjetEta", binLowEdges=[0.5, 1.0, 1.5, 2.0], useAbsoluteValues=True),  # 5 bins
         # PSet(label="TetrajsetBjetPt", binLowEdges=[60, 80, 100], useAbsoluteValues=False),
         # PSet(label="TetrajetBjetEta", binLowEdges=[0.6, 1.4], useAbsoluteValues=True),
-        PSet(label="TetrajsetBjetPt", binLowEdges=[55, 110], useAbsoluteValues=False), #new
-        PSet(label="TetrajetBjetEta", binLowEdges=[0.6, 1.4], useAbsoluteValues=True), #new
+        PSet(label="TetrajsetBjetPt", binLowEdges=[55, 100, 170], useAbsoluteValues=False), #new
+        PSet(label="TetrajetBjetEta", binLowEdges=[0.6, 1.4, 2.0], useAbsoluteValues=True), #new
         ### 1D-binning (Eta)
         #PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True),  #AN v4
         ]
