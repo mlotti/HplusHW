@@ -21,9 +21,11 @@ EXAMPLES:
 ./plot_EfficiencySystTop.py -m TopTaggerEfficiency_180603_SystTop_hadronic_BDTtraining_ptRew13TeV --folder topbdtSelection_ --type showerScales
 ./plot_EfficiencySystTop.py -m TopTaggerEfficiency_180603_SystTop_hadronic_BDTtraining_ptRew13TeV --folder topbdtSelection_ --type mTop
 
-
 LAST USED:
-./plot_EfficiencySystTop.py -m TopTaggerEfficiency_180603_SystTop_hadronic_BDTtraining_ptRew13TeV --folder topbdtSelection_ --type partonShower --url -v
+./plot_EfficiencySystTop.py -m TopTaggerEfficiency_180608_200027_massCut1000_All --folder topbdtSelection_ --type partonShower --url
+./plot_EfficiencySystTop.py -m TopTaggerEfficiency_180608_195638_massCut400_All --folder topbdtSelection_ --type partonShower --url
+./plot_EfficiencySystTop.py -m TopTaggerEfficiency_180608_194156_massCut300_All --folder topbdtSelection_ --type partonShower --url
+
 
 STATISTICS OPTIONS:
 https://iktp.tu-dresden.de/~nbarros/doc/root/TEfficiency.html
@@ -173,7 +175,7 @@ def GetHistoKwargs(histoName, opts):
         "addLuminosityText": False,
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
-        "opts"             : {"ymin": 0.0, "ymaxfactor": 1.2},
+        "opts"             : {"ymin": 0.0, "xmax":600, "ymaxfactor": 1.2},
         "opts2"            : {"ymin": 0.6, "ymax": 1.4},
         "log"              : False,
         "moveLegend"       : {"dx": -0.12, "dy": -0.40, "dh": +0.05*(-4+opts.nDatasets)},  #"dh": +0.18}, 
