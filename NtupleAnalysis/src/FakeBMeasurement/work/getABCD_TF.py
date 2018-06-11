@@ -377,7 +377,6 @@ def main(opts):
         
         # Do the fit on the histo after ALL selections (incl. topology cuts)
         folderList = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(opts.folder)
-        #folderList1 = [h for h in folderList if "TetrajetPt" in h]
         #folderList1 = [h for h in folderList if "MET" in h]
         #folderList1 = [h for h in folderList if "TetrajetMass" in h]
         folderList1 = [h for h in folderList if "TetrajetBJetPt" in h]
