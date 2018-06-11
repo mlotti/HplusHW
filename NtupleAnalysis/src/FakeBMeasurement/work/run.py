@@ -185,13 +185,17 @@ def main():
     # Set splitting of phase-space (first bin is below first edge value and last bin is above last edge value)
     allSelections.CommonPlots.histogramSplitting = [        
         ### 2D-binning (Pt, Eta)
-        PSet(label="TetrajsetBjetPt" , binLowEdges=[55], useAbsoluteValues=False),  #best
-        PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True), # 3 bins (default)
+        # PSet(label="TetrajsetBjetPt" , binLowEdges=[55], useAbsoluteValues=False),  #best
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True), # 3 bins (default)
+        # PSet(label="TetrajsetBjetPt" , binLowEdges=[60, 100], useAbsoluteValues=False),  #new
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.4], useAbsoluteValues=True), #new
         # PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6, 2.0], useAbsoluteValues=True), # 4 bins v1
         # PSet(label="TetrajetBjetEta", binLowEdges=[0.6, 1.4, 1.9], useAbsoluteValues=True), # 4 bins v2
         # PSet(label="TetrajetBjetEta", binLowEdges=[0.5, 1.0, 1.5, 2.0], useAbsoluteValues=True),  # 5 bins
         # PSet(label="TetrajsetBjetPt", binLowEdges=[60, 80, 100], useAbsoluteValues=False),
         # PSet(label="TetrajetBjetEta", binLowEdges=[0.6, 1.4], useAbsoluteValues=True),
+        PSet(label="TetrajsetBjetPt", binLowEdges=[55, 110], useAbsoluteValues=False), #new
+        PSet(label="TetrajetBjetEta", binLowEdges=[0.6, 1.4], useAbsoluteValues=True), #new
         ### 1D-binning (Eta)
         #PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True),  #AN v4
         ]
@@ -200,7 +204,8 @@ def main():
     # allSelections.Trigger.triggerOR = ["HLT_PFHT450_SixJet40_BTagCSV_p056", "HLT_PFJet450"]
     #allSelections.FakeBTopSelectionBDT.MassCutValue = 5000.0  # [default: 600.0]
     #allSelections.FakeBTopSelectionBDT.MassCutValue = allSelections.TopSelectionBDT.MassCutValue
-    #allSelections.FakeBTopSelectionBDT.MVACutValue  = -0.4    # [default: -1.0]
+    allSelections.TopSelectionBDT.MVACutValue = 0.40       # [default: 0.4]  # marina
+    allSelections.FakeBTopSelectionBDT.MVACutValue = -0.20 # [default: -1.0] # marina
     #allSelections.FakeBTopSelectionBDT.LdgTopDefinition = "Pt" # [default: "MVA"] (options: "MVA", "Pt")
     #print "FIXME "*10
     #print "=== run.py: Temporary overwrite of parameters"
