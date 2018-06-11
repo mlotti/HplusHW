@@ -12,7 +12,6 @@ EXAMPLES:
 
 
 LAST USED:
-./plot_Efficiency.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopTaggerEfficiency_180529_TopEfficiency_vs_mass --folder topbdtSelection_ -v -e "220|250|350|180|300"
 ./plot_Efficiency.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopTaggerEfficiency_180610_Efficiencies_BDT0p4 --folder topbdtSelection_ -v --url
 
 STATISTICS OPTIONS:
