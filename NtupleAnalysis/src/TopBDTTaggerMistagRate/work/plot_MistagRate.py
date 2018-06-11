@@ -11,7 +11,9 @@ EXAMPLES:
 ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180603_JetPt100_40_40_40_1bjet_HT500/ --folder TopBDTTagger_QCDMistagRate
 
 LAST USD:
-./plot_MistagRate.py -m TopBDTTaggerMistagRate_180603_JetPt100_40_40_40_1bjet_HT500/ --folder TopBDTTagger_QCDMistagRate
+./plot_MistagRate.py -m TopBDTTaggerMistagRate_180609_PFHT900_FatJet_HT1000_massCut300/ --folder TopBDTTagger_QCDMistagRate
+./plot_MistagRate.py -m TopBDTTaggerMistagRate_180609_PFHT900_ldgJetPT100_HT1000_massCut300/ --folder TopBDTTagger_QCDMistagRate
+
 
 
 STATISTICS OPTIONS:

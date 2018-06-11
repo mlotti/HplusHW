@@ -13,6 +13,7 @@ EXAMPLES:
 
 LAST USED:
 ./plot_Efficiency.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopTaggerEfficiency_180529_TopEfficiency_vs_mass --folder topbdtSelection_ -v -e "220|250|350|180|300"
+./plot_Efficiency.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopTaggerEfficiency_180610_Efficiencies_BDT0p4 --folder topbdtSelection_ -v --url
 
 STATISTICS OPTIONS:
 https://iktp.tu-dresden.de/~nbarros/doc/root/TEfficiency.html
@@ -197,8 +198,8 @@ def main(opts, signalMass):
     # Apply TDR style
     style = tdrstyle.TDRStyle()
     style.setOptStat(True)
-    style.setGridX(True)
-    style.setGridY(True)
+    style.setGridX(False)
+    style.setGridY(False)
     
     # If user does not define optimisation mode do all of them
     if opts.optMode == None:
@@ -250,8 +251,8 @@ def main(opts, signalMass):
         # Re-order datasets
         datasetOrder = []
         for d in datasetsMgr.getAllDatasets():
-            if "TT" in d.getName():
-                continue
+            #if "TT" in d.getName():
+            #    continue
             if "M_" in d.getName():
                 if d not in signalMass:
                     continue
@@ -272,11 +273,15 @@ def main(opts, signalMass):
         # Print dataset information
         datasetsMgr.PrintInfo()
 
+
         # Define list with Numerators - Denominators
+
         Numerator = ["AllTopQuarkPt_MatchedBDT",
                      "TrijetFakePt_BDT",
                      "AssocTopQuarkPt_MatchedBDT",
                      "HiggsTopQuarkPt_MatchedBDT",
+                     "AssocTopQuarkPt_Matched",                       
+                     "HiggsTopQuarkPt_Matched",                       
                      "AllTopQuarkPt_MatchedBDT",
                      "AllTopQuarkPt_Matched",
                      ]
@@ -284,40 +289,51 @@ def main(opts, signalMass):
                        "TrijetFakePt",
                        "AssocTopQuarkPt_Matched",                       
                        "HiggsTopQuarkPt_Matched",                       
+                       "AssocTopQuarkPt",                       
+                       "HiggsTopQuarkPt",                       
                        "TopQuarkPt",
                        "TopQuarkPt",
                        ]
 
         '''
-        Numerator = ["AllTopQuarkPt_MatchedBDT",
-                     "TrijetFakePt_BDT",
-                     "AllTopQuarkPt_Matched",
-                     "AllTopQuarkPt_MatchedBDT",
-                     #"AssocTopQuarkPt_Matched",
+        Numerator = [#"AllTopQuarkPt_MatchedBDT",
+                     #"TrijetFakePt_BDT",
                      #"AssocTopQuarkPt_MatchedBDT",
-                     "AssocTopQuarkPt_MatchedBDT",
-                     #"HiggsTopQuarkPt_Matched",
                      #"HiggsTopQuarkPt_MatchedBDT",
-                     "HiggsTopQuarkPt_MatchedBDT",
-                     #"BothTopQuarkPt_MatchedBDT", #Debug                    
-                     #"AllTopQuarkPt_Matched",     #Debug
-                     #"AllTopQuarkPt_MatchedBDT",  #Debug
+                     #"AllTopQuarkPt_MatchedBDT",
+                     #"AllTopQuarkPt_Matched",
+                     "TrijetPt_LdgOrSldg_Matched",
+                     "TrijetPt_LdgOrSldg_MatchedBDT",
+                     #"TrijetPt_LdgOrSldg_MatchedBDT",
+                     "TrijetPt_LdgOrSldg_UnmatchedBDT",
+                     "TrijetPt_Ldg_Matched",
+                     "TrijetPt_Ldg_MatchedBDT",
+                     #"TrijetPt_Ldg_MatchedBDT",
+                     "TrijetPt_Ldg_UnmatchedBDT",
+                     "TrijetPt_Sldg_Matched",
+                     #"TrijetPt_Sldg_MatchedBDT",
+                     #"TrijetPt_Sldg_MatchedBDT",
+                     "TrijetPt_Sldg_UnmatchedBDT",
+                     
                      ]
-        Denominator = ["AllTopQuarkPt_Matched",
-                       "TrijetFakePt",
-                       "TopQuarkPt",
-                       "TopQuarkPt",
-                       #"AssocTopQuarkPt",
-                       #"AssocTopQuarkPt",
-                       "AssocTopQuarkPt_Matched",                       
-                       #"HiggsTopQuarkPt",
-                       #"HiggsTopQuarkPt",
-                       "HiggsTopQuarkPt_Matched",                       
-                       "BothTopQuarkPt",
-                       "BothTopQuarkPt",        
-                       #"BothTopQuarkPt_Matched",    #Debug
-                       #"AllTopQuarkPt_Matched",     #Debug
-                       #"BothTopQuarkPt_MatchedBDT", #Debug
+        Denominator = [#"AllTopQuarkPt_Matched",
+                       #"TrijetFakePt",
+                       #"AssocTopQuarkPt_Matched",                       
+                       #"HiggsTopQuarkPt_Matched",                       
+                       #"TopQuarkPt",
+                       #"TopQuarkPt",
+                       "TrijetPt_LdgOrSldg",
+                       "TrijetPt_LdgOrSldg",
+                       #"TrijetPt_LdgOrSldg_Matched",
+                       "TrijetPt_LdgOrSldg_Unmatched",
+                       "TrijetPt_Ldg",
+                       "TrijetPt_Ldg",
+                       #"TrijetPt_Ldg_Matched",
+                       "TrijetPt_Ldg_Unmatched",
+                       "TrijetPt_Subldg",
+                       #"TrijetPt_Subldg",
+                       #"TrijetPt_Sldg_Matched",
+                       "TrijetPt_Sldg_Unmatched",
                        ]
         '''
         # For-loop: All numerator-denominator pairs
@@ -401,11 +417,11 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
         # Get the histograms
         #num = dataset.getDatasetRootHisto(numPath).getHistogram()
         #den = dataset.getDatasetRootHisto(denPath).getHistogram()
-        if "TT" in dataset.getName():
-            numPath = numPath.replace("HiggsTop", "AllTop")
-            denPath = denPath.replace("HiggsTop", "AllTop")
-            numPath = numPath.replace("AssocTop", "AllTop")
-            denPath = denPath.replace("AssocTop", "AllTop")
+        #if "TT" in dataset.getName():
+        #    numPath = numPath.replace("HiggsTop", "AllTop")
+        #    denPath = denPath.replace("HiggsTop", "AllTop")
+        #    numPath = numPath.replace("AssocTop", "AllTop")
+        #    denPath = denPath.replace("AssocTop", "AllTop")
                 
         n = dataset.getDatasetRootHisto(numPath)
         n.normalizeToLuminosity(intLumi)
@@ -486,9 +502,12 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
         
         # Append in list
         if "charged" in dataset.getName().lower():
-            myList.append(histograms.HistoGraph(eff, plots._legendLabels[dataset.getName()], "lp", "P"))
-        elif "tt" in dataset.getName().lower():
-            eff_ref = histograms.HistoGraph(eff, plots._legendLabels[dataset.getName()], "lp", "P")
+            if "m_500" in dataset.getName().lower():
+                eff_ref = histograms.HistoGraph(eff, plots._legendLabels[dataset.getName()], "lp", "P")
+            else:
+                myList.append(histograms.HistoGraph(eff, plots._legendLabels[dataset.getName()], "lp", "P"))
+        #elif "tt" in dataset.getName().lower():
+        #    eff_ref = histograms.HistoGraph(eff, plots._legendLabels[dataset.getName()], "lp", "P")
             
     # Define save name
     saveName = "Eff_" + name_N.split("/")[-1] + "Over"+ name_D.split("/")[-1]
