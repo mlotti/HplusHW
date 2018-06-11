@@ -143,31 +143,12 @@ def main():
     allSelections.histogramAmbientLevel = opts.histoLevel
 
     # Set splitting of phase-space (first bin is below first edge value and last bin is above last edge value)
-    allSelections.CommonPlots.histogramSplitting = [        
-        # Default
-        # PSet(label="TetrajetBjetEta", binLowEdges= [0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True), #default
-        # PSet(label="TetrajetBjetEta", binLowEdges=[0.2, 0.4, 0.6, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True), #also good
-        #
-        # PSet(label="TetrajetBjetEta", binLowEdges=[0.6, 1.2, 1.8, 2.1], useAbsoluteValues=True), 
-        ## PSet(label="TetrajetBjetEta", binLowEdges=[0.6, 0.9, 1.2, 1.5, 1.8, 2.1], useAbsoluteValues=True), 
-        ## PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0], useAbsoluteValues=True), 
-        #
-        # 2D binning (Pt, Eta)
-        PSet(label="TetrajetBjetPt" , binLowEdges=[50, 100], useAbsoluteValues=False),
+    allSelections.CommonPlots.histogramSplitting = [               
+        ### 2D binning (Pt, Eta)
+        PSet(label="TetrajetBjetPt" , binLowEdges=[50, 110], useAbsoluteValues=False),
         PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True),
-        #
-        #  PSet(label="TetrajetBjetPt" , binLowEdges=[80, 160], useAbsoluteValues=False), # Alexandros (40-60, 60-80 off. rest good!)
-        # PSet(label="TetrajetBjetPt" , binLowEdges=[50, 65, 85], useAbsoluteValues=False), # Alexandros (40-60, 60-80 off. rest good!)        
-        # PSet(label="TetrajetBjetEta", binLowEdges=[1.0, 1.8], useAbsoluteValues=True), # Alexandros (good)
-        #
-        # PSet(label="TetrajetBjetPt" , binLowEdges=[80, 200], useAbsoluteValues=False), # Fotis
-        # PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True), # Fotis
-        #
-        # PSet(label="TetrajetBjetPt" , binLowEdges=[60, 100], useAbsoluteValues=False), # B) not bad for -1.0 < BDT < 0.4
-        # PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 1.2, 1.8, 2.0], useAbsoluteValues=True), # B) not bad for -1.0 < BDT < 0.4
-        #
-        # PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 1.2, 1.8], useAbsoluteValues=True),
-        # PSet(label="TetrajetBjetPt" , binLowEdges=[40, 60, 100, 200, 300], useAbsoluteValues=False), # pT < 40, pT=40-60, pT=60-100, pT=100-200, pT > 200
+        ### 1D binning (Eta) 
+        #PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True), #AN_v4
         ]
     
     # allSelections.BJetSelection.triggerMatchingApply = True # at least 1 trg b-jet matched to offline b-jets

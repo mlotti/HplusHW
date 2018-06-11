@@ -1505,7 +1505,6 @@ def GetRequestName(dataset):
     # Append the dataset name
     if match:
 	requestName = match.group("name")
-        
     firstName = requestName
 
     # Append the Run number (for Data samples only)
@@ -1523,7 +1522,39 @@ def GetRequestName(dataset):
     if tev_match:
 	requestName = tev_match.group("name")
 
-    # Fast hack to prevent overwrite of default TT
+    # Simple hack to prevent overwrite of special TT samples
+    requestName = GetTTbarSystematicsName(firstName, requestName) 
+
+    # Append the Ext
+    ext_match = ext_re.search(dataset.URL)
+    if ext_match:
+	requestName+=ext_match.group("name")
+
+    # Append the Run Range (for Data samples only)
+    if dataset.isData():
+	runRangeMatch = runRange_re.search(dataset.lumiMask)
+	if runRangeMatch:
+	    runRange= runRangeMatch.group("RunRange")
+	    runRange = runRange.replace("-","_")
+	    #bunchSpace = runRangeMatch.group("BunchSpacing")
+	    requestName += "_" + runRange #+ bunchSpace
+	    #Ag = runRangeMatch.group("Silver")
+	    #if Ag == "_Silver": # Use  chemical element of silver (Ag)
+            #    requestName += Ag
+
+    # Finally, replace dashes with underscores    
+    requestName = requestName.replace("-","_")
+    return requestName
+
+
+def GetTTbarSystematicsName(firstName, requestName):
+    '''
+    A simple hack to prevent overwrite of default TT when
+    using TTbar samples for systematics studies 
+    (ISR, FSR, EVTGEN, MTOP, etc..) 
+    
+    Added by M.K, 06 June 2018
+    '''
     if "fsrdown" in firstName:
         requestName = requestName+"_fsrdown"
     elif "fsrup" in firstName:
@@ -1564,27 +1595,8 @@ def GetRequestName(dataset):
         requestName = requestName+"_madgraph"
     elif "SingleLeptFromT" in firstName and "amcatnlo" in firstName:
         requestName = requestName+"_amcatnlo"
-
-
-    # Append the Ext
-    ext_match = ext_re.search(dataset.URL)
-    if ext_match:
-	requestName+=ext_match.group("name")
-
-    # Append the Run Range (for Data samples only)
-    if dataset.isData():
-	runRangeMatch = runRange_re.search(dataset.lumiMask)
-	if runRangeMatch:
-	    runRange= runRangeMatch.group("RunRange")
-	    runRange = runRange.replace("-","_")
-	    #bunchSpace = runRangeMatch.group("BunchSpacing")
-	    requestName += "_" + runRange #+ bunchSpace
-	    #Ag = runRangeMatch.group("Silver")
-	    #if Ag == "_Silver": # Use  chemical element of silver (Ag)
-            #    requestName += Ag
-
-    # Finally, replace dashes with underscores    
-    requestName = requestName.replace("-","_")
+    else:
+        pass
     return requestName
 
 

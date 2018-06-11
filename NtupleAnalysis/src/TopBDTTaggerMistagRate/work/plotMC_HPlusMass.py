@@ -135,8 +135,8 @@ def main(opts, signalMass):
         # Remove datasets
         if 1:
             datasetsMgr.remove(filter(lambda name: "Data" in name, datasetsMgr.getAllDatasetNames()))
-            #datasetsMgr.remove(filter(lambda name: "QCD_b" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "QCD_HT" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr.remove(filter(lambda name: "QCD_b" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "QCD_HT" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "SingleTop" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "DYJetsToQQHT" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "TTZToQQ" in name, datasetsMgr.getAllDatasetNames()))
@@ -271,14 +271,6 @@ def PlotMC(datasetsMgr, histo, intLumi):
         _xlabel = "p_{T} (%s)" % _units
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         #_opts["xmax"] = 505 #1005
-
-    if "eta" in histo.lower():
-        _units  = ""
-        _format = "%0.1f " + _units
-        _xlabel = "#eta %s" % _units
-        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
-        _opts["xmax"] = 2.5
-        _opts["xmin"] = -2.5
 
     if "trijetmass" in histo.lower():
         _rebinX = 2
@@ -430,15 +422,15 @@ if __name__ == "__main__":
     '''
     
     # Default Settings
-    ANALYSISNAME = "TopTaggerEfficiency"
+    ANALYSISNAME = "TopBDTTaggerMistagRate"
     MVACUT       = "MVA"
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
     OPTMODE      = ""
     BATCHMODE    = True
     PRECISION    = 3
-    SIGNALMASS   = [200, 400, 500, 650, 1000]
-    #SIGNALMASS   = []
+    #SIGNALMASS   = [200, 400, 500, 650, 1000]
+    SIGNALMASS   = []
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False

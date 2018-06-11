@@ -63,13 +63,14 @@ def PrintFlushed(msg, printHeader=True):
     sys.stdout.flush()
     return
 
-def createBinByBinStatUncertHistograms(hRate, xmin=None, xmax=None):
+def createBinByBinStatUncertHistograms(hRate, xmin=None, xmax=None, binByBinLabel=""):
     '''
     Creates and returns a list of bin-by-bin stat. uncert. histograms
     Inputs:
     hRate  rate histogram
     xmin   float, specifies minimum value for which bin-by-bin histograms are created (default: all)
     xmax   float, specifies maximum value for which bin-by-bin histograms are created (default: all)
+    binByBinLabel string, specifies an optional postfix used to name bin-by-bin stat. nuisances (default: "")
     '''
     myList = []
     myName = hRate.GetTitle()
@@ -102,8 +103,8 @@ def createBinByBinStatUncertHistograms(hRate, xmin=None, xmax=None):
                 nNegativeRate += 1
 
             # Clone hRate histogram to hUp and hDown
-            hUp   = aux.Clone(hRate, "%s_%s_statBin%dUp"  % (myName, myName,i) )
-            hDown = aux.Clone(hRate, "%s_%s_statBin%dDown"% (myName, myName,i) )
+            hUp   = aux.Clone(hRate, "%s_%s_statBin%s%dUp"  % (myName, myName,binByBinLabel,i) )
+            hDown = aux.Clone(hRate, "%s_%s_statBin%s%dDown"% (myName, myName,binByBinLabel,i) )
             hUp.SetTitle(hUp.GetName())
             hDown.SetTitle(hDown.GetName())
 
@@ -146,7 +147,7 @@ def createBinByBinStatUncertHistograms(hRate, xmin=None, xmax=None):
 
     return myList
 
-def createBinByBinStatUncertNames(hRate):
+def createBinByBinStatUncertNames(hRate,binByBinLabel=""):
     '''
     Creates and returns a list of bin-by-bin stat. uncert. name strings
     Inputs:
@@ -155,7 +156,7 @@ def createBinByBinStatUncertNames(hRate):
     myList = []
     myName = hRate.GetTitle()
     for i in range(1, hRate.GetNbinsX()+1):
-        myList.append(myName+"_statBin%d"%i)
+        myList.append( myName+"_statBin%s%d"%(binByBinLabel,i) )
     return myList
 
 def calculateCellWidths(widths,table):
@@ -214,6 +215,9 @@ class TableProducer:
         '''
         self._opts = opts
         self._config = config
+        self._binByBinLabel = ""
+        if hasattr(self._config, 'OptionBinByBinLabel'):
+            self._binByBinLabel = self._config.OptionBinByBinLabel
         self._outputPrefix = outputPrefix
         self._luminosity = luminosity
         self._observation = observation
@@ -471,8 +475,8 @@ class TableProducer:
             myFile.close()
             Verbose("Written datacard to %s" % (ShellStyles.SuccessStyle() + myFilename + ShellStyles.NormalStyle() ))
 
-            # Save & close histograms to root file
-            self._saveHistograms(myRootFile,m),
+            # Save & close histograms to root file and create bin-by-bin stat. uncertainties
+            self._saveHistograms(myRootFile,m,binByBinLabel=self._binByBinLabel),
             myRootFile.Write()
             myRootFile.Close()
             Verbose("Written shape ROOT file to %s" % (ShellStyles.SuccessStyle() + myRootFilename + ShellStyles.NormalStyle() ))
@@ -758,7 +762,7 @@ class TableProducer:
         for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
             if c.isActiveForMass(mass,self._config):
                 hRate = c._rateResult.getHistograms()[0]
-                myNames = createBinByBinStatUncertNames(hRate)
+                myNames = createBinByBinStatUncertNames(hRate,binByBinLabel=self._binByBinLabel)
                 for name in myNames:
                     myRow = []
                     myRow.append(name)
@@ -858,7 +862,7 @@ class TableProducer:
                 myResult.append(myDownRow)
         return myResult
 
-    def _saveHistograms(self, rootFile, mass):
+    def _saveHistograms(self, rootFile, mass, binByBinLabel=""):
         '''
         Save histograms to root file
         '''
@@ -871,7 +875,7 @@ class TableProducer:
                 c.setResultHistogramsToRootFile(rootFile)
                 # Add bin-by-bin stat.uncert.
                 hRate = c._rateResult.getHistograms()[0]
-                myHistos = createBinByBinStatUncertHistograms(hRate)
+                myHistos = createBinByBinStatUncertHistograms(hRate, binByBinLabel=binByBinLabel)
                 for h in myHistos:
                     h.SetDirectory(rootFile)
                 c._rateResult._tempHistos.extend(myHistos)
@@ -1230,6 +1234,7 @@ class TableProducer:
         if light:
             signalColumn="HW"
         myColumnOrder = [signalColumn, 
+                         "CMS_Hptntj_QCDandFakeTau", 
                          "ttbar_CMS_Hptntj", 
                          "CMS_Hptntj_W", 
                          "CMS_Hptntj_singleTop",
@@ -1283,9 +1288,15 @@ class TableProducer:
                                ["CMS_res_j","jet energy resolution"],
                                ["CMS_topPtReweight","top $p_T$ reweighting"],
                                ["CMS_pileup","pileup reweighting"],
+                               ["CMS_Hptn_pdf_Hptn", "pdf acceptance (signal)"],
+                               ["CMS_Hptn_pdf_top", "pdf acceptance (top BG)"],
+                               ["CMS_Hptn_pdf_ewk", "pdf acceptance (EWK BG)"],
+                               ["CMS_Hptn_mu_RF_Hptn", "RF scale acceptance (signal)"],
+                               ["CMS_Hptn_mu_RF_top", "RF scale acceptance (top BG)"],
+                               ["CMS_Hptn_mu_RF_ewk", "RF scale acceptance (EWK BG)"],
                                ["QCDscale_ttbar", "ttbar scale"],
                                ["pdf_ttbar", "ttbar pdf"],
-                               ["mass_ttbar", "ttbar mass"],
+                               ["mass_top", "top mass"],
                                ["QCDscale_Wjets", "W+jets scale"],
                                ["pdf_Wjets", "W+jets pdf"],
                                ["QCDscale_DY", "DY scale"],
@@ -1294,7 +1305,7 @@ class TableProducer:
                                ["pdf_VV", "diboson pdf"],
                                ["lumi_13TeV","luminosity (13 TeV)"],
                                ["CMS_Hptntj_fake_t_fit","Fake tau template fit"],
-                               ["CMS_Hptntj_fake_t_shape","Fake tau MET shape"]
+                               ["CMS_Hptntj_fake_t_shape","Fake tau mT shape"]
                                ]
             
         # Make table - The horror!
