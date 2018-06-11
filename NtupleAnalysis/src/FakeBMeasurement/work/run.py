@@ -205,7 +205,7 @@ def main():
     #allSelections.FakeBTopSelectionBDT.MassCutValue = 5000.0  # [default: 600.0]
     #allSelections.FakeBTopSelectionBDT.MassCutValue = allSelections.TopSelectionBDT.MassCutValue
     allSelections.TopSelectionBDT.MVACutValue = 0.40       # [default: 0.4]  # marina
-    allSelections.FakeBTopSelectionBDT.MVACutValue = -0.20 # [default: -1.0] # marina
+    allSelections.FakeBTopSelectionBDT.MVACutValue = 0.00 # [default: -1.0] # marina
     #allSelections.FakeBTopSelectionBDT.LdgTopDefinition = "Pt" # [default: "MVA"] (options: "MVA", "Pt")
     #print "FIXME "*10
     #print "=== run.py: Temporary overwrite of parameters"
