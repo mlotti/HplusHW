@@ -72,6 +72,7 @@ ROOT.gErrorIgnoreLevel = ROOT.kFatal #kPrint = 0,  kInfo = 1000, kWarning = 2000
 from ROOT import *
 
 import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
+import HiggsAnalysis.NtupleAnalysis.tools.systematics as systematics
 import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
 import HiggsAnalysis.NtupleAnalysis.tools.counter as counter
 import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
@@ -158,28 +159,11 @@ def GetHistoKwargs(histoName):
             _opts["xmin"] =    0
             _opts["xmax"] = 3000
             _cutBox       = {"cutValue": 180.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
-            _rebinX       = getBinningForTetrajetMass()
+            _rebinX       = systematics.getBinningForTetrajetMass(0) #systematics.getBinningForTetrajetMass(1) systematics.getBinningForTetrajetMass(13)
             if isinstance(_rebinX, list):
                 _ylabel = "Events / bin"
-
-    if "met" in histoName.lower():
-        _units        = "GeV"
-        _xlabel       = "E_{T}^{miss} (%s)" % (_units)
-        _cutBox       = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
-        _opts         = {"xmin": 0.0, "xmax": 400.0, "ymin": 1e0, "ymax": 1e3}
-        myBins = []
-        for j in range(0, 100, 10):
-            myBins.append(j)
-        for k in range(100, 200, 20):
-            myBins.append(k)
-        for k in range(200, 300, 50):
-            myBins.append(k)
-        for k in range(300, 400+100, 100):
-            myBins.append(k)
-        _rebinX  = myBins #1
-        # _ylabel      += " " + _units
-        binWmin, binWmax = GetBinWidthMinMax(myBins)
-        _ylabel = "Events / %.0f-%.0f %s" % (binWmin, binWmax, _units)
+        if "trijet" in histoName.lower():
+            _opts["xmax"] = 300                
 
     if "tetrajetbjeteta" in histoName.lower():
         _units   = ""
@@ -377,10 +361,10 @@ def main(opts):
         
         # Do the fit on the histo after ALL selections (incl. topology cuts)
         folderList = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(opts.folder)
-        #folderList1 = [h for h in folderList if "MET" in h]
         #folderList1 = [h for h in folderList if "TetrajetMass" in h]
-        folderList1 = [h for h in folderList if "TetrajetBJetPt" in h]
+        #folderList1 = [h for h in folderList if "TetrajetBJetPt" in h]
         #folderList1 = [h for h in folderList if "TetrajetBJetEta" in h]
+        folderList1 = [h for h in folderList if opts.histoKey in h]
         folderList2 = [h for h in folderList1 if "VR" in h or "SR" in h or "CRone" in h or "CRtwo" in h  or "CRthree" in h  or "CRfour" in h]
 
         # For-loop: All folders
@@ -408,49 +392,6 @@ def GetBinLabels(region, histoPaths):
             binLabels.append(h.split(region)[-1])
     return binLabels
         
-def getBinningForTetrajetMass(binLevel=0):
-    '''
-    Currenty in Combine:
-    myBins = [0,50,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,520,540,560,580,600,620,640,660,680,700,720,740,
-              760,780,800,820,840,860,880,900,920,940,960,980,1000,1020,1040,1060,1080,1100,1150,1200,1250,1300,1350,1400,1450,1500,1750,2000,2250,2500,
-              2750,3000,3250,3500,3750,4000]
-    '''
-    myBins = []
-    if binLevel == -1:
-        myBins = [0.0, 4000.0]
-    elif binLevel == 0: #default binning
-        for i in range(0, 1000, 50):
-            myBins.append(i)
-        for i in range(1000, 2000, 100):
-            myBins.append(i)
-        for i in range(2000, 4000+500, 500):
-            myBins.append(i)
-    elif binLevel == 1: #finer binning
-        for i in range(0, 1000, 25):
-            myBins.append(i)
-        for i in range(1000, 2000, 50):
-            myBins.append(i)
-        for i in range(2000, 4000+250, 250):
-            myBins.append(i)
-    elif binLevel == 2:
-        for i in range(0, 1000, 20):
-            myBins.append(i)
-        for i in range(1000, 2000, 40):
-            myBins.append(i)
-        for i in range(2000, 4000+200, 200):
-            myBins.append(i)
-    elif binLevel == 3:
-        for i in range(0, 1000, 10):
-            myBins.append(i)
-        for i in range(1000, 2000, 20):
-            myBins.append(i)
-        for i in range(2000, 4000+50, 50):
-            myBins.append(i)
-    else:
-        raise Exception(ShellStyles.ErrorStyle() + "Please choose bin-level from -1 to 3" + ShellStyles.NormalStyle())
-
-    return myBins
-
 def GetHistoPathDict(histoList, printList=False):
     histoDict = {}
 
@@ -702,6 +643,7 @@ if __name__ == "__main__":
     RATIO        = True
     FOLDER       = "ForFakeBMeasurement"
     INCLUSIVE    = False
+    HISTOKEY     = "TetrajetBJetEta" #options: "MET", "TetrajetBJetPt", "TetrajetBJetEta", "TetrajetMass", "LdgTrijetMass", "LdgTrijetPt"
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -729,6 +671,9 @@ if __name__ == "__main__":
 
     parser.add_option("--altPlot", dest="altPlot", action="store_true", default=ALTPLOT, 
                       help="Draw alternative plot with Data and Bkg-Sum [default: %s]" % ALTPLOT)
+
+    parser.add_option("--histoKey", dest="histoKey", type="string", default=HISTOKEY, 
+                      help="Keyword string to uniquely identify the histogram to use in extracting the Transfer Factors (TFs) [default: %s]" % HISTOKEY)
 
     parser.add_option("--dataEra", dest="dataEra", type="string", default=DATAERA, 
                       help="Override default dataEra [default: %s]" % DATAERA)

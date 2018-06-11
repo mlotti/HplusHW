@@ -20,11 +20,18 @@ EXAMPLES:
 ./plot_EfficiencySystTop.py -m TopTaggerEfficiency_180603_SystTop_hadronic_BDTtraining_ptRew13TeV --folder topbdtSelection_ --type partonShower
 ./plot_EfficiencySystTop.py -m TopTaggerEfficiency_180603_SystTop_hadronic_BDTtraining_ptRew13TeV --folder topbdtSelection_ --type showerScales
 ./plot_EfficiencySystTop.py -m TopTaggerEfficiency_180603_SystTop_hadronic_BDTtraining_ptRew13TeV --folder topbdtSelection_ --type mTop
-
-LAST USED:
-./plot_EfficiencySystTop.py -m TopTaggerEfficiency_180608_200027_massCut1000_All --folder topbdtSelection_ --type partonShower --url
 ./plot_EfficiencySystTop.py -m TopTaggerEfficiency_180608_195638_massCut400_All --folder topbdtSelection_ --type partonShower --url
 ./plot_EfficiencySystTop.py -m TopTaggerEfficiency_180608_194156_massCut300_All --folder topbdtSelection_ --type partonShower --url
+./plot_EfficiencySystTop.py -m TopTaggerEfficiency_180608_200027_massCut1000_All --folder topbdtSelection_ --type colourReconnection
+
+
+LAST USED: 
+./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_200027_massCut1000_All --type showerScales 
+./plot_EfficiencySystTop. py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_200027_massCut1000_All --type highPtRadiation
+./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/p seudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_200027_massCut1000_All --type mTop 
+./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficien cy/TopTaggerEfficiency_180608_200027_massCut1000_All --type partonShower
+./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_18 0608_200027_massCut1000_All --type evtGen
+./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_200027_massCut1000_All --type colourReconnection
 
 
 STATISTICS OPTIONS:
@@ -179,7 +186,7 @@ def GetHistoKwargs(histoName, opts):
         "opts2"            : {"ymin": 0.6, "ymax": 1.4},
         "log"              : False,
         "moveLegend"       : {"dx": -0.12, "dy": -0.40, "dh": +0.05*(-4+opts.nDatasets)},  #"dh": +0.18}, 
-        "cutBoxY"          : {"cutValue": 1.10, "fillColor": ROOT.kGray+1, "fillStyle": 3001, "box": True, "line": True, "greaterThan": True, "mainCanvas": False, "ratioCanvas": True, "mirror": True}
+        "cutBoxY"          : {"cutValue": 1.10, "fillColor": ROOT.kGray+1, "fillStyle": 3001, "box": False, "line": True, "greaterThan": True, "mainCanvas": False, "ratioCanvas": True, "mirror": True}
         }
     
     if "pt" in h:

@@ -1639,14 +1639,11 @@ def _createCutBoxAndLineY(frame, cutValue, fillColor=18, fillStyle=3001, box=Tru
         l1 = ROOT.TLine(xmin, cutValue, xmax, cutValue)
         l1.SetLineWidth(3)
         l1.SetLineStyle(ROOT.kDashed)
-        l1.SetLineColor(ROOT.kBlack)
+        l1.SetLineColor(fillColor) #ROOT.kBlack
         if mirror:
             l2 = ROOT.TLine(xmin, cutValueMirror, xmax, cutValueMirror)
-            l2.SetLineWidth(0)
-            l1.SetLineWidth(0)
-            #l.SetLineStyle(ROOT.kDashed)
-            #l.SetLineColor(ROOT.kBlack)
-            l2.SetLineStyle(ROOT.kSolid)
+            l2.SetLineWidth(3)
+            l2.SetLineStyle(ROOT.kDashed)
             l2.SetLineColor(fillColor)
 
         # Append objects to list for drawing
