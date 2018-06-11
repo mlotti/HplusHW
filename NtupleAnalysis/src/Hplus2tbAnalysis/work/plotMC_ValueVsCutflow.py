@@ -160,7 +160,8 @@ def main(opts):
             for d in datasetsMgr.getAllDatasets():
                 if "ChargedHiggs" in d.getName():
                     s = d.getName()
-                    m = int(d.getName().split("M_")[-1])
+                    dName = d.getName().replace("_ext1", "").split("M_")
+                    m = int(dName[-1])
                     opts.signal.append(s)
                     opts.signalMasses.append(m)
 
