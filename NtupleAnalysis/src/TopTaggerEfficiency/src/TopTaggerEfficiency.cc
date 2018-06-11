@@ -180,6 +180,12 @@ private:
 
   WrappedTH1Triplet* hTopBDT_AllCandidates;
 
+  WrappedTH1* hLdgInPtTrijetBDT;
+  WrappedTH1* hSubldgInPtTrijetBDT;
+
+  WrappedTH1* hLdgInBDTTrijetBDT;
+  WrappedTH1* hSubldgInBDTTrijetBDT;
+
 };
 
 #include "Framework/interface/SelectorFactory.h"
@@ -323,7 +329,7 @@ void TopTaggerEfficiency::book(TDirectory *dir) {
   hTrijetPt_Sldg_Unmatched     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TrijetPt_Sldg_Unmatched", ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
   hTrijetPt_Sldg_UnmatchedBDT  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TrijetPt_Sldg_UnmatchedBDT", ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
   hTrijetPt_Sldg_Matched       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TrijetPt_Sldg_Matched", ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
-  hTrijetPt_Sldg_MatchedBDT     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TrijetPt_Ldg_MatchedBDT", ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
+  hTrijetPt_Sldg_MatchedBDT     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TrijetPt_Sldg_MatchedBDT", ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
 
 
   //Distances
@@ -402,7 +408,11 @@ void TopTaggerEfficiency::book(TDirectory *dir) {
   hLdgTrijet_DeltaR_Dijet = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "LdgTrijet_DeltaR_Dijet", ";",
 							      nDRBins     , fDRMin     , 6);
 
-  hTopBDT_AllCandidates           = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TopBDT_AllCandidates",";top candidate BDT", 40, -1.0, 1.0) ;
+  hTopBDT_AllCandidates           = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TopBDT_AllCandidates",";top candidate BDT", 40, -1.0, 1.0);
+  hLdgInPtTrijetBDT               = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "LdgInPtTrijetBDT",    ";top candidate BDT", 40, -1.0, 1.0);
+  hSubldgInPtTrijetBDT            = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "SubldgInPtTrijetBDT", ";top candidate BDT", 40, -1.0, 1.0);
+  hLdgInBDTTrijetBDT              = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "LdgInBDTTrijetBDT",   ";top candidate BDT", 40, -1.0, 1.0);
+  hSubldgInBDTTrijetBDT           = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "SubldgInBDTTrijetBDT",";top candidate BDT", 40, -1.0, 1.0);
 
   //Top candidates multiplicity
   h_TopMultiplicity_AllTops              = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TopMultiplicity_AllTops",             ";top multiplicity", 20, 0, 20);
@@ -615,8 +625,51 @@ bool TopTaggerEfficiency::TrijetPassBDT_crossCleaned(int Index, const TopSelecti
   return true;
 }
 
+/*
+int TopTaggerEfficiency::SortInPt(vector <int> TopIndex){
+  //  Description
+  //  Takes as input a collection of Top Candidates and returns the collection sorted in pt value
 
+  size_t size = TopIndex.size();
+  if (size < 1) return TopCand;
 
+  for (size_t i=0; i<size-1; i++)
+    {
+      for  (size_t j=i+1; j<size; j++)
+        {
+          Jet Jet1_i = TopCand.Jet1.at(i);
+          Jet Jet2_i = TopCand.Jet2.at(i);
+          Jet BJet_i = TopCand.BJet.at(i);
+          double mva_i = TopCand.MVA.at(i);
+	  math::XYZTLorentzVector TrijetP4_i = TopCand.TrijetP4.at(i);
+	  math::XYZTLorentzVector DijetP4_i = TopCand.DijetP4.at(i);
+
+          Jet Jet1_j = TopCand.Jet1.at(j);
+          Jet Jet2_j = TopCand.Jet2.at(j);
+          Jet BJet_j = TopCand.BJet.at(j);
+          double mva_j = TopCand.MVA.at(j);
+	  math::XYZTLorentzVector TrijetP4_j = TopCand.TrijetP4.at(j);
+	  math::XYZTLorentzVector DijetP4_j = TopCand.DijetP4.at(j);
+          if (mva_i >= mva_j) continue;
+          TopCand.Jet1.at(i) = Jet1_j;
+          TopCand.Jet2.at(i) = Jet2_j;
+          TopCand.BJet.at(i) = BJet_j;
+          TopCand.MVA.at(i)  = mva_j;
+          TopCand.TrijetP4.at(i) = TrijetP4_j;
+          TopCand.DijetP4.at(i) = DijetP4_j;
+
+          TopCand.Jet1.at(j) = Jet1_i;
+          TopCand.Jet2.at(j) = Jet2_i;
+          TopCand.BJet.at(j) = BJet_i;
+          TopCand.MVA.at(j)  = mva_i;
+          TopCand.TrijetP4.at(j) = TrijetP4_i;
+          TopCand.DijetP4.at(j) = DijetP4_i;
+        }
+    }
+  return TopCand;
+}
+
+*/
 void TopTaggerEfficiency::setupBranches(BranchManager& branchManager) {
   fEvent.setupBranches(branchManager);
   return;
@@ -1158,9 +1211,12 @@ void TopTaggerEfficiency::process(Long64_t entry) {
 	Jet jet1 = topData.getAllTopsJet1().at(i);
 	Jet jet2 = topData.getAllTopsJet2().at(i);
 	Jet bjet = topData.getAllTopsBJet().at(i);
-
+	
 	bool realTrijet = isRealMVATop(jet1, jet2, bjet, MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet);
-	hTopBDT_AllCandidates -> Fill(realTrijet, topData.getAllTopsMVA().at(i));
+	//Fill only once
+	if (j == 0){	  
+	  hTopBDT_AllCandidates -> Fill(realTrijet, topData.getAllTopsMVA().at(i));
+	}
 	if ( isMatched*isOnlyMatched )
 	  {	    
 	    if (isRealMVATop(jet1, jet2, bjet, MCtrue_LdgJet.at(0), MCtrue_SubldgJet.at(0), MCtrue_Bjet.at(0))) genuineTop = true;
@@ -1238,8 +1294,8 @@ void TopTaggerEfficiency::process(Long64_t entry) {
       std::cout<<"SubldgTop "<<SubldgTijetJet1_afterSS.index()<<" "<<SubldgTijetJet2_afterSS.index()<<" "<<SubldgTijetBJet_afterSS.index()<<" "<<SubldgTrijetMVA_afterSS<<std::endl;
       std::cout<<"==="<<std::endl;
     }
-    bool isreal_ldgTop  = (isRealMVATop(LdgTijetJet1_afterSS, LdgTijetJet1_afterSS, LdgTijetBJet_afterSS, MCtrue_LdgJet,  MCtrue_SubldgJet, MCtrue_Bjet));
-    bool isreal_sldgTop = (isRealMVATop(SubldgTijetJet1_afterSS, SubldgTijetJet1_afterSS, SubldgTijetBJet_afterSS, MCtrue_LdgJet,  MCtrue_SubldgJet, MCtrue_Bjet));
+    bool isreal_ldgTop  = (isRealMVATop(LdgTijetJet1_afterSS, LdgTijetJet2_afterSS, LdgTijetBJet_afterSS, MCtrue_LdgJet,  MCtrue_SubldgJet, MCtrue_Bjet));
+    bool isreal_sldgTop = (isRealMVATop(SubldgTijetJet1_afterSS, SubldgTijetJet2_afterSS, SubldgTijetBJet_afterSS, MCtrue_LdgJet,  MCtrue_SubldgJet, MCtrue_Bjet));
     
     hTrijetPt_LdgOrSldg -> Fill(LdgTrijetP4_afterSS.Pt());
     hTrijetPt_LdgOrSldg -> Fill(SubldgTrijetP4_afterSS.Pt());
@@ -1279,34 +1335,22 @@ void TopTaggerEfficiency::process(Long64_t entry) {
 	hTrijetPt_Sldg_UnmatchedBDT      -> Fill(SubldgTrijetP4_afterSS.Pt());
       }
     }      
-    //hTrijetPt_LdgOrSldg 
-      /*
-	bool isreal_ldgTop  = (isRealMVATop(topData.getLdgTrijetJet1(),    topData.getLdgTrijetJet2(),    topData.getLdgTrijetBJet(),     MCtrue_LdgJet,  MCtrue_SubldgJet, MCtrue_Bjet));
-	bool isreal_sldgTop = (isRealMVATop(topData.getSubldgTrijetJet1(), topData.getSubldgTrijetJet2(), topData.getSubldgTrijetBJet(),  MCtrue_LdgJet,  MCtrue_SubldgJet, MCtrue_Bjet));
-	bool isFake_ldgTop  = (!isRealMVATop(topData.getLdgTrijetJet1(),    topData.getLdgTrijetJet2(),    topData.getLdgTrijetBJet(),     MCtrue_LdgJet,  MCtrue_SubldgJet, MCtrue_Bjet));
-	bool isFake_sldgTop = (!isRealMVATop(topData.getSubldgTrijetJet1(), topData.getSubldgTrijetJet2(), topData.getSubldgTrijetBJet(),  MCtrue_LdgJet,  MCtrue_SubldgJet, MCtrue_Bjet));
-	
-	if (isFake_ldgTop){
-	hTrijetFakePt_LdgOrSldgTop -> Fill(topData.getLdgTrijet().Pt());
-	hTrijetFakePt_LdgTop       -> Fill(topData.getLdgTrijet().Pt());
-	}
-	if (isFake_sldgTop){
-	hTrijetFakePt_LdgOrSldgTop -> Fill(topData.getSubldgTrijet().Pt());
-	hTrijetFakePt_SldgTop      -> Fill(topData.getSubldgTrijet().Pt());
-	}
-	
-	if (isFake_ldgTop  && cfg_PrelimTopMVACut.passedCut(topData.getMVALdgInPt())){
-	hTrijetFakePt_LdgOrSldgTop_BDT -> Fill(topData.getLdgTrijet().Pt());
-	hTrijetFakePt_LdgTop_BDT       -> Fill(topData.getLdgTrijet().Pt());
-	}
-	
-	if (isFake_sldgTop && cfg_PrelimTopMVACut.passedCut(topData.getMVASubldgInPt())){
-	hTrijetFakePt_LdgOrSldg_BDT -> Fill(topData.getSubldgTrijet().Pt());
-	hTrijetFakePt_SldgTop_BDT   -> Fill(topData.getSubldgTrijet().Pt());
-	}
-      */
+
+
+    for (size_t i = 0; i < topData.getAllTopsBJet().size(); i++){      	
+      Jet jet1 = topData.getAllTopsJet1().at(i);
+      Jet jet2 = topData.getAllTopsJet2().at(i);
+      Jet bjet = topData.getAllTopsBJet().at(i);
+      
+      bool realTrijet = isRealMVATop(jet1, jet2, bjet, MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet);
+      //Fill only once
+      hTopBDT_AllCandidates -> Fill(realTrijet, topData.getAllTopsMVA().at(i));
+    }
+      
+    //======================================
     //======================================
     //Efficiency per Event: Tag both real tops 
+    //======================================
     //======================================
     if (topData.getSelectedCleanedTopsBJet().size() < 2) return;
     if (!topData.hasFreeBJet()) return;
@@ -1500,6 +1544,11 @@ void TopTaggerEfficiency::process(Long64_t entry) {
   }
   if (SubldgTopIsTopFromH)    hTetrajetMass_SubldgTopIsHTop -> Fill(isBfromH, subldgTetrajet_p4.M());
   if (LdgWIsWFromH)           hTetrajetMass_LdgWIsWfromH    -> Fill(isBfromH, tetrajet_p4.M());
+
+  hLdgInPtTrijetBDT     -> Fill(topData.getMVALdgInPt());
+  hSubldgInPtTrijetBDT  -> Fill(topData.getMVASubldgInPt());
+  hLdgInBDTTrijetBDT    -> Fill(topData.getMVAmax1());
+  hSubldgInBDTTrijetBDT -> Fill(topData.getMVAmax2());
 
   //================================================================================================
   // Finalize
