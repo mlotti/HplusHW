@@ -70,16 +70,14 @@ bool LheMttSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetup ){
     if(lheHandle.isValid()){
         const auto& hepeup = lheHandle->hepeup(); 
         for(unsigned i=0; i<hepeup.IDUP.size(); ++i){
-            if (hepeup.ISTUP[i] != 1) continue; //Outgoing final state particle
-            TLorentzVector p4(hepeup.PUP[i][0],hepeup.PUP[i][1],hepeup.PUP[i][2],hepeup.PUP[i][3]);
-            if(abs(hepeup.IDUP[i]) ==6) {
+            if(abs(hepeup.IDUP[i]) == 6) {
+              TLorentzVector p4(hepeup.PUP[i][0],hepeup.PUP[i][1],hepeup.PUP[i][2],hepeup.PUP[i][3]);
               mInv += p4;
               ntops++;
             }
         }
     }
     double Mtt = mInv.M();
-std::cout << "check Mtt " << ntops << " "<< mInv.M() << std::endl;
     if(Mtt < Mttmin || Mtt > Mttmax) return false;
     
     // All selections passed
