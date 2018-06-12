@@ -202,15 +202,18 @@ def main():
     
     # allSelections.BJetSelection.triggerMatchingApply = True # at least 1 trg b-jet matched to offline b-jets
     # allSelections.Trigger.triggerOR = ["HLT_PFHT450_SixJet40_BTagCSV_p056", "HLT_PFJet450"]
-    #allSelections.FakeBTopSelectionBDT.MassCutValue = 5000.0  # [default: 600.0]
-    #allSelections.FakeBTopSelectionBDT.MassCutValue = allSelections.TopSelectionBDT.MassCutValue
-    allSelections.TopSelectionBDT.MVACutValue = 0.40       # [default: 0.4]  # marina
-    allSelections.FakeBTopSelectionBDT.MVACutValue = 0.00 # [default: -1.0] # marina
-    #allSelections.FakeBTopSelectionBDT.LdgTopDefinition = "Pt" # [default: "MVA"] (options: "MVA", "Pt")
-    #print "FIXME "*10
-    #print "=== run.py: Temporary overwrite of parameters"
-    #print "FIXME "*10
-
+    # allSelections.FakeBTopSelectionBDT.MassCutValue = 5000.0  # [default: 600.0]
+    # allSelections.FakeBTopSelectionBDT.MassCutValue = allSelections.TopSelectionBDT.MassCutValue
+    # allSelections.FakeBTopSelectionBDT.LdgTopDefinition = "Pt" # [default: "MVA"] (options: "MVA", "Pt")
+    allSelections.TopSelectionBDT.MVACutValue           = 0.40 # [default: 0.4]  # marina
+    allSelections.FakeBTopSelectionBDT.MVACutValue      = 0.00 # [default: -1.0] # marina
+    allSelections.FakeBMeasurement.LdgTopMVACutValue    = allSelections.TopSelectionBDT.MVACutValue
+    allSelections.FakeBMeasurement.SubldgTopMVACutValue = allSelections.TopSelectionBDT.MVACutValue
+    print "NOTE "*10
+    print "=== run.py: Default parameters overwritten!"
+    print "NOTE "*10
+    
+    
     # ================================================================================================
     # Command Line Options
     # ================================================================================================ 
