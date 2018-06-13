@@ -50,6 +50,7 @@ public:
   bool foundFreeBjet(const Jet& trijet1Jet1, const Jet& trijet1Jet2, const Jet& trijet1BJet, const Jet& trijet2Jet1, const Jet& trijet2Jet2, const Jet& trijet2BJet , const std::vector<Jet>& bjets);
 
   bool TrijetPassBDT_crossCleaned(int Index, const TopSelectionBDT::Data& topData, const std::vector<Jet>& bjets);
+  int GetLdgOrSubldgTopIndex(std::vector<int>TopIndex, const TopSelectionBDT::Data& topData, string type);
 
   /// Called for each event
   virtual void process(Long64_t entry) override;
@@ -625,6 +626,34 @@ bool TopTaggerEfficiency::TrijetPassBDT_crossCleaned(int Index, const TopSelecti
   return true;
 }
 
+int TopTaggerEfficiency::GetLdgOrSubldgTopIndex(std::vector<int>TopIndex, const TopSelectionBDT::Data& topData, string type){
+  double maxPt1 = -999.999, maxPt2 = -999.999;
+  int maxIndex1 = -1, maxIndex2 = -1;
+  
+  for (size_t i=0; i< TopIndex.size(); i++){
+    int index = TopIndex.at(i);
+    math::XYZTLorentzVector TopP4;
+    TopP4 = topData.getAllTopsJet1().at(index).p4() + topData.getAllTopsJet2().at(index).p4() + topData.getAllTopsBJet().at(index).p4() ;
+    //std::cout<<"pt "<<TopP4.Pt()<<std::endl;
+    if (maxPt2 > TopP4.Pt()) continue;
+    if (maxPt1 < TopP4.Pt()){
+      maxPt2 = maxPt1;
+      maxIndex2 = maxIndex1;
+      maxPt1 = TopP4.Pt();
+      maxIndex1 = index;
+    }
+    else{
+      maxPt2 = TopP4.Pt();
+      maxIndex2 = index;
+    }
+  }
+  //std::cout<<"leading "<<maxPt1<<" subleading "<<maxPt2<<std::endl;
+  if (type == "leading") return maxIndex1;
+  if (type == "subleading") return maxIndex2;
+  std::cout<<"GetLdgOrSubldgTopIndex: returning leading top index"<<std::endl;
+  return maxIndex1;
+}
+      
 /*
 int TopTaggerEfficiency::SortInPt(vector <int> TopIndex){
   //  Description
@@ -1273,7 +1302,8 @@ void TopTaggerEfficiency::process(Long64_t entry) {
     //Check only leading - subleading trijet
     //======================================    
     //Ldg in BDT top candidate
-    int index1 = AllTopCandIndex_cleaned.at(0);
+    int index1 = GetLdgOrSubldgTopIndex(AllTopCandIndex_cleaned, topData, "leading");
+    //int index1 = AllTopCandIndex_cleaned.at(0);
     Jet LdgTijetJet1_afterSS = topData.getAllTopsJet1().at(index1);
     Jet LdgTijetJet2_afterSS = topData.getAllTopsJet2().at(index1);
     Jet LdgTijetBJet_afterSS = topData.getAllTopsBJet().at(index1);
@@ -1281,7 +1311,8 @@ void TopTaggerEfficiency::process(Long64_t entry) {
     math::XYZTLorentzVector LdgTrijetP4_afterSS;
     LdgTrijetP4_afterSS = LdgTijetJet1_afterSS.p4() + LdgTijetJet2_afterSS.p4() + LdgTijetBJet_afterSS.p4();
     //Subldg in BDT top candidate
-    int index2 = AllTopCandIndex_cleaned.at(1);
+    int index2 = GetLdgOrSubldgTopIndex(AllTopCandIndex_cleaned, topData, "subleading");
+    //int index2 = AllTopCandIndex_cleaned.at(1);
     Jet SubldgTijetJet1_afterSS = topData.getAllTopsJet1().at(index2);
     Jet SubldgTijetJet2_afterSS = topData.getAllTopsJet2().at(index2);
     Jet SubldgTijetBJet_afterSS = topData.getAllTopsBJet().at(index2);
@@ -1322,7 +1353,7 @@ void TopTaggerEfficiency::process(Long64_t entry) {
     if (isreal_sldgTop){
       hTrijetPt_LdgOrSldg_Matched -> Fill(SubldgTrijetP4_afterSS.Pt());
       hTrijetPt_Sldg_Matched      -> Fill(SubldgTrijetP4_afterSS.Pt());
-      if (cfg_PrelimTopMVACut.passedCut(LdgTrijetMVA_afterSS)){
+      if (cfg_PrelimTopMVACut.passedCut(SubldgTrijetMVA_afterSS)){
 	hTrijetPt_LdgOrSldg_MatchedBDT -> Fill(SubldgTrijetP4_afterSS.Pt());
 	hTrijetPt_Sldg_MatchedBDT      -> Fill(SubldgTrijetP4_afterSS.Pt());
       }
@@ -1330,7 +1361,7 @@ void TopTaggerEfficiency::process(Long64_t entry) {
     else{
       hTrijetPt_LdgOrSldg_Unmatched -> Fill(SubldgTrijetP4_afterSS.Pt());
       hTrijetPt_Sldg_Unmatched      -> Fill(SubldgTrijetP4_afterSS.Pt());
-      if (cfg_PrelimTopMVACut.passedCut(LdgTrijetMVA_afterSS)){
+      if (cfg_PrelimTopMVACut.passedCut(SubldgTrijetMVA_afterSS)){
 	hTrijetPt_LdgOrSldg_UnmatchedBDT -> Fill(SubldgTrijetP4_afterSS.Pt());
 	hTrijetPt_Sldg_UnmatchedBDT      -> Fill(SubldgTrijetP4_afterSS.Pt());
       }

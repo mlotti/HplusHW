@@ -182,6 +182,9 @@ def GetHistoKwargs(histoName, opts):
             kwargs["moveLegend"] = {"dx": -0.08, "dy": -0.65, "dh": -0.08}
             #myBins  = [0, 50, 100, 150, 250, 350, 400, 500]
             #myBins  = [0, 100, 200, 300, 400, 500, 800]
+        if "_matched" in h:
+            print "HERE IS THE PROBLEM"
+            myBins  = [0, 100, 200, 300, 500]
         if 0:
             ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
 
@@ -274,7 +277,7 @@ def main(opts, signalMass):
 
 
         # Define list with Numerators - Denominators
-
+        '''
         Numerator = ["AllTopQuarkPt_MatchedBDT",
                      "TrijetFakePt_BDT",
                      "AssocTopQuarkPt_MatchedBDT",
@@ -293,8 +296,8 @@ def main(opts, signalMass):
                        "TopQuarkPt",
                        "TopQuarkPt",
                        ]
-
         '''
+
         Numerator = [#"AllTopQuarkPt_MatchedBDT",
                      #"TrijetFakePt_BDT",
                      #"AssocTopQuarkPt_MatchedBDT",
@@ -302,17 +305,19 @@ def main(opts, signalMass):
                      #"AllTopQuarkPt_MatchedBDT",
                      #"AllTopQuarkPt_Matched",
                      "TrijetPt_LdgOrSldg_Matched",
+                     "TrijetPt_LdgOrSldg_Unmatched",
                      "TrijetPt_LdgOrSldg_MatchedBDT",
-                     #"TrijetPt_LdgOrSldg_MatchedBDT",
+                     "TrijetPt_LdgOrSldg_MatchedBDT",
                      "TrijetPt_LdgOrSldg_UnmatchedBDT",
-                     "TrijetPt_Ldg_Matched",
-                     "TrijetPt_Ldg_MatchedBDT",
+                     "TrijetPt_LdgOrSldg_UnmatchedBDT",
+                     #"TrijetPt_Ldg_Matched",
                      #"TrijetPt_Ldg_MatchedBDT",
-                     "TrijetPt_Ldg_UnmatchedBDT",
-                     "TrijetPt_Sldg_Matched",
+                     #"TrijetPt_Ldg_MatchedBDT",
+                     #"TrijetPt_Ldg_UnmatchedBDT",
+                     #"TrijetPt_Sldg_Matched",
                      #"TrijetPt_Sldg_MatchedBDT",
                      #"TrijetPt_Sldg_MatchedBDT",
-                     "TrijetPt_Sldg_UnmatchedBDT",
+                     #"TrijetPt_Sldg_UnmatchedBDT",
                      
                      ]
         Denominator = [#"AllTopQuarkPt_Matched",
@@ -323,18 +328,20 @@ def main(opts, signalMass):
                        #"TopQuarkPt",
                        "TrijetPt_LdgOrSldg",
                        "TrijetPt_LdgOrSldg",
-                       #"TrijetPt_LdgOrSldg_Matched",
+                       "TrijetPt_LdgOrSldg",
+                       "TrijetPt_LdgOrSldg_Matched",
+                       "TrijetPt_LdgOrSldg",
                        "TrijetPt_LdgOrSldg_Unmatched",
-                       "TrijetPt_Ldg",
-                       "TrijetPt_Ldg",
+                       #"TrijetPt_Ldg",
+                       #"TrijetPt_Ldg",
                        #"TrijetPt_Ldg_Matched",
-                       "TrijetPt_Ldg_Unmatched",
-                       "TrijetPt_Subldg",
+                       #"TrijetPt_Ldg_Unmatched",
+                       #"TrijetPt_Subldg",
                        #"TrijetPt_Subldg",
                        #"TrijetPt_Sldg_Matched",
-                       "TrijetPt_Sldg_Unmatched",
+                       #"TrijetPt_Sldg_Unmatched",
                        ]
-        '''
+
         # For-loop: All numerator-denominator pairs
         for i in range(len(Numerator)):
             numerator   = os.path.join(opts.folder, Numerator[i])
@@ -407,7 +414,7 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
     myList  = []
     myBckList = []
     index   = 0
-    _kwargs = GetHistoKwargs(numPath, opts)        
+    _kwargs = GetHistoKwargs(denPath, opts)        
     counter = 0
     # For-loop: All datasets
     for dataset in datasetsMgr.getAllDatasets():
@@ -500,8 +507,10 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
 
         
         # Append in list
-        if "charged" in dataset.getName().lower():
-            if "m_500" in dataset.getName().lower():
+        #if "charged" in dataset.getName().lower():
+        #    if "m_500" in dataset.getName().lower():
+        if 1:
+            if "tt" in dataset.getName().lower():
                 eff_ref = histograms.HistoGraph(eff, plots._legendLabels[dataset.getName()], "lp", "P")
             else:
                 myList.append(histograms.HistoGraph(eff, plots._legendLabels[dataset.getName()], "lp", "P"))
