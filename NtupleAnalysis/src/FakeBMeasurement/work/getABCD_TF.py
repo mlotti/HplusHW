@@ -598,7 +598,7 @@ def PlotHistosAndCalculateTF(datasetsMgr, histoList, binLabels, opts):
         p.setDefaultStyles()
 
     # Draw the plot and save it
-    hName = "test"
+    hName = opts.histoKey #"test"
     plots.drawPlot(p, hName, **_kwargs)
     SavePlot(p, hName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png"])
 
