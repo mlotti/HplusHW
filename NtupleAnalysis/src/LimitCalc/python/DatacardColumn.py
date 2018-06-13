@@ -555,9 +555,13 @@ class DatacardColumn():
             mySystematics = dataset.Systematics(allShapes=True)
 
             if not dsetMgr.hasDataset(self.getDatasetMgrColumn()):
-                msg = "Cannot find merged dataset by key '%s' in multicrab dir! Did you forget to merge the root files with hplusMergeHistograms.py?" % self.getDatasetMgrColumn()
-                dsetMgr.PrintInfo()
-                raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
+                dset = self.getDatasetMgrColumn()
+                if not dsetMgr.hasDataset(dset):
+                    dset += "_ext1"
+                    if not dsetMgr.hasDataset(dset):
+                        msg = "Cannot find merged dataset by key '%s' in multicrab dir! Did you forget to merge the root files with hplusMergeHistograms.py?" % dset
+                        dsetMgr.PrintInfo()
+                        raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
 
             myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
 

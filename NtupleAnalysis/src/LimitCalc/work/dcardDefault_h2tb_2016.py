@@ -10,7 +10,7 @@ USAGE:
 
 
 EXAMPLES:
-xOB./dcardGenerator_v2.py -x dcardDefault_h2tb_2016.py -d limits2016/ --h2tb
+./dcardGenerator_v2.py -x dcardDefault_h2tb_2016.py -d limits2016/ --h2tb
 
 
 LAST USED:
@@ -111,11 +111,10 @@ def getFakeBSystematics(myTTBarSystematics, OptionShapeSystematics, verbose=Fals
 #================================================================================================  
 OptionTest                             = False
 OptionPaper                            = True  # (units, ..)
-OptionIncludeSystematics               = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
+OptionIncludeSystematics               = False # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionShapeSystematics                 = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionDoControlPlots                   = True  # [default: True]   (Produce control plots defined at end of this file)
-#MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
-MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
+MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
 DataCardName                           = "Hplus2tb_13TeV"
 OptionMassShape                        = "LdgTetrajetMass_AfterAllSelections" #"SubldgTetrajetMass_AfterAllSelections"
 #OptionMassShape                        = "SubldgTetrajetMass_AfterAllSelections"
@@ -655,6 +654,20 @@ hLdgTopBjetEta = ControlPlotInput(
                          },
     )
 
+hLdgTopBjetBdisc = ControlPlotInput(
+    title            = "LdgTrijetBjetBdisc_AfterAllSelections",
+    histoName        = "LdgTrijetBjetBdisc_AfterAllSelections",
+    details          = { "xlabel"             : "CSVv2 discriminator",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "",
+                         "log"                : True,
+                         "legendPosition"     : "NW",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-2, "ymaxfactor": 10, "xmin": 0.78, "xmax": 1.0} 
+                         },
+    )
+
 
 hLdgTopDijetPt = ControlPlotInput(
     title            = "LdgTrijetDijetPt_AfterAllSelections",
@@ -740,6 +753,20 @@ hSubldgTopBjetEta = ControlPlotInput(
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
                          "opts"               : {"ymin": 1e-2, "ymaxfactor": 10, "xmin": -2.5, "xmax": 2.5} 
+                         },
+    )
+
+hSubldgTopBjetBdisc = ControlPlotInput(
+    title            = "SubldgTrijetBjetBdisc_AfterAllSelections",
+    histoName        = "SubldgTrijetBjetBdisc_AfterAllSelections",
+    details          = { "xlabel"             : "CSVv2 discriminator",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "",
+                         "log"                : True,
+                         "legendPosition"     : "NW",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-2, "ymaxfactor": 10, "xmin": 0.78, "xmax": 1.0} 
                          },
     )
 
@@ -1030,7 +1057,7 @@ hSubldgHiggsMass = ControlPlotInput(
                          "ratioLegendPosition": "right",
                          "opts"               : {"ymin": 1e-2, "ymaxfactor": 10}#, "xmax": 3000.0}
                          },
-    blindedRange=[200.0, 3000.0], # specify range min,max if blinding applies to this control plot
+    blindedRange=[0.0, 3000.0], # specify range min,max if blinding applies to this control plot
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
     # flowPlotCaption  = "m_{jjbb}", # Leave blank if you don't want to include the item to the selection flow plot    
     )
@@ -1249,7 +1276,7 @@ hBJet1Pt = ControlPlotInput(
 hBJet2Pt = ControlPlotInput(
     title            = "BJet2Pt_AfterAllSelections",
     histoName        = "BJet2Pt_AfterAllSelections",
-    details          = { "xlabel"             : "p_{T} / #Deltap_{T}",
+    details          = { "xlabel"             : "p_{T}",
                          #"ylabel"             : "Events",
                          "ylabel"             : "< Events / %s >" % (uPt),
                          "divideByBinWidth"   : True,
@@ -1321,33 +1348,35 @@ hBJet3Eta = ControlPlotInput(
 ControlPlots.append(hMET)
 ControlPlots.append(hHT)
 ControlPlots.append(hMHT)
-### ControlPlots.append(hQGLR) # to speed-up code
+# ControlPlots.append(hQGLR) # not used
 ControlPlots.append(hLdgTopPt)
 ControlPlots.append(hLdgTopMass)
-# ControlPlots.append(hLdgTopBjetPt)  # No agreement expected
-# ControlPlots.append(hLdgTopBjetEta) # No agreement expected
+ControlPlots.append(hLdgTopBjetPt)    # No agreement expected
+ControlPlots.append(hLdgTopBjetEta)   # No agreement expected
+ControlPlots.append(hLdgTopBjetBdisc) # No agreement expected
 ControlPlots.append(hLdgTopDijetPt)
 ControlPlots.append(hLdgTopDijetMass)
-### ControlPlots.append(hLdgTopR32)
+# ControlPlots.append(hLdgTopR32)
 ControlPlots.append(hTetrajetBjetPt)
 ControlPlots.append(hTetrajetBjetEta)
 ControlPlots.append(hLdgHiggsPt)
 ControlPlots.append(hLdgHiggsMass)
 ControlPlots.append(hVertices)
 ControlPlots.append(hNjets)
-### ControlPlots.append(hNBjets) #No agreement expected
+# ControlPlots.append(hNBjets) # No agreement expected
 ControlPlots.append(hJetPt)
 ControlPlots.append(hJetEta)
 ControlPlots.append(hBJetPt)
 ControlPlots.append(hBJetEta)
-### ControlPlots.append(hBtagDiscriminator) #No agreement expected
+# ControlPlots.append(hBtagDiscriminator)
 ControlPlots.append(hSubldgTopPt)
 ControlPlots.append(hSubldgTopMass)
-#ControlPlots.append(hSubldgTopBjetPt)  # No agreement expected
-#ControlPlots.append(hSubldgTopBjetEta) # No agreement expected
+ControlPlots.append(hSubldgTopBjetPt)
+ControlPlots.append(hSubldgTopBjetEta)
+ControlPlots.append(hSubldgTopBjetBdisc)
 ControlPlots.append(hSubldgTopDijetPt)
 ControlPlots.append(hSubldgTopDijetMass)
-### ControlPlots.append(hSubldgTopR32)
+# ControlPlots.append(hSubldgTopR32)
 ControlPlots.append(hSubldgHiggsPt)
 ControlPlots.append(hSubldgHiggsMass)
 ControlPlots.append(hJet1Pt)
@@ -1365,7 +1394,7 @@ ControlPlots.append(hJet5Eta)
 ControlPlots.append(hJet6Eta)
 ControlPlots.append(hJet7Eta)
 # No agreement expected
-if 0:
+if 1:
     ControlPlots.append(hBJet1Pt)
     ControlPlots.append(hBJet2Pt)
     ControlPlots.append(hBJet3Pt)
@@ -1378,4 +1407,10 @@ if OptionTest:
     ControlPlots.append(hLdgHiggsMass)
     ControlPlots.append(hTetrajetBjetPt)
     ControlPlots.append(hTetrajetBjetEta)
-    MassPoints = [180, 500]
+    ControlPlots.append(hLdgTopBjetPt)  # No agreement expected
+    ControlPlots.append(hLdgTopBjetEta) # No agreement expected
+    ControlPlots.append(hLdgTopBjetBdisc) # No agreement expected
+    ControlPlots.append(hSubldgTopBjetPt)  # No agreement expected
+    ControlPlots.append(hSubldgTopBjetEta) # No agreement expected
+    ControlPlots.append(hSubldgTopBjetBdisc) # No agreement expected
+    MassPoints = [500]

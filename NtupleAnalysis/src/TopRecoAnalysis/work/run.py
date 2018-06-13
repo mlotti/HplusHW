@@ -141,15 +141,11 @@ def main():
     from HiggsAnalysis.NtupleAnalysis.parameters.hplus2tbAnalysis import allSelections
     allSelections.verbose = opts.verbose
     allSelections.histogramAmbientLevel = opts.histoLevel
-        
     # allSelections.BjetSelection.triggerMatchingApply = True
     # allSelections.TopSelection.ChiSqrCutValue = 100.0
     # allSelections.BJetSelection.numberOfBJetsCutValue = 0
     # allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
-    
-    allSelections.TopSelectionBDT.MVACutValue = 0.40
-    allSelections.TopSelectionBDT.MassCutValue = 400.0
-    
+    allSelections.TopSelectionBDT.WeightFile             = "TopRecoTree_180523_DeltaR0p3_DeltaPtOverPt0p32_TopPtReweighting_BDTG.weights.xml"
     # ================================================================================================
     # Add Analysis Variations
     # ================================================================================================

@@ -1621,32 +1621,42 @@ def _createCutBoxAndLine(frame, cutValue, fillColor=18, box=True, line=True, **k
 # \param box        If true, draw cut box
 # \param line       If true, draw cut line
 # \param kwargs     Keyword arguments (\a lessThan or \a greaterThan, forwarded to histograms.isLessThan())
-def _createCutBoxAndLineY(frame, cutValue, fillColor=18, fillStyle=3001, box=True, line=True, **kwargs):
+def _createCutBoxAndLineY(frame, cutValue, fillColor=18, fillStyle=3001, box=True, line=True, mirror=False, **kwargs):
     xmin = frame.GetXaxis().GetXmin()
     xmax = frame.GetXaxis().GetXmax()
     ymin = cutValue
     ymax = cutValue
     ret  = []
 
+    # Mirror calculations
+    dy = 1.0-cutValue
+    if dy < 0:
+        cutValueMirror = 1.0-abs(dy)
+    else:
+        cutValueMirror = 1.0+abs(dy)
+
+    if line:
+        l1 = ROOT.TLine(xmin, cutValue, xmax, cutValue)
+        l1.SetLineWidth(3)
+        l1.SetLineStyle(ROOT.kDashed)
+        l1.SetLineColor(fillColor) #ROOT.kBlack
+        if mirror:
+            l2 = ROOT.TLine(xmin, cutValueMirror, xmax, cutValueMirror)
+            l2.SetLineWidth(3)
+            l2.SetLineStyle(ROOT.kDashed)
+            l2.SetLineColor(fillColor)
+
+        # Append objects to list for drawing
+        ret.append(l1)
+        if mirror:
+            ret.append(l2)
+
     if box:
-        if histograms.isLessThan(**kwargs):
-            ymin = frame.GetYaxis().GetXmin()
-            ymax = cutValue
-        else:
-            ymin = cutValue
-            ymax = frame.GetYaxis().GetXmax()
-        b = ROOT.TBox(xmin, ymin, xmax, ymax)
+        b = ROOT.TBox(xmin, cutValue, xmax, cutValueMirror)
         b.SetFillColor(fillColor)
         b.SetFillStyle(fillStyle)
         ret.append(b)
-
-    if line:
-        l = ROOT.TLine(xmin, cutValue, xmax, cutValue)
-        l.SetLineWidth(3)
-        l.SetLineStyle(ROOT.kDashed)
-        l.SetLineColor(ROOT.kBlack)
-        ret.append(l)
-
+        
     return ret
 
 ## Helper function for creating a histograms.Histo object from a ROOT object based on the ROOT object type
@@ -1870,18 +1880,15 @@ class PlotBase:
     # \param kwargs  Keyword arguments (forwarded to plots._createCutBoxAndLine())
     def addCutBoxAndLineY(self, *args, **kwargs):
         objs = _createCutBoxAndLineY(self.getFrame(), *args, **kwargs)
-        for o in objs:
+        for o in objs:            
             if "mainCanvas" in kwargs:
                 if kwargs["mainCanvas"]:
-                    self.appendPlotObject(o)
-            else:
-                self.appendPlotObject(o)
+                    self.prependPlotObject(o)
+                    #self.appendPlotObject(o)
             if "ratioCanvas" in kwargs:
                 if kwargs["ratioCanvas"]:
                     self.prependPlotObjectToRatio(o)
-            else:
-                self.prependPlotObjectToRatio(o) 
-                
+                    #self.appendPlotObjectToRatio(o)
 
     ## Add MC uncertainty histogram
     def addMCUncertainty(self):
