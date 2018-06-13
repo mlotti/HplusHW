@@ -41,68 +41,25 @@
   ./getEfficiencies.py -num <pseudo_nummcrab_directory> -den <pseudo_dencrab_directory> [opts]
   
   LAST USED:
-
-  (1) ./getGenuineEfficiency.py --noSF SystTopBDT_180528_151309_MET30_MuIso0p1_InvMET30_InvMuIso0p2_noSF --withCR1SF SystTopBDT_180602_113334_MET30_MuIso0p2_InvMET30_InvMuIso0p2_withCR1SF \
-  --withCR2SF SystTopBDT_180529_083852_MET30_MuIso0p2_InvMET30_InvMuIso0p2_withCR2SF --url -e "TTW"
-
-  (2) ./getGenuineEfficiency.py --noSF SystTopBDT_180528_151533_MET30_MuIso0p1_InvMET30_InvMuIso0p2_noSF --withCR1SF SystTopBDT_180602_114148_MET30_MuIso0p1_InvMET30_InvMuIso0p2_withCR1SF \
-  --withCR2SF SystTopBDT_180529_084257_MET30_MuIso0p1_InvMET30_InvMuIso0p2_withCR2SF --url -e "TTW"
-
-  (3) ./getGenuineEfficiency.py --noSF SystTopBDT_180528_152141_MET50_MuIso0p1_InvMET20_InvMuIso0p2_noSF --withCR1SF SystTopBDT_180602_114435_MET50_MuIso0p1_InvMET20_InvMuIso0p2_withCR1SF \
-  --withCR2SF SystTopBDT_180529_084610_MET50_MuIso0p1_InvMET20_InvMuIso0p2_withCR2SF --url -e "TTW"
-
-  (4) ./getGenuineEfficiency.py --noSF SystTopBDT_180528_152310_MET40_MuIso0p1_InvMET30_InvMuIso0p2_noSF --withCR1SF SystTopBDT_180602_114641_MET40_MuIso0p1_InvMET30_InvMuIso0p2_withCR1SF \
-  --withCR2SF SystTopBDT_180529_084900_MET40_MuIso0p1_InvMET30_InvMuIso0p2_withCR2SF --url -e "TTW"
-
-  (5) ./getGenuineEfficiency.py --noSF SystTopBDT_180528_152540_MET30_MuIso0p1_InvMET15_InvMuIso0p2_noSF --withCR1SF SystTopBDT_180602_114840_MET30_MuIso0p1_InvMET15_InvMuIso0p2_withCR1SF \
-  --withCR2SF SystTopBDT_180529_085334_MET30_MuIso0p1_InvMET15_InvMuIso0p2_withCR2SF --url -e "TTW"
-  
-  (6) ./getGenuineEfficiency.py --noSF SystTopBDT_180528_152944_MET30_MuIso0p2_InvMET20_InvMuIso0p4_noSF --withCR1SF SystTopBDT_180602_115034_MET30_MuIso0p2_InvMET20_InvMuIso0p4_withCR1SF \
-  --withCR2SF SystTopBDT_180529_085656_MET30_MuIso0p2_InvMET20_InvMuIso0p4_withCR2SF --url -e "TTW"
-
-  (7) ./getGenuineEfficiency.py --noSF SystTopBDT_180529_093052_MET50_MuIso0p1_InvMET20_InvMuIso0p1_noSF --withCR1SF SystTopBDT_180602_115353_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR1SF \
-  --withCR2SF SystTopBDT_180530_075514_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR2SF --url -e "TTW"
-
-  (8) ./getGenuineEfficiency.py --noSF SystTopBDT_180529_165537_MET30_MuIso0p1_InvMET30_InvMuIso0p1_noSF --withCR1SF SystTopBDT_180602_115622_MET30_MuIso0p1_InvMET30_InvMuIso0p1_withCR1SF \
-  --withCR2SF SystTopBDT_180530_075724_MET30_MuIso0p1_InvMET30_InvMuIso0p1_withCR2SF --url -e "TTW"
   # Marina
-  (9) ./getGenuineEfficiency.py --noSF SystTopBDT_180529_170402_MET30_MuIso0p1_InvMET20_InvMuIso0p1_noSF --withCR1SF SystTopBDT_180602_115822_MET30_MuIso0p1_InvMET20_InvMuIso0p1_withCR1SF \
-  --withCR2SF SystTopBDT_180530_080019_MET30_MuIso0p1_InvMET20_InvMuIso0p1_withCR2SF --url -e "TTW"
+  (1) Default
+  ./getGenuineEfficiency.py --noSF SystTopBDT_180612_120857_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_noSF \
+  --withCR1SF SystTopBDT_180612_191845_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR1SF_default_massCut300 \
+  --withCR2SF SystTopBDT_180612_164619_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR2SF_default_massCut300 \
+  --url -e "TTW"
   
-  (10) ./getGenuineEfficiency.py --noSF SystTopBDT_180529_094433_MET30_MuIso0p1_InvMET15_InvMuIso0p1_noSF --withCR1SF SystTopBDT_180602_120116_MET30_MuIso0p1_InvMET15_InvMuIso0p1_withCR1SF \
-  --withCR2SF SystTopBDT_180530_080239_MET30_MuIso0p1_InvMET15_InvMuIso0p1_withCR2SF --url -e "TTW"
+  (2) CR2 SF from Soti's Fat Jet
+  ./getGenuineEfficiency.py --noSF SystTopBDT_180612_120857_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_noSF \
+  --withCR1SF SystTopBDT_180612_192056_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR1SF_FatJet_massCut300 \
+  --withCR2SF SystTopBDT_180612_192227_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR1SF_LeadingJet_massCut300 \
+  --url -e "TTW"
   
-  (11) ./getGenuineEfficiency.py --noSF SystTopBDT_180529_094647_MET50_MuIso0p2_InvMET30_InvMuIso0p2_noSF --withCR1SF SystTopBDT_180602_122528_MET50_MuIso0p2_InvMET30_InvMuIso0p2_withCR1SF \
-  --withCR2SF SystTopBDT_180530_075159_MET50_MuIso0p2_InvMET30_InvMuIso0p2_withCR2SF --url -e "TTW"
-
-  (12) ./getGenuineEfficiency.py --noSF SystTopBDT_180529_094856_MET30_MuIso0p1_InvMET20_InvMuIso0p3_noSF --withCR1SF SystTopBDT_180602_123016_MET30_MuIso0p1_InvMET20_InvMuIso0p3_withCR1SF \
-  --withCR2SF SystTopBDT_180530_074700_MET30_MuIso0p1_InvMET20_InvMuIso0p3_withCR2SF --url -e "TTW"
-
-
-
-
+  (3) CR1 SF from Soti's Leading Jet
+  ./getGenuineEfficiency.py --noSF SystTopBDT_180612_120857_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_noSF \
+  --withCR1SF SystTopBDT_180612_192227_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR1SF_LeadingJet_massCut300 \
+  --withCR2SF SystTopBDT_180612_165901_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR2SF_LeadingJet_massCut300 \
+  --url -e "TTW"
   
-  OTHER SELECTIONS:
-  (A) ./getGenuineEfficiency.py --noSF SystTopBDT_180513_100633_MET50_MuIso0p2_InvMET20_InvMuIso0p2_noSF --withCR1SF SystTopBDT_180513_181711_MET50_MuIso0p2_InvMET20_InvMuIso0p2_withCR1SF \
-  --withCR2SF SystTopBDT_180513_154620_MET50_MuIso0p2_InvMET20_InvMuIso0p2_withCR2SF --url -e "TTW"
-
-  (B) ./getGenuineEfficiency.py --noSF SystTopBDT_180513_101101_MET50_MuIso0p1_InvMET20_InvMuIso0p1_noSF --withCR1SF SystTopBDT_180513_184604_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR1SF \
-  --withCR2SF SystTopBDT_180513_155700_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR2SF --url -e "TTW"
-  
-  (C) ./getGenuineEfficiency.py --noSF SystTopBDT_180513_101634_MET50_MuIso0p2_InvMET30_InvMuIso0p2_noSF --withCR1SF SystTopBDT_180513_185326_MET50_MuIso0p2_InvMET30_InvMuIso0p2_withCR1F \
-  --withCR2SF SystTopBDT_180513_160712_MET50_MuIso0p2_InvMET30_InvMuIso0p2_withCR2SF --url -e "TTW"
-  
-  (D) ./getGenuineEfficiency.py --noSF SystTopBDT_180513_102112_MET50_MuIso0p1_InvMET30_InvMuIso0p1_noSF --withCR1SF SystTopBDT_180513_185942_MET50_MuIso0p1_InvMET30_InvMuIso0p1_withCR1SF \
-  --withCR2SF SystTopBDT_180513_161853_MET50_MuIso0p1_InvMET30_InvMuIso0p1_withCR2SF --url -e "TTW"
-
-  (E) ./getGenuineEfficiency.py --noSF SystTopBDT_180514_110341_MET40_MuIso0p1_InvMET20_InvMuIso0p1_noSF --withCR1SF SystTopBDT_180515_034913_MET40_MuIso0p1_InvMET20_InvMuIso0p1_withCR1SF \
-  --withCR2SF SystTopBDT_180514_170239_MET40_MuIso0p1_InvMET20_InvMuIso0p1_withCR2SF --url -e "TTW"
-  
-  (F) ./getGenuineEfficiency.py --noSF SystTopBDT_180514_115524_MET40_MuIso0p1_InvMET30_InvMuIso0p1_noSF --withCR1SF SystTopBDT_180515_035307_MET40_MuIso0p1_InvMET30_InvMuIso0p1_withCR1SF \
---withCR2SF SystTopBDT_180514_174250_MET40_MuIso0p1_InvMET30_InvMuIso0p1_withCR2SF --url -e "TTW"
-
-  (G) ./getGenuineEfficiency.py --noSF SystTopBDT_180514_115629_MET30_MuIso0p1_InvMET20_InvMuIso0p1_noSF --withCR1SF SystTopBDT_180515_035717_MET30_MuIso0p1_InvMET20_InvMuIso0p1_withCR1SF \
---withCR2SF SystTopBDT_180514_174443_MET30_MuIso0p1_InvMET20_InvMuIso0p1_withCR2SF --url -e "TTW"
 
 '''
 #================================================================================================ 
@@ -589,18 +546,7 @@ def PlotHistos(noSF_datasetsMgr, withCR1SF_datasetsMgr, withCR2SF_datasetsMgr, n
     # Normalization Factors (see: getNormalization.py)
     # =========================================================================================
     # Marina
-    #f1=0.610901; f2=0.889906; # (1)
-    #f1=0.610901; f2=0.906343; # (2)
-    #f1=0.610963; f2=0.903020; # (3)
-    #f1=0.610901; f2=0.901711; # (4)
-    #f1=0.603648; f2=0.907290; # (5)
-    #f1=0.611682; f2=0.889619; # (6)
-    #f1=0.613102; f2=0.902808; # (7)
-    #f1=0.609202; f2=0.906565; # (8)
-    #f1=0.613102; f2=0.906056; # (9)
-    #f1=0.608068; f2=0.906713; # (10)
-    #f1=0.610901; f2=0.889106; # (11)
-    f1=0.616422; f2=0.905622; # (12)
+    f1=0.619886; f2=0.904877;
     
     # =========================================================================================
     # (A) Apply Normalization Factors (see: getNormalizations.py)
@@ -675,7 +621,7 @@ def PlotHistos(noSF_datasetsMgr, withCR1SF_datasetsMgr, withCR2SF_datasetsMgr, n
     styles.getABCDStyle("CR4").apply(den_mc)
     
     # Denominator
-    hName = "GenuineTT_SR_Denominator"
+    hName = "GenuineTT_SR_Denominator_LeadingJet"
     hData_Den = histograms.Histo( den_data, "genuine t#bar{t}_{SR} (Data)", "Data", drawStyle="AP"); hData_Den.setIsDataMC(isData=True, isMC=False)
     hMC_Den   = histograms.Histo( den_mc,   "genuine t#bar{t}_{SR} (MC)", "MC", drawStyle="HIST");   hMC_Den.setIsDataMC(isData=False, isMC=True)
 
@@ -686,7 +632,7 @@ def PlotHistos(noSF_datasetsMgr, withCR1SF_datasetsMgr, withCR2SF_datasetsMgr, n
     SavePlot(pDen, hName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png"])
     
     # Numerator
-    hName = "GenuineTT_SR_Numerator"
+    hName = "GenuineTT_SR_Numerator_LeadingJet"
     hData_Num = histograms.Histo( num_data, "genuine t#bar{t}_{SR} (Data)", "Data", drawStyle="AP"); hData_Num.setIsDataMC(isData=True, isMC=False)
     hMC_Num   = histograms.Histo( num_mc,   "genuine t#bar{t}_{SR} (MC)", "MC", drawStyle="HIST");   hMC_Num.setIsDataMC(isData=False, isMC=True)
 
@@ -758,7 +704,7 @@ def PlotHistos(noSF_datasetsMgr, withCR1SF_datasetsMgr, withCR2SF_datasetsMgr, n
     Graph_MC   = histograms.HistoGraph(geff_mc, "genuine t#bar{t}_{SR} (MC)", "p", "P")
     
     p = plots.ComparisonManyPlot(Graph_MC, [Graph_Data], saveFormats=[])
-    saveName = "Efficiency_GenuineTT_SR"
+    saveName = "Efficiency_GenuineTT_SR_LeadingJet"
     savePath = os.path.join(opts.saveDir, opts.optMode)
     plots.drawPlot(p, savePath, **_kwargs)
     SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf"])
