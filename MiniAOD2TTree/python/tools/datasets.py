@@ -471,7 +471,6 @@ datasetsZJetsToQQ.append(Dataset('/ZJetsToQQ_HT600toInf_13TeV-madgraph/RunIISumm
 
 
 datasetsDiboson = []
-dasWW = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FWW_TuneCUETP8M1_13TeV-pythia8%2FRunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_201*%2FMINIAODSIM"
 dasWZ = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FWZ*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
 datasetsDiboson.append(Dataset('/WZ_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=dasWZ))
 datasetsDiboson.append(Dataset('/WZ_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=dasWZ, name="WZ_ext1"))
@@ -481,9 +480,11 @@ datasetsDiboson.append(Dataset('/WWTo4Q_13TeV-powheg/RunIISummer16MiniAODv2-PUMo
 
 datasetsDiboson.append(Dataset('/ZZ_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=dasWZ, name="ZZ"))
 datasetsDiboson.append(Dataset('/ZZ_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=dasWZ, name="ZZ_ext1"))
-datasetsDiboson.append(Dataset('/WW_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=dasWW, name='WW'))
-datasetsDiboson.append(Dataset('/WW_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM',dataVersion="80Xmc", dasQuery=dasWW, name='WW_ext1'))
 
+datasetsDibosonWW = []
+dasWW = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FWW_TuneCUETP8M1_13TeV-pythia8%2FRunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_201*%2FMINIAODSIM"
+datasetsDibosonWW.append(Dataset('/WW_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=dasWW, name='WW'))
+datasetsDibosonWW.append(Dataset('/WW_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM',dataVersion="80Xmc", dasQuery=dasWW, name='WW_ext1'))
 
 datasetsDibosonToQQ = []
 dasWZ = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FWZ*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
@@ -713,7 +714,7 @@ JetTriggersDatasets.extend(datasetsQCDMuEnriched)
 
 # Top BDT Systematics
 TopSystBDTDatasets = []
-#TopSystBDTDatasets.extend(datasetsJetHTData_03Feb2017)
+TopSystBDTDatasets.extend(datasetsJetHTData_03Feb2017)
 TopSystBDTDatasets.extend(datasetsTop)
 TopSystBDTDatasets.extend(datasetsTopSyst)
 #TopSystBDTDatasets.extend(datasetsDY)
@@ -722,6 +723,7 @@ TopSystBDTDatasets.extend(datasetsTopSyst)
 #TopSystBDTDatasets.extend(datasetsTTWJetsToLNu)
 #TopSystBDTDatasets.extend(datasetsQCDMuEnriched)
 #TopSystBDTDatasets.extend(datasetsDiboson)
+#TopSystBDTDatasets.extend(datasetsDibosonWW)
 
 
 #================================================================================================ 

@@ -415,8 +415,8 @@ def GetDatasetWhitelist(opts):
         myWhitelist.append("WZ")
         myWhitelist.append("WZ_ext1")
         myWhitelist.append("ZZTo4Q")
-        #myWhitelist.append("TTZToQQ")
-        #myWhitelist.append("TTWJetsToQQ")
+        myWhitelist.append("TTZToQQ")
+        myWhitelist.append("TTWJetsToQQ")
     elif opts.group == "F":
         myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_180_ext1")
     elif opts.group == "G":
