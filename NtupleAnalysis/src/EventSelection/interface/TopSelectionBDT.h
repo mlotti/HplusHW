@@ -319,7 +319,8 @@ private:
   bool TopIsCrossCleaned(int Index, TrijetSelection TopCand, const std::vector<Jet>& bjets);
   // Input parameters
   const DirectionalCut<double> cfg_MVACut;
-  const DirectionalCut<double> cfg_MassCut;
+  const DirectionalCut<double> cfg_TopMassCut;
+  const DirectionalCut<double> cfg_WMassCut;
   const DirectionalCut<double> cfg_CSV_bDiscCut;
 
   // Event counter for passing selection
@@ -333,7 +334,8 @@ private:
   Count cSubPassedFreeBjetCut;
   //
   Count cTopsAll;
-  Count cTopsPassMassCut;
+  Count cTopsPassTopMassCut;
+  Count cTopsPassWMassCut;
   Count cTopsPassBDiscCut;
   Count cTopsPassBDTCut;
   Count cTopsPassCrossCleanCut;

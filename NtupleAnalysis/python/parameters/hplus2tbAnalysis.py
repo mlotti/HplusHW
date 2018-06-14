@@ -8,13 +8,12 @@ import HiggsAnalysis.NtupleAnalysis.parameters.jsonReader as jsonReader
 # General parameters
 #================================================================================================
 verbose               = True
-histogramAmbientLevel = "Debug"  # Options: Systematics, Vital, Informative, Debug
+histogramAmbientLevel = "Debug"  # (options: "Systematics", "Vital", "Informative", "Debug")
 
 #================================================================================================
-# Trigger
+# Trigger [scanned in range _v1--_v100 (=>remove the '_v' suffix)]
 #================================================================================================
 trigger = PSet(
-    # scanned in range _v1--_v100 (=>remove the '_v' suffix)
     triggerOR = [
         "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056",
         "HLT_PFHT450_SixJet40_BTagCSV_p056",       
@@ -179,8 +178,10 @@ metSelection = PSet(
 topSelectionBDT = PSet(
     MVACutValue            = 0.40,    # [default: 0.40]
     MVACutDirection        =  ">=",   # [default: ">="]
-    MassCutValue           = 300.0,   # [default: 400 or 500.0]  # Do not evaluate top candidate if mass greater than this cut
-    MassCutDirection       = "<=",    # [default: "<"]
+    TopMassCutValue        = 300.0,   # [default: 400 or 500.0]  # Do not evaluate top candidate if top mass greater than this cut
+    TopMassCutDirection    = "<=",    # [default: "<"]
+    WMassCutValue          =   0.0,   # [default: 0.0]  # Do not evaluate top candidate if W mass greater than this cut
+    WWMassCutDirection     = ">=",    # [default: ">"]
     CSV_bDiscCutValue      = 0.8484,  # [default: 0.8484] # Do not evaluate top candidate if b-jet assigned as b from top fails this cut
     CSV_bDiscCutDirection  = ">=",    # [default: ">="]
     #WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32.weights.xml", # (All XML files located in data/TopTaggerWeights/)
@@ -209,8 +210,10 @@ fakeBTopSelectionBDT = PSet(
     MVACutValue            = -1.0,   # [default: -1.0] NOTE: defines SR, VR, CR1, and CR2
     MVACutDirection        = ">",    # [default: ">"] (NOTE: Crashes if set to ">=" -1)
     LdgTopDefinition       = "MVA",  # [default: "MVA"] (options: "MVA", "Pt")
-    MassCutValue           = topSelectionBDT.MassCutValue,  # [default: 600.0] #topSelectionBDT.MassCutValue, (800.0 is way too much. TTbar takes > 24 hours)
-    MassCutDirection       = topSelectionBDT.MassCutDirection,
+    TopMassCutValue        = 600.0, #topSelectionBDT.TopMassCutValue,  # [default: 600.0] #topSelectionBDT.MassCutValue, (800.0 is way too much. TTbar takes > 24 hours)
+    TopMassCutDirection    = topSelectionBDT.TopMassCutDirection,
+    WMassCutValue          = 0.0,    # [default: ?] #topSelectionBDT.WMassCutValue,
+    WMassCutDirection      = ">",    # [default: ?] #topSelectionBDT.WMassCutDirection,
     CSV_bDiscCutValue      = topSelectionBDT.CSV_bDiscCutValue,
     CSV_bDiscCutDirection  = topSelectionBDT.CSV_bDiscCutDirection,
     WeightFile             = topSelectionBDT.WeightFile,

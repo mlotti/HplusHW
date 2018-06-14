@@ -55,7 +55,8 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config, EventCounter& event
   : BaseSelection(eventCounter, histoWrapper, commonPlots, postfix),
     // Input parameters
     cfg_MVACut(config, "MVACut"),
-    cfg_MassCut(config, "MassCut"),
+    cfg_TopMassCut(config, "TopMassCut"),
+    cfg_WMassCut(config, "WMassCut"),
     cfg_CSV_bDiscCut(config, "CSV_bDiscCut"),
     // Event counter for passing selection
     cPassedTopSelectionBDT(fEventCounter.addCounter("passed top selection ("+postfix+")")),
@@ -67,7 +68,8 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config, EventCounter& event
     cSubPassedFreeBjetCut(fEventCounter.addSubCounter("top selection ("+postfix+")", "Passed free b-jet cut")),
     // Top candidates
     cTopsAll(fEventCounter.addSubCounter("top candidates ("+postfix+")", "All candidates")),
-    cTopsPassMassCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed mass cut")),
+    cTopsPassTopMassCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed top mass cut")),
+    cTopsPassWMassCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed W mass cut")),
     cTopsPassBDiscCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed b-disc cut")),
     cTopsPassBDTCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed BDT cut")),
     cTopsPassCrossCleanCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed cross-clean cut"))
@@ -79,7 +81,8 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config)
 : BaseSelection(),
   // Input parameters
   cfg_MVACut(config, "MVACut"),
-  cfg_MassCut(config, "MassCut"),
+  cfg_TopMassCut(config, "TopMassCut"),
+  cfg_WMassCut(config, "WMassCut"),
   cfg_CSV_bDiscCut(config, "CSV_bDiscCut"),
   // Event counter for passing selection
   cPassedTopSelectionBDT(fEventCounter.addCounter("passed top selection")),
@@ -91,7 +94,8 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config)
   cSubPassedFreeBjetCut(fEventCounter.addSubCounter("top selection", "Passed Free Bjet cut")),
   // Top candidates
   cTopsAll(fEventCounter.addSubCounter("top candidates", "All candidates")),
-  cTopsPassMassCut(fEventCounter.addSubCounter("top candidates", "Passed mass cut")),
+  cTopsPassTopMassCut(fEventCounter.addSubCounter("top candidates", "Passed top mass cut")),
+  cTopsPassWMassCut(fEventCounter.addSubCounter("top candidates", "Passed W mass cut")),
   cTopsPassBDiscCut(fEventCounter.addSubCounter("top candidates", "Passed b-disc cut")),
   cTopsPassBDTCut(fEventCounter.addSubCounter("top candidates", "Passed BDT cut")),
   cTopsPassCrossCleanCut(fEventCounter.addSubCounter("top candidates", "Passed cross-clean cut"))
@@ -395,8 +399,8 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   TrijetSelection fSelectedCleanedTops;
 
   // For-loop: All b-jets
-  //for (auto& bjet: jets) // Before 01 June 2018
-  for (auto& bjet: bjets) // After 01 June 2018
+  // for (auto& bjet: jets) // OldTop (Between ~March-June 2018)
+  for (auto& bjet: bjets) // NewTop (Testing since 01/06/2018)
     {
       int index1 = 0;
 
@@ -428,9 +432,13 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	      top_p4 = bjet.p4() + jet1.p4() + jet2.p4();
 	      w_p4   = jet1.p4() + jet2.p4();
 	      
-	      // Skip trijet combinations which do not fulfil the invariant mass
-	      if (!cfg_MassCut.passedCut(top_p4.M())) continue;
-	      cTopsPassMassCut.increment();
+	      // Skip trijet combinations which do not fulfil the top invariant mass
+	      if (!cfg_TopMassCut.passedCut(top_p4.M())) continue;
+	      cTopsPassTopMassCut.increment();
+
+	      // Skip trijet combinations which do not fulfil the W invariant mass
+	      if (!cfg_WMassCut.passedCut(w_p4.M())) continue;
+	      cTopsPassWMassCut.increment();
 
 	      // Skip trijet combinations which do not fulfil bjet_CSV threshold
 	      if (!cfg_CSV_bDiscCut.passedCut(bjet.bjetDiscriminator())) continue;
