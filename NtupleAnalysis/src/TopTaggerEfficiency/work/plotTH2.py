@@ -18,7 +18,7 @@ EXAMPLES:
 
 
 LAST USED:
-./plotTH2.py -m TopTaggerEfficiency_15June18_BDT0p40_Masscut300_NewTop_BugFix/ --folder topbdtSelectionTH2_ --gridX --gridY --dataset ChargedHiggs_HplusTB_HplusToTB_M_500 --normalizeToLumi --logZ --intLumi 35920 -v --url
+./plotTH2.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_15June18_BDT0p40_Masscut300_NewTop_BugFix/ --folder topbdtSelectionTH2_ --gridX --gridY --dataset ChargedHiggs_HplusTB_HplusToTB_M_500 --normalizeToLumi --logZ --intLumi 35920 -v --url
 '''
 
 #================================================================================================ 

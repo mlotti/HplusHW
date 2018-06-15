@@ -13,7 +13,7 @@ Examples:
 ./plotMC_HPlusMass.py -m <peudo_mcrab> --normaliseToOne --url --signalMass 500
 
 Last Used:
-./plotMC_HPlusMass.py -m TopTaggerEfficiency_15June18_BDT0p40_Masscut300_NewTop_BugFix/ --folder topbdtSelection_ --url -v
+./plotMC_HPlusMass.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_15June18_BDT0p40_Masscut300_NewTop_BugFix/ --folder topbdtSelection_ --url -v
 '''
 
 #================================================================================================ 
