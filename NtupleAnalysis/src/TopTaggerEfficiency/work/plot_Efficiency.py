@@ -183,8 +183,12 @@ def GetHistoKwargs(histoName, opts):
             #myBins  = [0, 50, 100, 150, 250, 350, 400, 500]
             #myBins  = [0, 100, 200, 300, 400, 500, 800]
         if "_matched" in h:
-            print "HERE IS THE PROBLEM"
             myBins  = [0, 100, 200, 300, 500]
+        if "_ldg_" in h:
+            myBins  = [0, 150, 250, 350, 500]
+        if "_sldg_" in h:
+            myBins  = [100, 350]
+
         if 0:
             ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
 
@@ -305,15 +309,15 @@ def main(opts, signalMass):
                      #"AllTopQuarkPt_MatchedBDT",
                      #"AllTopQuarkPt_Matched",
                      "TrijetPt_LdgOrSldg_Matched",
-                     "TrijetPt_LdgOrSldg_Unmatched",
+                     ##"TrijetPt_LdgOrSldg_Unmatched",
                      "TrijetPt_LdgOrSldg_MatchedBDT",
                      "TrijetPt_LdgOrSldg_MatchedBDT",
                      "TrijetPt_LdgOrSldg_UnmatchedBDT",
                      "TrijetPt_LdgOrSldg_UnmatchedBDT",
-                     #"TrijetPt_Ldg_Matched",
-                     #"TrijetPt_Ldg_MatchedBDT",
-                     #"TrijetPt_Ldg_MatchedBDT",
-                     #"TrijetPt_Ldg_UnmatchedBDT",
+                     "TrijetPt_Ldg_Matched",
+                     "TrijetPt_Ldg_MatchedBDT",
+                     ##"TrijetPt_Ldg_MatchedBDT",
+                     "TrijetPt_Ldg_UnmatchedBDT",
                      #"TrijetPt_Sldg_Matched",
                      #"TrijetPt_Sldg_MatchedBDT",
                      #"TrijetPt_Sldg_MatchedBDT",
@@ -327,15 +331,15 @@ def main(opts, signalMass):
                        #"TopQuarkPt",
                        #"TopQuarkPt",
                        "TrijetPt_LdgOrSldg",
-                       "TrijetPt_LdgOrSldg",
+                       ##"TrijetPt_LdgOrSldg",
                        "TrijetPt_LdgOrSldg",
                        "TrijetPt_LdgOrSldg_Matched",
                        "TrijetPt_LdgOrSldg",
                        "TrijetPt_LdgOrSldg_Unmatched",
-                       #"TrijetPt_Ldg",
-                       #"TrijetPt_Ldg",
-                       #"TrijetPt_Ldg_Matched",
-                       #"TrijetPt_Ldg_Unmatched",
+                       "TrijetPt_Ldg",
+                       "TrijetPt_Ldg",
+                       ##"TrijetPt_Ldg_Matched",
+                       "TrijetPt_Ldg_Unmatched",
                        #"TrijetPt_Subldg",
                        #"TrijetPt_Subldg",
                        #"TrijetPt_Sldg_Matched",
@@ -374,18 +378,15 @@ def CheckNegatives(hNum, hDen, verbose=False):
         # Numerator > Denominator
         if nbin > dbin:
             hNum.SetBinContent(i, dbin)
-            print "here1"
         # Numerator < 0 
         if nbin < 0:
             #hNum.SetBinContent(i,0)
             hNum.SetBinContent(i, abs(nbin) )
-            print "here2"
         # Denominator < 0
         if dbin < 0:
             #hNum.SetBinContent(i,0)
             #hDen.SetBinContent(i,0)
             hDen.SetBinContent(i, abs(dbin))
-            print "here3"
         # Save updated info to table
         nbin = hNum.GetBinContent(i)
         dbin = hDen.GetBinContent(i)

@@ -436,7 +436,7 @@ def main(opts, signalMass):
             p.setLuminosity(intLumi)
             _kwargs["ratio"] = True
             #_kwargs["ratioInvert"] = True
-            _kwargs["cutBoxY"] = {"cutValue": 1.10, "fillColor": ROOT.kGray+1, "fillStyle": 3001, "box": True, "line": True, "greaterThan": True, "mainCanvas": False, 
+            _kwargs["cutBoxY"] = {"cutValue": 1.10, "fillColor": ROOT.kGray+1, "fillStyle": 3001, "box": False, "line": True, "greaterThan": True, "mainCanvas": False, 
                                    "ratioCanvas": True, "mirror": True}
             ##_kwargs["cutBoxY"] = {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": True}
             plots.drawPlot(p, plotName, **_kwargs)

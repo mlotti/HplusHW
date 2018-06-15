@@ -13,7 +13,7 @@ Examples:
 ./plotMC_HPlusMass.py -m <peudo_mcrab> --normaliseToOne --url --signalMass 500
 
 Last Used:
-./plotMC_HPlusMass.py -m TopTaggerEfficiency_180529_TopEfficiency_vs_mass/ --folder topbdtSelection_ --normaliseToOne -v -e "TT" --url
+./plotMC_HPlusMass.py -m TopTaggerEfficiency_15June18_BDT0p40_Masscut300_NewTop_BugFix/ --folder topbdtSelection_ --url -v
 '''
 
 #================================================================================================ 
@@ -438,7 +438,7 @@ if __name__ == "__main__":
     BATCHMODE    = True
     PRECISION    = 3
     SIGNALMASS   = [200, 400, 500, 650, 1000]
-    SIGNALMASS   = [500]
+    #SIGNALMASS   = [500]
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False
