@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 '''
 DESCRIPTION:
-Plots purity of FakeB background in all Control Regions (CR)
-on the same cavnas. In particular it plots the FakeB Purity 
-for VR, CR1, and CR2.
+Plots purity of FakeB (or GenuineB or QCD or EWK) in all Control Regions (CR)
+on the same cavnas. More specifically, this script plots the FakeB (or GenuineB or QCD or EWK) 
+Purity for VR, CR1, and CR2.
 
 
 USAGE:
@@ -18,7 +18,15 @@ EXAMPLES:
 
 
 LAST USED:
-./plot_Purity.py -m FakeBMeasurement_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p50to085_180129_133455 
+1) Fake-B
+./plot_Purity.py -m FakeBMeasurement_180614_034501_NewTopAndBugFix_BDT_G0p00_BDT_L0p40_Pt55_110_AbsEta0p8_1p6/ 
+2) Genuine-B
+./plot_Purity.py -m FakeBMeasurement_180614_034501_NewTopAndBugFix_BDT_G0p00_BDT_L0p40_Pt55_110_AbsEta0p8_1p6/ --doEWK
+3) QCD
+./plot_Purity.py -m FakeBMeasurement_180614_034501_NewTopAndBugFix_BDT_G0p00_BDT_L0p40_Pt55_110_AbsEta0p8_1p6/ --doQCD
+3) EWK
+./plot_Purity.py -m FakeBMeasurement_180614_034501_NewTopAndBugFix_BDT_G0p00_BDT_L0p40_Pt55_110_AbsEta0p8_1p6/ --doEWK --doQCD
+
 
 '''
 
@@ -292,9 +300,11 @@ def GetPurityHistoGraph(datasetsMgr, folder, hName):
 
     # Get histos (Data, EWK) for Inclusive
     p1 = plots.ComparisonPlot(*getHistos(datasetsMgr, histoName) )
-    if opts.doQCD:
+    if opts.doQCD: #inclusive histo name
+        Print("NOTE! Using \"Inclusive\" (not \"GenuineB\") histo. This is suitable for \"EWK\" or \"QCD\" plots" , True)
         p2 = plots.ComparisonPlot(*getHistos(datasetsMgr, histoName) )
-    else:
+    else: #genuineB histo name
+        Print("NOTE! Using \"GenuineB\" (not \"Inclusive\") histo. This is suitable for \"FakeB\" or \"GenuineB\" plots only.", True)
         p2 = plots.ComparisonPlot(*getHistos(datasetsMgr, hNameGenuineB) )
 
     p1.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
@@ -302,7 +312,7 @@ def GetPurityHistoGraph(datasetsMgr, folder, hName):
 
     # Clone histograms 
     Data = p1.histoMgr.getHisto("Data").getRootHisto().Clone("Data")
-    EWK  = p2.histoMgr.getHisto("EWK").getRootHisto().Clone("EWK") # EWKGenuineB
+    EWK  = p2.histoMgr.getHisto("EWK").getRootHisto().Clone("EWK")
     QCD  = p1.histoMgr.getHisto("Data").getRootHisto().Clone("QCD")
 
     # Rebin histograms (Before calculating Purity)
@@ -320,9 +330,10 @@ def GetPurityHistoGraph(datasetsMgr, folder, hName):
     QCD.Add(EWK, -1)
 
     # Create the Purity histos
-    hPurity = GetPurityHisto(Data, EWK, _kwargs, printValues=False, hideZeros=True)
     if opts.doEWK:
-        hPurity = GetPurityHisto(Data, QCD, _kwargs, printValues=False, hideZeros=True)
+        hPurity = GetPurityHisto(Data, QCD, _kwargs, printValues=True, hideZeros=True)
+    else:
+        hPurity = GetPurityHisto(Data, EWK, _kwargs, printValues=True, hideZeros=True)
 
     # Convert histos to TGraph
     gPurity = convertHisto2TGraph(hPurity, printValues=False)
@@ -376,7 +387,7 @@ def GetHistoKwargs(histoName, opts):
     '''
     h = histoName.split("/")[-1]
     histoKwargs = {}
-    _moveLegend = {"dx": -0.08, "dy": -0.42, "dh": -0.14}
+    _moveLegend = {"dx": -0.55, "dy": -0.55, "dh": -0.14}
     _yMin       = 0.0
     _yMax       = 1.09
     _cutBox     = None
@@ -431,20 +442,18 @@ def GetHistoKwargs(histoName, opts):
         _cutBox  = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
 
     if "met" in h.lower():
-        _xlabel  = "E_{T}^{miss} (GeV"
+        _xlabel  = "E_{T}^{miss} (GeV)"
         myBins   = systematics._dataDrivenCtrlPlotBinning["MET_AfterAllSelections"]
         
     if "mvamax1" in h.lower():
-        #_xlabel = "leading BDT"
         _xlabel = "top-tag discriminant"
         _cutBox = {"cutValue": 0.40, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
-        myBins  = [float(mva)/10.0 for mva in range(-10, 10, 1)]
+        myBins  = [float(mva)/10.0 for mva in range(-10, 11, 1)]
 
     if "mvamax2" in h.lower():
-        #_xlabel = "subleading BDT"
         _xlabel = "top-tag discriminant"
         _cutBox = {"cutValue": 0.40, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
-        myBins  = [float(mva)/10.0 for mva in range(-10, 10, 1)]
+        myBins  = [float(mva)/10.0 for mva in range(-10, 11, 1)]
 
     if "trijetm" in h.lower():
         _units  = "GeV/c^{2}" 
@@ -528,6 +537,22 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
 
     # Create the name under which plot will be saved
     saveName = os.path.join(saveDir, plotName.replace("/", "_"))
+    
+    # Append dataset name
+    if not opts.doQCD and not opts.doEWK:
+        saveName += "_FakeB"
+
+    if opts.doQCD:
+        if opts.doEWK:
+            saveName += "_EWK"
+        else:
+            saveName += "_QCD"    
+            
+    if opts.doEWK:
+        if opts.doQCD:
+            pass
+        else:
+            saveName += "_GenuineB"
 
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
@@ -604,7 +629,9 @@ def convertHisto2TGraph(histo, printValues=False):
     return tgraph
 
 def GetPurityHisto(hData, hEWK, kwargs, printValues=False, hideZeros=True):
-
+    '''
+    hEWK is a dummie name
+    '''
     # Prepare a new histo
     h = hData.Clone()    
     h.Reset("ICESM")
@@ -613,7 +640,7 @@ def GetPurityHisto(hData, hEWK, kwargs, printValues=False, hideZeros=True):
     # Construct info table (debugging)
     table  = []
     align  = "{:>6} {:^20} {:>10} {:>10} {:>10} {:^3} {:<10}"
-    header = align.format("Bin", "Range", "EWK", "Data", "Purity", "+/-", "Error") #Purity = 1-EWK/Data
+    header = align.format("Bin", "Range", "%s" % hEWK.GetName(), "Data", "Purity", "+/-", "Error") #Purity = 1-EWK/Data
     hLine  = "="*70
     nBinsX = hData.GetNbinsX()
     table.append("{:^70}".format("Histogram"))
@@ -624,7 +651,7 @@ def GetPurityHisto(hData, hEWK, kwargs, printValues=False, hideZeros=True):
     # For-loop: All histogram bins
     for j in range (1, nBinsX+1):
         
-        # Legeacy: No idea why the code snippet I copied used "j=j-1" instead of "i=j". 
+        # Legacy: No idea why the code snippet I copied used "j=j-1" instead of "i=j". 
         i = j
 
         # Declare variables
@@ -710,19 +737,14 @@ if __name__ == "__main__":
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
     OPTMODE      = ""
+    FOLDER       = "ForFakeBMeasurement"
     BATCHMODE    = True
-    PRECISION    = 3
     INTLUMI      = -1.0
-    SUBCOUNTERS  = False
-    LATEX        = False
-    MCONLY       = False
     URL          = False
-    NOERROR      = True
     DOEWK        = False
+    DOQCD        = False
     SAVEDIR      = None
     VERBOSE      = False
-    DOQCD        = False
-    FOLDER       = "ForFakeBMeasurement"
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -736,11 +758,20 @@ if __name__ == "__main__":
     parser.add_option("-b", "--batchMode", dest="batchMode", action="store_false", default=BATCHMODE, 
                       help="Enables batch mode (canvas creation does NOT generate a window) [default: %s]" % BATCHMODE)
 
+    parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE, 
+                      help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
+
+    parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
+                      help="List of datasets in mcrab to include")
+
+    parser.add_option("-e", "--excludeTasks", dest="excludeTasks", action="store", 
+                      help="List of datasets in mcrab to exclude")
+
+    parser.add_option("--folder", dest="folder", type="string", default = FOLDER,
+                      help="ROOT file folder under which all histograms to be plotted are located [default: %s]" % (FOLDER) )
+
     parser.add_option("--analysisName", dest="analysisName", type="string", default=ANALYSISNAME,
                       help="Override default analysisName [default: %s]" % ANALYSISNAME)
-
-    parser.add_option("--mcOnly", dest="mcOnly", action="store_true", default=MCONLY,
-                      help="Plot only MC info [default: %s]" % MCONLY)
 
     parser.add_option("--intLumi", dest="intLumi", type=float, default=INTLUMI,
                       help="Override the integrated lumi [default: %s]" % INTLUMI)
@@ -751,29 +782,17 @@ if __name__ == "__main__":
     parser.add_option("--dataEra", dest="dataEra", type="string", default=DATAERA, 
                       help="Override default dataEra [default: %s]" % DATAERA)
 
-    parser.add_option("--doEWK", dest="doEWK", action="store_true", default=DOEWK, 
-                      help="Plot EWK purity instead of Fake-B purity [default: %s]" % (DOEWK) )
-
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR, 
                       help="Directory where all pltos will be saved [default: %s]" % SAVEDIR)
 
     parser.add_option("--url", dest="url", action="store_true", default=URL, 
                       help="Don't print the actual save path the histogram is saved, but print the URL instead [default: %s]" % URL)
     
-    parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE, 
-                      help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
+    parser.add_option("--doEWK", dest="doEWK", action="store_true", default=DOEWK, 
+                      help="Plot EWK purity instead of Fake-B purity [default: %s]" % (DOEWK) )
 
     parser.add_option("--doQCD", dest="doQCD", action="store_true", default = DOQCD,
                       help="Plot QCD purity instead of Fake-B purity [default: %s]" % (DOQCD))
-
-    parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
-                      help="List of datasets in mcrab to include")
-
-    parser.add_option("-e", "--excludeTasks", dest="excludeTasks", action="store", 
-                      help="List of datasets in mcrab to exclude")
-
-    parser.add_option("--folder", dest="folder", type="string", default = FOLDER,
-                      help="ROOT file folder under which all histograms to be plotted are located [default: %s]" % (FOLDER) )
 
     (opts, parseArgs) = parser.parse_args()
 
