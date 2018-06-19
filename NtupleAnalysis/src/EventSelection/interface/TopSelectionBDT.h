@@ -214,10 +214,10 @@ public:
     const std::vector<Jet>& getSelectedCleanedTopsJet2() const { return fSelectedCleanedTopsJet2; }
     const std::vector<Jet>& getSelectedCleanedTopsBJet() const { return fSelectedCleanedTopsBJet; }
     const std::vector<float>& getSelectedCleanedTopsMVA() const { return fSelectedCleanedTopsMVA; }
-    const std::vector<Jet>& getNotSelectedCleanedTopsJet1() const { return fNotSelectedCleanedTopsJet1; }
-    const std::vector<Jet>& getNotSelectedCleanedTopsJet2() const { return fNotSelectedCleanedTopsJet2; }
-    const std::vector<Jet>& getNotSelectedCleanedTopsBJet() const { return fNotSelectedCleanedTopsBJet; }
-    const std::vector<float>& getNotSelectedCleanedTopsMVA() const { return fNotSelectedCleanedTopsMVA; }
+    const std::vector<Jet>& getAllCleanedTopsJet1() const { return fAllCleanedTopsJet1; }
+    const std::vector<Jet>& getAllCleanedTopsJet2() const { return fAllCleanedTopsJet2; }
+    const std::vector<Jet>& getAllCleanedTopsBJet() const { return fAllCleanedTopsBJet; }
+    const std::vector<float>& getAllCleanedTopsMVA() const { return fAllCleanedTopsMVA; }
     
     /// Obtain the b-tagging event weight 
     const double getTopTaggingScaleFactorEventWeight() const { return fTopTaggingScaleFactorEventWeight; }
@@ -276,10 +276,10 @@ public:
     std::vector<Jet> fSelectedCleanedTopsBJet;
     std::vector<float> fSelectedCleanedTopsMVA;
 
-    std::vector<Jet> fNotSelectedCleanedTopsJet1;
-    std::vector<Jet> fNotSelectedCleanedTopsJet2;
-    std::vector<Jet> fNotSelectedCleanedTopsBJet;
-    std::vector<float> fNotSelectedCleanedTopsMVA;
+    std::vector<Jet> fAllCleanedTopsJet1;
+    std::vector<Jet> fAllCleanedTopsJet2;
+    std::vector<Jet> fAllCleanedTopsBJet;
+    std::vector<float> fAllCleanedTopsMVA;
 
     // top-tagging scale factor event weight
     double fTopTaggingScaleFactorEventWeight;
@@ -342,6 +342,17 @@ private:
   SelectedTrijets getLdgOrSubldgTop(TrijetSelection myTops, string selectedTrijet);
   SelectedTrijets GetSelectedTopCandidate(TrijetSelection TopCand, int index);
   bool TopIsCrossCleaned(int Index, TrijetSelection TopCand, const std::vector<Jet>& bjets);
+  vector<genParticle> GetGenParticles(const vector<genParticle> genParticles, const int pdgId);
+  const genParticle GetLastCopy(const vector<genParticle> genParticles, const genParticle &p);
+  genParticle getLeadingSubleadingParton(const genParticle& quark0, const genParticle& quark1, string selectedParton);
+  vector<genParticle> GetWpartons( genParticle daughter, const Event& event);
+  double CalculateTopScaleFactor(const Jet& jet1, const Jet& jet2, const Jet& bjet, 
+				 const std::vector<Jet>& MCtrue_LdgJet, const std::vector<Jet>& MCtrue_SubldgJet, const std::vector<Jet>& MCtrue_Bjet, float mva);
+  bool IsGenuineTop(const Jet& trijetJet1, const Jet& trijetJet2, const Jet& trijetBJet,
+		    const std::vector<Jet>& MCtrue_LdgJet,  const std::vector<Jet>& MCtrue_SubldgJet, const std::vector<Jet>& MCtrue_Bjet);
+
+  
+
   // Input parameters
   const DirectionalCut<double> cfg_MVACut;
   const DirectionalCut<double> cfg_TopMassLowCut;
@@ -393,10 +404,10 @@ private:
   WrappedTH1 *hTopPt_NotSelectedCandidates;
   WrappedTH1 *hTopMultiplicity_NotSelectedCandidates;
 
-  WrappedTH1 *hTopBDT_NotSelectedCleanedCandidates;
-  WrappedTH1 *hTopMass_NotSelectedCleanedCandidates;
-  WrappedTH1 *hTopPt_NotSelectedCleanedCandidates;
-  WrappedTH1 *hTopMultiplicity_NotSelectedCleanedCandidates;
+  WrappedTH1 *hTopBDT_AllCleanedCandidates;
+  WrappedTH1 *hTopMass_AllCleanedCandidates;
+  WrappedTH1 *hTopPt_AllCleanedCandidates;
+  WrappedTH1 *hTopMultiplicity_AllCleanedCandidates;
 
   // Ldg in pt free b-jet
   WrappedTH1  *hTetrajetBJetPt;
