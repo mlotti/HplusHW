@@ -41,6 +41,7 @@ private:
   METSelection fMETSelection;
   // QuarkGluonLikelihoodRatio fQGLRSelection;
   TopSelectionBDT fTopSelection;
+  Count cTopTaggingSFCounter;
   // FatJetSelection fFatJetSelection;
   Count cSelected;
     
@@ -66,10 +67,11 @@ Hplus2tbAnalysis::Hplus2tbAnalysis(const ParameterSet& config, const TH1* skimCo
     fTauSelection(config.getParameter<ParameterSet>("TauSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
     fJetSelection(config.getParameter<ParameterSet>("JetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    cBTaggingSFCounter(fEventCounter.addCounter("b tag SF")),
+    cBTaggingSFCounter(fEventCounter.addCounter("b-tag SF")),
     fMETSelection(config.getParameter<ParameterSet>("METSelection")), // no subcounter in main counter
     // fQGLRSelection(config.getParameter<ParameterSet>("QGLRSelection")),// fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    cTopTaggingSFCounter(fEventCounter.addCounter("top-tag SF")),
     // fFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
     cSelected(fEventCounter.addCounter("Selected Events"))
 { }
@@ -238,6 +240,13 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   //================================================================================================
   if (0) std::cout << "=== All Selections" << std::endl;
   if (!topData.passedSelection()) return;
+
+  if (fEvent.isMC()) 
+    {
+      fEventWeight.multiplyWeight(topData.getTopTaggingScaleFactorEventWeight());
+    }
+  cTopTaggingSFCounter.increment();
+
 
 //  //================================================================================================
 //  // *) FatJet veto
