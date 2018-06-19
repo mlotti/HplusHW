@@ -10,7 +10,7 @@ USAGE:
 
 
 EXAMPLES:
-xOB./dcardGenerator_v2.py -x dcardDefault_h2tb_2016.py -d limits2016/ --h2tb
+./dcardGenerator_v2.py -x dcardDefault_h2tb_2016.py -d limits2016/ --h2tb
 
 
 LAST USED:
@@ -110,11 +110,11 @@ def getFakeBSystematics(myTTBarSystematics, OptionShapeSystematics, verbose=Fals
 # Options
 #================================================================================================  
 OptionTest                             = False
-OptionIncludeSystematics               = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
+OptionPaper                            = True  # (units, ..)
+OptionIncludeSystematics               = False # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionShapeSystematics                 = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionDoControlPlots                   = True  # [default: True]   (Produce control plots defined at end of this file)
-#MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
-MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
+MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
 DataCardName                           = "Hplus2tb_13TeV"
 OptionMassShape                        = "LdgTetrajetMass_AfterAllSelections" #"SubldgTetrajetMass_AfterAllSelections"
 #OptionMassShape                        = "SubldgTetrajetMass_AfterAllSelections"
@@ -391,7 +391,7 @@ bTagSF_Const    = Nuisance(id="CMS_eff_b"        , label="b tagging (Approx.)", 
 JES_Const       = Nuisance(id="CMS_scale_j"      , label="Jet Energy Scale (JES) (Approx.)"     , distr="lnN", function="Constant", value=0.03)
 JER_Const       = Nuisance(id="CMS_res_j"        , label="Jet Energy Resolution (JER) (Approx.)", distr="lnN", function="Constant", value=0.04)
 topPt_Const     = Nuisance(id="CMS_topPtReweight", label="Top pT reweighting (Approx.)", distr="lnN", function="Constant", value=0.25)
-topTag_Const    = Nuisance(id="CMS_topTagging"   , label="Top tagging (Approx.)", distr="lnN", function="Constant", value=0.10) #fixme
+topTag_Const    = Nuisance(id="CMS_topTagging"   , label="Top tagging (Approx.)", distr="lnN", function="Constant", value=0.10)
 
 # Cross section uncertainties
 ttbar_scale_Const    = Nuisance(id="CMS_scale_ttbar"    , label="TTbar XSection scale uncertainty", distr="lnN", function="Constant", value=tt_scale_down, upperValue=tt_scale_up)
@@ -540,6 +540,13 @@ if (nSysShapeComponents>0):
 #================================================================================================ 
 # Control plots
 #================================================================================================ 
+# https://twiki.cern.ch/twiki/bin/view/CMS/Internal/PubGuidelines#Figures_and_tables
+uPt   = "GeV/c"
+uMass = "GeV/c^{2}"
+if OptionPaper:
+    uPt   = "GeV"
+    uMass = "GeV"
+
 from HiggsAnalysis.LimitCalc.InputClasses import ControlPlotInput
 ControlPlots= []
 
@@ -547,7 +554,8 @@ hMET = ControlPlotInput(
     title            = "MET_AfterAllSelections",
     histoName        = "MET_AfterAllSelections",
     details          = { "xlabel"             : "E_{T}^{miss}",
-                         "ylabel"             : "Events / #DeltaE_{T}^{miss}",
+                         #"ylabel"             : "Events / #DeltaE_{T}^{miss}",
+                         "ylabel"             : "< Events / GeV >",
                          "divideByBinWidth"   : True,
                          "unit"               : "GeV",
                          "log"                : True,
@@ -562,7 +570,8 @@ hHT = ControlPlotInput(
     title            = "HT_AfterAllSelections",
     histoName        = "HT_AfterAllSelections",
     details          = { "xlabel"             : "H_{T}",
-                         "ylabel"             : "Events / #DeltaH_{T}",
+                         #"ylabel"             : "Events / #DeltaH_{T}",
+                         "ylabel"             : "< Events / GeV >",
                          "divideByBinWidth"   : True,
                          "unit"               : "GeV",
                          "log"                : True,
@@ -577,8 +586,9 @@ hMHT = ControlPlotInput(
     title            = "MHT_AfterAllSelections",
     histoName        = "MHT_AfterAllSelections",
     details          = { "xlabel"             : "MHT",
-                         "ylabel"             : "Events / #DeltaMHT",
-                         "divideByBinWidth"   : True,
+                         #"ylabel"             : "Events / #DeltaMHT",
+                         "ylabel"             : "< Events / GeV >",
+                          "divideByBinWidth"   : True,
                          "unit"               : "GeV",
                          "log"                : True,
                          "legendPosition"     : "NE",
@@ -591,9 +601,10 @@ hLdgTopPt = ControlPlotInput(
     title            = "LdgTrijetPt_AfterAllSelections",
     histoName        = "LdgTrijetPt_AfterAllSelections",
     details          = { "xlabel"             : "p_{T}",
-                         "ylabel"             : "Events / #Deltap_{T}",
+                         #"ylabel"             : "Events / #Deltap_{T}",
+                         "ylabel"             : "< Events / %s >" % (uPt),
                          "divideByBinWidth"   : True,
-                         "unit"               : "GeV/c",
+                         "unit"               : "%s" % (uPt),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
@@ -607,7 +618,7 @@ hLdgTopMass = ControlPlotInput(
     details          = { "xlabel"             : "m_{jjb}",
                          "ylabel"             : "Events",
                          "divideByBinWidth"   : False,
-                         "unit"               : "GeV/c^{2}",
+                         "unit"               : "%s" % (uMass),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
@@ -621,7 +632,7 @@ hLdgTopBjetPt = ControlPlotInput(
     details          = { "xlabel"             : "p_{T}",
                          "ylabel"             : "Events",
                          "divideByBinWidth"   : False,
-                         "unit"               : "GeV/c",
+                         "unit"               : "%s" % (uPt),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
@@ -643,14 +654,29 @@ hLdgTopBjetEta = ControlPlotInput(
                          },
     )
 
+hLdgTopBjetBdisc = ControlPlotInput(
+    title            = "LdgTrijetBjetBdisc_AfterAllSelections",
+    histoName        = "LdgTrijetBjetBdisc_AfterAllSelections",
+    details          = { "xlabel"             : "CSVv2 discriminator",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "",
+                         "log"                : True,
+                         "legendPosition"     : "NW",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-2, "ymaxfactor": 10, "xmin": 0.78, "xmax": 1.0} 
+                         },
+    )
+
 
 hLdgTopDijetPt = ControlPlotInput(
     title            = "LdgTrijetDijetPt_AfterAllSelections",
     histoName        = "LdgTrijetDijetPt_AfterAllSelections",
     details          = { "xlabel"             : "p_{T}",
-                         "ylabel"             : "Events / #Deltap_{T}",
+                         #"ylabel"             : "Events / #Deltap_{T}",
+                         "ylabel"             : "< Events / %s >" % (uPt),
                          "divideByBinWidth"   : True,
-                         "unit"               : "GeV/c",
+                         "unit"               : "%s" % (uPt),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
@@ -664,7 +690,7 @@ hLdgTopDijetMass = ControlPlotInput(
     details          = { "xlabel"             : "m_{jj}",
                          "ylabel"             : "Events",
                          "divideByBinWidth"   : False,
-                         "unit"               : "GeV/c^{2}",
+                         "unit"               : "%s" % (uMass),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
@@ -676,9 +702,10 @@ hSubldgTopPt = ControlPlotInput(
     title            = "SubldgTrijetPt_AfterAllSelections",
     histoName        = "SubldgTrijetPt_AfterAllSelections",
     details          = { "xlabel"             : "p_{T}",
-                         "ylabel"             : "Events / #Deltap_{T}",
+                         #"ylabel"             : "Events / #Deltap_{T}",
+                         "ylabel"             : "< Events / %s >" % (uPt),
                          "divideByBinWidth"   : True,
-                         "unit"               : "GeV/c",
+                         "unit"               : "%s" % (uPt),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
@@ -692,7 +719,7 @@ hSubldgTopMass = ControlPlotInput(
     details          = { "xlabel"             : "m_{jjb}",
                          "ylabel"             : "Events",
                          "divideByBinWidth"   : False,
-                         "unit"               : "GeV/c^{2}",
+                         "unit"               : "%s" % (uMass),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
@@ -704,9 +731,10 @@ hSubldgTopBjetPt = ControlPlotInput(
     title            = "SubldgTrijetBjetPt_AfterAllSelections",
     histoName        = "SubldgTrijetBjetPt_AfterAllSelections",
     details          = { "xlabel"             : "p_{T}",
-                         "ylabel"             : "Events / #Deltap_{T}",
+                         #"ylabel"             : "Events / #Deltap_{T}",
+                         "ylabel"             : "< Events / %s >" % (uPt),
                          "divideByBinWidth"   : True,
-                         "unit"               : "GeV/c",
+                         "unit"               : "%s" % (uPt),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
@@ -728,14 +756,29 @@ hSubldgTopBjetEta = ControlPlotInput(
                          },
     )
 
+hSubldgTopBjetBdisc = ControlPlotInput(
+    title            = "SubldgTrijetBjetBdisc_AfterAllSelections",
+    histoName        = "SubldgTrijetBjetBdisc_AfterAllSelections",
+    details          = { "xlabel"             : "CSVv2 discriminator",
+                         "ylabel"             : "Events",
+                         "divideByBinWidth"   : False,
+                         "unit"               : "",
+                         "log"                : True,
+                         "legendPosition"     : "NW",
+                         "ratioLegendPosition": "right",
+                         "opts"               : {"ymin": 1e-2, "ymaxfactor": 10, "xmin": 0.78, "xmax": 1.0} 
+                         },
+    )
+
 
 hSubldgTopDijetPt = ControlPlotInput(
     title            = "SubldgTrijetDijetPt_AfterAllSelections",
     histoName        = "SubldgTrijetDijetPt_AfterAllSelections",
     details          = { "xlabel"             : "p_{T}",
-                         "ylabel"             : "Events / #Deltap_{T}",
+                         #"ylabel"             : "Events / #Deltap_{T}",
+                         "ylabel"             : "< Events / %s >" % (uPt),
                          "divideByBinWidth"   : True,
-                         "unit"               : "GeV/c",
+                         "unit"               : "%s" % (uPt),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
@@ -749,7 +792,7 @@ hSubldgTopDijetMass = ControlPlotInput(
     details          = { "xlabel"             : "m_{jj}",
                          "ylabel"             : "Events",
                          "divideByBinWidth"   : False,
-                         "unit"               : "GeV/c^{2}",
+                         "unit"               : "%s" % (uMass),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
@@ -786,9 +829,10 @@ hTetrajetBjetPt = ControlPlotInput(
     title            = "TetrajetBjetPt_AfterAllSelections",
     histoName        = "TetrajetBjetPt_AfterAllSelections",
     details          = { "xlabel"             : "p_{T}",
-                         "ylabel"             : "Events / #Deltap_{T}",
+                         #"ylabel"             : "Events / #Deltap_{T}",
+                         "ylabel"             : "< Events / %s >" % (uPt),
                          "divideByBinWidth"   : True,
-                         "unit"               : "GeV/c",
+                         "unit"               : "%s" % (uPt),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
@@ -818,9 +862,10 @@ hLdgHiggsPt = ControlPlotInput(
     title            = "LdgTetrajetPt_AfterAllSelections",
     histoName        = "LdgTetrajetPt_AfterAllSelections",
     details          = { "xlabel"             : "p_{T}",
-                         "ylabel"             : "Events / #Deltap_{T}",
+                         #"ylabel"             : "Events / #Deltap_{T}",
+                         "ylabel"             : "< Events / %s >" % (uPt),
                          "divideByBinWidth"   : True,
-                         "unit"               : "GeV/c",
+                         "unit"               : "%s" % (uPt),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
@@ -834,15 +879,16 @@ hLdgHiggsMass = ControlPlotInput(
     title            = "LdgTetrajetMass_AfterAllSelections",
     histoName        = "LdgTetrajetMass_AfterAllSelections",
     details          = { "xlabel"             : "m_{jjbb}",
-                         "ylabel"             : "Events / #Deltam_{jjbb}",
+                         #"ylabel"             : "Events / #Deltam_{jjbb}",
+                         "ylabel"             : "< Events / %s >" % (uMass),
                          "divideByBinWidth"   : True,
-                         "unit"               : "GeV/c^{2}",
+                         "unit"               : "%s" % (uMass),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
                          "opts"               : {"ymin": 1e-2, "ymaxfactor": 10}#, "xmax": 3000.0} 
                          },
-    blindedRange=[200.0, 2500.0], # specify range min,max if blinding applies to this control plot
+    blindedRange=[0.0, 2500.0], # specify range min,max if blinding applies to this control plot
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
     # flowPlotCaption  = "m_{jjbb}", # Leave blank if you don't want to include the item to the selection flow plot    
     )
@@ -851,7 +897,8 @@ hVertices = ControlPlotInput(
     title            = "NVertices_AfterAllSelections",
     histoName        = "NVertices_AfterAllSelections",
     details          = { "xlabel"             : "vertex multiplicity",
-                         "ylabel"             : "Events / #Deltabin",
+                         #"ylabel"             : "Events / #Deltabin",
+                         "ylabel"             : "< Events >",
                          "divideByBinWidth"   : True,
                          "unit"               : "",
                          "log"                : True,
@@ -866,7 +913,8 @@ hQGLR  = ControlPlotInput(
     title            = "QGLR_AfterAllSelections",
     histoName        = "QGLR_AfterAllSelections",
     details          = { "xlabel"             : "QGLR",
-                         "ylabel"             : "Events",
+                         #"ylabel"             : "Events",
+                         "ylabel"             : "< Events >",
                          "divideByBinWidth"   : True,
                          "unit"               : "",
                          "log"                : True,
@@ -897,7 +945,7 @@ hNBjets = ControlPlotInput(
     histoName        = "NBjets_AfterAllSelections",
     details          = { "xlabel"             : "b-jets multiplicity",
                          "ylabel"             : "Events",
-                         "divideByBinWidth"   : True,
+                         "divideByBinWidth"   : False,
                          "unit"               : "",
                          "log"                : True,
                          "legendPosition"     : "NE",
@@ -911,9 +959,10 @@ hJetPt = ControlPlotInput(
     title            = "JetPt_AfterAllSelections",
     histoName        = "JetPt_AfterAllSelections",
     details          = { "xlabel"             : "p_{T}",
-                         "ylabel"             : "Events / #Deltap_{T}",
+                         #"ylabel"             : "Events / #Deltap_{T}",
+                         "ylabel"             : "< Events / %s >" % (uPt),
                          "divideByBinWidth"   : True,
-                         "unit"               : "GeV/c",
+                         "unit"               : "%s" % (uPt),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
@@ -940,9 +989,10 @@ hBJetPt = ControlPlotInput(
     title            = "BJetPt_AfterAllSelections",
     histoName        = "BJetPt_AfterAllSelections",
     details          = { "xlabel"             : "p_{T}",
-                         "ylabel"             : "Events / #Deltap_{T}",
+                         #"ylabel"             : "Events / #Deltap_{T}",
+                         "ylabel"             : "< Events / %s >" % (uPt),
                          "divideByBinWidth"   : True,
-                         "unit"               : "GeV/c",
+                         "unit"               : "%s" % (uPt),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
@@ -982,14 +1032,15 @@ hSubldgHiggsPt = ControlPlotInput(
     title            = "SubldgTetrajetPt_AfterAllSelections",
     histoName        = "SubldgTetrajetPt_AfterAllSelections",
     details          = { "xlabel"             : "p_{T}",
-                         "ylabel"             : "Events / #Deltap_{T}",
+                         #"ylabel"             : "Events / #Deltap_{T}",
+                         "ylabel"             : "< Events / %s >" % (uPt),
                          "divideByBinWidth"   : True,
-                         "unit"               : "GeV/c",
+                         "unit"               : "%s" % (uPt),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
                          "opts"               : {"ymin": 1e-2, "ymaxfactor": 10, "xmax": 900.0} },
-    blindedRange=[200.0, 900.0], # specify range min,max if blinding applies to this control plot      
+    blindedRange=[0.0, 900.0], # specify range min,max if blinding applies to this control plot      
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
     )
 
@@ -997,15 +1048,16 @@ hSubldgHiggsMass = ControlPlotInput(
     title            = "SubldgTetrajetMass_AfterAllSelections",
     histoName        = "SubldgTetrajetMass_AfterAllSelections",
     details          = { "xlabel"             : "m_{jjbb}",
-                         "ylabel"             : "Events / #Deltam_{jjbb}",
-                         "divideByBinWidth"   : True, #True
-                         "unit"               : "GeV/c^{2}",
+                         #"ylabel"             : "Events / #Deltam_{jjbb}",
+                         "ylabel"             : "< Events / %s >" % (uMass),
+                         "divideByBinWidth"   : True,
+                         "unit"               : "%s" % (uMass),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
                          "opts"               : {"ymin": 1e-2, "ymaxfactor": 10}#, "xmax": 3000.0}
                          },
-    blindedRange=[200.0, 3000.0], # specify range min,max if blinding applies to this control plot
+    blindedRange=[0.0, 3000.0], # specify range min,max if blinding applies to this control plot
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot    
     # flowPlotCaption  = "m_{jjbb}", # Leave blank if you don't want to include the item to the selection flow plot    
     )
@@ -1014,9 +1066,10 @@ hJet1Pt = ControlPlotInput(
     title            = "Jet1Pt_AfterAllSelections",
     histoName        = "Jet1Pt_AfterAllSelections",
     details          = { "xlabel"             : "p_{T}",
-                         "ylabel"             : "Events / #Deltap_{T}",
+                         #"ylabel"             : "Events / #Deltap_{T}",
+                         "ylabel"             : "< Events / %s >" % (uPt),
                          "divideByBinWidth"   : True,
-                         "unit"               : "GeV/c",
+                         "unit"               : "%s" % (uPt),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
@@ -1028,9 +1081,10 @@ hJet2Pt = ControlPlotInput(
     title            = "Jet2Pt_AfterAllSelections",
     histoName        = "Jet2Pt_AfterAllSelections",
     details          = { "xlabel"             : "p_{T}",
-                         "ylabel"             : "Events / #Deltap_{T}",
+                         #"ylabel"             : "Events / #Deltap_{T}",
+                         "ylabel"             : "< Events / %s >" % (uPt),
                          "divideByBinWidth"   : True,
-                         "unit"               : "GeV/c",
+                         "unit"               : "%s" % (uPt),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
@@ -1042,9 +1096,10 @@ hJet3Pt = ControlPlotInput(
     title            = "Jet3Pt_AfterAllSelections",
     histoName        = "Jet3Pt_AfterAllSelections",
     details          = { "xlabel"             : "p_{T}",
-                         "ylabel"             : "Events / #Deltap_{T}",
+                         #"ylabel"             : "Events / #Deltap_{T}",
+                         "ylabel"             : "< Events / %s >" % (uPt),
                          "divideByBinWidth"   : True,
-                         "unit"               : "GeV/c",
+                         "unit"               : "%s" % (uPt),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
@@ -1056,9 +1111,10 @@ hJet4Pt = ControlPlotInput(
     title            = "Jet4Pt_AfterAllSelections",
     histoName        = "Jet4Pt_AfterAllSelections",
     details          = { "xlabel"             : "p_{T}",
-                         "ylabel"             : "Events / #Deltap_{T}",
+                         #"ylabel"             : "Events / #Deltap_{T}",
+                         "ylabel"             : "< Events / %s >" % (uPt),
                          "divideByBinWidth"   : True,
-                         "unit"               : "GeV/c",
+                         "unit"               : "%s" % (uPt),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
@@ -1070,9 +1126,10 @@ hJet5Pt = ControlPlotInput(
     title            = "Jet5Pt_AfterAllSelections",
     histoName        = "Jet5Pt_AfterAllSelections",
     details          = { "xlabel"             : "p_{T}",
-                         "ylabel"             : "Events / #Deltap_{T}",
+                         #"ylabel"             : "Events / #Deltap_{T}",
+                         "ylabel"             : "< Events / %s >" % (uPt),
                          "divideByBinWidth"   : True,
-                         "unit"               : "GeV/c",
+                         "unit"               : "%s" % (uPt),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
@@ -1084,9 +1141,10 @@ hJet6Pt = ControlPlotInput(
     title            = "Jet6Pt_AfterAllSelections",
     histoName        = "Jet6Pt_AfterAllSelections",
     details          = { "xlabel"             : "p_{T}",
-                         "ylabel"             : "Events / #Deltap_{T}",
+                         #"ylabel"             : "Events / #Deltap_{T}",
+                         "ylabel"             : "< Events / %s >" % (uPt),
                          "divideByBinWidth"   : True,
-                         "unit"               : "GeV/c",
+                         "unit"               : "%s" % (uPt),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
@@ -1098,9 +1156,10 @@ hJet7Pt = ControlPlotInput(
     title            = "Jet7Pt_AfterAllSelections",
     histoName        = "Jet7Pt_AfterAllSelections",
     details          = { "xlabel"             : "p_{T}",
-                         "ylabel"             : "Events / #Deltap_{T}",
+                         #"ylabel"             : "Events / #Deltap_{T}",
+                         "ylabel"             : "< Events / %s >" % (uPt),
                          "divideByBinWidth"   : True,
-                         "unit"               : "GeV/c",
+                         "unit"               : "%s" % (uPt),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
@@ -1203,9 +1262,10 @@ hBJet1Pt = ControlPlotInput(
     title            = "BJet1Pt_AfterAllSelections",
     histoName        = "BJet1Pt_AfterAllSelections",
     details          = { "xlabel"             : "p_{T}",
-                         "ylabel"             : "Events / #Deltap_{T}",
+                         #"ylabel"             : "Events / #Deltap_{T}",
+                         "ylabel"             : "< Events / %s >" % (uPt),
                          "divideByBinWidth"   : True,
-                         "unit"               : "GeV/c",
+                         "unit"               : "%s" % (uPt),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
@@ -1216,10 +1276,11 @@ hBJet1Pt = ControlPlotInput(
 hBJet2Pt = ControlPlotInput(
     title            = "BJet2Pt_AfterAllSelections",
     histoName        = "BJet2Pt_AfterAllSelections",
-    details          = { "xlabel"             : "p_{T} / #Deltap_{T}",
-                         "ylabel"             : "Events",
+    details          = { "xlabel"             : "p_{T}",
+                         #"ylabel"             : "Events",
+                         "ylabel"             : "< Events / %s >" % (uPt),
                          "divideByBinWidth"   : True,
-                         "unit"               : "GeV/c",
+                         "unit"               : "%s" % (uPt),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
@@ -1231,9 +1292,10 @@ hBJet3Pt = ControlPlotInput(
     title            = "BJet3Pt_AfterAllSelections",
     histoName        = "BJet3Pt_AfterAllSelections",
     details          = { "xlabel"             : "p_{T}",
-                         "ylabel"             : "Events / #Deltap_{T}",
+                         #"ylabel"             : "Events / #Deltap_{T}",
+                         "ylabel"             : "< Events / %s >" % (uPt),
                          "divideByBinWidth"   : True,
-                         "unit"               : "GeV/c",
+                         "unit"               : "%s" % (uPt),
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
@@ -1286,33 +1348,35 @@ hBJet3Eta = ControlPlotInput(
 ControlPlots.append(hMET)
 ControlPlots.append(hHT)
 ControlPlots.append(hMHT)
-### ControlPlots.append(hQGLR) # to speed-up code
+# ControlPlots.append(hQGLR) # not used
 ControlPlots.append(hLdgTopPt)
 ControlPlots.append(hLdgTopMass)
-# ControlPlots.append(hLdgTopBjetPt)  # No agreement expected
-# ControlPlots.append(hLdgTopBjetEta) # No agreement expected
+ControlPlots.append(hLdgTopBjetPt)    # No agreement expected
+ControlPlots.append(hLdgTopBjetEta)   # No agreement expected
+ControlPlots.append(hLdgTopBjetBdisc) # No agreement expected
 ControlPlots.append(hLdgTopDijetPt)
 ControlPlots.append(hLdgTopDijetMass)
-### ControlPlots.append(hLdgTopR32)
+# ControlPlots.append(hLdgTopR32)
 ControlPlots.append(hTetrajetBjetPt)
 ControlPlots.append(hTetrajetBjetEta)
 ControlPlots.append(hLdgHiggsPt)
 ControlPlots.append(hLdgHiggsMass)
 ControlPlots.append(hVertices)
 ControlPlots.append(hNjets)
-### ControlPlots.append(hNBjets) #No agreement expected
+# ControlPlots.append(hNBjets) # No agreement expected
 ControlPlots.append(hJetPt)
 ControlPlots.append(hJetEta)
 ControlPlots.append(hBJetPt)
 ControlPlots.append(hBJetEta)
-### ControlPlots.append(hBtagDiscriminator) #No agreement expected
+# ControlPlots.append(hBtagDiscriminator)
 ControlPlots.append(hSubldgTopPt)
 ControlPlots.append(hSubldgTopMass)
-#ControlPlots.append(hSubldgTopBjetPt)  # No agreement expected
-#ControlPlots.append(hSubldgTopBjetEta) # No agreement expected
+ControlPlots.append(hSubldgTopBjetPt)
+ControlPlots.append(hSubldgTopBjetEta)
+ControlPlots.append(hSubldgTopBjetBdisc)
 ControlPlots.append(hSubldgTopDijetPt)
 ControlPlots.append(hSubldgTopDijetMass)
-### ControlPlots.append(hSubldgTopR32)
+# ControlPlots.append(hSubldgTopR32)
 ControlPlots.append(hSubldgHiggsPt)
 ControlPlots.append(hSubldgHiggsMass)
 ControlPlots.append(hJet1Pt)
@@ -1330,7 +1394,7 @@ ControlPlots.append(hJet5Eta)
 ControlPlots.append(hJet6Eta)
 ControlPlots.append(hJet7Eta)
 # No agreement expected
-if 0:
+if 1:
     ControlPlots.append(hBJet1Pt)
     ControlPlots.append(hBJet2Pt)
     ControlPlots.append(hBJet3Pt)
@@ -1343,4 +1407,10 @@ if OptionTest:
     ControlPlots.append(hLdgHiggsMass)
     ControlPlots.append(hTetrajetBjetPt)
     ControlPlots.append(hTetrajetBjetEta)
-    MassPoints = [180, 500]
+    ControlPlots.append(hLdgTopBjetPt)  # No agreement expected
+    ControlPlots.append(hLdgTopBjetEta) # No agreement expected
+    ControlPlots.append(hLdgTopBjetBdisc) # No agreement expected
+    ControlPlots.append(hSubldgTopBjetPt)  # No agreement expected
+    ControlPlots.append(hSubldgTopBjetEta) # No agreement expected
+    ControlPlots.append(hSubldgTopBjetBdisc) # No agreement expected
+    MassPoints = [500]

@@ -555,23 +555,27 @@ class DatacardColumn():
             mySystematics = dataset.Systematics(allShapes=True)
 
             if not dsetMgr.hasDataset(self.getDatasetMgrColumn()):
-                msg = "Cannot find merged dataset by key '%s' in multicrab dir! Did you forget to merge the root files with hplusMergeHistograms.py?" % self.getDatasetMgrColumn()
-                dsetMgr.PrintInfo()
-                raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
+                dset = self.getDatasetMgrColumn()
+                if not dsetMgr.hasDataset(dset):
+                    dset += "_ext1"
+                    if not dsetMgr.hasDataset(dset):
+                        msg = "Cannot find merged dataset by key '%s' in multicrab dir! Did you forget to merge the root files with hplusMergeHistograms.py?" % dset
+                        dsetMgr.PrintInfo()
+                        raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
 
             myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
 
             if myDatasetRootHisto.isMC():
                 # Set signal cross section for light H+
                 # Check the options in configuration
-                limitOnSigmaBr = False # use heavy signal model by default
+                limitOnSigmaBr = True # use heavy signal model by default
                 if hasattr(config, 'OptionLimitOnSigmaBr'):
-                    OptionLimitOnSigmaBr = config.OptionLimitOnSigmaBr
+                    limitOnSigmaBr = config.OptionLimitOnSigmaBr
                 limitOnBrBr = False # do not use light signal model by default
                 if hasattr(config, 'OptionLimitOnBrBr'):
-                    OptionLimitOnBrBr = config.OptionLimitOnBrBr
+                    limitOnBrBr = config.OptionLimitOnBrBr
                 # For light H+, use 13 TeV ttbar xsect from https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
-                if not limitOnSigmaBr and (limitOnBrBr or (self._label.startswith("HW") or self._label.startswith("HH") or self._label.startswith("WH"))):
+                if self._landsProcess <= 0 and not limitOnSigmaBr and (limitOnBrBr or (self._label.startswith("HW") or self._label.startswith("HH") or self._label.startswith("WH"))):
                      ttbarxsect = xsect.backgroundCrossSections.crossSection("TT", energy="13")
                      if abs(dsetMgr.getDataset(self.getDatasetMgrColumn()).getCrossSection() - ttbarxsect) > 0.0001:
                          print ShellStyles.WarningLabel()+"Forcing light H+ signal sample %s to 13 TeV ttbar cross section %f in DatacardColumn.py"%(self._label,ttbarxsect)

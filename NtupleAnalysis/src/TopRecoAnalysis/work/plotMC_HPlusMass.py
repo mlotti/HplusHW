@@ -26,6 +26,7 @@ import sys
 import math
 import copy
 import os
+import getpass
 from optparse import OptionParser
 
 import ROOT
@@ -282,7 +283,7 @@ def SavePlot(plot, saveName, saveDir, saveFormats = [".pdf", ".png"]):
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
         saveNameURL = savePath + ext
-        saveNameURL = saveNameURL.replace("/publicweb/s/skonstan/", "http://home.fnal.gov/~skonstan/")
+        saveNameURL = saveNameURL.replace(opts.saveDir, "http://home.fnal.gov/~%s/" % (getpass.getuser()))
         if opts.url:
             Print(saveNameURL, i==0)
         else:
@@ -369,6 +370,8 @@ def PlotMC(datasetsMgr, histo, intLumi):
         _units  = "GeV/c"
         _format = "%0.0f " + _units
         _opts["xmax"] = 800
+
+
 
     elif "trijetmass" in histo.lower():
         _rebinX = 1
@@ -499,6 +502,33 @@ def PlotMC(datasetsMgr, histo, intLumi):
     if "ldgfatjetpt" in histo.lower():
         _opts["xmax"] = 1000
 
+    if "deltar_w" in histo.lower():
+        _rebinX = 2
+        _xlabel = "#Delta R"
+        _format = "%0.1f "
+        _opts["xmax"] = 5
+        logY = True
+
+    if "ldgtrijet_deltar" in histo.lower():
+        _rebinX = 2
+        _xlabel = "#Delta R"
+        _format = "%0.1f "
+        _opts["xmax"] = 5
+        logY = True
+
+    if "higgstop_deltar" in histo.lower():
+        _rebinX = 2
+        _xlabel = "#Delta R"
+        _format = "%0.1f "
+        _opts["xmax"] = 5
+        logY = True
+
+
+    if "allfatjet" in histo.lower():
+        _rebinX = 2
+        _units  = "GeV/c"
+        _format = "%0.0f " + _units
+        _opts["xmax"] = 800
 
 
     else:
@@ -506,7 +536,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
 
 
     if opts.normaliseToOne:
-        logY    = False
+        logY    = True
         Ylabel  = "Arbitrary Units / %s" % (_format)
     else:
         logY    = True
@@ -607,7 +637,7 @@ def SavePlot(plot, saveName, saveDir, saveFormats = [".pdf", ".png"]):
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
         saveNameURL = savePath + ext
-        saveNameURL = saveNameURL.replace("/publicweb/s/skonstan/", "http://home.fnal.gov/~skonstan/")
+        saveNameURL = saveNameURL.replace(opts.saveDir, "http://home.fnal.gov/~%s/" % (getpass.getuser()))
         if opts.url:
             Print(saveNameURL, i==0)
         else:
@@ -644,7 +674,7 @@ if __name__ == "__main__":
     OPTMODE      = ""
     BATCHMODE    = True
     PRECISION    = 3
-    SIGNALMASS   = [500]
+    SIGNALMASS   = [500, 400]
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False
@@ -656,15 +686,7 @@ if __name__ == "__main__":
 #        DIR = MVACUT
 #    else:
 #        DIR = MVACUT+ "/normToLumi/"
-
-    SAVEDIR = "/publicweb/s/skonstan/" + ANALYSISNAME
-#    SAVEDIR      = "/publicweb/s/skonstan/" + ANALYSISNAME + "/TT/"   #save TT plots
-#    SAVEDIR      = "/publicweb/s/skonstan/" + ANALYSISNAME + "/"+ MVACUT+ "/noQCD/"   #save noQCD plots
-#    SAVEDIR      = "/publicweb/s/skonstan/" + ANALYSISNAME + "/"+ MVACUT+ "/normToLumi/"   #save lumi plots
-#    SAVEDIR      = "/publicweb/s/skonstan/" + ANALYSISNAME + "/"+ MVACUT 
-#    SAVEDIR      = "/publicweb/s/skonstan/" + ANALYSISNAME + "/normToLumi/"   #save Lumi plots
-#    SAVEDIR      = "/publicweb/s/skonstan/" + ANALYSISNAME + "/test/"   #save test plots
-#    SAVEDIR      = "/publicweb/s/skonstan/" + ANALYSISNAME 
+    SAVEDIR      = "/publicweb/%s/%s/%s" % (getpass.getuser()[0], getpass.getuser(), ANALYSISNAME)
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
     NORMALISE    = False

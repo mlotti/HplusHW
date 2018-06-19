@@ -2,14 +2,15 @@
     "title"           : "AngularPlane",
     "histogram"       : "AngularCuts_BackToBack/AngularCuts_BackToBack_jet1",
     "outputdir"       : "Plots",
-    "samples"         : ["HplusTB_M200","HplusTB_M500"],
-    "rebinx"          : 5,
-    "rebiny"          : 5,
+    "samples"         : ["HplusTB_M200","HplusTB_M500","HplusTB_M1000","HplusTB_M2000","TT"],
+    "rebinX"          : 1,
+    "rebinY"          : 1,
     "xlabel"          : "#Delta#phi(#tau,E_{T}^{miss}) (^{o})",
     "ylabel"          : "#Delta#phi(jet_{1},E_{T}^{miss}) (^{o})",
     "divideByBinWidth": "False",
     "logy"            : "False",
     "logx"            : "False",
-    "drawStyle"       : "CONT1Z",
-    "opts"            : {"ymin": 0, "ymax": 180}
+    "drawStyle"       : "CONT4Z",
+    "opts"            : {"ymax": 180},
+    "useBeachPalette" : "True"
 }

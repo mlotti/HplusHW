@@ -614,6 +614,8 @@ class QCDNormalizationManagerBase:
         self._qcdNormalizationError = {}
         self._ewkFakesNormalization = {}
         self._ewkFakesNormalizationError = {}
+        self._qcdmcNormalization = {}
+        self._qcdmcNormalizationError = {}
         self._combinedFakesNormalization = {}
         self._combinedFakesNormalizationError = {}
         self._combinedFakesNormalizationUp = {}
@@ -720,13 +722,25 @@ class QCDNormalizationManagerBase:
         for k in self._qcdNormalization:
             s += '    "%s": %f,\n'%(k, self._qcdNormalization[k])
         s += "}\n"
+        s += "QCDNormalizationError = {\n"
+        for k in self._qcdNormalizationError:
+            s += '    "%s": %f,\n'%(k, self._qcdNormalizationError[k])
+        s += "}\n"
         s += "EWKFakeTausNormalization = {\n"
         for k in self._ewkFakesNormalization:
             s += '    "%s": %f,\n'%(k, self._ewkFakesNormalization[k])
         s += "}\n"
+        s += "EWKFakeTausNormalizationError = {\n"
+        for k in self._ewkFakesNormalizationError:
+            s += '    "%s": %f,\n'%(k, self._ewkFakesNormalizationError[k])
+        s += "}\n"
         s += "QCDPlusEWKFakeTausNormalization = {\n"
         for k in self._combinedFakesNormalization:
             s += '    "%s": %f,\n'%(k, self._combinedFakesNormalization[k])
+        s += "}\n"
+        s += "QCDPlusEWKFakeTausNormalizationError = {\n"
+        for k in self._combinedFakesNormalizationError:
+            s += '    "%s": %f,\n'%(k, self._combinedFakesNormalizationError[k])
         s += "}\n"
         s += "QCDPlusEWKFakeTausNormalizationSystFakeWeightingVarDown = {\n"
         for k in self._combinedFakesNormalizationDown:
@@ -736,6 +750,16 @@ class QCDNormalizationManagerBase:
         for k in self._combinedFakesNormalizationUp:
             s += '    "%s": %f,\n'%(k, self._combinedFakesNormalizationUp[k])
         s += "}\n"
+        if len(self._qcdmcNormalization) > 0:
+            s += "##QCDMCNormalization = {\n"
+            for k in self._qcdmcNormalization:
+                s += '##    "%s": %f,\n'%(k, self._qcdmcNormalization[k])
+            s += "##}\n"
+            s += "##QCDMCNormalizationError = {\n"
+            for k in self._qcdmcNormalizationError:
+                s += '##    "%s": %f,\n'%(k, self._qcdmcNormalizationError[k])
+            s += "##}\n"
+        s += "\n"
         s += "# Log of fake rate calculation:\n"
         fOUT = open(filename,"w")
         fOUT.write(s)
@@ -756,7 +780,7 @@ class QCDNormalizationManagerBase:
                 g.SetPoint(i, i+0.5, valueDict[binList[i]])
                 g.SetPointEYhigh(i, upDict[binList[i]])
                 g.SetPointEYlow(i, downDict[binList[i]])
-            g.SetMarkerSize(1.6)
+            g.SetMarkerSize(0.6)
             g.SetMarkerStyle(markerStyle)
             g.SetLineColor(color)
             g.SetLineWidth(2)
@@ -767,16 +791,56 @@ class QCDNormalizationManagerBase:
         keys = self._qcdNormalization.keys()
         keys.sort()
         for k in keys:
-            if "lt" in k:
-                keyList.append(k)
+            if "Etalt" in k and not k in keyList:
+                if "Ptlt" in k:
+                    keyList.append(k)
         for k in keys:
-            if "eq" in k:
-                keyList.append(k)
+            if "Etalt" in k and not k in keyList:
+                if "Pteq" in k:
+                    keyList.append(k)
         for k in keys:
-            if "gt" in k:
-                keyList.append(k)
-        if "Inclusive" in keys:
+            if "Etalt" in k and not k in keyList:
+                if "Ptgt" in k:
+                    keyList.append(k)
+
+        for k in keys:
+            if "Etaeq" in k and not k in keyList:
+                if "Ptlt" in k:
+                    keyList.append(k)
+        for k in keys:
+            if "Etaeq" in k and not k in keyList:
+                if "Pteq" in k:
+                    keyList.append(k)
+        for k in keys:
+            if "Etaeq" in k and not k in keyList:
+                if "Ptgt" in k:
+                    keyList.append(k)
+
+        for k in keys:
+            if "Etagt" in k and not k in keyList:
+                if "Ptlt" in k:
+                    keyList.append(k)
+        for k in keys:
+            if "Etagt" in k and not k in keyList:
+                if "Pteq" in k:
+                    keyList.append(k)
+        for k in keys:
+            if "Etagt" in k and not k in keyList:
+                if "Ptgt" in k:
+                    keyList.append(k)
+
+#        for k in keys:
+#            if "lt" in k:
+#                keyList.append(k)
+#        for k in keys:
+#            if "eq" in k:
+#                keyList.append(k)
+#        for k in keys:
+#            if "gt" in k:
+#                keyList.append(k)
+        if "Inclusive" in keys and "Inclusive" not in keyList:
             keyList.append("Inclusive")
+
         # Create graphs
         gQCD = makeGraph(24, ROOT.kRed, keyList, self._qcdNormalization, self._qcdNormalizationError, self._qcdNormalizationError)
         gFake = makeGraph(27, ROOT.kBlue, keyList, self._ewkFakesNormalization, self._ewkFakesNormalizationError, self._ewkFakesNormalizationError)
@@ -966,6 +1030,7 @@ class QCDNormalizationManagerBase:
         lines.append("   Normalization factor (QCD): %f +- %f"%(self._qcdNormalization[binLabel], self._qcdNormalizationError[binLabel]))
         lines.append("   Normalization factor (EWK fake taus): %f +- %f"%(self._ewkFakesNormalization[binLabel], self._ewkFakesNormalizationError[binLabel]))
         lines.append("   Combined norm. factor: %f +- %f"%(self._combinedFakesNormalization[binLabel], self._combinedFakesNormalizationError[binLabel]))
+        lines.append("   Normalization factor (QCDMC, not to be used, only for cross check): %f +- %f"%(self._qcdmcNormalization[binLabel], self._qcdmcNormalizationError[binLabel]))
         self._commentLines.extend(lines)
         return lines
 
@@ -1068,6 +1133,20 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
         self._ewkFakesNormalization[binLabel] = ewkFakesNormFactor
         self._ewkFakesNormalizationError[binLabel] = ewkFakesNormFactorError
 
+        #===== Normalization factor for QCD MC (not used, only for cross checking)
+        qcdmcNormFactor = None
+        qcdmcNormFactorError = None
+        nQCDMCBaseline = 0
+        nQCDMCInverted = 0
+        if "QCDMC_Baseline" in self._templates.keys():
+            nQCDMCBaseline = self._templates["QCDMC_Baseline"].getNeventsFromHisto(False)
+            nQCDMCInverted = self._templates["QCDMC_Inverted"].getNeventsFromHisto(False)
+            if nQCDMCInverted > 0.0:
+                qcdmcNormFactor = nQCDMCBaseline/nQCDMCInverted
+                qcdmcNormFactorError = errorPropagation.errorPropagationForDivision(nQCDMCBaseline, self._templates["QCDMC_Baseline"].getNeventsErrorFromHisto(False),
+                                                                                nQCDMCInverted, self._templates["QCDMC_Inverted"].getNeventsErrorFromHisto(False))
+            self._qcdmcNormalization[binLabel] = qcdmcNormFactor
+            self._qcdmcNormalizationError[binLabel] = qcdmcNormFactorError
 
 # Unit tests
 if __name__ == "__main__":

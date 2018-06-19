@@ -145,8 +145,7 @@ def main():
     # allSelections.TopSelection.ChiSqrCutValue = 100.0
     # allSelections.BJetSelection.numberOfBJetsCutValue = 0
     # allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
-
-    
+    allSelections.TopSelectionBDT.WeightFile             = "TopRecoTree_180523_DeltaR0p3_DeltaPtOverPt0p32_TopPtReweighting_BDTG.weights.xml"
     # ================================================================================================
     # Add Analysis Variations
     # ================================================================================================

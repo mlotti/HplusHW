@@ -40,7 +40,12 @@ TopSelectionBDT::Data::Data()
   fAllTopsJet1(),
   fAllTopsJet2(),
   fAllTopsBJet(),
-  fAllTopsMVA()
+  fAllTopsMVA(),
+  fSelectedCleanedTopsJet1(),
+  fSelectedCleanedTopsJet2(),
+  fSelectedCleanedTopsBJet(),
+  fSelectedCleanedTopsMVA()
+
 { }
 
 TopSelectionBDT::Data::~Data() { }
@@ -390,7 +395,8 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   TrijetSelection fSelectedCleanedTops;
 
   // For-loop: All b-jets
-  for (auto& bjet: jets)
+  //for (auto& bjet: jets) // Before 01 June 2018
+  for (auto& bjet: bjets) // After 01 June 2018
     {
       int index1 = 0;
 
@@ -498,16 +504,34 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   fSelectedTops = SortInMVAvalue(fSelectedTops);
   hTopMultiplicity_SelectedCandidates->Fill(fSelectedTops.MVA.size());
   // For-loop: All (pt-sorted) selected tops
+
+  
+  //Debug: Check cleaned top candidates
+  bool printCleanedTops = false;
+
+  if (printCleanedTops){
+    std::cout << "\n" << std::endl;
+    std::cout<<"Entry: "<<cSubAll.value()<<std::endl;
+    std::cout << std::string(10*10, '=') << std::endl;                                                                                                                                      
+    std::cout << std::setw(12) << "Jet1 indx "  << std::setw(12) << "Jet2 indx"<< std::setw(12) << "Bjet indx"   << std::setw(12) << "BDT"   << std::setw(12) << "is cleaned"  << std::endl;
+    std::cout << std::string(10*10, '=') << std::endl;                                                                                                                                      
+  }
   for (size_t i = 0; i < fSelectedTops.MVA.size(); i++)
     {
-
       // Fill Histos (selected candidates)
       hTopBDT_SelectedCandidates -> Fill(fSelectedTops.MVA.at(i) );
       hTopMass_SelectedCandidates-> Fill(fSelectedTops.TrijetP4.at(i).M());
       hTopPt_SelectedCandidates  -> Fill(fSelectedTops.TrijetP4.at(i).pt());
-
+      
       // Is this top cross-cleaned (b-jet availability check, object sharing with higher BDT value)
       bool isCrossCleaned = TopIsCrossCleaned(i, fSelectedTops, bjets);
+
+      if (printCleanedTops){
+      std::cout << std::setw(12) << fSelectedTops.Jet1.at(i).index()      << std::setw(12)   << fSelectedTops.Jet2.at(i).index()   << std::setw(12)   << fSelectedTops.BJet.at(i).index()
+		<< std::setw(12) << fSelectedTops.MVA.at(i)               << std::setw(12)   << isCrossCleaned
+		<<  std::endl;
+      
+      }
       if (!isCrossCleaned) continue;
       cTopsPassCrossCleanCut.increment();
 
@@ -524,6 +548,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
       hTopMass_SelectedCleanedCandidates-> Fill(fSelectedTops.TrijetP4.at(i).M());
       hTopPt_SelectedCleanedCandidates  -> Fill(fSelectedTops.TrijetP4.at(i).pt());
     }
+
   hTopMultiplicity_SelectedCleanedCandidates->Fill(fSelectedCleanedTops.MVA.size());
 
   //================================================================================================  
@@ -630,7 +655,15 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
       output.fAllTopsBJet.push_back(fAllTops.BJet.at(i));
       output.fAllTopsMVA.push_back(fAllTops.MVA.at(i));
     }
-	
+
+  for (size_t i = 0; i < fSelectedCleanedTops.MVA.size(); i++)
+    {
+      output.fSelectedCleanedTopsJet1.push_back(fSelectedCleanedTops.Jet1.at(i));
+      output.fSelectedCleanedTopsJet2.push_back(fSelectedCleanedTops.Jet2.at(i));
+      output.fSelectedCleanedTopsBJet.push_back(fSelectedCleanedTops.BJet.at(i));
+      output.fSelectedCleanedTopsMVA.push_back(fSelectedCleanedTops.MVA.at(i));
+    }
+
    //================================================================================================
   // Increment counters
   //================================================================================================
@@ -918,7 +951,9 @@ bool TopSelectionBDT::TopIsCrossCleaned(int Index, TrijetSelection TopCand, cons
 	  bool bMatchedJet1 = isMatchedJet(TopCand.Jet1.at(Index), TopCand, i);
 	  bool bMatchedJet2 = isMatchedJet(TopCand.Jet2.at(Index), TopCand, i);
 	  bool bMatchedBJet = isMatchedJet(TopCand.BJet.at(Index), TopCand, i);
-	  if (bMatchedJet1 || bMatchedJet2 || bMatchedBJet) return false;
+	  bool sharedJets = bMatchedJet1 || bMatchedJet2 || bMatchedBJet;
+	  //if (bMatchedJet1 || bMatchedJet2 || bMatchedBJet) return false;
+	  if (sharedJets && TopIsCrossCleaned(i, TopCand, bjets)) return false;
 	}
     }
   

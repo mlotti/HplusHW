@@ -307,7 +307,8 @@ def GetHistoKwargs(h, opts):
         kwargs["cutBoxY"] = cutBoxY
         ptBins = [b for b in range(0, 100, 10)]
         ptBins.extend([b for b in range(100, 500, 20)])
-        kwargs["rebinX"]  = ptBins #[b for b in range(0, 600, 20)]
+        #kwargs["rebinX"]  = ptBins #[b for b in range(0, 600, 20)]
+        kwargs["rebinX"]  = 2 #iro
     return kwargs
 
 

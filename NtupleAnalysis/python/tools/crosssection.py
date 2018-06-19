@@ -274,11 +274,9 @@ backgroundCrossSections = CrossSectionList(
             "8": 245.8, # [10]
             "13": 831.76, # [18] 
             }),
-    # Marina
     CrossSection("TTGJets", {            
-            "13": 1.0, # FIXME
+            "13": 1.0, # FIXME (Marina)
             }),
-    
     CrossSection("TT_fsrdown", {
             "13": 831.76, # [18] 
             }),
@@ -354,11 +352,6 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("TT_QCDbasedCRTune_erdON", {
             "13": 831.76, # [18] 
             }),
-    
-    
-
-    #========================================================== Marina
-    
     CrossSection("TTJets_HT600to800", {
             "13": 0.0, 
             }),
