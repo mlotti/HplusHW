@@ -423,7 +423,7 @@ def main(opts):
         
         # List of TDirectoryFile (_CRone, _CRtwo, _VR, _SR)
         tdirs  = ["LdgTrijetPt_", "LdgTrijetMass_"  , "TetrajetBJetPt_", "TetrajetBJetEta_", "LdgTetrajetPt_", "LdgTetrajetMass_"] 
-        region = ["CRone", "CRtwo", "SR", "VR"] #iro
+        region = ["CRone", "CRtwo", "SR", "VR"]
         hList  = []
         for d in tdirs:
             for r in region:
@@ -669,17 +669,18 @@ def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
             rFakeB_SR.Scale(1.0/rFakeB_SR.Integral())
 
         # Apply histogram styles          
+        doAllRegions = False #iro
         styles.getABCDStyle("CRone").apply(rFakeB_CRone)
         styles.getABCDStyle("CRtwo").apply(rFakeB_CRtwo)
-        if 0:
+        if doAllRegions:
             styles.getABCDStyle("VR").apply(rFakeB_VR)
             styles.getABCDStyle("SR").apply(rFakeB_SR)
         
         # Create the plot
-        if 0:
+        if doAllRegions:
             p = plots.ComparisonManyPlot(rFakeB_CRone, [rFakeB_VR, rFakeB_SR, rFakeB_CRtwo], saveFormats=[]) 
         else:
-            p = plots.ComparisonManyPlot(rFakeB_CRone, [rFakeB_CRtwo], saveFormats=[]) #iro
+            p = plots.ComparisonManyPlot(rFakeB_CRone, [rFakeB_CRtwo], saveFormats=[])
         p.setLuminosity(opts.intLumi)
     
         # Set draw/legend style
@@ -687,19 +688,25 @@ def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
         p.histoMgr.setHistoLegendStyle(hName1, "LP")
         p.histoMgr.setHistoDrawStyle(hName2, "HIST")
         p.histoMgr.setHistoLegendStyle(hName2, "F")
-        if 0:
+        if doAllRegions:
             p.histoMgr.setHistoDrawStyle(hName3, "AP")
             p.histoMgr.setHistoLegendStyle(hName3, "LP")
             p.histoMgr.setHistoDrawStyle(hName4, "AP")
             p.histoMgr.setHistoLegendStyle(hName4, "LP")
         
         # Set legend labels
-        p.histoMgr.setHistoLegendLabelMany({
-                hName1 : "CR1",
-                hName2 : "CR2",
-                #hName3 : "VR",
-                #hName4 : "SR",
-                })
+        if doAllRegions:
+            p.histoMgr.setHistoLegendLabelMany({
+                    hName1 : "CR1",
+                    hName2 : "CR2",
+                    hName3 : "VR",
+                    hName4 : "SR",
+                    })
+        else:
+            p.histoMgr.setHistoLegendLabelMany({
+                    hName1 : "CR1",
+                    hName2 : "CR2",
+                    })
 
         # Draw the plot and save it
         if bin == "Inclusive":
