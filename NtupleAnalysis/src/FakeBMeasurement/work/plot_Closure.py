@@ -642,6 +642,8 @@ if __name__ == "__main__":
     NORMALISE    = True
     FOLDER       = "ForFakeBMeasurement"
     RATIOTYPE    = "errorPropagation" # "errorPropagation", "errorScale", "binomial"
+    SIGNALMASS   = 500
+    USEMC        = False
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -691,6 +693,11 @@ if __name__ == "__main__":
     parser.add_option("--ratioType", dest="ratioType", type="string", default = RATIOTYPE,
                       help="Error type for to be used for the ratio [default: %s]" % (RATIOTYPE) )
 
+    parser.add_option("--signalMass", dest="signalMass", type=int, default=SIGNALMASS,
+                      help="Mass value of signal to use [default: %s]" % SIGNALMASS)
+
+    parser.add_option("--useMC", dest="useMC", action="store_true", default=USEMC, 
+                      help="Use QCD MC instead of QCD=Data-EWK? [default: %s]" % (USEMC) )
 
     (opts, parseArgs) = parser.parse_args()
 

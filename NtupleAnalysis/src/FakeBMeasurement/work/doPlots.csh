@@ -22,10 +22,10 @@ set PSEUDO_MCRAB_DIR = ${1}
 ./plot_ClosureBinned.py -m $PSEUDO_MCRAB_DIR -n --url --ratio
 ###./plot_ClosureBinnedBuffer.py -m $PSEUDO_MCRAB_DIR -n --url --ratio
 ###./plot_FailedBJet.py -m  $PSEUDO_MCRAB_DIR --url
-./plot_Purity.py -m $PSEUDO_MCRAB_DIR --url                 # FakeB
-#./plot_Purity.py -m $PSEUDO_MCRAB_DIR --url --doEWK        # GenuineB
-./plot_Purity.py -m $PSEUDO_MCRAB_DIR --url --doQCD         # QCD
-./plot_Purity.py -m $PSEUDO_MCRAB_DIR --url --doQCD --doEWK # EWK
+./plot_Purity.py -m $PSEUDO_MCRAB_DIR --url --type FakeB
+./plot_Purity.py -m $PSEUDO_MCRAB_DIR --url --type GenuineB
+./plot_Purity.py -m $PSEUDO_MCRAB_DIR --url --type QCD
+./plot_Purity.py -m $PSEUDO_MCRAB_DIR --url --type EWK
 ./plot_DataMC.py -m $PSEUDO_MCRAB_DIR --folder counters/weighted --url
 ./getABCD_TF.py -m $PSEUDO_MCRAB_DIR --url --histoKey TetrajetBJetPt
 ./getABCD_TF.py -m $PSEUDO_MCRAB_DIR --url --histoKey TetrajetBJetEta
