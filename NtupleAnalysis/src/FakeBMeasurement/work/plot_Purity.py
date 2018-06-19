@@ -234,10 +234,7 @@ def main(opts):
                         PlotHistoGraph(hgQCD, kwargs)
 
             msg   = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % i, "/", "%s:" % (len(myHistos)), h)
-            if i>1:
-                break
             Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), i==1)
-            
             PlotHistoGraphs(hGraphList, kwargs)
     
     Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)
