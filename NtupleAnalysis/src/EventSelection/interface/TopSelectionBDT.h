@@ -5,6 +5,7 @@
 #include "EventSelection/interface/BaseSelection.h"
 #include "EventSelection/interface/JetSelection.h"
 #include "EventSelection/interface/BJetSelection.h"
+#include "EventSelection/interface/TopTagSFCalculator.h"
 #include "DataFormat/interface/Jet.h"
 #include "Framework/interface/EventCounter.h"
 #include "Tools/interface/DirectionalCut.h"
@@ -201,6 +202,10 @@ public:
     const std::vector<Jet>& getSelectedTopsJet2() const { return fSelectedTopsJet2; }
     const std::vector<Jet>& getSelectedTopsBJet() const { return fSelectedTopsBJet; }
     const std::vector<float>& getSelectedTopsMVA() const { return fSelectedTopsMVA; }
+    const std::vector<Jet>& getNotSelectedTopsJet1() const { return fNotSelectedTopsJet1; }
+    const std::vector<Jet>& getNotSelectedTopsJet2() const { return fNotSelectedTopsJet2; }
+    const std::vector<Jet>& getNotSelectedTopsBJet() const { return fNotSelectedTopsBJet; }
+    const std::vector<float>& getNotSelectedTopsMVA() const { return fNotSelectedTopsMVA; }
     const std::vector<Jet>& getAllTopsJet1() const { return fAllTopsJet1; }
     const std::vector<Jet>& getAllTopsJet2() const { return fAllTopsJet2; }
     const std::vector<Jet>& getAllTopsBJet() const { return fAllTopsBJet; }
@@ -209,6 +214,13 @@ public:
     const std::vector<Jet>& getSelectedCleanedTopsJet2() const { return fSelectedCleanedTopsJet2; }
     const std::vector<Jet>& getSelectedCleanedTopsBJet() const { return fSelectedCleanedTopsBJet; }
     const std::vector<float>& getSelectedCleanedTopsMVA() const { return fSelectedCleanedTopsMVA; }
+    const std::vector<Jet>& getNotSelectedCleanedTopsJet1() const { return fNotSelectedCleanedTopsJet1; }
+    const std::vector<Jet>& getNotSelectedCleanedTopsJet2() const { return fNotSelectedCleanedTopsJet2; }
+    const std::vector<Jet>& getNotSelectedCleanedTopsBJet() const { return fNotSelectedCleanedTopsBJet; }
+    const std::vector<float>& getNotSelectedCleanedTopsMVA() const { return fNotSelectedCleanedTopsMVA; }
+    
+    /// Obtain the b-tagging event weight 
+    const double getTopTaggingScaleFactorEventWeight() const { return fTopTaggingScaleFactorEventWeight; }
 
     friend class TopSelectionBDT;
 
@@ -249,6 +261,11 @@ public:
     std::vector<Jet> fSelectedTopsBJet;
     std::vector<float> fSelectedTopsMVA;
 
+    std::vector<Jet> fNotSelectedTopsJet1;
+    std::vector<Jet> fNotSelectedTopsJet2;
+    std::vector<Jet> fNotSelectedTopsBJet;
+    std::vector<float> fNotSelectedTopsMVA;
+
     std::vector<Jet> fAllTopsJet1;
     std::vector<Jet> fAllTopsJet2;
     std::vector<Jet> fAllTopsBJet;
@@ -258,6 +275,14 @@ public:
     std::vector<Jet> fSelectedCleanedTopsJet2;
     std::vector<Jet> fSelectedCleanedTopsBJet;
     std::vector<float> fSelectedCleanedTopsMVA;
+
+    std::vector<Jet> fNotSelectedCleanedTopsJet1;
+    std::vector<Jet> fNotSelectedCleanedTopsJet2;
+    std::vector<Jet> fNotSelectedCleanedTopsBJet;
+    std::vector<float> fNotSelectedCleanedTopsMVA;
+
+    // top-tagging scale factor event weight
+    double fTopTaggingScaleFactorEventWeight;
 
   };
   
@@ -319,8 +344,10 @@ private:
   bool TopIsCrossCleaned(int Index, TrijetSelection TopCand, const std::vector<Jet>& bjets);
   // Input parameters
   const DirectionalCut<double> cfg_MVACut;
-  const DirectionalCut<double> cfg_TopMassCut;
-  const DirectionalCut<double> cfg_WMassCut;
+  const DirectionalCut<double> cfg_TopMassLowCut;
+  const DirectionalCut<double> cfg_TopMassUppCut;
+  const DirectionalCut<double> cfg_WMassLowCut;
+  const DirectionalCut<double> cfg_WMassUppCut;
   const DirectionalCut<double> cfg_CSV_bDiscCut;
 
   // Event counter for passing selection
@@ -334,25 +361,42 @@ private:
   Count cSubPassedFreeBjetCut;
   //
   Count cTopsAll;
-  Count cTopsPassTopMassCut;
-  Count cTopsPassWMassCut;
+  Count cTopsPassTopMassLowCut;
+  Count cTopsPassTopMassUppCut;
+  Count cTopsPassWMassLowCut;
+  Count cTopsPassWMassUppCut;
   Count cTopsPassBDiscCut;
   Count cTopsPassBDTCut;
   Count cTopsPassCrossCleanCut;
 
+  // Scalefactor calculator
+  // TopTagSFCalculator fTopTagSFCalculator;
+
   // Histograms (1D)
-  WrappedTH1 *hTopMultiplicity_AllCandidates;
   WrappedTH1 *hTopBDT_AllCandidates;
   WrappedTH1 *hTopMass_AllCandidates;
   WrappedTH1 *hTopPt_AllCandidates;
-  WrappedTH1 *hTopMultiplicity_SelectedCandidates;
+  WrappedTH1 *hTopMultiplicity_AllCandidates;
+
   WrappedTH1 *hTopBDT_SelectedCandidates;
   WrappedTH1 *hTopMass_SelectedCandidates;
   WrappedTH1 *hTopPt_SelectedCandidates;
-  WrappedTH1 *hTopMultiplicity_SelectedCleanedCandidates;
+  WrappedTH1 *hTopMultiplicity_SelectedCandidates;
+
   WrappedTH1 *hTopBDT_SelectedCleanedCandidates;
   WrappedTH1 *hTopMass_SelectedCleanedCandidates;
   WrappedTH1 *hTopPt_SelectedCleanedCandidates;
+  WrappedTH1 *hTopMultiplicity_SelectedCleanedCandidates;
+
+  WrappedTH1 *hTopBDT_NotSelectedCandidates;
+  WrappedTH1 *hTopMass_NotSelectedCandidates;
+  WrappedTH1 *hTopPt_NotSelectedCandidates;
+  WrappedTH1 *hTopMultiplicity_NotSelectedCandidates;
+
+  WrappedTH1 *hTopBDT_NotSelectedCleanedCandidates;
+  WrappedTH1 *hTopMass_NotSelectedCleanedCandidates;
+  WrappedTH1 *hTopPt_NotSelectedCleanedCandidates;
+  WrappedTH1 *hTopMultiplicity_NotSelectedCleanedCandidates;
 
   // Ldg in pt free b-jet
   WrappedTH1  *hTetrajetBJetPt;
