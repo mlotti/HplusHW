@@ -178,10 +178,14 @@ metSelection = PSet(
 topSelectionBDT = PSet(
     MVACutValue            = 0.40,    # [default: 0.40]
     MVACutDirection        =  ">=",   # [default: ">="]
-    TopMassCutValue        = 300.0,   # [default: 400 or 500.0]  # Do not evaluate top candidate if top mass greater than this cut
-    TopMassCutDirection    = "<=",    # [default: "<"]
-    WMassCutValue          =   0.0,   # [default: 0.0]  # Do not evaluate top candidate if W mass greater than this cut
-    WWMassCutDirection     = ">=",    # [default: ">"]
+    TopMassLowCutValue     =   0.0,   # [default: 0.0]
+    TopMassLowCutDirection =  ">=",   # [default: ">="]
+    TopMassUppCutValue     = 300.0,   # [default: 400 or 500.0]  # Do not evaluate top candidate if top mass greater than this cut
+    TopMassUppCutDirection =  "<=",   # [default: "<"]
+    WMassLowCutValue       =   0.0,   # [default: 0.0] 
+    WMassLowCutDirection   =  ">=",   # [default: ">="]
+    WMassUppCutValue       =   0.0,   # [default: 0.0]
+    WMassUppCutDirection   =  ">=",   # [default: ">="]
     CSV_bDiscCutValue      = 0.8484,  # [default: 0.8484] # Do not evaluate top candidate if b-jet assigned as b from top fails this cut
     CSV_bDiscCutDirection  = ">=",    # [default: ">="]
     #WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32.weights.xml", # (All XML files located in data/TopTaggerWeights/)
@@ -210,10 +214,14 @@ fakeBTopSelectionBDT = PSet(
     MVACutValue            = -1.0,   # [default: -1.0] NOTE: defines SR, VR, CR1, and CR2
     MVACutDirection        = ">",    # [default: ">"] (NOTE: Crashes if set to ">=" -1)
     LdgTopDefinition       = "MVA",  # [default: "MVA"] (options: "MVA", "Pt")
-    TopMassCutValue        = 600.0, #topSelectionBDT.TopMassCutValue,  # [default: 600.0] #topSelectionBDT.MassCutValue, (800.0 is way too much. TTbar takes > 24 hours)
-    TopMassCutDirection    = topSelectionBDT.TopMassCutDirection,
-    WMassCutValue          = 0.0,    # [default: ?] #topSelectionBDT.WMassCutValue,
-    WMassCutDirection      = ">",    # [default: ?] #topSelectionBDT.WMassCutDirection,
+    TopMassLowCutValue     = 600.0, #topSelectionBDT.TopMassCutValue,  # [default: 600.0] #topSelectionBDT.MassCutValue, (800.0 is way too much. TTbar takes > 24 hours)
+    TopMassLowCutDirection = "<=",
+    TopMassUppCutValue     =   0.0,
+    TopMassUppCutDirection = ">=", 
+    WMassLowCutValue       = 0.0,    # [default: ?] #topSelectionBDT.WMassCutValue,
+    WMassLowCutDirection   = ">",    # [default: ?] #topSelectionBDT.WMassCutDirection,
+    WMassUppCutValue       = 0.0,    # [default: ?] #topSelectionBDT.WMassCutValue,
+    WMassUppCutDirection   = ">",    # [default: ?] #topSelectionBDT.WMassCutDirection,
     CSV_bDiscCutValue      = topSelectionBDT.CSV_bDiscCutValue,
     CSV_bDiscCutDirection  = topSelectionBDT.CSV_bDiscCutDirection,
     WeightFile             = topSelectionBDT.WeightFile,

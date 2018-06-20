@@ -200,7 +200,7 @@ def main(opts):
 
         # For-loop: All histogram pairs
         for hVR, hCR2, hCR1 in zip(path_VR, path_CR2, path_CR1):
-            break # not needed now
+            break
             if "IsGenuineB" in hVR:
                 continue
             PlotComparison(datasetsMgr, hVR, hCR2, "VRvCR2")
@@ -219,7 +219,7 @@ def main(opts):
 
         # For-loop: All histogram pairs
         for hSR, hVR in zip(path_SR, path_VR):
-            #break
+            break
             # Print("UNBLINDING SR! Are you nuts ? BREAK!", False)
             if "IsGenuineB" in hSR:
                 continue
@@ -446,7 +446,7 @@ def GetHistoKwargs(histoName, ext, opts):
         _format = "%0.0f " + _units
         _xlabel = "m_{jj} (%s)" % _units
         _cutBox = {"cutValue": 80.385, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 200.0
+        _opts["xmax"] = 400.0 #200
     if "trijetm" in hName:
         _rebinX = 2
         _units  = "GeV/c^{2}"
@@ -457,7 +457,7 @@ def GetHistoKwargs(histoName, ext, opts):
             _rebinX = 4
             _opts["xmax"] = 800.0
         else:
-            _opts["xmax"] = 300.0
+            _opts["xmax"] = 500.0 #300.0
     if "pt" in hName:
         #_rebinX = 2
         _rebinX = 1        
@@ -527,7 +527,8 @@ def GetHistoKwargs(histoName, ext, opts):
         _cutBox = {"cutValue": +0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _xlabel = "b-tag discriminant"
         if "trijet" in hName:
-            _opts["xmin"] = 0.7
+            #_opts["xmin"] = 0.7
+            _opts["xmin"] = 0.0
     if "tetrajetm" in hName:
         #_rebinX = 4
         _units  = "GeV/c^{2}"
@@ -636,15 +637,13 @@ if __name__ == "__main__":
     BATCHMODE    = True
     MERGEEWK     = True
     URL          = False
-    NOERROR      = True
     SAVEDIR      = None
     VERBOSE      = False
-    HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
     NORMALISE    = True
-    USEMC        = False
-    SIGNALMASS   = 500
     FOLDER       = "ForFakeBMeasurement"
     RATIOTYPE    = "errorPropagation" # "errorPropagation", "errorScale", "binomial"
+    SIGNALMASS   = 500
+    USEMC        = False
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -679,9 +678,6 @@ if __name__ == "__main__":
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE, 
                       help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
 
-    parser.add_option("--histoLevel", dest="histoLevel", action="store", default = HISTOLEVEL,
-                      help="Histogram ambient level (default: %s)" % (HISTOLEVEL))
-
     parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
                       help="List of datasets in mcrab to include")
 
@@ -691,18 +687,17 @@ if __name__ == "__main__":
     parser.add_option("-n", "--normaliseToOne", dest="normaliseToOne", action="store_true", default=NORMALISE, 
                       help="Normalise the baseline and inverted shapes to one? [default: %s]" % (NORMALISE) )
 
-    parser.add_option("--useMC", dest="useMC", action="store_true", default=USEMC, 
-                      help="Use QCD MC instead of QCD=Data-EWK? [default: %s]" % (USEMC) )
-
-    parser.add_option("--signalMass", dest="signalMass", type=int, default=SIGNALMASS,
-                      help="Mass value of signal to use [default: %s]" % SIGNALMASS)
-
     parser.add_option("--folder", dest="folder", type="string", default = FOLDER,
                       help="ROOT file folder under which all histograms to be plotted are located [default: %s]" % (FOLDER) )
 
     parser.add_option("--ratioType", dest="ratioType", type="string", default = RATIOTYPE,
                       help="Error type for to be used for the ratio [default: %s]" % (RATIOTYPE) )
 
+    parser.add_option("--signalMass", dest="signalMass", type=int, default=SIGNALMASS,
+                      help="Mass value of signal to use [default: %s]" % SIGNALMASS)
+
+    parser.add_option("--useMC", dest="useMC", action="store_true", default=USEMC, 
+                      help="Use QCD MC instead of QCD=Data-EWK? [default: %s]" % (USEMC) )
 
     (opts, parseArgs) = parser.parse_args()
 
