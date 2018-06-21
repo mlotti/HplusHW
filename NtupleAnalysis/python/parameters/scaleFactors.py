@@ -189,11 +189,11 @@ def setupToptagSFInformation(topTagPset, topTagMisidFilename, topTagEfficiencyFi
         raise Exception("Error: unknown parameter for variationInfo given (%s)! Valid options are: %s" % (variationInfo, ", ".join(variationInfo)) )
 
     # Process the misidentification rates (MC and data)
-    Print("Setting top-tag SF misid filename to \"%s\"" % (topTagMisidFilename), True)
+    Print("Setting top-tag misid (data and MC) filename to \"%s\"" % (topTagMisidFilename), True)
     _setupToptagMisid(topTagPset, topTagMisidFilename, direction, variationInfo)
 
     # Process the tagging efficiencies (MC and data)
-    Print("Setting top-tag SF misid filename to \"%s\"" % (topTagEfficiencyFilename), False)
+    Print("Setting top-tag tagging efficiency (data and MC) filename to \"%s\"" % (topTagEfficiencyFilename), False)
     _setupToptagEfficiency(topTagPset, topTagEfficiencyFilename, direction, variationInfo)
 
     # Set syst. uncert. variation information
@@ -203,7 +203,7 @@ def setupToptagSFInformation(topTagPset, topTagMisidFilename, topTagEfficiencyFi
     else:
         topTagPset.topTagSFVariationInfo = variationInfo
 
-    if 1:
+    if 0:
         Print("Printing topTag PSet", True)
         print topTagPset
     return
@@ -402,8 +402,8 @@ def _setupToptagMisid(topTagPset, topTagMisidFilename, direction, variationInfo)
         
         # Define the Scale Factor (SF) as: SF = Eff_Data / Eff_MC
         sf     = effData / effMC
-        sfUp   = effDataUp / effMC
-        sfDown = effDataDown / effMC
+        sfUp   = effDataUp / effMC   # fixme
+        sfDown = effDataDown / effMC # fixme
         Verbose("pT = %.1f, sf = %0.3f, sf+ = %0.3f, sf- = %0.3f" % (pT, sf, sfUp, sfDown), i==0)
 
         result["SF"].append(sf)
@@ -431,7 +431,7 @@ def _setupToptagMisid(topTagPset, topTagMisidFilename, direction, variationInfo)
                  )
         psetList.append(p)
     topTagPset.topTagMisid = psetList
-    if 1:
+    if 0:
         print topTagPset
         #print topTagPset.topTagMisid
     return
@@ -534,7 +534,7 @@ def _setupToptagEfficiency(topTagPset, topTagEfficiencyFilename, direction, vari
                  )
         psetList.append(p)
         topTagPset.topTagEfficiency = psetList
-    if 1:
+    if 0:
         print topTagPset
         #print topTagPset.topTagEfficiency
     return
