@@ -207,24 +207,21 @@ def main():
     # allSelections.Trigger.triggerOR = ["HLT_PFHT450_SixJet40_BTagCSV_p056", "HLT_PFJet450"]
 
     #allSelections.FakeBTopSelectionBDT.LdgTopDefinition = "Pt" # [default: "MVA"] (options: "MVA", "Pt")
-    allSelections.FakeBTopSelectionBDT.TopMassLowCutValue     =  0.0   # [default: 0.0]
+    allSelections.FakeBTopSelectionBDT.TopMassLowCutValue     =  90.0   # [default: 0.0]
     allSelections.FakeBTopSelectionBDT.TopMassLowCutDirection = ">="   # [default: ">="]
-    allSelections.FakeBTopSelectionBDT.TopMassUppCutValue     =  0.0  # [default: 600.0]
-    allSelections.FakeBTopSelectionBDT.TopMassUppCutDirection = ">="   # "<="   # [default: "<="]
-    #allSelections.FakeBTopSelectionBDT.WMassLowCutValue       =   0.0
-    #allSelections.FakeBTopSelectionBDT.WMassLowCutDirection   = ">="
-    #allSelections.FakeBTopSelectionBDT.WMassUppCutValue       = 0.0   # 150.0
-    #allSelections.FakeBTopSelectionBDT.WMassUppCutDirection   = ">=   # "<="
+    allSelections.FakeBTopSelectionBDT.TopMassUppCutValue     = 250.0  # [default: 600.0]
+    allSelections.FakeBTopSelectionBDT.TopMassUppCutDirection = "<="   # [default: "<="]
+    allSelections.FakeBTopSelectionBDT.WMassLowCutValue       =   0.0
+    allSelections.FakeBTopSelectionBDT.WMassLowCutDirection   = ">="
+    allSelections.FakeBTopSelectionBDT.WMassUppCutValue       = 150.0
+    allSelections.FakeBTopSelectionBDT.WMassUppCutDirection   = "<="
     allSelections.FakeBTopSelectionBDT.CSV_bDiscCutValue      = 0.5426
     allSelections.FakeBTopSelectionBDT.CSV_bDiscCutDirection  = ">="
     allSelections.TopSelectionBDT.MVACutValue                 =  0.40 # [default:  0.40]
     allSelections.FakeBTopSelectionBDT.MVACutValue            = -1.00 # [default: -1.00]
     allSelections.FakeBMeasurement.LdgTopMVACutValue          = allSelections.TopSelectionBDT.MVACutValue
     allSelections.FakeBMeasurement.SubldgTopMVACutValue       = 0.00  # allSelections.TopSelectionBDT.MVACutValue
-    print "NOTE "*10
     print "=== run.py: Default parameters overwritten!"
-    print "NOTE "*10
-    
     
     # ================================================================================================
     # Command Line Options
