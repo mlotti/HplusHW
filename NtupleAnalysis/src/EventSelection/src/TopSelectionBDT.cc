@@ -713,8 +713,11 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   std::vector <double>     dRminB;
   const double twoSigmaDpt = 0.32, dRcut = 0.4;
 
-  GenTops = GetGenParticles(event.genparticles().getGenParticles(), 6);
-
+  if (event.isMC())
+    {
+    GenTops = GetGenParticles(event.genparticles().getGenParticles(), 6);
+    }
+  
   // For-loop: All top quarks
   for (auto& top: GenTops){
     std::vector<genParticle> quarks, bquark;
@@ -880,7 +883,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 
       // Calculate and store b-jet scale factor weight and it's uncertainty
       output.fTopTaggingScaleFactorEventWeight = fTopTagSFCalculator.calculateSF(fAllCleanedTops.TrijetP4, fAllCleanedTops.isTagged, fAllCleanedTops.isGenuine);
-      std::cout << "output.fTopTaggingScaleFactorEventWeight = " << output.fTopTaggingScaleFactorEventWeight  << std::endl;
+
     }
 
 

@@ -200,7 +200,6 @@ TopTagSFCalculator::TopTagSFCalculator(const ParameterSet& config)
   isActive(true),
   hTopTagSF(nullptr),
   hTopTagSFRelUncert(nullptr) {
-
   // Import efficiencies
   handleEfficiencyInput(config.getParameterOptional<std::vector<ParameterSet>>("topTagEfficiency"));
   // fEfficiencies.setOverflowBinByPt("EfficiencyNominal"); //fixme
@@ -208,7 +207,7 @@ TopTagSFCalculator::TopTagSFCalculator(const ParameterSet& config)
   // fEfficienciesDown.setOverflowBinByPt("EfficiencyDown");
   // fEfficienciesSF.setOverflowBinByPt("EfficienciesSFnominal");
   // fEfficienciesSFUp.setOverflowBinByPt("EfficienciesSFup");
-  //  fEfficienciesSFDown.setOverflowBinByPt("EfficienciesSFdown");
+  // fEfficienciesSFDown.setOverflowBinByPt("EfficienciesSFdown");
 
   // Import misidefication rates
   handleMisidInput(config.getParameterOptional<std::vector<ParameterSet>>("topTagMisid"));
@@ -218,7 +217,6 @@ TopTagSFCalculator::TopTagSFCalculator(const ParameterSet& config)
   // fMisidSF.setOverflowBinByPt("MisidSFnominal");
   // fMisidSFUp.setOverflowBinByPt("MisidSFup");
   // fMisidSFDown.setOverflowBinByPt("MisidSFdown");
-
 
   // Import scale factors
   // handleSFInput(config.getParameterOptional<std::vector<ParameterSet>>("toptagSF"));
@@ -274,7 +272,8 @@ void TopTagSFCalculator::bookHistograms(TDirectory* dir, HistoWrapper& histoWrap
 }
 
 // Calculate scale factors
-const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzVector> cleanTopP4, const std::vector<bool> cleanTopIsTagged, const std::vector<bool> cleanTopIsGenuine)
+const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzVector> cleanTopP4, 
+					    const std::vector<bool> cleanTopIsTagged, const std::vector<bool> cleanTopIsGenuine)
 {
   if (!isActive) return 1.0;
   
@@ -351,14 +350,14 @@ const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzV
       
       // Event weight to correct simulations is a product of SFs and MC tagging effiencies
       totalSF *= sf;
-      std::cout << "totalSF = " << totalSF << " flavor = " << flavor 
-		<< " pt = " << pt << " isTag = " << isTag 
-		<< " isGen = " << isGen << " SF = " << sf << std::endl;
+      if (0) std::cout << "SF = " << sf << " totalSF = " << totalSF << " flavor = " << flavor 
+		       << " pt = " << pt << " isTag = " << isTag << " isGen = " << isGen << std::endl;
     }
   
   // Fill histograms
   hTopTagSF->Fill(totalSF);
-  std::cout << "totalSF = " << totalSF << std::endl;
+
+  // std::cout << "totalSF = " << totalSF << std::endl;
   return totalSF;
 }
 
@@ -386,7 +385,7 @@ void TopTagSFCalculator::handleEfficiencyInput(boost::optional<std::vector<Param
   // Sanity check
   if (!psets) 
     {
-      std::cout << "TopTagSFCalculator::handleEfficiencyInput() No Psets found! Return" << std::endl;
+      std::cout << "=== TopTagSFCalculator::handleEfficiencyInput() No Psets found! Return." << std::endl;
       return;
     }
 
@@ -440,7 +439,7 @@ void TopTagSFCalculator::handleMisidInput(boost::optional<std::vector<ParameterS
   // Sanity check
   if (!psets) 
     {
-      std::cout << "TopTagSFCalculator::handleEfficiencyInput() No Psets found! Return" << std::endl;
+      std::cout << "TopTagSFCalculator::handleEfficiencyInput() No Psets found! Return." << std::endl;
       return;
     }
 
