@@ -4,7 +4,6 @@
 
 #include "EventSelection/interface/BaseSelection.h"
 #include "EventSelection/interface/JetSelection.h"
-#include "EventSelection/interface/TopSelectionBDT.h"
 #include "Framework/interface/EventCounter.h"
 #include "Tools/interface/DirectionalCut.h"
 
@@ -46,13 +45,10 @@ private:
 /// Mediator class between individual TopTagSFInputItem and TopTagSFCalculator
 class TopTagSFInputStash {
 public:
-  enum TopTagJetFlavorType { 
-    // README: https://hypernews.cern.ch/HyperNews/CMS/get/btag/1482/1/1/1/1/1.html
-    kBJet,
-    kCJet,
-    // kGJet,   // obsolete (see README)
-    // kUDSJet, // obsolete (see README)
-    kUDSGJet,
+  enum TopTagJetFlavorType {
+    kInclusiveTop,
+    kGenuineTop,
+    kFakeTop,
   };
   TopTagSFInputStash();
   ~TopTagSFInputStash();
@@ -60,12 +56,16 @@ public:
   /// Add input 
   void addInput(TopTagJetFlavorType flavor, float ptMin, float ptMax, const std::string& formula);
   void addInput(TopTagJetFlavorType flavor, float ptMin, float ptMax, float eff);
+
   /// Returns the size of the collection
   const size_t sizeOfList(TopTagJetFlavorType flavor) const { return getConstCollection(flavor).size(); }
+
   /// Returns value by pt
   const float getInputValueByPt(TopTagJetFlavorType flavor, float pt) const;
+
   /// Set maximum bins as overflow bins
   void setOverflowBinByPt(const std::string& label);
+
   /// Debug
   void debug() const;
   
@@ -73,10 +73,10 @@ private:
   const std::vector<TopTagSFInputItem*>& getConstCollection(TopTagJetFlavorType flavor) const;
   std::vector<TopTagSFInputItem*>& getCollection(TopTagJetFlavorType flavor);
   
-  std::vector<TopTagSFInputItem*> fBToB;
-  std::vector<TopTagSFInputItem*> fCToB;
-  // std::vector<TopTagSFInputItem*> fGToB;
-  std::vector<TopTagSFInputItem*> fUdsgToB;
+  std::vector<TopTagSFInputItem*> fInclusiveTop;
+  std::vector<TopTagSFInputItem*> fGenuineTop;
+  std::vector<TopTagSFInputItem*> fFakeTop;
+
 };
 
 class TopTagSFCalculator {
@@ -96,21 +96,29 @@ public:
   /// Book histograms
   void bookHistograms(TDirectory* dir, HistoWrapper& histoWrapper);
   /// Calculate scale factor for the event
-  const float calculateSF(const std::vector<Jet>& selectedJets, const std::vector<Jet>& selectedBJets);
+  const float calculateSF(const std::vector<math::XYZTLorentzVector> cleanTopP4, const std::vector<bool> cleanTopIsTagged, const std::vector<bool> cleanTopIsGenuine);
+
   /// Returns the size of the efficiency config items
   const size_t sizeOfEfficiencyList(TopTagSFInputStash::TopTagJetFlavorType flavor, const std::string& direction) const;
   /// Returns the size of the SF config items
   const size_t sizeOfSFList(TopTagSFInputStash::TopTagJetFlavorType flavor, const std::string& direction) const;
   
 private:
+  /// Method for handling the misidentification rateinput
+  void handleMisidInput(boost::optional<std::vector<ParameterSet>> psets);
+
   /// Method for handling the efficiency input
   void handleEfficiencyInput(boost::optional<std::vector<ParameterSet>> psets);
+
   /// Method for handling the SF input
   void handleSFInput(boost::optional<std::vector<ParameterSet>> psets);
+
   /// Method for converting flavor string to flavor type
   TopTagSFInputStash::TopTagJetFlavorType getFlavorTypeForEfficiency(const std::string& str) const;
+  
   /// Method for converting flavor string to flavor type
   TopTagSFInputStash::TopTagJetFlavorType getFlavorTypeForSF(int i) const;
+  
   /// Find input value
   float getInputValueByPt(std::vector<TopTagSFInputItem>& container, float pt);
 
@@ -119,14 +127,14 @@ private:
   
   /// Systematic variation type
   const TopTagSFVariationType fVariationInfo;
-  /// parton->b jet efficiencies from config
+  /// Top-tagging  efficiencies from config (MC)
   TopTagSFInputStash fEfficiencies;
   TopTagSFInputStash fEfficienciesUp;
   TopTagSFInputStash fEfficienciesDown;
-  /// parton->b jet data/MC scalefactors from config
-  TopTagSFInputStash fSF;
+  TopTagSFInputStash fSF; // SF =  Eff_Data/Eff_MC
   TopTagSFInputStash fSFUp;
   TopTagSFInputStash fSFDown;
+
   /// Validity of input
   bool isActive;
   // Histograms

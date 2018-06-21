@@ -114,23 +114,6 @@ bjetSelection = PSet(
     numberOfBJetsCutDirection = ">=",     # [default: ">="] (options: ==, !=, <, <=, >, >=)
 )
 
-#================================================================================================
-# Scale Factors
-#================================================================================================
-if bjetSelection.bjetDiscr == "pfCombinedInclusiveSecondaryVertexV2BJetTags":
-    scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
-                                        btagPayloadFilename    = "CSVv2.csv",
-                                        #btagEfficiencyFilename = "btageff_hybrid_HToTB.json",
-                                        btagEfficiencyFilename = "btageff_HToTB.json",
-                                        direction              = "nominal")
-elif bjetSelection.bjetDiscr == "pfCombinedMVAV2BJetTags":
-    scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
-                                        btagPayloadFilename    = "cMVAv2_Moriond17_B_H.csv", # use this for MVA b-tagging
-                                        btagEfficiencyFilename = "btageff_Hybrid_TT+WJetsHT.json", # use with taunu analysis and WJetsHT samples
-                                        direction              = "nominal")
-else:
-    pass #should crash
-
 #=================================================================================================
 # QGL selection
 #=================================================================================================
@@ -242,6 +225,32 @@ fakeBMeasurement = PSet(
     # BDT <  topSelectionBDT.MVACutValue
     # BDT >= (topSelectionBDT.MVACutValue-fakeBMeasurement.SubldgTopMVACutValue)
     )
+
+#================================================================================================
+# Scale Factors (SFs)
+#================================================================================================
+# b-tagging
+if bjetSelection.bjetDiscr == "pfCombinedInclusiveSecondaryVertexV2BJetTags":
+    scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
+                                        btagPayloadFilename    = "CSVv2.csv",
+                                        #btagEfficiencyFilename = "btageff_hybrid_HToTB.json",
+                                        btagEfficiencyFilename = "btageff_HToTB.json",
+                                        direction              = "nominal")
+elif bjetSelection.bjetDiscr == "pfCombinedMVAV2BJetTags":
+    scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
+                                        btagPayloadFilename    = "cMVAv2_Moriond17_B_H.csv", # use this for MVA b-tagging
+                                        btagEfficiencyFilename = "btageff_Hybrid_TT+WJetsHT.json", # use with taunu analysis and WJetsHT samples
+                                        direction              = "nominal")
+else:
+    # should crash
+    pass
+
+# top-tagging
+scaleFactors.setupToptagSFInformation(topTagPset               = topSelectionBDT, 
+                                      topTagMisidFilename      = "toptagMisid_fatJet.json", # "toptagMisid_default.json", "toptagMisid_fatJet.json", "toptagMisid_ldgJet.json"
+                                      topTagEfficiencyFilename = "toptagEff_fatJet.json",   # "toptagEff_default.json"  , "toptagEff_fatJet.json"  , "toptagEff_ldgJet.json"
+                                      direction                = "nominal",
+                                      variationInfo            = None)
 
 #================================================================================================
 # Common plots options

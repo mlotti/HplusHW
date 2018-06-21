@@ -29,7 +29,7 @@
 #include <TMVA/TMVAGui.h>
 #include <TMVA/Reader.h>
 
-
+// Forward declarations
 class ParameterSet;
 class CommonPlots;
 class Event;
@@ -38,13 +38,16 @@ class HistoWrapper;
 class WrappedTH1;
 class WrappedTH2;
 
+
 struct TrijetSelection{
   std::vector<Jet> Jet1;
   std::vector<Jet> Jet2;
   std::vector<Jet> BJet;
-  std::vector <double> MVA;
+  std::vector<double> MVA;
   std::vector<math::XYZTLorentzVector> TrijetP4;
   std::vector<math::XYZTLorentzVector> DijetP4; 
+  std::vector<bool> isGenuine;
+  std::vector<bool> isTagged;
 };
 
 struct SelectedTrijets{
@@ -346,13 +349,10 @@ private:
   const genParticle GetLastCopy(const vector<genParticle> genParticles, const genParticle &p);
   genParticle getLeadingSubleadingParton(const genParticle& quark0, const genParticle& quark1, string selectedParton);
   vector<genParticle> GetWpartons( genParticle daughter, const Event& event);
-  double CalculateTopScaleFactor(const Jet& jet1, const Jet& jet2, const Jet& bjet, 
-				 const std::vector<Jet>& MCtrue_LdgJet, const std::vector<Jet>& MCtrue_SubldgJet, const std::vector<Jet>& MCtrue_Bjet, float mva);
   bool IsGenuineTop(const Jet& trijetJet1, const Jet& trijetJet2, const Jet& trijetBJet,
 		    const std::vector<Jet>& MCtrue_LdgJet,  const std::vector<Jet>& MCtrue_SubldgJet, const std::vector<Jet>& MCtrue_Bjet);
 
-  
-
+ 
   // Input parameters
   const DirectionalCut<double> cfg_MVACut;
   const DirectionalCut<double> cfg_TopMassLowCut;
@@ -381,7 +381,7 @@ private:
   Count cTopsPassCrossCleanCut;
 
   // Scalefactor calculator
-  // TopTagSFCalculator fTopTagSFCalculator;
+  TopTagSFCalculator fTopTagSFCalculator;
 
   // Histograms (1D)
   WrappedTH1 *hTopBDT_AllCandidates;

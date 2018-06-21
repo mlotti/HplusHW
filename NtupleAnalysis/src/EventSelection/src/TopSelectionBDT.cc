@@ -84,7 +84,8 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config, EventCounter& event
     cTopsPassWMassUppCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed W mass upp cut")),
     cTopsPassBDiscCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed b-disc cut")),
     cTopsPassBDTCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed BDT cut")),
-    cTopsPassCrossCleanCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed cross-clean cut"))
+    cTopsPassCrossCleanCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed cross-clean cut")),
+    fTopTagSFCalculator(config)
 {
   initialize(config);
 }
@@ -114,7 +115,8 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config)
   cTopsPassWMassUppCut(fEventCounter.addSubCounter("top candidates", "Passed W mass upp cut")),
   cTopsPassBDiscCut(fEventCounter.addSubCounter("top candidates", "Passed b-disc cut")),
   cTopsPassBDTCut(fEventCounter.addSubCounter("top candidates", "Passed BDT cut")),
-  cTopsPassCrossCleanCut(fEventCounter.addSubCounter("top candidates", "Passed cross-clean cut"))
+  cTopsPassCrossCleanCut(fEventCounter.addSubCounter("top candidates", "Passed cross-clean cut")),
+  fTopTagSFCalculator(config)
 {
   initialize(config);
   bookHistograms(new TDirectory());
@@ -385,6 +387,7 @@ void TopSelectionBDT::bookHistograms(TDirectory* dir) {
 											     ";#Delta Y (Trijet_{Ldg}, b_{free}^{ldg});#Delta Y (Trijet_{Sbldg}, b_{free}^{ldg})", 
 											     nDRBins     , fDRMin     , 6., nDRBins     , fDRMin     , 6.);
 
+  fTopTagSFCalculator.bookHistograms(subdir, fHistoWrapper); 
   return;
 }
 
@@ -433,7 +436,6 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   TrijetSelection fSelectedCleanedTops;
   TrijetSelection fNotSelectedTops;
   TrijetSelection fAllCleanedTops;
-  std::vector<double> fAllCleanedTops_SF;
 
   // For-loop: All b-jets
   // for (auto& bjet: jets) // OldTop (Between ~March-June 2018)
@@ -525,6 +527,9 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	      fAllTops.Jet1.push_back(getLeadingSubleadingJet(jet1, jet2, "leading"));
 	      fAllTops.Jet2.push_back(getLeadingSubleadingJet(jet1, jet2, "subleading"));
 	      fAllTops.BJet.push_back(bjet);
+	      fAllTops.isGenuine.push_back(false);
+	      fAllTops.isTagged.push_back(cfg_MVACut.passedCut(MVAoutput)); // fixme: which MVA cut? ldg, or subldg, or?
+
 	      // std::cout << "MVAoutput = " << MVAoutput << " " << cfg_MVACut.getCutDirectionString() << " " << cfg_MVACut.getCutValue() << "?" <<  std::endl;
 
 	      // Get top candidates above MVA cut
@@ -538,6 +543,8 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 		  fSelectedTops.Jet1.push_back(getLeadingSubleadingJet(jet1, jet2, "leading"));
 		  fSelectedTops.Jet2.push_back(getLeadingSubleadingJet(jet1, jet2, "subleading"));
 		  fSelectedTops.BJet.push_back(bjet);
+		  fSelectedTops.isGenuine.push_back(false); // fixme
+		  fSelectedTops.isTagged.push_back(true);  // fixme: which MVA cut? ldg, or subldg, or?
 		}
 	      else
 		{
@@ -548,6 +555,8 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 		  fNotSelectedTops.Jet1.push_back(getLeadingSubleadingJet(jet1, jet2, "leading"));
 		  fNotSelectedTops.Jet2.push_back(getLeadingSubleadingJet(jet1, jet2, "subleading"));
 		  fNotSelectedTops.BJet.push_back(bjet);
+		  fNotSelectedTops.isGenuine.push_back(true); // fixme
+		  fNotSelectedTops.isTagged.push_back(false); // fixme: which MVA cut? ldg, or subldg, or?
 		}
 		
 	    }// For-loop: All jets
@@ -595,12 +604,14 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
       cTopsPassCrossCleanCut.increment();
 
       // Save the top selected && cross-cleaned top candidate
-      fSelectedCleanedTops.MVA.push_back( fSelectedTops.MVA.at(i) );
-      fSelectedCleanedTops.TrijetP4.push_back( fSelectedTops.TrijetP4.at(i) );
-      fSelectedCleanedTops.DijetP4.push_back( fSelectedTops.DijetP4.at(i) );
       fSelectedCleanedTops.Jet1.push_back( fSelectedTops.Jet1.at(i) );
       fSelectedCleanedTops.Jet2.push_back( fSelectedTops.Jet2.at(i) );
       fSelectedCleanedTops.BJet.push_back( fSelectedTops.BJet.at(i) );
+      fSelectedCleanedTops.MVA.push_back( fSelectedTops.MVA.at(i) );
+      fSelectedCleanedTops.TrijetP4.push_back( fSelectedTops.TrijetP4.at(i) );
+      fSelectedCleanedTops.DijetP4.push_back( fSelectedTops.DijetP4.at(i) );
+      fSelectedCleanedTops.isGenuine.push_back( fSelectedTops.isGenuine.at(i) ); // fixme: always false, overwite later.
+      fSelectedCleanedTops.isTagged.push_back( fSelectedTops.isTagged.at(i) );   // fixme: which MVA cut? ldg, or subldg, or?
 
       // Fill Histos (selected, cross-cleaned candidates)
       hTopBDT_SelectedCleanedCandidates -> Fill(fSelectedTops.MVA.at(i) );
@@ -631,12 +642,14 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
       if (!isCrossCleaned) continue;
 
       // Save the top selected && cross-cleaned top candidate
-      fAllCleanedTops.MVA.push_back( fAllTops.MVA.at(i) );
-      fAllCleanedTops.TrijetP4.push_back( fAllTops.TrijetP4.at(i) );
-      fAllCleanedTops.DijetP4.push_back( fAllTops.DijetP4.at(i) );
       fAllCleanedTops.Jet1.push_back( fAllTops.Jet1.at(i) );
       fAllCleanedTops.Jet2.push_back( fAllTops.Jet2.at(i) );
       fAllCleanedTops.BJet.push_back( fAllTops.BJet.at(i) );
+      fAllCleanedTops.MVA.push_back( fAllTops.MVA.at(i) );
+      fAllCleanedTops.TrijetP4.push_back( fAllTops.TrijetP4.at(i) );
+      fAllCleanedTops.DijetP4.push_back( fAllTops.DijetP4.at(i) );
+      fAllCleanedTops.isGenuine.push_back( fAllTops.isGenuine.at(i) ); // fixme: always false, overwite later.
+      fAllCleanedTops.isTagged.push_back( fAllTops.isTagged.at(i) );   // fixme: which MVA cut? ldg, or subldg, or?
 
       // Fill Histos (selected, cross-cleaned candidates)
       hTopBDT_AllCleanedCandidates -> Fill(fAllTops.MVA.at(i) );
@@ -693,12 +706,12 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 
 
   //================================================================================================
-  //Find top decay products
+  // Find top decay products
   //================================================================================================
   std::vector<genParticle> GenTops, GenTops_BQuark, GenTops_SubldgQuark, GenTops_LdgQuark;
   std::vector <Jet>        MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet, MC_BJets;
   std::vector <double>     dRminB;
-  const double twoSigmaDpt = 0.32,  dRcut = 0.4;
+  const double twoSigmaDpt = 0.32, dRcut = 0.4;
 
   GenTops = GetGenParticles(event.genparticles().getGenParticles(), 6);
 
@@ -729,11 +742,11 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   bool doMatching = (GenTops_BQuark.size() == GenTops.size());	    
 
   //================================================================================================
-  //Find Matched top candidates
+  // Find truth-matched top candidates
   //================================================================================================
   if (doMatching)
     {
-      // ======= B jet matching (Loop over all top-quarks)
+      // For-loop: All top quarks (for b-jet matching)
       for (size_t i=0; i<GenTops.size(); i++)
         {
           genParticle BQuark = GenTops_BQuark.at(i);
@@ -745,24 +758,27 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
             {
               double dR  = ROOT::Math::VectorUtil::DeltaR( bjet.p4(), BQuark.p4());
               double dPtOverPt = std::abs((bjet.pt() - BQuark.pt())/BQuark.pt());
+
 	      // Find minimum dR
               if (dR > dRmin) continue;
+
               //Skip if dPtOverPt > twoSigmaDpt/Pt
               if (dPtOverPt > twoSigmaDpt) continue;
+
               // Store values
               dRmin  = dR;
               mcMatched_BJet = bjet;
-            }// For-loop: selected jets
+            }// For-loop: All selected jets
 
           // Store match
           dRminB.push_back(dRmin);
           MC_BJets.push_back(mcMatched_BJet);
-        }// For-loop: All top-quarks    
+        }// For-loop: All top quarks    
       
-      //======= Dijet matching (Loop over all top-quarks)
+      // For-loop: All top quarks (for dijet matching)
       for (size_t i=0; i<GenTops.size(); i++)
 	{
-	  genParticle top = GenTops.at(i);
+	  genParticle top         = GenTops.at(i);
 	  genParticle LdgQuark    = GenTops_LdgQuark.at(i);
 	  genParticle SubldgQuark = GenTops_SubldgQuark.at(i);
 	  Jet mcMatched_LdgJet, mcMatched_SubldgJet;	  
@@ -773,6 +789,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	  for (auto& jet: jets)
 	    {
 	      bool same = false;
+	      
 	      // For-loop: All top-quarks (Skip the jets that are matched to bquarks)
 	      for (size_t k=0; k<GenTops.size(); k++)
 		{
@@ -781,9 +798,11 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 		}// For-loop: All top-quarks
 	      
 	      if (same) continue;
+
 	      // Find dR for the two jets in top-decay dijet
 	      double dR1 = ROOT::Math::VectorUtil::DeltaR(jet.p4(), LdgQuark.p4());
 	      double dR2 = ROOT::Math::VectorUtil::DeltaR(jet.p4(), SubldgQuark.p4());
+
 	      // Calculate dPtOverPt for each jet in top-decay dijet
 	      double dPtOverPt1 = std::abs((jet.pt() - LdgQuark.pt())/LdgQuark.pt());
 	      double dPtOverPt2 = std::abs((jet.pt() - SubldgQuark.pt())/SubldgQuark.pt());
@@ -833,11 +852,12 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 		}
 	    }//For-loop: All selected jets
 	  
-	  // Check if TOP is genuine
+	  // Check if top-tagged object is genuine (fully truth-matched)
 	  bool isGenuine = (dR1min<= dRcut && dR2min <= dRcut && dRminB.at(i) <= dRcut);
+
 	  if (isGenuine)
 	    {
-	      //Store genuine top candidates
+	      // Store genuine top candidates
 	      MCtrue_LdgJet.push_back(mcMatched_LdgJet);
 	      MCtrue_SubldgJet.push_back(mcMatched_SubldgJet);
 	      MCtrue_Bjet.push_back(MC_BJets.at(i));
@@ -846,21 +866,25 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
     }
 
   //================================================================================================
-  // Calculate Scale Factors
+  // Calculate the event top-tagging Scale Factor (SF)
   //================================================================================================
-  
-  //For loop: All cleaned top-candidates
-    for (size_t i = 0; i < fAllCleanedTops.MVA.size(); i++)
-    {      
-      Jet jet1  = fAllCleanedTops.Jet1.at(i);
-      Jet jet2  = fAllCleanedTops.Jet2.at(i);
-      Jet bjet  = fAllCleanedTops.BJet.at(i);
-      float mva = fAllCleanedTops.MVA.at(i);
-      
-      double top_sf = CalculateTopScaleFactor(jet1, jet2, bjet, MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet, mva); //FIXME!
-      fAllCleanedTops_SF.push_back(top_sf);
+  if (event.isMC())
+    {
+
+      // First of all, update the mc-truth info
+      for (size_t i = 0; i < fAllCleanedTops.MVA.size(); i++)
+	{      
+	  bool isFullyMatched = IsGenuineTop(fAllCleanedTops.Jet1.at(i), fAllCleanedTops.Jet2.at(i), fAllCleanedTops.BJet.at(i), MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet);
+	  fAllCleanedTops.isGenuine.at(i) = isFullyMatched;
+	}
+
+      // Calculate and store b-jet scale factor weight and it's uncertainty
+      output.fTopTaggingScaleFactorEventWeight = fTopTagSFCalculator.calculateSF(fAllCleanedTops.TrijetP4, fAllCleanedTops.isTagged, fAllCleanedTops.isGenuine);
+      std::cout << "output.fTopTaggingScaleFactorEventWeight = " << output.fTopTaggingScaleFactorEventWeight  << std::endl;
     }
-  
+
+
+    
   //================================================================================================
   // Fill output data
   //================================================================================================
@@ -1047,14 +1071,6 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   double LdgTrijet_DeltaPhi = std::abs(ROOT::Math::VectorUtil::DeltaPhi(top_ldgInPt.TrijetP4, output.fTetrajetBJet.p4()));
   double SubldgTrijet_DeltaPhi = std::abs(ROOT::Math::VectorUtil::DeltaPhi(top_subLdgInPt.TrijetP4, output.fTetrajetBJet.p4()));
   hDeltaPhi_LdgTrijet_TetrajetBjet_Vs_SubldgTrijet_TetrajetBjet -> Fill(LdgTrijet_DeltaPhi, SubldgTrijet_DeltaPhi);
-
-  // BTag SF should be applied before applying fNumberOfJetsCut (so that SF are applied in inverted method)
-  if (event.isMC())
-    {
-      // Calculate and store b-jet scale factor weight and it's uncertainty
-      // output.fTopTaggingScaleFactorEventWeight = fTopTagSFCalculator.calculateSF(output.fSelected); // xenios
-      output.fTopTaggingScaleFactorEventWeight = 1.0;
-    }
 
   return output;
 }
@@ -1329,44 +1345,16 @@ vector<genParticle> TopSelectionBDT::GetWpartons( genParticle daughter, const Ev
   return quarks;
 }
 
-double TopSelectionBDT::CalculateTopScaleFactor(const Jet& jet1, const Jet& jet2, const Jet& bjet, 
-						const std::vector<Jet>& MCtrue_LdgJet, const std::vector<Jet>& MCtrue_SubldgJet, const std::vector<Jet>& MCtrue_Bjet, float mva){
-
-  math::XYZTLorentzVector TopP4;
-  TopP4 = jet1.p4() + jet2.p4() + bjet.p4();
-  double top_pt = TopP4.Pt();
-  double top_eta = TopP4.Eta();
+bool TopSelectionBDT::IsGenuineTop(const Jet& trijetJet1, const Jet& trijetJet2, const Jet& trijetBJet,
+				   const std::vector<Jet>& MCtrue_LdgJet,  const std::vector<Jet>& MCtrue_SubldgJet, const std::vector<Jet>& MCtrue_Bjet){
   
-  //tmp
-  double SF_genuineANDtagged = 1;
-  double SF_genuineNOTtagged = 1;
-  double SF_fakeANDtagged = 1;
-  double SF_fakeNOTtagged = 1;
-  double SF_top = -1;
-
-  if (0) std::cout<<"FIXME: Use top_pt, top_eta information to calculate SFs "<<top_pt<<" "<<top_eta<<std::endl;
-  
-  bool isGenuineTop = IsGenuineTop(jet1, jet2, bjet, MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet);
-  bool isTagged     = cfg_MVACut.passedCut(mva);
- 
-  if (isGenuineTop  && isTagged)  SF_top = SF_genuineANDtagged;
-  if (isGenuineTop  && !isTagged) SF_top = SF_genuineNOTtagged;
-  if (!isGenuineTop && isTagged)  SF_top = SF_fakeANDtagged;
-  if (!isGenuineTop && !isTagged) SF_top = SF_fakeNOTtagged;
- 
-  return SF_top;
- 
-}
-  bool TopSelectionBDT::IsGenuineTop(const Jet& trijetJet1, const Jet& trijetJet2, const Jet& trijetBJet,
-				     const std::vector<Jet>& MCtrue_LdgJet,  const std::vector<Jet>& MCtrue_SubldgJet, const std::vector<Jet>& MCtrue_Bjet){
-    
-    for (size_t k=0; k<MCtrue_Bjet.size(); k++){
-      bool same1 = areSameJets(trijetJet1, MCtrue_LdgJet.at(k))       && areSameJets(trijetJet2, MCtrue_SubldgJet.at(k)) && areSameJets(trijetBJet,  MCtrue_Bjet.at(k));
-      bool same2 = areSameJets(trijetJet1, MCtrue_SubldgJet.at(k))    && areSameJets(trijetJet2, MCtrue_LdgJet.at(k))    && areSameJets(trijetBJet,  MCtrue_Bjet.at(k));
-      if (same1 || same2) return true;
-    }
-    return false;
+  for (size_t k=0; k<MCtrue_Bjet.size(); k++){
+    bool same1 = areSameJets(trijetJet1, MCtrue_LdgJet.at(k))       && areSameJets(trijetJet2, MCtrue_SubldgJet.at(k)) && areSameJets(trijetBJet,  MCtrue_Bjet.at(k));
+    bool same2 = areSameJets(trijetJet1, MCtrue_SubldgJet.at(k))    && areSameJets(trijetJet2, MCtrue_LdgJet.at(k))    && areSameJets(trijetBJet,  MCtrue_Bjet.at(k));
+    if (same1 || same2) return true;
   }
+  return false;
+}
 
   
 
