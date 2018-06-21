@@ -1431,6 +1431,7 @@ def MergeFiles(mergeName, inputFiles, opts):
             Verbose("cp %s %s" % (inputFiles[0], mergeName) )
             if not opts.test:
                 shutil.copy(inputFiles[0], mergeName)
+                os.system("chmod u+r,g+r,o+r %s"%mergeName)
             ret=0
     else:
         if opts.filesInEOS:
@@ -1998,8 +1999,8 @@ def main(opts, args):
         if opts.skipVerify:
             files = GetTaskRootFiles(taskName, opts)
 
-        if CopyMCFiles(d,files) == None:
-            continue
+        #if CopyMCFiles(d,files) == None:
+        #    continue
 
         # Clean up pre-merged ROOT files before continuing? 
         if opts.deleteMergedFilesFirst:
