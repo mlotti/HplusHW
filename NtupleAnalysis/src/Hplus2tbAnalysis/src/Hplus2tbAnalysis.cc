@@ -39,7 +39,6 @@ private:
   BJetSelection fBJetSelection;
   Count cBTaggingSFCounter;
   METSelection fMETSelection;
-  // QuarkGluonLikelihoodRatio fQGLRSelection;
   TopSelectionBDT fTopSelection;
   Count cTopTaggingSFCounter;
   // FatJetSelection fFatJetSelection;
@@ -69,7 +68,6 @@ Hplus2tbAnalysis::Hplus2tbAnalysis(const ParameterSet& config, const TH1* skimCo
     fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cBTaggingSFCounter(fEventCounter.addCounter("b-tag SF")),
     fMETSelection(config.getParameter<ParameterSet>("METSelection")), // no subcounter in main counter
-    // fQGLRSelection(config.getParameter<ParameterSet>("QGLRSelection")),// fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cTopTaggingSFCounter(fEventCounter.addCounter("top-tag SF")),
     // fFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
@@ -91,7 +89,6 @@ void Hplus2tbAnalysis::book(TDirectory *dir) {
   fJetSelection.bookHistograms(dir);
   fBJetSelection.bookHistograms(dir);
   fMETSelection.bookHistograms(dir);
-  // fQGLRSelection.bookHistograms(dir);
   fTopSelection.bookHistograms(dir);
   // fFatJetSelection.bookHistograms(dir);
 
@@ -201,13 +198,6 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   if (0) std::cout << "=== MET selection" << std::endl;
   const METSelection::Data METData = fMETSelection.silentAnalyze(fEvent, nVertices);
   // if (!METData.passedSelection()) return;
-
-  //================================================================================================
-  // 10) Quark-Gluon Likelihood Ratio Selection
-  //================================================================================================
-  // if (0) std::cout << "=== QGLR selection" << std::endl;
-  // const QuarkGluonLikelihoodRatio::Data QGLRData = fQGLRSelection.analyze(fEvent, jetData, bjetData);
-  // if (!QGLRData.passedSelection()) return;
 
   //================================================================================================
   // 11) Top selection
