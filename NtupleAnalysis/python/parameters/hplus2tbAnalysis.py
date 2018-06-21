@@ -115,20 +115,6 @@ bjetSelection = PSet(
 )
 
 #=================================================================================================
-# QGL selection
-#=================================================================================================
-qglrSelection = PSet(
-    QGLRCutValue             = -1.0, # [default: -1.0] (to disable choose ">=" than -ve value)
-    QGLRCutDirection         = ">=", # [default: ">="] 
-    numberOfJetsCutValue     = 8,   # [default: 10]   (needed to suppress combinatorics => run time)
-    numberOfJetsCutDirection = "<=", # [default: "<="] 
-)
-
-jsonReader.setupQGLInformation(QGLRPset  = qglrSelection,
-                               jsonname_Light  = "QGLdiscriminator_QCD_LightJets.json",
-                               jsonname_Gluon  = "QGLdiscriminator_QCD_GluonJets.json")
-
-#=================================================================================================
 # Fat jet selection
 #=================================================================================================
 fatjetVeto = PSet(
@@ -218,7 +204,7 @@ fakeBMeasurement = PSet(
     LdgTopMVACutValue              = topSelectionBDT.MVACutValue,
     LdgTopMVACutDirection          = topSelectionBDT.MVACutDirection, 
     # Define CR1, CR2
-    #SubldgTopMVACutValue           = 0.4, #[default: 0.4] #buffer
+    # SubldgTopMVACutValue           = 0.4, #[default: 0.4] #buffer
     SubldgTopMVACutValue           = topSelectionBDT.MVACutValue, #default
     SubldgTopMVACutDirection       = "<",
     # CR3, CR4 are automatically defined as:
@@ -245,10 +231,16 @@ else:
     # should crash
     pass
 
-# top-tagging
+# top-tagging (json files available for: defaut, fatJet, ldgJet)
 scaleFactors.setupToptagSFInformation(topTagPset               = topSelectionBDT, 
-                                      topTagMisidFilename      = "toptagMisid_fatJet.json", # "toptagMisid_default.json", "toptagMisid_fatJet.json", "toptagMisid_ldgJet.json"
-                                      topTagEfficiencyFilename = "toptagEff_fatJet.json",   # "toptagEff_default.json"  , "toptagEff_fatJet.json"  , "toptagEff_ldgJet.json"
+                                      topTagMisidFilename      = "toptagMisid_BDT0p40_fatJet.json", 
+                                      topTagEfficiencyFilename = "toptagEff_BDT0p40_fatJet.json",
+                                      direction                = "nominal",
+                                      variationInfo            = None)
+
+scaleFactors.setupToptagSFInformation(topTagPset               = fakeBTopSelectionBDT, 
+                                      topTagMisidFilename      = "toptagMisid_BDT0p40_fatJet.json",
+                                      topTagEfficiencyFilename = "toptagEff_BDT0p40_fatJet.json",
                                       direction                = "nominal",
                                       variationInfo            = None)
 
@@ -299,5 +291,4 @@ allSelections = PSet(
     FakeBTopSelectionBDT  = fakeBTopSelectionBDT,
     CommonPlots           = commonPlotsOptions,
     HistogramAmbientLevel = histogramAmbientLevel,
-    # QGLRSelection         = qglrSelection,
 )
