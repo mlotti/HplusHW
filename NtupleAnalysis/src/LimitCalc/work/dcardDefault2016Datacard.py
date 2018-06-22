@@ -78,6 +78,7 @@ OptionIncludeSystematics=True # Include shape systematics (multicrabs must bepro
 OptionCombineSingleColumnUncertainties = False # (approxmation that makes limit running faster)
 # Datasets
 OptionUseWJetsHT = True # Use HT binned WJets samples instead of inclusive for WJets background
+OptionUseDYHT = True # Use HT binned DY samples instead of inclusive for DY background
 OptionGenuineTauBackgroundSource="MC_FakeAndGenuineTauNotSeparated" # Use "DataDriven" to get EWK+tt genuine taus from embedded samples
 IntSFuncertainty = 0.227 # for SF 0.41 (light region)
 #IntSFuncertainty = 0.106 # for SF 0.65 (heavy region)
@@ -95,7 +96,7 @@ MinimumStatUncertainty=0.5 # Minimum stat. uncertainty to set to bins with zero 
 UseAutomaticMinimumStatUncertainty = True # Do NOT use the MinimumStatUncertainty value above for ~empty bins, but determine the value from the lowest non-zero rate for each dataset
 ToleranceForMinimumRate=0.0 # Tolerance for almost zero rate (columns with smaller rate are suppressed)
 #OptionBinByBinLabel="_RtauGt0p75_" # Label to be attached to stat. uncert. shape nuisances, needed to decorrelate stat. uncertainty variations in case of categorization
-OptionBinByBinLabel="_RtauLt0p75_" # Label to be attached to stat. uncert. shape nuisances, needed to decorrelate stat. uncertainty variations in case of categorization
+#OptionBinByBinLabel="_RtauLt0p75_" # Label to be attached to stat. uncert. shape nuisances, needed to decorrelate stat. uncertainty variations in case of categorization
 
 # Nuisances
 OptionConvertFromShapeToConstantList=[] # Convert the following nuisances from shape to constant
@@ -293,8 +294,11 @@ DataGroups.append(myQCD)
 
 # Choose between WJets and WJetsHT dataset
 WJetsDataset = "WJets"
+DYDataset = "DYJetsToLL"
 if OptionUseWJetsHT:
     WJetsDataset = "WJetsHT"
+if OptionUseDYHT:
+   DYDataset = "DYJetsToLLHT"
 
 if OptionGenuineTauBackgroundSource =="DataDriven":
     # EWK genuine taus from embedding
@@ -314,7 +318,7 @@ else:
     DataGroups.append(DataGroup(label="ttbar"+labelPostfix, landsProcess=3,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
                                 datasetType="Embedding",
-                                datasetDefinition="TT",
+                                datasetDefinition="TT_Mtt",
                                 validMassPoints=MassPoints,
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]+myTauMisIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
@@ -339,7 +343,7 @@ else:
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
                                 datasetType="Embedding",
                                 #datasetDefinition="DYJetsToLLHT",
-                                datasetDefinition="DYJetsToLL",
+                                datasetDefinition=DYDataset,
                                 validMassPoints=MassPoints,
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]+myTauMisIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myEWKAcceptanceSystematics+myPileupSystematics[:]+myLeptonVetoSystematics[:]
