@@ -116,7 +116,7 @@ class Category:
 #        self.h_data.SetMarkerStyle(21)
 #        self.h_data.SetMarkerSize(2)
         styles.dataStyle.apply(self.h_data)
-        hhd = histograms.Histo(self.h_data,"Data",legendStyle="E1P", drawStyle="E1P")
+        hhd = histograms.Histo(self.h_data,"Data",legendStyle="PL", drawStyle="E1P")
         hhd.setIsDataMC(isData=True,isMC=False)
         histolist.append(hhd)
         for hname in self.histonames:
@@ -130,29 +130,57 @@ class Category:
         style = tdrstyle.TDRStyle()
 
         p = plots.DataMCPlot2(histolist)
+        p.setDefaultStyles()
         p.stackMCHistograms()
+
+        p.addMCUncertainty()
+
+####        ROOT.gStyle.SetErrorX(0.5)
 
         opts = {}
         opts2 = {"ymin": 0.5, "ymax": 1.5}
-        p.createFrame(os.path.join(plotDir, name), logx=True, createRatio=True, opts=opts, opts2=opts2)
+        """
+        p.createFrame(os.path.join(plotDir, name), logx=True, createRatio=True, opts=opts, opts2=opts2, ratioType="errorPropagation", ratioErrorOptions={"numeratorStatSyst": False})
         p.getFrame().GetXaxis().SetTitle("m_{T}(GeV)")
         p.getFrame().GetYaxis().SetTitle("< Events / bin >")
         p.getFrame2().GetYaxis().SetTitle("Data/Bkg.")
 
         p.getPad().SetLogx(True)
         p.getPad2().SetLogx(True)  
-#        ROOT.gPad.SetLogx(True)
+        
 
 	moveLegend = {"dx": -0.1, "dy": -0.1, "dh": 0.}
+        
 	p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
 
         p.draw()
 
         histograms.addStandardTexts(lumi=lumi)
+
+        histograms.addText(0.7, 0.84, "2016", size=20)
         
         if not os.path.exists(plotDir):
             os.mkdir(plotDir)
         p.save(formats)
+        print "Saved plot",os.path.join(plotDir, name)
+        """
+        myParams = {}
+        myParams["xlabel"] = "m_{T}(GeV)"
+        myParams["ylabel"] = "< Events / bin >"
+        myParams["ratio"] = True
+        myParams["ratioYlabel"] = "Data/Bkg."
+        myParams["logx"] = True
+        myParams["ratioType"] ="errorPropagation"
+        myParams["ratioErrorOptions"] = {"numeratorStatSyst": False}
+        myParams["opts"] = opts
+        myParams["opts2"] = opts2
+        myParams["errorBarsX"] = True
+#        myParams["createLegend"] = {"dx": -0.3, "dy": -0.2, "dh": 0.}
+#        myParams["moveLegend"] = moveLegend
+#        myParams[""] =
+#        myParams[""] =
+
+        plots.drawPlot(p,os.path.join(plotDir, name),**myParams)
         print "Saved plot",os.path.join(plotDir, name)
 
 
@@ -197,7 +225,7 @@ taunuLept_14 = taunuLept_1.clone("ch1_R4_0_1Mu")
 taunuLept_15 = taunuLept_1.clone("ch1_R4_1_1El")
 taunuLept_16 = taunuLept_1.clone("ch1_R4_1_1Mu")
 
-#categories = [taunuLept_1]#,taunuLept_2,taunuLept_3,taunuLept_4,taunuLept_5,taunuLept_6,taunuLept_7,taunuLept_8,taunuLept_9,taunuLept_10,taunuLept_11,taunuLept_12,taunuLept_13,taunuLept_14,taunuLept_15,taunuLept_16]
+#categories = [taunuLept_1,taunuLept_2,taunuLept_3,taunuLept_4,taunuLept_5,taunuLept_6,taunuLept_7,taunuLept_8,taunuLept_9,taunuLept_10,taunuLept_11,taunuLept_12,taunuLept_13,taunuLept_14,taunuLept_15,taunuLept_16]
 
 # ttlf kRed-7
 # ttcc kRed-3
