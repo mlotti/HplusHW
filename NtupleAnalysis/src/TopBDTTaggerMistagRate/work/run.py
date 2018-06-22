@@ -208,7 +208,7 @@ def main():
     #===============
     #Top Selection
     #===============
-    #allSelections.TopSelectionBDT.MassCutValue            = 1000
+    allSelections.TopSelectionBDT.MassCutValue            = 1000
     
     # ================================================================================================
     # Add Analysis Variations

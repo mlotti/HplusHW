@@ -1,0 +1,92 @@
+{
+  "_timestamp":   "Generated on Tue Jun 19 03:12:46 2018 by HiggsAnalysis/NtupleAnalysis/src/SystTopBDT/work/PythonWriter.py",
+  "_rootVersion": "6.05/03",
+  "dataParameters": {
+      "runs_273150_284044": {
+          "era": "2016",
+          "firstRun"  :273150,
+          "lastRun"   :284044,
+          "luminosity": 35916.636,
+          "bins" : [
+             {
+               "pt"              :0.0,
+               "efficiency"      :0.18028055833,
+               "uncertaintyPlus" :0.0260366856891,
+               "uncertaintyMinus":0.0260366856891
+             },
+             {
+               "pt"              :100.0,
+               "efficiency"      :0.300006758873,
+               "uncertaintyPlus" :0.0075077094101,
+               "uncertaintyMinus":0.0075077094101
+             },
+             {
+               "pt"              :200.0,
+               "efficiency"      :0.448875215789,
+               "uncertaintyPlus" :0.00532708307092,
+               "uncertaintyMinus":0.00532708307092
+             },
+             {
+               "pt"              :300.0,
+               "efficiency"      :0.562985646884,
+               "uncertaintyPlus" :0.00689896517431,
+               "uncertaintyMinus":0.00689896517431
+             },
+             {
+               "pt"              :400.0,
+               "efficiency"      :0.555160900138,
+               "uncertaintyPlus" :0.0114689127366,
+               "uncertaintyMinus":0.0114689127366
+             },
+             {
+               "pt"              :500.0,
+               "efficiency"      :0.441180872459,
+               "uncertaintyPlus" :0.0217796393975,
+               "uncertaintyMinus":0.0217796393975
+             }
+          ]
+      }
+  },
+  "mcParameters": {
+      "2016": {
+          "bins" : [
+             {
+               "pt"              :0.0,
+               "efficiency"      :0.192575465749,
+               "uncertaintyPlus" :0.00335383304505,
+               "uncertaintyMinus":0.00335383304505
+             },
+             {
+               "pt"              :100.0,
+               "efficiency"      :0.30512387024,
+               "uncertaintyPlus" :0.00189804067141,
+               "uncertaintyMinus":0.00189804067141
+             },
+             {
+               "pt"              :200.0,
+               "efficiency"      :0.454454785176,
+               "uncertaintyPlus" :0.00226627851575,
+               "uncertaintyMinus":0.00226627851575
+             },
+             {
+               "pt"              :300.0,
+               "efficiency"      :0.560584873459,
+               "uncertaintyPlus" :0.00352978251767,
+               "uncertaintyMinus":0.00352978251767
+             },
+             {
+               "pt"              :400.0,
+               "efficiency"      :0.586508036845,
+               "uncertaintyPlus" :0.00616591739465,
+               "uncertaintyMinus":0.00616591739465
+             },
+             {
+               "pt"              :500.0,
+               "efficiency"      :0.493498094327,
+               "uncertaintyPlus" :0.0122488484656,
+               "uncertaintyMinus":0.0122488484656
+             }
+          ]
+      }
+  }
+}

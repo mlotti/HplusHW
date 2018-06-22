@@ -145,6 +145,9 @@ def GetHistoKwargs(histoName):
             _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             _rebinX = 1 #2
             _opts["xmax"] = 800
+        if "trijet" in histoName.lower():
+            _rebinX = 2 #10
+            _opts["xmax"] = 800 #600
 
     if "mass" in histoName.lower():
         _units        = "GeV/c^{2}"

@@ -5,6 +5,7 @@
 #include "EventSelection/interface/BaseSelection.h"
 #include "EventSelection/interface/JetSelection.h"
 #include "EventSelection/interface/BJetSelection.h"
+#include "EventSelection/interface/TopTagSFCalculator.h"
 #include "DataFormat/interface/Jet.h"
 #include "Framework/interface/EventCounter.h"
 #include "Tools/interface/DirectionalCut.h"
@@ -28,7 +29,7 @@
 #include <TMVA/TMVAGui.h>
 #include <TMVA/Reader.h>
 
-
+// Forward declarations
 class ParameterSet;
 class CommonPlots;
 class Event;
@@ -37,13 +38,16 @@ class HistoWrapper;
 class WrappedTH1;
 class WrappedTH2;
 
+
 struct TrijetSelection{
   std::vector<Jet> Jet1;
   std::vector<Jet> Jet2;
   std::vector<Jet> BJet;
-  std::vector <double> MVA;
+  std::vector<double> MVA;
   std::vector<math::XYZTLorentzVector> TrijetP4;
   std::vector<math::XYZTLorentzVector> DijetP4; 
+  std::vector<bool> isGenuine;
+  std::vector<bool> isTagged;
 };
 
 struct SelectedTrijets{
@@ -201,6 +205,10 @@ public:
     const std::vector<Jet>& getSelectedTopsJet2() const { return fSelectedTopsJet2; }
     const std::vector<Jet>& getSelectedTopsBJet() const { return fSelectedTopsBJet; }
     const std::vector<float>& getSelectedTopsMVA() const { return fSelectedTopsMVA; }
+    const std::vector<Jet>& getNotSelectedTopsJet1() const { return fNotSelectedTopsJet1; }
+    const std::vector<Jet>& getNotSelectedTopsJet2() const { return fNotSelectedTopsJet2; }
+    const std::vector<Jet>& getNotSelectedTopsBJet() const { return fNotSelectedTopsBJet; }
+    const std::vector<float>& getNotSelectedTopsMVA() const { return fNotSelectedTopsMVA; }
     const std::vector<Jet>& getAllTopsJet1() const { return fAllTopsJet1; }
     const std::vector<Jet>& getAllTopsJet2() const { return fAllTopsJet2; }
     const std::vector<Jet>& getAllTopsBJet() const { return fAllTopsBJet; }
@@ -209,6 +217,13 @@ public:
     const std::vector<Jet>& getSelectedCleanedTopsJet2() const { return fSelectedCleanedTopsJet2; }
     const std::vector<Jet>& getSelectedCleanedTopsBJet() const { return fSelectedCleanedTopsBJet; }
     const std::vector<float>& getSelectedCleanedTopsMVA() const { return fSelectedCleanedTopsMVA; }
+    const std::vector<Jet>& getAllCleanedTopsJet1() const { return fAllCleanedTopsJet1; }
+    const std::vector<Jet>& getAllCleanedTopsJet2() const { return fAllCleanedTopsJet2; }
+    const std::vector<Jet>& getAllCleanedTopsBJet() const { return fAllCleanedTopsBJet; }
+    const std::vector<float>& getAllCleanedTopsMVA() const { return fAllCleanedTopsMVA; }
+    
+    /// Obtain the b-tagging event weight 
+    const double getTopTaggingScaleFactorEventWeight() const { return fTopTaggingScaleFactorEventWeight; }
 
     friend class TopSelectionBDT;
 
@@ -249,6 +264,11 @@ public:
     std::vector<Jet> fSelectedTopsBJet;
     std::vector<float> fSelectedTopsMVA;
 
+    std::vector<Jet> fNotSelectedTopsJet1;
+    std::vector<Jet> fNotSelectedTopsJet2;
+    std::vector<Jet> fNotSelectedTopsBJet;
+    std::vector<float> fNotSelectedTopsMVA;
+
     std::vector<Jet> fAllTopsJet1;
     std::vector<Jet> fAllTopsJet2;
     std::vector<Jet> fAllTopsBJet;
@@ -258,6 +278,14 @@ public:
     std::vector<Jet> fSelectedCleanedTopsJet2;
     std::vector<Jet> fSelectedCleanedTopsBJet;
     std::vector<float> fSelectedCleanedTopsMVA;
+
+    std::vector<Jet> fAllCleanedTopsJet1;
+    std::vector<Jet> fAllCleanedTopsJet2;
+    std::vector<Jet> fAllCleanedTopsBJet;
+    std::vector<float> fAllCleanedTopsMVA;
+
+    // top-tagging scale factor event weight
+    double fTopTaggingScaleFactorEventWeight;
 
   };
   
@@ -317,9 +345,20 @@ private:
   SelectedTrijets getLdgOrSubldgTop(TrijetSelection myTops, string selectedTrijet);
   SelectedTrijets GetSelectedTopCandidate(TrijetSelection TopCand, int index);
   bool TopIsCrossCleaned(int Index, TrijetSelection TopCand, const std::vector<Jet>& bjets);
+  vector<genParticle> GetGenParticles(const vector<genParticle> genParticles, const int pdgId);
+  const genParticle GetLastCopy(const vector<genParticle> genParticles, const genParticle &p);
+  genParticle getLeadingSubleadingParton(const genParticle& quark0, const genParticle& quark1, string selectedParton);
+  vector<genParticle> GetWpartons( genParticle daughter, const Event& event);
+  bool IsGenuineTop(const Jet& trijetJet1, const Jet& trijetJet2, const Jet& trijetBJet,
+		    const std::vector<Jet>& MCtrue_LdgJet,  const std::vector<Jet>& MCtrue_SubldgJet, const std::vector<Jet>& MCtrue_Bjet);
+
+ 
   // Input parameters
   const DirectionalCut<double> cfg_MVACut;
-  const DirectionalCut<double> cfg_MassCut;
+  const DirectionalCut<double> cfg_TopMassLowCut;
+  const DirectionalCut<double> cfg_TopMassUppCut;
+  const DirectionalCut<double> cfg_WMassLowCut;
+  const DirectionalCut<double> cfg_WMassUppCut;
   const DirectionalCut<double> cfg_CSV_bDiscCut;
 
   // Event counter for passing selection
@@ -333,24 +372,42 @@ private:
   Count cSubPassedFreeBjetCut;
   //
   Count cTopsAll;
-  Count cTopsPassMassCut;
+  Count cTopsPassTopMassLowCut;
+  Count cTopsPassTopMassUppCut;
+  Count cTopsPassWMassLowCut;
+  Count cTopsPassWMassUppCut;
   Count cTopsPassBDiscCut;
   Count cTopsPassBDTCut;
   Count cTopsPassCrossCleanCut;
 
+  // Scalefactor calculator
+  TopTagSFCalculator fTopTagSFCalculator;
+
   // Histograms (1D)
-  WrappedTH1 *hTopMultiplicity_AllCandidates;
   WrappedTH1 *hTopBDT_AllCandidates;
   WrappedTH1 *hTopMass_AllCandidates;
   WrappedTH1 *hTopPt_AllCandidates;
-  WrappedTH1 *hTopMultiplicity_SelectedCandidates;
+  WrappedTH1 *hTopMultiplicity_AllCandidates;
+
   WrappedTH1 *hTopBDT_SelectedCandidates;
   WrappedTH1 *hTopMass_SelectedCandidates;
   WrappedTH1 *hTopPt_SelectedCandidates;
-  WrappedTH1 *hTopMultiplicity_SelectedCleanedCandidates;
+  WrappedTH1 *hTopMultiplicity_SelectedCandidates;
+
   WrappedTH1 *hTopBDT_SelectedCleanedCandidates;
   WrappedTH1 *hTopMass_SelectedCleanedCandidates;
   WrappedTH1 *hTopPt_SelectedCleanedCandidates;
+  WrappedTH1 *hTopMultiplicity_SelectedCleanedCandidates;
+
+  WrappedTH1 *hTopBDT_NotSelectedCandidates;
+  WrappedTH1 *hTopMass_NotSelectedCandidates;
+  WrappedTH1 *hTopPt_NotSelectedCandidates;
+  WrappedTH1 *hTopMultiplicity_NotSelectedCandidates;
+
+  WrappedTH1 *hTopBDT_AllCleanedCandidates;
+  WrappedTH1 *hTopMass_AllCleanedCandidates;
+  WrappedTH1 *hTopPt_AllCleanedCandidates;
+  WrappedTH1 *hTopMultiplicity_AllCleanedCandidates;
 
   // Ldg in pt free b-jet
   WrappedTH1  *hTetrajetBJetPt;

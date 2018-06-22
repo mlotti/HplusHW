@@ -37,6 +37,10 @@ TopSelectionBDT::Data::Data()
   fSelectedTopsJet2(),
   fSelectedTopsBJet(),
   fSelectedTopsMVA(),
+  fNotSelectedTopsJet1(),
+  fNotSelectedTopsJet2(),
+  fNotSelectedTopsBJet(),
+  fNotSelectedTopsMVA(),
   fAllTopsJet1(),
   fAllTopsJet2(),
   fAllTopsBJet(),
@@ -44,8 +48,12 @@ TopSelectionBDT::Data::Data()
   fSelectedCleanedTopsJet1(),
   fSelectedCleanedTopsJet2(),
   fSelectedCleanedTopsBJet(),
-  fSelectedCleanedTopsMVA()
-
+  fSelectedCleanedTopsMVA(),
+  fAllCleanedTopsJet1(),
+  fAllCleanedTopsJet2(),
+  fAllCleanedTopsBJet(),
+  fAllCleanedTopsMVA(),
+  fTopTaggingScaleFactorEventWeight(1.0)
 { }
 
 TopSelectionBDT::Data::~Data() { }
@@ -55,8 +63,11 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config, EventCounter& event
   : BaseSelection(eventCounter, histoWrapper, commonPlots, postfix),
     // Input parameters
     cfg_MVACut(config, "MVACut"),
-    cfg_MassCut(config, "MassCut"),
-    cfg_CSV_bDiscCut(config, "CSV_bDiscCut"),
+    cfg_TopMassLowCut(config, "TopMassLowCut"),
+    cfg_TopMassUppCut(config, "TopMassUppCut"),
+    cfg_WMassLowCut(config  , "WMassLowCut"),
+    cfg_WMassUppCut(config  , "WMassUppCut"),
+    cfg_CSV_bDiscCut(config , "CSV_bDiscCut"),
     // Event counter for passing selection
     cPassedTopSelectionBDT(fEventCounter.addCounter("passed top selection ("+postfix+")")),
     // Sub counters
@@ -67,10 +78,14 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config, EventCounter& event
     cSubPassedFreeBjetCut(fEventCounter.addSubCounter("top selection ("+postfix+")", "Passed free b-jet cut")),
     // Top candidates
     cTopsAll(fEventCounter.addSubCounter("top candidates ("+postfix+")", "All candidates")),
-    cTopsPassMassCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed mass cut")),
+    cTopsPassTopMassLowCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed top mass low cut")),
+    cTopsPassTopMassUppCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed top mass upp cut")),
+    cTopsPassWMassLowCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed W mass low cut")),
+    cTopsPassWMassUppCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed W mass upp cut")),
     cTopsPassBDiscCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed b-disc cut")),
     cTopsPassBDTCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed BDT cut")),
-    cTopsPassCrossCleanCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed cross-clean cut"))
+    cTopsPassCrossCleanCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed cross-clean cut")),
+    fTopTagSFCalculator(config)
 {
   initialize(config);
 }
@@ -79,8 +94,11 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config)
 : BaseSelection(),
   // Input parameters
   cfg_MVACut(config, "MVACut"),
-  cfg_MassCut(config, "MassCut"),
-  cfg_CSV_bDiscCut(config, "CSV_bDiscCut"),
+  cfg_TopMassLowCut(config, "TopMassLowCut"),
+  cfg_TopMassUppCut(config, "TopMassUppCut"),
+  cfg_WMassLowCut(config  , "WMassLowCut"),
+  cfg_WMassUppCut(config  , "WMassUppCut"),
+  cfg_CSV_bDiscCut(config , "CSV_bDiscCut"),
   // Event counter for passing selection
   cPassedTopSelectionBDT(fEventCounter.addCounter("passed top selection")),
   // Sub counters
@@ -91,10 +109,14 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config)
   cSubPassedFreeBjetCut(fEventCounter.addSubCounter("top selection", "Passed Free Bjet cut")),
   // Top candidates
   cTopsAll(fEventCounter.addSubCounter("top candidates", "All candidates")),
-  cTopsPassMassCut(fEventCounter.addSubCounter("top candidates", "Passed mass cut")),
+  cTopsPassTopMassLowCut(fEventCounter.addSubCounter("top candidates", "Passed top mass low cut")),
+  cTopsPassTopMassUppCut(fEventCounter.addSubCounter("top candidates", "Passed top mass upp cut")),
+  cTopsPassWMassLowCut(fEventCounter.addSubCounter("top candidates", "Passed W mass low cut")),
+  cTopsPassWMassUppCut(fEventCounter.addSubCounter("top candidates", "Passed W mass upp cut")),
   cTopsPassBDiscCut(fEventCounter.addSubCounter("top candidates", "Passed b-disc cut")),
   cTopsPassBDTCut(fEventCounter.addSubCounter("top candidates", "Passed BDT cut")),
-  cTopsPassCrossCleanCut(fEventCounter.addSubCounter("top candidates", "Passed cross-clean cut"))
+  cTopsPassCrossCleanCut(fEventCounter.addSubCounter("top candidates", "Passed cross-clean cut")),
+  fTopTagSFCalculator(config)
 {
   initialize(config);
   bookHistograms(new TDirectory());
@@ -108,14 +130,24 @@ TopSelectionBDT::~TopSelectionBDT() {
   delete hTopBDT_AllCandidates;
   delete hTopMass_AllCandidates;
   delete hTopPt_AllCandidates;
-  delete hTopMultiplicity_SelectedCandidates;
+
   delete hTopBDT_SelectedCandidates;
   delete hTopMass_SelectedCandidates;
   delete hTopPt_SelectedCandidates;
-  delete hTopMultiplicity_SelectedCleanedCandidates;
+  delete hTopMultiplicity_SelectedCandidates;
   delete hTopBDT_SelectedCleanedCandidates;
   delete hTopMass_SelectedCleanedCandidates;
   delete hTopPt_SelectedCleanedCandidates;
+  delete hTopMultiplicity_SelectedCleanedCandidates;
+
+  delete hTopBDT_NotSelectedCandidates;
+  delete hTopMass_NotSelectedCandidates;
+  delete hTopPt_NotSelectedCandidates;
+  delete hTopMultiplicity_NotSelectedCandidates;
+  delete hTopBDT_AllCleanedCandidates;
+  delete hTopMass_AllCleanedCandidates;
+  delete hTopPt_AllCleanedCandidates;
+  delete hTopMultiplicity_AllCleanedCandidates;
 
   // Ldg in pt free b-jet
   delete hTetrajetBJetPt;
@@ -264,20 +296,28 @@ void TopSelectionBDT::bookHistograms(TDirectory* dir) {
   TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kVital, dir, "topSelectionBDT_"    + sPostfix);
 
   // All Candidates
-  hTopMultiplicity_AllCandidates  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TopMultiplicity_AllCandidates", ";top candidate multiplicity", 400, 0.0, 400.0);
   hTopBDT_AllCandidates           = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TopBDT_AllCandidates",";top candidate BDT", 40, -1.0, 1.0) ; 
   hTopMass_AllCandidates          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TopMass_AllCandidates" ,";top candidate M (GeVc^{-2})", nTopMassBins, fTopMassMin, fTopMassMax);
   hTopPt_AllCandidates            = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TopPt_AllCandidates", ";top candidate p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
+  hTopMultiplicity_AllCandidates  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TopMultiplicity_AllCandidates", ";top candidate multiplicity", 400, 0.0, 400.0);
 
-  hTopMultiplicity_SelectedCandidates  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TopMultiplicity_SelectedCandidates", ";top candidate multiplicity", 50, 0.0, 50.0);
   hTopBDT_SelectedCandidates           = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TopBDT_SelectedCandidates",";top candidate BDT", 40, -1.0, 1.0) ; 
   hTopMass_SelectedCandidates          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TopMass_SelectedCandidates" ,";top candidate M (GeVc^{-2})", nTopMassBins, fTopMassMin, fTopMassMax);
   hTopPt_SelectedCandidates            = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TopPt_SelectedCandidates", ";top candidate p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
-
-  hTopMultiplicity_SelectedCleanedCandidates  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TopMultiplicity_SelectedCleanedCandidates", ";top candidate multiplicity", 10, 0.0, 10.0);
+  hTopMultiplicity_SelectedCandidates  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TopMultiplicity_SelectedCandidates", ";top candidate multiplicity", 50, 0.0, 50.0);
   hTopBDT_SelectedCleanedCandidates           = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TopBDT_SelectedCleanedCandidates",";top candidate BDT", 40, -1.0, 1.0) ; 
   hTopMass_SelectedCleanedCandidates          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TopMass_SelectedCleanedCandidates" ,";top candidate M (GeVc^{-2})", nTopMassBins, fTopMassMin, fTopMassMax);
   hTopPt_SelectedCleanedCandidates            = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TopPt_SelectedCleanedCandidates", ";top candidate p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
+  hTopMultiplicity_SelectedCleanedCandidates  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TopMultiplicity_SelectedCleanedCandidates", ";top candidate multiplicity", 10, 0.0, 10.0);
+
+  hTopBDT_NotSelectedCandidates           = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TopBDT_NotSelectedCandidates",";top candidate BDT", 40, -1.0, 1.0) ; 
+  hTopMass_NotSelectedCandidates          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TopMass_NotSelectedCandidates" ,";top candidate M (GeVc^{-2})", nTopMassBins, fTopMassMin, fTopMassMax);
+  hTopPt_NotSelectedCandidates            = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TopPt_NotSelectedCandidates", ";top candidate p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
+  hTopMultiplicity_NotSelectedCandidates  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TopMultiplicity_NotSelectedCandidates", ";top candidate multiplicity", 50, 0.0, 50.0);
+  hTopBDT_AllCleanedCandidates           = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TopBDT_AllCleanedCandidates",";top candidate BDT", 40, -1.0, 1.0) ; 
+  hTopMass_AllCleanedCandidates          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TopMass_AllCleanedCandidates" ,";top candidate M (GeVc^{-2})", nTopMassBins, fTopMassMin, fTopMassMax);
+  hTopPt_AllCleanedCandidates            = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TopPt_AllCleanedCandidates", ";top candidate p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
+  hTopMultiplicity_AllCleanedCandidates  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TopMultiplicity_AllCleanedCandidates", ";top candidate multiplicity", 10, 0.0, 10.0);
 
   // Ldg in pt free b-jet
   hTetrajetBJetPt     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "TetrajetBJetPt"   ,";p_{T} (GeV/c)"      , nPtBins     , fPtMin     , fPtMax);
@@ -347,6 +387,7 @@ void TopSelectionBDT::bookHistograms(TDirectory* dir) {
 											     ";#Delta Y (Trijet_{Ldg}, b_{free}^{ldg});#Delta Y (Trijet_{Sbldg}, b_{free}^{ldg})", 
 											     nDRBins     , fDRMin     , 6., nDRBins     , fDRMin     , 6.);
 
+  fTopTagSFCalculator.bookHistograms(subdir, fHistoWrapper); 
   return;
 }
 
@@ -393,10 +434,12 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   TrijetSelection fAllTops;
   TrijetSelection fSelectedTops;
   TrijetSelection fSelectedCleanedTops;
+  TrijetSelection fNotSelectedTops;
+  TrijetSelection fAllCleanedTops;
 
   // For-loop: All b-jets
-  //for (auto& bjet: jets) // Before 01 June 2018
-  for (auto& bjet: bjets) // After 01 June 2018
+  // for (auto& bjet: jets) // OldTop (Between ~March-June 2018)
+  for (auto& bjet: bjets) // NewTop (Testing since 01/06/2018)
     {
       int index1 = 0;
 
@@ -428,9 +471,17 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	      top_p4 = bjet.p4() + jet1.p4() + jet2.p4();
 	      w_p4   = jet1.p4() + jet2.p4();
 	      
-	      // Skip trijet combinations which do not fulfil the invariant mass
-	      if (!cfg_MassCut.passedCut(top_p4.M())) continue;
-	      cTopsPassMassCut.increment();
+	      // Skip trijet combinations which do not fulfil the top invariant mass
+	      if (!cfg_TopMassLowCut.passedCut(top_p4.M())) continue;
+	      cTopsPassTopMassLowCut.increment();
+	      if (!cfg_TopMassUppCut.passedCut(top_p4.M())) continue;
+	      cTopsPassTopMassUppCut.increment();
+
+	      // Skip trijet combinations which do not fulfil the W invariant mass
+	      if (!cfg_WMassLowCut.passedCut(w_p4.M())) continue;
+	      cTopsPassWMassLowCut.increment();
+	      if (!cfg_WMassUppCut.passedCut(w_p4.M())) continue;
+	      cTopsPassWMassUppCut.increment();
 
 	      // Skip trijet combinations which do not fulfil bjet_CSV threshold
 	      if (!cfg_CSV_bDiscCut.passedCut(bjet.bjetDiscriminator())) continue;
@@ -476,6 +527,9 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	      fAllTops.Jet1.push_back(getLeadingSubleadingJet(jet1, jet2, "leading"));
 	      fAllTops.Jet2.push_back(getLeadingSubleadingJet(jet1, jet2, "subleading"));
 	      fAllTops.BJet.push_back(bjet);
+	      fAllTops.isGenuine.push_back(false);
+	      fAllTops.isTagged.push_back(cfg_MVACut.passedCut(MVAoutput)); // fixme: which MVA cut? ldg, or subldg, or?
+
 	      // std::cout << "MVAoutput = " << MVAoutput << " " << cfg_MVACut.getCutDirectionString() << " " << cfg_MVACut.getCutValue() << "?" <<  std::endl;
 
 	      // Get top candidates above MVA cut
@@ -489,8 +543,22 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 		  fSelectedTops.Jet1.push_back(getLeadingSubleadingJet(jet1, jet2, "leading"));
 		  fSelectedTops.Jet2.push_back(getLeadingSubleadingJet(jet1, jet2, "subleading"));
 		  fSelectedTops.BJet.push_back(bjet);
+		  fSelectedTops.isGenuine.push_back(false); // fixme
+		  fSelectedTops.isTagged.push_back(true);  // fixme: which MVA cut? ldg, or subldg, or?
 		}
-
+	      else
+		{
+		  // Get top candidates failing MVA cut
+		  fNotSelectedTops.MVA.push_back(MVAoutput);
+		  fNotSelectedTops.TrijetP4.push_back(top_p4);
+		  fNotSelectedTops.DijetP4.push_back(w_p4);
+		  fNotSelectedTops.Jet1.push_back(getLeadingSubleadingJet(jet1, jet2, "leading"));
+		  fNotSelectedTops.Jet2.push_back(getLeadingSubleadingJet(jet1, jet2, "subleading"));
+		  fNotSelectedTops.BJet.push_back(bjet);
+		  fNotSelectedTops.isGenuine.push_back(false); // fixme
+		  fNotSelectedTops.isTagged.push_back(false); // fixme: which MVA cut? ldg, or subldg, or?
+		}
+		
 	    }// For-loop: All jets
 	}// For-loop: All jets
     }// For-loop: All b-jets
@@ -500,22 +568,23 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   // Sort top candidates in descending MVA values
   //================================================================================================    
   if (0) std::cout << "=== TopSelectionBDT::Sort top candidates in MVA" << std::endl;
-  fAllTops      = SortInMVAvalue(fAllTops);
-  fSelectedTops = SortInMVAvalue(fSelectedTops);
-  hTopMultiplicity_SelectedCandidates->Fill(fSelectedTops.MVA.size());
-  // For-loop: All (pt-sorted) selected tops
-
+  fAllTops         = SortInMVAvalue(fAllTops);
+  fSelectedTops    = SortInMVAvalue(fSelectedTops);
+  fNotSelectedTops = SortInMVAvalue(fNotSelectedTops);
   
   //Debug: Check cleaned top candidates
   bool printCleanedTops = false;
 
-  if (printCleanedTops){
-    std::cout << "\n" << std::endl;
-    std::cout<<"Entry: "<<cSubAll.value()<<std::endl;
-    std::cout << std::string(10*10, '=') << std::endl;                                                                                                                                      
-    std::cout << std::setw(12) << "Jet1 indx "  << std::setw(12) << "Jet2 indx"<< std::setw(12) << "Bjet indx"   << std::setw(12) << "BDT"   << std::setw(12) << "is cleaned"  << std::endl;
-    std::cout << std::string(10*10, '=') << std::endl;                                                                                                                                      
-  }
+  if (printCleanedTops)
+    {
+      std::cout << "\n" << std::endl;
+      std::cout<<"Entry: "<<cSubAll.value()<<std::endl;
+      std::cout << std::string(10*10, '=') << std::endl;
+      std::cout << std::setw(12) << "Jet1 indx "  << std::setw(12) << "Jet2 indx"<< std::setw(12) << "Bjet indx"   << std::setw(12) << "BDT"   << std::setw(12) << "is cleaned"  << std::endl;
+      std::cout << std::string(10*10, '=') << std::endl;
+    }
+
+  // For-loop: All (MVA sorted) selected tops
   for (size_t i = 0; i < fSelectedTops.MVA.size(); i++)
     {
       // Fill Histos (selected candidates)
@@ -526,22 +595,23 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
       // Is this top cross-cleaned (b-jet availability check, object sharing with higher BDT value)
       bool isCrossCleaned = TopIsCrossCleaned(i, fSelectedTops, bjets);
 
-      if (printCleanedTops){
-      std::cout << std::setw(12) << fSelectedTops.Jet1.at(i).index()      << std::setw(12)   << fSelectedTops.Jet2.at(i).index()   << std::setw(12)   << fSelectedTops.BJet.at(i).index()
-		<< std::setw(12) << fSelectedTops.MVA.at(i)               << std::setw(12)   << isCrossCleaned
-		<<  std::endl;
+      if (printCleanedTops)
+	{
+	  std::cout << std::setw(12) << fSelectedTops.Jet1.at(i).index() << std::setw(12) << fSelectedTops.Jet2.at(i).index() << std::setw(12) << fSelectedTops.BJet.at(i).index() << std::setw(12) << fSelectedTops.MVA.at(i) << std::setw(12) << isCrossCleaned <<  std::endl;
       
       }
       if (!isCrossCleaned) continue;
       cTopsPassCrossCleanCut.increment();
 
       // Save the top selected && cross-cleaned top candidate
-      fSelectedCleanedTops.MVA.push_back( fSelectedTops.MVA.at(i) );
-      fSelectedCleanedTops.TrijetP4.push_back( fSelectedTops.TrijetP4.at(i) );
-      fSelectedCleanedTops.DijetP4.push_back( fSelectedTops.DijetP4.at(i) );
       fSelectedCleanedTops.Jet1.push_back( fSelectedTops.Jet1.at(i) );
       fSelectedCleanedTops.Jet2.push_back( fSelectedTops.Jet2.at(i) );
       fSelectedCleanedTops.BJet.push_back( fSelectedTops.BJet.at(i) );
+      fSelectedCleanedTops.MVA.push_back( fSelectedTops.MVA.at(i) );
+      fSelectedCleanedTops.TrijetP4.push_back( fSelectedTops.TrijetP4.at(i) );
+      fSelectedCleanedTops.DijetP4.push_back( fSelectedTops.DijetP4.at(i) );
+      fSelectedCleanedTops.isGenuine.push_back( fSelectedTops.isGenuine.at(i) ); // fixme: always false, overwite later.
+      fSelectedCleanedTops.isTagged.push_back( fSelectedTops.isTagged.at(i) );   // fixme: which MVA cut? ldg, or subldg, or?
 
       // Fill Histos (selected, cross-cleaned candidates)
       hTopBDT_SelectedCleanedCandidates -> Fill(fSelectedTops.MVA.at(i) );
@@ -549,7 +619,59 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
       hTopPt_SelectedCleanedCandidates  -> Fill(fSelectedTops.TrijetP4.at(i).pt());
     }
 
+  // For-loop: All candidates
+  for (size_t i = 0; i < fAllTops.MVA.size(); i++)
+    {      
+      // Is this top cross-cleaned (b-jet availability check, object sharing with higher BDT value)
+      bool isCrossCleaned = TopIsCrossCleaned(i, fAllTops, bjets);
+      printCleanedTops = false;
+      
+      if (printCleanedTops){
+	if (i==0){
+	  std::cout << "\n" << std::endl;
+	  std::cout<<"Entry: "<<cSubAll.value()<<std::endl;
+	  std::cout << std::string(10*10, '=') << std::endl;
+	  std::cout << std::setw(12) << "Jet1 indx "  << std::setw(12) << "Jet2 indx"<< std::setw(12) << "Bjet indx"   << std::setw(12) << "BDT"   << std::setw(12) << "is cleaned"  << std::endl;
+	  std::cout << std::string(10*10, '=') << std::endl;	
+	}
+	std::cout << std::setw(12) << fAllTops.Jet1.at(i).index()      << std::setw(12)   << fAllTops.Jet2.at(i).index()   << std::setw(12)   << fAllTops.BJet.at(i).index()
+		  << std::setw(12) << fAllTops.MVA.at(i)               << std::setw(12)   << isCrossCleaned
+		  <<  std::endl;
+	
+      }
+      if (!isCrossCleaned) continue;
+
+      // Save the top selected && cross-cleaned top candidate
+      fAllCleanedTops.Jet1.push_back( fAllTops.Jet1.at(i) );
+      fAllCleanedTops.Jet2.push_back( fAllTops.Jet2.at(i) );
+      fAllCleanedTops.BJet.push_back( fAllTops.BJet.at(i) );
+      fAllCleanedTops.MVA.push_back( fAllTops.MVA.at(i) );
+      fAllCleanedTops.TrijetP4.push_back( fAllTops.TrijetP4.at(i) );
+      fAllCleanedTops.DijetP4.push_back( fAllTops.DijetP4.at(i) );
+      fAllCleanedTops.isGenuine.push_back( fAllTops.isGenuine.at(i) ); // fixme: always false, overwite later.
+      fAllCleanedTops.isTagged.push_back( fAllTops.isTagged.at(i) );   // fixme: which MVA cut? ldg, or subldg, or?
+
+      // Fill Histos (selected, cross-cleaned candidates)
+      hTopBDT_AllCleanedCandidates -> Fill(fAllTops.MVA.at(i) );
+      hTopMass_AllCleanedCandidates-> Fill(fAllTops.TrijetP4.at(i).M());
+      hTopPt_AllCleanedCandidates  -> Fill(fAllTops.TrijetP4.at(i).pt());
+    }
+
+
+  // For-loop: Failed candidates
+  for (size_t i = 0; i < fNotSelectedTops.MVA.size(); i++)
+    {
+      // Fill Histos (selected candidates)
+      hTopBDT_NotSelectedCandidates -> Fill(fNotSelectedTops.MVA.at(i) );
+      hTopMass_NotSelectedCandidates-> Fill(fNotSelectedTops.TrijetP4.at(i).M());
+      hTopPt_NotSelectedCandidates  -> Fill(fNotSelectedTops.TrijetP4.at(i).pt());
+    }
+
+  // Fill multiplicities
+  hTopMultiplicity_SelectedCandidates->Fill(fSelectedTops.MVA.size());
   hTopMultiplicity_SelectedCleanedCandidates->Fill(fSelectedCleanedTops.MVA.size());
+  hTopMultiplicity_NotSelectedCandidates->Fill(fNotSelectedTops.MVA.size());
+  hTopMultiplicity_AllCleanedCandidates->Fill(fAllCleanedTops.MVA.size());
 
   //================================================================================================  
   // Determine the ldg-in-pt free b-jet (tetrajet b-jet)
@@ -582,6 +704,190 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
       subLdgTetrajet_P4 = top_subLdgInPt.TrijetP4 + tetrajetBjet.p4();
     }
 
+
+  //================================================================================================
+  // Find top decay products
+  //================================================================================================
+  std::vector<genParticle> GenTops, GenTops_BQuark, GenTops_SubldgQuark, GenTops_LdgQuark;
+  std::vector <Jet>        MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet, MC_BJets;
+  std::vector <double>     dRminB;
+  const double twoSigmaDpt = 0.32, dRcut = 0.4;
+
+  if (event.isMC())
+    {
+    GenTops = GetGenParticles(event.genparticles().getGenParticles(), 6);
+    }
+  
+  // For-loop: All top quarks
+  for (auto& top: GenTops){
+    std::vector<genParticle> quarks, bquark;
+    // For-loop: Top quark daughters (Nested)
+    for (size_t i=0; i<top.daughters().size(); i++)
+      {
+        genParticle dau = event.genparticles().getGenParticles()[top.daughters().at(i)];
+        // B-Quark, W-Boson
+        if (std::abs(dau.pdgId()) ==  5) bquark.push_back(dau);
+	if (std::abs(dau.pdgId()) == 24) quarks = GetWpartons(dau, event);
+      }//Top-quark daughters
+
+    // Skip top if b-quark is not found (i.e. top decays to W and c)
+    if (bquark.size() < 1) continue;
+    // Skip top if at least one W decays leptonically
+    if (quarks.size() < 2) continue;
+
+    // Fill vectors for b-quarks, leading and subleading quarks coming from tops
+    GenTops_BQuark.push_back(bquark.at(0));
+    GenTops_LdgQuark.push_back(getLeadingSubleadingParton(quarks.at(0),    quarks.at(1), "leading"));
+    GenTops_SubldgQuark.push_back(getLeadingSubleadingParton(quarks.at(0), quarks.at(1), "subleading"));
+  }
+  
+  // Skip matcing if top does not decay to b
+  bool doMatching = (GenTops_BQuark.size() == GenTops.size());	    
+
+  //================================================================================================
+  // Find truth-matched top candidates
+  //================================================================================================
+  if (doMatching)
+    {
+      // For-loop: All top quarks (for b-jet matching)
+      for (size_t i=0; i<GenTops.size(); i++)
+        {
+          genParticle BQuark = GenTops_BQuark.at(i);
+          Jet mcMatched_BJet;
+          double dRmin  = 99999.9;
+
+          // For-loop: All selected jets
+          for (auto& bjet: jets)
+            {
+              double dR  = ROOT::Math::VectorUtil::DeltaR( bjet.p4(), BQuark.p4());
+              double dPtOverPt = std::abs((bjet.pt() - BQuark.pt())/BQuark.pt());
+
+	      // Find minimum dR
+              if (dR > dRmin) continue;
+
+              //Skip if dPtOverPt > twoSigmaDpt/Pt
+              if (dPtOverPt > twoSigmaDpt) continue;
+
+              // Store values
+              dRmin  = dR;
+              mcMatched_BJet = bjet;
+            }// For-loop: All selected jets
+
+          // Store match
+          dRminB.push_back(dRmin);
+          MC_BJets.push_back(mcMatched_BJet);
+        }// For-loop: All top quarks    
+      
+      // For-loop: All top quarks (for dijet matching)
+      for (size_t i=0; i<GenTops.size(); i++)
+	{
+	  genParticle top         = GenTops.at(i);
+	  genParticle LdgQuark    = GenTops_LdgQuark.at(i);
+	  genParticle SubldgQuark = GenTops_SubldgQuark.at(i);
+	  Jet mcMatched_LdgJet, mcMatched_SubldgJet;	  
+	  double dR1min, dR2min;
+	  dR1min = dR2min = 99999.9;
+	  
+	  // For-loop: All selected jets
+	  for (auto& jet: jets)
+	    {
+	      bool same = false;
+	      
+	      // For-loop: All top-quarks (Skip the jets that are matched to bquarks)
+	      for (size_t k=0; k<GenTops.size(); k++)
+		{
+		  if (dRminB.at(k) > dRcut) continue;
+		  if (areSameJets(jet,MC_BJets.at(k))) same = true;
+		}// For-loop: All top-quarks
+	      
+	      if (same) continue;
+
+	      // Find dR for the two jets in top-decay dijet
+	      double dR1 = ROOT::Math::VectorUtil::DeltaR(jet.p4(), LdgQuark.p4());
+	      double dR2 = ROOT::Math::VectorUtil::DeltaR(jet.p4(), SubldgQuark.p4());
+
+	      // Calculate dPtOverPt for each jet in top-decay dijet
+	      double dPtOverPt1 = std::abs((jet.pt() - LdgQuark.pt())/LdgQuark.pt());
+	      double dPtOverPt2 = std::abs((jet.pt() - SubldgQuark.pt())/SubldgQuark.pt());
+	      
+	      // Find which of the two is the correct match                                                     
+	      if (dR1 < dR2)
+		{
+		  // Is Jet1 closer in eta-phi AND has smaller pT difference?
+		  if (dR1 < dR1min)
+		    {
+		      if (dPtOverPt1 < twoSigmaDpt)
+			{
+			  dR1min = dR1;
+			  mcMatched_LdgJet = jet;
+			}
+		    }		  
+		  // Is Jet2 closer in eta-phi AND has smaller pT difference?
+		  else if (dR2 < dR2min)
+		    {
+		      if (dPtOverPt2 < twoSigmaDpt)
+			{
+			  dR2min  = dR2;
+			  mcMatched_SubldgJet = jet;
+			}
+		    }
+		}
+	      else
+		{
+		  // Is Jet2 closer in eta-phi AND has smaller pT difference?
+		  if (dR2 < dR2min)
+		    {
+		      if (dPtOverPt2 < twoSigmaDpt)
+			{
+			  dR2min  = dR2;
+			  mcMatched_SubldgJet = jet;
+			}
+		    }		  
+		  // Is Jet2 closer in eta-phi AND has smaller pT difference?
+		  else if (dR1 < dR1min)
+		    {
+		      if  (dPtOverPt1 < twoSigmaDpt)
+			{
+			  dR1min  = dR1;
+			  mcMatched_LdgJet = jet;
+			}
+		    }
+		}
+	    }//For-loop: All selected jets
+	  
+	  // Check if top-tagged object is genuine (fully truth-matched)
+	  bool isGenuine = (dR1min<= dRcut && dR2min <= dRcut && dRminB.at(i) <= dRcut);
+
+	  if (isGenuine)
+	    {
+	      // Store genuine top candidates
+	      MCtrue_LdgJet.push_back(mcMatched_LdgJet);
+	      MCtrue_SubldgJet.push_back(mcMatched_SubldgJet);
+	      MCtrue_Bjet.push_back(MC_BJets.at(i));
+	    }
+	}
+    }
+
+  //================================================================================================
+  // Calculate the event top-tagging Scale Factor (SF)
+  //================================================================================================
+  if (event.isMC())
+    {
+
+      // First of all, update the mc-truth info
+      for (size_t i = 0; i < fAllCleanedTops.MVA.size(); i++)
+	{      
+	  bool isFullyMatched = IsGenuineTop(fAllCleanedTops.Jet1.at(i), fAllCleanedTops.Jet2.at(i), fAllCleanedTops.BJet.at(i), MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet);
+	  fAllCleanedTops.isGenuine.at(i) = isFullyMatched;
+	}
+
+      // Calculate and store b-jet scale factor weight and it's uncertainty
+      output.fTopTaggingScaleFactorEventWeight = fTopTagSFCalculator.calculateSF(fAllCleanedTops.TrijetP4, fAllCleanedTops.isTagged, fAllCleanedTops.isGenuine);
+
+    }
+
+
+    
   //================================================================================================
   // Fill output data
   //================================================================================================
@@ -648,6 +954,14 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
       output.fSelectedTopsMVA.push_back(fSelectedTops.MVA.at(i));
     }
 
+  for (size_t i = 0; i < fNotSelectedTops.MVA.size(); i++)
+    {
+      output.fNotSelectedTopsJet1.push_back(fNotSelectedTops.Jet1.at(i));
+      output.fNotSelectedTopsJet2.push_back(fNotSelectedTops.Jet2.at(i));
+      output.fNotSelectedTopsBJet.push_back(fNotSelectedTops.BJet.at(i));
+      output.fNotSelectedTopsMVA.push_back(fNotSelectedTops.MVA.at(i));
+    }
+
   for (size_t i = 0; i < fAllTops.MVA.size(); i++)
     {
       output.fAllTopsJet1.push_back(fAllTops.Jet1.at(i));
@@ -662,6 +976,14 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
       output.fSelectedCleanedTopsJet2.push_back(fSelectedCleanedTops.Jet2.at(i));
       output.fSelectedCleanedTopsBJet.push_back(fSelectedCleanedTops.BJet.at(i));
       output.fSelectedCleanedTopsMVA.push_back(fSelectedCleanedTops.MVA.at(i));
+    }
+
+  for (size_t i = 0; i < fAllCleanedTops.MVA.size(); i++)
+    {
+      output.fAllCleanedTopsJet1.push_back(fAllCleanedTops.Jet1.at(i));
+      output.fAllCleanedTopsJet2.push_back(fAllCleanedTops.Jet2.at(i));
+      output.fAllCleanedTopsBJet.push_back(fAllCleanedTops.BJet.at(i));
+      output.fAllCleanedTopsMVA.push_back(fAllCleanedTops.MVA.at(i));
     }
 
    //================================================================================================
@@ -785,6 +1107,22 @@ Jet TopSelectionBDT::getLeadingSubleadingJet(const Jet& jet0, const Jet& jet1, s
   if (selectedJet == "subleading") return subleadingJet;
   return leadingJet;
 }
+
+genParticle TopSelectionBDT::getLeadingSubleadingParton(const genParticle& quark0, const genParticle& quark1, string selectedParton){
+  if (selectedParton != "leading" && selectedParton!="subleading") std::cout<<"WARNING! Unknown option "<<selectedParton<<". Function getLeadingSubleadingParton returns leading Parton"<<std::endl;
+  genParticle leadingParton, subleadingParton;
+  if (quark0.pt() > quark1.pt()){                                                                                                   
+    leadingParton    = quark0;                  
+    subleadingParton = quark1;      
+  }           
+  else{                         
+    leadingParton    = quark1;                                          
+    subleadingParton = quark0;
+  }
+  if (selectedParton == "subleading") return subleadingParton;
+  return leadingParton;
+}
+
 
 bool TopSelectionBDT::isMatchedJet(const Jet& jet, const TrijetSelection& myTops, const unsigned int index) {
   // Sanity check: If index is bigger than the number of tops that top does not exist => not possible to be matched
@@ -959,3 +1297,72 @@ bool TopSelectionBDT::TopIsCrossCleaned(int Index, TrijetSelection TopCand, cons
   
   return true;
 }
+
+//Get all gen particles by pdgId
+vector<genParticle> TopSelectionBDT::GetGenParticles(const vector<genParticle> genParticles, const int pdgId)
+{
+  std::vector<genParticle> particles;
+  // For-loop: All genParticles  
+  for (auto& p: genParticles){
+    // Find last copy of a given particle
+    if (!p.isLastCopy()) continue;
+    // Consider only particles
+    if (std::abs(p.pdgId()) != pdgId) continue;
+    // Save this particle
+    particles.push_back(p);
+  }
+  return particles;
+}
+
+//  Get the last copy of a particle.
+const genParticle TopSelectionBDT::GetLastCopy(const vector<genParticle> genParticles, const genParticle &p){
+
+  int gen_pdgId = p.pdgId();
+  for (size_t i=0; i<p.daughters().size(); i++){
+    const genParticle genDau = genParticles[p.daughters().at(i)];
+    int genDau_pdgId   = genDau.pdgId();
+
+    if (gen_pdgId == genDau_pdgId)  return GetLastCopy(genParticles, genDau);
+  }
+  return p;
+}
+
+
+vector<genParticle> TopSelectionBDT::GetWpartons( genParticle daughter, const Event& event){
+  vector<genParticle> quarks;
+
+  // Get the last copy
+  genParticle W = GetLastCopy(event.genparticles().getGenParticles(), daughter);
+  // For-loop: W-boson daughters
+  for (size_t idau = 0; idau < W.daughters().size(); idau++)
+    {
+      // Find the decay products of W-boson
+      int Wdau_index   = W.daughters().at(idau);
+      genParticle Wdau = event.genparticles().getGenParticles()[Wdau_index];
+      // Consider only quarks as decaying products
+      if (std::abs(Wdau.pdgId()) > 5) continue;
+      // Save daughter
+      quarks.push_back(Wdau);
+    }//W-boson daughters
+  
+  return quarks;
+}
+
+bool TopSelectionBDT::IsGenuineTop(const Jet& trijetJet1, const Jet& trijetJet2, const Jet& trijetBJet,
+				   const std::vector<Jet>& MCtrue_LdgJet,  const std::vector<Jet>& MCtrue_SubldgJet, const std::vector<Jet>& MCtrue_Bjet){
+  
+  for (size_t k=0; k<MCtrue_Bjet.size(); k++){
+    bool same1 = areSameJets(trijetJet1, MCtrue_LdgJet.at(k))       && areSameJets(trijetJet2, MCtrue_SubldgJet.at(k)) && areSameJets(trijetBJet,  MCtrue_Bjet.at(k));
+    bool same2 = areSameJets(trijetJet1, MCtrue_SubldgJet.at(k))    && areSameJets(trijetJet2, MCtrue_LdgJet.at(k))    && areSameJets(trijetBJet,  MCtrue_Bjet.at(k));
+    if (same1 || same2) return true;
+  }
+  return false;
+}
+
+  
+
+  
+  
+
+    
+  

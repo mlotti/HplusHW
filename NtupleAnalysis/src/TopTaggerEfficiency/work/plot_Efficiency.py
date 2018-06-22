@@ -9,14 +9,10 @@ USAGE:
 
 EXAMPLES:
 ./plot_Efficiency.py -m TopTaggerEfficiency_180529_TopEfficiency_vs_mass --folder topbdtSelection_ -v -e "220"
-./plot_Efficiency.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopTaggerEfficiency_180529_TopEfficiency_vs_mass --folder topbdtSelection_ -v -e "220|250|350|180|300"
-./plot_Efficiency.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopTaggerEfficiency_180529_TopEfficiency_vs_mass -i "220|300|400|500|650" --gridX --gridY --ratio
-./plot_Efficiency.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopTaggerEfficiency_180529_TopEfficiency_vs_mass -i "220|300|400|500|650" --bandValue 5     
 
 
 LAST USED:
-./plot_Efficiency.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopTaggerEfficiency_180529_TopEfficiency_vs_mass -i "200|300|500|650|800" --bandValue 10 --ratio --refMass 500
-
+./plot_Efficiency.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopTaggerEfficiency_180610_Efficiencies_BDT0p4 --folder topbdtSelection_ -v --url
 
 STATISTICS OPTIONS:
 https://iktp.tu-dresden.de/~nbarros/doc/root/TEfficiency.html
@@ -51,7 +47,6 @@ import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
 import HiggsAnalysis.NtupleAnalysis.tools.counter as counter
 import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
-import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
@@ -136,28 +131,26 @@ def GetHistoKwargs(histoName, opts):
     value = kwargs
     '''
     h = histoName.lower()
-    if opts.ratio:
-        legPos = {"dx": -0.08, "dy": -0.65, "dh": -0.08}
-    else:
-        legPos = {"dx": -0.08, "dy": -0.1, "dh": -0.08}
-
     kwargs     = {
         "xlabel"           : "x-axis",
         "ylabel"           : "Efficiency / ", #/ %.1f ",
         # "rebinX"           : 1,
         "ratioYlabel"      : "Ratio",
-        "ratio"            : opts.ratio,
+        "ratio"            : True,
         "ratioInvert"      : False,
         "stackMCHistograms": False,
         "addMCUncertainty" : False,
         "addLuminosityText": False,
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
-        "opts"             : {"ymin": 0.0, "ymaxfactor": 1.05},
+        #"opts"             : {"ymin": 0.0, "ymax": 1.09},
+        "opts"             : {"ymin": 0.0, "ymaxfactor": 1.2},
         "opts2"            : {"ymin": 0.6, "ymax": 1.4},
         "log"              : False,
-        "moveLegend"       : legPos,
-        #"cutBoxY"          : {"cutValue": 1.10, "fillColor": ROOT.kGray+1, "fillStyle": 3001, "box": True, "line": True, "greaterThan": True, "mainCanvas": False, "ratioCanvas": True, "mirror": True}
+#        "moveLegend"       : {"dx": -0.08, "dy": -0.01, "dh": -0.08},
+        "moveLegend"       : {"dx": -0.08, "dy": -0.005, "dh": -0.08},
+#        "moveLegend"       : {"dx": -0.57, "dy": -0.007, "dh": -0.18},
+        #"cutBoxY"          : {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": True}
         }
 
     if "pt" in h:
@@ -172,6 +165,8 @@ def GetHistoKwargs(histoName, opts):
         #if "all" in h:
         #    myBins  = [0, 50, 100, 150, 200, 300, 450]
         if "topquark" in h:
+            #kwargs["moveLegend"] = {"dx": -0.55, "dy": -0.55, "dh": -0.08}
+            kwargs["moveLegend"] = {"dx": -0.08, "dy": -0.65, "dh": -0.08}
             xlabel = "generated top p_{T} (%s)" % (units)
         if 0:
             ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
@@ -187,6 +182,13 @@ def GetHistoKwargs(histoName, opts):
             kwargs["moveLegend"] = {"dx": -0.08, "dy": -0.65, "dh": -0.08}
             #myBins  = [0, 50, 100, 150, 250, 350, 400, 500]
             #myBins  = [0, 100, 200, 300, 400, 500, 800]
+        if "_matched" in h:
+            myBins  = [0, 100, 200, 300, 500]
+        if "_ldg_" in h:
+            myBins  = [0, 150, 250, 350, 500]
+        if "_sldg_" in h:
+            myBins  = [100, 350]
+
         if 0:
             ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
 
@@ -202,8 +204,8 @@ def main(opts, signalMass):
     # Apply TDR style
     style = tdrstyle.TDRStyle()
     style.setOptStat(True)
-    style.setGridX(opts.gridX)
-    style.setGridY(opts.gridY)
+    style.setGridX(False)
+    style.setGridY(False)
     
     # If user does not define optimisation mode do all of them
     if opts.optMode == None:
@@ -233,15 +235,20 @@ def main(opts, signalMass):
             if "ChargedHiggs" in d.getName():
                 datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
 
+        datasetsMgr.PrintInfo()
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
         
+        # Print dataset information before removing anything?
+        if 0:
+            datasetsMgr.PrintInfo()
+
         # Determine integrated Lumi before removing data
         if "Data" in datasetsMgr.getAllDatasetNames():
             intLumi = datasetsMgr.getDataset("Data").getLuminosity()
+
         else:
             intLumi = 35920
-
         # Remove datasets
         filterKeys = ["Data", "QCD", "TTZToQQ", "TTWJets", "TTTT", "ZJetsToQQ_HT600toInf", "DYJetsToQQHT", "SingleTop", "WJetsToQQ_HT_600ToInf", "Diboson"]
         for key in filterKeys:
@@ -250,8 +257,8 @@ def main(opts, signalMass):
         # Re-order datasets
         datasetOrder = []
         for d in datasetsMgr.getAllDatasets():
-            if "TT" in d.getName():
-                continue
+            #if "TT" in d.getName():
+            #    continue
             if "M_" in d.getName():
                 if d not in signalMass:
                     continue
@@ -272,63 +279,79 @@ def main(opts, signalMass):
         # Print dataset information
         datasetsMgr.PrintInfo()
 
-        # Define list with Numerators - Denominators
-        Numerator = ["AllTopQuarkPt_MatchedBDT",
-                     "TrijetFakePt_BDT",
-                     "AssocTopQuarkPt_MatchedBDT",
-                     "HiggsTopQuarkPt_MatchedBDT",
-                     "AllTopQuarkPt_MatchedBDT",
-                     "AllTopQuarkPt_Matched",
-                     ]
-        Denominator = ["AllTopQuarkPt_Matched",
-                       "TrijetFakePt",
-                       "AssocTopQuarkPt_Matched",                       
-                       "HiggsTopQuarkPt_Matched",                       
-                       "TopQuarkPt",
-                       "TopQuarkPt",
-                       ]
 
+        # Define list with Numerators - Denominators
         '''
         Numerator = ["AllTopQuarkPt_MatchedBDT",
                      "TrijetFakePt_BDT",
-                     "AllTopQuarkPt_Matched",
-                     "AllTopQuarkPt_MatchedBDT",
-                     #"AssocTopQuarkPt_Matched",
-                     #"AssocTopQuarkPt_MatchedBDT",
                      "AssocTopQuarkPt_MatchedBDT",
-                     #"HiggsTopQuarkPt_Matched",
-                     #"HiggsTopQuarkPt_MatchedBDT",
                      "HiggsTopQuarkPt_MatchedBDT",
-                     #"BothTopQuarkPt_MatchedBDT", #Debug                    
-                     #"AllTopQuarkPt_Matched",     #Debug
-                     #"AllTopQuarkPt_MatchedBDT",  #Debug
+                     "AssocTopQuarkPt_Matched",                       
+                     "HiggsTopQuarkPt_Matched",                       
+                     "AllTopQuarkPt_MatchedBDT",
+                     "AllTopQuarkPt_Matched",
                      ]
         Denominator = ["AllTopQuarkPt_Matched",
                        "TrijetFakePt",
-                       "TopQuarkPt",
-                       "TopQuarkPt",
-                       #"AssocTopQuarkPt",
-                       #"AssocTopQuarkPt",
                        "AssocTopQuarkPt_Matched",                       
-                       #"HiggsTopQuarkPt",
-                       #"HiggsTopQuarkPt",
                        "HiggsTopQuarkPt_Matched",                       
-                       "BothTopQuarkPt",
-                       "BothTopQuarkPt",        
-                       #"BothTopQuarkPt_Matched",    #Debug
-                       #"AllTopQuarkPt_Matched",     #Debug
-                       #"BothTopQuarkPt_MatchedBDT", #Debug
+                       "AssocTopQuarkPt",                       
+                       "HiggsTopQuarkPt",                       
+                       "TopQuarkPt",
+                       "TopQuarkPt",
                        ]
         '''
+
+        Numerator = [#"AllTopQuarkPt_MatchedBDT",
+                     #"TrijetFakePt_BDT",
+                     #"AssocTopQuarkPt_MatchedBDT",
+                     #"HiggsTopQuarkPt_MatchedBDT",
+                     #"AllTopQuarkPt_MatchedBDT",
+                     #"AllTopQuarkPt_Matched",
+                     "TrijetPt_LdgOrSldg_Matched",
+                     ##"TrijetPt_LdgOrSldg_Unmatched",
+                     "TrijetPt_LdgOrSldg_MatchedBDT",
+                     "TrijetPt_LdgOrSldg_MatchedBDT",
+                     "TrijetPt_LdgOrSldg_UnmatchedBDT",
+                     "TrijetPt_LdgOrSldg_UnmatchedBDT",
+                     "TrijetPt_Ldg_Matched",
+                     "TrijetPt_Ldg_MatchedBDT",
+                     ##"TrijetPt_Ldg_MatchedBDT",
+                     "TrijetPt_Ldg_UnmatchedBDT",
+                     #"TrijetPt_Sldg_Matched",
+                     #"TrijetPt_Sldg_MatchedBDT",
+                     #"TrijetPt_Sldg_MatchedBDT",
+                     #"TrijetPt_Sldg_UnmatchedBDT",
+                     
+                     ]
+        Denominator = [#"AllTopQuarkPt_Matched",
+                       #"TrijetFakePt",
+                       #"AssocTopQuarkPt_Matched",                       
+                       #"HiggsTopQuarkPt_Matched",                       
+                       #"TopQuarkPt",
+                       #"TopQuarkPt",
+                       "TrijetPt_LdgOrSldg",
+                       ##"TrijetPt_LdgOrSldg",
+                       "TrijetPt_LdgOrSldg",
+                       "TrijetPt_LdgOrSldg_Matched",
+                       "TrijetPt_LdgOrSldg",
+                       "TrijetPt_LdgOrSldg_Unmatched",
+                       "TrijetPt_Ldg",
+                       "TrijetPt_Ldg",
+                       ##"TrijetPt_Ldg_Matched",
+                       "TrijetPt_Ldg_Unmatched",
+                       #"TrijetPt_Subldg",
+                       #"TrijetPt_Subldg",
+                       #"TrijetPt_Sldg_Matched",
+                       #"TrijetPt_Sldg_Unmatched",
+                       ]
 
         # For-loop: All numerator-denominator pairs
         for i in range(len(Numerator)):
             numerator   = os.path.join(opts.folder, Numerator[i])
             denominator = os.path.join(opts.folder, Denominator[i])
             PlotEfficiency(datasetsMgr, numerator, denominator, intLumi)
-            # CalcEfficiency(datasetsMgr, numerator, denominator, intLumi)
-
-    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)
+            #CalcEfficiency(datasetsMgr, numerator, denominator, intLumi)
     return
 
 
@@ -355,18 +378,15 @@ def CheckNegatives(hNum, hDen, verbose=False):
         # Numerator > Denominator
         if nbin > dbin:
             hNum.SetBinContent(i, dbin)
-            print "here1"
         # Numerator < 0 
         if nbin < 0:
             #hNum.SetBinContent(i,0)
             hNum.SetBinContent(i, abs(nbin) )
-            print "here2"
         # Denominator < 0
         if dbin < 0:
             #hNum.SetBinContent(i,0)
             #hDen.SetBinContent(i,0)
             hDen.SetBinContent(i, abs(dbin))
-            print "here3"
         # Save updated info to table
         nbin = hNum.GetBinContent(i)
         dbin = hDen.GetBinContent(i)
@@ -395,7 +415,7 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
     myList  = []
     myBckList = []
     index   = 0
-    _kwargs = GetHistoKwargs(numPath, opts)        
+    _kwargs = GetHistoKwargs(denPath, opts)        
     counter = 0
     # For-loop: All datasets
     for dataset in datasetsMgr.getAllDatasets():
@@ -404,11 +424,11 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
         # Get the histograms
         #num = dataset.getDatasetRootHisto(numPath).getHistogram()
         #den = dataset.getDatasetRootHisto(denPath).getHistogram()
-        if "TT" in dataset.getName():
-            numPath = numPath.replace("HiggsTop", "AllTop")
-            denPath = denPath.replace("HiggsTop", "AllTop")
-            numPath = numPath.replace("AssocTop", "AllTop")
-            denPath = denPath.replace("AssocTop", "AllTop")
+        #if "TT" in dataset.getName():
+        #    numPath = numPath.replace("HiggsTop", "AllTop")
+        #    denPath = denPath.replace("HiggsTop", "AllTop")
+        #    numPath = numPath.replace("AssocTop", "AllTop")
+        #    denPath = denPath.replace("AssocTop", "AllTop")
                 
         n = dataset.getDatasetRootHisto(numPath)
         n.normalizeToLuminosity(intLumi)
@@ -474,44 +494,45 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
                 eff.SetLineStyle(ROOT.kSolid)
                 eff.SetLineWidth(3)
                 eff.SetMarkerSize(1.2)
+                '''
+                mass = dataset.getName().split("M_")[-1]
+                mass = mass.replace("650", "1000")
+                s = styles.getSignalStyleHToTB_M(mass)
+                s.apply(eff)
+                '''
+        '''
+        ttStyle = styles.getEWKLineStyle()
+        if "tt" in dataset.getName().lower():
+            ttStyle.apply(eff)
+        '''
+
         
         # Append in list
-        if "charged" in dataset.getName().lower():
-            myList.append(histograms.HistoGraph(eff, plots._legendLabels[dataset.getName()], "lp", "P"))
-        elif "tt" in dataset.getName().lower():
-            eff_ref = histograms.HistoGraph(eff, plots._legendLabels[dataset.getName()], "lp", "P")
+        #if "charged" in dataset.getName().lower():
+        #    if "m_500" in dataset.getName().lower():
+        if 1:
+            if "tt" in dataset.getName().lower():
+                eff_ref = histograms.HistoGraph(eff, plots._legendLabels[dataset.getName()], "lp", "P")
+            else:
+                myList.append(histograms.HistoGraph(eff, plots._legendLabels[dataset.getName()], "lp", "P"))
+        #elif "tt" in dataset.getName().lower():
+        #    eff_ref = histograms.HistoGraph(eff, plots._legendLabels[dataset.getName()], "lp", "P")
             
     # Define save name
     saveName = "Eff_" + name_N.split("/")[-1] + "Over"+ name_D.split("/")[-1]
 
-    # Plot the efficiency    
-    refPlot = None
-    for i, h in enumerate(myList, 0):
-        name = h.getRootHisto().GetName()
-        if opts.refSignal in name:
-            refPlot = h
-            myList.remove(h)
-        
-    #refPlot   = myList[refIndex]
-    #compPlots = [x for i, x in enumerate(myList) if i!=refIndex]
-    # p = plots.PlotBase(datasetRootHistos=myList, saveFormats=[])
-    # p = plots.ComparisonManyPlot(eff_ref, myList, saveFormats=[])
-    #p = plots.ComparisonManyPlot(myList[0], myList[1:], saveFormats=[])
-    #p = plots.ComparisonManyPlot(refPlot, compPlots, saveFormats=[])
-    p = plots.ComparisonManyPlot(refPlot, myList, saveFormats=[])
-
-    # Draw the plot
+    # Plot the efficiency
+    #p = plots.PlotBase(datasetRootHistos=myList, saveFormats=[])
+    p = plots.ComparisonManyPlot(eff_ref, myList, saveFormats=[])
     plots.drawPlot(p, saveName, **_kwargs)
-
-
-    if opts.bandValue != 0:
-        kwargs = {"cutValue": 1.0 + opts.bandValue/100.0, "fillColor": ROOT.kGray, "fillStyle": 3001, "box": True, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": False, "mirror": True}
-        p.addCutBoxAndLineY(**kwargs)
 
     # Save plot in all formats
     savePath = os.path.join(opts.saveDir, name_N.split("/")[0], opts.optMode)
     SavePlot(p, saveName, savePath, saveFormats = [".png", ".C", ".pdf"])#, ".pdf"])
     return
+
+
+
 
 def CalcEfficiency(datasetsMgr, numPath, denPath, intLumi):
     # Definitions
@@ -608,8 +629,6 @@ def convert2TGraph(tefficiency):
     graph = ROOT.TGraphAsymmErrors(n, array.array("d",x), array.array("d",y),
                                    array.array("d",xerrl), array.array("d",xerrh),
                                   array.array("d",yerrl), array.array("d",yerrh)) 
-
-    graph.SetName(tefficiency.GetName())
     return graph
 
 
@@ -663,7 +682,7 @@ if __name__ == "__main__":
     BATCHMODE    = True
     PRECISION    = 3
     SIGNALMASS   = [300, 500]
-    REFMASS      = 500
+    #SIGNALMASS   = [500]
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False
@@ -671,13 +690,10 @@ if __name__ == "__main__":
     NOERROR      = True
     SAVEDIR      = None #"/publicweb/%s/%s/%s" % (getpass.getuser()[0], getpass.getuser(), ANALYSISNAME)
     VERBOSE      = False
-    RATIO        = False
-    GRIDX        = False
-    GRIDY        = False
+    HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
     NORMALISE    = False
-    FOLDER       = "topbdtSelection_"
+    FOLDER       = "" #"topSelection_" #"ForDataDrivenCtrlPlots" #"topologySelection_"
     MVACUT       = "MVA"
-    BANDVALUE    = 0.0
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -703,8 +719,8 @@ if __name__ == "__main__":
     parser.add_option("--dataEra", dest="dataEra", type="string", default=DATAERA, 
                       help="Override default dataEra [default: %s]" % DATAERA)
 
-    parser.add_option("--refMass", dest="refMass", type=int, default=REFMASS, 
-                      help="Reference Mass value of signal to use [default: %d]" % REFMASS)
+    #parser.add_option("--signalMass", dest="signalMass", type=float, default=SIGNALMASS, 
+                      #help="Mass value of signal to use [default: %s]" % SIGNALMASS)
 
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR, 
                       help="Directory where all pltos will be saved [default: %s]" % SAVEDIR)
@@ -715,14 +731,8 @@ if __name__ == "__main__":
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE, 
                       help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
 
-    parser.add_option("--gridX", dest="gridX", action="store_true", default=GRIDX,
-                      help="Enables x-axis grid [default: %s]" % GRIDX)
-
-    parser.add_option("--gridY", dest="gridY", action="store_true", default=GRIDY,
-                      help="Enables y-axis grid [default: %s]" % GRIDY)
-
-    parser.add_option("--ratio", dest="ratio", action="store_true", default=RATIO,
-                      help="Enables the ratio gad [default: %s]" % RATIO)
+    parser.add_option("--histoLevel", dest="histoLevel", action="store", default = HISTOLEVEL,
+                      help="Histogram ambient level (default: %s)" % (HISTOLEVEL))
 
     parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
                       help="List of datasets in mcrab to include")
@@ -738,10 +748,6 @@ if __name__ == "__main__":
 
     parser.add_option("--MVAcut", dest="MVAcut", type="string", default = MVACUT,
                       help="Save plots to directory in respect of the MVA cut value [default: %s]" % (MVACUT) )
-
-    parser.add_option("--bandValue", dest="bandValue", type="float", default=BANDVALUE,
-                      help="Add a symmetric band around 1.0. Value passed should be the percentage (e.g 10 or 5)  [default: %s]" % (BANDVALUE) )
-
 
     (opts, parseArgs) = parser.parse_args()
 
@@ -765,10 +771,7 @@ if __name__ == "__main__":
     for m in sorted(SIGNALMASS, reverse=True):
         signalMass.append("ChargedHiggs_HplusTB_HplusToTB_M_%.f_ext1" % m)
         signalMass.append("ChargedHiggs_HplusTB_HplusToTB_M_%.f" % m)
-    if opts.refMass not in allowedMass:
-        raise Exception("Invalid value for reference mass (=%d)" % (opts.refMass))
-    opts.refSignal = "ChargedHiggs_HplusTB_HplusToTB_M_%d" % opts.refMass
-        
+
     # Call the main function
     main(opts, signalMass)
 

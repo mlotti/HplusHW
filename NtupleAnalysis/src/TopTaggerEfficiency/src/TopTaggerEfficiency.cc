@@ -49,7 +49,12 @@ public:
   int GetTrijet2(const TopSelectionBDT::Data& topData, const std::vector<Jet>& bjets, const Jet& trijetJet1, const Jet& trijetJet2, const Jet& trijetBJet);
   bool foundFreeBjet(const Jet& trijet1Jet1, const Jet& trijet1Jet2, const Jet& trijet1BJet, const Jet& trijet2Jet1, const Jet& trijet2Jet2, const Jet& trijet2BJet , const std::vector<Jet>& bjets);
 
-  bool TrijetPassBDT_crossCleaned(int Index, const TopSelectionBDT::Data& topData, const std::vector<Jet>& bjets);
+  bool Trijet_crossCleaned(int Index, const TopSelectionBDT::Data& topData, const std::vector<Jet>& bjets);
+  bool TrijetPassBDT_crossCleaned(int Index, const TopSelectionBDT::Data& topData, const std::vector<Jet>& bjets); //Really needed?
+  bool IsCrossCleaned(int index_j, const TopSelectionBDT::Data& topData, const std::vector<Jet>& bjets, std::vector<int> TopIndex);
+  int GetLdgOrSubldgTopIndex(std::vector<int>TopIndex, const TopSelectionBDT::Data& topData, string type);
+
+  std::vector<int>SortPt(const TopSelectionBDT::Data& topData);
 
   /// Called for each event
   virtual void process(Long64_t entry) override;
@@ -180,6 +185,35 @@ private:
 
   WrappedTH1Triplet* hTopBDT_AllCandidates;
 
+  WrappedTH1* hLdgInPtTrijetBDT;
+  WrappedTH1* hSubldgInPtTrijetBDT;
+  WrappedTH1* hLdgInBDTTrijetBDT;
+  WrappedTH1* hSubldgInBDTTrijetBDT;
+
+  WrappedTH1* hTopBDT_AllCleanedCandidates;
+  WrappedTH1* hTrijet1_BDT;
+  WrappedTH1* hTrijet2_BDT;
+  WrappedTH1* hLdgTrijet_BDT;
+  WrappedTH1* hSubldgTrijet_BDT;
+  WrappedTH1* hBothTopCandidates_BDT;
+
+  WrappedTH2* hTopBDT_Vs_TopMass;
+  WrappedTH2* hTopBDT_Vs_WMass;
+  WrappedTH2* hTopBDT_Vs_TopMass_AllCandidates;
+  WrappedTH2* hTopBDT_Vs_WMass_AllCandidates;
+  WrappedTH2* hTopBDT_Vs_TopMass_AllCleanedCandidates;
+  WrappedTH2* hTopBDT_Vs_WMass_AllCleanedCandidates;
+  WrappedTH2* hTrijet1_BDT_Vs_TopMass;
+  WrappedTH2* hTrijet2_BDT_Vs_TopMass;
+  WrappedTH2* hLdgTrijet_BDT_Vs_TopMass;
+  WrappedTH2* hSubldgTrijet_BDT_Vs_TopMass;
+  WrappedTH2* hTrijet1_BDT_Vs_WMass;
+  WrappedTH2* hTrijet2_BDT_Vs_WMass;
+  WrappedTH2* hLdgTrijet_BDT_Vs_WMass;
+  WrappedTH2* hSubldgTrijet_BDT_Vs_WMass;
+  WrappedTH2* hBothTopCandidates_BDT_Vs_TopMass;
+  WrappedTH2* hBothTopCandidates_BDT_Vs_WMass;
+
 };
 
 #include "Framework/interface/SelectorFactory.h"
@@ -231,9 +265,13 @@ void TopTaggerEfficiency::book(TDirectory *dir) {
   // const double fPtMin     = 2 *fCommonPlots.getPtBinSettings().min();
   // const double fPtMax     = 2* fCommonPlots.getPtBinSettings().max();
 
-  // const int nWMassBins    = fCommonPlots.getWMassBinSettings().bins();
-  // const float fWMassMin   = fCommonPlots.getWMassBinSettings().min();
-  // const float fWMassMax   = fCommonPlots.getWMassBinSettings().max();
+  const int nWMassBins    = fCommonPlots.getWMassBinSettings().bins();
+  const float fWMassMin   = fCommonPlots.getWMassBinSettings().min();
+  const float fWMassMax   = fCommonPlots.getWMassBinSettings().max();
+
+  const int nTopMassBins  = fCommonPlots.getTopMassBinSettings().bins();
+  const float fTopMassMin = fCommonPlots.getTopMassBinSettings().min();
+  const float fTopMassMax = fCommonPlots.getTopMassBinSettings().max();
 
   const int nPtBins       = 2*fCommonPlots.getPtBinSettings().bins();
   const double fPtMin     = 2 *fCommonPlots.getPtBinSettings().min();
@@ -266,6 +304,7 @@ void TopTaggerEfficiency::book(TDirectory *dir) {
 
 
   TDirectory* subdirTH1 = fHistoWrapper.mkdir(HistoLevel::kVital, dir, "topbdtSelection_");
+  TDirectory* subdirTH2 = fHistoWrapper.mkdir(HistoLevel::kVital, dir, "topbdtSelectionTH2_");
 
   std::string myInclusiveLabel  = "AnalysisTriplets";
   std::string myFakeLabel       = myInclusiveLabel+"False";
@@ -276,12 +315,7 @@ void TopTaggerEfficiency::book(TDirectory *dir) {
   std::vector<TDirectory*> myDirs = {myInclusiveDir, myFakeDir, myGenuineDir};
 
   // Book non-common histograms
-  //For Efficiency plots                                                                                                                                                                                             
-  //const int nPtBins       = 2*fCommonPlots.getPtBinSettings().bins();
-  //const double fPtMin     = 2 *fCommonPlots.getPtBinSettings().min();
-  //const double fPtMax     = 2* fCommonPlots.getPtBinSettings().max();
-
-
+  //For Efficiency plots
   hTopQuarkPt                   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TopQuarkPt"                  , ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
   hAllTopQuarkPt_Matched        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "AllTopQuarkPt_Matched"       , ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
   hAllTopQuarkPt_MatchedBDT     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "AllTopQuarkPt_MatchedBDT"    , ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
@@ -323,7 +357,7 @@ void TopTaggerEfficiency::book(TDirectory *dir) {
   hTrijetPt_Sldg_Unmatched     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TrijetPt_Sldg_Unmatched", ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
   hTrijetPt_Sldg_UnmatchedBDT  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TrijetPt_Sldg_UnmatchedBDT", ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
   hTrijetPt_Sldg_Matched       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TrijetPt_Sldg_Matched", ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
-  hTrijetPt_Sldg_MatchedBDT     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TrijetPt_Ldg_MatchedBDT", ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
+  hTrijetPt_Sldg_MatchedBDT     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TrijetPt_Sldg_MatchedBDT", ";p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
 
 
   //Distances
@@ -402,13 +436,75 @@ void TopTaggerEfficiency::book(TDirectory *dir) {
   hLdgTrijet_DeltaR_Dijet = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "LdgTrijet_DeltaR_Dijet", ";",
 							      nDRBins     , fDRMin     , 6);
 
-  hTopBDT_AllCandidates           = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TopBDT_AllCandidates",";top candidate BDT", 40, -1.0, 1.0) ;
+  hTopBDT_AllCandidates           = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TopBDT_AllCandidates",";top candidate BDT", 40, -1.0, 1.0);
+  hLdgInPtTrijetBDT               = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "LdgInPtTrijetBDT",    ";top candidate BDT", 40, -1.0, 1.0);
+  hSubldgInPtTrijetBDT            = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "SubldgInPtTrijetBDT", ";top candidate BDT", 40, -1.0, 1.0);
+  hLdgInBDTTrijetBDT              = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "LdgInBDTTrijetBDT",   ";top candidate BDT", 40, -1.0, 1.0);
+  hSubldgInBDTTrijetBDT           = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "SubldgInBDTTrijetBDT",";top candidate BDT", 40, -1.0, 1.0);
 
   //Top candidates multiplicity
   h_TopMultiplicity_AllTops              = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TopMultiplicity_AllTops",             ";top multiplicity", 20, 0, 20);
   h_TopMultiplicity_SelectedTops         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TopMultiplicity_SelectedTops",        ";top multiplicity", 20, 0, 20);
   h_TopMultiplicity_AllTops_cleaned      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TopMultiplicity_AllTops_cleaned",     ";top multiplicity", 10, 0, 10);
   h_TopMultiplicity_SelectedTops_cleaned = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TopMultiplicity_SelectedTops_cleaned",";top multiplicity", 10, 0, 10);
+
+  hTopBDT_AllCleanedCandidates  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TopBDT_AllCleanedCandidates",";top candidate BDT", 40, -1.0, 1.0);
+  hTrijet1_BDT                  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "Trijet1_BDT", ";top candidate BDT", 40, -1.0, 1.0);
+  hTrijet2_BDT                  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "Trijet2_BDT", ";top candidate BDT", 40, -1.0, 1.0);
+  hLdgTrijet_BDT                = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "LdgTrijet_BDT", ";top candidate BDT", 40, -1.0, 1.0);
+  hSubldgTrijet_BDT             = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "SubldgTrijet_BDT", ";top candidate BDT", 40, -1.0, 1.0);
+  hBothTopCandidates_BDT        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "BothTopCandidates_BDT", ";top candidate BDT", 40, -1.0, 1.0);
+
+  // Histograms (2D)
+
+  hTopBDT_Vs_TopMass = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "TopBDT_Vs_TopMass", ";top candidate BDT;m_{top} GeV/c^{2}",
+						  40, -1.0, 1.0, nTopMassBins, fTopMassMin, fTopMassMax);
+
+  hTopBDT_Vs_WMass   = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "TopBDT_Vs_WMass", ";top candidate BDT;m_{W} GeV/c^{2}",
+						  40, -1.0, 1.0, nWMassBins, fWMassMin, fWMassMax);
+
+  hTopBDT_Vs_TopMass_AllCandidates = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "TopBDT_Vs_TopMass_AllCandidates", ";top candidate BDT;m_{top} GeV/c^{2}",
+								40, -1.0, 1.0, nTopMassBins, fTopMassMin, fTopMassMax);
+
+  hTopBDT_Vs_WMass_AllCandidates   = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "TopBDT_Vs_WMass_AllCandidates", ";top candidate BDT;m_{W} GeV/c^{2}",                         
+								40, -1.0, 1.0, nWMassBins, fWMassMin, fWMassMax);                                                           
+
+  hTopBDT_Vs_TopMass_AllCleanedCandidates = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "TopBDT_Vs_TopMass_AllCleanedCandidates", ";top candidate BDT;m_{top} GeV/c^{2}",
+								       40, -1.0, 1.0, nTopMassBins, fTopMassMin, fTopMassMax);
+
+  hTopBDT_Vs_WMass_AllCleanedCandidates   = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "TopBDT_Vs_WMass_AllCleanedCandidates", ";top candidate BDT;m_{W} GeV/c^{2}",
+								       40, -1.0, 1.0, nWMassBins, fWMassMin, fWMassMax);
+
+  hTrijet1_BDT_Vs_TopMass   = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "Trijet1_BDT_Vs_TopMass", ";top candidate BDT;m_{top} GeV/c^{2}",
+							 40, -1.0, 1.0, nTopMassBins, fTopMassMin, fTopMassMax);
+
+  hTrijet2_BDT_Vs_TopMass  = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "Trijet2_BDT_Vs_TopMass", ";top candidate BDT;m_{top} GeV/c^{2}",
+							40, -1.0, 1.0, nTopMassBins, fTopMassMin, fTopMassMax);
+
+  hLdgTrijet_BDT_Vs_TopMass = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "LdgTrijet_BDT_Vs_TopMass", ";top candidate BDT;m_{top} GeV/c^{2}",
+							 40, -1.0, 1.0, nTopMassBins, fTopMassMin, fTopMassMax);
+
+  hSubldgTrijet_BDT_Vs_TopMass = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "SubldgTrijet_BDT_Vs_TopMass", ";top candidate BDT;m_{top} GeV/c^{2}",
+							    40, -1.0, 1.0, nTopMassBins, fTopMassMin, fTopMassMax);
+  
+  hTrijet1_BDT_Vs_WMass = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "Trijet1_BDT_Vs_WMass", ";top candidate BDT;m_{W} GeV/c^{2}",
+						     40, -1.0, 1.0, nWMassBins, fWMassMin, fWMassMax);
+
+  hTrijet2_BDT_Vs_WMass = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "Trijet2_BDT_Vs_WMass", ";top candidate BDT;m_{W} GeV/c^{2}",
+						     40, -1.0, 1.0, nWMassBins, fWMassMin, fWMassMax);
+
+  hLdgTrijet_BDT_Vs_WMass = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "LdgTrijet_BDT_Vs_WMass", ";top candidate BDT;m_{W} GeV/c^{2}",
+						       40, -1.0, 1.0, nWMassBins, fWMassMin, fWMassMax);
+
+  hSubldgTrijet_BDT_Vs_WMass = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "SubldgTrijet_BDT_Vs_WMass", ";top candidate BDT;m_{W} GeV/c^{2}",
+							  40, -1.0, 1.0, nWMassBins, fWMassMin, fWMassMax);
+  
+  hBothTopCandidates_BDT_Vs_TopMass = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "BothTopCandidates_BDT_Vs_TopMass", ";top candidate BDT;m_{top} GeV/c^{2}",
+								 40, -1.0, 1.0, nTopMassBins, fTopMassMin, fTopMassMax);
+
+  hBothTopCandidates_BDT_Vs_WMass = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "BothTopCandidates_BDT_Vs_WMass", ";top candidate BDT;m_{W} GeV/c^{2}",
+							       40, -1.0, 1.0, nWMassBins, fWMassMin, fWMassMax);
+
 
   return;
 }
@@ -588,7 +684,7 @@ bool TopTaggerEfficiency::foundFreeBjet(const Jet& trijet1Jet1, const Jet& trije
 
 
 
-bool TopTaggerEfficiency::TrijetPassBDT_crossCleaned(int Index, const TopSelectionBDT::Data& topData, const std::vector<Jet>& bjets){
+bool TopTaggerEfficiency::Trijet_crossCleaned(int Index, const TopSelectionBDT::Data& topData, const std::vector<Jet>& bjets){
   //Descriptions: Used to find the cross-cleaned trijet multiplicity. The function takes as input the index of a trijet and the total trijet collection and returns
   //False: (a) If the trijet uses all the bjets of the event
   //       (b) If at least one of the subjets of the trijets are used by the trijets with Higher BDT value (Higher BDT value -> smaller index: Trijets sorted in BDT value)
@@ -606,7 +702,7 @@ bool TopTaggerEfficiency::TrijetPassBDT_crossCleaned(int Index, const TopSelecti
 
           bool sharedJets = isMatchedJet(topData.getAllTopsBJet().at(Index), Trijet) || isMatchedJet(topData.getAllTopsJet1().at(Index), Trijet) || isMatchedJet(topData.getAllTopsJet2().at(Index), Trijet);
 	  //if (sharedJets) return false;
-	  if (TrijetPassBDT_crossCleaned(i, topData, bjets) && sharedJets ){
+	  if (Trijet_crossCleaned(i, topData, bjets) && sharedJets ){
             return false;
           }
         }
@@ -616,7 +712,179 @@ bool TopTaggerEfficiency::TrijetPassBDT_crossCleaned(int Index, const TopSelecti
 }
 
 
+bool TopTaggerEfficiency::TrijetPassBDT_crossCleaned(int Index, const TopSelectionBDT::Data& topData, const std::vector<Jet>& bjets){
+  //Descriptions: Used to find the cross-cleaned trijet multiplicity. The function takes as input the index of a trijet and the total trijet collection and returns
+  //False: (a) If the trijet uses all the bjets of the event
+  //       (b) If at least one of the subjets of the trijets are used by the trijets with Higher BDT value (Higher BDT value -> smaller index: Trijets sorted in BDT value)
+  //True: If cross-cleaned trijet                                                                                                                                                                                                                                     
+  if ( (size_t)( isBJet(topData.getSelectedTopsJet1().at(Index),bjets) + isBJet(topData.getSelectedTopsJet2().at(Index),bjets) + isBJet(topData.getSelectedTopsBJet().at(Index),bjets)) ==  bjets.size()) return false;
+  if (Index > 0)
+    {
+      for (size_t i=0; i<(size_t)Index; i++)
+        {
+          if ( (size_t)( isBJet(topData.getSelectedTopsJet1().at(i),bjets) + isBJet(topData.getSelectedTopsJet2().at(i),bjets) + isBJet(topData.getSelectedTopsBJet().at(i),bjets)) ==  bjets.size()) continue;
+          //Vector includes the 3 subjets of a trijet                                                                                                                                                                                                                 
+	  std::vector<Jet> Trijet;
+          Trijet.push_back(topData.getSelectedTopsJet1().at(i)); Trijet.push_back(topData.getSelectedTopsJet2().at(i)); Trijet.push_back(topData.getSelectedTopsBJet().at(i));
+          // Skip top candidates with same jets as Trijets with higher BDDT value                                                                                                                                                                                     
 
+          bool sharedJets = isMatchedJet(topData.getSelectedTopsBJet().at(Index), Trijet) || isMatchedJet(topData.getSelectedTopsJet1().at(Index), Trijet) || isMatchedJet(topData.getSelectedTopsJet2().at(Index), Trijet);
+	  //if (sharedJets) return false;
+	  if (TrijetPassBDT_crossCleaned(i, topData, bjets) && sharedJets ){
+            return false;
+          }
+        }
+    }
+
+  return true;
+}
+
+bool TopTaggerEfficiency::IsCrossCleaned(int index_j, const TopSelectionBDT::Data& topData, const std::vector<Jet>& bjets, std::vector<int> TopIndex){
+  //Descriptions: Used to find the cross-cleaned trijet multiplicity. The function takes as input the index of a trijet and the total trijet collection and returns
+  //False: (a) If the trijet uses all the bjets of the event
+  //       (b) If at least one of the subjets of the trijets are used by the trijets with Higher BDT value (Higher BDT value -> smaller index: Trijets sorted in BDT value)
+  //True: If cross-cleaned trijet                                                                                                                                                                                                                                     
+  int Index = TopIndex.at(index_j);
+  if ( (size_t)( isBJet(topData.getAllTopsJet1().at(Index),bjets) + isBJet(topData.getAllTopsJet2().at(Index),bjets) + isBJet(topData.getAllTopsBJet().at(Index),bjets)) ==  bjets.size()) return false;
+  //std::cout<<"3"<<std::endl;
+  if (index_j > 0)
+    {
+      for (size_t i=0; i<(size_t)index_j; i++)
+	{
+	  int Index_i = TopIndex.at(i);
+          if ( (size_t)( isBJet(topData.getAllTopsJet1().at(Index_i),bjets) + isBJet(topData.getAllTopsJet2().at(Index_i),bjets) + isBJet(topData.getAllTopsBJet().at(Index_i),bjets)) ==  bjets.size()) continue;
+          //Vector includes the 3 subjets of a trijet
+	  std::vector<Jet> Trijet;
+          Trijet.push_back(topData.getAllTopsJet1().at(Index_i)); Trijet.push_back(topData.getAllTopsJet2().at(Index_i)); Trijet.push_back(topData.getAllTopsBJet().at(Index_i));
+          // Skip top candidates with same jets as Trijets with higher BDDT value                                                                                                                                                                                    
+                                                                                                                                                                                                                   
+          bool sharedJets = isMatchedJet(topData.getAllTopsBJet().at(Index), Trijet) || isMatchedJet(topData.getAllTopsJet1().at(Index), Trijet) || isMatchedJet(topData.getAllTopsJet2().at(Index), Trijet);
+
+	  // std::cout<<"trijet1: "<<topData.getAllTopsJet1().at(Index_i).index()<<" "<<topData.getAllTopsJet2().at(Index_i).index()<<" "<<topData.getAllTopsBJet().at(Index_i).index()<<std::endl;
+	  // std::cout<<"trijet2: "<<topData.getAllTopsBJet().at(Index).index()<<" "<<topData.getAllTopsJet1().at(Index).index()<<" "<<topData.getAllTopsJet2().at(Index).index()<<std::endl;
+	  // std::cout<<"have shared objects "<<sharedJets<<std::endl;
+	  //bool myBoolean = IsCrossCleaned(i, topData, bjets, TopIndex) && sharedJets;
+	  //std::cout<<"IsCrossCleaned(i, topData, bjets, TopIndex) && sharedJets "<<myBoolean<<std::endl;
+	  if (IsCrossCleaned(i, topData, bjets, TopIndex) && sharedJets ){
+	    return false;
+	  }
+	  //return (!(IsCrossCleaned(i, topData, bjets, TopIndex) && sharedJets ));
+        }
+    }
+
+  return true;
+}
+
+
+
+
+int TopTaggerEfficiency::GetLdgOrSubldgTopIndex(std::vector<int>TopIndex, const TopSelectionBDT::Data& topData, string type){
+  double maxPt1 = -999.999, maxPt2 = -999.999;
+  int maxIndex1 = -1, maxIndex2 = -1;
+  
+  for (size_t i=0; i< TopIndex.size(); i++){
+    int index = TopIndex.at(i);
+    math::XYZTLorentzVector TopP4;
+    TopP4 = topData.getAllTopsJet1().at(index).p4() + topData.getAllTopsJet2().at(index).p4() + topData.getAllTopsBJet().at(index).p4() ;
+    //std::cout<<"pt "<<TopP4.Pt()<<std::endl;
+    if (maxPt2 > TopP4.Pt()) continue;
+    if (maxPt1 < TopP4.Pt()){
+      maxPt2 = maxPt1;
+      maxIndex2 = maxIndex1;
+      maxPt1 = TopP4.Pt();
+      maxIndex1 = index;
+    }
+    else{
+      maxPt2 = TopP4.Pt();
+      maxIndex2 = index;
+    }
+  }
+  //std::cout<<"leading "<<maxPt1<<" subleading "<<maxPt2<<std::endl;
+  if (type == "leading") return maxIndex1;
+  if (type == "subleading") return maxIndex2;
+  std::cout<<"GetLdgOrSubldgTopIndex: returning leading top index"<<std::endl;
+  return maxIndex1;
+}
+      
+
+// AllTopCandIndexSortPt_cleaned = SortPt(AllTopCandIndex_cleaned, topData);
+std::vector<int>TopTaggerEfficiency::SortPt(const TopSelectionBDT::Data& topData){
+  
+  vector<int> TopSortPt;
+  size_t size = topData.getAllTopsBJet().size();
+  
+  //Fill TopSortPt with initial vector's values
+  for (size_t i=0; i<size; i++){
+    TopSortPt.push_back(i);
+  }
+    
+  if (size < 1) return TopSortPt;
+
+  for (size_t i=0; i<size-1; i++)
+    {
+      for  (size_t j=i+1; j<size; j++)
+        {
+	  int index_i = TopSortPt.at(i);
+	  math::XYZTLorentzVector TopP4_i;
+	  TopP4_i = topData.getAllTopsJet1().at(index_i).p4() + topData.getAllTopsJet2().at(index_i).p4() + topData.getAllTopsBJet().at(index_i).p4() ;
+
+	  int index_j = TopSortPt.at(j);
+	  math::XYZTLorentzVector TopP4_j;
+	  TopP4_j = topData.getAllTopsJet1().at(index_j).p4() + topData.getAllTopsJet2().at(index_j).p4() + topData.getAllTopsBJet().at(index_j).p4() ;
+	  if (TopP4_i.Pt() >= TopP4_j.Pt()) continue;
+	  int keepIndex = TopSortPt.at(i);
+	  TopSortPt.at(i) = TopSortPt.at(j);
+	  TopSortPt.at(j) = keepIndex;
+	}
+    }
+  return TopSortPt;
+}
+
+/*
+int TopTaggerEfficiency::SortInPt(vector <int> TopIndex){
+  //  Description
+  //  Takes as input a collection of Top Candidates and returns the collection sorted in pt value
+
+  size_t size = TopIndex.size();
+  if (size < 1) return TopCand;
+
+  for (size_t i=0; i<size-1; i++)
+    {
+      for  (size_t j=i+1; j<size; j++)
+        {
+          Jet Jet1_i = TopCand.Jet1.at(i);
+          Jet Jet2_i = TopCand.Jet2.at(i);
+          Jet BJet_i = TopCand.BJet.at(i);
+          double mva_i = TopCand.MVA.at(i);
+	  math::XYZTLorentzVector TrijetP4_i = TopCand.TrijetP4.at(i);
+	  math::XYZTLorentzVector DijetP4_i = TopCand.DijetP4.at(i);
+
+          Jet Jet1_j = TopCand.Jet1.at(j);
+          Jet Jet2_j = TopCand.Jet2.at(j);
+          Jet BJet_j = TopCand.BJet.at(j);
+          double mva_j = TopCand.MVA.at(j);
+	  math::XYZTLorentzVector TrijetP4_j = TopCand.TrijetP4.at(j);
+	  math::XYZTLorentzVector DijetP4_j = TopCand.DijetP4.at(j);
+          if (mva_i >= mva_j) continue;
+          TopCand.Jet1.at(i) = Jet1_j;
+          TopCand.Jet2.at(i) = Jet2_j;
+          TopCand.BJet.at(i) = BJet_j;
+          TopCand.MVA.at(i)  = mva_j;
+          TopCand.TrijetP4.at(i) = TrijetP4_j;
+          TopCand.DijetP4.at(i) = DijetP4_j;
+
+          TopCand.Jet1.at(j) = Jet1_i;
+          TopCand.Jet2.at(j) = Jet2_i;
+          TopCand.BJet.at(j) = BJet_i;
+          TopCand.MVA.at(j)  = mva_i;
+          TopCand.TrijetP4.at(j) = TrijetP4_i;
+          TopCand.DijetP4.at(j) = DijetP4_i;
+        }
+    }
+  return TopCand;
+}
+
+*/
 void TopTaggerEfficiency::setupBranches(BranchManager& branchManager) {
   fEvent.setupBranches(branchManager);
   return;
@@ -1054,15 +1322,17 @@ void TopTaggerEfficiency::process(Long64_t entry) {
     std::cout<<GenHTop.pt()<<have_Wa<<have_Wh<<std::endl;
   }
 
-  vector <int> AllTopCandIndex_cleaned, SelectedTopCandIndex_cleaned;
+  vector <int> AllTopCandIndex_cleaned, SelectedTopCandIndex_cleaned, AllTopCandIndexSortPt, AllTopCandIndexSortPt_cleaned;
   bool haveMatchedHiggsTop = HiggsTop_Bjet.size() > 0;
   bool haveMatchedAssocTop = AssocTop_Bjet.size() > 0;
   int ncleaned = 0;//, ncleaned_selected = 0;
 
+  AllTopCandIndexSortPt = SortPt(topData);
+
   //Find cross-cleaned Tops
   for (size_t i = 0; i < topData.getAllTopsBJet().size(); i++){
     int index = i;
-    if (TrijetPassBDT_crossCleaned(index, topData, bjetData.getSelectedBJets())){
+    if (Trijet_crossCleaned(index, topData, bjetData.getSelectedBJets())){
       ncleaned++;
       AllTopCandIndex_cleaned.push_back(index);
     }
@@ -1076,12 +1346,53 @@ void TopTaggerEfficiency::process(Long64_t entry) {
     }
   }
 
+
+  //Find cross-cleaned Top candidates !Starting from leading in pt top
+  for (size_t i = 0; i < AllTopCandIndexSortPt.size(); i++){    
+    int index = i;
+    Jet jet1 = topData.getAllTopsJet1().at(AllTopCandIndexSortPt.at(i));
+    Jet jet2 = topData.getAllTopsJet2().at(AllTopCandIndexSortPt.at(i));
+    Jet bjet = topData.getAllTopsBJet().at(AllTopCandIndexSortPt.at(i));
+    math::XYZTLorentzVector TopP4;
+    TopP4 = jet1.p4() + jet2.p4() + bjet.p4();
+	  
+    if (IsCrossCleaned(index, topData, bjetData.getSelectedBJets(), AllTopCandIndexSortPt)){  //Soti:FIXME - Write ONE function for cleaned tops
+      AllTopCandIndexSortPt_cleaned.push_back(AllTopCandIndexSortPt.at(i));      
+      //std::cout<<jet1.index()<<" "<<jet2.index()<<" "<<bjet.index()<<std::endl;
+    }
+  }
+
+  
+  for (size_t i = 0; i < AllTopCandIndexSortPt_cleaned.size(); i++){    
+    Jet jet1 = topData.getAllTopsJet1().at(AllTopCandIndexSortPt_cleaned.at(i));
+    Jet jet2 = topData.getAllTopsJet2().at(AllTopCandIndexSortPt_cleaned.at(i));
+    Jet bjet = topData.getAllTopsBJet().at(AllTopCandIndexSortPt_cleaned.at(i));
+    // std::cout<<jet1.index()<<" "<<jet2.index()<<" "<<bjet.index()<<std::endl;
+    // std::cout<<"Pt "<<(jet1.p4() + jet2.p4() + bjet.p4()).Pt()<<std::endl;
+  }
+  
+  //std::cout<<"==="<<std::endl;
+    
   //Top candidates multiplicity
   h_TopMultiplicity_AllTops              -> Fill(topData.getAllTopsBJet().size());
   h_TopMultiplicity_SelectedTops         -> Fill(topData.getSelectedTopsBJet().size());
   h_TopMultiplicity_AllTops_cleaned      -> Fill(AllTopCandIndex_cleaned.size());
   h_TopMultiplicity_SelectedTops_cleaned -> Fill(SelectedTopCandIndex_cleaned.size());
 
+  
+  for (size_t i = 0; i < topData.getAllTopsBJet().size(); i++){      	
+    Jet jet1 = topData.getAllTopsJet1().at(i);
+    Jet jet2 = topData.getAllTopsJet2().at(i);
+    Jet bjet = topData.getAllTopsBJet().at(i);
+    
+    //double mva = topData.getAllTopsMVA().at(i);
+
+    bool realTrijet = isRealMVATop(jet1, jet2, bjet, MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet);
+    hTopBDT_AllCandidates -> Fill(realTrijet, topData.getAllTopsMVA().at(i));
+
+  }
+
+  
   //============================================================
   //============================================================
   //Return if less than two top candidates found in the event!!!
@@ -1089,6 +1400,107 @@ void TopTaggerEfficiency::process(Long64_t entry) {
   //============================================================
   //============================================================
 
+
+  for (size_t i = 0; i < topData.getAllTopsBJet().size(); i++){      	
+    Jet jet1 = topData.getAllTopsJet1().at(i);
+    Jet jet2 = topData.getAllTopsJet2().at(i);
+    Jet bjet = topData.getAllTopsBJet().at(i);
+    
+    double mva = topData.getAllTopsMVA().at(i);
+
+    math::XYZTLorentzVector trijetP4, dijetP4;
+    trijetP4 = jet1.p4() + jet2.p4() + bjet.p4();
+    dijetP4  = jet1.p4() + jet2.p4();
+
+    hTopBDT_Vs_TopMass_AllCandidates -> Fill(mva, trijetP4.M());
+    hTopBDT_Vs_WMass_AllCandidates   -> Fill(mva, dijetP4.M());   
+
+  }
+
+  for (size_t i = 0; i < AllTopCandIndex_cleaned.size(); i++){
+    int index = AllTopCandIndex_cleaned.at(i);
+
+    Jet jet1 = topData.getAllTopsJet1().at(index);
+    Jet jet2 = topData.getAllTopsJet2().at(index);
+    Jet bjet = topData.getAllTopsBJet().at(index);
+    
+    double mva = topData.getAllTopsMVA().at(index);
+    hTopBDT_AllCleanedCandidates -> Fill(mva);
+    
+    math::XYZTLorentzVector trijetP4, dijetP4;
+    trijetP4 = jet1.p4() + jet2.p4() + bjet.p4();
+    dijetP4  = jet1.p4() + jet2.p4();
+
+    hTopBDT_Vs_TopMass_AllCleanedCandidates -> Fill(mva, trijetP4.M());
+    hTopBDT_Vs_WMass_AllCleanedCandidates   -> Fill(mva, dijetP4.M());   
+  }
+
+
+  //Leading / Subleading top: Before cuts
+  math::XYZTLorentzVector Trijet1_beforeCuts, Trijet2_beforeCuts;
+  int ldg_index = -1, sldg_index = -1;
+
+  int index1 = AllTopCandIndex_cleaned.at(0);
+  Jet Trijet1Jet1_beforeCut  = topData.getAllTopsJet1().at(index1);
+  Jet Trijet1Jet2_beforeCut  = topData.getAllTopsJet2().at(index1);
+  Jet Trijet1BJet_beforeCut  = topData.getAllTopsBJet().at(index1);
+  float Trijet1MVA_beforeCut = topData.getAllTopsMVA().at(index1);
+  Trijet1_beforeCuts = Trijet1Jet1_beforeCut.p4() + Trijet1Jet2_beforeCut.p4() + Trijet1BJet_beforeCut.p4();
+
+  int index2 = AllTopCandIndex_cleaned.at(1);
+  Jet Trijet2Jet1_beforeCut  = topData.getAllTopsJet1().at(index2);
+  Jet Trijet2Jet2_beforeCut  = topData.getAllTopsJet2().at(index2);
+  Jet Trijet2BJet_beforeCut  = topData.getAllTopsBJet().at(index2);
+  float Trijet2MVA_beforeCut = topData.getAllTopsMVA().at(index2);
+  Trijet2_beforeCuts = Trijet2Jet1_beforeCut.p4() + Trijet2Jet2_beforeCut.p4() + Trijet2BJet_beforeCut.p4();
+  
+  if (Trijet1_beforeCuts.Pt() >= Trijet2_beforeCuts.Pt()){
+    ldg_index = index1;
+    sldg_index = index2;
+  }
+  else{
+    ldg_index = index2;
+    sldg_index = index1;
+  }
+    
+  Jet LdgTrijetJet1_beforeCut     = topData.getAllTopsJet1().at(ldg_index);
+  Jet LdgTrijetJet2_beforeCut     = topData.getAllTopsJet2().at(ldg_index);
+  Jet LdgTrijetBJet_beforeCut     = topData.getAllTopsBJet().at(ldg_index);
+  float LdgTrijetMVA_beforeCut    = topData.getAllTopsMVA().at(ldg_index);
+
+  Jet SubldgTrijetJet1_beforeCut  = topData.getAllTopsJet1().at(sldg_index);
+  Jet SubldgTrijetJet2_beforeCut  = topData.getAllTopsJet2().at(sldg_index);
+  Jet SubldgTrijetBJet_beforeCut  = topData.getAllTopsBJet().at(sldg_index);
+  float SubldgTrijetMVA_beforeCut = topData.getAllTopsMVA().at(sldg_index);
+
+
+  //Fill Histograms
+  hTrijet1_BDT      -> Fill(Trijet1MVA_beforeCut);
+  hTrijet2_BDT      -> Fill(Trijet2MVA_beforeCut);
+  hLdgTrijet_BDT    -> Fill(LdgTrijetMVA_beforeCut);
+  hSubldgTrijet_BDT -> Fill(SubldgTrijetMVA_beforeCut);
+  
+  hTrijet1_BDT_Vs_TopMass   -> Fill(Trijet1MVA_beforeCut, (Trijet1Jet1_beforeCut.p4() + Trijet1Jet2_beforeCut.p4() + Trijet1BJet_beforeCut.p4()).M());
+  hTrijet2_BDT_Vs_TopMass   -> Fill(Trijet2MVA_beforeCut, (Trijet2Jet1_beforeCut.p4() + Trijet2Jet2_beforeCut.p4() + Trijet2BJet_beforeCut.p4()).M());
+  hLdgTrijet_BDT_Vs_TopMass -> Fill(LdgTrijetMVA_beforeCut, (LdgTrijetJet1_beforeCut.p4() + LdgTrijetJet2_beforeCut.p4() + LdgTrijetBJet_beforeCut.p4()).M());
+  hSubldgTrijet_BDT_Vs_TopMass -> Fill(SubldgTrijetMVA_beforeCut, (SubldgTrijetJet1_beforeCut.p4() + SubldgTrijetJet2_beforeCut.p4() + SubldgTrijetBJet_beforeCut.p4()).M());
+
+  hTrijet1_BDT_Vs_WMass   -> Fill(Trijet1MVA_beforeCut, (Trijet1Jet1_beforeCut.p4() + Trijet1Jet2_beforeCut.p4()).M());
+  hTrijet2_BDT_Vs_WMass   -> Fill(Trijet2MVA_beforeCut, (Trijet2Jet1_beforeCut.p4() + Trijet2Jet2_beforeCut.p4()).M());
+  hLdgTrijet_BDT_Vs_WMass -> Fill(LdgTrijetMVA_beforeCut, (LdgTrijetJet1_beforeCut.p4() + LdgTrijetJet2_beforeCut.p4()).M());
+  hSubldgTrijet_BDT_Vs_WMass -> Fill(SubldgTrijetMVA_beforeCut, (SubldgTrijetJet1_beforeCut.p4() + SubldgTrijetJet2_beforeCut.p4()).M());
+
+  hBothTopCandidates_BDT -> Fill(Trijet1MVA_beforeCut);
+  hBothTopCandidates_BDT -> Fill(Trijet2MVA_beforeCut);
+
+  hBothTopCandidates_BDT_Vs_TopMass -> Fill(Trijet1MVA_beforeCut, (Trijet1Jet1_beforeCut.p4() + Trijet1Jet2_beforeCut.p4() + Trijet1BJet_beforeCut.p4()).M());
+  hBothTopCandidates_BDT_Vs_TopMass -> Fill(Trijet2MVA_beforeCut, (Trijet2Jet1_beforeCut.p4() + Trijet2Jet2_beforeCut.p4() + Trijet2BJet_beforeCut.p4()).M());
+
+  hBothTopCandidates_BDT_Vs_WMass -> Fill(Trijet1MVA_beforeCut, (Trijet1Jet1_beforeCut.p4() + Trijet1Jet2_beforeCut.p4()).M());
+  hBothTopCandidates_BDT_Vs_WMass -> Fill(Trijet2MVA_beforeCut, (Trijet2Jet1_beforeCut.p4() + Trijet2Jet2_beforeCut.p4()).M());
+
+
+  
   if (doMatching){
     bool TopPassBDT_h = false;
     bool TopPassBDT_a = false;
@@ -1158,9 +1570,12 @@ void TopTaggerEfficiency::process(Long64_t entry) {
 	Jet jet1 = topData.getAllTopsJet1().at(i);
 	Jet jet2 = topData.getAllTopsJet2().at(i);
 	Jet bjet = topData.getAllTopsBJet().at(i);
-
-	bool realTrijet = isRealMVATop(jet1, jet2, bjet, MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet);
-	hTopBDT_AllCandidates -> Fill(realTrijet, topData.getAllTopsMVA().at(i));
+	
+	//bool realTrijet = isRealMVATop(jet1, jet2, bjet, MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet);
+	//Fill only once
+	// if (j == 0){	  
+	//   hTopBDT_AllCandidates -> Fill(realTrijet, topData.getAllTopsMVA().at(i));
+	// }
 	if ( isMatched*isOnlyMatched )
 	  {	    
 	    if (isRealMVATop(jet1, jet2, bjet, MCtrue_LdgJet.at(0), MCtrue_SubldgJet.at(0), MCtrue_Bjet.at(0))) genuineTop = true;
@@ -1212,40 +1627,23 @@ void TopTaggerEfficiency::process(Long64_t entry) {
       }
     }
 
-
     //======================================
     //Check only leading - subleading trijet
     //======================================    
+
     //Ldg in BDT top candidate
-    int index1 = AllTopCandIndex_cleaned.at(0);
+    int index1 = AllTopCandIndexSortPt_cleaned.at(0);
     Jet LdgTijetJet1_afterSS = topData.getAllTopsJet1().at(index1);
     Jet LdgTijetJet2_afterSS = topData.getAllTopsJet2().at(index1);
     Jet LdgTijetBJet_afterSS = topData.getAllTopsBJet().at(index1);
     float LdgTrijetMVA_afterSS = topData.getAllTopsMVA().at(index1);
+
     math::XYZTLorentzVector LdgTrijetP4_afterSS;
     LdgTrijetP4_afterSS = LdgTijetJet1_afterSS.p4() + LdgTijetJet2_afterSS.p4() + LdgTijetBJet_afterSS.p4();
-    //Subldg in BDT top candidate
-    int index2 = AllTopCandIndex_cleaned.at(1);
-    Jet SubldgTijetJet1_afterSS = topData.getAllTopsJet1().at(index2);
-    Jet SubldgTijetJet2_afterSS = topData.getAllTopsJet2().at(index2);
-    Jet SubldgTijetBJet_afterSS = topData.getAllTopsBJet().at(index2);
-    float SubldgTrijetMVA_afterSS = topData.getAllTopsMVA().at(index2);
-    math::XYZTLorentzVector SubldgTrijetP4_afterSS;
-    SubldgTrijetP4_afterSS = SubldgTijetJet1_afterSS.p4() + SubldgTijetJet2_afterSS.p4() + SubldgTijetBJet_afterSS.p4();
-    
-    if (0){
-      std::cout<<"LdgTop "<<LdgTijetJet1_afterSS.index()<<" "<<LdgTijetJet2_afterSS.index()<<" "<<LdgTijetBJet_afterSS.index()<<" "<<LdgTrijetMVA_afterSS<<std::endl;
-      std::cout<<"SubldgTop "<<SubldgTijetJet1_afterSS.index()<<" "<<SubldgTijetJet2_afterSS.index()<<" "<<SubldgTijetBJet_afterSS.index()<<" "<<SubldgTrijetMVA_afterSS<<std::endl;
-      std::cout<<"==="<<std::endl;
-    }
-    bool isreal_ldgTop  = (isRealMVATop(LdgTijetJet1_afterSS, LdgTijetJet1_afterSS, LdgTijetBJet_afterSS, MCtrue_LdgJet,  MCtrue_SubldgJet, MCtrue_Bjet));
-    bool isreal_sldgTop = (isRealMVATop(SubldgTijetJet1_afterSS, SubldgTijetJet1_afterSS, SubldgTijetBJet_afterSS, MCtrue_LdgJet,  MCtrue_SubldgJet, MCtrue_Bjet));
-    
-    hTrijetPt_LdgOrSldg -> Fill(LdgTrijetP4_afterSS.Pt());
-    hTrijetPt_LdgOrSldg -> Fill(SubldgTrijetP4_afterSS.Pt());
 
+    bool isreal_ldgTop  = (isRealMVATop(LdgTijetJet1_afterSS, LdgTijetJet2_afterSS, LdgTijetBJet_afterSS, MCtrue_LdgJet,  MCtrue_SubldgJet, MCtrue_Bjet));    
     hTrijetPt_Ldg    -> Fill(LdgTrijetP4_afterSS.Pt());
-    hTrijetPt_Subldg -> Fill(SubldgTrijetP4_afterSS.Pt());
+    hTrijetPt_LdgOrSldg -> Fill(LdgTrijetP4_afterSS.Pt());
 
     if (isreal_ldgTop){
       hTrijetPt_LdgOrSldg_Matched -> Fill(LdgTrijetP4_afterSS.Pt());
@@ -1263,50 +1661,51 @@ void TopTaggerEfficiency::process(Long64_t entry) {
       hTrijetPt_Ldg_UnmatchedBDT       -> Fill(LdgTrijetP4_afterSS.Pt());      
       }
     }
-    if (isreal_sldgTop){
-      hTrijetPt_LdgOrSldg_Matched -> Fill(SubldgTrijetP4_afterSS.Pt());
-      hTrijetPt_Sldg_Matched      -> Fill(SubldgTrijetP4_afterSS.Pt());
-      if (cfg_PrelimTopMVACut.passedCut(LdgTrijetMVA_afterSS)){
-	hTrijetPt_LdgOrSldg_MatchedBDT -> Fill(SubldgTrijetP4_afterSS.Pt());
-	hTrijetPt_Sldg_MatchedBDT      -> Fill(SubldgTrijetP4_afterSS.Pt());
+    
+
+    if (AllTopCandIndexSortPt_cleaned.size() > 1){
+      //Subldg in BDT top candidate
+      int index2 = AllTopCandIndexSortPt_cleaned.at(1);
+      Jet SubldgTijetJet1_afterSS = topData.getAllTopsJet1().at(index2);
+      Jet SubldgTijetJet2_afterSS = topData.getAllTopsJet2().at(index2);
+      Jet SubldgTijetBJet_afterSS = topData.getAllTopsBJet().at(index2);
+      float SubldgTrijetMVA_afterSS = topData.getAllTopsMVA().at(index2);
+      
+      math::XYZTLorentzVector SubldgTrijetP4_afterSS;
+      SubldgTrijetP4_afterSS = SubldgTijetJet1_afterSS.p4() + SubldgTijetJet2_afterSS.p4() + SubldgTijetBJet_afterSS.p4();
+      
+      if (0){
+	std::cout<<"LdgTop "<<LdgTijetJet1_afterSS.index()<<" "<<LdgTijetJet2_afterSS.index()<<" "<<LdgTijetBJet_afterSS.index()<<" "<<LdgTrijetMVA_afterSS<<" "<<LdgTrijetP4_afterSS.Pt()<<std::endl;
+	std::cout<<"SubldgTop "<<SubldgTijetJet1_afterSS.index()<<" "<<SubldgTijetJet2_afterSS.index()<<" "<<SubldgTijetBJet_afterSS.index()<<" "<<SubldgTrijetMVA_afterSS<<" "<<SubldgTrijetP4_afterSS.Pt()<<std::endl;
+	std::cout<<"==="<<std::endl;
       }
+      
+      bool isreal_sldgTop = (isRealMVATop(SubldgTijetJet1_afterSS, SubldgTijetJet2_afterSS, SubldgTijetBJet_afterSS, MCtrue_LdgJet,  MCtrue_SubldgJet, MCtrue_Bjet));
+      hTrijetPt_Subldg -> Fill(SubldgTrijetP4_afterSS.Pt());
+      hTrijetPt_LdgOrSldg -> Fill(SubldgTrijetP4_afterSS.Pt());
+      
+      if (isreal_sldgTop){
+	hTrijetPt_LdgOrSldg_Matched -> Fill(SubldgTrijetP4_afterSS.Pt());
+	hTrijetPt_Sldg_Matched      -> Fill(SubldgTrijetP4_afterSS.Pt());
+	if (cfg_PrelimTopMVACut.passedCut(SubldgTrijetMVA_afterSS)){
+	  hTrijetPt_LdgOrSldg_MatchedBDT -> Fill(SubldgTrijetP4_afterSS.Pt());
+	  hTrijetPt_Sldg_MatchedBDT      -> Fill(SubldgTrijetP4_afterSS.Pt());
+	}
+      }
+      else{
+	hTrijetPt_LdgOrSldg_Unmatched -> Fill(SubldgTrijetP4_afterSS.Pt());
+	hTrijetPt_Sldg_Unmatched      -> Fill(SubldgTrijetP4_afterSS.Pt());
+	if (cfg_PrelimTopMVACut.passedCut(SubldgTrijetMVA_afterSS)){
+	  hTrijetPt_LdgOrSldg_UnmatchedBDT -> Fill(SubldgTrijetP4_afterSS.Pt());
+	  hTrijetPt_Sldg_UnmatchedBDT      -> Fill(SubldgTrijetP4_afterSS.Pt());
+	}
+      }      
     }
-    else{
-      hTrijetPt_LdgOrSldg_Unmatched -> Fill(SubldgTrijetP4_afterSS.Pt());
-      hTrijetPt_Sldg_Unmatched      -> Fill(SubldgTrijetP4_afterSS.Pt());
-      if (cfg_PrelimTopMVACut.passedCut(LdgTrijetMVA_afterSS)){
-	hTrijetPt_LdgOrSldg_UnmatchedBDT -> Fill(SubldgTrijetP4_afterSS.Pt());
-	hTrijetPt_Sldg_UnmatchedBDT      -> Fill(SubldgTrijetP4_afterSS.Pt());
-      }
-    }      
-    //hTrijetPt_LdgOrSldg 
-      /*
-	bool isreal_ldgTop  = (isRealMVATop(topData.getLdgTrijetJet1(),    topData.getLdgTrijetJet2(),    topData.getLdgTrijetBJet(),     MCtrue_LdgJet,  MCtrue_SubldgJet, MCtrue_Bjet));
-	bool isreal_sldgTop = (isRealMVATop(topData.getSubldgTrijetJet1(), topData.getSubldgTrijetJet2(), topData.getSubldgTrijetBJet(),  MCtrue_LdgJet,  MCtrue_SubldgJet, MCtrue_Bjet));
-	bool isFake_ldgTop  = (!isRealMVATop(topData.getLdgTrijetJet1(),    topData.getLdgTrijetJet2(),    topData.getLdgTrijetBJet(),     MCtrue_LdgJet,  MCtrue_SubldgJet, MCtrue_Bjet));
-	bool isFake_sldgTop = (!isRealMVATop(topData.getSubldgTrijetJet1(), topData.getSubldgTrijetJet2(), topData.getSubldgTrijetBJet(),  MCtrue_LdgJet,  MCtrue_SubldgJet, MCtrue_Bjet));
-	
-	if (isFake_ldgTop){
-	hTrijetFakePt_LdgOrSldgTop -> Fill(topData.getLdgTrijet().Pt());
-	hTrijetFakePt_LdgTop       -> Fill(topData.getLdgTrijet().Pt());
-	}
-	if (isFake_sldgTop){
-	hTrijetFakePt_LdgOrSldgTop -> Fill(topData.getSubldgTrijet().Pt());
-	hTrijetFakePt_SldgTop      -> Fill(topData.getSubldgTrijet().Pt());
-	}
-	
-	if (isFake_ldgTop  && cfg_PrelimTopMVACut.passedCut(topData.getMVALdgInPt())){
-	hTrijetFakePt_LdgOrSldgTop_BDT -> Fill(topData.getLdgTrijet().Pt());
-	hTrijetFakePt_LdgTop_BDT       -> Fill(topData.getLdgTrijet().Pt());
-	}
-	
-	if (isFake_sldgTop && cfg_PrelimTopMVACut.passedCut(topData.getMVASubldgInPt())){
-	hTrijetFakePt_LdgOrSldg_BDT -> Fill(topData.getSubldgTrijet().Pt());
-	hTrijetFakePt_SldgTop_BDT   -> Fill(topData.getSubldgTrijet().Pt());
-	}
-      */
+
+    //======================================
     //======================================
     //Efficiency per Event: Tag both real tops 
+    //======================================
     //======================================
     if (topData.getSelectedCleanedTopsBJet().size() < 2) return;
     if (!topData.hasFreeBJet()) return;
@@ -1500,6 +1899,11 @@ void TopTaggerEfficiency::process(Long64_t entry) {
   }
   if (SubldgTopIsTopFromH)    hTetrajetMass_SubldgTopIsHTop -> Fill(isBfromH, subldgTetrajet_p4.M());
   if (LdgWIsWFromH)           hTetrajetMass_LdgWIsWfromH    -> Fill(isBfromH, tetrajet_p4.M());
+
+  hLdgInPtTrijetBDT     -> Fill(topData.getMVALdgInPt());
+  hSubldgInPtTrijetBDT  -> Fill(topData.getMVASubldgInPt());
+  hLdgInBDTTrijetBDT    -> Fill(topData.getMVAmax1());
+  hSubldgInBDTTrijetBDT -> Fill(topData.getMVAmax2());
 
   //================================================================================================
   // Finalize

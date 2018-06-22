@@ -11,7 +11,9 @@ EXAMPLES:
 ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180603_JetPt100_40_40_40_1bjet_HT500/ --folder TopBDTTagger_QCDMistagRate
 
 LAST USD:
-./plot_MistagRate.py -m TopBDTTaggerMistagRate_180603_JetPt100_40_40_40_1bjet_HT500/ --folder TopBDTTagger_QCDMistagRate
+./plot_MistagRate.py -m TopBDTTaggerMistagRate_180609_PFHT900_FatJet_HT1000_massCut300/ --folder TopBDTTagger_QCDMistagRate
+./plot_MistagRate.py -m TopBDTTaggerMistagRate_180609_PFHT900_ldgJetPT100_HT1000_massCut300/ --folder TopBDTTagger_QCDMistagRate
+
 
 
 STATISTICS OPTIONS:
@@ -434,7 +436,7 @@ def main(opts, signalMass):
             p.setLuminosity(intLumi)
             _kwargs["ratio"] = True
             #_kwargs["ratioInvert"] = True
-            _kwargs["cutBoxY"] = {"cutValue": 1.10, "fillColor": ROOT.kGray+1, "fillStyle": 3001, "box": True, "line": True, "greaterThan": True, "mainCanvas": False, 
+            _kwargs["cutBoxY"] = {"cutValue": 1.10, "fillColor": ROOT.kGray+1, "fillStyle": 3001, "box": False, "line": True, "greaterThan": True, "mainCanvas": False, 
                                    "ratioCanvas": True, "mirror": True}
             ##_kwargs["cutBoxY"] = {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": True}
             plots.drawPlot(p, plotName, **_kwargs)

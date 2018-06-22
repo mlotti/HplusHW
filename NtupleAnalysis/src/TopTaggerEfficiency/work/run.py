@@ -190,7 +190,7 @@ def main():
 
     allSelections.TopSelectionBDT.MVACutValue            = 0.40
     allSelections.TopSelectionBDT.MVACutDirection        =  ">="
-    allSelections.TopSelectionBDT.WeightFile             = "TopRecoTree_180523_DeltaR0p3_DeltaPtOverPt0p32_TopPtReweighting_BDTG.weights.xml"
+    # allSelections.TopSelectionBDT.WeightFile             = "TopRecoTree_180523_DeltaR0p3_DeltaPtOverPt0p32_TopPtReweighting_BDTG.weights.xml"
     # allSelections.BjetSelection.triggerMatchingApply = True
     # allSelections.TopSelection.ChiSqrCutValue = 100.0
     # allSelections.BJetSelection.numberOfBJetsCutValue = 0

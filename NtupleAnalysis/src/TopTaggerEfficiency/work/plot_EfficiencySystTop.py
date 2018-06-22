@@ -307,10 +307,6 @@ def main(opts):
             #denFolder    = denFolder.replace("Genuine", "")
             #print "denFolder", denFolder
             denominator  = os.path.join(denFolder, hDenominator)
-
-            #counter+=1
-            #msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % counter, "/", "%s:" % (nPlots), "%s" % (var))
-            #Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), counter==1)
             
             PlotEfficiency(datasetsMgr, numerator, denominator)            
             
