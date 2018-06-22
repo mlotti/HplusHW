@@ -220,7 +220,7 @@ def main():
     allSelections.TopSelectionBDT.MVACutValue                 =  0.40 # [default:  0.40]
     allSelections.FakeBTopSelectionBDT.MVACutValue            = -1.00 # [default: -1.00]
     allSelections.FakeBMeasurement.LdgTopMVACutValue          = allSelections.TopSelectionBDT.MVACutValue
-    allSelections.FakeBMeasurement.SubldgTopMVACutValue       = 0.00  # allSelections.TopSelectionBDT.MVACutValue
+    allSelections.FakeBMeasurement.SubldgTopMVACutValue       = allSelections.TopSelectionBDT.MVACutValue
     print "=== run.py: Default parameters overwritten!"
     
     # ================================================================================================
