@@ -285,8 +285,8 @@ const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzV
     {
       float pt   = cleanTopP4.at(i).pt();
       // float mass = cleanTopP4.at(i).M();
-      bool isGen = cleanTopIsTagged.at(i);
-      bool isTag = cleanTopIsGenuine.at(i);
+      bool isGen = cleanTopIsGenuine.at(i);
+      bool isTag = cleanTopIsTagged.at(i);
       TopTagSFInputStash::TopTagJetFlavorType flavor;
       
       // Calculate the SF
@@ -308,7 +308,7 @@ const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzV
 	  // sf = just apply the SF or SF+deltaSF
 	  
 	  // nominal
-	  sf = fSF.getInputValueByPt(flavor, pt);	
+	  sf = fSF.getInputValueByPt(flavor, pt);
 	  
 	  // up variation
 	  // sf = fSFUp.getInputValueByPt(flavor, pt); //fixme
@@ -350,14 +350,16 @@ const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzV
       
       // Event weight to correct simulations is a product of SFs and MC tagging effiencies
       totalSF *= sf;
-      if (0) std::cout << "SF = " << sf << " totalSF = " << totalSF << " flavor = " << flavor 
-		       << " pt = " << pt << " isTag = " << isTag << " isGen = " << isGen << std::endl;
+      if (0) std::cout << i << ") pT = " << pt << " isTag = " << isTag << " isGen = " << isGen 
+		       << " flavor = " << flavor << " eff = " << fEfficiencies.getInputValueByPt(flavor, pt)
+		       << " SF = " << sf << ": totalSF = " << totalSF << std::endl;
+
     }
   
   // Fill histograms
   hTopTagSF->Fill(totalSF);
-
-  // std::cout << "totalSF = " << totalSF << std::endl;
+  
+  if (0) std::cout << "totalSF = " << totalSF << std::endl;
   return totalSF;
 }
 

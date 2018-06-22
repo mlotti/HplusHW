@@ -2429,8 +2429,8 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
 
   if (fEvent.isMC()) 
     {
-      std::cout << "FIXME! Need to move this to a later part of the code! Make sure this is properly calculated for all the regions! (top-tagging reference cut value?)" << std::endl;
-      fEventWeight.multiplyWeight(topData.getTopTaggingScaleFactorEventWeight()); //FIXME! MVACut
+      // std::cout << "FIXME! Need to move this to a later part of the code! Make sure this is properly calculated for all the regions! (top-tagging reference cut value?)" << std::endl;
+      fEventWeight.multiplyWeight(topData.getTopTaggingScaleFactorEventWeight());
     }
   cBaselineTopTaggingSFCounter.increment();
 
