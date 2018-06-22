@@ -41,6 +41,32 @@
   ./getEfficiencies.py -num <pseudo_nummcrab_directory> -den <pseudo_dencrab_directory> [opts]
   
   LAST USED:
+  
+  BDT 0.40: ./getGenuineEfficiency.py --noSF SystTopBDT_180620_045023_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p40_noSF \
+  --withCR1SF SystTopBDT_180620_142324_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p40_withCR1SF \
+  --withCR2SF SystTopBDT_180620_103846_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p40_withCR2SF --url -e "TTW"
+  
+  BDT 0.50: ./getGenuineEfficiency.py --noSF SystTopBDT_180620_045528_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p50_noSF \
+  --withCR1SF SystTopBDT_180620_143319_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p50_withCR1SF \
+  --withCR2SF SystTopBDT_180620_105041_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p50_withCR2SF --url -e "TTW"
+  
+  BDT 0.60: ./getGenuineEfficiency.py --noSF SystTopBDT_180620_050745_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p60_noSF \
+  --withCR1SF SystTopBDT_180620_143627_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p60_withCR1SF \
+  --withCR2SF SystTopBDT_180620_105610_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p60_withCR2SF --url -e "TTW"
+  
+  BDT 0.70: ./getGenuineEfficiency.py --noSF SystTopBDT_180620_052556_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p70_noSF \
+  --withCR1SF SystTopBDT_180620_143925_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p70_withCR1SF \
+  --withCR2SF SystTopBDT_180620_110408_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p70_withCR2SF --url -e "TTW"
+  
+  BDT 0.80: ./getGenuineEfficiency.py --noSF SystTopBDT_180620_054613_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p80_noSF \
+  --withCR1SF SystTopBDT_180620_144205_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p80_withCR1SF \
+  --withCR2SF SystTopBDT_180620_110854_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p80_withCR2SF --url -e "TTW"
+  
+  BDT 0.90: ./getGenuineEfficiency.py --noSF SystTopBDT_180620_055650_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p90_noSF \
+  --withCR1SF SystTopBDT_180620_155656_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p90_withCR1SF \
+  --withCR2SF SystTopBDT_180620_111439_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p90_withCR2SF --url -e "TTW"
+
+
   # Marina
   (1) Default
   ./getGenuineEfficiency.py --noSF SystTopBDT_180612_120857_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_noSF \
@@ -545,7 +571,6 @@ def PlotHistos(noSF_datasetsMgr, withCR1SF_datasetsMgr, withCR2SF_datasetsMgr, n
     # =========================================================================================
     # Normalization Factors (see: getNormalization.py)
     # =========================================================================================
-    # Marina
     f1=0.619886; f2=0.904877;
     
     # =========================================================================================
