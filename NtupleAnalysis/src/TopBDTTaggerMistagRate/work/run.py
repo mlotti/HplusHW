@@ -24,6 +24,10 @@ Example:
 ./run.py -m <multicrab-directory> -e TT_extOB
 ./run.py -m <multicrab_directory> -n 10 -e "QCD_bEnriched_HT300|2016|ST_"
 
+ LAST USED:
+ ./run.py -m /uscms_data/d3/skonstan/workspace/multicrab/multicrab_Hplus2tbAnalysis_v8030_20180526T0746 -i "JetHT|QCD"
+
+
 ROOT:
 The available ROOT options for the Error-Ignore-Level are (const Int_t):
         kUnset    =  -1
@@ -177,15 +181,12 @@ def main():
     #===============
     # Trigger
     #===============
-    allSelections.Trigger.triggerOR = ["HLT_PFHT900"
-                                       #"HLT_PFHT400_SixJet30",
-                                       #"HLT_PFHT450_SixJet40",
-                                       ]
+    allSelections.Trigger.triggerOR = ["HLT_PFHT900"]
+
     #===============
     # Jet Selection
     #===============
     allSelections.JetSelection.jetPtCuts                = [40, 40, 40, 40]
-    #allSelections.JetSelection.jetPtCuts                = [100, 40, 40, 40]
     allSelections.JetSelection.numberOfJetsCutValue     = 4
     allSelections.JetSelection.numberOfJetsCutDirection = ">="
     allSelections.JetSelection.HTCutValue               = 1000.0
@@ -205,10 +206,9 @@ def main():
     allSelections.METSelection.METCutValue                = -1000.0
     allSelections.METSelection.METCutDirection            = ">"
 
-    #===============
-    #Top Selection
-    #===============
-    #allSelections.TopSelectionBDT.MassCutValue            = 1000
+    # Study MisID vs BDT Cut
+    #allSelections.TopSelectionBDT.MVACutValue = 0.40
+    
     
     # ================================================================================================
     # Add Analysis Variations
@@ -236,12 +236,6 @@ def main():
                               doSystematicVariations = opts.doSystematics,
                               analysisType="HToTB",
                               verbose=opts.verbose)
-
-    # Add variations (e.g. for optimisation)
-    # builder.addVariation("METSelection.METCutValue", [100,120,140])
-    # builder.addVariation("AngularCutsBackToBack.workingPoint", ["Loose","Medium","Tight"])
-    # builder.addVariation("BJetSelection.triggerMatchingApply", [False])
-    # builder.addVariation("TopSelection.ChiSqrCutValue", [5, 10, 15, 20])
 
     # Build the builder
     builder.build(process, allSelections)
