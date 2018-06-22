@@ -273,7 +273,9 @@ void TopTagSFCalculator::bookHistograms(TDirectory* dir, HistoWrapper& histoWrap
 
 // Calculate scale factors
 const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzVector> cleanTopP4, 
-					    const std::vector<bool> cleanTopIsTagged, const std::vector<bool> cleanTopIsGenuine)
+					    const std::vector<double> cleanTopMVA, 
+					    const std::vector<bool> cleanTopIsTagged, 
+					    const std::vector<bool> cleanTopIsGenuine)
 {
   if (!isActive) return 1.0;
   
@@ -284,7 +286,8 @@ const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzV
   for (size_t i = 0; i < cleanTopP4.size(); i++)
     {
       float pt   = cleanTopP4.at(i).pt();
-      // float mass = cleanTopP4.at(i).M();
+      float mass = cleanTopP4.at(i).M();
+      float mva  = cleanTopMVA.at(i);
       bool isGen = cleanTopIsGenuine.at(i);
       bool isTag = cleanTopIsTagged.at(i);
       TopTagSFInputStash::TopTagJetFlavorType flavor;
@@ -350,12 +353,14 @@ const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzV
       
       // Event weight to correct simulations is a product of SFs and MC tagging effiencies
       totalSF *= sf;
-      if (0) std::cout << i << ") pT = " << pt << " isTag = " << isTag << " isGen = " << isGen 
+      if (1) std::cout << i << ") pT = " << pt << " m(jjb) = " << mass << " MVA " << mva	       
+		       << " isTag = " << isTag << " isGen = " << isGen 
 		       << " flavor = " << flavor << " eff = " << fEfficiencies.getInputValueByPt(flavor, pt)
 		       << " SF = " << sf << ": totalSF = " << totalSF << std::endl;
 
     }
-  
+  std::cout << "\n" << std::endl;
+
   // Fill histograms
   hTopTagSF->Fill(totalSF);
   
