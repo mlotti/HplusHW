@@ -176,8 +176,12 @@ def main():
     # allSelections.TopSelection.ChiSqrCutValue = 100.0
     # allSelections.BJetSelection.numberOfBJetsCutValue = 0
     # allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
-
     
+    #allSelections.TopSelectionBDT.MVACutValue           = 0.90 # [default: 0.4]
+    #allSelections.FakeBTopSelectionBDT.MVACutValue      = 0.00 # [default: -1.0]
+    #allSelections.FakeBMeasurement.LdgTopMVACutValue    = allSelections.TopSelectionBDT.MVACutValue
+    #allSelections.FakeBMeasurement.SubldgTopMVACutValue = allSelections.TopSelectionBDT.MVACutValue
+
     # ================================================================================================
     # Add Analysis Variations
     # ================================================================================================

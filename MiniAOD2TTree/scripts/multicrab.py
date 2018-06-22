@@ -1192,7 +1192,7 @@ def WalkEOSDir(taskName, pathOnEOS, opts):
         for d in dirContents:
             if d == "crab_" + taskName:
                 subDir = d
-            
+
         # Special case required due to all data (Tau, JetHT) put under a single directory in EOS
         if subDir != None:
             pathOnEOS = WalkEOSDir(taskName, pathOnEOS + "/" + subDir, opts)
@@ -1505,6 +1505,7 @@ def GetRequestName(dataset):
     # Append the dataset name
     if match:
 	requestName = match.group("name")
+    firstName = requestName
 
     # Append the Run number (for Data samples only)
     if dataset.isData():
@@ -1520,6 +1521,9 @@ def GetRequestName(dataset):
     tev_match = tev_re.search(requestName)
     if tev_match:
 	requestName = tev_match.group("name")
+
+    # Simple hack to prevent overwrite of special TT samples
+    requestName = GetTTbarSystematicsName(firstName, requestName) 
 
     # Append the Ext
     ext_match = ext_re.search(dataset.URL)
@@ -1540,6 +1544,59 @@ def GetRequestName(dataset):
 
     # Finally, replace dashes with underscores    
     requestName = requestName.replace("-","_")
+    return requestName
+
+
+def GetTTbarSystematicsName(firstName, requestName):
+    '''
+    A simple hack to prevent overwrite of default TT when
+    using TTbar samples for systematics studies 
+    (ISR, FSR, EVTGEN, MTOP, etc..) 
+    
+    Added by M.K, 06 June 2018
+    '''
+    if "fsrdown" in firstName:
+        requestName = requestName+"_fsrdown"
+    elif "fsrup" in firstName:
+        requestName = requestName+"_fsrup"
+    elif "isrdown" in firstName:
+        requestName = requestName+"_isrdown"
+    elif "isrup" in firstName:
+        requestName = requestName+"_isrup"
+    elif "evtgen" in firstName:
+        requestName = requestName+"_evtgen"
+    elif "GluonMoveCRTune" in firstName:
+        requestName = requestName+"_GluonMoveCRTune"
+    elif "GluonMoveCRTune_erdON" in firstName:
+        requestName = requestName+"_GluonMoveCRTune_erdON"
+    elif "QCDbasedCRTune_erdON" in firstName:
+        requestName = requestName+"_QCDbasedCRTune_erdON"
+    elif "erdON" in firstName:
+        requestName = requestName+"_erdON"
+    elif "mtop1665" in firstName:
+        requestName = requestName+"_mtop1665"
+    elif "mtop1695" in firstName:
+        requestName = requestName+"_mtop1695"
+    elif "mtop1715" in firstName:
+        requestName = requestName+"_mtop1715"
+    elif "mtop1735" in firstName:
+        requestName = requestName+"_mtop1735"
+    elif "mtop1755" in firstName:
+        requestName = requestName+"_mtop1755"
+    elif "mtop1785" in firstName:
+        requestName = requestName+"_mtop1785"
+    elif "TuneCUETP8M2T4down" in firstName:
+        requestName = requestName+"_TuneCUETP8M2T4down"
+    elif "TuneCUETP8M2T4up" in firstName:
+        requestName = requestName+"_TuneCUETP8M2T4up"
+    elif "TuneEE5C" in firstName:
+        requestName = requestName+"_TuneEE5C"
+    elif "SingleLeptFromT" in firstName and "madgraph" in firstName:
+        requestName = requestName+"_madgraph"
+    elif "SingleLeptFromT" in firstName and "amcatnlo" in firstName:
+        requestName = requestName+"_amcatnlo"
+    else:
+        pass
     return requestName
 
 

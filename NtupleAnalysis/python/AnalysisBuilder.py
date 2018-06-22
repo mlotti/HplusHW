@@ -87,6 +87,17 @@ class AnalysisConfig:
                     direction = value.replace("BTagSF","").replace("BMistagSF","").replace("Minus","down").replace("Plus","up")
                     scaleFactors.updateBtagSFInformationForVariations(self._config.BJetSelection, direction=direction, variationInfo=variationType)
 
+		# top-tag SF
+		elif value.startswith("TopTagSF") or value.startswith("TopMistagSF"):
+                    self.Print("************************* This is still under construction. Never tested before!", True)
+                    variationType = None
+                    if value.startswith("TopTagSF"):
+                        variationType = "tag"
+                    elif value.startswith("TopMistagSF"):
+                        variationType = "mistag"
+                    direction = value.replace("TopTagSF","").replace("TopMistagSF","").replace("Minus","down").replace("Plus","up")
+                    scaleFactors.updateTopTagSFInformationForVariations(self._config.TopSelectionBDT, direction=direction, variationInfo=variationType)
+
 		# top quarks
 		elif value.startswith("TopPt"):
                     self._config.topPtSystematicVariation = value.replace("TopPt","").replace("Plus","plus").replace("Minus","minus")

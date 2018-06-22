@@ -285,11 +285,9 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("TT_Mtt_1000toInf", {
             "13": 20.57789, # [18],[20], calculated as 20.187 (from generation) /815.96 (from generation) * 831.76 (NNLO)
             }),
-    # Marina
     CrossSection("TTGJets", {            
-            "13": 1.0, # FIXME
+            "13": 1.0, # FIXME (Marina)
             }),
-    
     CrossSection("TT_fsrdown", {
             "13": 831.76, # [18] 
             }),
@@ -365,11 +363,6 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("TT_QCDbasedCRTune_erdON", {
             "13": 831.76, # [18] 
             }),
-    
-    
-
-    #========================================================== Marina
-    
     CrossSection("TTJets_HT600to800", {
             "13": 0.0, 
             }),

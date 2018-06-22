@@ -11,12 +11,13 @@ USAGE:
 EXAMPLES:
 ./plot_BDTG.py -r TopReco_DR0p3_DPtOverPt0p32.root --reff mvaeffs.root --url
 ./plot_BDTG.py -r /uscms_data/d3/skonstan/workspace/rootfiles/TopReco_DR0p3_DPtOverPt0p32.root --reff /uscms_data/d3/skonstan/workspace/rootfiles/mvaeffs.root --url
-
+./plot_BDTG.py -r /uscms_data/d3/skonstan/workspace/rootfiles/TopRecoTree_180523_DeltaR0p3_DeltaPtOverPt0p32_TopPtRew13TeV.root --reff /uscms_data/d3/skonstan/workspace/rootfiles/mvaeffs_TopPtRew13TeV_DeltaPtOverPt0p32.root --url
 
 LAST USED:
 ./plot_BDTG.py -r /uscms_data/d3/aattikis/workspace/rootfiles/TopReco_DR0p3_DPtOverPt0p32.root --reff /uscms_data/d3/aattikis/workspace/rootfiles/mvaeffs.root --url
 
 '''
+
 
 #================================================================================================ 
 # Imports
@@ -25,6 +26,7 @@ import sys
 import math
 import copy
 import os
+import getpass
 from optparse import OptionParser
 
 import ROOT
@@ -303,7 +305,7 @@ def SavePlot(plot, saveName, saveDir, saveFormats = [".pdf"]):
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
         saveNameURL = savePath + ext
-        saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
+        saveNameURL = saveNameURL.replace("/publicweb/%s/%s" % (getpass.getuser()[0], getpass.getuser()), "http://home.fnal.gov/~%s" % (getpass.getuser()))
         if opts.url:
             Print(saveNameURL, i==0)
         else:
@@ -349,7 +351,7 @@ if __name__ == "__main__":
     MERGEEWK     = False
     URL          = False
     NOERROR      = True
-    SAVEDIR      = "/publicweb/a/aattikis/" + ANALYSISNAME
+    SAVEDIR      = "/publicweb/%s/%s/%s" % (getpass.getuser()[0], getpass.getuser(), ANALYSISNAME)
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
     NORMALISE    = False

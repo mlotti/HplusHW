@@ -12,11 +12,18 @@ EXAMPLES:
 ./plotMC_InvMassSmearing.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400_wSignal/TopRecoAnalysis_180422_BDT40/ --signalMass  500
 ./plotMC_InvMassSmearing.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400_wSignal/TopRecoAnalysis_180422_BDT40/ --signalMass 1000
 ./plotMC_InvMassSmearing.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400_wSignal/TopRecoAnalysis_180422_BDT40/ --signalMass 1000
+./plotMC_InvMassSmearing.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400_wSignal/TopRecoAnalysis_180422_BDT40/ --signalMass 500 --url -n
 
 
 LAST USED:
-/plotMC_InvMassSmearing.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400_wSignal/TopRecoAnalysis_180422_BDT40/ --signalMass 500 --url -n
+./plotMC_InvMassSmearing.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/TopRecoAnalysis_180524_052417_Mcrab644_BDT_DR0p3_DPtOverPt0p32_PtReweighting/--signalMass 500 --url -n
 
+
+New training:
+/uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/TopRecoAnalysis_180524_052417_Mcrab644_BDT_DR0p3_DPtOverPt0p32_PtReweighting/
+
+Old training:
+/uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/TopRecoAnalysis_180524_051147_Mcrab644_BDT_DR0p3_DPtOverPt0p32/
 '''
 
 #================================================================================================ 
@@ -28,6 +35,7 @@ import copy
 import os
 from optparse import OptionParser
 
+import getpass
 import ROOT
 ROOT.gROOT.SetBatch(True)
 from ROOT import *
@@ -40,7 +48,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
-
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 #================================================================================================ 
 # Function Definition
 #================================================================================================ 
@@ -166,6 +174,7 @@ def getHistos(datasetsMgr, histoName):
     h2.setName("EWK")
     return [h1, h2]
 
+'''
 def SavePlot(plot, saveName, saveDir, saveFormats = [".pdf", ".png"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
     
@@ -184,6 +193,25 @@ def SavePlot(plot, saveName, saveDir, saveFormats = [".pdf", ".png"]):
         else:
             Print(savePath + ext, i==0)
         plot.saveAs(savePath, formats=saveFormats)
+    return
+'''
+
+def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
+    Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
+
+     # Check that path exists                                                                                                                                                                               
+    if not os.path.exists(saveDir):
+        os.makedirs(saveDir)
+
+    # Create the name under which plot will be saved                                                                                                                                                        
+    saveName = os.path.join(saveDir, plotName.replace("/", "_"))
+
+    # For-loop: All save formats                                                                                                                                                                            
+    for i, ext in enumerate(saveFormats):
+        saveNameURL = saveName + ext
+        saveNameURL = aux.convertToURL(saveNameURL, opts.url)
+        Print(saveNameURL, i==0)
+        plot.saveAs(saveName, formats=saveFormats)
     return
 
 def PlotHistograms(datasetsMgr):
@@ -251,7 +279,7 @@ def PlotHistograms(datasetsMgr):
     # Overwite signal style?
     style  = [200, 500, 800, 1000, 2000, 5000]
     lstyle = [ROOT.kSolid, ROOT.kDashed, ROOT.kDashDotted, ROOT.kDotted, ROOT.kDotted, ROOT.kSolid]
-    p.histoMgr.forHisto("Matched-LdgTrijet-Bjet" , styles.getFakeBStyle())
+    p.histoMgr.forHisto("Matched-LdgTrijet-Bjet" , styles.getFakeBLineStyle()) #styles.getFakeBStyle())
     p.histoMgr.forHisto("Matched-Bjet"           , styles.mcStyle) #getInvertedLineStyle()) 
     p.histoMgr.forHisto("Matched-LdgTrijet"      , styles.stylesCompound[-1])
     p.histoMgr.forHisto("Inclusive"              , styles.getGenuineBLineStyle())
@@ -268,14 +296,14 @@ def PlotHistograms(datasetsMgr):
     p.histoMgr.setHistoLegendStyle("Inclusive", "LP")
     p.histoMgr.setHistoLegendStyle("Matched-Bjet", "LP")
     p.histoMgr.setHistoLegendStyle("Matched-LdgTrijet", "F")
-    p.histoMgr.setHistoLegendStyle("Matched-LdgTrijet-Bjet", "F")
+    p.histoMgr.setHistoLegendStyle("Matched-LdgTrijet-Bjet", "L")
     p.histoMgr.setHistoLegendStyle("Unmatched", "F")
 
     p.histoMgr.setHistoLegendLabelMany({
             "Inclusive"              : "Inclusive",
             "Matched-Bjet"           : "b-jet match",
             "Matched-LdgTrijet"      : "top match",
-            "Matched-LdgTrijet-Bjet" : "top + b-jet match",
+            "Matched-LdgTrijet-Bjet" : "full match", #"top + b-jet match",
             "Unmatched"              : "Combinatoric",
             })
     
@@ -293,15 +321,24 @@ def PlotHistograms(datasetsMgr):
     else:
         yLabel = "Events / %0.0f " + _units
 
+    if opts.logY:
+        ymin  = 1e-3
+        ymaxf = 5
+    else:
+        ymin  = 0.0
+        ymaxf = 1.2
+
+    ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
+
     plots.drawPlot(p, 
                    saveName,
                    xlabel       = "m_{jjbb} (%s)" % (_units),
                    ylabel       = yLabel,
-                   log          = False,
-                   rebinX       = 5,
+                   log          = opts.logY,
+                   rebinX       = 2, #2, 5
                    cmsExtraText = "Preliminary",
                    createLegend = _leg,
-                   opts         = {"xmin": 0.0, "xmax": 1500.0, "ymin": 0.0, "ymaxfactor": 1.2},
+                   opts         = {"xmin": 0.0, "xmax": 1400.0, "ymin": ymin, "ymaxfactor": ymaxf},
                    opts2        = {"ymin": 0.6, "ymax": 1.4},
                    cutBox       = {"cutValue": opts.signalMass, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
                    )
@@ -312,7 +349,7 @@ def PlotHistograms(datasetsMgr):
 
     return
 
-
+'''
 def SavePlot(plot, saveName, saveDir, saveFormats = [".C", ".pdf", ".png"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
     
@@ -332,7 +369,7 @@ def SavePlot(plot, saveName, saveDir, saveFormats = [".C", ".pdf", ".png"]):
             Print(savePath + ext, i==0)
         plot.saveAs(savePath, formats=saveFormats)
     return
-
+'''
 
 #================================================================================================ 
 # Main
@@ -367,9 +404,9 @@ if __name__ == "__main__":
     VERBOSE      = False
     NORMALISE    = False
     ANALYSISNAME = "TopRecoAnalysis"
-    SAVEDIR      = "/publicweb/a/aattikis/" + ANALYSISNAME
-
-
+    SAVEDIR      = None #"/publicweb/a/aattikis/" + ANALYSISNAME
+    LOGY         = False
+    
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
 
@@ -418,6 +455,9 @@ if __name__ == "__main__":
     parser.add_option("-n", "--normaliseToOne", dest="normaliseToOne", action="store_true", 
                       help="Normalise the histograms to one? [default: %s]" % (NORMALISE) )
 
+    parser.add_option("--logY", dest="logY", action="store_true", 
+                      help="Set y-axis to log scale [default: %s]" % (LOGY) )
+
     (opts, parseArgs) = parser.parse_args()
 
     # Require at least two arguments (script-name, path to multicrab)
@@ -435,8 +475,12 @@ if __name__ == "__main__":
     if opts.mergeEWK:
         Print("Merging EWK samples into a single Datasets \"EWK\"", True)
 
+    # Save directory
+    if opts.saveDir == None:
+        opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="")
+
     # Sanity check
-    allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 2000, 3000]
+    allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 2000, 3000]
     if opts.signalMass not in allowedMass:
         raise Exception("Signal mass invalid")
 

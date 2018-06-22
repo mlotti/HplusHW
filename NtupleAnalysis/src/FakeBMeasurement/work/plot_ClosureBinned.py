@@ -423,7 +423,7 @@ def main(opts):
         
         # List of TDirectoryFile (_CRone, _CRtwo, _VR, _SR)
         tdirs  = ["LdgTrijetPt_", "LdgTrijetMass_"  , "TetrajetBJetPt_", "TetrajetBJetEta_", "LdgTetrajetPt_", "LdgTetrajetMass_"] 
-        region = ["CRone", "CRtwo"]
+        region = ["CRone", "CRtwo", "SR", "VR"]
         hList  = []
         for d in tdirs:
             for r in region:
@@ -585,12 +585,18 @@ def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
         # Definitions
         region1      = "CRone"
         region2      = "CRtwo"
+        region3      = "VR"
+        region4      = "SR"
         key2         = key1.replace(region1, region2)
+        key3         = key1.replace(region1, region3)
+        key4         = key1.replace(region1, region4)
         dataset      = key1.split("-")[0]
         region       = key1.split("-")[1]
         bin          = key1.split("-")[2]
         hName1       = rhDict[key1].GetName()
         hName2       = rhDict[key2].GetName()
+        hName3       = rhDict[key3].GetName()
+        hName4       = rhDict[key4].GetName()
         bInclusive   = "Inclusive" in key1
 
         # Dataset and Region filter
@@ -610,6 +616,12 @@ def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
             rFakeB_CRtwo = rhDict[key2].Clone()
             rFakeB_CRtwo.Reset("ICES")
 
+            rFakeB_VR = rhDict[key3].Clone()
+            rFakeB_VR.Reset("ICES")
+            
+            rFakeB_SR = rhDict[key4].Clone()
+            rFakeB_SR.Reset("ICES")
+
             # For-loop: All fakeB bins (to add-up all binned histos)
             for i, b in enumerate(binLabels, 1):
                 if "Inclusive" in b:
@@ -621,49 +633,80 @@ def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
                 # Determine keys
                 k1 = key1.replace("Inclusive", b)
                 k2 = key2.replace("Inclusive", b)
+                k3 = key3.replace("Inclusive", b)
+                k4 = key4.replace("Inclusive", b)
 
                 # Normalise bin histo to one (before adding to inclusive histo)
                 Verbose("Cloning histogram %s"  % (rhDict[k1].GetName()), False)
                 h1 = rhDict[k1].Clone()
                 h2 = rhDict[k2].Clone()
+                h3 = rhDict[k3].Clone()
+                h4 = rhDict[k4].Clone()
 
                 # First normalise the histos
                 h1.Scale(1.0/h1.Integral())
                 h2.Scale(1.0/h2.Integral())
+                h3.Scale(1.0/h3.Integral())
+                h4.Scale(1.0/h4.Integral())
 
                 # Add-up individual bins
                 rFakeB_CRone.Add(h1, +1)
                 rFakeB_CRtwo.Add(h2, +1)
+                rFakeB_VR.Add(h3, +1)
+                rFakeB_SR.Add(h4, +1)
         else:
             # Get the histos
             rFakeB_CRone = rhDict[key1]
             rFakeB_CRtwo = rhDict[key2]
+            rFakeB_VR    = rhDict[key3]
+            rFakeB_SR    = rhDict[key4]
 
         # Normalise the histos?
         if opts.normaliseToOne:
             rFakeB_CRone.Scale(1.0/rFakeB_CRone.Integral())
             rFakeB_CRtwo.Scale(1.0/rFakeB_CRtwo.Integral())
+            rFakeB_VR.Scale(1.0/rFakeB_VR.Integral())
+            rFakeB_SR.Scale(1.0/rFakeB_SR.Integral())
 
         # Apply histogram styles          
+        doAllRegions = False #iro
         styles.getABCDStyle("CRone").apply(rFakeB_CRone)
         styles.getABCDStyle("CRtwo").apply(rFakeB_CRtwo)
+        if doAllRegions:
+            styles.getABCDStyle("VR").apply(rFakeB_VR)
+            styles.getABCDStyle("SR").apply(rFakeB_SR)
         
         # Create the plot
-        p = plots.ComparisonManyPlot(rFakeB_CRone, [rFakeB_CRtwo], saveFormats=[])
+        if doAllRegions:
+            p = plots.ComparisonManyPlot(rFakeB_CRone, [rFakeB_VR, rFakeB_SR, rFakeB_CRtwo], saveFormats=[]) 
+        else:
+            p = plots.ComparisonManyPlot(rFakeB_CRone, [rFakeB_CRtwo], saveFormats=[])
         p.setLuminosity(opts.intLumi)
     
         # Set draw/legend style
         p.histoMgr.setHistoDrawStyle(hName1, "AP")
         p.histoMgr.setHistoLegendStyle(hName1, "LP")
-
         p.histoMgr.setHistoDrawStyle(hName2, "HIST")
         p.histoMgr.setHistoLegendStyle(hName2, "F")
+        if doAllRegions:
+            p.histoMgr.setHistoDrawStyle(hName3, "AP")
+            p.histoMgr.setHistoLegendStyle(hName3, "LP")
+            p.histoMgr.setHistoDrawStyle(hName4, "AP")
+            p.histoMgr.setHistoLegendStyle(hName4, "LP")
         
         # Set legend labels
-        p.histoMgr.setHistoLegendLabelMany({
-                hName1 : "CR1",
-                hName2 : "CR2",
-                })
+        if doAllRegions:
+            p.histoMgr.setHistoLegendLabelMany({
+                    hName1 : "CR1",
+                    hName2 : "CR2",
+                    hName3 : "VR",
+                    hName4 : "SR",
+                    })
+        else:
+            p.histoMgr.setHistoLegendLabelMany({
+                    hName1 : "CR1",
+                    hName2 : "CR2",
+                    })
 
         # Draw the plot and save it
         if bin == "Inclusive":

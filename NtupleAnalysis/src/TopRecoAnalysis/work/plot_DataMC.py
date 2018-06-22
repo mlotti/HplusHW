@@ -39,7 +39,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
 import HiggsAnalysis.NtupleAnalysis.tools.counter as counter
 import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
-import HiggsAnalysis.NtupleAnalysis.tools.styles_Soti as styles
+import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots_Soti as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
@@ -160,12 +160,12 @@ def main(opts):
             if "ChargedHiggs" in d.getName():
                 datasetsMgr.getDataset(d.getName()).setCrossSection(1.0) # ATLAS 13 TeV H->tb exclusion limits
                 #if d.getName() != opts.signal:
-                if "M_650" in d.getName():  #soti fixmi
-                    datasetsToRemove.append(d.getName())
+                #if "M_650" in d.getName():  #soti fixmi
+                #    datasetsToRemove.append(d.getName())
                 if "M_800" in d.getName():
                     datasetsToRemove.append(d.getName())
-                if "M_200" in d.getName():
-                    datasetsToRemove.append(d.getName())
+                #if "M_200" in d.getName():
+                #    datasetsToRemove.append(d.getName())
 
         if opts.verbose:
             datasetsMgr.PrintCrossSections()
@@ -205,7 +205,7 @@ def main(opts):
 #            s = newOrder.pop( newOrder.index(opts.signal) )
 #            newOrder.insert(0, s)
         print len(newOrder), "newOrder"
-        signalMass = ["M_300", "M_500", "M_1000"]
+        signalMass = ["M_200", "M_500", "M_1000", "M_650"]
         for d in datasetsMgr.getMCDatasets():
             for m in signalMass:
                 if m in d.getName():
@@ -829,6 +829,8 @@ def PlotHistograms(datasetsMgr, datasetsMgr_matched, histoName, intLumi):
     # Apply style
     if opts.signalMass != 0:
         p.histoMgr.forHisto(opts.signal, styles.getSignalStyleHToTB_M(opts.signalMass))
+
+
 
     # p.histoMgr.forHisto(opts.signalMass, styles.getSignalStyleHToTB())
     if "QCD" in datasetsMgr.getAllDatasetNames():
