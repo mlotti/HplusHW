@@ -555,7 +555,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 		  fNotSelectedTops.Jet1.push_back(getLeadingSubleadingJet(jet1, jet2, "leading"));
 		  fNotSelectedTops.Jet2.push_back(getLeadingSubleadingJet(jet1, jet2, "subleading"));
 		  fNotSelectedTops.BJet.push_back(bjet);
-		  fNotSelectedTops.isGenuine.push_back(true); // fixme
+		  fNotSelectedTops.isGenuine.push_back(false); // fixme
 		  fNotSelectedTops.isTagged.push_back(false); // fixme: which MVA cut? ldg, or subldg, or?
 		}
 		
