@@ -16,9 +16,10 @@ TopTagSFInputItem::TopTagSFInputItem(float ptMin, float ptMax, const std::string
   fPtMax(ptMax),
   bIsOverflowBinPt(false) {
   int v = fFormula.Compile(formula.c_str());
-  if (v) {
-    throw hplus::Exception("config") << "TopTag SF formula '" << formula << "' does not compile for TFormula!";
-  }
+  if (v) 
+    {
+      throw hplus::Exception("config") << "TopTag SF formula '" << formula << "' does not compile for TFormula!";
+    }
 }
 
 // Constructor using efficiency number
@@ -52,76 +53,96 @@ const float TopTagSFInputItem::getValueByPt(float pt) const {
     throw hplus::Exception("assert") << "The requested pt (" << pt << ") is out of range!";
   }
   // For jet pt's above the maximum pt value, use the maximum value (otherwise the SF's become anomalously large)
-  if (pt > fPtMax) {
-    return fFormula.Eval(fPtMax);
-  }
+  if (pt > fPtMax) 
+    {
+      return fFormula.Eval(fPtMax);
+    }
+
   return fFormula.Eval(pt);
 }
 
-void TopTagSFInputItem::setAsOverflowBinPt() { bIsOverflowBinPt = true; }
+void TopTagSFInputItem::setAsOverflowBinPt() 
+{ 
+  bIsOverflowBinPt = true; 
 
-// Print debug information
-void TopTagSFInputItem::debug() const {
-  std::cout << "ptmin=" << fPtMin << " ptmax=" << fPtMax 
-            << " overflow=" << bIsOverflowBinPt 
-            << " formula=" << fFormula.GetExpFormula() << std::endl;
+  return;
+}
+
+void TopTagSFInputItem::debug() const 
+{
+  // Print debug information
+  std::cout << " ptmin = "    << fPtMin 
+	    << " ptmax = "    << fPtMax 
+            << " overflow = " << bIsOverflowBinPt 
+            << " formula = "  << fFormula.GetExpFormula() 
+	    << std::endl;
+  
+  return;
 }
 
 
 // --- TopTagSFInputStash ---
-
 
 // Constructor
 TopTagSFInputStash::TopTagSFInputStash() { }
 
 // Destructor
 TopTagSFInputStash::~TopTagSFInputStash() {
-  // std::vector<std::vector<TopTagSFInputItem*>> collections = { fBToB, fCToB, fGToB, fUdsToB };
-std::vector<std::vector<TopTagSFInputItem*>> collections = { fBToB, fCToB, fUdsgToB };
+  std::vector<std::vector<TopTagSFInputItem*>> collections = { fGenuineTop, fFakeTop };
+
   for (auto& container: collections) {
     for (size_t i = 0; i < container.size(); ++i) {
       delete container[i];
     }
     container.clear();
   }
+
 }
 
-// Create new input item corresponding to certain flavor and pT range (using formula string)
-void TopTagSFInputStash::addInput(TopTagJetFlavorType flavor, float ptMin, float ptMax, const std::string& formula) {
+// Create new input item corresponding to certain pT range (using formula string)
+void TopTagSFInputStash::addInput(TopTagJetFlavorType flavor, float ptMin, float ptMax, const std::string& formula) 
+{
   getCollection(flavor).push_back(new TopTagSFInputItem(ptMin, ptMax, formula));
+
+  return; 
 }
 
-// Create new input item corresponding to certain flavor and pT range (using eff)
-void TopTagSFInputStash::addInput(TopTagJetFlavorType flavor, float ptMin, float ptMax, float eff) {
+// Create new input item corresponding to certain pT range (using eff)
+void TopTagSFInputStash::addInput(TopTagJetFlavorType flavor, float ptMin, float ptMax, float eff) 
+{
   getCollection(flavor).push_back(new TopTagSFInputItem(ptMin, ptMax, eff));
+  return;
 }
 
 // Per-jet SF (by pT)
-const float TopTagSFInputStash::getInputValueByPt(TopTagJetFlavorType flavor, float pt) const {
+const float TopTagSFInputStash::getInputValueByPt(TopTagJetFlavorType flavor, float pt) const 
+{
   for (auto &p: getConstCollection(flavor)) {
     if (p->matchesPtRange(pt)) {
       return p->getValueByPt(pt);
     }
   }
-  //std::cout << "***" << getConstCollection(flavor).size() << std::endl;
-//  throw hplus::Exception("Logic") << "Jet pt " << pt << " flavor " << flavor << " is out of range for btag SF calculation!";
-  std::cout << "Warning: Jet pt " << pt << " flavor " << flavor << " is out of range for btag SF calculation!";
+  std::cout << "=== TopTagSFCalculator::addInput() Jet pt " << pt << " flavor " << flavor << " is out of range for top-tag SF calculation!";
   return 1.0;
 }
 
 // Define overflow bin
-void TopTagSFInputStash::setOverflowBinByPt(const std::string& label) {
-  //  std::vector<std::vector<TopTagSFInputItem*>> collections = { fBToB, fCToB, fGToB, fUdsToB };
-  std::vector<std::vector<TopTagSFInputItem*>> collections = { fBToB, fCToB, fUdsgToB };
+void TopTagSFInputStash::setOverflowBinByPt(const std::string& label) 
+{
+  std::vector<std::vector<TopTagSFInputItem*>> collections = { fGenuineTop, fFakeTop};
   size_t i = 0;
+  
+  
   for (auto& container: collections) {
     if (!container.size()) {
-      std::cout << "Warning: Btag SF: empty collection for " << label << " flavor=" << i << std::endl;
+      std::cout << "=== TopTagSFCalculator::setOverflowBinByPt() Empty collection for " << label << " flavor =" << i << std::endl;
       continue;
     }
+
     float maxValue = -1.0;
     int index = -1;
     int i = 0;
+
     for (auto p: container) {
       if (p->getPtMax() > maxValue) {
         maxValue = p->getPtMax();
@@ -136,39 +157,38 @@ void TopTagSFInputStash::setOverflowBinByPt(const std::string& label) {
     //container[index]->debug();
     ++i;
   }
+  
+  return;
 }
 
-// Get const vector of input items (according to flavor)
-const std::vector<TopTagSFInputItem*>& TopTagSFInputStash::getConstCollection(TopTagJetFlavorType flavor) const {
-  if (flavor == kBJet)
-    return fBToB;
-  else if (flavor == kCJet)
-    return fCToB;
-  else if (flavor == kUDSGJet)
-    return fUdsgToB;
-  throw hplus::Exception("Logic") << "Unknown flavor requested! " << flavor;
-}
+ // Get const vector of input items
+ const std::vector<TopTagSFInputItem*>& TopTagSFInputStash::getConstCollection(TopTagJetFlavorType flavor) const 
+ {
+   if (flavor == kInclusiveTop) return fInclusiveTop;
+   else if (flavor == kGenuineTop) return fGenuineTop;
+   else if (flavor == kFakeTop) return fFakeTop;
+   throw hplus::Exception("Logic") << "Unknown flavor requested! " << flavor;
+ }
 
-// Get vector of input items (according to flavor)
-std::vector<TopTagSFInputItem*>& TopTagSFInputStash::getCollection(TopTagJetFlavorType flavor) {
-  if (flavor == kBJet)
-    return fBToB;
-  else if (flavor == kCJet)
-    return fCToB;
-  else if (flavor == kUDSGJet)
-    return fUdsgToB;
-  throw hplus::Exception("Logic") << "Unknown flavor requested! " << flavor;
-}
+// Get vector of input items
+ std::vector<TopTagSFInputItem*>& TopTagSFInputStash::getCollection(TopTagJetFlavorType flavor) 
+ {
+   if (flavor == kInclusiveTop)  return fInclusiveTop;
+   else if (flavor == kGenuineTop)  return fGenuineTop;
+   else if (flavor == kFakeTop)  return fFakeTop;
+   throw hplus::Exception("Logic") << "Unknown flavor requested! " << flavor;
+ }
 
 // Debug prints
 void TopTagSFInputStash::debug() const {
-  // std::vector<std::vector<TopTagSFInputItem*>> collections = { fBToB, fCToB, fGToB, fUdsToB };
-  std::vector<std::vector<TopTagSFInputItem*>> collections = { fBToB, fCToB, fUdsgToB };
+  std::vector<std::vector<TopTagSFInputItem*>> collections = { fGenuineTop, fFakeTop};
   for (auto p: collections) {
     for (auto pp: p) {
       pp->debug();
     }
   }
+
+  return;
 }
 
 
@@ -181,272 +201,376 @@ TopTagSFCalculator::TopTagSFCalculator(const ParameterSet& config)
   hTopTagSF(nullptr),
   hTopTagSFRelUncert(nullptr) {
   // Import efficiencies
-  handleEfficiencyInput(config.getParameterOptional<std::vector<ParameterSet>>("btagEfficiency"));
-  fEfficiencies.setOverflowBinByPt("EfficiencyNominal");
-  fEfficienciesUp.setOverflowBinByPt("EfficiencyUp");
-  fEfficienciesDown.setOverflowBinByPt("EfficiencyDown");
+  handleEfficiencyInput(config.getParameterOptional<std::vector<ParameterSet>>("topTagEfficiency"));
+  // fEfficiencies.setOverflowBinByPt("EfficiencyNominal"); //fixme
+  // fEfficienciesUp.setOverflowBinByPt("EfficiencyUp");
+  // fEfficienciesDown.setOverflowBinByPt("EfficiencyDown");
+  // fEfficienciesSF.setOverflowBinByPt("EfficienciesSFnominal");
+  // fEfficienciesSFUp.setOverflowBinByPt("EfficienciesSFup");
+  // fEfficienciesSFDown.setOverflowBinByPt("EfficienciesSFdown");
+
+  // Import misidefication rates
+  handleMisidInput(config.getParameterOptional<std::vector<ParameterSet>>("topTagMisid"));
+  // fMisid.setOverflowBinByPt("MisidNominal"); //fixme
+  // fMisidUp.setOverflowBinByPt("MisidUp");
+  // fMisidDown.setOverflowBinByPt("MisidDown");
+  // fMisidSF.setOverflowBinByPt("MisidSFnominal");
+  // fMisidSFUp.setOverflowBinByPt("MisidSFup");
+  // fMisidSFDown.setOverflowBinByPt("MisidSFdown");
+
   // Import scale factors
-  handleSFInput(config.getParameterOptional<std::vector<ParameterSet>>("btagSF"));
-  fSF.setOverflowBinByPt("SFnominal");
-  fSFUp.setOverflowBinByPt("SFup");
-  fSFDown.setOverflowBinByPt("SFdown");
+  // handleSFInput(config.getParameterOptional<std::vector<ParameterSet>>("toptagSF"));
+  // fEfficienciesSF.setOverflowBinByPt("SFnominal");
+  // fEfficienciesSFUp.setOverflowBinByPt("SFup");
+  // fEfficienciesSFDown.setOverflowBinByPt("SFdown");
+  
   // Debug prints
-
-  // std::cout << "\n=== TopTagSFCalculator::TopTagSFCalculator() - DEBUG" << std::endl;
-  // fEfficiencies.debug();
-  // fEfficienciesUp.debug();
-  // fEfficienciesDown.debug();
-  // fSF.debug();
-  // fSFUp.debug();
-  // fSFDown.debug();
-
+  if (0)
+    {
+      std::cout << "\n=== TopTagSFCalculator::TopTagSFCalculator() - DEBUG" << std::endl;
+      fEfficiencies.debug();
+      fEfficienciesUp.debug();
+      fEfficienciesDown.debug();
+      fSF.debug();
+      fSFUp.debug();
+      fSFDown.debug();
+    }
+  
   // Check validity of input
-  if (!sizeOfEfficiencyList(TopTagSFInputStash::kBJet, "nominal") || !sizeOfSFList(TopTagSFInputStash::kBJet, "nominal")) {
-    isActive = false;
-    std::cout << "WARNING: Disabling Btag SF because btag SF's and efficiencies are not provided!" << std::endl;
-  }
+  const size_t effSize   = sizeOfEfficiencyList(TopTagSFInputStash::kGenuineTop, "nominal");
+  const size_t misidSize = sizeOfEfficiencyList(TopTagSFInputStash::kFakeTop, "nominal");
+  if (!effSize)
+    {
+      isActive = false;
+      std::cout << "=== TopTagSFCalculator::TopTagSFCalculator() Disabling topTag SF because top-tagging efficiencies and SFs are not provided!" << std::endl;
+    }
+  if (!misidSize)
+    {
+      isActive = false;
+      std::cout << "=== TopTagSFCalculator::TopTagSFCalculator() Disabling topTag SF because top-tagging misidentification rates and SFs are not provided!" << std::endl;
+    }
+
+  return;    
 }
 
 // Destructor
-TopTagSFCalculator::~TopTagSFCalculator() {
+TopTagSFCalculator::~TopTagSFCalculator() 
+{
   if (hTopTagSF) delete hTopTagSF;
   if (hTopTagSFRelUncert) delete hTopTagSFRelUncert;
 }
 
-// Book histograms
+
+// Book the histograms
 void TopTagSFCalculator::bookHistograms(TDirectory* dir, HistoWrapper& histoWrapper) {
-  hTopTagSF = histoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "btagSF", "btag SF", 500, 0., 5.);
-  hTopTagSFRelUncert = histoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "btagSFRelUncert", "Relative btagSF uncert.", 100, 0., 1.);
+
+  hTopTagSF = histoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "topTagSF", "topTag SF", 500, 0.0, 5.0);
+  hTopTagSFRelUncert = histoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "topTagSFRelUncert", "Relative topTagSF uncert.", 100, 0.0, 1.0);
+
+  return;
+
 }
 
-
 // Calculate scale factors
-const float TopTagSFCalculator::calculateSF(const std::vector<Jet>& selectedJets, const std::vector<Jet>& selectedBJets) {
+const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzVector> cleanTopP4, 
+					    const std::vector<double> cleanTopMVA, 
+					    const std::vector<bool> cleanTopIsTagged, 
+					    const std::vector<bool> cleanTopIsGenuine)
+{
   if (!isActive) return 1.0;
+  
+  // Define the totalSF (the final number to be returned)
+  float totalSF = 1.0;
 
-  double totalSF = 1.0; // final number to be returned
-  for (auto &jet: selectedJets) {
-    // See if the jet passed the b jet selection
-    bool passedBJetSelection = false;
-    for (auto &bjet: selectedBJets) {
-      if (std::abs(jet.bjetDiscriminator() - bjet.bjetDiscriminator()) < 0.0001) {
-        passedBJetSelection = true;
-      }
-    }
-    // Obtain jet flavor using patJet::hadronFlavour() 
-    // see: https://hypernews.cern.ch/HyperNews/CMS/get/btag/1482/1/1/1/1/1.html
-    int flavor = std::abs(jet.hadronFlavour());
-    // int flavor = std::abs(jet.pdgId());
+  // For loop: All cleaned top-candidates
+  for (size_t i = 0; i < cleanTopP4.size(); i++)
+    {
+      float pt   = cleanTopP4.at(i).pt();
+      float mass = cleanTopP4.at(i).M();
+      float mva  = cleanTopMVA.at(i);
+      bool isGen = cleanTopIsGenuine.at(i);
+      bool isTag = cleanTopIsTagged.at(i);
+      TopTagSFInputStash::TopTagJetFlavorType flavor;
+      
+      // Calculate the SF
+      float sf  = 0.0;
+      
+      // Top candidate is tagged (t|?)
+      if (isTag)
+	{
+	  // Top candidate is also truth-matched  (t|gen-t)
+	  if (isGen)
+	    {
+	      flavor = TopTagSFInputStash::kGenuineTop;
+	    }
+	  else // Top candidate is not truth-matched  (t|!gen-t)
+	    {
+	      flavor = TopTagSFInputStash::kFakeTop;
+	    }
+	     
+	  // sf = just apply the SF or SF+deltaSF
+	  
+	  // nominal
+	  sf = fSF.getInputValueByPt(flavor, pt);
+	  
+	  // up variation
+	  // sf = fSFUp.getInputValueByPt(flavor, pt); //fixme
+	  
+	  // down variation
+	  // sf = fSFDown.getInputValueByPt(flavor, pt); /fixme
+	  
+	} 
+      else // Top candidate is not tagged (!t|?)
+	{
+	  // Top candidate is nevertheless truth-matched  (!t|gen-t)
+	  if (isGen)
+	    {
+	      flavor = TopTagSFInputStash::kGenuineTop;
+	    }
+	  else // Top candidate is not truth-matched  (!t|!gen-t)
+	    {
+	      flavor = TopTagSFInputStash::kFakeTop;
+	    }
+	  
+	  // sf = (1-eff*SF)/(1-eff) where eff = MC efficiency, SF = (Data efficiency) / (MC efficiency)
+	  float sf_value   = fSF.getInputValueByPt(flavor, pt);	
+	  float eff        = fEfficiencies.getInputValueByPt(flavor, pt);
+	  float sf_nominal = std::abs((1.0-eff*sf_value) / (1.0-eff));
+	  
+	  // nominal
+	  sf = sf_nominal;
+	
+	  // Protect against div by zero
+	  if (std::abs(eff-1.0) < 0.00001 || sf_nominal > 2.0) 
+	    {
+	      std::cout << "=== TopTagSFCalculator::calculateSF(): Anomalously high SF."
+			<< " Using SF=1 for this top-canidate with flavor = " << flavor 
+			<< " pt = " << pt << " isTag = " << isTag 
+			<< " isGen = " << isGen << " eff = " << eff << " SF = " << sf << std::endl;
+	      sf = 1.0;
+	    }
+	}
+      
+      // Event weight to correct simulations is a product of SFs and MC tagging effiencies
+      totalSF *= sf;
+      if (1) std::cout << i << ") pT = " << pt << " m(jjb) = " << mass << " MVA " << mva	       
+		       << " isTag = " << isTag << " isGen = " << isGen 
+		       << " flavor = " << flavor << " eff = " << fEfficiencies.getInputValueByPt(flavor, pt)
+		       << " SF = " << sf << ": totalSF = " << totalSF << std::endl;
 
-    TopTagSFInputStash::TopTagJetFlavorType flavorType = TopTagSFInputStash::kUDSGJet; // Default value
-    if (flavor == 5) { // b jet
-      flavorType = TopTagSFInputStash::kBJet;
-    } else if (flavor == 4) { // c jet
-      flavorType = TopTagSFInputStash::kCJet;
-    } else if (flavor == 0) { // uds or g jet
-      flavorType = TopTagSFInputStash::kUDSGJet;
     }
-    else 
-      {
-	throw hplus::Exception("Logic") << "Jet has unexpected flavor '" << flavor << "'";
-      }
+  std::cout << "\n" << std::endl;
 
-    // Calculate SF
-    // Assuming that the SF's of the jets are independent (BTV POG recommendation)
-    // Such approach simplifies notably the error propagation
-    double sf = 0.;
-    if (passedBJetSelection) {
-    // x -> b jet; just apply the SF or SF+deltaSF
-      if ((fVariationInfo == kVariationTagUp && flavor == 5) || (fVariationInfo == kVariationMistagUp && flavor != 5)) {
-      // up variation
-        sf = fSFUp.getInputValueByPt(flavorType, jet.pt());
-      // down variation
-      } else if ((fVariationInfo == kVariationTagDown && flavor == 5) || (fVariationInfo == kVariationMistagDown && flavor != 5)) {
-        sf = fSFDown.getInputValueByPt(flavorType, jet.pt());
-      // nominal
-      } else {
-        sf = fSF.getInputValueByPt(flavorType, jet.pt());
-      }
-    } else {
-    // x -> not b; apply (1-eff*SF)/(1-eff) where eff = MC efficiency, SF = per-jet scale factor
-      double eff = fEfficiencies.getInputValueByPt(flavorType, jet.pt());
-      double sfvalue = fSF.getInputValueByPt(flavorType, jet.pt());
-      // nominal
-      double sfnominal = std::abs((1.0-eff*sfvalue) / (1.0-eff));
-      // up variation
-      if ((fVariationInfo == kVariationTagUp && flavor == 5) || (fVariationInfo == kVariationMistagUp && flavor != 5)) {
-        double effDelta = fEfficienciesUp.getInputValueByPt(flavorType, jet.pt());
-        double sfDelta = fSFUp.getInputValueByPt(flavorType, jet.pt()) - sfvalue;
-        // error propagation
-        double a = (1-sfvalue) / (1.0-eff) / (1.0-eff); // d/deff((1-eff*SF)/(1-eff))
-        double b = -eff / (1.0-eff); // d/dsf((1-eff*SF)/(1-eff))
-        // squared sum of eff and SF uncertainties
-        double sfuncert = TMath::Sqrt(a*a*effDelta*effDelta + b*b*sfDelta*sfDelta);
-        sf = std::abs(sfnominal + sfuncert);
-        hTopTagSFRelUncert->Fill(sfuncert/sfnominal);
-      }
-      // down variation
-      else if ((fVariationInfo == kVariationTagDown && flavor == 5) || (fVariationInfo == kVariationMistagDown && flavor != 5)) {
-        double effDelta = fEfficienciesDown.getInputValueByPt(flavorType, jet.pt());
-        double sfDelta = fSFDown.getInputValueByPt(flavorType, jet.pt()) - sfvalue;
-        // error propagation (as above)
-        double a = (1-sfvalue) / (1.0-eff) / (1.0-eff); // d/deff((1-eff*SF)/(1-eff))
-        double b = -eff / (1.0-eff); // d/dsf((1-eff*SF)/(1-eff))
-        // squared sum of eff and SF uncertainties
-        double sfuncert = TMath::Sqrt(a*a*effDelta*effDelta + b*b*sfDelta*sfDelta);
-        sf = std::abs(sfnominal - sfuncert);
-        hTopTagSFRelUncert->Fill(sfuncert/sfnominal);
-      } 
-      // nominal
-      else {
-        sf = sfnominal;
-      }
-      // Protect against div by zero
-      if (std::abs(eff-1.0) < 0.00001 || sfnominal > 2.0) {
-        std::cout << "BtagSF: anomalously high sf, using sf=1 for this jet: flavor=" << flavor << " pt=" << jet.pt() << " pass btag=" << passedBJetSelection << " eff=" << eff << " sf=" << sf << std::endl;
-        sf = 1.0;
-      }
-    }
-    totalSF *= sf;
-    //std::cout << "jet: flavor=" << flavor << " pt=" << jet.pt() << " pass=" << passedBJetSelection << " sf=" << sf << std::endl;
-    //std::cout << totalSF << std::endl;
-  }
-  //std::cout << "SF=" << totalSF << std::endl;
+  // Fill histograms
   hTopTagSF->Fill(totalSF);
   
+  if (0) std::cout << "totalSF = " << totalSF << std::endl;
   return totalSF;
 }
 
 
 // Get size of const list
 const size_t TopTagSFCalculator::sizeOfEfficiencyList(TopTagSFInputStash::TopTagJetFlavorType flavor, const std::string& direction) const {
-  if (direction == "nominal")
-    return fEfficiencies.sizeOfList(flavor);
-  if (direction == "up")
-    return fEfficienciesUp.sizeOfList(flavor);
-  if (direction == "down")
-    return fEfficienciesDown.sizeOfList(flavor);
+
+  if (direction == "nominal") return fEfficiencies.sizeOfList(flavor);
+  if (direction == "up") return fEfficienciesUp.sizeOfList(flavor);
+  if (direction == "down") return fEfficienciesDown.sizeOfList(flavor);
   return 0;
 }
 
 // Get list size
 const size_t TopTagSFCalculator::sizeOfSFList(TopTagSFInputStash::TopTagJetFlavorType flavor, const std::string& direction) const {
-  if (direction == "nominal")
-    return fSF.sizeOfList(flavor);
-  if (direction == "up")
-    return fSFUp.sizeOfList(flavor);
-  if (direction == "down")
-    return fSFDown.sizeOfList(flavor);
+  if (direction == "nominal") return fSF.sizeOfList(flavor);
+  if (direction == "up") return fSFUp.sizeOfList(flavor);
+  if (direction == "down") return fSFDown.sizeOfList(flavor);
   return 0;
 }
 
 // Import efficiencies
 void TopTagSFCalculator::handleEfficiencyInput(boost::optional<std::vector<ParameterSet>> psets) {
-  if (!psets) return;
-  for (auto &p: *psets) {
+
+  // Sanity check
+  if (!psets) 
+    {
+      std::cout << "=== TopTagSFCalculator::handleEfficiencyInput() No Psets found! Return." << std::endl;
+      return;
+    }
+
+  // For-loop: All PSets
+  for (auto &p: *psets) 
+    {
+
     // Obtain variables
-    float ptMin = p.getParameter<float>("ptMin");
-    float ptMax = p.getParameter<float>("ptMax");
-    float eff = p.getParameter<float>("eff");
-    float effUp = p.getParameter<float>("effUp");
-    float effDown = p.getParameter<float>("effDown");
-    TopTagSFInputStash::TopTagJetFlavorType flavor = getFlavorTypeForEfficiency(p.getParameter<std::string>("jetFlavor"));
-    // Store item
-    fEfficiencies.addInput(flavor, ptMin, ptMax, eff);
-    fEfficienciesUp.addInput(flavor, ptMin, ptMax, effUp);
-    fEfficienciesDown.addInput(flavor, ptMin, ptMax, effDown);
-    //std::cout << "adding eff " << flavor << " ptmin=" << ptMin << " ptmax=" << ptMax << std::endl;
-  }
+    float ptMin        = p.getParameter<float>("ptMin");
+    float ptMax        = p.getParameter<float>("ptMax");
+    float effData      = p.getParameter<float>("effData");
+    float effDataUp    = p.getParameter<float>("effDataUp");
+    float effDataDown  = p.getParameter<float>("effDataDown");
+    float effMC        = p.getParameter<float>("effMC");
+    float effMCUp      = p.getParameter<float>("effMCUp");
+    float effMCDown    = p.getParameter<float>("effMCDown");
+    float sfMC         = p.getParameter<float>("sf");
+    float sfMCUp       = p.getParameter<float>("sfUp");
+    float sfMCDown     = p.getParameter<float>("sfDown");
+    TopTagSFInputStash::TopTagJetFlavorType flavor = getFlavorTypeForEfficiency("Genuine"); // fixme
+    // TopTagSFInputStash::TopTagJetFlavorType flavor = getFlavorTypeForEfficiency(p.getParameter<std::string>("jetFlavor")); 
+
+    // Store items
+    fEfficiencies.addInput(flavor, ptMin, ptMax, effMC);
+    fEfficienciesUp.addInput(flavor, ptMin, ptMax, effMCUp);
+    fEfficienciesDown.addInput(flavor, ptMin, ptMax, effMCDown);
+    fSF.addInput(flavor, ptMin, ptMax, sfMC);
+    fSFUp.addInput(flavor, ptMin, ptMax, sfMCUp);
+    fSFDown.addInput(flavor, ptMin, ptMax, sfMCDown);
+
+    // Debug?
+    if (0)
+      {
+	std::cout << "ptmin = " << ptMin << " ptmax = " << ptMax 
+		  << " effData = " << effData << " effDataUp = " << effDataUp
+		  << " effDataDown = " << effDataDown << " effMC = " << effMC
+		  << " effMCUp = " << effMCUp  << " effMCDown = " << effMCDown
+		  << " sfMC = " << sfMC << " sfMCUp = " << sfMCUp
+		  << " sfMCDown = " << sfMCDown << std::endl;
+      }
+    
+    }
+
+  return;
+}
+
+
+// Import misidentification rates
+void TopTagSFCalculator::handleMisidInput(boost::optional<std::vector<ParameterSet>> psets) {
+
+  // Sanity check
+  if (!psets) 
+    {
+      std::cout << "TopTagSFCalculator::handleEfficiencyInput() No Psets found! Return." << std::endl;
+      return;
+    }
+
+  // For-loop: All PSets
+  for (auto &p: *psets) 
+    {
+
+    // Obtain variables
+    float ptMin         = p.getParameter<float>("ptMin");
+    float ptMax         = p.getParameter<float>("ptMax");
+    float misidData     = p.getParameter<float>("misidData");
+    float misidDataUp   = p.getParameter<float>("misidDataUp");
+    float misidDataDown = p.getParameter<float>("misidDataDown");
+    float misidMC       = p.getParameter<float>("misidMC");
+    float misidMCUp     = p.getParameter<float>("misidMCUp");
+    float misidMCDown   = p.getParameter<float>("misidMCDown");
+    float sfMC          = p.getParameter<float>("sf");
+    float sfMCUp        = p.getParameter<float>("sfUp");
+    float sfMCDown      = p.getParameter<float>("sfDown");
+    TopTagSFInputStash::TopTagJetFlavorType flavor = getFlavorTypeForEfficiency("Fake");//tmp: fixme
+    // TopTagSFInputStash::TopTagJetFlavorType flavor = getFlavorTypeForEfficiency(p.getParameter<std::string>("jetFlavor")); 
+
+    // Store items
+    fEfficiencies.addInput(flavor, ptMin, ptMax, misidMC);
+    fEfficienciesUp.addInput(flavor, ptMin, ptMax, misidMCUp);
+    fEfficienciesDown.addInput(flavor, ptMin, ptMax, misidMCDown);
+    fSF.addInput(flavor, ptMin, ptMax, sfMC);
+    fSFUp.addInput(flavor, ptMin, ptMax, sfMCUp);
+    fSFDown.addInput(flavor, ptMin, ptMax, sfMCDown);
+
+    // Debug?
+    if (0)
+      {
+	std::cout << "ptmin = " << ptMin << " ptmax = " << ptMax 
+		  << " misidData = " << misidData << " misidDataUp = " << misidDataUp 
+		  << " misidDataDown = " << misidDataDown << " misidMC = " << misidMC
+		  << " misidMCUp = " << misidMCUp   << " misidMCDown = "   << misidMCDown
+		  << " sfMC = "  << sfMC << " sfMCUp = " << sfMCUp 
+		  << " sfMCDown = " << sfMCDown << std::endl;
+      }
+    }
+  
+  return;
 }
 
 // Import scale factors
 void TopTagSFCalculator::handleSFInput(boost::optional<std::vector<ParameterSet>> psets) {
-  if (!psets) return;
+  // Sanity check
+  if (!psets) 
+    {
+      std::cout << "TopTagSFCalculator::handleEfficiencyInput() No Psets found! Return" << std::endl;
+      return;
+    }
+
+  // For-loop: All psets
   for (auto &p: *psets) {
+
     // Obtain variables
-    float ptMin = p.getParameter<float>("ptMin");
-    float ptMax = p.getParameter<float>("ptMax");
+    float ptMin         = p.getParameter<float>("ptMin");
+    float ptMax         = p.getParameter<float>("ptMax");
     std::string formula = p.getParameter<std::string>("formula");
     std::string sysType = p.getParameter<std::string>("sysType");
-    TopTagSFInputStash::TopTagJetFlavorType flavor = getFlavorTypeForSF(p.getParameter<int>("jetFlavor"));
+    // TopTagSFInputStash::TopTagJetFlavorType flavor = getFlavorTypeForEfficiency("Genuine");//tmp: fixme
+    // TopTagSFInputStash::TopTagJetFlavorType flavor = getFlavorTypeForEfficiency(p.getParameter<std::string>("jetFlavor")); 
     std::vector<TopTagSFInputStash::TopTagJetFlavorType> flavorCollection;
-    if (flavor == TopTagSFInputStash::kUDSGJet) {
-      // flavorCollection.push_back(TopTagSFInputStash::kUDSJet);
-      // flavorCollection.push_back(TopTagSFInputStash::kGJet);
-      flavorCollection.push_back(TopTagSFInputStash::kUDSGJet);
-    } else {
-      flavorCollection.push_back(flavor);
-    }
-    for (auto pflavor: flavorCollection) {
-      if (sysType == " central") {
-        fSF.addInput(pflavor, ptMin, ptMax, formula);
-      } else if (sysType == " up") {
-        fSFUp.addInput(pflavor, ptMin, ptMax, formula);
-      } else if (sysType == " down") {
-        fSFDown.addInput(pflavor, ptMin, ptMax, formula);
-      } else {
-        throw hplus::Exception("config") << "Undefined value for sysType '" << sysType << "'!";
+    flavorCollection.push_back(TopTagSFInputStash::kInclusiveTop);
+
+    // For-loop: All flavor collections
+    for (auto pflavor: flavorCollection) 
+      {
+	if (sysType == " central")   fSF.addInput(pflavor, ptMin, ptMax, formula);
+	else if (sysType == " up")   fSFUp.addInput(pflavor, ptMin, ptMax, formula);
+	else if (sysType == " down") fSFDown.addInput(pflavor, ptMin, ptMax, formula);
+	else 
+	  {
+	    throw hplus::Exception("config") << "Undefined value for sysType '" << sysType << "'!";
+	  }
+	std::cout << "sf " << pflavor << std::endl;
       }
-      //std::cout << "sf " << pflavor << std::endl;
-    }
   }
 
-  //std::cout << fBToBSF.size() << " " << fCToBSF.size() << " " << fGToBSF.size() << " " << fUdsToBSF.size() << std::endl;
   return;
 }
 
 // Get flavor type for efficiency (from .json file evaluated with TopTagEfficiencyAnalysis)
 TopTagSFInputStash::TopTagJetFlavorType TopTagSFCalculator::getFlavorTypeForEfficiency(const std::string& str) const {
-  if (str == "B") {
-    return TopTagSFInputStash::kBJet;
-  } else if (str == "C") {
-    return TopTagSFInputStash::kCJet;
-  } else if (str == "Light") {
-    return TopTagSFInputStash::kUDSGJet;
-  } else if (str == "G") {
-    return TopTagSFInputStash::kUDSGJet;
-  }
-  throw hplus::Exception("config") << "Unknown flavor '" << str << "'!";
+  if (str == "Inclusive") return TopTagSFInputStash::kInclusiveTop;
+  else if (str == "Genuine") return TopTagSFInputStash::kGenuineTop;
+  else if (str == "Fake") return TopTagSFInputStash::kFakeTop;
+  else throw hplus::Exception("config") << "Unknown flavor '" << str << "'!";
 }
 
 // Get flavor type for scale factor (from .csv file provided by TopTagging POG)
 TopTagSFInputStash::TopTagJetFlavorType TopTagSFCalculator::getFlavorTypeForSF(int i) const {
-  if (i == 0) {
-    return TopTagSFInputStash::kBJet;
-  } else if (i == 1) {
-    return TopTagSFInputStash::kCJet;
-  } else if (i == 2) {
-    return TopTagSFInputStash::kUDSGJet;
-  }
-  throw hplus::Exception("config") << "Unknown flavor '" << i << "'!";
+  if (i == 0) return TopTagSFInputStash::kInclusiveTop;
+  else if (i == 1) return TopTagSFInputStash::kGenuineTop;
+  else if (i == 2) return TopTagSFInputStash::kFakeTop;
+  else throw hplus::Exception("config") << "Unknown flavor '" << i << "'!";
 }
 
 // Parser
 const TopTagSFCalculator::TopTagSFVariationType TopTagSFCalculator::parseVariationType(const ParameterSet& config) const {
-  boost::optional<std::string> sDirection = config.getParameterOptional<std::string>("btagSFVariationDirection");
-  boost::optional<std::string> sVariationInfo = config.getParameterOptional<std::string>("btagSFVariationInfo");
-  if (!sDirection)
-    return kNominal;
+  boost::optional<std::string> sDirection = config.getParameterOptional<std::string>("topTagSFVariationDirection");
+  boost::optional<std::string> sVariationInfo = config.getParameterOptional<std::string>("topTagSFVariationInfo");
+  if (!sDirection) return kNominal;
   // Nominal
-  if (*sDirection == "nominal")
-    return kNominal;
+  if (*sDirection == "nominal") return kNominal;
   // Variations
   if (!sVariationInfo) {
-    throw hplus::Exception("config") << "Error: please specify in config field btagSFVariationInfo!";
+    throw hplus::Exception("config") << "Error: please specify in config field topTagSFVariationInfo!";
   }
   if (*sDirection == "up") {
     if (*sVariationInfo == "tag")
       return kVariationTagUp;
     if (*sVariationInfo == "mistag")
       return kVariationMistagUp;
-    throw hplus::Exception("config") << "Error: Invalid value for field btagSFVariationInfo!";
+    throw hplus::Exception("config") << "Error: Invalid value for field topTagSFVariationInfo!";
   }
   if (*sDirection == "down") {
     if (*sVariationInfo == "tag")
       return kVariationTagDown;
     if (*sVariationInfo == "mistag")
       return kVariationMistagDown;
-    throw hplus::Exception("config") << "Error: Invalid value for field btagSFVariationInfo!";
+    throw hplus::Exception("config") << "Error: Invalid value for field topTagSFVariationInfo!";
   }
-  throw hplus::Exception("config") << "Error: Invalid value for field btagSFVariationDirection!";
+  throw hplus::Exception("config") << "Error: Invalid value for field topTagSFVariationDirection!";
 }

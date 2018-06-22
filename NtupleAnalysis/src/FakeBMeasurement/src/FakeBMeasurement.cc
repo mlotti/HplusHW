@@ -53,9 +53,8 @@ private:
   Count cBaselineBTaggingSFCounter;
   BJetSelection fBaselineBJetSelection;
   METSelection fBaselineMETSelection;
-  // QuarkGluonLikelihoodRatio fBaselineQGLRSelection;
   TopSelectionBDT fBaselineTopSelection;
-  // FatJetSelection fBaselineFatJetSelection;
+  Count cBaselineTopTaggingSFCounter;
   Count cBaselineSelected;
   Count cBaselineSelectedCR;
   // Inverted selection
@@ -63,9 +62,8 @@ private:
   Count cInvertedBTaggingSFCounter;
   BJetSelection fInvertedBJetSelection;
   METSelection fInvertedMETSelection;
-  /// QuarkGluonLikelihoodRatio fInvertedQGLRSelection;
   TopSelectionBDT fInvertedTopSelection;
-  // FatJetSelection fInvertedFatJetSelection;
+  Count cInvertedTopTaggingSFCounter;
   Count cInvertedSelected;
   Count cInvertedSelectedCR;
 
@@ -552,17 +550,16 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
     fBaselineMETSelection(config.getParameter<ParameterSet>("METSelection")),
     // fBaselineQGLRSelection(config.getParameter<ParameterSet>("QGLRSelection")),// fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
     fBaselineTopSelection(config.getParameter<ParameterSet>("FakeBTopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
-    // fBaselineFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
+    cBaselineTopTaggingSFCounter(fEventCounter.addCounter("Baseline: top-tag SF")),
     cBaselineSelected(fEventCounter.addCounter("Baseline: selected events")),
     cBaselineSelectedCR(fEventCounter.addCounter("Baseline: selected CR events")),
     cInvertedBTaggingCounter(fEventCounter.addCounter("Inverted: passed b-jet selection")),
     cInvertedBTaggingSFCounter(fEventCounter.addCounter("Inverted: b tag SF")),
     fInvertedBJetSelection(config.getParameter<ParameterSet>("FakeBBjetSelection")),//, fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fInvertedMETSelection(config.getParameter<ParameterSet>("METSelection")),
-    // fInvertedQGLRSelection(config.getParameter<ParameterSet>("QGLRSelection")),// fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
     fInvertedTopSelection(config.getParameter<ParameterSet>("FakeBTopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
-    // fInvertedFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
-    cInvertedSelected(fEventCounter.addCounter("Inverted: selected events")),
+    cInvertedTopTaggingSFCounter(fEventCounter.addCounter("Inverted: top-tag SF")),
+    cInvertedSelected(fEventCounter.addCounter("Inverted: selected -events")),
     cInvertedSelectedCR(fEventCounter.addCounter("Inverted: selected CR events"))
 { }
 
@@ -1066,15 +1063,11 @@ void FakeBMeasurement::book(TDirectory *dir) {
   // Baseline selection
   fBaselineBJetSelection.bookHistograms(dir);
   fBaselineMETSelection.bookHistograms(dir);
-  // fBaselineQGLRSelection.bookHistograms(dir);
   fBaselineTopSelection.bookHistograms(dir);
-  // fBaselineFatJetSelection.bookHistograms(dir);
   // Inverted selection
   fInvertedBJetSelection.bookHistograms(dir);
   fInvertedMETSelection.bookHistograms(dir);
-  // fInvertedQGLRSelection.bookHistograms(dir);
   fInvertedTopSelection.bookHistograms(dir);
-  // fInvertedFatJetSelection.bookHistograms(dir);
   
   // ====== Histogram settings
   HistoSplitter histoSplitter = fCommonPlots.getHistoSplitter();
@@ -2427,28 +2420,23 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   const METSelection::Data METData = fBaselineMETSelection.silentAnalyze(fEvent, nVertices);
   // if (!METData.passedSelection()) return;
 
-  // //================================================================================================
-  // // 10) Quark-Gluon Likelihood Ratio Selection
-  // //================================================================================================
-  // if (0) std::cout << "=== Baseline: QGLR selection" << std::endl;
-  // const QuarkGluonLikelihoodRatio::Data QGLRData = fBaselineQGLRSelection.analyze(fEvent, jetData, bjetData);
-  // if (!QGLRData.passedSelection()) return;
-
   //================================================================================================
   // 11) Top selection
   //================================================================================================
   if (0) std::cout << "=== Baseline: Top selection" << std::endl;
   const TopSelectionBDT::Data topData = fBaselineTopSelection.analyze(fEvent, jetData, bjetData); 
-  if (!topData.passedSelection()) return; // preliminary cut!
+  if (!topData.passedSelection()) return; //preliminary cut
 
-//  //================================================================================================
-//  // *) FatJet veto
-//  //================================================================================================
-//  if (0) std::cout << "\n=== Baseline: FatJet veto" << std::endl;
-//  const FatJetSelection::Data fatjetData = fBaselineFatJetSelection.analyze(fEvent, topData);
-//  if (!fatjetData.passedSelection()) return;
+  if (fEvent.isMC()) 
+    {
+      // std::cout << "FIXME! Need to move this to a later part of the code! Make sure this is properly calculated for all the regions! (top-tagging reference cut value?)" << std::endl;
+      fEventWeight.multiplyWeight(topData.getTopTaggingScaleFactorEventWeight());
+    }
+  cBaselineTopTaggingSFCounter.increment();
 
+  //================================================================================================
   // Defining the splitting of phase-space as the eta of the Tetrajet b-jet
+  //================================================================================================
   std::vector<float> myFactorisationInfo;
   // myFactorisationInfo.push_back(topData.getTetrajetBJet().pt() ); //new
   myFactorisationInfo.push_back(topData.getTetrajetBJet().eta() );
@@ -2998,29 +2986,23 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   const METSelection::Data METData = fInvertedMETSelection.silentAnalyze(fEvent, nVertices);
   // if (!METData.passedSelection()) return;
 
-  // //================================================================================================
-  // // 10) Quark-Gluon Likelihood Ratio Selection
-  // //================================================================================================
-  // if (0) std::cout << "=== Inverted BJet: QGLR selection" << std::endl;
-  // const QuarkGluonLikelihoodRatio::Data QGLRData = fInvertedQGLRSelection.analyze(fEvent, jetData, invBjetData);
-  // if (!QGLRData.passedSelection()) return;
-
   //================================================================================================
   // 11) Top selection
   //================================================================================================
   if (0) std::cout << "=== Inverted BJet: Top selection" << std::endl;
   const TopSelectionBDT::Data topData = fInvertedTopSelection.analyze(fEvent, jetData, invBjetData);
-  if (!topData.passedSelection()) return; // preliminary cut!
+  if (!topData.passedSelection()) return;//preliminary cut
 
-//  //================================================================================================
-//  // *) FatJet veto
-//  //================================================================================================
-//  if (0) std::cout << "\n=== Inverted BJet: FatJet veto" << std::endl;
-//  const FatJetSelection::Data fatjetData = fInvertedFatJetSelection.analyze(fEvent, topData);
-//  if (!fatjetData.passedSelection()) return;
+  if (fEvent.isMC()) 
+    {
+      fEventWeight.multiplyWeight(topData.getTopTaggingScaleFactorEventWeight());
+    }
+  cInvertedTopTaggingSFCounter.increment();
 
 
+  //================================================================================================
   // Defining the splitting of phase-space as the eta of the Tetrajet b-jet
+  //================================================================================================
   std::vector<float> myFactorisationInfo;
   // myFactorisationInfo.push_back(topData.getTetrajetBJet().pt() ); //new
   myFactorisationInfo.push_back(topData.getTetrajetBJet().eta() );

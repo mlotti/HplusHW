@@ -35,6 +35,7 @@ import copy
 import os
 from optparse import OptionParser
 
+import getpass
 import ROOT
 ROOT.gROOT.SetBatch(True)
 from ROOT import *
@@ -47,7 +48,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
-
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 #================================================================================================ 
 # Function Definition
 #================================================================================================ 
@@ -173,6 +174,7 @@ def getHistos(datasetsMgr, histoName):
     h2.setName("EWK")
     return [h1, h2]
 
+'''
 def SavePlot(plot, saveName, saveDir, saveFormats = [".pdf", ".png"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
     
@@ -191,6 +193,25 @@ def SavePlot(plot, saveName, saveDir, saveFormats = [".pdf", ".png"]):
         else:
             Print(savePath + ext, i==0)
         plot.saveAs(savePath, formats=saveFormats)
+    return
+'''
+
+def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
+    Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
+
+     # Check that path exists                                                                                                                                                                               
+    if not os.path.exists(saveDir):
+        os.makedirs(saveDir)
+
+    # Create the name under which plot will be saved                                                                                                                                                        
+    saveName = os.path.join(saveDir, plotName.replace("/", "_"))
+
+    # For-loop: All save formats                                                                                                                                                                            
+    for i, ext in enumerate(saveFormats):
+        saveNameURL = saveName + ext
+        saveNameURL = aux.convertToURL(saveNameURL, opts.url)
+        Print(saveNameURL, i==0)
+        plot.saveAs(saveName, formats=saveFormats)
     return
 
 def PlotHistograms(datasetsMgr):
@@ -328,7 +349,7 @@ def PlotHistograms(datasetsMgr):
 
     return
 
-
+'''
 def SavePlot(plot, saveName, saveDir, saveFormats = [".C", ".pdf", ".png"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
     
@@ -348,7 +369,7 @@ def SavePlot(plot, saveName, saveDir, saveFormats = [".C", ".pdf", ".png"]):
             Print(savePath + ext, i==0)
         plot.saveAs(savePath, formats=saveFormats)
     return
-
+'''
 
 #================================================================================================ 
 # Main
@@ -383,7 +404,7 @@ if __name__ == "__main__":
     VERBOSE      = False
     NORMALISE    = False
     ANALYSISNAME = "TopRecoAnalysis"
-    SAVEDIR      = "/publicweb/a/aattikis/" + ANALYSISNAME
+    SAVEDIR      = None #"/publicweb/a/aattikis/" + ANALYSISNAME
     LOGY         = False
     
     # Define the available script options
@@ -453,6 +474,10 @@ if __name__ == "__main__":
     # Sanity check
     if opts.mergeEWK:
         Print("Merging EWK samples into a single Datasets \"EWK\"", True)
+
+    # Save directory
+    if opts.saveDir == None:
+        opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="")
 
     # Sanity check
     allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 2000, 3000]

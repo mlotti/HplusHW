@@ -13,7 +13,7 @@ Examples:
 ./plotMC_HPlusMass.py -m <peudo_mcrab> --normaliseToOne --url --signalMass 500
 
 Last Used:
-./plotMC_HPlusMass.py -m TopTaggerEfficiency_180529_TopEfficiency_vs_mass/ --folder topbdtSelection_ --normaliseToOne -v -e "TT" --url
+./plotMC_HPlusMass.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_15June18_BDT0p40_Masscut300_NewTop_BugFix/ --folder topbdtSelection_ --url -v
 '''
 
 #================================================================================================ 
@@ -136,7 +136,7 @@ def main(opts, signalMass):
         if 1:
             datasetsMgr.remove(filter(lambda name: "Data" in name, datasetsMgr.getAllDatasetNames()))
             #datasetsMgr.remove(filter(lambda name: "QCD_b" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "QCD_HT" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "QCD_HT" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "SingleTop" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "DYJetsToQQHT" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "TTZToQQ" in name, datasetsMgr.getAllDatasetNames()))
@@ -289,7 +289,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
         _opts["xmax"] = 505 #1005
 
     elif "tetrajetmass" in histo.lower():
-        _rebinX = 5 #5 #10 #4
+        _rebinX = 8 #5 #10 #4
         _units  = "GeV/c^{2}"
         _format = "%0.0f " + _units
         _xlabel = "m_{jjbb} (%s)" % (_units)
@@ -356,7 +356,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
     p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineStyle(ROOT.kSolid))
 
     if "QCD" in datasetsMgr.getAllDatasetNames():
-        p.histoMgr.forHisto("QCD", styles.getQCDFillStyle() )
+        p.histoMgr.forHisto("QCD", styles.getQCDLineStyle()) #getQCDFillStyle() )
         p.histoMgr.setHistoDrawStyle("QCD", "HIST")
         p.histoMgr.setHistoLegendStyle("QCD", "F")
 
@@ -438,7 +438,7 @@ if __name__ == "__main__":
     BATCHMODE    = True
     PRECISION    = 3
     SIGNALMASS   = [200, 400, 500, 650, 1000]
-    #SIGNALMASS   = []
+    #SIGNALMASS   = [500]
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False

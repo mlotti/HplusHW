@@ -114,37 +114,6 @@ bjetSelection = PSet(
     numberOfBJetsCutDirection = ">=",     # [default: ">="] (options: ==, !=, <, <=, >, >=)
 )
 
-#================================================================================================
-# Scale Factors
-#================================================================================================
-if bjetSelection.bjetDiscr == "pfCombinedInclusiveSecondaryVertexV2BJetTags":
-    scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
-                                        btagPayloadFilename    = "CSVv2.csv",
-                                        #btagEfficiencyFilename = "btageff_hybrid_HToTB.json",
-                                        btagEfficiencyFilename = "btageff_HToTB.json",
-                                        direction              = "nominal")
-elif bjetSelection.bjetDiscr == "pfCombinedMVAV2BJetTags":
-    scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
-                                        btagPayloadFilename    = "cMVAv2_Moriond17_B_H.csv", # use this for MVA b-tagging
-                                        btagEfficiencyFilename = "btageff_Hybrid_TT+WJetsHT.json", # use with taunu analysis and WJetsHT samples
-                                        direction              = "nominal")
-else:
-    pass #should crash
-
-#=================================================================================================
-# QGL selection
-#=================================================================================================
-qglrSelection = PSet(
-    QGLRCutValue             = -1.0, # [default: -1.0] (to disable choose ">=" than -ve value)
-    QGLRCutDirection         = ">=", # [default: ">="] 
-    numberOfJetsCutValue     = 8,   # [default: 10]   (needed to suppress combinatorics => run time)
-    numberOfJetsCutDirection = "<=", # [default: "<="] 
-)
-
-jsonReader.setupQGLInformation(QGLRPset  = qglrSelection,
-                               jsonname_Light  = "QGLdiscriminator_QCD_LightJets.json",
-                               jsonname_Gluon  = "QGLdiscriminator_QCD_GluonJets.json")
-
 #=================================================================================================
 # Fat jet selection
 #=================================================================================================
@@ -235,13 +204,45 @@ fakeBMeasurement = PSet(
     LdgTopMVACutValue              = topSelectionBDT.MVACutValue,
     LdgTopMVACutDirection          = topSelectionBDT.MVACutDirection, 
     # Define CR1, CR2
-    #SubldgTopMVACutValue           = 0.4, #[default: 0.4] #buffer
+    # SubldgTopMVACutValue           = 0.4, #[default: 0.4] #buffer
     SubldgTopMVACutValue           = topSelectionBDT.MVACutValue, #default
     SubldgTopMVACutDirection       = "<",
     # CR3, CR4 are automatically defined as:
     # BDT <  topSelectionBDT.MVACutValue
     # BDT >= (topSelectionBDT.MVACutValue-fakeBMeasurement.SubldgTopMVACutValue)
     )
+
+#================================================================================================
+# Scale Factors (SFs)
+#================================================================================================
+# b-tagging
+if bjetSelection.bjetDiscr == "pfCombinedInclusiveSecondaryVertexV2BJetTags":
+    scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
+                                        btagPayloadFilename    = "CSVv2.csv",
+                                        #btagEfficiencyFilename = "btageff_hybrid_HToTB.json",
+                                        btagEfficiencyFilename = "btageff_HToTB.json",
+                                        direction              = "nominal")
+elif bjetSelection.bjetDiscr == "pfCombinedMVAV2BJetTags":
+    scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
+                                        btagPayloadFilename    = "cMVAv2_Moriond17_B_H.csv", # use this for MVA b-tagging
+                                        btagEfficiencyFilename = "btageff_Hybrid_TT+WJetsHT.json", # use with taunu analysis and WJetsHT samples
+                                        direction              = "nominal")
+else:
+    # should crash
+    pass
+
+# top-tagging (json files available for: defaut, fatJet, ldgJet)
+scaleFactors.setupToptagSFInformation(topTagPset               = topSelectionBDT, 
+                                      topTagMisidFilename      = "toptagMisid_BDT0p40_fatJet.json", 
+                                      topTagEfficiencyFilename = "toptagEff_BDT0p40_fatJet.json",
+                                      direction                = "nominal",
+                                      variationInfo            = None)
+
+scaleFactors.setupToptagSFInformation(topTagPset               = fakeBTopSelectionBDT, 
+                                      topTagMisidFilename      = "toptagMisid_BDT0p40_fatJet.json",
+                                      topTagEfficiencyFilename = "toptagEff_BDT0p40_fatJet.json",
+                                      direction                = "nominal",
+                                      variationInfo            = None)
 
 #================================================================================================
 # Common plots options
@@ -290,5 +291,4 @@ allSelections = PSet(
     FakeBTopSelectionBDT  = fakeBTopSelectionBDT,
     CommonPlots           = commonPlotsOptions,
     HistogramAmbientLevel = histogramAmbientLevel,
-    # QGLRSelection         = qglrSelection,
 )

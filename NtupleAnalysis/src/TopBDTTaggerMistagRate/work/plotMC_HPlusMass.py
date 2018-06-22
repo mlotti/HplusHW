@@ -337,6 +337,11 @@ def PlotMC(datasetsMgr, histo, intLumi):
         _format = "%0.0f " + _units
         _opts["xmax"] = 800
 
+    elif "tau" in histo.lower():
+        _format = "%0.2f "
+
+    elif "deltar" in histo.lower():
+        _format = "%0.2f "
 
     elif "bdtvalue" in histo.lower():
         _format = "%0.1f"
@@ -396,7 +401,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
                    ylabel       = Ylabel,
                    log          = logY,
                    rebinX       = _rebinX, cmsExtraText = "Preliminary", 
-                   createLegend = {"x1": 0.58, "y1": 0.65, "x2": 0.92, "y2": 0.92},
+                   createLegend = {"x1": 0.68, "y1": 0.82, "x2": 1.0, "y2": 0.92},
                    #createLegend = {"x1": 0.73, "y1": 0.85, "x2": 0.97, "y2": 0.77},
                    opts         = _opts,
                    opts2        = {"ymin": 0.6, "ymax": 1.4},
