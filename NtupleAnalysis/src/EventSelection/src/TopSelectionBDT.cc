@@ -882,7 +882,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	}
 
       // Calculate and store b-jet scale factor weight and it's uncertainty
-      output.fTopTaggingScaleFactorEventWeight = fTopTagSFCalculator.calculateSF(fAllCleanedTops.TrijetP4, fAllCleanedTops.isTagged, fAllCleanedTops.isGenuine);
+      output.fTopTaggingScaleFactorEventWeight = fTopTagSFCalculator.calculateSF(fAllCleanedTops.TrijetP4, fAllCleanedTops.MVA, fAllCleanedTops.isTagged, fAllCleanedTops.isGenuine);
 
     }
 
@@ -1150,42 +1150,42 @@ TrijetSelection TopSelectionBDT::SortInMVAvalue(TrijetSelection TopCand){
     {
       for  (size_t j=i+1; j<size; j++)
 	{
-	  Jet Jet1_i = TopCand.Jet1.at(i);
-	  Jet Jet2_i = TopCand.Jet2.at(i);
-	  Jet BJet_i = TopCand.BJet.at(i);
+	  Jet Jet1_i   = TopCand.Jet1.at(i);
+	  Jet Jet2_i   = TopCand.Jet2.at(i);
+	  Jet BJet_i   = TopCand.BJet.at(i);
 	  double mva_i = TopCand.MVA.at(i);
 	  math::XYZTLorentzVector TrijetP4_i = TopCand.TrijetP4.at(i);
-	  math::XYZTLorentzVector DijetP4_i = TopCand.DijetP4.at(i);
+	  math::XYZTLorentzVector DijetP4_i  = TopCand.DijetP4.at(i);
 	  bool isGenuine_i = TopCand.isGenuine.at(i);
-          bool isTagged_i = TopCand.isTagged.at(i);
+          bool isTagged_i  = TopCand.isTagged.at(i);
 
-	  Jet Jet1_j = TopCand.Jet1.at(j);
-	  Jet Jet2_j = TopCand.Jet2.at(j);
-	  Jet BJet_j = TopCand.BJet.at(j);
+	  Jet Jet1_j   = TopCand.Jet1.at(j);
+	  Jet Jet2_j   = TopCand.Jet2.at(j);
+	  Jet BJet_j   = TopCand.BJet.at(j);
 	  double mva_j = TopCand.MVA.at(j);
 	  math::XYZTLorentzVector TrijetP4_j = TopCand.TrijetP4.at(j);
-	  math::XYZTLorentzVector DijetP4_j = TopCand.DijetP4.at(j);
+	  math::XYZTLorentzVector DijetP4_j  = TopCand.DijetP4.at(j);
 	  bool isGenuine_j = TopCand.isGenuine.at(j);
-          bool isTagged_j = TopCand.isTagged.at(j);
+          bool isTagged_j  = TopCand.isTagged.at(j);
 
 	  if (mva_i >= mva_j) continue;
 	  TopCand.Jet1.at(i) = Jet1_j;
 	  TopCand.Jet2.at(i) = Jet2_j;
 	  TopCand.BJet.at(i) = BJet_j;
 	  TopCand.MVA.at(i)  = mva_j;
-	  TopCand.TrijetP4.at(i) = TrijetP4_j;
-	  TopCand.DijetP4.at(i) = DijetP4_j;
+	  TopCand.TrijetP4.at(i)  = TrijetP4_j;
+	  TopCand.DijetP4.at(i)   = DijetP4_j;
 	  TopCand.isGenuine.at(i) = isGenuine_j;
-          TopCand.isTagged.at(i) = isTagged_j;
+          TopCand.isTagged.at(i)  = isTagged_j;
 
-	  TopCand.Jet1.at(j) = Jet1_i;
-	  TopCand.Jet2.at(j) = Jet2_i;
-	  TopCand.BJet.at(j) = BJet_i;
-	  TopCand.MVA.at(j)  = mva_i;
-	  TopCand.TrijetP4.at(j) = TrijetP4_i;
-	  TopCand.DijetP4.at(j) = DijetP4_i;
+	  TopCand.Jet1.at(j)      = Jet1_i;
+	  TopCand.Jet2.at(j)      = Jet2_i;
+	  TopCand.BJet.at(j)      = BJet_i;
+	  TopCand.MVA.at(j)       = mva_i;
+	  TopCand.TrijetP4.at(j)  = TrijetP4_i;
+	  TopCand.DijetP4.at(j)   = DijetP4_i;
 	  TopCand.isGenuine.at(j) = isGenuine_i;
-          TopCand.isTagged.at(j) = isTagged_i;
+          TopCand.isTagged.at(j)  = isTagged_i;
 	}
     }
   return TopCand;
