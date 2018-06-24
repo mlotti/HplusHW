@@ -109,7 +109,7 @@ def getFakeBSystematics(myTTBarSystematics, OptionShapeSystematics, verbose=Fals
 #================================================================================================  
 # Options
 #================================================================================================  
-OptionTest                             = True
+OptionTest                             = False
 OptionPaper                            = True  # (units, ..)
 OptionIncludeSystematics               = True # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionShapeSystematics                 = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
@@ -164,28 +164,28 @@ Observation = ObservationInput(datasetDefinition="Data", shapeHistoName=OptionMa
 #================================================================================================  
 # Nuisance Lists (Just the strings; The objects are defined later below)
 #================================================================================================ 
-myLumiSystematics       = ["lumi_13TeV"]
-myPileupSystematics     = ["CMS_pileup"]
-myTopTagSystematics     = ["CMS_HPTB_toptagging"]
-myTrgEffSystematics     = ["CMS_eff_trg_MC"]
-myLeptonVetoSystematics = ["CMS_eff_e_veto", "CMS_eff_m_veto", "CMS_eff_tau_veto"]
-myJetSystematics        = ["CMS_scale_j", "CMS_res_j"]
-myBtagSystematics       = ["CMS_eff_b"]
+myLumiSystematics          = ["lumi_13TeV"]
+myPileupSystematics        = ["CMS_pileup"]
+myTopTagSystematics        = ["CMS_HPTB_toptagging"]
+myTrgEffSystematics        = ["CMS_eff_trg_MC"]
+myLeptonVetoSystematics    = ["CMS_eff_e_veto", "CMS_eff_m_veto", "CMS_eff_tau_veto"]
+myJetSystematics           = ["CMS_scale_j", "CMS_res_j"]
+myBtagSystematics          = ["CMS_eff_b"]
 
 # Define systematics dictionary (easier access)
 mySystematics = {}
 mySystematics["MC"]          =  myLumiSystematics + myPileupSystematics + myTrgEffSystematics + myLeptonVetoSystematics + myJetSystematics + myBtagSystematics + myTopTagSystematics
-mySystematics["Signal"]      = mySystematics["MC"]
+mySystematics["Signal"]      = mySystematics["MC"] + ["CMS_HPTB_mu_RF_HPTB","CMS_HPTB_pdf_HPTB"]
 mySystematics["FakeB"]       = []
 mySystematics["QCD"]         = mySystematics["MC"]
-mySystematics["TT"]          = mySystematics["MC"] + ["QCDscale_ttbar", "pdf_ttbar", "mass_top", "CMS_topreweight"]
-mySystematics["SingleTop"]   = mySystematics["MC"] + ["QCDscale_singleTop", "pdf_singleTop"]
-mySystematics["TTZToQQ"]     = mySystematics["MC"] + ["QCDscale_ttZ", "pdf_ttZ"]
-mySystematics["TTTT"]        = mySystematics["MC"]
-mySystematics["DYJets"]      = mySystematics["MC"] + ["QCDscale_DY", "pdf_DY"]
-mySystematics["TTWJetsToQQ"] = mySystematics["MC"] + ["QCDscale_ttW", "pdf_ttW"]
-mySystematics["WJetsToQQ_HT_600ToInf"]  = mySystematics["MC"] + ["QCDscale_Wjets", "pdf_Wjets"]
-mySystematics["Diboson"]     = mySystematics["MC"] + ["QCDscale_VV", "pdf_VV"]
+mySystematics["TT"]          = mySystematics["MC"] + ["QCDscale_ttbar", "pdf_ttbar", "mass_top", "CMS_topreweight"] + ["CMS_HPTB_mu_RF_top","CMS_HPTB_pdf_top"]
+mySystematics["SingleTop"]   = mySystematics["MC"] + ["QCDscale_singleTop", "pdf_singleTop"] + ["CMS_HPTB_mu_RF_top","CMS_HPTB_pdf_top"]
+mySystematics["TTZToQQ"]     = mySystematics["MC"] + ["QCDscale_ttZ", "pdf_ttZ"] + ["CMS_HPTB_mu_RF_ewk","CMS_HPTB_pdf_ewk"]
+mySystematics["TTTT"]        = mySystematics["MC"] + ["CMS_HPTB_mu_RF_top","CMS_HPTB_pdf_top"]
+mySystematics["DYJets"]      = mySystematics["MC"] + ["QCDscale_DY", "pdf_DY"] + ["CMS_HPTB_mu_RF_ewk","CMS_HPTB_pdf_ewk"]
+mySystematics["TTWJetsToQQ"] = mySystematics["MC"] + ["QCDscale_ttW", "pdf_ttW"] + ["CMS_HPTB_mu_RF_top","CMS_HPTB_pdf_top"]
+mySystematics["WJetsToQQ_HT_600ToInf"]  = mySystematics["MC"] + ["QCDscale_Wjets", "pdf_Wjets"] + ["CMS_HPTB_mu_RF_ewk","CMS_HPTB_pdf_ewk"]
+mySystematics["Diboson"]     = mySystematics["MC"] + ["QCDscale_VV", "pdf_VV"] + ["CMS_HPTB_mu_RF_ewk","CMS_HPTB_pdf_ewk"]
 mySystematics["FakeB"]       = getFakeBSystematics(mySystematics["TT"], OptionShapeSystematics, verbose=False)
 if not OptionIncludeSystematics:
     msg = "Disabled systematics for all datasets (Stat. only datacards)"
@@ -413,6 +413,18 @@ ttZ_scale_Const      = Nuisance(id="QCDscale_ttZ"      , label="QCD XSection unc
 #tttt_pdf_Const       = Nuisance(id="pdf_tttt"          , label="TTTT XSection pdf uncertainty", distr="lnN", function="Constant", value=tttt_pdf_down)
 #tttt_scale_Const     = Nuisance(id="QCDscale_tttt"     , label="TTTT XSection scale uncertainty", distr="lnN", function="Constant", value=tttt_scale_down)
 
+
+#==== Acceptance uncertainties (QCDscale) - new fixme
+RF_QCDscale_top_const  = Nuisance(id="CMS_HPTB_mu_RF_top" , label="QCDscale acceptance uncertainty for top backgrounds", distr="lnN", function="Constant",value=0.02)
+RF_QCDscale_ewk_const  = Nuisance(id="CMS_HPTB_mu_RF_ewk" , label="QCDscale acceptance uncertainty for EWK backgrounds", distr="lnN", function="Constant",value=0.05)
+RF_QCDscale_HPTB_const = Nuisance(id="CMS_HPTB_mu_RF_HPTB", label="QCDscale acceptance uncertainty for signal"         , distr="lnN", function="Constant",value=0.048)
+#RF_QCDscale_HPTB_const = Nuisance(id="CMS_HPTB_mu_RF_HPTB_heavy", label="QCDscale acceptance uncertainty for signal", distr="lnN", function="Constant",value=0.012)
+
+#==== Acceptance uncertainties  (PDF) -new fixme
+RF_pdf_top_const  = Nuisance(id="CMS_HPTB_pdf_top", label="PDF acceptance uncertainty for top backgrounds", distr="lnN", function="Constant",value=0.02,upperValue=0.0027)
+RF_pdf_ewk_const  = Nuisance(id="CMS_HPTB_pdf_ewk", label="PDF acceptance uncertainty for EWK backgrounds", distr="lnN", function="Constant",value=0.033,upperValue=0.046)
+RF_pdf_HPTB_const = Nuisance(id="CMS_HPTB_pdf_HPTB", label="PDF acceptance uncertainty for signal", distr="lnN", function="Constant",value=0.004,upperValue=0.017)
+
 # Fake-b nuisances
 tf_FakeB_Const          = Nuisance(id="CMS_HPTB_fakeB_transferfactor", label="Transfer Factor uncertainty", distr="lnN", function="Constant", value=0.10)
 lumi13TeV_FakeB_Const   = Nuisance(id="lumi_13TeV_forFakeB"      , label="Luminosity 13 TeV uncertainty", distr="lnN", function="ConstantForFakeB", value=lumi_2016)
@@ -429,6 +441,9 @@ topTag_FakeB_Const      = Nuisance(id="CMS_HPTB_toptagging_forFakeB", label="Top
 ttbar_scale_FakeB_Const = Nuisance(id="QCDscale_ttbar_forFakeB"  , label="QCD XSection uncertainties", distr="lnN", function="ConstantForFakeB", value=tt_scale_down, upperValue=tt_scale_up)
 ttbar_pdf_FakeB_Const   = Nuisance(id="pdf_ttbar_forFakeB"       , label="TTbar XSection pdf uncertainty", distr="lnN", function="ConstantForFakeB", value=tt_pdf_down, upperValue=tt_pdf_up)
 ttbar_mass_FakeB_Const  = Nuisance(id="mass_top_forFakeB"        , label="TTbar XSection top mass uncertainty", distr="lnN", function="ConstantForFakeB", value=tt_mass_down, upperValue=tt_mass_up) 
+RF_QCDscale_FakeB_const = Nuisance(id="CMS_HPTB_mu_RF_top_forFakeB", label="QCDscale acceptance uncertainty for FakeB" , distr="lnN", function="ConstantForFakeB",value=0.02)
+RF_pdf_FakeB_const      = Nuisance(id="CMS_HPTB_pdf_top_forFakeB"  , label="PDF acceptance uncertainty for FakeB"      , distr="lnN", function="ConstantForFakeB",value=0.02, upperValue=0.0027)
+
 
 #================================================================================================ 
 # Nuisance List (If a given nuisance "name" is used in any of the DataGroups it must be appended)
@@ -489,6 +504,17 @@ Nuisances.append(ttZ_pdf_Const)
 Nuisances.append(ttZ_scale_Const)
 # Nuisances.append(tttt_pdf_Const)
 # Nuisances.append(tttt_scale_Const)
+### New: Fixme
+Nuisances.append(RF_QCDscale_top_const)
+Nuisances.append(RF_QCDscale_ewk_const)
+Nuisances.append(RF_QCDscale_HPTB_const)
+#Nuisances.append(RF_QCDscale_HPTB_const)
+Nuisances.append(RF_QCDscale_FakeB_const)
+Nuisances.append(RF_pdf_top_const)
+Nuisances.append(RF_pdf_ewk_const)
+Nuisances.append(RF_pdf_HPTB_const)
+Nuisances.append(RF_pdf_FakeB_const)
+
 PrintNuisancesTable(Nuisances, DataGroups)
 
 #================================================================================================ 
@@ -520,6 +546,8 @@ MergeNuisances.append(["CMS_eff_trg_MC"   , "CMS_eff_trg_MC_forFakeB"])
 #MergeNuisances.append(["CMS_eff_tau_veto" , "CMS_eff_tau_veto_forFakeB"])
 MergeNuisances.append(["CMS_HPTB_toptagging", "CMS_HPTB_toptagging_forFakeB"])
 MergeNuisances.append(["mass_top"   , "mass_top_forFakeB"])
+MergeNuisances.append(["CMS_HPTB_mu_RF_top", "CMS_HPTB_mu_RF_top_forFakeB"]) #new fixme
+MergeNuisances.append(["CMS_HPTB_pdf_top", "CMS_HPTB_pdf_top_forFakeB"]) #new fixme
 
 if not OptionShapeSystematics:
     MergeNuisances.append(["CMS_pileup"   , "CMS_pileup_forFakeB"])
