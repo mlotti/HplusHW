@@ -281,6 +281,7 @@ const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzV
   
   // Define the totalSF (the final number to be returned)
   float totalSF = 1.0;
+  bool debug = false;
 
   // For loop: All cleaned top-candidates
   for (size_t i = 0; i < cleanTopP4.size(); i++)
@@ -353,13 +354,13 @@ const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzV
       
       // Event weight to correct simulations is a product of SFs and MC tagging effiencies
       totalSF *= sf;
-      if (1) std::cout << i << ") pT = " << pt << " m(jjb) = " << mass << " MVA " << mva	       
+      if (debug) std::cout << i+1 << "/" << cleanTopP4.size() << ": pT = " << pt << " m(jjb) = " << mass << " MVA " << mva	       
 		       << " isTag = " << isTag << " isGen = " << isGen 
 		       << " flavor = " << flavor << " eff = " << fEfficiencies.getInputValueByPt(flavor, pt)
-		       << " SF = " << sf << ": totalSF = " << totalSF << std::endl;
+		       << " SF = " << sf << " totalSF = " << totalSF << std::endl;
 
     }
-  std::cout << "\n" << std::endl;
+  if (debug) std::cout << "\n" << std::endl;
 
   // Fill histograms
   hTopTagSF->Fill(totalSF);
