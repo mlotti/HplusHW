@@ -26,13 +26,11 @@ EXAMPLES:
 
 
 LAST USED: 
-./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_200027_massCut1000_All --type showerScales 
-./plot_EfficiencySystTop. py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_200027_massCut1000_All --type highPtRadiation
-./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/p seudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_200027_massCut1000_All --type mTop 
-./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficien cy/TopTaggerEfficiency_180608_200027_massCut1000_All --type partonShower
-./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_18 0608_200027_massCut1000_All --type evtGen
-./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_200027_massCut1000_All --type colourReconnection
-
+./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_194156_massCut300_All --type showerScales 
+./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_194156_massCut300_All --type highPtRadiation
+./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_194156_massCut300_All --type mTop 
+./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_194156_massCut300_All --type partonShower
+./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_194156_massCut300_All --type evtGen
 
 STATISTICS OPTIONS:
 https://iktp.tu-dresden.de/~nbarros/doc/root/TEfficiency.html
@@ -196,7 +194,7 @@ def GetHistoKwargs(histoName, opts):
         bins              = [i for i in range(0, 1000+50, 50)]
         if opts.folder == "topbdtSelection_":
             #bins          = [i for i in range(0, 600+100, 100)] + [800]
-            bins              = [0, 100, 150, 200, 300, 400, 500, 600, 900]
+            bins              = [0, 100, 200, 300, 400, 500, 600]
         else:
             bins          = []
 
@@ -469,6 +467,17 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, eff_def):
             counter+=1
             #myList.append(histograms.HistoGraph(gEff, legend, "lp", "P"))
             myList.append(histograms.HistoGraph(gEff, legend, "p", "P"))
+         
+   
+    units = "GeV/c"
+    if eff_def == "fakeTop":
+        _kwargs["xlabel"]  = "candidate p_{T} (%s)" % (units)
+    elif eff_def == "inclusiveTop" or eff_def == "genuineTop":
+        _kwargs["xlabel"]  = "generated top p_{T} (%s)" % (units)
+    else:
+        _kwargs["xlabel"]  = "p_{T} (%s)" % (units)
+
+
 
     # Define stuff
     numPath  = numPath.replace("AfterAllSelections_","")
