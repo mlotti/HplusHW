@@ -258,6 +258,9 @@ TopTagSFCalculator::~TopTagSFCalculator()
 {
   if (hTopTagSF) delete hTopTagSF;
   if (hTopTagSFRelUncert) delete hTopTagSFRelUncert;
+  if (hTopEff_Vs_TopPt_Inclusive) delete hTopEff_Vs_TopPt_Inclusive;
+  if (hTopEff_Vs_TopPt_Fake) delete hTopEff_Vs_TopPt_Fake;
+  if (hTopEff_Vs_TopPt_Genuine) delete hTopEff_Vs_TopPt_Genuine;
 }
 
 
@@ -266,7 +269,10 @@ void TopTagSFCalculator::bookHistograms(TDirectory* dir, HistoWrapper& histoWrap
 
   hTopTagSF = histoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "topTagSF", "topTag SF", 500, 0.0, 5.0);
   hTopTagSFRelUncert = histoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "topTagSFRelUncert", "Relative topTagSF uncert.", 100, 0.0, 1.0);
-
+  hTopEff_Vs_TopPt_Inclusive = histoWrapper.makeTH<TH2F>(HistoLevel::kInformative, dir, "topEff_Vs_TopPt_Inclusive", ";Efficiency;p_{T}", 100, 0.0, 1.0, 400, 0, 2000);
+  hTopEff_Vs_TopPt_Fake = histoWrapper.makeTH<TH2F>(HistoLevel::kInformative, dir, "topEff_Vs_TopPt_Fake", ";Efficiency;p_{T}", 100, 0.0, 1.0, 400, 0, 2000);
+  hTopEff_Vs_TopPt_Genuine = histoWrapper.makeTH<TH2F>(HistoLevel::kInformative, dir, "topEff_Vs_TopPt_Genuine", ";Efficiency;p_{T}", 100, 0.0, 1.0, 400, 0, 2000);
+  
   return;
 
 }
@@ -310,10 +316,15 @@ const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzV
 	    }
 	     
 	  // sf = just apply the SF or SF+deltaSF
-	  
+	  float eff = fEfficiencies.getInputValueByPt(flavor, pt);	  
+
 	  // nominal
 	  sf = fSF.getInputValueByPt(flavor, pt);
 	  
+          hTopEff_Vs_TopPt_Inclusive          -> Fill(eff, pt);
+          if (isGen) hTopEff_Vs_TopPt_Genuine -> Fill(eff, pt);
+          else hTopEff_Vs_TopPt_Fake          -> Fill(eff, pt);
+
 	  // up variation
 	  // sf = fSFUp.getInputValueByPt(flavor, pt); //fixme
 	  
@@ -340,6 +351,10 @@ const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzV
 	  
 	  // nominal
 	  sf = sf_nominal;
+
+          hTopEff_Vs_TopPt_Inclusive          -> Fill(eff, pt);
+          if (isGen) hTopEff_Vs_TopPt_Genuine -> Fill(eff, pt);
+          else hTopEff_Vs_TopPt_Fake          -> Fill(eff, pt);
 	
 	  // Protect against div by zero
 	  if (std::abs(eff-1.0) < 0.00001 || sf_nominal > 2.0) 
