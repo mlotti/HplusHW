@@ -240,7 +240,7 @@ scaleFactors.setupToptagSFInformation(topTagPset               = topSelectionBDT
 
 scaleFactors.setupToptagSFInformation(topTagPset               = fakeBTopSelectionBDT, 
                                       topTagMisidFilename      = "toptagMisid_BDT0p40_fatJet.json",
-                                      topTagEfficiencyFilename = "toptagEff_BDT0p40_fatJet.json",
+                                      topTagEfficiencyFilename = "toptagEff_BDT0p40_GenuineTT_fatJet.json",
                                       direction                = "nominal",
                                       variationInfo            = None)
 
