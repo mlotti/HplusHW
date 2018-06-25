@@ -54,18 +54,20 @@ private:
   BJetSelection fBaselineBJetSelection;
   METSelection fBaselineMETSelection;
   TopSelectionBDT fBaselineTopSelection;
-  Count cBaselineTopTaggingSFCounter;
-  Count cBaselineSelected;
-  Count cBaselineSelectedCR;
+  Count cTopTaggingSFCounter_SR;
+  Count cTopTaggingSFCounter_CRone;
+  Count ccSR;
+  Count cCRone;
   // Inverted selection
   Count cInvertedBTaggingCounter;
   Count cInvertedBTaggingSFCounter;
   BJetSelection fInvertedBJetSelection;
   METSelection fInvertedMETSelection;
   TopSelectionBDT fInvertedTopSelection;
-  Count cInvertedTopTaggingSFCounter;
-  Count cInvertedSelected;
-  Count cInvertedSelectedCR;
+  Count cTopTaggingSFCounter_VR;
+  Count cTopTaggingSFCounter_CRtwo;
+  Count cVR;
+  Count cCRtwo;
 
   void DoBaselineAnalysis(const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const int nVertices);
   void DoInvertedAnalysis(const JetSelection::Data& jetData, const int nVertices);
@@ -544,23 +546,25 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
     fMuonSelection(config.getParameter<ParameterSet>("MuonSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
     fTauSelection(config.getParameter<ParameterSet>("TauSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
     fJetSelection(config.getParameter<ParameterSet>("JetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    cBaselineBTaggingCounter(fEventCounter.addCounter("Baseline: passed b-jet selection")),
-    cBaselineBTaggingSFCounter(fEventCounter.addCounter("Baseline: b tag SF")),
+    cBaselineBTaggingCounter(fEventCounter.addCounter("#geq 3 b-jets")),
+    cBaselineBTaggingSFCounter(fEventCounter.addCounter("3 b-jets SF")),
     fBaselineBJetSelection(config.getParameter<ParameterSet>("BJetSelection")),// fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fBaselineMETSelection(config.getParameter<ParameterSet>("METSelection")),
     // fBaselineQGLRSelection(config.getParameter<ParameterSet>("QGLRSelection")),// fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
     fBaselineTopSelection(config.getParameter<ParameterSet>("FakeBTopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
-    cBaselineTopTaggingSFCounter(fEventCounter.addCounter("Baseline: top-tag SF")),
-    cBaselineSelected(fEventCounter.addCounter("Baseline: selected events")),
-    cBaselineSelectedCR(fEventCounter.addCounter("Baseline: selected CR events")),
-    cInvertedBTaggingCounter(fEventCounter.addCounter("Inverted: passed b-jet selection")),
-    cInvertedBTaggingSFCounter(fEventCounter.addCounter("Inverted: b tag SF")),
+    cTopTaggingSFCounter_SR(fEventCounter.addCounter("SR: top SF")),
+    cTopTaggingSFCounter_CRone(fEventCounter.addCounter("CR1: top SF")),
+    ccSR(fEventCounter.addCounter("SR")),
+    cCRone(fEventCounter.addCounter("CR1")),
+    cInvertedBTaggingCounter(fEventCounter.addCounter("== 2 b-jets")),
+    cInvertedBTaggingSFCounter(fEventCounter.addCounter("2 b-jets SF")),
     fInvertedBJetSelection(config.getParameter<ParameterSet>("FakeBBjetSelection")),//, fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fInvertedMETSelection(config.getParameter<ParameterSet>("METSelection")),
     fInvertedTopSelection(config.getParameter<ParameterSet>("FakeBTopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
-    cInvertedTopTaggingSFCounter(fEventCounter.addCounter("Inverted: top-tag SF")),
-    cInvertedSelected(fEventCounter.addCounter("Inverted: selected -events")),
-    cInvertedSelectedCR(fEventCounter.addCounter("Inverted: selected CR events"))
+    cTopTaggingSFCounter_VR(fEventCounter.addCounter("VR: top SF")),
+    cTopTaggingSFCounter_CRtwo(fEventCounter.addCounter("CR2: top SF")),
+    cVR(fEventCounter.addCounter("VR")),
+    cCRtwo(fEventCounter.addCounter("CR2"))
 { }
 
 
@@ -2357,7 +2361,8 @@ void FakeBMeasurement::process(Long64_t entry) {
   if (0) std::cout << "=== Jet selection" << std::endl;
   const JetSelection::Data jetData = fJetSelection.silentAnalyzeWithoutTau(fEvent);
   if (!jetData.passedSelection()) return;
-  
+  // fCommonPlots.fillControlPlotsAfterTopologicalSelections(fEvent, true); //new
+
   //================================================================================================  
   // 8) BJet Selection
   //================================================================================================
@@ -2427,12 +2432,6 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   const TopSelectionBDT::Data topData = fBaselineTopSelection.analyze(fEvent, jetData, bjetData); 
   if (!topData.passedSelection()) return; //preliminary cut
 
-  if (fEvent.isMC()) 
-    {
-      // std::cout << "FIXME! Need to move this to a later part of the code! Make sure this is properly calculated for all the regions! (top-tagging reference cut value?)" << std::endl;
-      fEventWeight.multiplyWeight(topData.getTopTaggingScaleFactorEventWeight());
-    }
-  cBaselineTopTaggingSFCounter.increment();
 
   //================================================================================================
   // Defining the splitting of phase-space as the eta of the Tetrajet b-jet
@@ -2600,7 +2599,7 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
       // CR4
       if (bPass_LdgTopMVA && cfg_SubldgTopMVAMinCut.passedCut(subldgMVA) && cfg_SubldgTopMVAMaxCut.passedCut(subldgMVA) )
 	{
-	  // std::cout << "CR4: ldgMVA = " << ldgMVA << ", subldgMVA = " << subldgMVA << std::endl;
+	  std::cout << "FIXME! no top-tag SF applied! CR4: ldgMVA = " << ldgMVA << ", subldgMVA = " << subldgMVA << std::endl;
 
 	  // Splitted Histos
 	  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hLdgTrijetPt_CRfour, isGenuineB, topData.getLdgTrijet().pt() );
@@ -2617,7 +2616,12 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
       if (!bPass_InvertedTop) return;
 
       if (0) std::cout << "=== Baseline: Control Region 1 (CRone)" << std::endl;
-      cBaselineSelectedCR.increment();
+      if (fEvent.isMC()) 
+	{
+	  fEventWeight.multiplyWeight(topData.getTopTaggingScaleFactorEventWeight());
+	}
+      cTopTaggingSFCounter_CRone.increment();
+      cCRone.increment();
 
       // Fill histos (CR1)
       hBaseline_Njets_AfterCRSelections->Fill(isGenuineB, jetData.getSelectedJets().size());
@@ -2777,7 +2781,12 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
     }
 
   if (0) std::cout << "=== Baseline: Signal Region (SR)" << std::endl;
-  cBaselineSelected.increment();
+  if (fEvent.isMC()) 
+    {
+      fEventWeight.multiplyWeight(topData.getTopTaggingScaleFactorEventWeight());
+    }
+  cTopTaggingSFCounter_SR.increment();
+  ccSR.increment();
 
   //================================================================================================
   // Fill final plots
@@ -2993,12 +3002,6 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   const TopSelectionBDT::Data topData = fInvertedTopSelection.analyze(fEvent, jetData, invBjetData);
   if (!topData.passedSelection()) return;//preliminary cut
 
-  if (fEvent.isMC()) 
-    {
-      fEventWeight.multiplyWeight(topData.getTopTaggingScaleFactorEventWeight());
-    }
-  cInvertedTopTaggingSFCounter.increment();
-
 
   //================================================================================================
   // Defining the splitting of phase-space as the eta of the Tetrajet b-jet
@@ -3169,7 +3172,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
       // CR3
       if (bPass_LdgTopMVA && cfg_SubldgTopMVAMinCut.passedCut(subldgMVA) && cfg_SubldgTopMVAMaxCut.passedCut(subldgMVA) )
 	{
-	  // std::cout << "CR3: ldgMVA = " << ldgMVA << ", subldgMVA = " << subldgMVA << std::endl;
+	  std::cout << "FIXME! No top-tag SF applied. CR3: ldgMVA = " << ldgMVA << ", subldgMVA = " << subldgMVA << std::endl;
 
 	  // Splitted Histos
 	  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hLdgTrijetPt_CRthree, isGenuineB, topData.getLdgTrijet().pt() );
@@ -3186,7 +3189,12 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
       if (!bPass_InvertedTop) return;
 
       if (0) std::cout << "=== Inverted BJet: Control Region 2 (CR2)" << std::endl;
-      cInvertedSelectedCR.increment();
+      if (fEvent.isMC()) 
+	{
+	  fEventWeight.multiplyWeight(topData.getTopTaggingScaleFactorEventWeight());
+	}
+      cTopTaggingSFCounter_CRtwo.increment();
+      cCRtwo.increment();
 
       // Fill plots (CR2)
       hInverted_Njets_AfterCRSelections->Fill(isGenuineB, jetData.getSelectedJets().size());
@@ -3348,8 +3356,13 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
     }
 
   if (0) std::cout << "=== Inverted BJet: Verification Region (VR)" << std::endl;
-  cInvertedSelected.increment();
-
+  if (fEvent.isMC()) 
+    {
+      fEventWeight.multiplyWeight(topData.getTopTaggingScaleFactorEventWeight());
+    }
+  cTopTaggingSFCounter_VR.increment();
+  cVR.increment();
+  
   //================================================================================================
   // Fill final plots (VR)
   //================================================================================================
