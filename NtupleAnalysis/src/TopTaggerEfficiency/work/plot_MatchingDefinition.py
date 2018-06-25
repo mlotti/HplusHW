@@ -4,26 +4,10 @@ DESCRIPTION:
 This scipt is used to investigate the difference in efficiency using different matching definition
 
 USAGE:
-./plot_EfficiencySystTop.py -m <pseudo_mcrab> -m2 <pseudo_multicrab2> [opts]
-
-
-EXAMPLES:
-./plot_EfficiencySystTop.py -m TopTaggerEfficiency_180603_SystTop_hadronic_BDTtraining_ptRew13TeV --folder topbdtSelection_ --type partonShower
-./plot_EfficiencySystTop.py -m TopTaggerEfficiency_180603_SystTop_hadronic_BDTtraining_ptRew13TeV --folder topbdtSelection_ --type showerScales
-./plot_EfficiencySystTop.py -m TopTaggerEfficiency_180603_SystTop_hadronic_BDTtraining_ptRew13TeV --folder topbdtSelection_ --type mTop
-./plot_EfficiencySystTop.py -m TopTaggerEfficiency_180608_195638_massCut400_All --folder topbdtSelection_ --type partonShower --url
-./plot_EfficiencySystTop.py -m TopTaggerEfficiency_180608_194156_massCut300_All --folder topbdtSelection_ --type partonShower --url
-./plot_EfficiencySystTop.py -m TopTaggerEfficiency_180608_200027_massCut1000_All --folder topbdtSelection_ --type colourReconnection
-
+./plot_MatchingDefinition.py -m <pseudo_mcrab> -m2 <pseudo_multicrab2> [opts]
 
 LAST USED: 
-./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_200027_massCut1000_All --type showerScales 
-./plot_EfficiencySystTop. py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_200027_massCut1000_All --type highPtRadiation
-./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/p seudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_200027_massCut1000_All --type mTop 
-./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficien cy/TopTaggerEfficiency_180608_200027_massCut1000_All --type partonShower
-./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_18 0608_200027_massCut1000_All --type evtGen
-./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_200027_massCut1000_All --type colourReconnection
-
+./plot_MatchingDefinition.py -m TopTaggerEfficiency_180612_174230_massCut300_TT_DefaultTraining -s TopTaggerEfficiency_180612_143743_massCut300_TT_OtherTraining
 
 STATISTICS OPTIONS:
 https://iktp.tu-dresden.de/~nbarros/doc/root/TEfficiency.html
@@ -160,7 +144,7 @@ def GetHistoKwargs(histoName, opts):
         bins              = [i for i in range(0, 1000+50, 50)]
         if opts.folder == "topbdtSelection_":
             #bins          = [i for i in range(0, 600+100, 100)] + [800]
-            bins              = [0, 100, 150, 200, 300, 400, 500, 600, 900]
+            bins              = [0, 100, 200, 300, 400, 500, 600]
         else:
             bins          = []
 
@@ -238,6 +222,7 @@ def main(opts):
         # For-loop: All numerator-denominator pairs
 
         for i in range(len(Numerator)):
+            
             numerator   = os.path.join(opts.folder, Numerator[i])
             denominator = os.path.join(opts.folder, Denominator[i])
             counter+=1
@@ -353,7 +338,15 @@ def PlotEfficiency(datasetMgr1, datasetMgr2, numPath, denPath, eff_def):
     
     # Define stuff
     saveName = "Efficiency_%s_MatchingDefinition_%s" % (eff_def, numPath.split("/")[-1])
-   
+    
+    units = "GeV/c"
+    if eff_def == "fakeTop":
+        _kwargs["xlabel"]  = "candidate p_{T} (%s)" % (units)
+    elif eff_def == "inclusiveTop" or eff_def == "genuineTop":
+        _kwargs["xlabel"]  = "generated top p_{T} (%s)" % (units)
+    else:
+        _kwargs["xlabel"]  = "p_{T} (%s)" % (units)
+        
     # Plot the efficiency
     p = plots.ComparisonManyPlot(Graph1, [Graph2], saveFormats=[])
     savePath = os.path.join(opts.saveDir, opts.optMode)    
