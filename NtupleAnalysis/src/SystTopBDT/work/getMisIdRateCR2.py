@@ -24,34 +24,7 @@
  
  # Marina
  LAST USED:
- (1)  ./getMisIdRateCR2.py -m SystTopBDT_180528_151309_MET30_MuIso0p1_InvMET30_InvMuIso0p2_noSF -e "TTW|TTZ"                                                                                                     
- (2)  ./getMisIdRateCR2.py -m SystTopBDT_180528_151533_MET30_MuIso0p1_InvMET30_InvMuIso0p2_noSF -e "TTW|TTZ"                                                                                                      
- (3)  ./getMisIdRateCR2.py -m SystTopBDT_180528_152141_MET50_MuIso0p1_InvMET20_InvMuIso0p2_noSF -e "TTW|TTZ"                                                                                                      
- (4)  ./getMisIdRateCR2.py -m SystTopBDT_180528_152310_MET40_MuIso0p1_InvMET30_InvMuIso0p2_noSF -e "TTW|TTZ"                                                                                                      
- (5)  ./getMisIdRateCR2.py -m SystTopBDT_180528_152540_MET30_MuIso0p1_InvMET15_InvMuIso0p2_noSF -e "TTW|TTZ"                                                                                                      
- (6)  ./getMisIdRateCR2.py -m SystTopBDT_180528_152944_MET30_MuIso0p2_InvMET20_InvMuIso0p4_noSF -e "TTW|TTZ"      
- (7)  ./getMisIdRateCR2.py -m SystTopBDT_180529_093052_MET50_MuIso0p1_InvMET20_InvMuIso0p1_noSF -e "TTW|TTZ"
- (8)  ./getMisIdRateCR2.py -m SystTopBDT_180529_165537_MET30_MuIso0p1_InvMET30_InvMuIso0p1_noSF -e "TTW|TTZ"
- (9)  ./getMisIdRateCR2.py -m SystTopBDT_180529_170402_MET30_MuIso0p1_InvMET20_InvMuIso0p1_noSF -e "TTW|TTZ"
- (10) ./getMisIdRateCR2.py -m SystTopBDT_180529_094433_MET30_MuIso0p1_InvMET15_InvMuIso0p1_noSF -e "TTW|TTZ"
- (11) ./getMisIdRateCR2.py -m SystTopBDT_180529_094647_MET50_MuIso0p2_InvMET30_InvMuIso0p2_noSF -e "TTW|TTZ"
- (12) ./getMisIdRateCR2.py -m SystTopBDT_180529_094856_MET30_MuIso0p1_InvMET20_InvMuIso0p3_noSF -e "TTW|TTZ"
- 
- 
- ./getMisIdRateCR2.py -m SystTopBDT_180524_074141_MET50_MuIso0p1_InvMET20_InvMuIso0p1_noSF -e "TTW|TTZ"
- 
- OTHER SELECTIONS:
-  Selection A) ./getMisIdRateCR2.py -m SystTopBDT_180513_100633_MET50_MuIso0p2_InvMET20_InvMuIso0p2_noSF -e "TTW|TTZ"
-  Selection B) ./getMisIdRateCR2.py -m SystTopBDT_180513_101101_MET50_MuIso0p1_InvMET20_InvMuIso0p1_noSF -e "TTW|TTZ"
-  Selection C) ./getMisIdRateCR2.py -m SystTopBDT_180513_101634_MET50_MuIso0p2_InvMET30_InvMuIso0p2_noSF -e "TTW|TTZ"
-  Selection D) ./getMisIdRateCR2.py -m SystTopBDT_180513_102112_MET50_MuIso0p1_InvMET30_InvMuIso0p1_noSF -e "TTW|TTZ"
-  Selection E) ./getMisIdRateCR2.py -m SystTopBDT_180514_110341_MET40_MuIso0p1_InvMET20_InvMuIso0p1_noSF -e "TTW|TTZ"
-  Selection F) ./getMisIdRateCR2.py -m SystTopBDT_180514_115524_MET40_MuIso0p1_InvMET30_InvMuIso0p1_noSF -e "TTW|TTZ"
-  Selection G) ./getMisIdRateCR2.py -m SystTopBDT_180514_115629_MET30_MuIso0p1_InvMET20_InvMuIso0p1_noSF -e "TTW|TTZ"
-  Selection H) ./getMisIdRateCR2.py -m SystTopBDT_180517_102420_MET40_MuIso0p1_InvMET20_InvMuIso0p1_noSF -e "TTW|TTZ"
-  Selection I) ./getMisIdRateCR2.py -m SystTopBDT_180517_102638_MET30_MuIso0p1_InvMET20_InvMuIso0p2_noSF -e "TTW|TTZ"
-  Selection J) ./getMisIdRateCR2.py -m SystTopBDT_180517_102808_MET30_MuIso0p1_InvMET30_InvMuIso0p2_noSF -e "TTW|TTZ"
-  Selection K) ./getMisIdRateCR2.py -m SystTopBDT_180517_174526_TopDir_noSF -e "TTW|TTZ"
+ (1) ./getMisIdRateCR2.py -m SystTopBDT_180612_120857_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_noSF -e "TTW|TTZ"
 '''
 
 #================================================================================================ 
@@ -165,7 +138,7 @@ def GetHistoKwargs(h, opts):
         "ratioYlabel"      : "Data/MC",
         "ratio"            : True,
         "ratioCreateLegend": True,
-        "ratioType"        : "errorScale",
+        "ratioType"        : "errorPropagation", # "errorScale",
         "ratioErrorOptions": {"numeratorStatSyst": False},
         "ratioMoveLegend"  : {"dx": -0.51, "dy": 0.03, "dh": -0.05},
         "stackMCHistograms": False, #not opts.nostack,
@@ -548,21 +521,10 @@ def GetScaleFactors(datasetsMgr, num_pathList, den_pathList, intLumi):
     
     # Marina
     # Normalization Factors (see: getNormalization.py)
-    #f1=0.610901; f2=0.889906; # (1)
-    #f1=0.610901; f2=0.906343; # (2)
-    #f1=0.610963; f2=0.903020; # (3)
-    #f1=0.610901; f2=0.901711; # (4)
-    #f1=0.603648; f2=0.907290; # (5)
-    #f1=0.611682; f2=0.889619; # (6)
-    #f1=0.613102; f2=0.902808; # (7)
-    #f1=0.613102; f2=0.902808; # (8)
-    #f1=0.609202; f2=0.906565; # (9)
-    #f1=0.608068; f2=0.906716; # (10)
-    #f1=0.610901; f2=0.906713; # (11)
-    f1=0.616422; f2=0.905622; # (12)
+    f1=0.619886; f2=0.904877;
 
     # Marina
-    jsonName = "Efficiency_SystBDT_CR2_MET30_MuIso0p1_InvMET20_InvMuIso0p3.json"
+    jsonName = "Efficiency_SystBDT_CR2_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300.json"
 
 
     # ------------------------------------------------------------------------------

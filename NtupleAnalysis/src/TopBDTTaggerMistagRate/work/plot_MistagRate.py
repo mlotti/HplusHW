@@ -15,6 +15,17 @@ LAST USD:
 ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180609_PFHT900_ldgJetPT100_HT1000_massCut300/ --folder TopBDTTagger_QCDMistagRate
 
 
+ BDT 0.00:  ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180621_083003_BDTCut0p00 --folder TopBDTTagger_QCDMistagRate
+ BDT 0.10:  ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180621_083431_BDTCut0p10 --folder TopBDTTagger_QCDMistagRate
+ BDT 0.20:  ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180621_083835_BDTCut0p20 --folder TopBDTTagger_QCDMistagRate
+ BDT 0.30:  ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180621_084625_BDTCut0p30 --folder TopBDTTagger_QCDMistagRate
+ BDT 0.40:  ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180620_123333_BDTCut0p40 --folder TopBDTTagger_QCDMistagRate
+ BDT 0.50:  ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180620_125801_BDTCut0p50 --folder TopBDTTagger_QCDMistagRate
+ BDT 0.60:  ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180620_130203_BDTCut0p60 --folder TopBDTTagger_QCDMistagRate
+ BDT 0.70:  ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180620_130608_BDTCut0p70 --folder TopBDTTagger_QCDMistagRate
+ BDT 0.80:  ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180620_131348_BDTCut0p80 --folder TopBDTTagger_QCDMistagRate
+ BDT 0.90:  ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180620_131730_BDTCut0p90 --folder TopBDTTagger_QCDMistagRate
+
 
 STATISTICS OPTIONS:
 https://iktp.tu-dresden.de/~nbarros/doc/root/TEfficiency.html
@@ -176,7 +187,7 @@ def GetHistoKwargs(histoName, opts):
         "opts"             : {"ymin": 0.0, "ymaxfactor": 2.0, "xmax" : 600},
         "opts2"            : {"ymin": 0.30, "ymax": 1.70},
         "log"              : False,
-        "createLegend"     : {"x1": 0.55, "y1": 0.70, "x2": 0.95, "y2": 0.92},
+        "createLegend"     : {"x1": 0.75, "y1": 0.72, "x2": 0.95, "y2": 0.88},
         }
 
 
@@ -447,9 +458,9 @@ def main(opts, signalMass):
             SavePlot(p, plotName, savePath, saveFormats = [".png", ".pdf", ".C"])
         
     # Save results in JSON
-    name = opts.mcrab.split("/")[0]
+    name = opts.mcrab.split("_")[-1]
     name = name.replace(opts.analysisName, "")
-    jsonName = "Efficiency"+ name +".json"
+    jsonName = "topMisID_"+ name +".json"
     #runRange = "273150-284044"
     analysis = opts.analysisName
     label = "2016"
