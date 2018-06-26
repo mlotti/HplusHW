@@ -1,40 +1,80 @@
 #!/usr/bin/env python
-'''                                                                                                                                                                                                                  DESCRIPTION:
-  
-  This script calculates the genuine tt efficiency.
-  Steps before running this script:
-  
-  1. Produce the normalization factors for QCD and TT with getNormalization.py
-  2. Get QCD+EWK+ST misidentification rate and produce the SF_{CR2} json with script getMisIdRateCR2.py
-  3. Run the analyzer on QCD+EWK+ST events with the SF_{CR2} form step 2.
-  4. Ready to calculate the Genuine TT efficiencies of the Top BDT tagger.
-  
-  Mini-Isolation
-          ^
-          |
-          |--------------|--------------|--------------|
-    >=0.1 |      CR2     |              |      VR      |
-          |--------------|              |--------------|
-     <0.1 |      CR1     |              |      SR      |
-          |--------------|--------------|--------------|----> MET
-          |              20             50             |
-
- USAGE:
- ./getInclusiveEfficiency.py -num <pseudo_nummcrab_directory> -den <pseudo_dencrab_directory> [opts]
-
- LAST USED:
- # Marina
- ./getInclusiveEfficiency.py --noSF SystTopBDT_180612_120857_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_noSF \ 
- --withCR2SF SystTopBDT_180612_164619_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR2SF_default_massCut300 --url -e "TTW"
-
- ./getInclusiveEfficiency.py --noSF SystTopBDT_180612_120857_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_noSF \
- --withCR2SF SystTopBDT_180612_164846_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR2SF_FatJet_massCut300 --url -e "TTW"
-
- ./getInclusiveEfficiency.py --noSF SystTopBDT_180612_120857_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_noSF \
- --withCR2SF SystTopBDT_180612_165901_MET50_MuIso0p1_InvMET20_InvMuIso0p1_withCR2SF_LeadingJet_massCut300 --url -e "TTW"
-
 '''
+  DESCRIPTION:
+  
+  This script calculates the genuine & inclusive tt efficiency. 
 
+  PHASE SPACE:
+  
+         Mini-Isolation
+              ^
+              |
+              |--------------|--------------|--------------|
+        >=0.1 |      CR2     |      -       |      VR      |
+              |--------------|              |--------------|
+         <0.1 |      CR1     |      -       |      SR      |
+              |--------------|--------------|--------------|----> MET
+              |              20             50             |
+
+  Genuine TT in Data:
+  
+  Numerator:    [ Data - (F1*QCD - EWK - ST - F2*FakeTT)*SF ] passing BDT
+  Denominator:  [ Data - (F1*QCD - EWK - ST - F2*FakeTT)    ]
+  
+  Inclusive TT in Data:
+  
+  Numerator:    [ Data - (F1*QCD - EWK - ST)*SF ] passing BDT
+  Denominator:  [ Data - (F1*QCD - EWK - ST)    ]
+
+  SF = Efficiency in Data / Efficiency in MC
+  
+  USAGE:
+  ./getEfficiencies.py --noSF <pseudo multicrab with no SF applied> --withSF <pseudo multicrab with SF applied> [opts]
+  
+  
+  LAST USED:
+  
+  BDT 0.00: ./getEfficiencies.py --noSF SystTopBDT_180621_085413_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p00_noSF \
+  --withSF SystTopBDT_180621_162205_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p00_withSF \
+  --url -e "TTW"
+  
+  BDT 0.10: ./getEfficiencies.py --noSF SystTopBDT_180621_112722_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p10_noSF \
+  --withSF SystTopBDT_180621_162205_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p00_withSF \
+  --url -e "TTW"
+  
+  BDT 0.20: ./getEfficiencies.py --noSF SystTopBDT_180621_090053_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p20_noSF \
+  --withSF SystTopBDT_180621_163417_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p20_withSF \
+  --url -e "TTW"
+  
+  BDT 0.30: ./getEfficiencies.py --noSF SystTopBDT_180621_090339_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p30_noSF \
+  --withSF SystTopBDT_180621_163417_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p20_withSF \
+  --url -e "TTW"
+
+  BDT 0.40: ./getEfficiencies.py --noSF SystTopBDT_180620_045023_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p40_noSF \
+  --withSF SystTopBDT_180621_093037_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p40_withSF \
+  --url -e "TTW"
+  
+  BDT 0.50: ./getEfficiencies.py --noSF SystTopBDT_180620_045528_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p50_noSF \
+  --withSF SystTopBDT_180621_094207_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p50_withSF \
+  --url -e "TTW"
+  
+  BDT 0.60: ./getEfficiencies.py --noSF SystTopBDT_180620_050745_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p60_noSF \
+  --withSF SystTopBDT_180621_094642_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p60_withSF \
+  --url -r "TTW"
+  
+  BDT 0.70: ./getEfficiencies.py --noSF SystTopBDT_180620_052556_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p70_noSF \
+  --withSF SystTopBDT_180621_095138_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p70_withSF \
+  --url -e "TTW"
+  
+  BDT 0.80: ./getEfficiencies.py --noSF SystTopBDT_180620_054613_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p80_noSF \
+  --withSF SystTopBDT_180621_095603_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p80_withSF \
+  --url -e "TTW"
+  
+  BDT 0.90: ./getEfficiencies.py --noSF SystTopBDT_180620_055650_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p90_noSF \
+  --withSF SystTopBDT_180621_095852_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p90_withSF \
+  --url -e "TTW"
+  
+'''
 #================================================================================================ 
 # Imports
 #================================================================================================ 
@@ -51,9 +91,6 @@ ROOT.gErrorIgnoreLevel = ROOT.kFatal #kPrint = 0,  kInfo = 1000, kWarning = 2000
 from ROOT import *
 
 import getpass
-
-from PythonWriter import PythonWriter
-pythonWriter = PythonWriter()
 
 import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
@@ -181,13 +218,9 @@ def GetHistoKwargs(histoName):
         "opts"             : _opts,
         "opts2"            : {"ymin": 0.6, "ymax": 2.0-0.6},
         "stackMCHistograms": True,
-        "ratio"            : True,
-        "ratioInvert"      : False,
-        "ratioType"        : "errorScale",
-        "ratioCreateLegend": True,
-        "ratioMoveLegend"  : {"dx": -0.51, "dy": 0.03, "dh": -0.08},
-        "ratioErrorOptions": {"numeratorStatSyst": False, "denominatorStatSyst": False},
+        "ratio"            : opts.ratio, 
         "ratioYlabel"      : "Data/MC",
+        "ratioInvert"      : False, 
         "cutBox"           : _cutBox,
         "addLuminosityText": True, # cannot do that
         "addCmsText"       : True,
@@ -300,51 +333,34 @@ def main(opts):
         opts.optMode = opt
 
         # Numerator & Denominator dataset manager
-        noSF_datasetsMgr      = GetDatasetsFromDir(opts, opts.noSFcrab)
-        withCR2SF_datasetsMgr = GetDatasetsFromDir(opts, opts.withCR2SFcrab) 
+        datasetMgr_noSF   = GetDatasetsFromDir(opts, opts.noSFcrab)
+        datasetMgr_withSF = GetDatasetsFromDir(opts, opts.withSFcrab)
         
         # Update all events to PU weighting
-        noSF_datasetsMgr.updateNAllEventsToPUWeighted()
-        withCR2SF_datasetsMgr.updateNAllEventsToPUWeighted()
+        datasetMgr_noSF.updateNAllEventsToPUWeighted()
+        datasetMgr_withSF.updateNAllEventsToPUWeighted()
         
         # Load Luminosities
-        noSF_datasetsMgr.loadLuminosities()
-        withCR2SF_datasetsMgr.loadLuminosities()
-        
+        datasetMgr_noSF.loadLuminosities()
         
         if 0:
-            noSF_datasetsMgr.PrintCrossSections()
-            noSF_datasetsMgr.PrintLuminosities()
- 
+            datasetMgr_noSF.PrintCrossSections()
+             
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
-        plots.mergeRenameReorderForDataMC(noSF_datasetsMgr) 
-        plots.mergeRenameReorderForDataMC(withCR2SF_datasetsMgr) 
+        plots.mergeRenameReorderForDataMC(datasetMgr_noSF)
+        plots.mergeRenameReorderForDataMC(datasetMgr_withSF)
         
         # Get luminosity if a value is not specified
         if opts.intLumi < 0:
-            opts.intLumi = noSF_datasetsMgr.getDataset("Data").getLuminosity()
-            
-        # Remove datasets
-        removeList = []
-        #removeList = ["TTWJetsToLNu_", "TTWJetsToQQ"]
-        for i, d in enumerate(removeList, 0):
-            msg = "Removing dataset %s" % d
-            Print(ShellStyles.WarningLabel() + msg + ShellStyles.NormalStyle(), i==0)
-            noSF_datasetsMgr.remove(filter(lambda name: d in name, noSF_datasetsMgr.getAllDatasetNames()))
-            
-        
-        # Print summary of datasets to be used
-        if 0:
-            noSF_datasetsMgr.PrintInfo()
-            withCR2SF_datasetsMgr.PrintInfo()
+            opts.intLumi = datasetMgr_noSF.getDataset("Data").getLuminosity()
             
         # Merge EWK samples
         EwkDatasets = ["Diboson", "DYJetsToLL", "WJetsHT"]
-        noSF_datasetsMgr.merge("EWK", EwkDatasets)
-        withCR2SF_datasetsMgr.merge("EWK", EwkDatasets)
-        
+        datasetMgr_noSF.merge("EWK", EwkDatasets)
+        datasetMgr_withSF.merge("EWK", EwkDatasets)
+                
         # Get histosgram names
-        folderListIncl = withCR2SF_datasetsMgr.getDataset(withCR2SF_datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(opts.folder)
+        folderListIncl = datasetMgr_withSF.getDataset(datasetMgr_withSF.getAllDatasetNames()[0]).getDirectoryContent(opts.folder)
         folderList = [h for h in folderListIncl if "AfterAllSelections_LeadingTrijet_Pt" in h ]
 
         # For-loop: All histo paths
@@ -373,7 +389,7 @@ def main(opts):
                 den_pathList.remove(h)
         
         # Do the histograms
-        PlotHistos(noSF_datasetsMgr, withCR2SF_datasetsMgr, num_pathList, den_pathList,  opts)
+        PlotHistos(datasetMgr_noSF, datasetMgr_withSF, num_pathList, den_pathList,  opts)
         
     return
 
@@ -500,7 +516,7 @@ def GetHistosForEfficiency(hNumerator, hDenominator):
         hDen.SetBinError(i, denErr)
     return hNum, hDen
 
-def PlotHistos(noSF_datasetsMgr, withCR2SF_datasetsMgr, num_histoList, den_histoList,  opts):    
+def PlotHistos(d_noSF, d_withSF, num_histoList, den_histoList,  opts):    
     
     # Get the histogram customisations (keyword arguments)
     _kwargs = GetHistoKwargs(num_histoList[0])
@@ -512,16 +528,15 @@ def PlotHistos(noSF_datasetsMgr, withCR2SF_datasetsMgr, num_histoList, den_histo
     #==========================================================================================
     # Get Dictionaries
     #==========================================================================================
-    rhDict_den_noSF      = GetRootHistos(noSF_datasetsMgr,      den_histoList, regions)
-    rhDict_num_noSF      = GetRootHistos(noSF_datasetsMgr,      num_histoList, regions)
-    rhDict_num_withCR2SF = GetRootHistos(withCR2SF_datasetsMgr, num_histoList, regions) # Scale Factors from CR2 are only applied in the Numerator on EWK+QCD+ST
-    
-    #=========================================================================================
+    rhDict_den_noSF   = GetRootHistos(d_noSF, den_histoList, regions)
+    rhDict_num_noSF   = GetRootHistos(d_noSF, num_histoList, regions)
+    rhDict_num_withSF = GetRootHistos(d_withSF, num_histoList, regions) 
+        
+    # =========================================================================================
     # Normalization Factors (see: getNormalization.py)
-    #=========================================================================================
-    # Marina
+    # =========================================================================================
     f1=0.619886; f2=0.904877;
-
+    
     # =========================================================================================
     # (A) Apply Normalization Factors (see: getNormalizations.py)
     # =========================================================================================
@@ -535,8 +550,8 @@ def PlotHistos(noSF_datasetsMgr, withCR2SF_datasetsMgr, num_histoList, den_histo
         rhDict_num_noSF["NormQCD-"+re+"-Inclusive"] =rhDict_num_noSF["QCD-"+re+"-Inclusive"].Clone("NormQCD-"+re+"-Inclusive")
         rhDict_num_noSF["NormQCD-"+re+"-Inclusive"].Scale(f1)
 
-        rhDict_num_withCR2SF["NormQCD-"+re+"-Inclusive"] = rhDict_num_withCR2SF["QCD-"+re+"-Inclusive"].Clone("NormQCD-"+re+"-Inclusive")
-        rhDict_num_withCR2SF["NormQCD-"+re+"-Inclusive"].Scale(f1)
+        rhDict_num_withSF["NormQCD-"+re+"-Inclusive"] = rhDict_num_withSF["QCD-"+re+"-Inclusive"].Clone("NormQCD-"+re+"-Inclusive")
+        rhDict_num_withSF["NormQCD-"+re+"-Inclusive"].Scale(f1)
         
         for la in labels:
             
@@ -545,83 +560,83 @@ def PlotHistos(noSF_datasetsMgr, withCR2SF_datasetsMgr, num_histoList, den_histo
             
             rhDict_num_noSF["NormTT-"+re+"-"+la] = rhDict_num_noSF["TT-"+re+"-"+la].Clone("NormTT-"+re+"-"+la)
             rhDict_num_noSF["NormTT-"+re+"-"+la].Scale(f2)
-                        
-    # ==========================================================================================
-    # (B) Estimate Inclusive TT in SR
-    # ==========================================================================================
             
-    # (B1) Inclusive TT in Data - Denominator = Data - F1*QCD - - EWK - ST
-    rhDict_den_noSF["TTinData-SR-Inclusive"] = rhDict_den_noSF["Data-SR-Inclusive"].Clone("t#bar{t} (Data)") 
+            rhDict_num_withSF["NormTT-"+re+"-"+la] = rhDict_num_withSF["TT-"+re+"-"+la].Clone("NormTT-"+re+"-"+la)
+            rhDict_num_withSF["NormTT-"+re+"-"+la].Scale(f2)
+            
+
+    # =========================================================================================
+    # (B) Estimate Inclusive TT in SR
+    # =========================================================================================
+    
+    # (B1) Inclusive TT in Data (Denominator)  =  Data - F1*QCD - EWK - ST
+    rhDict_den_noSF["TTinData-SR-Inclusive"] = rhDict_den_noSF["Data-SR-Inclusive"].Clone("Inclusive t#bar{t} (Data)")
     rhDict_den_noSF["TTinData-SR-Inclusive"].Add(rhDict_den_noSF["NormQCD-SR-Inclusive"],   -1)
     rhDict_den_noSF["TTinData-SR-Inclusive"].Add(rhDict_den_noSF["EWK-SR-Inclusive"],       -1)
     rhDict_den_noSF["TTinData-SR-Inclusive"].Add(rhDict_den_noSF["SingleTop-SR-Inclusive"], -1)
-
-    # (B2) Inclusive TT in Data - Numerator = Data - F1*QCD*SF_{CR2} - ST*SF_{CR2} - EWK*SF_{CR2}
-    rhDict_num_noSF["TTinData-SR-Inclusive"] = rhDict_num_noSF["Data-SR-Inclusive"].Clone("t#bar{t} (Data)")
-    rhDict_num_noSF["TTinData-SR-Inclusive"].Add(rhDict_num_withCR2SF["NormQCD-SR-Inclusive"],   -1)
-    rhDict_num_noSF["TTinData-SR-Inclusive"].Add(rhDict_num_withCR2SF["SingleTop-SR-Inclusive"], -1)
-    rhDict_num_noSF["TTinData-SR-Inclusive"].Add(rhDict_num_withCR2SF["EWK-SR-Inclusive"],       -1)
     
-    # (B3) Inclusive TT in MC - Denominator:  rhDict_den_noSF["TT-SR-Inclusive"]
-    # (B4) Inclusive TT in MC - Numerator:    rhDict_num_noSF["TT-SR-Inclusive"]
+    # (B2) Inclusive TT in Data (Numerator)    =  Data - (F1*QCD -EWK - ST)*SF
+    rhDict_num_noSF["TTinData-SR-Inclusive"] = rhDict_num_noSF["Data-SR-Inclusive"].Clone("Inclusive t#bar{t} (Data)")
+    rhDict_num_noSF["TTinData-SR-Inclusive"].Add(rhDict_num_withSF["NormQCD-SR-Inclusive"],   -1)
+    rhDict_num_noSF["TTinData-SR-Inclusive"].Add(rhDict_num_withSF["EWK-SR-Inclusive"],       -1)
+    rhDict_num_noSF["TTinData-SR-Inclusive"].Add(rhDict_num_withSF["SingleTop-SR-Inclusive"], -1)
     
-    
-    # ========================================================================================
-    # (C) Plot Numerator and Denominator (Data Vs MC)
-    # ========================================================================================
+    # ==========================================================================================
+    # (C) Plot Inclusive Efficiency (Data Vs MC)
+    # ==========================================================================================
     _kwargs["opts"] = {"xmax" : 800, "ymaxfactor" : 2.0}
     _kwargs["ratioYlabel"]  = "Data/MC"
     _kwargs["ratio"]        = True
     _kwargs["stackMCHistograms"] = False
-    _kwargs["createLegend"]      = {"x1": 0.68, "y1": 0.75, "x2": 0.95, "y2": 0.92}
+    _kwargs["createLegend"]      = {"x1": 0.60, "y1": 0.75, "x2": 0.95, "y2": 0.92}
     _kwargs["ratioInvert"]  = True
-
-    num_data = rhDict_num_noSF["TTinData-SR-Inclusive"].Clone("t#bar{t} (Data)")
-    den_data = rhDict_den_noSF["TTinData-SR-Inclusive"].Clone("t#bar{t} (Data)")
     
-    num_mc = rhDict_num_noSF["TT-SR-Inclusive"].Clone("t#bar{t} (MC)")
-    den_mc = rhDict_den_noSF["TT-SR-Inclusive"].Clone("t#bar{t} (MC)")
+    num_data = rhDict_num_noSF["TTinData-SR-Inclusive"].Clone("t#bar{t}_{SR} (Data)")
+    den_data = rhDict_den_noSF["TTinData-SR-Inclusive"].Clone("t#bar{t}_{SR} (Data)")
+    
+    num_mc = rhDict_num_noSF["TT-SR-Inclusive"].Clone("t#bar{t}_{SR} (MC)")
+    den_mc = rhDict_den_noSF["TT-SR-Inclusive"].Clone("t#bar{t}_{SR} (MC)")
     
     num_data.Rebin(2)
     num_mc.Rebin(2)
     den_data.Rebin(2)
-    den_mc.Rebin(2)               
+    den_mc.Rebin(2)
 
     styles.getABCDStyle("CR4").apply(num_mc)
     styles.getABCDStyle("CR4").apply(den_mc)
     
     # Denominator
-    hName = "InclusiveTT_SR_Denominator_LeadingJet"
-    hData_Den = histograms.Histo( den_data, "t#bar{t} (Data)", "Data", drawStyle="AP"); hData_Den.setIsDataMC(isData=True, isMC=False)
-    hMC_Den   = histograms.Histo( den_mc,   "t#bar{t} (MC)", "MC", drawStyle="HIST");   hMC_Den.setIsDataMC(isData=False, isMC=True)
+    hName = "InclusiveTT_SR_Denominator"
+    hData_Den = histograms.Histo( den_data, "t#bar{t}_{SR} (Data)", "Data", drawStyle="AP"); hData_Den.setIsDataMC(isData=True, isMC=False)
+    hMC_Den   = histograms.Histo( den_mc,   "t#bar{t}_{SR} (MC)", "MC", drawStyle="HIST");   hMC_Den.setIsDataMC(isData=False, isMC=True)
 
     pDen = plots.ComparisonManyPlot(hData_Den, [hMC_Den], saveFormats=[])
     pDen.setLuminosity(opts.intLumi)
     pDen.setDefaultStyles()
     plots.drawPlot(pDen, hName, **_kwargs)
-    SavePlot(pDen, hName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".C", ".pdf"])
-    
-    # Numerator
-    hName = "InclusiveTT_SR_Numerator_LeadingJet"
-    hData_Num = histograms.Histo( num_data, "t#bar{t} (Data)", "Data", drawStyle="AP"); hData_Num.setIsDataMC(isData=True, isMC=False)
-    hMC_Num   = histograms.Histo( num_mc,   "t#bar{t} (MC)", "MC", drawStyle="HIST");   hMC_Num.setIsDataMC(isData=False, isMC=True)
+    SavePlot(pDen, hName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png"])
 
+    # Numerator
+    hName = "InclusiveTT_SR_Numerator"
+    hData_Num = histograms.Histo( num_data, "t#bar{t}_{SR} (Data)", "Data", drawStyle="AP"); hData_Num.setIsDataMC(isData=True, isMC=False)
+    hMC_Num   = histograms.Histo( num_mc,   "t#bar{t}_{SR} (MC)", "MC", drawStyle="HIST");   hMC_Num.setIsDataMC(isData=False, isMC=True)
+    
     pNum = plots.ComparisonManyPlot(hData_Num, [hMC_Num], saveFormats=[])
     pNum.setLuminosity(opts.intLumi)
     pNum.setDefaultStyles()
     plots.drawPlot(pNum, hName, **_kwargs)
-    SavePlot(pNum, hName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".C", ".pdf"])
+    SavePlot(pNum, hName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png"])
     
-    # ========================================================================================
-    # (D) Plot Genuine TT Efficiency
-    # ========================================================================================
+    # =========================
+    # Inclusive Efficiency
+    # =========================
     _kwargs = {
         "xlabel"           : "p_{T} (GeV/c)",
         "ylabel"           : "Efficiency",
         "ratioYlabel"      : "Data/MC",
         "ratio"            : True,
         "ratioInvert"      : False,
-        "ratioType"        : "errorScale",
+        "ratioType"        : None,
         "ratioCreateLegend": True,
         "ratioMoveLegend"  : {"dx": -0.51, "dy": 0.03, "dh": -0.08},
         "ratioErrorOptions": {"numeratorStatSyst": False, "denominatorStatSyst": False},
@@ -631,23 +646,23 @@ def PlotHistos(noSF_datasetsMgr, withCR2SF_datasetsMgr, num_histoList, den_histo
         "addLuminosityText": False,
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
-        "opts"             : {"ymin": 0.0, "ymaxfactor": 1.28, "xmax" : 600},
-        "opts2"            : {"ymin": 0.72, "ymax": 1.28},
+        "opts"             : {"ymin": 0.0, "ymaxfactor": 1.5, "xmax" : 600},
+        "opts2"            : {"ymin": 0.6, "ymax": 1.5},
         "log"              : False,
-        "createLegend"     : {"x1": 0.68, "y1": 0.80, "x2": 0.95, "y2": 0.92},
+        "createLegend"     : {"x1": 0.64, "y1": 0.80, "x2": 0.95, "y2": 0.92},
         }
 
-    bins = [0, 100, 200, 300, 400, 500, 600]
+    bins  = [0, 100, 200, 300, 400, 500, 600]
     xBins = array.array('d', bins)
     nx    = len(xBins)-1
 
     # Data 
-    h0_data_den = rhDict_den_noSF["TTinData-SR-Inclusive"].Clone("t#bar{t} (Data)")
-    h0_data_num = rhDict_num_noSF["TTinData-SR-Inclusive"].Clone("t#bar{t} (Data)")
+    h0_data_den = rhDict_den_noSF["TTinData-SR-Inclusive"].Clone("t#bar{t}_{SR} (Data)")
+    h0_data_num = rhDict_num_noSF["TTinData-SR-Inclusive"].Clone("t#bar{t}_{SR} (Data)")
     
     # MC
-    h0_mc_den = rhDict_den_noSF["TT-SR-Inclusive"].Clone("t#bar{t} (MC)")
-    h0_mc_num = rhDict_num_noSF["TT-SR-Inclusive"].Clone("t#bar{t} (MC)")
+    h0_mc_den = rhDict_den_noSF["TT-SR-Inclusive"].Clone("t#bar{t}_{SR} (MC)")
+    h0_mc_num = rhDict_num_noSF["TT-SR-Inclusive"].Clone("t#bar{t}_{SR} (MC)")
     
     h0_data_den = h0_data_den.Rebin(nx, "", xBins)
     h0_data_num = h0_data_num.Rebin(nx, "", xBins)
@@ -670,28 +685,155 @@ def PlotHistos(noSF_datasetsMgr, withCR2SF_datasetsMgr, num_histoList, den_histo
     styles.dataStyle.apply(geff_data)
     styles.ttStyle.apply(geff_mc)
 
-    Graph_Data = histograms.HistoGraph(geff_data, "t#bar{t} (Data) ", "p", "P")
-    Graph_MC   = histograms.HistoGraph(geff_mc, "t#bar{t} (MC)", "p", "P")
+    Graph_Data = histograms.HistoGraph(geff_data, "t#bar{t}_{SR} (Data) ", "p", "P")
+    Graph_MC   = histograms.HistoGraph(geff_mc, "t#bar{t}_{SR} (MC)", "p", "P")
     
     p = plots.ComparisonManyPlot(Graph_MC, [Graph_Data], saveFormats=[])
-    saveName = "Efficiency_InclusiveTT_SR_LeadingJet"
+    saveName = "Efficiency_InclusiveTT_SR"
     savePath = os.path.join(opts.saveDir, opts.optMode)
     plots.drawPlot(p, savePath, **_kwargs)
-    SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf", ".C"])
+    SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf"])
+    
+    
+    
+    # ==========================================================================================
+    # (D) Estimate Genuine TT in SR
+    # ==========================================================================================
+    
+    # (D1) Genuine TT in Data - Denominator = Data - F1*QCD - F2*FakeTT - EWK - ST
+    rhDict_den_noSF["TTinData-SR-Genuine"] = rhDict_den_noSF["Data-SR-Inclusive"].Clone("genuine t#bar{t} (Data)") 
+    rhDict_den_noSF["TTinData-SR-Genuine"].Add(rhDict_den_noSF["NormQCD-SR-Inclusive"],   -1)
+    rhDict_den_noSF["TTinData-SR-Genuine"].Add(rhDict_den_noSF["NormTT-SR-Fake"],         -1)
+    rhDict_den_noSF["TTinData-SR-Genuine"].Add(rhDict_den_noSF["EWK-SR-Inclusive"],       -1)
+    rhDict_den_noSF["TTinData-SR-Genuine"].Add(rhDict_den_noSF["SingleTop-SR-Inclusive"], -1)
 
-    # =============================
-    #    Export JSON file
-    # =============================
-    #jsonName = "Efficiency_InclusiveTT_SR_MET50_MuIso0p1_InvMET20_InvMuIso0p1.json"
-    #runRange = "273150-284044"
-    #analysis = opts.analysisName
-    #label = "2016"
-    #plotDir =  os.path.join(opts.folder, jsonName)
-    #pythonWriter.addParameters(plotDir, label, runRange, opts.intLumi, geff_data)
-    #pythonWriter.addMCParameters(label, geff_mc)
-    #pythonWriter.writeJSON(jsonName)
+    # (D2) Genuine TT in Data - Numerator = Data - [F1*QCD - F2*FakeTT - ST - EWK] * SF
+    rhDict_num_noSF["TTinData-SR-Genuine"] = rhDict_num_noSF["Data-SR-Inclusive"].Clone("genuine t#bar{t} (Data)")
+    rhDict_num_noSF["TTinData-SR-Genuine"].Add(rhDict_num_withSF["NormQCD-SR-Inclusive"],   -1)
+    rhDict_num_noSF["TTinData-SR-Genuine"].Add(rhDict_num_withSF["NormTT-SR-Fake"],         -1)
+    rhDict_num_noSF["TTinData-SR-Genuine"].Add(rhDict_num_withSF["SingleTop-SR-Inclusive"], -1)
+    rhDict_num_noSF["TTinData-SR-Genuine"].Add(rhDict_num_withSF["EWK-SR-Inclusive"],       -1)
     
+    # ========================================================================================
+    # (E) Plot Numerator and Denominator (Data Vs MC)
+    # ========================================================================================
+    _kwargs = GetHistoKwargs(num_histoList[0])
+    _kwargs["opts"] = {"xmax" : 800, "ymaxfactor" : 2.0}
+    _kwargs["ratioYlabel"]  = "Data/MC"
+    _kwargs["ratio"]        = True
+    _kwargs["stackMCHistograms"] = False
+    _kwargs["createLegend"]      = {"x1": 0.60, "y1": 0.75, "x2": 0.95, "y2": 0.92}
+    _kwargs["ratioInvert"]  = True
     
+    num_data.Reset()
+    den_data.Reset()
+    num_mc.Reset()
+    den_mc.Reset()
+    
+    num_data = rhDict_num_noSF["TTinData-SR-Genuine"].Clone("genuine t#bar{t}_{SR} (Data)")
+    den_data = rhDict_den_noSF["TTinData-SR-Genuine"].Clone("genuine t#bar{t}_{SR} (Data)")
+    
+    num_mc = rhDict_num_noSF["TT-SR-Genuine"].Clone("genuine t#bar{t}_{SR} (MC)")
+    den_mc = rhDict_den_noSF["TT-SR-Genuine"].Clone("genuine t#bar{t}_{SR} (MC)")
+    
+    num_data.Rebin(2)
+    num_mc.Rebin(2)
+    den_data.Rebin(2)
+    den_mc.Rebin(2)               
+
+    styles.getABCDStyle("CR4").apply(num_mc)
+    styles.getABCDStyle("CR4").apply(den_mc)
+    
+    # Denominator
+    hName = "GenuineTT_SR_Denominator"
+    hData_Den = histograms.Histo( den_data, "genuine t#bar{t}_{SR} (Data)", "Data", drawStyle="AP"); hData_Den.setIsDataMC(isData=True, isMC=False)
+    hMC_Den   = histograms.Histo( den_mc,   "genuine t#bar{t}_{SR} (MC)", "MC", drawStyle="HIST");   hMC_Den.setIsDataMC(isData=False, isMC=True)
+
+    pDenumerator = plots.ComparisonManyPlot(hData_Den, [hMC_Den], saveFormats=[])
+    pDenumerator.setLuminosity(opts.intLumi)
+    pDenumerator.setDefaultStyles()
+    plots.drawPlot(pDenumerator, hName, **_kwargs)
+    SavePlot(pDenumerator, hName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png"])
+    
+    # Numerator
+    hName = "GenuineTT_SR_Numerator"
+    hData_Num = histograms.Histo( num_data, "genuine t#bar{t}_{SR} (Data)", "Data", drawStyle="AP"); hData_Num.setIsDataMC(isData=True, isMC=False)
+    hMC_Num   = histograms.Histo( num_mc,   "genuine t#bar{t}_{SR} (MC)", "MC", drawStyle="HIST");   hMC_Num.setIsDataMC(isData=False, isMC=True)
+
+    pNumerator = plots.ComparisonManyPlot(hData_Num, [hMC_Num], saveFormats=[])
+    pNumerator.setLuminosity(opts.intLumi)
+    pNumerator.setDefaultStyles()
+    plots.drawPlot(pNumerator, hName, **_kwargs)
+    SavePlot(pNumerator, hName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png"])
+    
+    # ========================================================================================
+    # (F) Plot Genuine TT Efficiency
+    # ========================================================================================
+    _kwargs = {
+        "xlabel"           : "p_{T} (GeV/c)",
+        "ylabel"           : "Efficiency",
+        "ratioYlabel"      : "Data/MC",
+        "ratio"            : True,
+        "ratioInvert"      : False,
+        "ratioType"        : None, #"errorScale",
+        "ratioCreateLegend": True,
+        "ratioMoveLegend"  : {"dx": -0.51, "dy": 0.03, "dh": -0.08},
+        "ratioErrorOptions": {"numeratorStatSyst": False, "denominatorStatSyst": False},
+        "errorBarsX"       : True,
+        "stackMCHistograms": False,
+        "addMCUncertainty" : False,
+        "addLuminosityText": False,
+        "addCmsText"       : True,
+        "cmsExtraText"     : "Preliminary",
+        "opts"             : {"ymin": 0.0, "ymaxfactor": 1.25, "xmax" : 600},
+        "opts2"            : {"ymin": 0.6, "ymax": 1.5},
+        "log"              : False,
+        "createLegend"     : {"x1": 0.54, "y1": 0.80, "x2": 0.95, "y2": 0.92},
+        }
+
+    bins  = [0, 100, 200, 300, 400, 500, 600]
+    xBins = array.array('d', bins)
+    nx    = len(xBins)-1
+    
+    # Data 
+    h1_data_den = rhDict_den_noSF["TTinData-SR-Genuine"].Clone("genuine t#bar{t}_{SR} (Data)")
+    h1_data_num = rhDict_num_noSF["TTinData-SR-Genuine"].Clone("genuine t#bar{t}_{SR} (Data)")
+    
+    # MC
+    h1_mc_den = rhDict_den_noSF["TT-SR-Genuine"].Clone("genuine t#bar{t}_{SR} (MC)")
+    h1_mc_num = rhDict_num_noSF["TT-SR-Genuine"].Clone("genuine t#bar{t}_{SR} (MC)")
+    
+    h1_data_den = h1_data_den.Rebin(nx, "", xBins)
+    h1_data_num = h1_data_num.Rebin(nx, "", xBins)
+    
+    h1_mc_den = h1_mc_den.Rebin(nx, "", xBins)
+    h1_mc_num = h1_mc_num.Rebin(nx, "", xBins)
+    
+    h_Numerator_Data, h_Denominator_Data = GetHistosForEfficiency(h1_data_num, h1_data_den)
+    h_Numerator_MC,   h_Denominator_MC   = GetHistosForEfficiency(h1_mc_num, h1_mc_den)
+    
+    effi_data = ROOT.TEfficiency(h_Numerator_Data, h_Denominator_Data)
+    effi_mc   = ROOT.TEfficiency(h_Numerator_MC,   h_Denominator_MC)
+
+    effi_data.SetStatisticOption(ROOT.TEfficiency.kFCP)
+    effi_mc.SetStatisticOption(ROOT.TEfficiency.kFCP)
+
+    geffi_data = convert2TGraph(effi_data)
+    geffi_mc   = convert2TGraph(effi_mc)
+
+    styles.dataStyle.apply(geffi_data)
+    styles.ttStyle.apply(geffi_mc)
+    
+    Graph_Data = histograms.HistoGraph(geffi_data, "genuine t#bar{t}_{SR} (Data) ", "p", "P")
+    Graph_MC   = histograms.HistoGraph(geffi_mc, "genuine t#bar{t}_{SR} (MC)", "p", "P")
+    
+    pp = plots.ComparisonManyPlot(Graph_MC, [Graph_Data], saveFormats=[])
+    saveName = "Efficiency_GenuineTT_SR"
+    savePath = os.path.join(opts.saveDir, opts.optMode)
+    plots.drawPlot(pp, savePath, **_kwargs)
+    SavePlot(pp, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf"])
+
+
     return
 
 
@@ -735,12 +877,10 @@ if __name__ == "__main__":
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
     
-    parser.add_option("--noSF", dest="noSFcrab", action="store",
-                      help="Path to the pseudo-multicrab directory without SF")
+    parser.add_option("--noSF", dest="noSFcrab", action="store", help="Path to the pseudo-multicrab directory without SF")
     
-    parser.add_option("--withCR2SF", dest="withCR2SFcrab", action="store",
-                      help="Path to the pseudo-multicrab directory with SF from CR2")
-
+    parser.add_option("--withSF", dest="withSFcrab", action="store", help="Path to the pseudo-multicrab directory with SF applied")
+    
     parser.add_option("-o", "--optMode", dest="optMode", type="string", default=OPTMODE, 
                       help="The optimization mode when analysis variation is enabled  [default: %s]" % OPTMODE)
 
@@ -800,7 +940,7 @@ if __name__ == "__main__":
         sys.exit(1)
         
     # Sanity check
-    if opts.noSFcrab == None or opts.withCR2SFcrab == None:
+    if opts.noSFcrab == None or opts.withSFcrab == None:
         Print("Not enough arguments passed to script execution. Printing docstring & EXIT.")
         parser.print_help()
         sys.exit(1)

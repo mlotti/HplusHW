@@ -74,15 +74,9 @@ jsonReader.setupQGLInformation(QGLRPset  = qglrSelection,
                                jsonname_Gluon  = "QGLdiscriminator_QCD_GluonJets.json")
 
 #================================================================================================
-# Topology selection
-#================================================================================================
-#topologySelection = hplus2tbAnalysis.topologySelection
-
-#================================================================================================
 # Top selection BDT
 #================================================================================================
 topSelectionBDT = hplus2tbAnalysis.topSelectionBDT
-
 
 #================================================================================================
 # MET selection
@@ -113,7 +107,7 @@ systTopBDTSelection = PSet(
     MiniIsoInvCutDirection   = ">",
     METCutValue              = "50",
     METCutDirection          = ">=",
-    METInvCutValue           = "30",
+    METInvCutValue           = "20",
     METInvCutDirection       = "<",
     MVACutValue              = "0.4",
     MVACutDirection          = ">=",
