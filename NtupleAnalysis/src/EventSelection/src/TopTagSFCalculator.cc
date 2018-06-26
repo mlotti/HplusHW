@@ -357,7 +357,7 @@ const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzV
           else hTopEff_Vs_TopPt_Fake          -> Fill(eff, pt);
 	
 	  // Protect against div by zero
-	  if (std::abs(eff-1.0) < 0.00001 || sf_nominal > 2.0) 
+	  if (std::abs(eff-1.0) < 0.00001 || sf_nominal > 10.0) 
 	    {
 	      std::cout << "=== TopTagSFCalculator::calculateSF(): Anomalously high SF."
 			<< " Using SF=1 for this top-canidate with flavor = " << flavor 
