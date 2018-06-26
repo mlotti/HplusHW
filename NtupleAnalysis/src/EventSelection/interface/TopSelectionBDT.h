@@ -54,9 +54,11 @@ struct SelectedTrijets{
   Jet Jet1;
   Jet Jet2;
   Jet BJet;
+  double MVA;
   math::XYZTLorentzVector TrijetP4;
   math::XYZTLorentzVector DijetP4;
-  double MVA;
+  bool isGenuine;
+  bool isTagged;
 };
 
 
