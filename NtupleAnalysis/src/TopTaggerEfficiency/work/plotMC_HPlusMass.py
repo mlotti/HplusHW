@@ -324,7 +324,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
         _opts["xmax"] = 800
 
 
-    elif "bdtvalue" in histo.lower():
+    elif "bdt" in histo.lower():
         _format = "%0.1f"
 
     else:
