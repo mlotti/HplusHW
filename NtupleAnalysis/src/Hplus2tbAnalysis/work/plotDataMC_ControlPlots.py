@@ -365,7 +365,7 @@ def GetHistoKwargs(h, opts):
     if h == "LdgBjetPt":
         ROOT.gStyle.SetNdivisions(8, "X")
         units            = "GeV/c"
-        kwargs["rebinX"] = 1
+        kwargs["rebinX"] = 2
         kwargs["xlabel"] = "p_{T} (%s)" % units
         kwargs["ylabel"] = _yLabel + units
         #kwargs["opts"]   = {"xmin": 0.0, "xmax": +1000.0, "ymin": yMin, "ymaxfactor": yMaxF}
@@ -382,7 +382,7 @@ def GetHistoKwargs(h, opts):
  
     if "dgTrijetBJetPt" in h:
         units            = "GeV/c"
-        kwargs["rebinX"] = 1
+        kwargs["rebinX"] = 2
         kwargs["xlabel"] = "p_{T} (%s)" % units
         kwargs["ylabel"] = _yLabel + units
         kwargs["cutBox"] = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
@@ -412,7 +412,7 @@ def GetHistoKwargs(h, opts):
 
     if "dgTrijetDiJetPt" in h:
         units            = "GeV/c"
-        kwargs["rebinX"] = 1
+        kwargs["rebinX"] = 2
         kwargs["xlabel"] = "p_{T,jj}^{BDT} (%s)" % units
         kwargs["ylabel"] = _yLabel + units
         kwargs["opts"]   = {"xmin": 0.0, "xmax": +800.0, "ymin": yMin, "ymaxfactor": yMaxF}
@@ -434,7 +434,7 @@ def GetHistoKwargs(h, opts):
 
     if  "ldgTrijetJet1Pt" in h or "ldgTrijetJet2Pt" in h:
         units            = "GeV/c"
-        kwargs["rebinX"] = 1
+        kwargs["rebinX"] = 2
         kwargs["xlabel"] = "p_{T} (%s)" % units
         kwargs["ylabel"] = _yLabel + units
         kwargs["cutBox"] = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
@@ -465,11 +465,11 @@ def GetHistoKwargs(h, opts):
         if "AfterAllSelections" in h:
             kwargs["opts"]   = {"xmin": 0, "xmax": +500, "ymin": yMin, "ymaxfactor": yMaxF}
 
-    if "ldgTrijetPt" in h:
+    if "dgTrijetPt" in h:
         ROOT.gStyle.SetNdivisions(8, "X")
         units            = "GeV/c"
-        kwargs["rebinX"] = 1
-        kwargs["xlabel"] = "p_{T,jjb}^{ldg} (%s)" % units
+        kwargs["rebinX"] = 2
+        kwargs["xlabel"] = "p_{T} (%s)" % (units) #"p_{T,jjb}^{ldg} (%s)" % units
         kwargs["ylabel"] = _yLabel + units
         #kwargs["opts"]   = {"xmin": 0.0, "xmax": +1000.0, "ymin": yMin, "ymax": 3e5} #yMaxF}
 
@@ -500,7 +500,7 @@ def GetHistoKwargs(h, opts):
     if h == "TetrajetBJetPt" in h:
         ROOT.gStyle.SetNdivisions(8, "X")
         units            = "GeV/c"
-        kwargs["rebinX"] = 1
+        kwargs["rebinX"] = 2
         kwargs["xlabel"] = "p_{T, b_{free}} (%s)" % units
         kwargs["ylabel"] = _yLabel + units
         kwargs["cutBox"] = {"cutValue": 30.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
@@ -540,7 +540,7 @@ def GetHistoKwargs(h, opts):
 
     if h == "counter":
         xMin = 15.0 # 7 jets
-        xMax = 20.0 # tops
+        xMax = 21.0 # all
         if 0:
             kwargs["opts"]   = {"xmin": xMin, "xmax": xMax, "ymin": 1e0, "ymax": 3e11}
         else:
@@ -732,7 +732,7 @@ def GetHistoKwargs(h, opts):
 
     if "LdgTrijetBjetPt" in h:
         units            = "GeV/c"
-        kwargs["rebinX"] = 1
+        kwargs["rebinX"] = 2
         kwargs["xlabel"] = "p_{T} (%s)" % units
         kwargs["ylabel"] = _yLabel + units
         kwargs["cutBox"] = {"cutValue": 30.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}

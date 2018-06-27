@@ -2432,6 +2432,9 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   const TopSelectionBDT::Data topData = fBaselineTopSelection.analyze(fEvent, jetData, bjetData); 
   if (!topData.passedSelection()) return; //preliminary cut
 
+  // New
+  if (topData.getSelectedCleanedTopsMVA().size() != 2) return;
+
 
   //================================================================================================
   // Defining the splitting of phase-space as the eta of the Tetrajet b-jet
@@ -2962,18 +2965,25 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   if (0) std::cout << "=== Inverted BJet: BJet selection" << std::endl;
   const BJetSelection::Data invBjetData = fInvertedBJetSelection.silentAnalyze(fEvent, jetData);
   if (!invBjetData.passedSelection()) return;
-
-   // CSVv2-Medium requirement
-   unsigned int nBaselineBjets = 0;
-   double bdiscWP = fInvertedBJetSelection.getDiscriminatorWP( cfg_BaselineBJetsDiscr, cfg_BaselineBJetsDiscrWP);
-
-   for (auto bjet: invBjetData.getSelectedBJets())
-     {
-       if (bjet.bjetDiscriminator() < bdiscWP) continue;
-       nBaselineBjets++;
-     }
-   bool passBaselineBjetCuts   = cfg_BaselineNumberOfBJets.passedCut(nBaselineBjets); 
-   if (!passBaselineBjetCuts) return;
+  
+  // CSVv2-Medium requirement (CSVv2-L > 0.5426, CSVv2-M > 0.8484, CSVv2-T = 0.9535)
+  // unsigned int nLooseBjets  = 0; // new
+  unsigned int nMediumBjets = 0;
+  double bdiscWP = fInvertedBJetSelection.getDiscriminatorWP( cfg_BaselineBJetsDiscr, cfg_BaselineBJetsDiscrWP);
+  
+  for (auto bjet: invBjetData.getSelectedBJets())
+    {
+      // if (bjet.bjetDiscriminator() < 0.7) continue; //new
+      // nLooseBjets++;
+      
+      if (bjet.bjetDiscriminator() < bdiscWP) continue;
+       nMediumBjets++;
+    }
+  // bool passInvertedBjetCuts = (nLooseBjets >= 3); //new
+  // if (!passInvertedBjetCuts) return;
+  
+  bool passBaselineBjetCuts = cfg_BaselineNumberOfBJets.passedCut(nMediumBjets); 
+  if (!passBaselineBjetCuts) return;
   
   // Increment counter
   cInvertedBTaggingCounter.increment();
@@ -3002,6 +3012,8 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   const TopSelectionBDT::Data topData = fInvertedTopSelection.analyze(fEvent, jetData, invBjetData);
   if (!topData.passedSelection()) return;//preliminary cut
 
+  // New
+  if (topData.getSelectedCleanedTopsMVA().size() != 2) return;
 
   //================================================================================================
   // Defining the splitting of phase-space as the eta of the Tetrajet b-jet
