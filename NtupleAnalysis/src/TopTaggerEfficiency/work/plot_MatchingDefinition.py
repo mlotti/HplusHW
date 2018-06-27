@@ -50,6 +50,9 @@ import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 
 ROOT.gErrorIgnoreLevel = ROOT.kError
+
+from UncertaintyWriter import UncertaintyWriter
+
 #================================================================================================ 
 # Function Definition
 #================================================================================================ 
@@ -322,9 +325,18 @@ def PlotEfficiency(datasetMgr1, datasetMgr2, numPath, denPath, eff_def):
     eff2.SetStatisticOption(ROOT.TEfficiency.kFCP) #FCP
     
     # Convert to TGraph
-    gEff1 = convert2TGraph(eff1)
+    gEff1 = convert2TGraph(eff1) # Default
     gEff2 = convert2TGraph(eff2)
-            
+    
+    # Write the JSON file 
+    if eff_def == "genuineTop":
+        uncWriter = UncertaintyWriter()
+        jsonName = "uncertainties_matching.json"
+        analysis = opts.analysisName
+        saveDir  =  os.path.join("", jsonName)
+        uncWriter.addParameters("matching", analysis, saveDir, gEff1, gEff2)
+        uncWriter.writeJSON(jsonName)
+
     # Apply styles
     styles.ttStyle.apply(gEff1)
     #styles.signalStyleHToTB500.apply(gEff2)
