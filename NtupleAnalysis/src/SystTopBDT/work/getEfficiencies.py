@@ -107,6 +107,9 @@ import HiggsAnalysis.SystTopBDT.SystTopBDTNormalization as SystTopBDTNormalizati
 import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
 import HiggsAnalysis.FakeBMeasurement.FakeBResult as fakeBResult
 
+from PythonWriter import PythonWriter
+pythonWriter = PythonWriter()
+
 #================================================================================================ 
 # Function Definition
 #================================================================================================ 
@@ -627,6 +630,7 @@ def PlotHistos(d_noSF, d_withSF, num_histoList, den_histoList,  opts):
     plots.drawPlot(pNum, hName, **_kwargs)
     SavePlot(pNum, hName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png"])
     
+
     # =========================
     # Inclusive Efficiency
     # =========================
@@ -693,6 +697,19 @@ def PlotHistos(d_noSF, d_withSF, num_histoList, den_histoList,  opts):
     savePath = os.path.join(opts.saveDir, opts.optMode)
     plots.drawPlot(p, savePath, **_kwargs)
     SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf"])
+    
+    '''
+    jsonName = "toptagEff_InclusiveTT_fatJet.json"
+    # Save results in JSON
+    runRange = "273150-284044"
+    analysis = opts.analysisName
+    label = "2016"
+    plotDir =  os.path.join(opts.folder, jsonName)
+    pythonWriter.addParameters(plotDir, label, runRange, opts.intLumi, geff_data)
+    pythonWriter.addMCParameters(label, geff_mc)
+    fileName_json = jsonName
+    pythonWriter.writeJSON(fileName_json)
+    '''
     
     
     
@@ -832,8 +849,19 @@ def PlotHistos(d_noSF, d_withSF, num_histoList, den_histoList,  opts):
     savePath = os.path.join(opts.saveDir, opts.optMode)
     plots.drawPlot(pp, savePath, **_kwargs)
     SavePlot(pp, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf"])
-
-
+    
+    
+    jsonName = "toptagEff_GenuineTT_fatJet.json"
+    # Save results in JSON
+    runRange = "273150-284044"
+    analysis = opts.analysisName
+    label = "2016"
+    plotDir =  os.path.join(opts.folder, jsonName)
+    pythonWriter.addParameters(plotDir, label, runRange, opts.intLumi, geffi_data)
+    pythonWriter.addMCParameters(label, geffi_mc)
+    fileName_json = jsonName
+    pythonWriter.writeJSON(fileName_json)
+    
     return
 
 
