@@ -468,7 +468,7 @@ def GetRootHistos(datasetsMgr, histoList, regions, binLabels):
             if opts.useMC:
                 rhDict["QCD-" + lIncl] = pIncl.histoMgr.getHisto("QCD").getRootHisto().Clone("QCD-" + lIncl)
                 # Add EWKFakeB (MC) to QCD (MC) to get FakeB (= QCD_inclusive + EWK_fakeB)
-                rhDict["FakeB-" + lIncl] = rhDict["QCD- "+ lIncl].Clone("FakeB-" + lIncl)
+                rhDict["FakeB-" + lIncl] = rhDict["QCD-"+ lIncl].Clone("FakeB-" + lIncl)
                 rhDict["FakeB-" + lIncl].Add( rhDict["EWK-" + lFakeB], +1 )
             else:
                 # Subtract EWKGenuineB (MC) from Data to get FakeB (= Data - EWK_genuineB)
@@ -529,7 +529,7 @@ def PlotHistosAndCalculateTF(datasetsMgr, histoList, binLabels, opts):
         VRtoSR_TF   = manager.GetTransferFactor(bin)
         Print("Applying TF = %s%0.6f%s to VR shape" % (ShellStyles.NoteStyle(), VRtoSR_TF, ShellStyles.NormalStyle()), True)
         binHisto_VR.Scale(VRtoSR_TF) 
-                # Add the normalised histogram to the final Inclusive SR (predicted) histo
+        # Add the normalised histogram to the final Inclusive SR (predicted) histo
         rBkgSum_SR.Add(binHisto_VR, +1)
     else:
         # For-loop: All bins

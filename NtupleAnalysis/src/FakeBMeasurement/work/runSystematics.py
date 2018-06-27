@@ -156,16 +156,16 @@ def main():
     # allSelections.Trigger.triggerOR = ["HLT_PFHT400_SixJet30_DoubleBTagCSV_p056"]
 
     #allSelections.FakeBTopSelectionBDT.LdgTopDefinition = "Pt" # [default: "MVA"] (options: "MVA", "Pt")
-    allSelections.FakeBTopSelectionBDT.TopMassLowCutValue     =  90.0   # [default: 0.0]
     allSelections.FakeBTopSelectionBDT.TopMassLowCutDirection = ">="   # [default: ">="]
-    allSelections.FakeBTopSelectionBDT.TopMassUppCutValue     = 250.0  # [default: 600.0]
+    allSelections.FakeBTopSelectionBDT.TopMassLowCutValue     =  0.0   # [default: 0.0] # 90.0
     allSelections.FakeBTopSelectionBDT.TopMassUppCutDirection = "<="   # [default: "<="]
-    allSelections.FakeBTopSelectionBDT.WMassLowCutValue       =   0.0
-    allSelections.FakeBTopSelectionBDT.WMassLowCutDirection   = ">="
-    allSelections.FakeBTopSelectionBDT.WMassUppCutValue       = 150.0
-    allSelections.FakeBTopSelectionBDT.WMassUppCutDirection   = "<="
-    allSelections.FakeBTopSelectionBDT.CSV_bDiscCutValue      = 0.5426
+    allSelections.FakeBTopSelectionBDT.TopMassUppCutValue     = 600.0  # [default: 600.0] #250
+    allSelections.FakeBTopSelectionBDT.WMassLowCutDirection   = ">="   # [default: ">="]
+    allSelections.FakeBTopSelectionBDT.WMassLowCutValue       =   0.0  # [default: 0.0]
+    allSelections.FakeBTopSelectionBDT.WMassUppCutDirection   = ">="   # [default: ">="] # "<="
+    allSelections.FakeBTopSelectionBDT.WMassUppCutValue       =   0.0  # [default: 0.0]  # 150.0
     allSelections.FakeBTopSelectionBDT.CSV_bDiscCutDirection  = ">="
+    allSelections.FakeBTopSelectionBDT.CSV_bDiscCutValue      = 0.8484 # [default: 0.8484], 0.5426
     allSelections.TopSelectionBDT.MVACutValue                 =  0.40 # [default:  0.40]
     allSelections.FakeBTopSelectionBDT.MVACutValue            = -1.00 # [default: -1.00]
     allSelections.FakeBMeasurement.LdgTopMVACutValue          = allSelections.TopSelectionBDT.MVACutValue
