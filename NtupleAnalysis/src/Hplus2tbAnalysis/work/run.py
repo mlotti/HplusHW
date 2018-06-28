@@ -138,10 +138,10 @@ def main():
                        "ChargedHiggs_HplusTB_HplusToTB_M_350_ext1", 
                        "ChargedHiggs_HplusTB_HplusToTB_M_400_ext1", 
                        "ChargedHiggs_HplusTB_HplusToTB_M_500_ext1", 
-                       #"ChargedHiggs_HplusTB_HplusToTB_M_650",  #10M events!
                        "ChargedHiggs_HplusTB_HplusToTB_M_800_ext1", 
                        "ChargedHiggs_HplusTB_HplusToTB_M_1000_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_2000_ext1"
+                       "ChargedHiggs_HplusTB_HplusToTB_M_1500_ext1",
+                       "ChargedHiggs_HplusTB_HplusToTB_M_2000_ext1",
                        "ChargedHiggs_HplusTB_HplusToTB_M_2500_ext1", 
                        "ChargedHiggs_HplusTB_HplusToTB_M_3000_ext1", 
                        # "ChargedHiggs_HplusTB_HplusToTB_M_1000",
