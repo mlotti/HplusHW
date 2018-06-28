@@ -229,6 +229,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   // All Selections
   //================================================================================================
   if (0) std::cout << "=== All Selections" << std::endl;
+  if (topData.getSelectedCleanedTopsMVA().size() != 2) return; // new
   if (!topData.passedSelection()) return;
 
   if (fEvent.isMC()) 
