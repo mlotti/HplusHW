@@ -238,7 +238,8 @@ private:
   HistoSplitter::SplittedTripletTH1s hCtrlQGLRNJetsAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlQGLRNLightJetsAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlQGLRNGluonJetsAfterStdSelections;
-
+  HistoSplitter::SplittedTripletTH1s hCtrlNAllTopsAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlNSelectedCleanedTopsAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlLdgTrijetPtAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlLdgTrijetDijetPtAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlLdgTrijetDijetMassAfterStdSelections;
@@ -343,6 +344,8 @@ private:
   HistoSplitter::SplittedTripletTH1s hCtrlQGLRNJetsAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlQGLRNLightJetsAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlQGLRNGluonJetsAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlNAllTopsAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlNSelectedCleanedTopsAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlLdgTrijetPtAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlLdgTrijetDijetPtAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlLdgTrijetDijetMassAfterAllSelections;

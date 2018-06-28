@@ -213,7 +213,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
     {
       passPrelimMVACut = cfg_PrelimTopMVACut.passedCut( std::min(topData.getMVALdgInPt(), topData.getMVASubldgInPt()) );
     }
-  if (!passPrelimMVACut) return;
+  //if (!passPrelimMVACut) return; // duplicate and thus not needed!  commented out on 27 june 2018
   // NOTE: The two iffs below if removed will cause fillControlPlotsAfterStandardSelections() to crash. 
   // Need to make necessary changes to fillControlPlots..()
   if (!topData.hasFreeBJet()) return;
