@@ -142,6 +142,9 @@ private:
   // Histograms
   WrappedTH1* hTopTagSF;
   WrappedTH1* hTopTagSFRelUncert;
+  WrappedTH2* hTopEff_Vs_TopPt_Inclusive;
+  WrappedTH2* hTopEff_Vs_TopPt_Fake;
+  WrappedTH2* hTopEff_Vs_TopPt_Genuine;
 };
 
 #endif

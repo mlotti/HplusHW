@@ -1219,47 +1219,58 @@ SelectedTrijets TopSelectionBDT::getLdgOrSubldgTop(TrijetSelection myTops, strin
   if ( myTops.MVA.size() == 0) return top_ldgInPt;
   if ( myTops.MVA.size() == 1) 
     {
-      top_ldgInPt.Jet1     = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "leading");
-      top_ldgInPt.Jet2     = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "subleading");
-      top_ldgInPt.BJet     = myTops.BJet.at(0);
-      top_ldgInPt.DijetP4  = myTops.DijetP4.at(0);
-      top_ldgInPt.TrijetP4 = myTops.TrijetP4.at(0);
-      top_ldgInPt.MVA      = myTops.MVA.at(0);
+      top_ldgInPt.Jet1      = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "leading");
+      top_ldgInPt.Jet2      = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "subleading");
+      top_ldgInPt.BJet      = myTops.BJet.at(0);
+      top_ldgInPt.DijetP4   = myTops.DijetP4.at(0);
+      top_ldgInPt.TrijetP4  = myTops.TrijetP4.at(0);
+      top_ldgInPt.MVA       = myTops.MVA.at(0);
+      top_ldgInPt.isGenuine = myTops.isGenuine.at(0);
+      top_ldgInPt.isTagged  = myTops.isTagged.at(0);
       return top_ldgInPt;
     }
 
   // Assuming myTops are selected and cross-cleaned
   if(myTops.TrijetP4.at(0).Pt() > myTops.TrijetP4.at(1).Pt())
     {
-      top_ldgInPt.Jet1     = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "leading");
-      top_ldgInPt.Jet2     = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "subleading");
-      top_ldgInPt.BJet     = myTops.BJet.at(0);
-      top_ldgInPt.DijetP4  = myTops.DijetP4.at(0);
-      top_ldgInPt.TrijetP4 = myTops.TrijetP4.at(0);
-      top_ldgInPt.MVA      = myTops.MVA.at(0);
+      top_ldgInPt.Jet1      = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "leading");
+      top_ldgInPt.Jet2      = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "subleading");
+      top_ldgInPt.BJet      = myTops.BJet.at(0);
+      top_ldgInPt.DijetP4   = myTops.DijetP4.at(0);
+      top_ldgInPt.TrijetP4  = myTops.TrijetP4.at(0);
+      top_ldgInPt.MVA       = myTops.MVA.at(0);
+      top_ldgInPt.isGenuine = myTops.isGenuine.at(0);
+      top_ldgInPt.isTagged  = myTops.isTagged.at(0);
 
-      top_subLdgInPt.Jet1     = getLeadingSubleadingJet(myTops.Jet1.at(1), myTops.Jet2.at(1), "leading");
-      top_subLdgInPt.Jet2     = getLeadingSubleadingJet(myTops.Jet1.at(1), myTops.Jet2.at(1), "subleading");
-      top_subLdgInPt.BJet     = myTops.BJet.at(1);
-      top_subLdgInPt.DijetP4  = myTops.DijetP4.at(1);
-      top_subLdgInPt.TrijetP4 = myTops.TrijetP4.at(1);
-      top_subLdgInPt.MVA      = myTops.MVA.at(1);
+      top_subLdgInPt.Jet1      = getLeadingSubleadingJet(myTops.Jet1.at(1), myTops.Jet2.at(1), "leading");
+      top_subLdgInPt.Jet2      = getLeadingSubleadingJet(myTops.Jet1.at(1), myTops.Jet2.at(1), "subleading");
+      top_subLdgInPt.BJet      = myTops.BJet.at(1);
+      top_subLdgInPt.DijetP4   = myTops.DijetP4.at(1);
+      top_subLdgInPt.TrijetP4  = myTops.TrijetP4.at(1);
+      top_subLdgInPt.MVA       = myTops.MVA.at(1);
+      top_subLdgInPt.isGenuine = myTops.isGenuine.at(1);
+      top_subLdgInPt.isTagged  = myTops.isTagged.at(1);
+
     }
   else  // if(myTops.TrijetP4.at(1).Pt() > myTops.TrijetP4.at(0).Pt())
     {
-      top_ldgInPt.Jet1     = getLeadingSubleadingJet(myTops.Jet1.at(1), myTops.Jet2.at(1), "leading");
-      top_ldgInPt.Jet2     = getLeadingSubleadingJet(myTops.Jet1.at(1), myTops.Jet2.at(1), "subleading");
-      top_ldgInPt.BJet     = myTops.BJet.at(1);
-      top_ldgInPt.DijetP4  = myTops.DijetP4.at(1);
-      top_ldgInPt.TrijetP4 = myTops.TrijetP4.at(1);
-      top_ldgInPt.MVA      = myTops.MVA.at(1);
+      top_ldgInPt.Jet1      = getLeadingSubleadingJet(myTops.Jet1.at(1), myTops.Jet2.at(1), "leading");
+      top_ldgInPt.Jet2      = getLeadingSubleadingJet(myTops.Jet1.at(1), myTops.Jet2.at(1), "subleading");
+      top_ldgInPt.BJet      = myTops.BJet.at(1);
+      top_ldgInPt.DijetP4   = myTops.DijetP4.at(1);
+      top_ldgInPt.TrijetP4  = myTops.TrijetP4.at(1);
+      top_ldgInPt.MVA       = myTops.MVA.at(1);
+      top_ldgInPt.isGenuine = myTops.isGenuine.at(1);
+      top_ldgInPt.isTagged  = myTops.isTagged.at(1);
 
-      top_subLdgInPt.Jet1     = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "leading");
-      top_subLdgInPt.Jet2     = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "subleading");
-      top_subLdgInPt.BJet     = myTops.BJet.at(0);
-      top_subLdgInPt.DijetP4  = myTops.DijetP4.at(0);
-      top_subLdgInPt.TrijetP4 = myTops.TrijetP4.at(0);
-      top_subLdgInPt.MVA      = myTops.MVA.at(0);
+      top_subLdgInPt.Jet1      = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "leading");
+      top_subLdgInPt.Jet2      = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "subleading");
+      top_subLdgInPt.BJet      = myTops.BJet.at(0);
+      top_subLdgInPt.DijetP4   = myTops.DijetP4.at(0);
+      top_subLdgInPt.TrijetP4  = myTops.TrijetP4.at(0);
+      top_subLdgInPt.MVA       = myTops.MVA.at(0);
+      top_subLdgInPt.isGenuine = myTops.isGenuine.at(0);
+      top_subLdgInPt.isTagged  = myTops.isTagged.at(0);
     }
 
   if (selectedTrijet == "subleading") return top_subLdgInPt;
@@ -1271,9 +1282,11 @@ SelectedTrijets TopSelectionBDT::GetSelectedTopCandidate(TrijetSelection TopCand
   trijet.Jet1 = TopCand.Jet1.at(index);
   trijet.Jet2 = TopCand.Jet2.at(index);
   trijet.BJet = TopCand.BJet.at(index);
-  trijet.MVA = TopCand.MVA.at(index);
-  trijet.TrijetP4 = TopCand.TrijetP4.at(index);
-  trijet.DijetP4 = TopCand.DijetP4.at(index);
+  trijet.MVA  = TopCand.MVA.at(index);
+  trijet.TrijetP4  = TopCand.TrijetP4.at(index);
+  trijet.DijetP4   = TopCand.DijetP4.at(index);
+  trijet.isGenuine = TopCand.isGenuine.at(index);
+  trijet.isTagged  = TopCand.isTagged.at(index);
   return trijet;
 }
 

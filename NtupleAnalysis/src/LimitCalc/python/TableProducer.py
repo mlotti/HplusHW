@@ -1254,20 +1254,30 @@ class TableProducer:
                                ["CMS_eff_b", "b-tagging eff."],
                                ["CMS_scale_j", "jet energy scale"],
                                ["CMS_res_j", "jet energy resolution"],
-                               ["CMS_topPtReweight","top $p_T$ reweighting"],
+                               ["CMS_topreweight","top $p_T$ reweighting"],
                                ["CMS_pileup", "pileup reweighting"],
-                               ["CMS_topTagging", "top tagging"],
-                               ["CMS_scale_ttbar", "$t\\bar{t}$ scale"],
-                               ["CMS_pdf_ttbar", "$t\\bar{t}$ pdf"],
-                               ["CMS_mass_ttbar", "$t\\bar{t}$ mass"],
-                               ["CMS_scale_Wjets", "W+jets scale"],
-                               ["CMS_pdf_Wjets", "W+jets pdf"],
-                               ["CMS_scale_DY",  "DY scale"],
-                               ["CMS_pdf_DY", "DY pdf"],
-                               ["CMS_scale_VV", "Diboson scale"],
-                               ["CMS_pdf_VV", "Diboson pdf"],
+                               ["CMS_HPTB_toptagging", "top tagging"],
+                               ["QCDscale_ttbar", "$t\\bar{t}$ scale"],
+                               ["pdf_ttbar", "$t\\bar{t}$ pdf"],
+                               ["mass_top", "top mass"],
+                               ["QCDscale_ttW", "$t\\bar{t}$W scale"],
+                               ["pdf_ttW", "$t\\bar{t}$W pdf"],
+                               ["QCDscale_ttZ", "$t\\bar{t}$Z scale"],
+                               ["pdf_ttZ", "$t\\bar{t}$Z pdf"],
+                               ["QCDscale_Wjets", "W+jets scale"],
+                               ["pdf_Wjets", "W+jets pdf"],
+                               ["QCDscale_DY",  "DY scale"],
+                               ["pdf_DY", "DY pdf"],
+                               ["QCDscale_VV", "Diboson scale"],
+                               ["pdf_VV", "Diboson pdf"],
                                ["lumi_13TeV", "luminosity (13 TeV)"],
-                               ["CMS_FakeB_transferFactor", "Fake $b$ transfer factors"]
+                               ["CMS_HPTB_pdf_HPTB"  , "pdf acceptance (signal)"],
+                               ["CMS_HPTB_pdf_top"   , "pdf acceptance (top"],
+                               ["CMS_HPTB_pdf_ewk"   , "pdf acceptance (EWK)"],
+                               ["CMS_HPTB_mu_RF_HPTB", "RF scale acceptance (signal)"],
+                               ["CMS_HPTB_mu_RF_top" , "RF scale acceptance (top)"],
+                               ["CMS_HPTB_mu_RF_ewk" , "RF scale acceptance (EWK)"],
+                               ["CMS_HPTB_fakeB_transferfactor", "Fake $b$ transfer factors"]
                                ]
         else:
             myNuisanceOrder = [["CMS_eff_t","tau ID"], # first ID, then the text that goes to the table
@@ -1481,7 +1491,7 @@ class TableProducer:
         myOutput += "\\hline\n"
         myOutput += "& Signal & Fake b & \multicolumn{8}{c}{Genuine b}"
         myOutput += "\n \\\\"
-        myCaptionLine = [["","","","$t\\bar{t}$", "Single top", "$t\\bar{t}$+Z", "$t\\bar{t}t\\bar{t}$", "$Z/\gamma^{*}$+jets", "$t\\bar{t}$+Z", "W+jets", "Diboson"]] 
+        myCaptionLine = [["","","","$t\\bar{t}$", "Single top", "$t\\bar{t}$+Z", "$t\\bar{t}t\\bar{t}$", "$Z/\gamma^{*}$+jets", "$t\\bar{t}$+W", "W+jets", "Diboson"]] 
         # Calculate dimensions of tables
         myWidths = []
         myWidths = calculateCellWidths(myWidths, myTable)

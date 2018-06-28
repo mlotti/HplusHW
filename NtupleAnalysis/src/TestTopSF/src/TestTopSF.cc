@@ -7,10 +7,10 @@
 
 #include "TDirectory.h"
 
-class Hplus2tbAnalysis: public BaseSelector {
+class TestTopSF: public BaseSelector {
 public:
-  explicit Hplus2tbAnalysis(const ParameterSet& config, const TH1* skimCounters);
-  virtual ~Hplus2tbAnalysis() {}
+  explicit TestTopSF(const ParameterSet& config, const TH1* skimCounters);
+  virtual ~TestTopSF() {}
 
   /// Books histograms
   virtual void book(TDirectory *dir) override;
@@ -40,6 +40,7 @@ private:
   Count cBTaggingSFCounter;
   METSelection fMETSelection;
   TopSelectionBDT fTopSelection;
+  Count cTopSelectionCounter;
   Count cTopTaggingSFCounter;
   // FatJetSelection fFatJetSelection;
   Count cSelected;
@@ -47,12 +48,22 @@ private:
   // Non-common histograms
   // WrappedTH1 *hAssociatedTop_Pt;
   // WrappedTH1 *hAssociatedTop_Eta;
+  WrappedTH1 *hAllCleanedTop_Pt_noSF;
+  WrappedTH1 *hAllCleanedTop_Eta_noSF;
+  WrappedTH1 *hAllCleanedTop_M_noSF;
+  WrappedTH1 *hAllCleanedTop_BDT_noSF;
+
+  WrappedTH1 *hAllCleanedTop_Pt;
+  WrappedTH1 *hAllCleanedTop_Eta;
+  WrappedTH1 *hAllCleanedTop_M;
+  WrappedTH1 *hAllCleanedTop_BDT;
+
 };
 
 #include "Framework/interface/SelectorFactory.h"
-REGISTER_SELECTOR(Hplus2tbAnalysis);
+REGISTER_SELECTOR(TestTopSF);
 
-Hplus2tbAnalysis::Hplus2tbAnalysis(const ParameterSet& config, const TH1* skimCounters)
+TestTopSF::TestTopSF(const ParameterSet& config, const TH1* skimCounters)
   : BaseSelector(config, skimCounters),
     cfg_PrelimTopMVACut(config, "FakeBTopSelectionBDT.MVACut"),
     cfg_LdgTopDefinition(config.getParameter<std::string>("FakeBTopSelectionBDT.LdgTopDefinition")),
@@ -69,15 +80,16 @@ Hplus2tbAnalysis::Hplus2tbAnalysis(const ParameterSet& config, const TH1* skimCo
     cBTaggingSFCounter(fEventCounter.addCounter("b-tag SF")),
     fMETSelection(config.getParameter<ParameterSet>("METSelection")), // no subcounter in main counter
     fTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    cTopSelectionCounter(fEventCounter.addCounter("top selection")),
     cTopTaggingSFCounter(fEventCounter.addCounter("top-tag SF")),
     // fFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
     cSelected(fEventCounter.addCounter("Selected Events"))
 { }
 
 
-void Hplus2tbAnalysis::book(TDirectory *dir) {
+void TestTopSF::book(TDirectory *dir) {
 
-  if (0) std::cout << "=== Hplus2tbAnalysis::book()" << std::endl;
+  if (0) std::cout << "=== TestTopSF::book()" << std::endl;
   // Book common plots histograms
   fCommonPlots.book(dir, isData());
 
@@ -92,20 +104,44 @@ void Hplus2tbAnalysis::book(TDirectory *dir) {
   fTopSelection.bookHistograms(dir);
   // fFatJetSelection.bookHistograms(dir);
 
+  const int nPtBins   = 2 * fCommonPlots.getPtBinSettings().bins();
+  const double fPtMin = 2 * fCommonPlots.getPtBinSettings().min();
+  const double fPtMax = 2 * fCommonPlots.getPtBinSettings().max();
+
+  const int  nEtaBins = fCommonPlots.getEtaBinSettings().bins();
+  const float fEtaMin = fCommonPlots.getEtaBinSettings().min();
+  const float fEtaMax = fCommonPlots.getEtaBinSettings().max();
+
+  const int nTopMassBins  = fCommonPlots.getTopMassBinSettings().bins();
+  const float fTopMassMin = fCommonPlots.getTopMassBinSettings().min();
+  const float fTopMassMax = fCommonPlots.getTopMassBinSettings().max();
+
+  TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kVital, dir, "hplus2tb_");
+
   // Book non-common histograms
   // hAssociatedTop_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTop_Pt", "Associated t pT;p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
   // hAssociatedTop_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTop_Eta", "Associated t eta;#eta", nBinsEta, minEta, maxEta);
+  hAllCleanedTop_Pt_noSF   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "AllCleanedTop_Pt_noSFt"       ,";p_{T} (GeV/c)", nPtBins     , fPtMin     , fPtMax);
+  hAllCleanedTop_Eta_noSF  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "AllCleanedTop_Eta_noSF"  ,";#eta"         , nEtaBins    , fEtaMin    , fEtaMax);
+  hAllCleanedTop_M_noSF    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "AllCleanedTop_M_noSF"     ,";M (GeV/c^{2})", nTopMassBins, fTopMassMin, fTopMassMax);
+  hAllCleanedTop_BDT_noSF  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "AllCleanedTop_BDT_noSF"     ,";BDT response", 40, -1, 1);
+
+  hAllCleanedTop_Pt   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "AllCleanedTop_Pt"       ,";p_{T} (GeV/c)", nPtBins     , fPtMin     , fPtMax);
+  hAllCleanedTop_Eta  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "AllCleanedTop_Eta"  ,";#eta"         , nEtaBins    , fEtaMin    , fEtaMax);
+  hAllCleanedTop_M    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "AllCleanedTop_M"     ,";M (GeV/c^{2})", nTopMassBins, fTopMassMin, fTopMassMax);
+  hAllCleanedTop_BDT  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "AllCleanedTop_BDT"     ,";BDT response", 40, -1, 1);
+
   return;
 }
 
 
-void Hplus2tbAnalysis::setupBranches(BranchManager& branchManager) {
+void TestTopSF::setupBranches(BranchManager& branchManager) {
   fEvent.setupBranches(branchManager);
   return;
 }
 
 
-void Hplus2tbAnalysis::process(Long64_t entry) {
+void TestTopSF::process(Long64_t entry) {
 
   // Sanity check
   if (cfg_LdgTopDefinition != "MVA" &&  cfg_LdgTopDefinition != "Pt")
@@ -213,7 +249,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
     {
       passPrelimMVACut = cfg_PrelimTopMVACut.passedCut( std::min(topData.getMVALdgInPt(), topData.getMVASubldgInPt()) );
     }
-  //if (!passPrelimMVACut) return; // duplicate and thus not needed!  commented out on 27 june 2018
+  if (!passPrelimMVACut) return;
   // NOTE: The two iffs below if removed will cause fillControlPlotsAfterStandardSelections() to crash. 
   // Need to make necessary changes to fillControlPlots..()
   if (!topData.hasFreeBJet()) return;
@@ -229,17 +265,44 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   // All Selections
   //================================================================================================
   if (0) std::cout << "=== All Selections" << std::endl;
-  if (topData.getSelectedCleanedTopsMVA().size() != 2) return; // new
   if (!topData.passedSelection()) return;
+  cTopSelectionCounter.increment();
 
+  for (size_t i = 0; i < topData.getAllCleanedTopsBJet().size(); i++){
+    Jet jet1 = topData.getAllCleanedTopsJet1().at(i);
+    Jet jet2 = topData.getAllCleanedTopsJet2().at(i);
+    Jet bjet = topData.getAllCleanedTopsBJet().at(i);
+    float mva = topData.getAllCleanedTopsMVA().at(i);
+    math::XYZTLorentzVector TopP4;
+    TopP4 = jet1.p4() + jet2.p4() + bjet.p4();
+
+    hAllCleanedTop_Pt_noSF   -> Fill(TopP4.Pt());
+    hAllCleanedTop_Eta_noSF  -> Fill(TopP4.Eta());
+    hAllCleanedTop_M_noSF    -> Fill(TopP4.M());
+    hAllCleanedTop_BDT_noSF  -> Fill(mva);
+  }
+    
   if (fEvent.isMC()) 
     {
       fEventWeight.multiplyWeight(topData.getTopTaggingScaleFactorEventWeight());
     }
   cTopTaggingSFCounter.increment();
+  
+  for (size_t i = 0; i < topData.getAllCleanedTopsBJet().size(); i++){
+    Jet jet1 = topData.getAllCleanedTopsJet1().at(i);
+    Jet jet2 = topData.getAllCleanedTopsJet2().at(i);
+    Jet bjet = topData.getAllCleanedTopsBJet().at(i);
+    float mva = topData.getAllCleanedTopsMVA().at(i);
+    math::XYZTLorentzVector TopP4;
+    TopP4 = jet1.p4() + jet2.p4() + bjet.p4();
 
-
-//  //================================================================================================
+    hAllCleanedTop_Pt   -> Fill(TopP4.Pt());
+    hAllCleanedTop_Eta  -> Fill(TopP4.Eta());
+    hAllCleanedTop_M    -> Fill(TopP4.M());
+    hAllCleanedTop_BDT  -> Fill(mva);
+  }
+   
+  //  //================================================================================================
 //  // *) FatJet veto
 //  //================================================================================================
 //  if (0) std::cout << "\n=== FatJet veto" << std::endl;
