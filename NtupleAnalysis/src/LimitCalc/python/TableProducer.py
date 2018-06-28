@@ -1277,7 +1277,7 @@ class TableProducer:
                                ["CMS_HPTB_mu_RF_HPTB", "RF scale acceptance (signal)"],
                                ["CMS_HPTB_mu_RF_top" , "RF scale acceptance (top)"],
                                ["CMS_HPTB_mu_RF_ewk" , "RF scale acceptance (EWK)"],
-                               ["CMS_HPTB_FakeB_transferfactor", "Fake $b$ transfer factors"]
+                               ["CMS_HPTB_fakeB_transferfactor", "Fake $b$ transfer factors"]
                                ]
         else:
             myNuisanceOrder = [["CMS_eff_t","tau ID"], # first ID, then the text that goes to the table
