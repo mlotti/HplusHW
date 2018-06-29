@@ -185,8 +185,9 @@ def main():
     # Set splitting of phase-space (first bin is below first edge value and last bin is above last edge value)
     allSelections.CommonPlots.histogramSplitting = [        
         ### 2D-binning (Pt, Eta)
-        PSet(label="TetrajsetBjetPt", binLowEdges=[55, 110], useAbsoluteValues=False),
+        #PSet(label="TetrajsetBjetPt", binLowEdges=[55, 110], useAbsoluteValues=False),
         #PSet(label="TetrajsetBjetPt", binLowEdges=[60, 100, 150], useAbsoluteValues=False),
+        PSet(label="TetrajsetBjetPt", binLowEdges=[60, 150], useAbsoluteValues=False),
         PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True),
         ### 1D-binning (Eta)
         #PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True),  #AN v4
@@ -198,13 +199,13 @@ def main():
     #allSelections.FakeBTopSelectionBDT.LdgTopDefinition = "Pt" # [default: "MVA"] (options: "MVA", "Pt")
     allSelections.FakeBTopSelectionBDT.TopMassLowCutValue     =  0.0   # [default: 0.0] #90.0
     allSelections.FakeBTopSelectionBDT.TopMassLowCutDirection = ">="   # [default: ">="]
-    allSelections.FakeBTopSelectionBDT.TopMassUppCutValue     = 600.0  # [default: 600.0] # 250
+    allSelections.FakeBTopSelectionBDT.TopMassUppCutValue     = 300.0  # [default: 600.0] # 250
     allSelections.FakeBTopSelectionBDT.TopMassUppCutDirection = "<="   # [default: "<="]
     allSelections.FakeBTopSelectionBDT.WMassLowCutValue       =   0.0  # [default: 0.0]
     allSelections.FakeBTopSelectionBDT.WMassLowCutDirection   = ">="   # [default: ">="]
     allSelections.FakeBTopSelectionBDT.WMassUppCutValue       = 0.0    # [default: "0.0] # 150.0
     allSelections.FakeBTopSelectionBDT.WMassUppCutDirection   = ">="   # [default: ">="] # "<="
-    allSelections.FakeBTopSelectionBDT.CSV_bDiscCutValue      = 0.8484 # [default: 0.8484] # 0.5426
+    allSelections.FakeBTopSelectionBDT.CSV_bDiscCutValue      = 0.5426 # [default: 0.8484] # 0.5426
     allSelections.FakeBTopSelectionBDT.CSV_bDiscCutDirection  = ">="   # [default: ">="]
     allSelections.TopSelectionBDT.MVACutValue                 =  0.40  # [default:  0.40]
     allSelections.FakeBTopSelectionBDT.MVACutValue            = -1.00  # [default: -1.00]
