@@ -2433,8 +2433,7 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   if (!topData.passedSelection()) return; //preliminary cut
 
   // New
-  if (topData.getSelectedCleanedTopsMVA().size() != 2) return;
-
+  if (topData.getSelectedCleanedTopsMVA().size() != 2) return; // ALEX - FIXME
 
   //================================================================================================
   // Defining the splitting of phase-space as the eta of the Tetrajet b-jet
@@ -3006,7 +3005,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   if (!topData.passedSelection()) return;//preliminary cut
 
   // New
-  if (topData.getSelectedCleanedTopsMVA().size() != 2) return;
+  if (topData.getSelectedCleanedTopsMVA().size() != 2) return; // ALEX - FIXME
 
   //================================================================================================
   // Defining the splitting of phase-space as the eta of the Tetrajet b-jet
