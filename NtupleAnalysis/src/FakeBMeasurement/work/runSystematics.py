@@ -145,11 +145,11 @@ def main():
     # Set splitting of phase-space (first bin is below first edge value and last bin is above last edge value)
     allSelections.CommonPlots.histogramSplitting = [               
         ### 2D binning (Pt, Eta)
-        #PSet(label="TetrajetBjetPt" , binLowEdges=[50, 110], useAbsoluteValues=False),
-        # PSet(label="TetrajetBjetPt" , binLowEdges=[55], useAbsoluteValues=False),
-        # PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True),
+        PSet(label="TetrajetBjetPt" , binLowEdges=[50, 110], useAbsoluteValues=False),
+        #PSet(label="TetrajetBjetPt" , binLowEdges=[55], useAbsoluteValues=False),
+        PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True),
         ### 1D binning (Eta) 
-        PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True), #AN_v4
+        #PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True), #AN_v4
         ]
     
     # allSelections.BJetSelection.triggerMatchingApply = True # at least 1 trg b-jet matched to offline b-jets

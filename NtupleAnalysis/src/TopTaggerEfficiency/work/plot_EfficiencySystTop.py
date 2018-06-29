@@ -26,13 +26,11 @@ EXAMPLES:
 
 
 LAST USED: 
-./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_200027_massCut1000_All --type showerScales 
-./plot_EfficiencySystTop. py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_200027_massCut1000_All --type highPtRadiation
-./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/p seudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_200027_massCut1000_All --type mTop 
-./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficien cy/TopTaggerEfficiency_180608_200027_massCut1000_All --type partonShower
-./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_18 0608_200027_massCut1000_All --type evtGen
-./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_200027_massCut1000_All --type colourReconnection
-
+./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_194156_massCut300_All --type showerScales 
+./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_194156_massCut300_All --type highPtRadiation
+./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_194156_massCut300_All --type mTop 
+./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_194156_massCut300_All --type partonShower
+./plot_EfficiencySystTop.py -m /uscms_data/d3/mkolosov/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_180608_194156_massCut300_All --type evtGen
 
 STATISTICS OPTIONS:
 https://iktp.tu-dresden.de/~nbarros/doc/root/TEfficiency.html
@@ -73,6 +71,9 @@ import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
+
+from UncertaintyWriter import UncertaintyWriter
+
 
 ROOT.gErrorIgnoreLevel = ROOT.kError
 #================================================================================================ 
@@ -196,7 +197,7 @@ def GetHistoKwargs(histoName, opts):
         bins              = [i for i in range(0, 1000+50, 50)]
         if opts.folder == "topbdtSelection_":
             #bins          = [i for i in range(0, 600+100, 100)] + [800]
-            bins              = [0, 100, 150, 200, 300, 400, 500, 600, 900]
+            bins              = [0, 100, 200, 300, 400, 500, 600]
         else:
             bins          = []
 
@@ -266,7 +267,7 @@ def main(opts):
         # Append signal datasets
         datasetsMgr.selectAndReorder(datasetOrder)
 
-
+        
         Numerator = ["AllTopQuarkPt_MatchedBDT",
                      "TrijetFakePt_BDT",
                      "AllTopQuarkPt_MatchedBDT",
@@ -286,6 +287,11 @@ def main(opts):
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
         
+        print "=============================================="
+        datasetsMgr.PrintInfo()
+
+
+
         counter =  0
         opts.nDatasets = len(datasetsMgr.getAllDatasets())
         nPlots  = len(Numerator)
@@ -359,8 +365,15 @@ def RemoveNegatives(histo):
 
 
 def PlotEfficiency(datasetsMgr, numPath, denPath, eff_def):  
+    
     # Definitions
-    myList      = []
+    myList       = []
+    
+    default_eff    = None
+    datasetList    = []
+    ttVariationEff = []
+
+    
     _kwargs     = GetHistoKwargs(numPath, opts)        
     nx          = 0
     if len(_kwargs["binList"]) > 0:
@@ -370,7 +383,7 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, eff_def):
 
     # For-loop: All datasets
     for dataset in datasetsMgr.getAllDatasets():
-
+        
         if dataset.isMC():
             n   = dataset.getDatasetRootHisto(numPath)
             d   = dataset.getDatasetRootHisto(denPath)
@@ -400,6 +413,8 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, eff_def):
         if num.GetEntries() > den.GetEntries():
             continue
         
+        
+        
         # Create Efficiency plots with Clopper-Pearson stats
         eff = ROOT.TEfficiency(num, den) 
         eff.SetStatisticOption(ROOT.TEfficiency.kFCP) #FCP
@@ -411,7 +426,7 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, eff_def):
         if nx > 0:
             numTT = numTT.Rebin(nx, "", xBins) #num.Rebin(nx, "", xBins)
             denTT = denTT.Rebin(nx, "", xBins) #den.Rebin(nx, "", xBins)
-
+            
 
         '''
         for i in range(1, num.GetNbinsX()+1):
@@ -429,11 +444,18 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, eff_def):
         '''
         eff_ref = ROOT.TEfficiency(numTT, denTT) 
         eff_ref.SetStatisticOption(ROOT.TEfficiency.kFCP) #FCP
-
+        
         # Convert to TGraph
         gEff    = convert2TGraph(eff)
         gEffRef = convert2TGraph(eff_ref)
-            
+        
+        # Keep the default tt and variations tt efficiency plots 
+        if dataset.getName() == "TT":
+            default_eff = gEffRef.Clone()
+        else:
+            datasetList.append(dataset.getName())
+            ttVariationEff.append(gEff)
+
         # Style definitions
         stylesDef = styles.ttStyle
         styles0 = styles.signalStyleHToTB300                                            
@@ -445,6 +467,9 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, eff_def):
         styles6 = styles.signalStyleHToTB180
         styles7 = styles.signalStyleHToTB3000
         styles8 = styles.signalStyleHToTB200
+
+        
+
 
         if dataset.getName() == "TT":
             styles.ttStyle.apply(gEffRef)
@@ -469,6 +494,17 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, eff_def):
             counter+=1
             #myList.append(histograms.HistoGraph(gEff, legend, "lp", "P"))
             myList.append(histograms.HistoGraph(gEff, legend, "p", "P"))
+         
+   
+    units = "GeV/c"
+    if eff_def == "fakeTop":
+        _kwargs["xlabel"]  = "candidate p_{T} (%s)" % (units)
+    elif eff_def == "inclusiveTop" or eff_def == "genuineTop":
+        _kwargs["xlabel"]  = "generated top p_{T} (%s)" % (units)
+    else:
+        _kwargs["xlabel"]  = "p_{T} (%s)" % (units)
+
+
 
     # Define stuff
     numPath  = numPath.replace("AfterAllSelections_","")
@@ -482,6 +518,31 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, eff_def):
 
     # Save plot in all formats
     SavePlot(p, saveName, savePath, saveFormats = [".png", ".pdf", ".C"])
+    
+    # ==============================================================================
+    #   I need the uncertainties from the ratio of all plots (ONLY for Genuine)
+    # ==============================================================================
+    
+    if eff_def == "genuineTop":
+        
+        uncWriter = UncertaintyWriter()
+        jsonName = "uncertainties_%s.json" % (opts.type)
+        analysis = opts.analysisName
+        saveDir  =  os.path.join("", jsonName)
+        
+        for i in range(0, len(datasetList)):
+            
+            uncWriter.addParameters(datasetList[i], analysis, saveDir, default_eff, ttVariationEff[i])
+
+            #print "i = ", i, " Dataset = ",  datasetList[i]
+            #for iBin in range(1, len(xBins)):
+            #ratio  = float(default_eff.GetEfficiency(iBin))/float(ttVariationEff[i].GetEfficiency(iBin))
+            #unc = 0.5*(1.0 - ratio) 
+            #print "iBin = ", iBin, " Default TT=", default_eff.GetEfficiency(iBin), "    Variation (", datasetList[i], ") =", ttVariationEff[i].GetEfficiency(iBin), "   Uncertainty =", unc
+        
+        uncWriter.writeJSON(jsonName)
+
+
     return
 
 def convert2TGraph(tefficiency):

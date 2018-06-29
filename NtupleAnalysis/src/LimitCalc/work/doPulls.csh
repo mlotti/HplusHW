@@ -51,6 +51,8 @@ set DATACARD_ROOT = higgsCombineblinded_m${MASS}.AsymptoticLimits.mH${MASS}.root
 set SEED          = 123456
 set BACKGROUND    = "Impacts_BkgOnly_m${MASS}.txt"
 set SIGNAL        = "Impacts_SB_m${MASS}.txt"
+set RMIN          = 0
+set RMAX          = 20
 
 echo "=== Building workspace"
 text2workspace.py $DATACARD_TXT -m $MASS -o $DATACARD_ROOT
@@ -60,10 +62,10 @@ echo "   Background Only    "
 echo "**********************"
 
 echo "=== Fit for each POI"
-combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS --doInitialFit --robustFit 1 -t -1 --expectSignal 0 --expectSignalMass $MASS --seed $SEED > $BACKGROUND
+combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS --doInitialFit --robustFit 1 -t -1 --expectSignal 0 --rMin $RMIN --rMax $RMAX --expectSignalMass $MASS --seed $SEED > $BACKGROUND
 
 echo "=== Fit scan for each nuisance parameter"
-combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS --robustFit 1 --doFits -t -1 --expectSignal 0 --expectSignalMass $MASS --parallel 8 --seed $SEED >> $BACKGROUND
+combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS --robustFit 1 --doFits -t -1 --expectSignal 0 --rMin $RMIN --rMax $RMAX --expectSignalMass $MASS --parallel 8 --seed $SEED >> $BACKGROUND
 
 echo "=== Collect the output and write results into a json file"
 combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS -t -1 -o impacts_BkgAsimov_$MASS.json --seed $SEED >> $BACKGROUND
@@ -76,10 +78,10 @@ echo " Signal + Background  "
 echo "**********************"
 
 echo "=== Fit for each POI"
-combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS --doInitialFit --robustFit 1 -t -1 --expectSignal 1 --seed $SEED > $SIGNAL
+combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS --doInitialFit --robustFit 1 -t -1 --expectSignal 1 --rMin $RMIN --rMax $RMAX --seed $SEED > $SIGNAL
 
 echo "=== Fit scan for each nuisance parameter"
-combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS --robustFit 1 --doFits -t -1 --expectSignal 1 --parallel 8 --seed $SEED >> $SIGNAL
+combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS --robustFit 1 --doFits -t -1 --expectSignal 1 --rMin $RMIN --rMax $RMAX --parallel 8 --seed $SEED >> $SIGNAL
 
 echo "=== Collect the output and write results into a json file"
 combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS -t -1 -o impacts_SBAsimov_$MASS.json --seed $SEED >> $SIGNAL

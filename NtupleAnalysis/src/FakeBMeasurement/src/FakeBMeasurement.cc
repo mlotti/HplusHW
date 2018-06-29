@@ -2440,7 +2440,7 @@ void FakeBMeasurement::DoBaselineAnalysis(const JetSelection::Data& jetData,
   // Defining the splitting of phase-space as the eta of the Tetrajet b-jet
   //================================================================================================
   std::vector<float> myFactorisationInfo;
-  // myFactorisationInfo.push_back(topData.getTetrajetBJet().pt() ); //new
+  myFactorisationInfo.push_back(topData.getTetrajetBJet().pt() ); //new
   myFactorisationInfo.push_back(topData.getTetrajetBJet().eta() );
   fCommonPlots.setFactorisationBinForEvent(myFactorisationInfo);
 
@@ -2967,21 +2967,14 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   if (!invBjetData.passedSelection()) return;
   
   // CSVv2-Medium requirement (CSVv2-L > 0.5426, CSVv2-M > 0.8484, CSVv2-T = 0.9535)
-  // unsigned int nLooseBjets  = 0; // new
   unsigned int nMediumBjets = 0;
   double bdiscWP = fInvertedBJetSelection.getDiscriminatorWP( cfg_BaselineBJetsDiscr, cfg_BaselineBJetsDiscrWP);
   
   for (auto bjet: invBjetData.getSelectedBJets())
     {
-      // if (bjet.bjetDiscriminator() < 0.7) continue; //new
-      // nLooseBjets++;
-      
       if (bjet.bjetDiscriminator() < bdiscWP) continue;
        nMediumBjets++;
     }
-  // bool passInvertedBjetCuts = (nLooseBjets >= 3); //new
-  // if (!passInvertedBjetCuts) return;
-  
   bool passBaselineBjetCuts = cfg_BaselineNumberOfBJets.passedCut(nMediumBjets); 
   if (!passBaselineBjetCuts) return;
   
@@ -3019,7 +3012,7 @@ void FakeBMeasurement::DoInvertedAnalysis(const JetSelection::Data& jetData,
   // Defining the splitting of phase-space as the eta of the Tetrajet b-jet
   //================================================================================================
   std::vector<float> myFactorisationInfo;
-  // myFactorisationInfo.push_back(topData.getTetrajetBJet().pt() ); //new
+  myFactorisationInfo.push_back(topData.getTetrajetBJet().pt() ); //new
   myFactorisationInfo.push_back(topData.getTetrajetBJet().eta() );
   fCommonPlots.setFactorisationBinForEvent(myFactorisationInfo);
 

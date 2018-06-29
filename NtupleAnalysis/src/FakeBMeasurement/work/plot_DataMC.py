@@ -873,7 +873,7 @@ if __name__ == "__main__":
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug' 
     FOLDER       = "counters/weighted" #ForDataDrivenCtrlPlots" #"jetSelection_
     ONLYMC       = False
-    RATIO        = False
+    RATIO        = True
     NOSTACK      = False
 
     # Define the available script options
