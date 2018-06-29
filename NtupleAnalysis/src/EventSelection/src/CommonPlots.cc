@@ -493,7 +493,7 @@ void CommonPlots::book(TDirectory *dir, bool isData) {
 
       fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlNAllTopsAfterStdSelections,
 						       "NAllTops_AfterStandardSelections", ";top multiplicity;N_{events}",
-						       fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
+						       fNjetsBinSettings.bins()*10, fNjetsBinSettings.min(), fNjetsBinSettings.max()*10);
 
       fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlNSelectedCleanedTopsAfterStdSelections,
 						       "NSelectedCleanedTops_AfterStandardSelections", ";top multiplicity;N_{events}",
@@ -613,7 +613,7 @@ void CommonPlots::book(TDirectory *dir, bool isData) {
 
       fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlNAllTopsAfterAllSelections,
 						       "NAllTops_AfterAllSelections", ";top multiplicity;N_{events}",
-						       fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
+						       fNjetsBinSettings.bins()*10, fNjetsBinSettings.min(), fNjetsBinSettings.max()*10);
 
       fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlNSelectedCleanedTopsAfterAllSelections,
 						       "NSelectedCleanedTops_AfterAllSelections", ";top multiplicity;N_{events}",
