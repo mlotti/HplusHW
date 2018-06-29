@@ -378,7 +378,7 @@ class FakeBNormalizationManager:
         # hFrame.GetXaxis().SetTitle("Fake-b bin")
         
         # Customise axes
-        logy = False
+        logy = True #False
         if logy:
             hFrame.SetMinimum(0.6e-1)
             hFrame.SetMaximum(2e0)
