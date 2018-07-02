@@ -164,7 +164,7 @@ def main():
         process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=opts.excludeTasks)
     else:
         myBlackList = ["M_180", "M_200" , "M_220" , "M_250" , "M_300" , "M_350" , "M_400" , "M_500" , "M_650",
-                       "M_800", "M_1000", "M_1500", "M_2000", "M_2500", "M_3000", "M_5000", "M_7000", "M_10000", "QCD"]
+                       "M_800", "M_1000", "M_1500", "M_2000", "M_2500", "M_3000", "M_5000", "M_7000", "M_10000", "QCD_b"]
         Verbose("Adding all datasets from multiCRAB directory %s except %s" % (opts.mcrab, (",".join(myBlackList))) )
         Verbose("Vertex reweighting is done according to the chosen data era (%s)" % (",".join(dataEras)) )
         # process.addDatasetsFromMulticrab(opts.mcrab, blacklist=myBlackList)
@@ -195,22 +195,19 @@ def main():
     
     # allSelections.BJetSelection.triggerMatchingApply = True # at least 1 trg b-jet matched to offline b-jets
     # allSelections.Trigger.triggerOR = ["HLT_PFHT450_SixJet40_BTagCSV_p056", "HLT_PFJet450"]
-
-    #allSelections.FakeBTopSelectionBDT.LdgTopDefinition = "Pt" # [default: "MVA"] (options: "MVA", "Pt")
-    allSelections.FakeBTopSelectionBDT.TopMassLowCutValue     =  0.0   # [default: 0.0] #90.0
-    allSelections.FakeBTopSelectionBDT.TopMassLowCutDirection = ">="   # [default: ">="]
-    allSelections.FakeBTopSelectionBDT.TopMassUppCutValue     = 300.0  # [default: 600.0] # 250
-    allSelections.FakeBTopSelectionBDT.TopMassUppCutDirection = "<="   # [default: "<="]
-    allSelections.FakeBTopSelectionBDT.WMassLowCutValue       =   0.0  # [default: 0.0]
-    allSelections.FakeBTopSelectionBDT.WMassLowCutDirection   = ">="   # [default: ">="]
-    allSelections.FakeBTopSelectionBDT.WMassUppCutValue       = 0.0    # [default: "0.0] # 150.0
-    allSelections.FakeBTopSelectionBDT.WMassUppCutDirection   = ">="   # [default: ">="] # "<="
-    allSelections.FakeBTopSelectionBDT.CSV_bDiscCutValue      = 0.5426 # [default: 0.8484] # 0.5426
-    allSelections.FakeBTopSelectionBDT.CSV_bDiscCutDirection  = ">="   # [default: ">="]
-    allSelections.TopSelectionBDT.MVACutValue                 =  0.40  # [default:  0.40]
-    allSelections.FakeBTopSelectionBDT.MVACutValue            = -1.00  # [default: -1.00]
-    allSelections.FakeBMeasurement.LdgTopMVACutValue          = allSelections.TopSelectionBDT.MVACutValue
-    allSelections.FakeBMeasurement.SubldgTopMVACutValue       = allSelections.TopSelectionBDT.MVACutValue
+    # allSelections.TopSelectionBDT.TopMassLowCutValue     =  0.0   # [default: 0.0] #90.0
+    # allSelections.TopSelectionBDT.TopMassLowCutDirection = ">="   # [default: ">="]
+    # allSelections.TopSelectionBDT.TopMassUppCutValue     = 300.0  # [default: 600.0] # 250
+    # allSelections.TopSelectionBDT.TopMassUppCutDirection = "<="   # [default: "<="]
+    # allSelections.TopSelectionBDT.WMassLowCutValue       =   0.0  # [default: 0.0]
+    # allSelections.TopSelectionBDT.WMassLowCutDirection   = ">="   # [default: ">="]
+    # allSelections.TopSelectionBDT.WMassUppCutValue       = 0.0    # [default: "0.0] # 150.0
+    # allSelections.TopSelectionBDT.WMassUppCutDirection   = ">="   # [default: ">="] # "<="
+    # allSelections.TopSelectionBDT.CSV_bDiscCutValue      = 0.8484 # [default: 0.8484] # 0.5426
+    # allSelections.TopSelectionBDT.CSV_bDiscCutDirection  = ">="   # [default: ">="]
+    allSelections.TopSelectionBDT.MVACutValue             =  -0.99  # [default:  0.40]
+    # allSelections.FakeBMeasurement.LdgTopMVACutValue      = allSelections.TopSelectionBDT.MVACutValue
+    # allSelections.FakeBMeasurement.SubldgTopMVACutValue   = allSelections.TopSelectionBDT.MVACutValue
     print "=== run.py: Default parameters overwritten!"
     
     # ================================================================================================
