@@ -105,7 +105,7 @@ class UncertaintyWriter:
             
             fOUT.write("               {\n")
             fOUT.write("                 \"pt\"              :"+str(binLowEdge)+",\n")
-            fOUT.write("                 \"uncertainty\"     :"+str(unc)+",\n")
+            fOUT.write("                 \"uncertainty\"     :"+str(unc)+"\n")
             fOUT.write("                }%s\n"%comma)
         
         fOUT.write("          ]\n")

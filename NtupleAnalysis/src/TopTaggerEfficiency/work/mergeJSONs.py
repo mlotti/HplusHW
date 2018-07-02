@@ -45,11 +45,9 @@ def main(opts):
         count = len(myfile.readlines())
         myLines.append(count)
         myfile.close()
-        
-        
 
     merged.write("{\n")
-
+    
     for k, myfile in enumerate(myList):
         
         i = open(myfile, "r")
@@ -75,7 +73,10 @@ def main(opts):
                     if cnt < myLines[k]-2:
                         merged.write(line)
                     elif cnt == myLines[k]-2:
-                        merged.write("      },\n")
+                        if k == len(myList)-1:
+                            merged.write("      } \n")
+                        else:
+                            merged.write("      }, \n")
                     else:
                         pass
                 else:
