@@ -290,7 +290,7 @@ def GetHistoKwargs(h, opts):
     if "BDT" in h:
         kwargs["ylabel"] = "Events / %.2f "
         kwargs["cutBox"] = {"cutValue": 0.4, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        kwargs["opts"]   = {"xmin": +0.4, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["opts"]   = {"xmin": +0.0, "ymin": yMin, "ymaxfactor": yMaxF}
 
     if "DeltaR" in h or "DeltaY" in h or "DR" in h:
         kwargs["ylabel"] = "Events / %.2f "
@@ -949,7 +949,7 @@ if __name__ == "__main__":
     VERBOSE      = False
     RATIO        = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug' 
-    FOLDER       = "topbdtSelection_" #jetSelection_
+    FOLDER       = "topSelectionBDT_" #"ForDataDrivenCtrlPlots" #jetSelection_
 
     
     # Define the available script options

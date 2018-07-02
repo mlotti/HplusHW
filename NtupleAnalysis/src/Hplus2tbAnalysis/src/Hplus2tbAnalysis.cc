@@ -20,10 +20,6 @@ public:
   virtual void process(Long64_t entry) override;
 
 private:
-  // Input parameters
-  const DirectionalCut<double> cfg_PrelimTopMVACut;
-  const std::string cfg_LdgTopDefinition;
-
   // Common plots
   CommonPlots fCommonPlots;
 
@@ -54,8 +50,6 @@ REGISTER_SELECTOR(Hplus2tbAnalysis);
 
 Hplus2tbAnalysis::Hplus2tbAnalysis(const ParameterSet& config, const TH1* skimCounters)
   : BaseSelector(config, skimCounters),
-    cfg_PrelimTopMVACut(config, "FakeBTopSelectionBDT.MVACut"),
-    cfg_LdgTopDefinition(config.getParameter<std::string>("FakeBTopSelectionBDT.LdgTopDefinition")),
     fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kHplus2tbAnalysis, fHistoWrapper),
     cAllEvents(fEventCounter.addCounter("all events")),
     cTrigger(fEventCounter.addCounter("passed trigger")),
@@ -107,12 +101,6 @@ void Hplus2tbAnalysis::setupBranches(BranchManager& branchManager) {
 
 void Hplus2tbAnalysis::process(Long64_t entry) {
 
-  // Sanity check
-  if (cfg_LdgTopDefinition != "MVA" &&  cfg_LdgTopDefinition != "Pt")
-    {
-      throw hplus::Exception("config") << "Unsupported method of defining the leading top (=" << cfg_LdgTopDefinition << "). Please select from \"MVA\" and \"Pt\".";
-    }
-
   //====== Initialize
   fCommonPlots.initialize();
   fCommonPlots.setFactorisationBinForEvent(std::vector<float> {});
@@ -122,12 +110,12 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   // 1) Apply trigger 
   //================================================================================================   
   if (0) std::cout << "=== Trigger" << std::endl;
-  if ( !(fEvent.passTriggerDecision()) ) return;
-  
+  if ( !(fEvent.passTriggerDecision()) ) return;  
   cTrigger.increment();
   int nVertices = fEvent.vertexInfo().value();
   fCommonPlots.setNvertices(nVertices);
   fCommonPlots.fillControlPlotsAfterTrigger(fEvent);
+
 
   //================================================================================================   
   // 2) MET filters (to remove events with spurious sources of fake MET)
@@ -137,6 +125,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   if (!metFilterData.passedSelection()) return;
   fCommonPlots.fillControlPlotsAfterMETFilter(fEvent);  
 
+
   //================================================================================================   
   // 3) Primarty Vertex (Check that a PV exists)
   //================================================================================================   
@@ -144,6 +133,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   if (nVertices < 1) return;
   cVertexSelection.increment();
   fCommonPlots.fillControlPlotsAtVertexSelection(fEvent);
+
   
   //================================================================================================   
   // 4) Electron veto (Fully hadronic + orthogonality)
@@ -151,6 +141,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   if (0) std::cout << "=== Electron veto" << std::endl;
   const ElectronSelection::Data eData = fElectronSelection.analyze(fEvent);
   if (eData.hasIdentifiedElectrons()) return;
+
 
   //================================================================================================
   // 5) Muon veto (Fully hadronic + orthogonality)
@@ -166,6 +157,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
   if (tauData.hasIdentifiedTaus() ) return;
 
+
   //================================================================================================
   // 7) Jet selection
   //================================================================================================
@@ -173,6 +165,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   const JetSelection::Data jetData = fJetSelection.analyzeWithoutTau(fEvent);
   if (!jetData.passedSelection()) return;
   fCommonPlots.fillControlPlotsAfterTopologicalSelections(fEvent, true);
+
  
   //================================================================================================  
   // 8) BJet selection
@@ -181,6 +174,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   const BJetSelection::Data bjetData = fBJetSelection.analyze(fEvent, jetData);
   if (!bjetData.passedSelection()) return;
   // fCommonPlots.fillControlPlotsAfterBJetSelection(fEvent, bjetData);
+
 
   //================================================================================================  
   // 9) BJet SF  
@@ -191,6 +185,8 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
       fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
     }
   cBTaggingSFCounter.increment();
+  int isGenuineB = bjetData.isGenuineB();
+
 
   //================================================================================================
   // - MET selection
@@ -199,68 +195,33 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   const METSelection::Data METData = fMETSelection.silentAnalyze(fEvent, nVertices);
   // if (!METData.passedSelection()) return;
 
+
   //================================================================================================
-  // 11) Top selection
+  // 10) Top selection
   //================================================================================================
   if (0) std::cout << "=== Top (BDT) selection" << std::endl;
   const TopSelectionBDT::Data topData = fTopSelection.analyze(fEvent, jetData, bjetData);
-  bool passPrelimMVACut = false;  
-  if (cfg_LdgTopDefinition == "MVA")
-    {
-      passPrelimMVACut = cfg_PrelimTopMVACut.passedCut( std::min(topData.getMVAmax1(), topData.getMVAmax2()) );
-    }
-  else
-    {
-      passPrelimMVACut = cfg_PrelimTopMVACut.passedCut( std::min(topData.getMVALdgInPt(), topData.getMVASubldgInPt()) );
-    }
-  //if (!passPrelimMVACut) return; // duplicate and thus not needed!  commented out on 27 june 2018
-  // NOTE: The two iffs below if removed will cause fillControlPlotsAfterStandardSelections() to crash. 
-  // Need to make necessary changes to fillControlPlots..()
-  if (!topData.hasFreeBJet()) return;
-  if (!passPrelimMVACut) return;
+  if (!topData.passedSelection()) return;  
 
-  //================================================================================================
-  // PreSelections
-  //================================================================================================
-  if (0) std::cout << "\n=== PreSelections" << std::endl;
-  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, QuarkGluonLikelihoodRatio::Data(), topData, bjetData.isGenuineB());  
-  
-  //================================================================================================
-  // All Selections
-  //================================================================================================
-  if (0) std::cout << "=== All Selections" << std::endl;
-  if (topData.getSelectedCleanedTopsMVA().size() != 2) return; // new
-  if (!topData.passedSelection()) return;
+  // Fill histos after StandardSelections: (After top-selections but BEFORE top-tag SF)
+  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, QuarkGluonLikelihoodRatio::Data(), topData, bjetData.isGenuineB());
 
+  // Apply top-tag SF
   if (fEvent.isMC()) 
     {
       fEventWeight.multiplyWeight(topData.getTopTaggingScaleFactorEventWeight());
     }
   cTopTaggingSFCounter.increment();
+  std::cout << "\nentry = " << entry << ", topData.getMVAmax1() = " << topData.getMVAmax1() << ", topData.getMVAmax2() = " << topData.getMVAmax2() << std::endl;
 
-
-//  //================================================================================================
-//  // *) FatJet veto
-//  //================================================================================================
-//  if (0) std::cout << "\n=== FatJet veto" << std::endl;
-//  const FatJetSelection::Data fatjetData = fFatJetSelection.analyze(fEvent, topData);
-//  // const FatJetSelection::Data fatjetData = fFatJetSelection.analyzeWithoutTop(fEvent);
-//  // if (fatjetData.fatjetMatchedToTopFound()) return;
-//  if (!fatjetData.passedSelection()) return;
-
-  // Increment counters & fill histograms
+  //================================================================================================
+  // All Selections
+  //================================================================================================
+  if (0) std::cout << "=== All Selections" << std::endl;
   cSelected.increment();
 
-
-  //================================================================================================
-  // Fill final plots
-  //===============================================================================================
-  int isGenuineB = bjetData.isGenuineB();
+  // Fill histos after AllSelections: (After top-selections and top-tag SF)
   fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, isGenuineB);
- 
-  //================================================================================================
-  // Finalize
-  //================================================================================================
   fEventSaver.save();
 
   return;

@@ -234,10 +234,10 @@ private:
   HistoSplitter::SplittedTripletTH1s hCtrlDeltaPhiMuMetAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlHTAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlMHTAfterStdSelections;
-  HistoSplitter::SplittedTripletTH1s hCtrlQGLRAfterStdSelections;
-  HistoSplitter::SplittedTripletTH1s hCtrlQGLRNJetsAfterStdSelections;
-  HistoSplitter::SplittedTripletTH1s hCtrlQGLRNLightJetsAfterStdSelections;
-  HistoSplitter::SplittedTripletTH1s hCtrlQGLRNGluonJetsAfterStdSelections;
+  // HistoSplitter::SplittedTripletTH1s hCtrlQGLRAfterStdSelections;
+  // HistoSplitter::SplittedTripletTH1s hCtrlQGLRNJetsAfterStdSelections;
+  // HistoSplitter::SplittedTripletTH1s hCtrlQGLRNLightJetsAfterStdSelections;
+  // HistoSplitter::SplittedTripletTH1s hCtrlQGLRNGluonJetsAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlNAllTopsAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlNSelectedCleanedTopsAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlLdgTrijetPtAfterStdSelections;
@@ -340,10 +340,10 @@ private:
   HistoSplitter::SplittedTripletTH1s hCtrlBDiscriminatorAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlBackToBackAngularCutsMinimumAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlDeltaPhiTauMetAfterAllSelections;
-  HistoSplitter::SplittedTripletTH1s hCtrlQGLRAfterAllSelections;
-  HistoSplitter::SplittedTripletTH1s hCtrlQGLRNJetsAfterAllSelections;
-  HistoSplitter::SplittedTripletTH1s hCtrlQGLRNLightJetsAfterAllSelections;
-  HistoSplitter::SplittedTripletTH1s hCtrlQGLRNGluonJetsAfterAllSelections;
+  // HistoSplitter::SplittedTripletTH1s hCtrlQGLRAfterAllSelections;
+  // HistoSplitter::SplittedTripletTH1s hCtrlQGLRNJetsAfterAllSelections;
+  // HistoSplitter::SplittedTripletTH1s hCtrlQGLRNLightJetsAfterAllSelections;
+  // HistoSplitter::SplittedTripletTH1s hCtrlQGLRNGluonJetsAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlNAllTopsAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlNSelectedCleanedTopsAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlLdgTrijetPtAfterAllSelections;
@@ -397,7 +397,7 @@ private:
   BJetSelection::Data fBJetData;
   METSelection::Data fMETData;
   TopologySelection::Data fTopologyData;
-  QuarkGluonLikelihoodRatio::Data fQGLRData;
+  // QuarkGluonLikelihoodRatio::Data fQGLRData;
   TopSelectionBDT::Data fTopData;
   AngularCutsCollinear::Data fBackToBackAngularCutsData;
   // FatJetSelection::Data fFatJetData;

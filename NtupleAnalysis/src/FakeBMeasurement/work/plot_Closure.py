@@ -453,11 +453,8 @@ def GetHistoKwargs(histoName, ext, opts):
         _format = "%0.0f " + _units
         _xlabel = "m_{jjb} (%s)" % _units
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        if "standardelections" in hName:
-            _rebinX = 4
-            _opts["xmax"] = 800.0
-        else:
-            _opts["xmax"] = 800.0 #300.0
+        _opts["xmax"] = 1000.0
+        ROOT.gStyle.SetNdivisions(8, "X")
     if "pt" in hName:
         #_rebinX = 2
         _rebinX = 1        
@@ -481,11 +478,9 @@ def GetHistoKwargs(histoName, ext, opts):
             _opts["xmax"] = 1000.0
             _cutBox = {"cutValue": 200.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
             ROOT.gStyle.SetNdivisions(8, "X")
-        elif "tetrajet" in hName:
+        elif "trijet" in hName:
             _opts["xmax"] = 1000.0
-            _cutBox = {"cutValue": 200.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
             ROOT.gStyle.SetNdivisions(8, "X")
-        elif "ldgtrijet" in hName:
             _cutBox = {"cutValue": 1000.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         else:
             _opts["xmax"] = 600.0
