@@ -1,0 +1,47 @@
+# On branch master
+# Changes not staged for commit:
+#   (use "git add <file>..." to update what will be committed)
+#   (use "git checkout -- <file>..." to discard changes in working directory)
+#
+#	modified:   ../interface/JetDumper.h
+#	modified:   ../interface/MiniAOD2TTreeFilter.h
+#	modified:   ../plugins/Hplus2tbAnalysisSkim.cc
+#	modified:   ../plugins/HplusTopPtWeightProducer.cc
+#	modified:   ../plugins/JetTriggersSkim.cc
+#	modified:   ../plugins/MiniAOD2TTreeFilter.cc
+#	modified:   ../plugins/PUInfo.cc
+#	modified:   ../plugins/TauLegSkim.cc
+#	modified:   ../python/CommonFragments.py
+#	modified:   ../python/Hplus2tbAnalysisSkim_cfi.py
+#	modified:   ../python/JetTriggersSkim_JetHT_cfi.py
+#	modified:   ../python/JetTriggersSkim_SingleMu_cfi.py
+#	modified:   ../python/Jet_cfi.py
+#	modified:   ../python/PUInfo_cfi.py
+#	modified:   ../python/TriggerSkim_cfi.py
+#	modified:   ../python/tools/datasets.py
+#	modified:   ../scripts/hplusLumiCalc.py
+#	modified:   ../scripts/hplusMergeOutput.py
+#	modified:   ../src/JetDumper.cc
+#	modified:   ../src/TriggerDumper.cc
+#	modified:   crabConfig.py
+#	modified:   miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py
+#	modified:   miniAOD2TTree_JetTriggersSkim_cfg.py
+#	modified:   miniAOD2TTree_METLegSkim_cfg.py
+#	modified:   miniAOD2TTree_SignalAnalysisSkim_cfg.py
+#
+# Untracked files:
+#   (use "git add <file>..." to include in what will be committed)
+#
+#	../plugins/Hplus2hwAnalysisSkim.cc
+#	../python/Hplus2hwAnalysisSkim_cfi.py
+#	copy_cfg.py
+#	miniAOD2TTree_Hplus2hwAnalysisSkim_cfg.py
+#	multicrab_Hplus2hwAnalysis_v8030_20180614T1645/
+#	multicrab_Hplus2tbAnalysis_v8030_20180601T1017/
+#	multicrab_Hplus2tbAnalysis_v8030_20180601T1039/
+#	multicrab_Hplus2tbAnalysis_v8030_20180615T1712/
+#	multicrab_Hplus2tbAnalysis_v8030_20180619T1935/
+#	../../NtupleAnalysis/python/parameters/hplus2hwAnalysis.py
+#	../../NtupleAnalysis/src/Hplus2hwAnalysis/
+no changes added to commit (use "git add" and/or "git commit -a")
+

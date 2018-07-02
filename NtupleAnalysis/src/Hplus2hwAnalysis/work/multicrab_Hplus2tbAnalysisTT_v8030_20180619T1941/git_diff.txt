@@ -1,0 +1,2202 @@
+diff --git a/MiniAOD2TTree/interface/JetDumper.h b/MiniAOD2TTree/interface/JetDumper.h
+index bf715d1..e4ecaea 100644
+--- a/MiniAOD2TTree/interface/JetDumper.h
++++ b/MiniAOD2TTree/interface/JetDumper.h
+@@ -77,6 +77,12 @@ class JetDumper : public BaseDumper {
+         FourVectorDumper *systJESup;
+         FourVectorDumper *systJESdown;
+         FourVectorDumper *systJERup;
+-        FourVectorDumper *systJERdown;	
++        FourVectorDumper *systJERdown;
++
++	// Marina - start
++	std::vector<int> *nSubjets;
++	std::vector<bool> *hasBTagSubjet;
++	// Marina - end
++	
+ };
+ #endif
+diff --git a/MiniAOD2TTree/interface/MiniAOD2TTreeFilter.h b/MiniAOD2TTree/interface/MiniAOD2TTreeFilter.h
+index 1a1f54b..d8a66f4 100644
+--- a/MiniAOD2TTree/interface/MiniAOD2TTreeFilter.h
++++ b/MiniAOD2TTree/interface/MiniAOD2TTreeFilter.h
+@@ -33,7 +33,6 @@
+ #include "HiggsAnalysis/MiniAOD2TTree/interface/GenParticleDumper.h"
+ #include "HiggsAnalysis/MiniAOD2TTree/interface/GenJetDumper.h"
+ #include "HiggsAnalysis/MiniAOD2TTree/interface/GenWeightDumper.h"
+-#include "HiggsAnalysis/MiniAOD2TTree/interface/FatJetDumper.h"
+ 
+ /**
+ 	Class for making a tree from MiniAOD
+@@ -62,7 +61,6 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
+ 
+ 	std::string outputFileName;
+         std::string PUInfoInputFileName;
+-        std::string PUInfoPSInputFileName;
+         std::string TopPtInputFileName;
+ 	std::string codeVersion;
+         std::string dataVersion;
+@@ -83,8 +81,8 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
+         std::vector<edm::ParameterSet> trackCollections;
+         std::vector<edm::ParameterSet> genParticleCollections;
+         std::vector<edm::ParameterSet> genJetCollections;
+-	std::vector<edm::ParameterSet> fatJetCollections;
+-	
++
++
+ 	TFile* fOUT;
+ 	TTree* Events;
+ 
+@@ -104,7 +102,6 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
+ 	TrackDumper* trackDumper;
+ 	GenParticleDumper* genParticleDumper;
+         GenJetDumper* genJetDumper;
+-	FatJetDumper* fatJetDumper;
+ };
+ 
+ #endif
+diff --git a/MiniAOD2TTree/plugins/Hplus2tbAnalysisSkim.cc b/MiniAOD2TTree/plugins/Hplus2tbAnalysisSkim.cc
+index a41f7c9..8c25a57 100644
+--- a/MiniAOD2TTree/plugins/Hplus2tbAnalysisSkim.cc
++++ b/MiniAOD2TTree/plugins/Hplus2tbAnalysisSkim.cc
+@@ -24,29 +24,15 @@
+ #include "DataFormats/Common/interface/TriggerResults.h"
+ 
+ #include "DataFormats/VertexReco/interface/Vertex.h"
+-#include "DataFormats/PatCandidates/interface/Jet.h"
+-#include "DataFormats/PatCandidates/interface/Tau.h"
+-
+-#include "HiggsAnalysis/MiniAOD2TTree/interface/MiniIsolation.h"
+-#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
+ #include "DataFormats/PatCandidates/interface/Electron.h"
+ #include "DataFormats/PatCandidates/interface/Muon.h"
+-
+-#include "DataFormats/Common/interface/View.h"
+-#include "DataFormats/Common/interface/Ptr.h"
+-
+-#include "DataFormats/Common/interface/ValueMap.h"
+-#include "DataFormats/Common/interface/Association.h"
+-#include "DataFormats/Common/interface/PtrVector.h"
+-#include "DataFormats/Common/interface/RefToBase.h"
++#include "DataFormats/PatCandidates/interface/Jet.h"
++//#include "DataFormats/PatCandidates/interface/Tau.h"
+ 
+ #include "FWCore/Framework/interface/LuminosityBlock.h"
+ 
+ #include <iostream>
+ #include <regex>
+-#include <string>
+-#include <vector>
+-#include <memory>
+ 
+ class Hplus2tbAnalysisSkim : public edm::EDFilter {
+ 
+@@ -67,30 +53,23 @@ private:
+   const double cfg_jetEtaCut;
+   const int cfg_nJets;
+ 
+-  edm::EDGetTokenT<edm::View<pat::PackedCandidate> > cfg_pfcandsToken;
+-  edm::EDGetTokenT<edm::View<reco::Vertex> > cfg_vertexToken;
+-  edm::EDGetTokenT<pat::ElectronCollection> cfg_electronToken;
++  edm::EDGetTokenT<edm::View<reco::Vertex>> cfg_vertexToken;
++
++  edm::EDGetTokenT<edm::View<pat::Electron>> cfg_electronToken;
+   edm::EDGetTokenT<double> cfg_rhoToken;
+   std::string cfg_electronID;
+-  edm::EDGetTokenT<edm::ValueMap<float> > cfg_electronMVAToken;
+-  const double cfg_electronMiniRelIsoEA;
++  const double cfg_electronRelIsoEA;
+   const double cfg_electronPtCut;
+   const double cfg_electronEtaCut;
+   const int cfg_electronNCut;
+-  
+-  edm::EDGetTokenT<edm::View<pat::Muon> > cfg_muonToken;
++
++  edm::EDGetTokenT<edm::View<pat::Muon>> cfg_muonToken;
+   std::string cfg_muonID;
+-  const double cfg_muonMiniRelIsoEA;
++  const double cfg_muonRelIso04;
+   const double cfg_muonPtCut;
+   const double cfg_muonEtaCut;
+   const int cfg_muonNCut;
+-  
+-  edm::EDGetTokenT<edm::View<pat::Tau> > cfg_tauToken;
+-  std::vector<std::string>  cfg_tauDiscriminators;
+-  const double cfg_tauPtCut;
+-  const double cfg_tauEtaCut;
+-  const int cfg_tauNCut;
+-  
++
+   int nEvents;
+   int nSelectedEvents;
+ };
+@@ -99,39 +78,25 @@ Hplus2tbAnalysisSkim::Hplus2tbAnalysisSkim(const edm::ParameterSet& iConfig)
+   : cfg_verbose(iConfig.getParameter<bool>("Verbose")),
+     cfg_trgResultsToken(consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("TriggerResults"))),
+     cfg_triggerBits(iConfig.getParameter<std::vector<std::string> >("HLTPaths")),
+-    
+     cfg_jetToken(consumes<edm::View<pat::Jet>>(iConfig.getParameter<edm::InputTag>("JetCollection"))),
+     cfg_jetUserFloats(iConfig.getParameter<std::vector<std::string> >("JetUserFloats")),
+     cfg_jetEtCut(iConfig.getParameter<double>("JetEtCut")),
+     cfg_jetEtaCut(iConfig.getParameter<double>("JetEtaCut")),
+     cfg_nJets(iConfig.getParameter<int>("NJets")),
+-    
+-    cfg_pfcandsToken(consumes<edm::View<pat::PackedCandidate> >(iConfig.getParameter<edm::InputTag>("PackedCandidatesCollection"))),
+-    
+-    cfg_vertexToken(consumes<edm::View<reco::Vertex> >(iConfig.getParameter<edm::InputTag>("VertexCollection"))),
+-    
+-    cfg_electronToken(consumes<pat::ElectronCollection>(iConfig.getParameter<edm::InputTag>("ElectronCollection"))),
++    cfg_vertexToken(consumes<edm::View<reco::Vertex>>(iConfig.getParameter<edm::InputTag>("VertexCollection"))),
++    cfg_electronToken(consumes<edm::View<pat::Electron>>(iConfig.getParameter<edm::InputTag>("ElectronCollection"))),
+     cfg_rhoToken(consumes<double>(iConfig.getParameter<edm::InputTag>("ElectronRhoSource"))),
+     cfg_electronID(iConfig.getParameter<std::string>("ElectronID")),
+-    cfg_electronMVAToken(consumes<edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("ElectronMVA"))),
+-    cfg_electronMiniRelIsoEA(iConfig.getParameter<double>("ElectronMiniRelIsoEA")),
++    cfg_electronRelIsoEA(iConfig.getParameter<double>("ElectronRelIsoEA")),
+     cfg_electronPtCut(iConfig.getParameter<double>("ElectronPtCut")),
+     cfg_electronEtaCut(iConfig.getParameter<double>("ElectronEtaCut")),
+     cfg_electronNCut(iConfig.getParameter<int>("ElectronNCut")),
+-    
+     cfg_muonToken(consumes<edm::View<pat::Muon>>(iConfig.getParameter<edm::InputTag>("MuonCollection"))),
+     cfg_muonID(iConfig.getParameter<std::string>("MuonID")),
+-    cfg_muonMiniRelIsoEA(iConfig.getParameter<double>("MuonMiniRelIsoEA")),
++    cfg_muonRelIso04(iConfig.getParameter<double>("MuonRelIso04")),
+     cfg_muonPtCut(iConfig.getParameter<double>("MuonPtCut")),
+     cfg_muonEtaCut(iConfig.getParameter<double>("MuonEtaCut")),
+     cfg_muonNCut(iConfig.getParameter<int>("MuonNCut")),
+-    
+-    cfg_tauToken(consumes<edm::View<pat::Tau> >(iConfig.getParameter<edm::InputTag>("TauCollection"))),
+-    cfg_tauDiscriminators(iConfig.getParameter<std::vector<std::string> >("TauDiscriminators")),
+-    cfg_tauPtCut(iConfig.getParameter<double>("TauPtCut")),
+-    cfg_tauEtaCut(iConfig.getParameter<double>("TauEtaCut")),
+-    cfg_tauNCut(iConfig.getParameter<int>("TauNCut")),
+-    
+     nEvents(0),
+     nSelectedEvents(0)
+ {
+@@ -142,10 +107,10 @@ Hplus2tbAnalysisSkim::Hplus2tbAnalysisSkim(const edm::ParameterSet& iConfig)
+ Hplus2tbAnalysisSkim::~Hplus2tbAnalysisSkim(){
+     double eff = 0;
+     if(nEvents > 0) eff = ((double)nSelectedEvents)/((double) nEvents);
+-    std::cout <<"Hplus2tbAnalysisSkim: "<<std::endl; //  	edm::LogVerbatim("Hplus2tbAnalysisSkim") 
+-    std::cout <<"  Number of events read                  = "<<nEvents<<std::endl;
+-    std::cout <<"  Number of events kept                  = "<<nSelectedEvents<<std::endl;
+-    std::cout <<"  Efficiency                             = "<<eff<<std::endl;
++    std::cout << "Hplus2tbAnalysisSkim: " //  	edm::LogVerbatim("Hplus2tbAnalysisSkim") 
++              << " Number_events_read " << nEvents
++              << " Number_events_kept " << nSelectedEvents
++              << " Efficiency         " << eff << std::endl;
+ }
+ 
+ 
+@@ -216,183 +181,157 @@ bool Hplus2tbAnalysisSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSe
+ 	std::cout << "\n" << std::endl;
+       }	
+ 
+-    
++
++
+     // Jets
+     edm::Handle<edm::View<pat::Jet> > jethandle;
+     iEvent.getByToken(cfg_jetToken, jethandle);
+     int nJets = 0;
+     if(jethandle.isValid()){
+-      
++
+       // For-loop: All jets
+-      for(size_t i=0; i<jethandle->size(); ++i) {
+-	const pat::Jet& obj = jethandle->at(i);
+-	
+-	if(obj.p4().pt() < cfg_jetEtCut) continue;
+-	if(fabs(obj.p4().eta()) > cfg_jetEtaCut) continue;
+-	/*
+-	  bool passed = true;
+-	  for(size_t j = 0; j < cfg_jetUserFloats.size(); ++j){
+-	  if(obj.userFloat(cfg_jetUserFloats[j]) < 0) {
+-	  passed = false;
+-	  break;
+-	  }
+-	  }
+-	  if(!passed) continue;
+-	*/
+-	nJets++;
+-      }
++        for(size_t i=0; i<jethandle->size(); ++i) {
++            const pat::Jet& obj = jethandle->at(i);
++
++	    if(obj.p4().pt() < cfg_jetEtCut) continue;
++	    if(fabs(obj.p4().eta()) > cfg_jetEtaCut) continue;
++
++	    /*
++	      bool passed = true;
++	      for(size_t j = 0; j < cfg_jetUserFloats.size(); ++j){
++	      if(obj.userFloat(cfg_jetUserFloats[j]) < 0) {
++	      passed = false;
++	      break;
++	      }
++	      }
++	      if(!passed) continue;
++	    */
++
++	    nJets++;
++	}
+     }
+     // Apply Jet Selections
+     if(nJets < cfg_nJets) return false;
+     if (cfg_verbose) std::cout << "=== Passed Jets:\n\t" << nJets << " > " << cfg_nJets << std::endl;
+-    
+-    
++
++
++    // Vertex (for Muon ID)
++    edm::Handle<edm::View<reco::Vertex> > vertexHandle;
++    iEvent.getByToken(cfg_vertexToken, vertexHandle);
++
+     // Electrons
+-    edm::Handle<pat::ElectronCollection>  electronHandle;
++    edm::Handle<edm::View<pat::Electron> > electronHandle;
+     iEvent.getByToken(cfg_electronToken, electronHandle);
+     int nElectrons = 0;
+ 
+-    edm::Handle<edm::ValueMap<float> > electronMVAHandle;
+-    iEvent.getByToken(cfg_electronMVAToken, electronMVAHandle);
+-    
+-    // Packed Candidates
+-    edm::Handle<edm::View<pat::PackedCandidate> > pfcandHandle;
+-    iEvent.getByToken(cfg_pfcandsToken, pfcandHandle);
+-    
+-    // Setup handles for rho
+-    edm::Handle<double> rhoHandle;
+-    iEvent.getByToken(cfg_rhoToken, rhoHandle);
+-    
+     if(electronHandle.isValid()){
+-      
++
++      // Setup handle for GsfElectrons (needed for ID)
++      // edm::Handle<edm::View<reco::GsfElectron>> gsfHandle;
++      // iEvent.getByToken(gsfElectronToken[ic], gsfHandle);
++
++      // Setup handles for rho
++      edm::Handle<double> rhoHandle;
++      iEvent.getByToken(cfg_rhoToken, rhoHandle);
++      double rho = *(rhoHandle.product());
++
++      // Setup handles for ID                                                                                                                                                                                                
++      // std::vector<edm::Handle<edm::ValueMap<bool>>> IDhandles;
++      // std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
++
++
+       // For-loop: All electrons
+-      int iEle = -1;
+-      for (const pat::Electron &obj: *electronHandle){
+-	
+-        iEle++;
+-	edm::RefToBase<pat::Electron> ref ( edm::Ref<pat::ElectronCollection >(electronHandle, iEle));
+-	
+-        // Calculate Mini relative isolation for the electron with effective area
+-        double miniRelIsoEA = getMiniIsolation_EffectiveArea(pfcandHandle, dynamic_cast<const reco::Candidate *>(&obj), 0.05, 0.2, 10., false, false, *rhoHandle);
++      for(size_t i = 0; i < electronHandle->size(); ++i) {
++	const pat::Electron& obj = electronHandle->at(i);
+ 	
+-        float mvaValue = (*electronMVAHandle)[ref];
+-        float AbsEta = fabs(obj.p4().eta());
+-	
+-        bool isLoose = false;
+-        if (AbsEta <= 0.8 and mvaValue >= -0.041)
+-          {
+-            isLoose = true;
+-          }
+-        if (AbsEta > 0.8 and AbsEta < 1.479 and mvaValue >= 0.383)
+-          {
+-            isLoose = true;
+-          }
+-	if (AbsEta >= 1.479 and mvaValue >= -0.515)
+-	  {
+-	    isLoose = true;
+-	  }
++	// Calculate relative isolation for the electron (delta beta)                                                                                                                                                      
++	// double isoDeltaBetaCorrected    = (obj.pfIsolationVariables().sumChargedHadronPt + 
++	// 				   std::max(obj.pfIsolationVariables().sumNeutralHadronEt + obj.pfIsolationVariables().sumPhotonEt - 0.5 * obj.pfIsolationVariables().sumPUPt, 0.0));
++	// double relIsoDeltaBetaCorrected = isoDeltaBetaCorrected / obj.pt();
++
++
++	// Calculate relative isolation with effective area (https://indico.cern.ch/event/369239/contributions/874575/attachments/1134761/1623262/talk_effective_areas_25ns.pdf)
++	double ea = 0.0;
++	if ( fabs(obj.p4().eta()) < 1.0 ) ea = 0.1752;
++	else if (fabs(obj.p4().eta()) < 1.479 ) ea = 0.1862;
++	else if (fabs(obj.p4().eta()) < 2.0 )   ea = 0.1411;
++	else if (fabs(obj.p4().eta()) < 2.2 )   ea = 0.1534;
++	else if (fabs(obj.p4().eta()) < 2.3 )   ea = 0.1903;
++	else if (fabs(obj.p4().eta()) < 2.4 )   ea = 0.2243;
++	else if (fabs(obj.p4().eta()) < 2.5 )   ea = 0.2687;
++
++	double isolationEA = (obj.pfIsolationVariables().sumChargedHadronPt + 
++			      std::max(obj.pfIsolationVariables().sumNeutralHadronEt + obj.pfIsolationVariables().sumPhotonEt - rho * ea, 0.0));
++	double relIsoEA    = isolationEA / obj.pt();
+ 	
++	// Apply electron selections
++	if (relIsoEA > cfg_electronRelIsoEA) continue;
++	if (obj.electronID(cfg_electronID) == false) continue;
++	// std::cout << "obj.electronID("<<cfg_electronID<<") = " << obj.electronID(cfg_electronID) << std::endl;
++
+ 	// Apply acceptance cuts
+-	if (!isLoose)                                  continue;
+-	if (miniRelIsoEA  > cfg_electronMiniRelIsoEA)  continue;
+-	if (obj.p4().pt() < cfg_electronPtCut)         continue;
+-	if (fabs(obj.p4().eta()) > cfg_electronEtaCut) continue;
+-	
++	if(obj.p4().pt() < cfg_electronPtCut) continue;
++	if(fabs(obj.p4().eta()) > cfg_electronEtaCut) continue;
+ 	nElectrons++;
+       }
+     }
+     // Apply Electron Veto
+     if(nElectrons > cfg_electronNCut) return false;
+     if (cfg_verbose) std::cout << "=== nElectrons:\n\t" << nElectrons << " < " << cfg_electronNCut << std::endl;
++
+     
+     // Muons
+-    // Vertex (for Muon ID)
+-    edm::Handle<edm::View<reco::Vertex> > vertexHandle;
+-    iEvent.getByToken(cfg_vertexToken, vertexHandle);
+-    
+     edm::Handle<edm::View<pat::Muon> > muonHandle;
+     iEvent.getByToken(cfg_muonToken, muonHandle);
+-
+-    std::vector<pat::Muon> selectedMuons;
+-    std::vector<float>     selectedMuons_Iso;
+-
++        
+     int nMuons = 0;
+     if(muonHandle.isValid()){
+-
++      
+       // For-loop: All muons
+       for(size_t i = 0; i < muonHandle->size(); ++i) {
+-        const pat::Muon& obj = muonHandle->at(i);
+-	
+-        // bool isGlobal = obj.isGlobalMuon();
+-        bool isLoose  = obj.isLooseMuon();
+-        bool isMedium = obj.isMediumMuon();
+-        bool isTight  = false;
+-        if (vertexHandle->size() == 0)
+-          {
+-            isTight = false;
+-          }
+-        else
+-          {
+-            isTight = obj.isTightMuon(vertexHandle->at(0));
+-          }
+-	
+-	// Apply muon selections
+-        double miniRelIsoEA = getMiniIsolation_EffectiveArea(pfcandHandle, dynamic_cast<const reco::Candidate *>(&obj), 0.05, 0.2, 10., false, false, *rhoHandle);
+-	
+-        if (cfg_muonID == "loose" || cfg_muonID == "Loose")
+-          {
+-            if (isLoose  == false) continue;
+-          }
+-        else if (cfg_muonID == "medium" || cfg_muonID == "Medium")
+-          {
+-            if (isMedium == false) continue;
+-          }
+-        else if (cfg_muonID == "tight" || cfg_muonID == "Tight")
+-          {
+-            if (isTight == false) continue;
+-          }
+-        else {
+-          throw cms::Exception("config") << "Invalid muonID option '" << cfg_muonID << "'! Options: 'loose', 'medium', 'tight'";
+-        }
+-
+-        // Apply acceptance cuts
+-        if (miniRelIsoEA > cfg_muonMiniRelIsoEA)  continue;
+-        if(obj.p4().pt() < cfg_muonPtCut)         continue;
+-        if(fabs(obj.p4().eta()) > cfg_muonEtaCut) continue;
+-
+-        selectedMuons.push_back(obj);
+-        selectedMuons_Iso.push_back(miniRelIsoEA);
+-
+-        nMuons++;
++            const pat::Muon& obj = muonHandle->at(i);
++
++	    // bool isGlobal = obj.isGlobalMuon();
++            bool isLoose  = obj.isLooseMuon();
++	    bool isMedium = obj.isMediumMuon();
++	    bool isTight  = false;
++	    if (vertexHandle->size() == 0) {
++	      isTight = false;
++	    } else {                                                                                                                                                                                                           
++	      isTight = obj.isTightMuon(vertexHandle->at(0));
++	    }
++        
++	    // Calculate relative isolation in cone of DeltaR=0.3                                                                                                                                                              
++	    // double isolation03 = (obj.pfIsolationR03().sumChargedHadronPt + std::max(obj.pfIsolationR03().sumNeutralHadronEt + obj.pfIsolationR03().sumPhotonEt - 0.5 * obj.pfIsolationR03().sumPUPt, 0.0));
++	    // double relIsoDeltaBetaCorrected03 = isolation03 / obj.pt();
++
++	    // Calculate relative isolation in cone of DeltaR=0.4
++	    double IsoDeltaBetaCorrected04    = (obj.pfIsolationR04().sumChargedHadronPt + 
++						 std::max(obj.pfIsolationR04().sumNeutralHadronEt + obj.pfIsolationR04().sumPhotonEt - 0.5 * obj.pfIsolationR04().sumPUPt, 0.0));
++	    double relIsoDeltaBetaCorrected04 = IsoDeltaBetaCorrected04 / obj.pt();
++
++	    // Apply muon selections
++	    if (relIsoDeltaBetaCorrected04 > cfg_muonRelIso04) continue;
++	    if (cfg_muonID == "loose" || cfg_muonID == "Loose") {
++	      if (isLoose  == false) continue;
++	    } else if (cfg_muonID == "medium" || cfg_muonID == "Medium") {
++	      if (isMedium == false) continue;
++	    } else if (cfg_muonID == "tight" || cfg_muonID == "Tight") {
++	      if (isTight == false) continue;
++	    } else {
++	      throw cms::Exception("config") << "Invalid muonID option '" << cfg_muonID << "'! Options: 'loose', 'medium', 'tight'";
++	    } 
++	    
++	    // Apply acceptance cuts
++	    if(obj.p4().pt() < cfg_muonPtCut) continue;
++	    if(fabs(obj.p4().eta()) > cfg_muonEtaCut) continue;
++	    nMuons++;
+       }
+     }
+     // Apply Electron Veto
+     if(nMuons > cfg_muonNCut) return false;
+     if (cfg_verbose) std::cout << "=== Passed Muons:\n\t" << nMuons << " < " << cfg_muonNCut << std::endl;
+-    
+-    // Taus
+-    edm::Handle<edm::View<pat::Tau> > tauHandle;
+-    iEvent.getByToken(cfg_tauToken, tauHandle);
+-      
+-    int nTaus = 0;
+-    if(tauHandle.isValid()){
+-	
+-      // For-loop: All taus
+-      for (const pat::Tau &obj: *tauHandle){
+-	  
+-	if (obj.p4().pt() < cfg_tauPtCut)         continue;
+-	if (fabs(obj.p4().eta()) > cfg_tauEtaCut) continue;
+-	  
+-	bool d = true;
+-	for(size_t j=0; j<cfg_tauDiscriminators.size(); ++j) {
+-	  d = d && obj.tauID(cfg_tauDiscriminators[j]);
+-	}
+-	if(!d) continue;
+-	nTaus++;
+-      }
+-    }
+-    if (nTaus > cfg_tauNCut) return false;
+-    if (cfg_verbose) std::cout << "=== Passed Taus:\n\t" << nTaus << " < " << cfg_tauNCut << std::endl;
++   
+     
+     // All selections passed
+     nSelectedEvents++;
+diff --git a/MiniAOD2TTree/plugins/HplusTopPtWeightProducer.cc b/MiniAOD2TTree/plugins/HplusTopPtWeightProducer.cc
+index bcea6e4..041197c 100644
+--- a/MiniAOD2TTree/plugins/HplusTopPtWeightProducer.cc
++++ b/MiniAOD2TTree/plugins/HplusTopPtWeightProducer.cc
+@@ -103,9 +103,9 @@ void HplusTopPtWeightProducer::produce(edm::Event& iEvent, const edm::EventSetup
+       std::vector<const reco::Candidate*> tops = GenParticleTools::findParticles(handle, 6);
+       for (auto& p: tops) {
+         double pt = p->pt();
+-        // Top pt weight is valid only up to 800 GeV
+-        if (pt > 800.0) {
+-          pt = 800.0;
++        // Top pt weight is valid only up to 400 GeV
++        if (pt > 400.0) {
++          pt = 400.0;
+         }
+         weight *= TMath::Exp(fParA - fParB*pt);
+       }
+diff --git a/MiniAOD2TTree/plugins/JetTriggersSkim.cc b/MiniAOD2TTree/plugins/JetTriggersSkim.cc
+index 634d05c..463d89a 100644
+--- a/MiniAOD2TTree/plugins/JetTriggersSkim.cc
++++ b/MiniAOD2TTree/plugins/JetTriggersSkim.cc
+@@ -27,28 +27,12 @@
+ #include "DataFormats/PatCandidates/interface/Electron.h"
+ #include "DataFormats/PatCandidates/interface/Muon.h"
+ #include "DataFormats/PatCandidates/interface/Jet.h"
+-#include "DataFormats/PatCandidates/interface/Tau.h"
+-
+-#include "HiggsAnalysis/MiniAOD2TTree/interface/MiniIsolation.h"
+-#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
+-#include "DataFormats/PatCandidates/interface/Electron.h"
+-#include "DataFormats/PatCandidates/interface/Muon.h"
+-
+-#include "DataFormats/Common/interface/View.h"
+-#include "DataFormats/Common/interface/Ptr.h"
+-
+-#include "DataFormats/Common/interface/ValueMap.h"
+-#include "DataFormats/Common/interface/Association.h"
+-#include "DataFormats/Common/interface/PtrVector.h"
+-#include "DataFormats/Common/interface/RefToBase.h"
++//#include "DataFormats/PatCandidates/interface/Tau.h"
+ 
+ #include "FWCore/Framework/interface/LuminosityBlock.h"
+ 
+ #include <iostream>
+ #include <regex>
+-#include <string>
+-#include <vector>
+-#include <memory>
+ 
+ class JetTriggersSkim : public edm::EDFilter {
+ 
+@@ -68,31 +52,24 @@ private:
+   const double cfg_jetEtCut;
+   const double cfg_jetEtaCut;
+   const int cfg_nJets;
+-  
+-  edm::EDGetTokenT<edm::View<pat::PackedCandidate> > cfg_pfcandsToken;
+-  edm::EDGetTokenT<edm::View<reco::Vertex> > cfg_vertexToken;
+-  edm::EDGetTokenT<pat::ElectronCollection> cfg_electronToken;
++
++  edm::EDGetTokenT<edm::View<reco::Vertex>> cfg_vertexToken;
++
++  edm::EDGetTokenT<edm::View<pat::Electron>> cfg_electronToken;
+   edm::EDGetTokenT<double> cfg_rhoToken;
+   std::string cfg_electronID;
+-  edm::EDGetTokenT<edm::ValueMap<float> > cfg_electronMVAToken;
+-  const double cfg_electronMiniRelIsoEA;
++  const double cfg_electronRelIsoEA;
+   const double cfg_electronPtCut;
+   const double cfg_electronEtaCut;
+   const int cfg_electronNCut;
+ 
+-  edm::EDGetTokenT<edm::View<pat::Muon> > cfg_muonToken;
++  edm::EDGetTokenT<edm::View<pat::Muon>> cfg_muonToken;
+   std::string cfg_muonID;
+-  const double cfg_muonMiniRelIsoEA;
++  const double cfg_muonRelIso04;
+   const double cfg_muonPtCut;
+   const double cfg_muonEtaCut;
+   const int cfg_muonNCut;
+ 
+-  edm::EDGetTokenT<edm::View<pat::Tau> > cfg_tauToken;
+-  std::vector<std::string>  cfg_tauDiscriminators;
+-  const double cfg_tauPtCut;
+-  const double cfg_tauEtaCut;
+-  const int cfg_tauNCut;
+-
+   int nEvents;
+   int nSelectedEvents;
+ };
+@@ -106,27 +83,20 @@ JetTriggersSkim::JetTriggersSkim(const edm::ParameterSet& iConfig)
+     cfg_jetEtCut(iConfig.getParameter<double>("JetEtCut")),
+     cfg_jetEtaCut(iConfig.getParameter<double>("JetEtaCut")),
+     cfg_nJets(iConfig.getParameter<int>("NJets")),
+-    cfg_pfcandsToken(consumes<edm::View<pat::PackedCandidate> >(iConfig.getParameter<edm::InputTag>("PackedCandidatesCollection"))),
+-    cfg_vertexToken(consumes<edm::View<reco::Vertex> >(iConfig.getParameter<edm::InputTag>("VertexCollection"))),
+-    cfg_electronToken(consumes<pat::ElectronCollection>(iConfig.getParameter<edm::InputTag>("ElectronCollection"))),
++    cfg_vertexToken(consumes<edm::View<reco::Vertex>>(iConfig.getParameter<edm::InputTag>("VertexCollection"))),
++    cfg_electronToken(consumes<edm::View<pat::Electron>>(iConfig.getParameter<edm::InputTag>("ElectronCollection"))),
+     cfg_rhoToken(consumes<double>(iConfig.getParameter<edm::InputTag>("ElectronRhoSource"))),
+     cfg_electronID(iConfig.getParameter<std::string>("ElectronID")),
+-    cfg_electronMVAToken(consumes<edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("ElectronMVA"))),
+-    cfg_electronMiniRelIsoEA(iConfig.getParameter<double>("ElectronMiniRelIsoEA")),
++    cfg_electronRelIsoEA(iConfig.getParameter<double>("ElectronRelIsoEA")),
+     cfg_electronPtCut(iConfig.getParameter<double>("ElectronPtCut")),
+     cfg_electronEtaCut(iConfig.getParameter<double>("ElectronEtaCut")),
+     cfg_electronNCut(iConfig.getParameter<int>("ElectronNCut")),
+     cfg_muonToken(consumes<edm::View<pat::Muon>>(iConfig.getParameter<edm::InputTag>("MuonCollection"))),
+     cfg_muonID(iConfig.getParameter<std::string>("MuonID")),
+-    cfg_muonMiniRelIsoEA(iConfig.getParameter<double>("MuonMiniRelIsoEA")),
++    cfg_muonRelIso04(iConfig.getParameter<double>("MuonRelIso04")),
+     cfg_muonPtCut(iConfig.getParameter<double>("MuonPtCut")),
+     cfg_muonEtaCut(iConfig.getParameter<double>("MuonEtaCut")),
+     cfg_muonNCut(iConfig.getParameter<int>("MuonNCut")),
+-    cfg_tauToken(consumes<edm::View<pat::Tau> >(iConfig.getParameter<edm::InputTag>("TauCollection"))),
+-    cfg_tauDiscriminators(iConfig.getParameter<std::vector<std::string> >("TauDiscriminators")),
+-    cfg_tauPtCut(iConfig.getParameter<double>("TauPtCut")),
+-    cfg_tauEtaCut(iConfig.getParameter<double>("TauEtaCut")),
+-    cfg_tauNCut(iConfig.getParameter<int>("TauNCut")),
+     nEvents(0),
+     nSelectedEvents(0)
+ {
+@@ -138,9 +108,9 @@ JetTriggersSkim::~JetTriggersSkim(){
+     double eff = 0;
+     if(nEvents > 0) eff = ((double)nSelectedEvents)/((double) nEvents);
+     std::cout << "JetTriggersSkim: " //  	edm::LogVerbatim("JetTriggersSkim") 
+-              << " Number_events_read =" << nEvents
+-              << " Number_events_kept =" << nSelectedEvents
+-              << " Efficiency         =" << eff << std::endl;
++              << " Number_events_read " << nEvents
++              << " Number_events_kept " << nSelectedEvents
++              << " Efficiency         " << eff << std::endl;
+ }
+ 
+ 
+@@ -245,147 +215,126 @@ bool JetTriggersSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetup )
+     if (cfg_verbose) std::cout << "=== Passed Jets:\n\t" << nJets << " > " << cfg_nJets << std::endl;
+ 
+ 
++    // Vertex (for Muon ID)
++    edm::Handle<edm::View<reco::Vertex> > vertexHandle;
++    iEvent.getByToken(cfg_vertexToken, vertexHandle);
++
++    //ATHER Disabling the Lepton Veto from Selection.
++    
+     // Electrons
+-    edm::Handle<pat::ElectronCollection>  electronHandle;
++    edm::Handle<edm::View<pat::Electron> > electronHandle;
+     iEvent.getByToken(cfg_electronToken, electronHandle);
+     int nElectrons = 0;
+ 
+-    edm::Handle<edm::ValueMap<float> > electronMVAHandle;
+-    iEvent.getByToken(cfg_electronMVAToken, electronMVAHandle);
+-
+-    // Packed Candidates
+-    edm::Handle<edm::View<pat::PackedCandidate> > pfcandHandle;
+-    iEvent.getByToken(cfg_pfcandsToken, pfcandHandle);
+-
+-    // Setup handles for rho
+-    edm::Handle<double> rhoHandle;
+-    iEvent.getByToken(cfg_rhoToken, rhoHandle);
+-
+     if(electronHandle.isValid()){
+ 
+-      // For-loop: All electrons
+-      int iEle = -1;
+-      for (const pat::Electron &obj: *electronHandle){
++      // Setup handle for GsfElectrons (needed for ID)
++      // edm::Handle<edm::View<reco::GsfElectron>> gsfHandle;
++      // iEvent.getByToken(gsfElectronToken[ic], gsfHandle);
+ 
+-        iEle++;
+-	edm::RefToBase<pat::Electron> ref ( edm::Ref<pat::ElectronCollection >(electronHandle, iEle));
++      // Setup handles for rho
++      edm::Handle<double> rhoHandle;
++      iEvent.getByToken(cfg_rhoToken, rhoHandle);
++      double rho = *(rhoHandle.product());
+ 
+-        // Calculate Mini relative isolation for the electron with effective area
+-        double miniRelIsoEA = getMiniIsolation_EffectiveArea(pfcandHandle, dynamic_cast<const reco::Candidate *>(&obj), 0.05, 0.2, 10., false, false, *rhoHandle);
++      // Setup handles for ID                                                                                                                                                                                                
++      // std::vector<edm::Handle<edm::ValueMap<bool>>> IDhandles;
++      // std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
+ 
+-        float mvaValue = (*electronMVAHandle)[ref];
+-        float AbsEta = fabs(obj.p4().eta());
+ 
+-        bool isLoose = false;
+-        if (AbsEta <= 0.8 and mvaValue >= -0.041)
+-          {
+-            isLoose = true;
+-          }
+-        if (AbsEta > 0.8 and AbsEta < 1.479 and mvaValue >= 0.383)
+-          {
+-            isLoose = true;
+-          }
+-	if (AbsEta >= 1.479 and mvaValue >= -0.515)
+-	  {
+-	    isLoose = true;
+-	  }
+-	// Apply acceptance cuts
+-	if (!isLoose)                                  continue;
+-	if (miniRelIsoEA  > cfg_electronMiniRelIsoEA)  continue;
+-	if (obj.p4().pt() < cfg_electronPtCut)         continue;
+-	if (fabs(obj.p4().eta()) > cfg_electronEtaCut) continue;
++      // For-loop: All electrons
++      for(size_t i = 0; i < electronHandle->size(); ++i) {
++	const pat::Electron& obj = electronHandle->at(i);
++	
++	// Calculate relative isolation for the electron (delta beta)                                                                                                                                                      
++	// double isoDeltaBetaCorrected    = (obj.pfIsolationVariables().sumChargedHadronPt + 
++	// 				   std::max(obj.pfIsolationVariables().sumNeutralHadronEt + obj.pfIsolationVariables().sumPhotonEt - 0.5 * obj.pfIsolationVariables().sumPUPt, 0.0));
++	// double relIsoDeltaBetaCorrected = isoDeltaBetaCorrected / obj.pt();
++
++
++	// Calculate relative isolation with effective area (https://indico.cern.ch/event/369239/contributions/874575/attachments/1134761/1623262/talk_effective_areas_25ns.pdf)
++	double ea = 0.0;
++	if ( fabs(obj.p4().eta()) < 1.0 ) ea = 0.1752;
++	else if (fabs(obj.p4().eta()) < 1.479 ) ea = 0.1862;
++	else if (fabs(obj.p4().eta()) < 2.0 )   ea = 0.1411;
++	else if (fabs(obj.p4().eta()) < 2.2 )   ea = 0.1534;
++	else if (fabs(obj.p4().eta()) < 2.3 )   ea = 0.1903;
++	else if (fabs(obj.p4().eta()) < 2.4 )   ea = 0.2243;
++	else if (fabs(obj.p4().eta()) < 2.5 )   ea = 0.2687;
++
++	double isolationEA = (obj.pfIsolationVariables().sumChargedHadronPt + 
++			      std::max(obj.pfIsolationVariables().sumNeutralHadronEt + obj.pfIsolationVariables().sumPhotonEt - rho * ea, 0.0));
++	double relIsoEA    = isolationEA / obj.pt();
++	
++	// Apply electron selections
++	if (relIsoEA > cfg_electronRelIsoEA) continue;
++	if (obj.electronID(cfg_electronID) == false) continue;
++	// std::cout << "obj.electronID("<<cfg_electronID<<") = " << obj.electronID(cfg_electronID) << std::endl;
+ 
++	// Apply acceptance cuts
++	if(obj.p4().pt() < cfg_electronPtCut) continue;
++	if(fabs(obj.p4().eta()) > cfg_electronEtaCut) continue;
+ 	nElectrons++;
+-	}
++      }
+     }
+     // Apply Electron Veto
+     if(nElectrons > cfg_electronNCut) return false;
+     if (cfg_verbose) std::cout << "=== nElectrons:\n\t" << nElectrons << " < " << cfg_electronNCut << std::endl;
+-      
+-    // Muons
+-    // Vertex (for Muon ID)
+-    edm::Handle<edm::View<reco::Vertex> > vertexHandle;
+-    iEvent.getByToken(cfg_vertexToken, vertexHandle);
++
+     
++    // Muons
+     edm::Handle<edm::View<pat::Muon> > muonHandle;
+     iEvent.getByToken(cfg_muonToken, muonHandle);
+-    
++        
+     int nMuons = 0;
+     if(muonHandle.isValid()){
+       
+       // For-loop: All muons
+       for(size_t i = 0; i < muonHandle->size(); ++i) {
+-	const pat::Muon& obj = muonHandle->at(i);
+-	
+-	// bool isGlobal = obj.isGlobalMuon();
+-	bool isLoose  = obj.isLooseMuon();
+-	bool isMedium = obj.isMediumMuon();
+-	bool isTight  = false;
+-	if (vertexHandle->size() == 0)
+-	  {
+-	    isTight = false;
+-	  }
+-	else
+-	  {
+-	    isTight = obj.isTightMuon(vertexHandle->at(0));
+-	  }
+-	
+-	// Apply muon selections
+-	double miniRelIsoEA = getMiniIsolation_EffectiveArea(pfcandHandle, dynamic_cast<const reco::Candidate *>(&obj), 0.05, 0.2, 10., false, false, *rhoHandle);
+-	
+-	if (cfg_muonID == "loose" || cfg_muonID == "Loose")
+-	  {
+-	    if (isLoose  == false) continue;
+-	  }
+-	else if (cfg_muonID == "medium" || cfg_muonID == "Medium")
+-	  {
+-	    if (isMedium == false) continue;
+-	  }
+-	else if (cfg_muonID == "tight" || cfg_muonID == "Tight")
+-	  {
+-	    if (isTight == false) continue;
+-	  }
+-	else {
+-	  throw cms::Exception("config") << "Invalid muonID option '" << cfg_muonID << "'! Options: 'loose', 'medium', 'tight'";
+-	}
+-	
+-	// Apply acceptance cuts
+-	if (miniRelIsoEA > cfg_muonMiniRelIsoEA)  continue;
+-	if(obj.p4().pt() < cfg_muonPtCut)         continue;
+-	if(fabs(obj.p4().eta()) > cfg_muonEtaCut) continue;
+-	
+-	nMuons++;
++            const pat::Muon& obj = muonHandle->at(i);
++
++	    // bool isGlobal = obj.isGlobalMuon();
++            bool isLoose  = obj.isLooseMuon();
++	    bool isMedium = obj.isMediumMuon();
++	    bool isTight  = false;
++	    if (vertexHandle->size() == 0) {
++	      isTight = false;
++	    } else {                                                                                                                                                                                                           
++	      isTight = obj.isTightMuon(vertexHandle->at(0));
++	    }
++        
++	    // Calculate relative isolation in cone of DeltaR=0.3                                                                                                                                                              
++	    // double isolation03 = (obj.pfIsolationR03().sumChargedHadronPt + std::max(obj.pfIsolationR03().sumNeutralHadronEt + obj.pfIsolationR03().sumPhotonEt - 0.5 * obj.pfIsolationR03().sumPUPt, 0.0));
++	    // double relIsoDeltaBetaCorrected03 = isolation03 / obj.pt();
++
++	    // Calculate relative isolation in cone of DeltaR=0.4
++	    //double IsoDeltaBetaCorrected04    = (obj.pfIsolationR04().sumChargedHadronPt + 
++	    //					 std::max(obj.pfIsolationR04().sumNeutralHadronEt + obj.pfIsolationR04().sumPhotonEt - 0.5 * obj.pfIsolationR04().sumPUPt, 0.0));
++	    //double relIsoDeltaBetaCorrected04 = IsoDeltaBetaCorrected04 / obj.pt();
++
++	    // Apply muon selections
++	    //ATHER removing the ISolation selection //if (relIsoDeltaBetaCorrected04 > cfg_muonRelIso04) continue;
++	    if (cfg_muonID == "loose" || cfg_muonID == "Loose") {
++	      if (isLoose  == false) continue;
++	    } else if (cfg_muonID == "medium" || cfg_muonID == "Medium") {
++	      if (isMedium == false) continue;
++	    } else if (cfg_muonID == "tight" || cfg_muonID == "Tight") {
++	      if (isTight == false) continue;
++	    } else {
++	      throw cms::Exception("config") << "Invalid muonID option '" << cfg_muonID << "'! Options: 'loose', 'medium', 'tight'";
++	    } 
++	    
++	    // Apply acceptance cuts
++	    if(obj.p4().pt() < cfg_muonPtCut) continue;
++	    if(fabs(obj.p4().eta()) > cfg_muonEtaCut) continue;
++	    nMuons++;
+       }
+     }
+-    // Apply Muon Selection 
++    // Apply Muon Selection alteast 1 mu
+     if(nMuons < cfg_muonNCut) return false;
+     if (cfg_verbose) std::cout << "=== Passed Muons:\n\t" << nMuons << " < " << cfg_muonNCut << std::endl;
+-    
+-    // Taus
+-    edm::Handle<edm::View<pat::Tau> > tauHandle;
+-    iEvent.getByToken(cfg_tauToken, tauHandle);
+-    
+-    int nTaus = 0;
+-    if(tauHandle.isValid()){
+-      
+-      // For-loop: All taus
+-      for (const pat::Tau &obj: *tauHandle){
+-
+-        if (obj.p4().pt() < cfg_tauPtCut)         continue;
+-        if (fabs(obj.p4().eta()) > cfg_tauEtaCut) continue;
+-
+-        bool d = true;
+-	for(size_t j=0; j<cfg_tauDiscriminators.size(); ++j) {
+-          d = d && obj.tauID(cfg_tauDiscriminators[j]);
+-        }
+-        if(!d) continue;
+-        nTaus++;
+-      }
+-    }
+-    // Apply tau veto
+-    if (nTaus > cfg_tauNCut) return false;
+-    if (cfg_verbose) std::cout << "=== Passed Taus:\n\t" << nTaus << " < " << cfg_tauNCut << std::endl;
+-    
++   
++       
+     // All selections passed
+     nSelectedEvents++;
+     return true;
+diff --git a/MiniAOD2TTree/plugins/MiniAOD2TTreeFilter.cc b/MiniAOD2TTree/plugins/MiniAOD2TTreeFilter.cc
+index 084edfe..6565fb1 100644
+--- a/MiniAOD2TTree/plugins/MiniAOD2TTreeFilter.cc
++++ b/MiniAOD2TTree/plugins/MiniAOD2TTreeFilter.cc
+@@ -15,11 +15,7 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
+     cmEnergy(iConfig.getParameter<int>("CMEnergy")),
+     eventInfoCollections(iConfig.getParameter<edm::ParameterSet>("EventInfo"))
+ {
+-
+-  PUInfoPSInputFileName = "";  
+-  if (iConfig.exists("PUInfoPSInputFileName")) {
+-    PUInfoPSInputFileName = iConfig.getParameter<std::string>("PUInfoPSInputFileName");
+-  }
++  
+   fOUT = TFile::Open(outputFileName.c_str(),"RECREATE");	
+     Events = new TTree("Events","");
+ 
+@@ -93,15 +89,6 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
+       std::cout << "Config: JetDumper ignored, because 'Jets' is missing from config" << std::endl;
+     }
+ 
+-    fatJetDumper = 0;
+-    if (iConfig.exists("FatJets")) {
+-      fatJetCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("FatJets");
+-      fatJetDumper = new FatJetDumper(consumesCollector(), fatJetCollections);
+-      fatJetDumper->book(Events);
+-    } else {
+-      std::cout << "Config: FatJetDumper ignored, because 'FatJets' is missing from config" << std::endl;
+-    }
+-    
+     softBTagDumper = 0;
+     if (iConfig.exists("SoftBTag")) {
+       std::cout << "SoftBTag exists!" << std::endl;
+@@ -211,7 +198,6 @@ bool MiniAOD2TTreeFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSet
+ 	if (trgDumper) trgDumper->triggerMatch(trigger::TriggerMuon,muonDumper->selected());
+     }
+     if (jetDumper) accept = accept && jetDumper->fill(iEvent,iSetup);
+-    if (fatJetDumper) accept = accept && fatJetDumper->fill(iEvent, iSetup);
+     if (softBTagDumper) accept = accept && softBTagDumper->fill(iEvent,iSetup);
+     if (topDumper) accept = accept && topDumper->fill(iEvent,iSetup);
+     if (metDumper) accept = accept && metDumper->fill(iEvent,iSetup);
+@@ -233,7 +219,6 @@ void MiniAOD2TTreeFilter::reset(){
+     if (electronDumper) electronDumper->reset();
+     if (muonDumper) muonDumper->reset();
+     if (jetDumper) jetDumper->reset();
+-    if (fatJetDumper) fatJetDumper->reset();
+     if (topDumper) topDumper->reset();
+     if (metDumper) metDumper->reset();
+     if (genMetDumper) genMetDumper->reset();
+@@ -320,29 +305,11 @@ void MiniAOD2TTreeFilter::endJob(){
+           TH1F* hPUclone = dynamic_cast<TH1F*>(hPU->Clone());
+           hPUclone->SetDirectory(fOUT);
+ 	  infodir->cd();
+-          if(dataVersion.find("data") < dataVersion.length()) hPUclone->SetName("pileupPS"); 
+           hPUclone->Write();
+         }
+       }
+       fPU->Close();
+     }
+-// in case there is a PU distribution for a prescaled trigger..
+-    if (PUInfoPSInputFileName.size()) {
+-      TFile* fPU_PS = TFile::Open(PUInfoPSInputFileName.c_str());
+-      if (fPU_PS) {
+-        // File open is successful
+-        TH1F* hPU_PS = dynamic_cast<TH1F*>(fPU_PS->Get("pileup"));
+-        if (hPU_PS) {
+-          // Histogram exists
+-          TH1F* hPUclone = dynamic_cast<TH1F*>(hPU_PS->Clone());
+-          hPUclone->SetDirectory(fOUT);
+-          infodir->cd();
+-          hPUclone->SetName("pileupPS");
+-          hPUclone->Write();
+-        }
+-      }
+-      fPU_PS->Close();
+-    }
+ 
+ // copy top pt weight histogram from separate file (makes merging of root files so much easier)
+     if (TopPtInputFileName.size()) {
+diff --git a/MiniAOD2TTree/plugins/PUInfo.cc b/MiniAOD2TTree/plugins/PUInfo.cc
+index 6b478a5..040aee0 100644
+--- a/MiniAOD2TTree/plugins/PUInfo.cc
++++ b/MiniAOD2TTree/plugins/PUInfo.cc
+@@ -9,9 +9,6 @@
+ #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
+ #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+ 
+-
+-#include "DataFormats/VertexReco/interface/Vertex.h"
+-
+ #include "TFile.h"
+ #include "TH1F.h"
+ 
+@@ -34,22 +31,17 @@ class PUInfo : public edm::EDAnalyzer {
+     private:
+         edm::EDGetTokenT<std::vector<PileupSummaryInfo> > puSummaryToken;
+         edm::EDGetTokenT<GenEventInfoProduct> eventInfoToken;
+-        edm::EDGetTokenT<std::vector<reco::Vertex> > pvToken;
+         std::string filename;
+ 
+-	bool runOnData;
+-
+ 	TH1F* hPU;
+ };
+ 
+ PUInfo::PUInfo(const edm::ParameterSet& iConfig) :
+   puSummaryToken(consumes<std::vector<PileupSummaryInfo>>(iConfig.getParameter<edm::InputTag>("PileupSummaryInfoSrc"))),
+   eventInfoToken(consumes<GenEventInfoProduct>(edm::InputTag("generator"))),
+-  pvToken(consumes<std::vector<reco::Vertex>>(iConfig.getParameter<edm::InputTag>("PileupSummaryInfoSrc"))),
+-  filename(iConfig.getParameter<std::string>("OutputFileName")),
+-  runOnData(iConfig.getUntrackedParameter<bool>("RunOnData",false))
++  filename(iConfig.getParameter<std::string>("OutputFileName"))
+ {
+-  
++
+   hPU = new TH1F("pileup","pileup",100,0,100);
+ }
+ 
+@@ -57,9 +49,9 @@ PUInfo::~PUInfo() {}
+ 
+ void PUInfo::beginJob(){}
+ void PUInfo::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup){
+-  if (!runOnData && iEvent.isRealData())
++  if (iEvent.isRealData())
+     return;
+-
++  
+   edm::Handle<GenEventInfoProduct> genEventInfoHandle;
+   iEvent.getByToken(eventInfoToken, genEventInfoHandle);
+   double w = 1.0;
+@@ -80,11 +72,6 @@ void PUInfo::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup){
+         }
+ 	hPU->Fill(nPU, w);
+     }
+-    edm::Handle<std::vector<reco::Vertex> > hPV2;
+-    iEvent.getByToken(pvToken, hPV2);
+-    if(hPV2.isValid()) {
+-        hPU->Fill(hPV2->size());
+-    }
+ }
+ 
+ void PUInfo::endJob(){
+diff --git a/MiniAOD2TTree/plugins/TauLegSkim.cc b/MiniAOD2TTree/plugins/TauLegSkim.cc
+index 454e9f7..79a3f0d 100644
+--- a/MiniAOD2TTree/plugins/TauLegSkim.cc
++++ b/MiniAOD2TTree/plugins/TauLegSkim.cc
+@@ -75,7 +75,7 @@ TauLegSkim::TauLegSkim(const edm::ParameterSet& iConfig)
+     tauEtaCut          = iConfig.getParameter<double>("TauEtaCut");                            
+ 
+     muonPtCut          = iConfig.getParameter<double>("MuonPtCut");                            
+-    muonEtaCut         = iConfig.getParameter<double>("MuonEtaCut");                            
++    muonPtCut          = iConfig.getParameter<double>("MuonEtaCut");                            
+ 
+     genWeights = iConfig.getParameter<std::vector<edm::ParameterSet> >("GenWeights");
+     genWeightToken = new edm::EDGetTokenT<GenEventInfoProduct>[genWeights.size()];
+diff --git a/MiniAOD2TTree/python/CommonFragments.py b/MiniAOD2TTree/python/CommonFragments.py
+index 8765c3e..df44194 100644
+--- a/MiniAOD2TTree/python/CommonFragments.py
++++ b/MiniAOD2TTree/python/CommonFragments.py
+@@ -11,6 +11,7 @@ Instructions:
+ #================================================================================================ 
+ import FWCore.ParameterSet.Config as cms
+ 
++
+ #================================================================================================ 
+ # Function definition
+ #================================================================================================ 
+@@ -25,30 +26,6 @@ def produceCustomisations(process, isData):
+     produceJets(process, isData)
+     print "=== Customisations done"
+ 
+-# AK8 Customisations
+-def produceAK8Customisations(process, isData):
+-    process.AK8CustomisationsSequence = cms.Sequence()
+-    produceAK8JEC(process, isData)
+-    print "=== AK8 Customisations done"
+-
+-def produceAK8JEC(process, isData):
+-    from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
+-    
+-    JEC = ['L1FastJet','L2Relative','L3Absolute']
+-    if isData:
+-        JEC += ['L2L3Residual']
+-        
+-    updateJetCollection(
+-        process,
+-        labelName = 'AK8PFCHS',
+-        jetSource = cms.InputTag("slimmedJetsAK8"),
+-        rParam = 0.8,
+-        jetCorrections = ('AK8PFchs', cms.vstring(JEC), 'None') 
+-    )
+-    
+-    process.AK8CustomisationsSequence += process.patJetCorrFactorsAK8PFCHS
+-    process.AK8CustomisationsSequence += process.updatedPatJetsAK8PFCHS
+-    return
+ 
+ def produceJets(process, isData):
+     '''
+@@ -86,6 +63,10 @@ def produceJets(process, isData):
+     getattr( process, 'updatedPatJetsAK4PFCHS').userData.userFloats.src += ['QGTagger'+'AK4PFCHS'+':axis2']
+     getattr( process, 'updatedPatJetsAK4PFCHS').userData.userInts.src   += ['QGTagger'+'AK4PFCHS'+':mult']
+ 
++    jetToolbox( process, "ak8", "ak8JetSubs", "out",
++                addSoftDrop=True, addSoftDropSubjets=True, addNsub=True, addNsubSubjets=True,
++                postFix='')
++    
+     return
+ 
+ 
+@@ -206,11 +187,6 @@ def reproduceMET(process,isdata):
+                 tag     = cms.string("JetCorrectorParametersCollection_"+era+"_AK4PFPuppi"),
+                 label   = cms.untracked.string("AK4PFPuppi")
+                 ),
+-            cms.PSet(record  = cms.string("JetCorrectionsRecord"),
+-                tag     = cms.string("JetCorrectorParametersCollection_"+era+"_AK8PFchs"),
+-                label   = cms.untracked.string("AK8PFchs")
+-                ),
+-    
+             )
+                                )
+     process.es_prefer_jec = cms.ESPrefer("PoolDBESSource",'jec')
+@@ -239,25 +215,7 @@ def reproduceMET(process,isdata):
+           tag    = cms.string('JR_'+jerera+'_MC_SF_AK4PFchs'),
+           label  = cms.untracked.string('AK4PFchs')
+           ),
+-        
+-        ### read the AK8 JER
+-        cms.PSet(
+-          record = cms.string('JetResolutionRcd'),
+-          tag    = cms.string('JR_'+jerera+'_MC_PtResolution_AK8PFchs'),
+-          label  = cms.untracked.string('AK8PFchs_pt')
+-          ),
+-        cms.PSet(
+-          record = cms.string("JetResolutionRcd"),
+-          tag    = cms.string('JR_'+jerera+'_MC_PhiResolution_AK8PFchs'),
+-          label  = cms.untracked.string("AK8PFchs_phi")
+-          ),
+-        cms.PSet( 
+-          record = cms.string('JetResolutionScaleFactorRcd'),
+-          tag    = cms.string('JR_'+jerera+'_MC_SF_AK8PFchs'),
+-          label  = cms.untracked.string('AK8PFchs')
+-          ),
+-        
+-          
++                  
+         #######
+         ### read the Puppi JER
+ 
+diff --git a/MiniAOD2TTree/python/Hplus2tbAnalysisSkim_cfi.py b/MiniAOD2TTree/python/Hplus2tbAnalysisSkim_cfi.py
+index 54043e4..0218a2b 100644
+--- a/MiniAOD2TTree/python/Hplus2tbAnalysisSkim_cfi.py
++++ b/MiniAOD2TTree/python/Hplus2tbAnalysisSkim_cfi.py
+@@ -4,10 +4,13 @@ skim = cms.EDFilter("Hplus2tbAnalysisSkim",
+     Verbose        = cms.bool(False),
+     TriggerResults = cms.InputTag("TriggerResults::HLT"),
+     HLTPaths       = cms.vstring(
++        "HLT_PFHT400_SixJet30_v", #Prescale 110 at inst. lumi 1.35E+34
+         "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056_v",
++        "HLT_PFHT450_SixJet40_v", #Prescale 26 at inst. lumi 1.35E+34
+         "HLT_PFHT450_SixJet40_BTagCSV_p056_v",
+-        "HLT_PFJet450_v", # For efficiency recovery in 2016H 
+     ),
++    # Vertex
++    VertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
+     # Jets (https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID#Recommendations_for_13_TeV_data)
+     JetCollection  = cms.InputTag("slimmedJets"),
+     JetUserFloats  = cms.vstring(
+@@ -16,39 +19,19 @@ skim = cms.EDFilter("Hplus2tbAnalysisSkim",
+     JetEtCut       = cms.double(20.0),
+     JetEtaCut      = cms.double(2.4),
+     NJets          = cms.int32(0),
+-       
+-    # PF Candidates
+-    PackedCandidatesCollection = cms.InputTag("packedPFCandidates"),
+-                    
+-    # Vertex
+-    VertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
+-
+     # Electrons (https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2)
+-    ElectronCollection   = cms.InputTag("slimmedElectrons"),
+-    ElectronID           = cms.string("cutBasedElectronID-Spring15-25ns-V1-standalone-veto"),
+-    ElectronMVA          = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values"),
+-    ElectronRhoSource    = cms.InputTag("fixedGridRhoFastjetCentralNeutral"),
+-    ElectronMiniRelIsoEA = cms.double(0.2), # MIT cut is at 0.40. Allow wiggle room by cutting at LOWER value
+-    ElectronPtCut        = cms.double(10.0),
+-    ElectronEtaCut       = cms.double(2.1),
+-    ElectronNCut         = cms.int32(0),
+-
++    ElectronCollection    = cms.InputTag("slimmedElectrons"),
++    ElectronID            = cms.string("cutBasedElectronID-Spring15-25ns-V1-standalone-veto"), #8X: "cutBasedElectronID-Summer16-80X-V1-veto"
++    ElectronRhoSource     = cms.InputTag("fixedGridRhoFastjetCentralCalo"), #7X: "fixedGridRhoFastjetAll" (for PU mitigation in isolation)
++    ElectronRelIsoEA      = cms.double(0.15), #Loose iso synced with H+->tau+ nu
++    ElectronPtCut         = cms.double(15.0),
++    ElectronEtaCut        = cms.double(2.5),
++    ElectronNCut          = cms.int32(0),
+     # Muons (https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMuonIdRun2)
+-    MuonCollection   = cms.InputTag("slimmedMuons"),
+-    MuonID           = cms.string("Loose"),
+-    MuonMiniRelIsoEA = cms.double(0.2),  # MIT cut is at 0.40. Allow wiggle room by cutting at LOWER value
+-    MuonPtCut        = cms.double(10.0),
+-    MuonEtaCut       = cms.double(2.4),
+-    MuonNCut         = cms.int32(0),
+-
+-    # Taus
+-    TauCollection     = cms.InputTag("slimmedTaus"),
+-    TauDiscriminators = cms.vstring(
+-        "decayModeFinding",
+-        "byVLooseIsolationMVArun2v1DBoldDMwLT",
+-        ),
+-    TauPtCut  = cms.double(20),
+-    TauEtaCut = cms.double(2.3),
+-    TauNCut   = cms.int32(999),
+-
+-)
++    MuonCollection    = cms.InputTag("slimmedMuons"),
++    MuonID            = cms.string("Loose"),
++    MuonRelIso04      = cms.double(0.15), #Loose iso synced with H+->tau+ nu
++    MuonPtCut         = cms.double(10.0),
++    MuonEtaCut        = cms.double(2.5),
++    MuonNCut          = cms.int32(0),
++   )
+diff --git a/MiniAOD2TTree/python/JetTriggersSkim_JetHT_cfi.py b/MiniAOD2TTree/python/JetTriggersSkim_JetHT_cfi.py
+index 4f45f81..7714754 100644
+--- a/MiniAOD2TTree/python/JetTriggersSkim_JetHT_cfi.py
++++ b/MiniAOD2TTree/python/JetTriggersSkim_JetHT_cfi.py
+@@ -12,7 +12,11 @@ skim = cms.EDFilter("Hplus2tbAnalysisSkim",
+         "HLT_PFHT450_SixJet40",
+         "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056",
+         "HLT_PFHT450_SixJet40_BTagCSV_p056",
++
++        
+     ),
++    # Vertex
++    VertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
+     # Jets (https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID#Recommendations_for_13_TeV_data)
+     JetCollection  = cms.InputTag("slimmedJets"),
+     JetUserFloats  = cms.vstring(
+@@ -21,39 +25,19 @@ skim = cms.EDFilter("Hplus2tbAnalysisSkim",
+     JetEtCut       = cms.double(20.0),
+     JetEtaCut      = cms.double(2.4),
+     NJets          = cms.int32(0),
+-                    
+-    # PF Candidates
+-    PackedCandidatesCollection = cms.InputTag("packedPFCandidates"),
+-
+-    # Vertex
+-    VertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
+-
+     # Electrons (https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2)
+-    ElectronCollection   = cms.InputTag("slimmedElectrons"),
+-    ElectronID           = cms.string("cutBasedElectronID-Spring15-25ns-V1-standalone-veto"),
+-    ElectronMVA          = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values"),
+-    ElectronRhoSource    = cms.InputTag("fixedGridRhoFastjetCentralNeutral"),
+-    ElectronMiniRelIsoEA = cms.double(0.2), # MIT cut is at 0.40. Allow wiggle room by cutting at LOWER value
+-    ElectronPtCut        = cms.double(10.0),
+-    ElectronEtaCut       = cms.double(2.1),
+-    ElectronNCut         = cms.int32(0),
+-
++    ElectronCollection    = cms.InputTag("slimmedElectrons"),
++    ElectronID            = cms.string("cutBasedElectronID-Spring15-25ns-V1-standalone-veto"), #8X: "cutBasedElectronID-Summer16-80X-V1-veto"
++    ElectronRhoSource     = cms.InputTag("fixedGridRhoFastjetCentralCalo"), #7X: "fixedGridRhoFastjetAll" (for PU mitigation in isolation)
++    ElectronRelIsoEA      = cms.double(0.15), #Loose iso synced with H+->tau+ nu
++    ElectronPtCut         = cms.double(15.0),
++    ElectronEtaCut        = cms.double(2.5),
++    ElectronNCut          = cms.int32(0),
+     # Muons (https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMuonIdRun2)
+-    MuonCollection   = cms.InputTag("slimmedMuons"),
+-    MuonID           = cms.string("Loose"),
+-    MuonMiniRelIsoEA = cms.double(0.2), # MIT cut is at 0.40. Allow wiggle room by cutting at LOWER value
+-    MuonPtCut        = cms.double(10.0),
+-    MuonEtaCut       = cms.double(2.4),
+-    MuonNCut         = cms.int32(0),
+-    
+-    # Taus
+-    TauCollection     = cms.InputTag("slimmedTaus"),
+-    TauDiscriminators = cms.vstring(
+-        "decayModeFinding",
+-        "byVLooseIsolationMVArun2v1DBoldDMwLT",
+-        ),
+-    TauPtCut  = cms.double(20),
+-    TauEtaCut = cms.double(2.3),
+-    TauNCut   = cms.int32(999),
+-
+-)
++    MuonCollection    = cms.InputTag("slimmedMuons"),
++    MuonID            = cms.string("Loose"),
++    MuonRelIso04      = cms.double(0.15), #Loose iso synced with H+->tau+ nu
++    MuonPtCut         = cms.double(10.0),
++    MuonEtaCut        = cms.double(2.5),
++    MuonNCut          = cms.int32(0),
++   )
+diff --git a/MiniAOD2TTree/python/JetTriggersSkim_SingleMu_cfi.py b/MiniAOD2TTree/python/JetTriggersSkim_SingleMu_cfi.py
+index b42f561..886cf78 100644
+--- a/MiniAOD2TTree/python/JetTriggersSkim_SingleMu_cfi.py
++++ b/MiniAOD2TTree/python/JetTriggersSkim_SingleMu_cfi.py
+@@ -1,10 +1,13 @@
+ import FWCore.ParameterSet.Config as cms
+ 
+ skim = cms.EDFilter("JetTriggersSkim",
+-    Verbose = cms.bool(False),
+-    TriggerResults = cms.InputTag("TriggerResults::HLT"),
+-    HLTPaths       = cms.vstring("HLT_IsoMu24_v", 
+-                                ),
++    Verbose        = cms.bool(False),
++                    TriggerResults = cms.InputTag("TriggerResults::HLT"),
++                    HLTPaths       = cms.vstring("HLT_IsoMu24_v", 
++        
++                                                 ),
++                    # Vertex
++    VertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
+     # Jets (https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID#Recommendations_for_13_TeV_data)
+     JetCollection  = cms.InputTag("slimmedJets"),
+     JetUserFloats  = cms.vstring(
+@@ -13,38 +16,19 @@ skim = cms.EDFilter("JetTriggersSkim",
+     JetEtCut       = cms.double(20.0),
+     JetEtaCut      = cms.double(2.4),
+     NJets          = cms.int32(0),
+-    
+-    # PF Candidates
+-    PackedCandidatesCollection = cms.InputTag("packedPFCandidates"),
+-
+-    # Vertex
+-    VertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
+-
+     # Electrons (https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2)
+-    ElectronCollection   = cms.InputTag("slimmedElectrons"),
+-    ElectronID           = cms.string("cutBasedElectronID-Spring15-25ns-V1-standalone-veto"),
+-    ElectronMVA          = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values"),
+-    ElectronRhoSource    = cms.InputTag("fixedGridRhoFastjetCentralNeutral"),
+-    ElectronMiniRelIsoEA = cms.double(0.2), # MIT cut is at 0.40. Allow wiggle room by cutting at LOWER value
+-    ElectronPtCut        = cms.double(10.0),
+-    ElectronEtaCut       = cms.double(2.1),
+-    ElectronNCut         = cms.int32(0),
+-
++    ElectronCollection    = cms.InputTag("slimmedElectrons"),
++    ElectronID            = cms.string("cutBasedElectronID-Spring15-25ns-V1-standalone-veto"), #8X: "cutBasedElectronID-Summer16-80X-V1-veto"
++    ElectronRhoSource     = cms.InputTag("fixedGridRhoFastjetCentralCalo"), #7X: "fixedGridRhoFastjetAll" (for PU mitigation in isolation)
++    ElectronRelIsoEA      = cms.double(0.15), #Loose iso synced with H+->tau+ nu
++    ElectronPtCut         = cms.double(15.0),
++    ElectronEtaCut        = cms.double(2.5),
++    ElectronNCut          = cms.int32(0),
+     # Muons (https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMuonIdRun2)
+-    MuonCollection   = cms.InputTag("slimmedMuons"),
+-    MuonID           = cms.string("Loose"),
+-    MuonMiniRelIsoEA = cms.double(0.2), # MIT cut is at 0.40. Allow wiggle room by cutting at LOWER value
+-    MuonPtCut        = cms.double(10.0),
+-    MuonEtaCut       = cms.double(2.4),
+-    MuonNCut         = cms.int32(1),
+-
+-    # Taus
+-    TauCollection     = cms.InputTag("slimmedTaus"),
+-    TauDiscriminators = cms.vstring(
+-        "decayModeFinding",
+-        "byVLooseIsolationMVArun2v1DBoldDMwLT",
+-        ),
+-    TauPtCut  = cms.double(20),
+-    TauEtaCut = cms.double(2.3),
+-    TauNCut   = cms.int32(999),
+-)
++    MuonCollection    = cms.InputTag("slimmedMuons"),
++    MuonID            = cms.string("Loose"),
++    MuonRelIso04      = cms.double(0.15), #Loose iso synced with H+->tau+ nu
++    MuonPtCut         = cms.double(26.0),
++    MuonEtaCut        = cms.double(2.5),
++    MuonNCut          = cms.int32(1),
++   )
+diff --git a/MiniAOD2TTree/python/Jet_cfi.py b/MiniAOD2TTree/python/Jet_cfi.py
+index 9be691a..357d84f 100644
+--- a/MiniAOD2TTree/python/Jet_cfi.py
++++ b/MiniAOD2TTree/python/Jet_cfi.py
+@@ -56,6 +56,31 @@ AK4Jets = cms.PSet(
+         ),
+     )
+ 
++AK8Jets = cms.PSet(
++    # Marina
++    branchname = cms.untracked.string("AK8Jets"),
++    src        = cms.InputTag("selectedPatJetsAK8PFCHS"),
++    systVariations = cms.bool(False),
++
++    discriminators = cms.vstring(
++        "pfCombinedInclusiveSecondaryVertexV2BJetTags",
++        "pfCombinedMVAV2BJetTags",
++        "pfCombinedCvsLJetTags",
++        "pfCombinedCvsBJetTags"
++        ),
++    userFloats = cms.vstring(
++        "NjettinessAK8CHS:tau1",
++        "NjettinessAK8CHS:tau2",
++        "NjettinessAK8CHS:tau3",
++        "NjettinessAK8CHS:tau4",
++        ),
++
++    userInts = cms.vstring(
++        ),
++    checkSubjets = cms.untracked.bool(True),
++    )
++   
++
+ AK4JetsPUPPI = cms.PSet(
+     branchname = cms.untracked.string("JetsPuppi"),
+     src        = cms.InputTag("updatedPatJetsUpdatedJECPuppi"),
+@@ -73,11 +98,40 @@ AK4JetsPUPPI = cms.PSet(
+         ),
+     )
+ 
++    
++# AK8 - SoftDrop Subjets
++AK8JetsSoftDrop = cms.PSet(
++    branchname = cms.untracked.string("AK8JetsSoftDrop"),
++    src        = cms.InputTag("packedPatJetsAK8PFCHSSoftDrop"),
++    systVariations = cms.bool(False),
++
++    discriminators = cms.vstring(
++        "pfCombinedInclusiveSecondaryVertexV2BJetTags",
++        ),
++    userFloats = cms.vstring(
++        ),
++    userInts = cms.vstring(
++        ),
++    checkSubjets = cms.untracked.bool(True),
++    ),
++
++
+ Jets = cms.VPSet()
+ Jets.append(AK4Jets)
+ 
++JetsWithAK8 = cms.VPSet()
++JetsWithAK8.append(AK4Jets)
++JetsWithAK8.append(AK8Jets)
++
++
+ JetsNoSysVariations = cms.VPSet()
+ for i in range(len(Jets)):
+     pset = Jets[i].clone()
+     pset.systVariations = cms.bool(False)
+     JetsNoSysVariations.append(pset)
++
++JetsNoSysVariationsWithAK8 = cms.VPSet()
++for i in range(len(JetsWithAK8)):
++    pset = JetsWithAK8[i].clone()
++    pset.systVariations = cms.bool(False)
++    JetsNoSysVariationsWithAK8.append(pset)
+diff --git a/MiniAOD2TTree/python/PUInfo_cfi.py b/MiniAOD2TTree/python/PUInfo_cfi.py
+index 5692ffd..47d3c30 100644
+--- a/MiniAOD2TTree/python/PUInfo_cfi.py
++++ b/MiniAOD2TTree/python/PUInfo_cfi.py
+@@ -3,13 +3,5 @@ import FWCore.ParameterSet.Config as cms
+ PUInfo = cms.EDAnalyzer('PUInfo',
+     OutputFileName = cms.string("PileUp.root"),
+ #    PileupSummaryInfoSrc = cms.InputTag("addPileupInfo")
+-    PileupSummaryInfoSrc = cms.InputTag("slimmedAddPileupInfo"),
+-    RunOnData = cms.untracked.bool(True)
++    PileupSummaryInfoSrc = cms.InputTag("slimmedAddPileupInfo")
+ )
+-
+-PUInfoPS = cms.EDAnalyzer('PUInfo',
+-    OutputFileName = cms.string("PileUpPS.root"),
+-    PileupSummaryInfoSrc = cms.InputTag("offlineSlimmedPrimaryVertices"),
+-    RunOnData = cms.untracked.bool(True)
+-)
+-
+diff --git a/MiniAOD2TTree/python/TriggerSkim_cfi.py b/MiniAOD2TTree/python/TriggerSkim_cfi.py
+index df293c6..3278975 100644
+--- a/MiniAOD2TTree/python/TriggerSkim_cfi.py
++++ b/MiniAOD2TTree/python/TriggerSkim_cfi.py
+@@ -2,6 +2,6 @@ import FWCore.ParameterSet.Config as cms
+ 
+ trgskim = cms.EDFilter("TriggerSkim",
+     TriggerResults = cms.InputTag("TriggerResults::HLT"),
+-    HLTPaths       = cms.vstring("HLT_LooseIsoPFTau50_Trk30_eta2p1_v"),
++    HLTPaths       = cms.vstring("HLT_IsoMu20_v"),
+     GenWeights     = cms.VPSet()
+ )
+diff --git a/MiniAOD2TTree/python/tools/datasets.py b/MiniAOD2TTree/python/tools/datasets.py
+index e51dcf4..eded798 100644
+--- a/MiniAOD2TTree/python/tools/datasets.py
++++ b/MiniAOD2TTree/python/tools/datasets.py
+@@ -68,7 +68,6 @@ datasetsTauData07Aug2017.append(Dataset('/Tau/Run2016E-07Aug17-v1/MINIAOD', data
+ 
+ datasetsJetHTData_03Feb2017 = []
+ das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FJetHT%2FRun2016*-03Feb2017*-v*%2FMINIAOD"
+-# cmd line: dasgoclient -query="dataset dataset=/JetHT/Run2016*-03Feb2017*-v*/MINIAOD"
+ datasetsJetHTData_03Feb2017.append(Dataset('/JetHT/Run2016B-03Feb2017_ver2-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_273150-275376_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016B.txt"))
+ datasetsJetHTData_03Feb2017.append(Dataset('/JetHT/Run2016C-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_275656-276283_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016C.txt"))
+ datasetsJetHTData_03Feb2017.append(Dataset('/JetHT/Run2016D-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276315-276811_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016D.txt"))
+@@ -240,44 +239,25 @@ datasetsQCD_reHLT.append(Dataset('/QCD_Pt_3200toInf_TuneCUETP8M1_13TeV_pythia8/R
+ #================================================================================================ 
+ datasetsSignalTB = []
+ das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FChargedHiggs_HplusTB_HplusToTB*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
+-campaign = 'RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6'
+-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-180_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-200_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-220_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-250_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-300_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-350_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-400_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-500_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-650_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-800_13TeV_amcatnlo_pythia8/'   + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-1000_13TeV_amcatnlo_pythia8/'  + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-1500_13TeV_amcatnlo_pythia8/'  + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-2000_13TeV_amcatnlo_pythia8/'  + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-2500_13TeV_amcatnlo_pythia8/'  + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-3000_13TeV_amcatnlo_pythia8/'  + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-5000_13TeV_amcatnlo_pythia8/'  + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-7000_13TeV_amcatnlo_pythia8/'  + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-10000_13TeV_amcatnlo_pythia8/' + campaign + '-v1/MINIAODSIM'     , dataVersion="80Xmc", dasQuery=das))
+-
+-datasetsSignalTB_ext1 = []
+-das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FChargedHiggs_HplusTB_HplusToTB*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
+-# cmd line: dasgoclient -query="dataset dataset=/ChargedHiggs_HplusTB_HplusToTB_M-*_13TeV_amcatnlo_pythia8*/*/MINIAODSIM release=CMSSW_8_0_21"
+-campaign = 'RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6'
+-datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-180_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-200_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-220_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-250_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v2/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-300_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-350_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-400_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-500_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v2/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-800_13TeV_amcatnlo_pythia8/'   + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-1000_13TeV_amcatnlo_pythia8/'  + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-1500_13TeV_amcatnlo_pythia8/'  + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-2000_13TeV_amcatnlo_pythia8/'  + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-2500_13TeV_amcatnlo_pythia8/'  + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTB_ext1.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-3000_13TeV_amcatnlo_pythia8/'  + campaign + '_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
++datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-180_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM' , dataVersion="80Xmc", dasQuery=das))
++datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-200_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM' , dataVersion="80Xmc", dasQuery=das))
++datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-220_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM' , dataVersion="80Xmc", dasQuery=das))
++datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-250_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM' , dataVersion="80Xmc", dasQuery=das))
++datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-300_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM' , dataVersion="80Xmc", dasQuery=das))
++datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-350_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM' , dataVersion="80Xmc", dasQuery=das))
++datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-400_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM' , dataVersion="80Xmc", dasQuery=das))
++datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-500_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM' , dataVersion="80Xmc", dasQuery=das))
++# datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-650_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM' , dataVersion="80Xmc", dasQuery=das))
++datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-800_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM' , dataVersion="80Xmc", dasQuery=das))
++datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-1000_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
++datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-1500_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
++datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-2000_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
++datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-2500_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
++datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-3000_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
++datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-5000_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
++datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-7000_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
++datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-10000_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
++
+ 
+ datasetsSignalTauNu = []
+ das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FChargedHiggs_TTToHplusBWB_HplusToTauNu_M-*%2FRunII*16MiniAODv2-*%2FMINIAODSIM"
+@@ -287,18 +267,12 @@ datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_M-220_13T
+ datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_M-250_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+ datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_M-300_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+ datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_M-400_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_M-500_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das,name="ChargedHiggs_HplusTB_HplusToTauNu_M_500"))
+-datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_M-500_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das,name="ChargedHiggs_HplusTB_HplusToTauNu_M_500_ext1"))
++datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_M-500_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+ datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_HeavyMass_M-750_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_HeavyMass_M-800_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+ datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_HeavyMass_M-1000_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_HeavyMass_M-1500_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+ datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_HeavyMass_M-2000_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_HeavyMass_M-2500_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+ datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_HeavyMass_M-3000_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_HeavyMass_M-5000_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_HeavyMass_M-7000_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_HeavyMass_M-10000_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
++
+ # Intermediate H+
+ datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M-145_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+ datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M-150_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+@@ -334,6 +308,13 @@ datasetsSignalTauNu.append(Dataset('/ChargedHiggs_TTToHplusBWB_HplusToTauNu_M-16
+ #datasetsSignalTauNu.extend(datasetsSignalTauNu_reHLT)
+ datasetsSignalTauNu.append(Dataset('/HplusToTauNu_M_200_TuneCUETP8M1_tauola_13TeV_pythia8/amarini-GEN-SIM-71-6edf4b210aa48b81088c0de44a7af6f5/USER', dbs="phys03",dataVersion="80Xmc", dasQuery=das))
+ 
++# cHiggs 2 HW
++datasetsSignalHW = []
++#das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FChargedHiggs_TTToHplusBWB_HplusToTauNu_M-*%2FRunII*16MiniAODv2-*%2FMINIAODSIM"
++datasetsSignalHW.append(Dataset('/CRAB_PrivateMC/mlotti-CRAB3_Hplus_PAT-71a58a62b6d71fe0f402eda209b9b80f/USER', dbs="phys03", dataVersion="80Xmc", dasQuery=das)) # m = 350
++
++
++
+ datasetsSingleTop = []
+ das1 = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FST_t-channel_antitop*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
+ das2 = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FST_t-channel_top*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
+@@ -362,15 +343,6 @@ datasetsTTJets.append(Dataset('/TTJets_HT-600to800_TuneCUETP8M1_13TeV-madgraphML
+ datasetsTTJets.append(Dataset('/TTJets_HT-800to1200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+ 
+ 
+-datasetsTTJets_SingleLeptFromT = []
+-das = "https://cmsweb.cern.ch/das/request?view=list&limit=150&instance=prod%2Fglobal&input=dataset%3D%2FTTJets*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
+-datasetsTTJets_SingleLeptFromT.append(Dataset('/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-datasetsTTJets_SingleLeptFromT.append(Dataset('/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-datasetsTTJets_SingleLeptFromT.append(Dataset('/TTJets_SingleLeptFromT_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-datasetsTTJets_SingleLeptFromT.append(Dataset('/TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-datasetsTTJets_SingleLeptFromT.append(Dataset('/TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-datasetsTTJets_SingleLeptFromT.append(Dataset('/TTJets_SingleLeptFromTbar_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+-
+ datasetsDY = []
+ das = "https://cmsweb.cern.ch/das/request?input=dataset%3D%2FDYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8%2FRunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2%2FMINIAODSIM&instance=prod%2Fglobal"
+ #datasetsDY.append(Dataset('/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-herwigpp_30M/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das, name="DYJetsToLL_M_50_HERWIGPP"))
+@@ -606,11 +578,10 @@ signalAnalysisDatasets = []
+ signalAnalysisDatasets.extend(datasetsTauData03Feb)
+ #signalAnalysisDatasets.extend(datasetsTauData18Apr)
+ #signalAnalysisDatasets.extend(datasetsTauData07Aug2017)
+-signalAnalysisDatasets.extend(datasetsDY) 
++#signalAnalysisDatasets.extend(datasetsDY) 
+ signalAnalysisDatasets.extend(datasetsTop)
+ signalAnalysisDatasets.extend(datasetsSingleTop)
+-signalAnalysisDatasets.extend(datasetsWJets)
+-signalAnalysisDatasets.extend(datasetsWJetsHT)  
++signalAnalysisDatasets.extend(datasetsWJets)  
+ signalAnalysisDatasets.extend(datasetsDiboson)
+ #signalAnalysisDatasets.extend(datasetsQCD)
+ signalAnalysisDatasets.extend(datasetsSignalTauNu)
+@@ -625,15 +596,12 @@ signalAnalysisDatasets.extend(datasetsSignalTauNu)
+ #signalAnalysisDatasets.extend(datasetsSignalTauNu_reHLT)
+ ##signalAnalysisDatasets.extend(datasetsSignalTB_reHLT)
+ 
+-# Signal Analysis (h2tb)
++
+ hplus2tbAnalysisDatasets = []
+ #hplus2tbAnalysisDatasets.extend(datasetsJetHTData_18Apr2017)
+ hplus2tbAnalysisDatasets.extend(datasetsJetHTData_03Feb2017)
+ hplus2tbAnalysisDatasets.extend(datasetsSignalTB)
+-# hplus2tbAnalysisDatasets.extend(datasetsSignalTB_ext1)
+ hplus2tbAnalysisDatasets.extend(datasetsTop)
+-#hplus2tbAnalysisDatasets.extend(datasetsTTJets) #-ve weights
+-hplus2tbAnalysisDatasets.extend(datasetsTTJets_SingleLeptFromT)
+ hplus2tbAnalysisDatasets.extend(datasetsSingleTop)
+ hplus2tbAnalysisDatasets.extend(datasetsDYJetsToQQ)
+ hplus2tbAnalysisDatasets.extend(datasetsWJetsToQQ)
+@@ -649,9 +617,35 @@ hplus2tbAnalysisDatasets.extend(datasetsTTZToQQ)
+ # hplus2tbAnalysisDatasets.extend(datasetsQCDMuEnriched)
+ # hplus2tbAnalysisDatasets.extend(datasetsQCD_HT_BGenFilter) 
+ # hplus2tbAnalysisDatasets.extend(datasetsQCD_HT_GenJets5) 
++# hplus2tbAnalysisDatasets.extend(datasetsTTJets) #-ve weights
++
++
++hplus2hwAnalysisDatasets = []
++#signalAnalysisDatasets.extend(datasetsTauData)
++hplus2hwAnalysisDatasets.extend(datasetsTauData03Feb)
++#signalAnalysisDatasets.extend(datasetsTauData18Apr)
++#signalAnalysisDatasets.extend(datasetsTauData07Aug2017)
++#hplus2hwAnalysisDatasets.extend(datasetsDY)
++hplus2hwAnalysisDatasets.extend(datasetsTop)
++hplus2hwAnalysisDatasets.extend(datasetsWJets)
+ 
++#hplus2hwAnalysisDatasets.extend(datasetsZJets) add!
+ 
+-# Trigger Efficiency (h2tb)
++hplus2hwAnalysisDatasets.extend(datasetsDiboson)
++signalAnalysisDatasets.extend(datasetsQCD)
++hplus2hwAnalysisDatasets.extend(datasetsSignalHW)
++#signalAnalysisDatasets.extend(datasetsSignalTB)
++####signalAnalysisDatasets.extend(datasetsSignalTauNu_TRGdev)
++
++#signalAnalysisDatasets.extend(datasetsDY_reHLT)
++#signalAnalysisDatasets.extend(datasetsTop_reHLT)
++#signalAnalysisDatasets.extend(datasetsWJets_reHLT)
++#signalAnalysisDatasets.extend(datasetsDiboson_reHLT)
++##signalAnalysisDatasets.extend(datasetsQCD_reHLT)
++#signalAnalysisDatasets.extend(datasetsSignalTauNu_reHLT)
++##signalAnalysisDatasets.extend(datasetsSignalTB_reHLT)
++
++#Ather Add here...                               
+ JetTriggersDatasets = []
+ #JetTriggersDatasets.extend(datasetsJetHTData)  
+ JetTriggersDatasets.extend(datasetsMuonData03Feb)
+@@ -661,6 +655,8 @@ JetTriggersDatasets.extend(datasetsTop)
+ #JetTriggersDatasets.extend(datasetsQCD_HT)   
+ JetTriggersDatasets.extend(datasetsQCDMuEnriched)
+ 
++
++
+ #================================================================================================ 
+ # Class Definition
+ #================================================================================================ 
+diff --git a/MiniAOD2TTree/scripts/hplusLumiCalc.py b/MiniAOD2TTree/scripts/hplusLumiCalc.py
+index a557716..c903ec9 100755
+--- a/MiniAOD2TTree/scripts/hplusLumiCalc.py
++++ b/MiniAOD2TTree/scripts/hplusLumiCalc.py
+@@ -30,7 +30,6 @@ setenv PATH ${PATH}:$HOME/.local/bin:/afs/cern.ch/cms/lumi/brilconda-1.0.3/bin:
+ hplusLumicalc.py
+ or
+ hplusLumiCalc.py -i 2016 --transferToEOS --collisions 2016 --offsite
+-hplusLumiCalc.py --ignore-logs --trigger="HLT_LooseIsoPFTau50_Trk30_eta2p1_v*"
+ 
+ 2) LPC (or outside LXPLUS in general):
+ open two terminals
+@@ -489,7 +488,7 @@ def GetLumiAndUnits(output):
+     return lumi, unit
+ 
+         
+-def CallPileupCalc(task, fOUT, inputFile, inputLumiJSON, minBiasXsec, calcMode="true", maxPileupBin="100", numPileupBins="100", pileupHistName="pileup", trigger=""):
++def CallPileupCalc(task, fOUT, inputFile, inputLumiJSON, minBiasXsec, calcMode="true", maxPileupBin="100", numPileupBins="100", pileupHistName="pileup"):
+     '''
+     Script to estimate pileup distribution using xing instantaneous luminosity
+     information and minimum bias cross section.  Output is TH1D stored in root
+@@ -502,40 +501,7 @@ def CallPileupCalc(task, fOUT, inputFile, inputLumiJSON, minBiasXsec, calcMode="
+     https://github.com/cms-sw/RecoLuminosity-LumiDB/blob/master/scripts/pileupCalc.py
+     '''
+     Verbose("CallPileupCalc()", True)
+-
+-    # pile-up for chosen trigger only
+-    if len(trigger) > 0:
+-        Verbose("Task %s, creating Pileup ROOT file for %s" % (task,trigger) )
+-        triggerName = trigger.replace("*","")
+-
+-        # brilcalc lumi -u /pb -i JSON-file
+-        home = os.environ['HOME']
+-        path = os.path.join(home, ".local/bin")
+-        exe  = os.path.join(path, "brilcalc")
+-        brilcalc_csv = os.path.join(task, "results","lumi_"+triggerName+".csv")
+-        cmd1 = [exe, "lumi", "--normtag", NormTagJSON, "-i", inputFile, "--hltpath", "'"+trigger+"'", "--byls", "--minBiasXsec", minBiasXsec, "-o", brilcalc_csv]
+-
+-        brilcalc_out = os.path.join(task, "results", "brilcalc_"+triggerName+".log")
+-        sys_cmd1 = " ".join(cmd1) + " > %s" %brilcalc_out
+-        Verbose(sys_cmd1)
+-        ret = os.system(sys_cmd1)
+-
+-        pileupReCalc_json = os.path.join(task, "results","pileup_"+triggerName+".json")
+-        cmd2 = ["pileupReCalc_HLTpaths.py", "-i", brilcalc_csv, "--inputLumiJSON", inputLumiJSON, "-o", pileupReCalc_json, "--runperiod", "Run2"]
+-        pileupReCalc_out = os.path.join(task, "results", "pileupReCalc_"+triggerName+".log")
+-        sys_cmd2 = " ".join(cmd2) + " > %s" %pileupReCalc_out
+-        Verbose(sys_cmd2)
+-        ret = os.system(sys_cmd2)
+-
+-        fTrgOUT = os.path.join(task, "results","PileUp_trigger.root")
+-        cmd3 = ["pileupCalc.py", "-i", inputFile, "--inputLumiJSON", pileupReCalc_json, "--calcMode", calcMode,
+-           "--minBiasXsec", minBiasXsec, "--maxPileupBin", maxPileupBin, "--numPileupBins", numPileupBins,
+-           fTrgOUT, "--pileupHistName", pileupHistName]
+-        pileupCalc_out = os.path.join(task, "results", "pileupCalc_"+triggerName+".log")
+-        sys_cmd3 = " ".join(cmd3) + " > %s" %pileupCalc_out
+-        Verbose(sys_cmd3)
+-        ret = os.system(sys_cmd3)
+-
++    
+     Verbose("Task %s, creating Pileup ROOT file" % (task) )
+     cmd = ["pileupCalc.py", "-i", inputFile, "--inputLumiJSON", inputLumiJSON, "--calcMode", calcMode, 
+            "--minBiasXsec", minBiasXsec, "--maxPileupBin", maxPileupBin, "--numPileupBins", numPileupBins, 
+@@ -774,8 +740,6 @@ def main(opts, args):
+     allowedColl = ["2015", "2016"]
+     if opts.collisions == "2016":
+         PileUpJSON = PileUpJSON_2016
+-        if opts.offsite:
+-            PileUpJSON = "pileup_latest.txt"
+     elif opts.collisions == "2015":
+         PileUpJSON = PileUpJSON_2015
+     else:
+@@ -879,15 +843,7 @@ def main(opts, args):
+         fOUT     = os.path.join(task, "results", "PileUp.root")
+         hName = "pileup"
+         PrintProgressBar(task + ", PileupCalc ", index, len(files), "[" + os.path.basename(jsonfile) + "]")
+-
+-        if opts.offsite:
+-            puJsonFile = os.path.join(os.getcwd(), PileUpJSON.split("/")[-1])
+-            if not os.path.isfile(puJsonFile):
+-                msg =  "\nOn LPC, the AFS is not mounted anymore (after 20-Feb-2018). So you must copy this file locally with scp!"
+-                raise Exception("Could not find pileup json file \"%s\".%s" % (puJsonFile, msg) )
+-            else:
+-                PileUpJSON = puJsonFile
+-        ret, output = CallPileupCalc(task, fOUT, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="100", numPileupBins="100", pileupHistName=hName, trigger=opts.trigger)
++        ret, output = CallPileupCalc(task, fOUT, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="100", numPileupBins="100", pileupHistName=hName)
+ 
+             
+         Verbose("Task %s, changing the --minBiasXsec value in the pileupCalc.py command by +0.05 around the chosen central value." % (task) )
+@@ -1048,8 +1004,6 @@ if __name__ == "__main__":
+                       help="The output ROOT files will be transfered to appropriate EOS paths [default: '%s']" % (TRANSFERTOEOS) )
+     parser.add_option("--ignore-logs", dest="ignoreLogs",default=False, action="store_true",
+                       help="Does not check the existence of log files. [default: False]")
+-    parser.add_option("--trigger", dest="trigger",default="", type="string",
+-                      help="Calculate an extra pu distribution for a chosen trigger")
+ 
+ 
+     (opts, args) = parser.parse_args()
+diff --git a/MiniAOD2TTree/scripts/hplusMergeOutput.py b/MiniAOD2TTree/scripts/hplusMergeOutput.py
+index b3c2db5..2add720 100755
+--- a/MiniAOD2TTree/scripts/hplusMergeOutput.py
++++ b/MiniAOD2TTree/scripts/hplusMergeOutput.py
+@@ -1523,7 +1523,7 @@ def GetMergeCommand(mergeName, inputFiles, opts):
+             cmd = GetHaddCommand(opts, mergeName, inputFiles)
+     return cmd
+ 
+-@timeout(1800) # 1800 seconds = 30 minutes for this functon to timeout
++@timeout(600) # 600 seconds = 10 minutes for this functon to timeout
+ def MergeFiles(mergeName, inputFiles, opts):
+     '''
+     Merges ROOT files, either stored locally or on EOS.
+@@ -2251,7 +2251,8 @@ def main(opts, args):
+     Verbose("Merged files%s:" % GetDeleteMessage(opts), False)
+     
+     Verbose("Merging completed! Now to clean duplicate folders and write PU histos", True)
+-    mcrabTask = DeleteFoldersAndWritePU(mcrabTask)
++    if 0: #alex-tmp
++        mcrabTask = DeleteFoldersAndWritePU(mcrabTask)
+ 
+     # Print summary table using reports
+     PrintSummary(mcrabTask)
+@@ -2309,7 +2310,7 @@ def DeleteFoldersAndWritePU(mcrabTask):
+         for j, f in enumerate(crabTask.GetMergedFiles(), 0):
+ 
+             # Add pile-up histos (for data only!)
+-            isData, fOUT = IsDataRootfile(f) #alex
++            isData, fOUT = IsDataRootfile(f)
+             time_start = time.time()
+             if isData:
+                 PrintProgressBar("Write PU histos (isData=%s)" % (isData) , j, nMergedFiles, os.path.basename(f))
+diff --git a/MiniAOD2TTree/src/JetDumper.cc b/MiniAOD2TTree/src/JetDumper.cc
+index a9a355e..df7d933 100644
+--- a/MiniAOD2TTree/src/JetDumper.cc
++++ b/MiniAOD2TTree/src/JetDumper.cc
+@@ -82,6 +82,10 @@ JetDumper::JetDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<ed
+       systJERup = new FourVectorDumper[inputCollections.size()];
+       systJERdown = new FourVectorDumper[inputCollections.size()];
+     }
++    // Marina - start
++    nSubjets     = new std::vector<int>[inputCollections.size()];
++    hasBTagSubjet= new std::vector<bool>[inputCollections.size()];
++    // Marina - end
+ }
+ 
+ JetDumper::~JetDumper(){}
+@@ -141,6 +145,14 @@ void JetDumper::book(TTree* tree){
+       systJERup[i].book(tree, name, "JERup");
+       systJERdown[i].book(tree, name, "JERdown");
+     }
++    
++    // Marina - start
++    bool checkSubjets = inputCollections[i].getUntrackedParameter<bool>("checkSubjets",false);
++    if (checkSubjets){
++      tree->Branch((name+"_nSubjets").c_str(),&nSubjets[i]);
++      tree->Branch((name+"_hasBTagSubjet").c_str(), &hasBTagSubjet[i]);
++    }
++    // Marina - end
+   }
+ }
+ 
+@@ -171,9 +183,6 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
+       }
+     }
+ */
+-    
+-
+-
+     edm::Handle <reco::GenParticleCollection> genParticlesHandle;
+     if (!iEvent.isRealData())
+       iEvent.getByToken(genParticleToken, genParticlesHandle);
+@@ -183,6 +192,10 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
+ 	std::vector<std::string> userfloatNames = inputCollections[ic].getParameter<std::vector<std::string> >("userFloats");
+ 	std::vector<std::string> userintNames = inputCollections[ic].getParameter<std::vector<std::string> >("userInts");
+ 	
++	// Marina - start
++	bool checkSubjets = inputCollections[ic].getUntrackedParameter<bool>("checkSubjets",false);
++	// Marina - end
++
+         edm::Handle<edm::View<pat::Jet>> jetHandle;
+         iEvent.getByToken(jetToken[ic], jetHandle);
+ 
+@@ -363,6 +376,22 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
+                   // JER
+ */                
+                 }
++		// Marina - start		
++		if (checkSubjets){
++		  auto &subjets = obj.subjets("SoftDrop");
++		  
++		  int nSub = 0;
++		  bool hasBSubjet = false;
++		  for (auto const & sj: subjets)
++		    {
++		      float csv = sj->bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags");
++		      if (csv >= 0.8484) hasBSubjet = true;   // Medium working point (Recommended for 2016 Analysis)
++		      nSub++;
++		    }
++		  nSubjets[ic].push_back(nSub);
++		  hasBTagSubjet[ic].push_back(hasBSubjet);
++		}
++		// Marina - end
+             }
+         }
+     }
+@@ -403,6 +432,10 @@ void JetDumper::reset(){
+           systJERup[ic].reset();
+           systJERdown[ic].reset();
+ 	}
++	// Marina - start
++	nSubjets[ic].clear();
++	hasBTagSubjet[ic].clear();
++	// Marina - end
+     }
+     for(size_t ic = 0; ic < inputCollections.size()*nDiscriminators; ++ic){
+         discriminators[ic].clear();
+diff --git a/MiniAOD2TTree/src/TriggerDumper.cc b/MiniAOD2TTree/src/TriggerDumper.cc
+index bfaa194..166ec02 100644
+--- a/MiniAOD2TTree/src/TriggerDumper.cc
++++ b/MiniAOD2TTree/src/TriggerDumper.cc
+@@ -270,6 +270,26 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
+ 	  //std::cout << "Trigger Tau " << patTriggerObject.p4().Pt() << std::endl;
+ 	}//triggerTau
+ 
++
++
++	////////
++	// Trigger object is of type Muon
++        if(patTriggerObject.id(trigger::TriggerMuon)){
++          bool fired = false;
++          for(size_t i = 0; i < trgMatchPaths.size(); ++i){
++            if(patTriggerObject.hasPathName( trgMatchPaths[i], false, true )) fired = true;
++          }
++          if(fired){
++//            HLTTau_pt.push_back(patTriggerObject.p4().Pt());
++//            HLTTau_eta.push_back(patTriggerObject.p4().Eta());
++//            HLTTau_phi.push_back(patTriggerObject.p4().Phi());
++//            HLTTau_e.push_back(patTriggerObject.p4().E());
++          }
++          std::cout << "Trigger Muon " << patTriggerObject.p4().Pt() << std::endl;
++        }//triggerMuon
++
++	////////
++
+ 	// // Trigger object is of type Jet
+ 	// if(patTriggerObject.id(trigger::TriggerJet)){
+ 	//   bool fired = false;
+diff --git a/MiniAOD2TTree/test/crabConfig.py b/MiniAOD2TTree/test/crabConfig.py
+index 72e8268..701f92a 100644
+--- a/MiniAOD2TTree/test/crabConfig.py
++++ b/MiniAOD2TTree/test/crabConfig.py
+@@ -10,8 +10,6 @@ https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookCRAB3Tutorial#Setup_the_e
+ from WMCore.Configuration import Configuration
+ from CRABClient.UserUtilities import getUsernameFromSiteDB
+ 
+-# Definitions
+-jecDB = ['Summer16_23Sep2016AllV4_DATA_JEC.db','Summer16_23Sep2016V4_MC_JEC.db','Spring16_25nsV10_MC_JER.db']
+ 
+ #================================================================================================
+ # General Section: The user specifies generic parameters about the request (e.g. request name).
+@@ -36,10 +34,7 @@ config.JobType.pluginName = 'Analysis'
+ config.JobType.psetName = 'miniAOD2TTree_cfg.py'
+ config.JobType.pyCfgParams = ''
+ config.JobType.outputFiles = ['miniaod2tree.root']
+-config.JobType.inputFiles  = ['jec']
+-config.JobType.inputFiles.extend(jecDB)
+-
+-
++config.JobType.inputFiles = ['Summer16_23Sep2016AllV4_DATA_JEC.db','Summer16_23Sep2016V4_MC_JEC.db','Spring16_25nsV10_MC_JER.db']
+ # options:
+ #config.JobType.generator
+ #config.JobType.inputFiles
+diff --git a/MiniAOD2TTree/test/miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py b/MiniAOD2TTree/test/miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py
+index 2fcf7df..798cc6a 100644
+--- a/MiniAOD2TTree/test/miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py
++++ b/MiniAOD2TTree/test/miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py
+@@ -15,7 +15,7 @@ from HiggsAnalysis.MiniAOD2TTree.tools.HChOptions import getOptionsDataVersion
+ maxEvents    = 100
+ maxWarnings  = 100
+ reportEvery  = 100
+-testWithData = False
++testWithData = True
+ if testWithData:
+     dataVersion  = "80Xdata"
+     datasetFiles = [
+@@ -34,10 +34,10 @@ if testWithData:
+ else:
+     dataVersion  = "80Xmc" 
+     datasetFiles = [
+-        #'/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/0693E0E7-97BE-E611-B32F-0CC47A78A3D8.root',
+-        #'/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/0806AB92-99BE-E611-9ECD-0025905A6138.root',
+-        #'/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/165F54A0-A3BE-E611-B3F7-0025905A606A.root',
+-        #'/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/18E31463-B3BE-E611-B6A3-0CC47A4D7678.root',
++        # '/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/0693E0E7-97BE-E611-B32F-0CC47A78A3D8.root',
++        # '/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/0806AB92-99BE-E611-9ECD-0025905A6138.root',
++        # '/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/165F54A0-A3BE-E611-B3F7-0025905A606A.root',
++        # '/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/18E31463-B3BE-E611-B6A3-0CC47A4D7678.root',
+         # '/store/mc/RunIISummer16MiniAODv2/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/110000/0055B499-54B6-E611-9F86-FA163E1F94C5.root',
+         # '/store/mc/RunIISummer16MiniAODv2/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/110000/02B77462-7CB5-E611-A061-0025905B8568.root',
+         # '/store/mc/RunIISummer16MiniAODv2/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/110000/02CDB360-51B5-E611-A568-002590747E0E.root',
+@@ -134,7 +134,6 @@ process.load("HiggsAnalysis/MiniAOD2TTree/Tau_cfi")
+ process.load("HiggsAnalysis/MiniAOD2TTree/Electron_cfi")
+ process.load("HiggsAnalysis/MiniAOD2TTree/Muon_cfi")
+ process.load("HiggsAnalysis/MiniAOD2TTree/Jet_cfi")
+-process.load("HiggsAnalysis/MiniAOD2TTree/FatJet_cfi")
+ process.load("HiggsAnalysis/MiniAOD2TTree/SecondaryVertex_cfi")
+ process.load("HiggsAnalysis/MiniAOD2TTree/Top_cfi")
+ process.load("HiggsAnalysis/MiniAOD2TTree/MET_cfi")
+@@ -189,8 +188,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
+     Electrons = process.Electrons,
+     Muons     = process.Muons,
+     Jets      = process.Jets,
+-    FatJets   = process.FatJets,
+-    #SoftBTag  = process.SoftBTag,
++    SoftBTag  = process.SoftBTag,
+     Top       = process.Top,
+     METs      = process.METs,
+     GenWeights = cms.VPSet(
+@@ -229,7 +227,6 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
+             saveHplusInfo       = cms.untracked.bool(False),
+         )
+     ),
+-
+ )
+ 
+ #================================================================================================ 
+@@ -246,41 +243,22 @@ process.skim.TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.ge
+ from HiggsAnalysis.MiniAOD2TTree.CommonFragments import produceCustomisations
+ produceCustomisations(process, dataVersion.isData()) # This produces process.CustomisationsSequence which needs to be included to path
+ 
+-from HiggsAnalysis.MiniAOD2TTree.CommonFragments import produceAK8Customisations
+-produceAK8Customisations(process, dataVersion.isData())   # This produces process.AK8CustomisationsSequence which needs to be included to path
+-
+-
+-# Set up electron MVA ID for Skimming
+-# https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentificationRun2
+-from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
+-
+-print "=== Adding Electron MVA: ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values"
+-switchOnVIDElectronIdProducer(process, DataFormat.MiniAOD)
+-
+-for idmod in ['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring16_GeneralPurpose_V1_cff']:
+-    setupAllVIDIdsInModule(process, idmod, setupVIDElectronSelection)
+ 
+ #================================================================================================ 
+ # Module execution
+ #================================================================================================ 
+ process.runEDFilter = cms.Path(process.PUInfo*
+                                process.TopPtProducer*
+-                               process.egmGsfElectronIDSequence*
+                                process.skimCounterAll*
+                                process.skim*
+                                process.skimCounterPassed*
+                                process.CustomisationsSequence*
+-                               process.AK8CustomisationsSequence*
+                                process.dump)
+ 
+ 
+ #process.output = cms.OutputModule("PoolOutputModule",
+ #   outputCommands = cms.untracked.vstring(
+-#       "keep *_*AK8*_*_*",
+-#       "keep *_*AK4*_*_*",
+-#       "keep *_selected*_*_*",
+-#       "keep *_updated*_*_*",
+-##      "keep *",
++#       "keep *",
+ #   ),
+ #   fileName = cms.untracked.string("CMSSW.root")
+ #)
+diff --git a/MiniAOD2TTree/test/miniAOD2TTree_JetTriggersSkim_cfg.py b/MiniAOD2TTree/test/miniAOD2TTree_JetTriggersSkim_cfg.py
+index a84d677..588f542 100644
+--- a/MiniAOD2TTree/test/miniAOD2TTree_JetTriggersSkim_cfg.py
++++ b/MiniAOD2TTree/test/miniAOD2TTree_JetTriggersSkim_cfg.py
+@@ -10,44 +10,33 @@ from HiggsAnalysis.MiniAOD2TTree.tools.HChOptions import getOptionsDataVersion
+ 
+ 
+ #================================================================================================  
+-# Options
++#- Options
+ #================================================================================================  
+-DataSet = "SingleMu" # Options = ["SingleMu", "JetHT"]
++DataSet = "SingleMu" #"SingleMu"# "JetHT"
+ 
+ maxEvents    = 1000
+ maxWarnings  = 100
+ reportEvery  = 100
+-testWithData = False
+-if testWithData:
+-    dataVersion  = "80Xdata"
+-    datasetFiles = [
+-        '/store/data/Run2016C/JetHT/MINIAOD/18Apr2017-v1/100000/000C9243-5634-E711-A2A8-0CC47A7C3612.root',
+-        '/store/data/Run2016C/JetHT/MINIAOD/18Apr2017-v1/100000/04BFE78E-5D34-E711-BCA5-0025905A48D8.root',
+-        '/store/data/Run2016C/JetHT/MINIAOD/18Apr2017-v1/100000/0A3F8104-6434-E711-9E9A-0CC47A4D76C6.root',
+-        '/store/data/Run2016C/JetHT/MINIAOD/18Apr2017-v1/100000/0C95C3F7-3534-E711-8FBB-0CC47A7C3612.root',
+-        '/store/data/Run2016C/JetHT/MINIAOD/18Apr2017-v1/100000/1032026F-4334-E711-84CE-0CC47A4C8E3C.root',
+-        '/store/data/Run2016C/JetHT/MINIAOD/18Apr2017-v1/100000/10898316-5034-E711-8167-0CC47A4D7644.root',
+-        '/store/data/Run2016C/JetHT/MINIAOD/18Apr2017-v1/100000/12062AF2-3A34-E711-BA6A-003048FFD79E.root',
+-        '/store/data/Run2016C/JetHT/MINIAOD/18Apr2017-v1/100000/12A273CE-2235-E711-A7C7-0025905A605E.root',
+-        '/store/data/Run2016C/JetHT/MINIAOD/18Apr2017-v1/100000/12CED57A-4334-E711-961B-003048FFD734.root',
+-        '/store/data/Run2016C/JetHT/MINIAOD/18Apr2017-v1/100000/14BEF0C3-4234-E711-B811-0025905A48E4.root',
+-        '/store/data/Run2016C/JetHT/MINIAOD/18Apr2017-v1/100000/16E75845-5634-E711-915E-0025905A60DE.root'
+-        ]
+-else:
+-    dataVersion  = "80Xmc"
+-    datasetFiles = [
+-        '/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/0693E0E7-97BE-E611-B32F-0CC47A78A3D8.root',
+-        '/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/0806AB92-99BE-E611-9ECD-0025905A6138.root',
+-        '/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/165F54A0-A3BE-E611-B3F7-0025905A606A.root',
+-        '/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/18E31463-B3BE-E611-B6A3-0CC47A4D7678.root',
+-        # '/store/mc/RunIISummer16MiniAODv2/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/110000/0055B499-54B6-E611-9F86-FA163E1F94C5.root',
+-        # '/store/mc/RunIISummer16MiniAODv2/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/110000/02B77462-7CB5-E611-A061-0025905B8568.root',
+-        # '/store/mc/RunIISummer16MiniAODv2/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/110000/02CDB360-51B5-E611-A568-002590747E0E.root',
+-        # '/store/mc/RunIISummer16MiniAODv2/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/110000/0486046D-0BB6-E611-B533-002590D9D8C0.root',
+-        #'/store/mc/RunIISummer16MiniAODv2/ZJetsToQQ_HT600toInf_13TeV-madgraph/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/110000/16DC0526-F4FA-E611-938E-6CC2173BBA40.root',
+-        #'/store/mc/RunIISummer16MiniAODv2/ZJetsToQQ_HT600toInf_13TeV-madgraph/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/110000/18DFBF7B-B5FC-E611-80D2-002481DE49B6.root',
+-        #'/store/mc/RunIISummer16MiniAODv2/ZJetsToQQ_HT600toInf_13TeV-madgraph/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/110000/20C84FF5-11FB-E611-AA3C-C4346BC70B58.root'
+-        ]
++##dataVersion  = "80Xdata"
++##datasetFiles = [
++##   '/store/data/Run2016B/SingleMuon/MINIAOD/03Feb2017_ver2-v2/100000/000C6E52-8BEC-E611-B3FF-0025905C42FE.root',
++#    '/store/data/Run2016B/SingleMuon/MINIAOD/03Feb2017_ver2-v2/100000/001E3E7D-57EB-E611-8469-0CC47A7C35D2.root',
++#    '/store/data/Run2016B/SingleMuon/MINIAOD/03Feb2017_ver2-v2/100000/002BBC83-57EB-E611-9701-0CC47A4D7692.root',
++#    '/store/data/Run2016B/SingleMuon/MINIAOD/03Feb2017_ver2-v2/100000/00359BA2-35EC-E611-AD92-0025905C3E68.root',
++#    '/store/data/Run2016B/SingleMuon/MINIAOD/03Feb2017_ver2-v2/100000/005BC53A-4DEC-E611-994F-0025905C43EA.root'
++
++#    '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/150/00000/66051AAF-D819-E611-BD3D-02163E011D55.root',
++#                 '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/1E4ABD0D-DA19-E611-9396-02163E014258.root',
++#                 '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/224967FC-D919-E611-9902-02163E0122C2.root',
++
++dataVersion  = "80Xmc" 
++datasetFiles = [
++    '/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/165F54A0-A3BE-E611-B3F7-0025905A606A.root'
++#    '/store/mc/RunIISummer16MiniAODv2/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/110000/0055B499-54B6-E611-9F86-FA163E1F94C5.root',
++#    '/store/mc/RunIISummer16MiniAODv2/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/110000/02B77462-7CB5-E611-A061-0025905B8568.root',
++  #  '/store/mc/RunIISummer16MiniAODv2/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/110000/02CDB360-51B5-E611-A568-002590747E0E.root',
++  #  '/store/mc/RunIISummer16MiniAODv2/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/110000/0486046D-0BB6-E611-B533-002590D9D8C0.root',
++    ]
+     
+ # For debugging purposes
+ debug       = False
+@@ -133,11 +122,9 @@ process.load("HiggsAnalysis/MiniAOD2TTree/Tau_cfi")
+ process.load("HiggsAnalysis/MiniAOD2TTree/Electron_cfi")
+ process.load("HiggsAnalysis/MiniAOD2TTree/Muon_cfi")
+ process.load("HiggsAnalysis/MiniAOD2TTree/Jet_cfi")
+-process.load("HiggsAnalysis/MiniAOD2TTree/FatJet_cfi")
+ process.load("HiggsAnalysis/MiniAOD2TTree/Top_cfi")
+ process.load("HiggsAnalysis/MiniAOD2TTree/MET_cfi")
+ process.load("HiggsAnalysis/MiniAOD2TTree/METNoiseFilter_cfi")
+-
+ process.METNoiseFilter.triggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getMETFilteringProcess())) 
+ print "check tau",process.Taus_TauPOGRecommendation[0]
+ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
+@@ -167,7 +154,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
+             "HLT_PFHT450_SixJet40_BTagCSV_p056_v",
+             "HLT_PFHT400_SixJet30_v",
+             "HLT_PFHT450_SixJet40_v",
+-            "HLT_PFJet450_v", 
++            "HLT_PFJet450_v", #ATHER
+         ),
+ 	L1Extra        = cms.InputTag("l1extraParticles:MET"),
+ 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
+@@ -181,7 +168,6 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
+     Electrons = process.Electrons,
+     Muons     = process.Muons,
+     Jets      = process.Jets,
+-    FatJets   = process.FatJets,
+     Top       = process.Top,
+     METs      = process.METs,
+     GenWeights = cms.VPSet(
+@@ -240,31 +226,16 @@ process.skim.TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.ge
+ from HiggsAnalysis.MiniAOD2TTree.CommonFragments import produceCustomisations
+ produceCustomisations(process,dataVersion.isData()) # This produces process.CustomisationsSequence which needs to be included to path
+ 
+-from HiggsAnalysis.MiniAOD2TTree.CommonFragments import produceAK8Customisations
+-produceAK8Customisations(process, dataVersion.isData())   # This produces process.AK8CustomisationsSequence which needs to be included to path                                                                     
+-
+-# Set up electron MVA ID for Skimming
+-# https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentificationRun2
+-from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
+-
+-print "=== Adding Electron MVA: ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values"
+-switchOnVIDElectronIdProducer(process, DataFormat.MiniAOD)
+-
+-for idmod in ['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring16_GeneralPurpose_V1_cff']:
+-    setupAllVIDIdsInModule(process, idmod, setupVIDElectronSelection)
+-
+ 
+ #================================================================================================ 
+ # Module execution
+ #================================================================================================ 
+ process.runEDFilter = cms.Path(process.PUInfo*
+                                process.TopPtProducer*
+-                               process.egmGsfElectronIDSequence*
+                                process.skimCounterAll*
+                                process.skim*
+                                process.skimCounterPassed*
+                                process.CustomisationsSequence*
+-                               process.AK8CustomisationsSequence*
+                                process.dump)
+ 
+ 
+diff --git a/MiniAOD2TTree/test/miniAOD2TTree_METLegSkim_cfg.py b/MiniAOD2TTree/test/miniAOD2TTree_METLegSkim_cfg.py
+index 8abe739..d7f50a6 100644
+--- a/MiniAOD2TTree/test/miniAOD2TTree_METLegSkim_cfg.py
++++ b/MiniAOD2TTree/test/miniAOD2TTree_METLegSkim_cfg.py
+@@ -54,8 +54,6 @@ process.HBHENoiseFilterResultProducer.IgnoreTS4TS5ifJetInLowBVRegion=cms.bool(Fa
+ process.HBHENoiseFilterResultProducer.defaultDecision = cms.string("HBHENoiseFilterResultRun2Loose")
+ # Do not apply EDfilters for HBHE noise, the discriminators for them are saved into the ttree
+ 
+-process.load("HiggsAnalysis.MiniAOD2TTree.TriggerSkim_cfi")
+-
+ process.load("HiggsAnalysis/MiniAOD2TTree/PUInfo_cfi")
+ process.load("HiggsAnalysis/MiniAOD2TTree/TopPt_cfi")
+ process.load("HiggsAnalysis/MiniAOD2TTree/Tau_cfi")
+@@ -69,7 +67,6 @@ process.METNoiseFilter.triggerResults = cms.InputTag("TriggerResults::"+str(data
+ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
+     OutputFileName = cms.string("miniaod2tree.root"),
+     PUInfoInputFileName = process.PUInfo.OutputFileName,
+-    PUInfoPSInputFileName = process.PUInfoPS.OutputFileName,
+     TopPtInputFileName = process.TopPtProducer.OutputFileName,
+     CodeVersion = cms.string(git.getCommitId()),
+     DataVersion = cms.string(str(dataVersion.version)),
+@@ -129,9 +126,7 @@ produceCustomisations(process,dataVersion.isData()) # This produces process.Cust
+             
+ # module execution
+ process.runEDFilter = cms.Path(process.PUInfo*
+-                               process.skimCounterAll*
+-                               process.trgskim*
+-                               process.PUInfoPS*
++                               process.skimCounterAll*  
+                                process.skim*
+                                process.skimCounterPassed*
+                                process.CustomisationsSequence*
+diff --git a/MiniAOD2TTree/test/miniAOD2TTree_SignalAnalysisSkim_cfg.py b/MiniAOD2TTree/test/miniAOD2TTree_SignalAnalysisSkim_cfg.py
+index 5a0fa88..3d6df6b 100644
+--- a/MiniAOD2TTree/test/miniAOD2TTree_SignalAnalysisSkim_cfg.py
++++ b/MiniAOD2TTree/test/miniAOD2TTree_SignalAnalysisSkim_cfg.py
+@@ -12,7 +12,7 @@ dataVersion = "80Xmc"
+ options, dataVersion = getOptionsDataVersion(dataVersion)
+ 
+ process.maxEvents = cms.untracked.PSet(
+-    input = cms.untracked.int32(-1)
++    input = cms.untracked.int32(50)
+ )
+ 
+ process.load("FWCore/MessageService/MessageLogger_cfi")
+@@ -30,8 +30,12 @@ process.source = cms.Source("PoolSource",
+     fileNames = cms.untracked.vstring(
+ #       '/store/data/Run2016H/Tau/MINIAOD/03Feb2017_ver2-v1/100000/00A17AC6-8AEB-E611-9A86-A0369F83627E.root',
+ #       '/store/data/Run2016B/Tau/MINIAOD/PromptReco-v2/000/273/150/00000/64EFFDF2-D719-E611-A0C3-02163E01421D.root',
+-#       '/store/mc/RunIISummer16MiniAODv2/ChargedHiggs_HplusTB_HplusToTauNu_M-200_13TeV_amcatnlo_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/066DC28C-02CB-E611-B4F0-5065F382B2D1.root'
+-	'/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/0693E0E7-97BE-E611-B32F-0CC47A78A3D8.root'
++
++       '/store/mc/RunIISummer16MiniAODv2/ChargedHiggs_HplusTB_HplusToTauNu_M-200_13TeV_amcatnlo_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/066DC28C-02CB-E611-B4F0-5065F382B2D1.root'
++#	'/store/user/mlotti/CRAB_PrivateMC/CRAB3_Hplus_PAT/180613_123703/0000/cHiggs_13TeV_TuneCUETP8M1_cfi_GEN_SIM_RECOBEFMIX_DIGIPREMIX_S2_DATAMIX_L1_DIGI2RAW_L1Reco_RECO_HLT_PAT_8.root'
++
++#	'/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/0693E0E7-97BE-E611-B32F-0CC47A78A3D8.root'
++#	'/store/user/mlotti/MinBias/CRAB3_test5_PAT/180531_132305/0000/cHiggs_13TeV_TuneCUETP8M1_cfi_GEN_SIM_RECOBEFMIX_DIGIPREMIX_S2_DATAMIX_L1_DIGI2RAW_L1Reco_RECO_HLT_PAT_1.root'
+     )
+ )
+ 
+
