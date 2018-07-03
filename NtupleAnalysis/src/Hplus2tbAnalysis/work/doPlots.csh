@@ -18,7 +18,7 @@ endif
 set PSEUDO_MCRAB_DIR = ${1}
 
 ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --ratio --folder  PUDependency --url
-./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR  --folder  counters/weighted --url
+./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --ratio --folder  counters/weighted --url
 ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --ratio --folder  eSelection_Veto --url 
 ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --ratio --folder  muSelection_Veto --url
 ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --ratio --folder  tauSelection_Veto --url
