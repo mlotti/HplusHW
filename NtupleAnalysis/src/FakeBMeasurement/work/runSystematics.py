@@ -144,33 +144,27 @@ def main():
 
     # Set splitting of phase-space (first bin is below first edge value and last bin is above last edge value)
     allSelections.CommonPlots.histogramSplitting = [               
-        ### 2D binning (Pt, Eta)
-        PSet(label="TetrajetBjetPt" , binLowEdges=[50, 110], useAbsoluteValues=False),
         #PSet(label="TetrajetBjetPt" , binLowEdges=[55], useAbsoluteValues=False),
+        PSet(label="TetrajetBjetPt" , binLowEdges=[55, 110], useAbsoluteValues=False),
         PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True),
-        ### 1D binning (Eta) 
         #PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True), #AN_v4
         ]
     
     # allSelections.BJetSelection.triggerMatchingApply = True # at least 1 trg b-jet matched to offline b-jets
     # allSelections.Trigger.triggerOR = ["HLT_PFHT400_SixJet30_DoubleBTagCSV_p056"]
-
-    #allSelections.FakeBTopSelectionBDT.LdgTopDefinition = "Pt" # [default: "MVA"] (options: "MVA", "Pt")
-    allSelections.FakeBTopSelectionBDT.TopMassLowCutDirection = ">="   # [default: ">="]
-    allSelections.FakeBTopSelectionBDT.TopMassLowCutValue     =  0.0   # [default: 0.0] # 90.0
-    allSelections.FakeBTopSelectionBDT.TopMassUppCutDirection = "<="   # [default: "<="]
-    allSelections.FakeBTopSelectionBDT.TopMassUppCutValue     = 600.0  # [default: 600.0] #250
-    allSelections.FakeBTopSelectionBDT.WMassLowCutDirection   = ">="   # [default: ">="]
-    allSelections.FakeBTopSelectionBDT.WMassLowCutValue       =   0.0  # [default: 0.0]
-    allSelections.FakeBTopSelectionBDT.WMassUppCutDirection   = ">="   # [default: ">="] # "<="
-    allSelections.FakeBTopSelectionBDT.WMassUppCutValue       =   0.0  # [default: 0.0]  # 150.0
-    allSelections.FakeBTopSelectionBDT.CSV_bDiscCutDirection  = ">="
-    allSelections.FakeBTopSelectionBDT.CSV_bDiscCutValue      = 0.8484 # [default: 0.8484], 0.5426
-    allSelections.TopSelectionBDT.MVACutValue                 =  0.40 # [default:  0.40]
-    allSelections.FakeBTopSelectionBDT.MVACutValue            = -1.00 # [default: -1.00]
-    allSelections.FakeBMeasurement.LdgTopMVACutValue          = allSelections.TopSelectionBDT.MVACutValue
-    allSelections.FakeBMeasurement.SubldgTopMVACutValue       = allSelections.TopSelectionBDT.MVACutValue
-    print "=== run.py: Default parameters overwritten!"
+    # allSelections.TopSelectionBDT.TopMassLowCutDirection = ">="   # [default: ">="]
+    # allSelections.TopSelectionBDT.TopMassLowCutValue     =  0.0   # [default: 0.0] # 90.0
+    # allSelections.TopSelectionBDT.TopMassUppCutDirection = "<="   # [default: "<="]
+    # allSelections.TopSelectionBDT.TopMassUppCutValue     = 600.0  # [default: 600.0] #250
+    # allSelections.TopSelectionBDT.WMassLowCutDirection   = ">="   # [default: ">="]
+    # allSelections.TopSelectionBDT.WMassLowCutValue       =   0.0  # [default: 0.0]
+    # allSelections.TopSelectionBDT.WMassUppCutDirection   = ">="   # [default: ">="] # "<="
+    # allSelections.TopSelectionBDT.WMassUppCutValue       =   0.0  # [default: 0.0]  # 150.0
+    # allSelections.TopSelectionBDT.CSV_bDiscCutDirection  = ">="
+    # allSelections.TopSelectionBDT.CSV_bDiscCutValue      = 0.8484 # [default: 0.8484], 0.5426
+    # allSelections.TopSelectionBDT.MVACutValue            =  0.40 # [default:  0.40]
+    # allSelections.FakeBMeasurement.LdgTopMVACutValue     = allSelections.TopSelectionBDT.MVACutValue
+    # allSelections.FakeBMeasurement.SubldgTopMVACutValue  = allSelections.TopSelectionBDT.MVACutValue
 
     # ================================================================================================
     # Command Line Options

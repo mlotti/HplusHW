@@ -344,7 +344,7 @@ def _setupToptagMisid(topTagPset, topTagMisidFilename, direction, variationInfo)
     era      = "2016" #fixme
     fullname = os.path.join(os.getenv("HIGGSANALYSIS_BASE"), "NtupleAnalysis", "data", topTagMisidFilename)
     if not os.path.exists(fullname):
-        raise Exception("Could not find the btag efficiency json file! (tried: %s)"%fullname)
+        raise Exception("Could not find the top-tag  misid json file! (tried: %s)"%fullname)
 
     # Read the json file
     Verbose("Opening file \"%s\" for reading the top-tag misidentification rates" % (fullname), True)
@@ -445,7 +445,7 @@ def _setupToptagEfficiency(topTagPset, topTagEfficiencyFilename, direction, vari
     era      = "2016" #fixme
     fullname = os.path.join(os.getenv("HIGGSANALYSIS_BASE"), "NtupleAnalysis", "data", topTagEfficiencyFilename)
     if not os.path.exists(fullname):
-        raise Exception("Could not find the btag efficiency json file! (tried: %s)" % fullname)
+        raise Exception("Could not find the top-tag efficiency json file! (tried: %s)" % fullname)
 
     # Read the json file
     Print("Opening file \"%s\" for reading the top-tag efficiencies" % (fullname), True)
