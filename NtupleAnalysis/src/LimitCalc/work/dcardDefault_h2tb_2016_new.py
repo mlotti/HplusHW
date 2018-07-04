@@ -110,9 +110,9 @@ def getFakeBSystematics(myTTBarSystematics, OptionShapeSystematics, verbose=Fals
 # Options
 #================================================================================================  
 OptionTest                             = False
-OptionPaper                            = True  # (units, ..)
-OptionIncludeSystematics               = True # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
-OptionShapeSystematics                 = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
+OptionPaper                            = True
+OptionIncludeSystematics               = False # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
+OptionShapeSystematics                 = False # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionDoControlPlots                   = True  # [default: True]   (Produce control plots defined at end of this file)
 MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
 DataCardName                           = "Hplus2tb_13TeV"
@@ -1416,10 +1416,10 @@ ControlPlots.append(hLdgHiggsMass)
 ControlPlots.append(hVertices)
 ControlPlots.append(hNjets)
 ### ControlPlots.append(hNBjets) #No agreement expected
-ControlPlots.append(hJetPt)
-ControlPlots.append(hJetEta)
-ControlPlots.append(hBJetPt)
-ControlPlots.append(hBJetEta)
+# ControlPlots.append(hJetPt)
+# ControlPlots.append(hJetEta)
+# ControlPlots.append(hBJetPt)
+# ControlPlots.append(hBJetEta)
 ### ControlPlots.append(hBtagDiscriminator) #No agreement expected
 ControlPlots.append(hSubldgTopPt)
 ControlPlots.append(hSubldgTopMass)
@@ -1466,4 +1466,4 @@ if OptionTest:
     ControlPlots.append(hSubldgTopBjetPt)  # No agreement expected
     ControlPlots.append(hSubldgTopBjetEta) # No agreement expected
     ControlPlots.append(hSubldgTopBjetBdisc) # No agreement expected
-    MassPoints = [500]
+    MassPoints = [500, 650]

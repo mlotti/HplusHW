@@ -368,7 +368,8 @@ private:
 
  
   // Input parameters
-  const DirectionalCut<double> cfg_MVACut;
+  const DirectionalCut<double> cfg_AnyTopMVACut;
+  const DirectionalCut<double> cfg_TopMVACut;
   const DirectionalCut<double> cfg_TopMassLowCut;
   const DirectionalCut<double> cfg_TopMassUppCut;
   const DirectionalCut<double> cfg_WMassLowCut;
