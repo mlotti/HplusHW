@@ -54,9 +54,11 @@ struct SelectedTrijets{
   Jet Jet1;
   Jet Jet2;
   Jet BJet;
+  double MVA;
   math::XYZTLorentzVector TrijetP4;
   math::XYZTLorentzVector DijetP4;
-  double MVA;
+  bool isGenuine;
+  bool isTagged;
 };
 
 
@@ -72,6 +74,8 @@ public:
 
     // Status of passing event selection
     bool passedSelection() const { return bPassedSelection; }    
+    // Status of passing presence of any two tops (with BDT > -1.0) and free b-jet
+    bool passedAnyTwoTopsAndFreeB() const { return bHasTwoTopsAndFreeB;}
     // Status of passing both MVA cuts
     bool passedBothMVA() const { return bPassedBothMVA; }
     // Status of passing MVA cut on ldg MVA top
@@ -205,22 +209,31 @@ public:
     const std::vector<Jet>& getSelectedTopsJet2() const { return fSelectedTopsJet2; }
     const std::vector<Jet>& getSelectedTopsBJet() const { return fSelectedTopsBJet; }
     const std::vector<float>& getSelectedTopsMVA() const { return fSelectedTopsMVA; }
+    const size_t getSelectedTopsSize() const { return fSelectedTopsMVA.size(); }
+
     const std::vector<Jet>& getNotSelectedTopsJet1() const { return fNotSelectedTopsJet1; }
     const std::vector<Jet>& getNotSelectedTopsJet2() const { return fNotSelectedTopsJet2; }
     const std::vector<Jet>& getNotSelectedTopsBJet() const { return fNotSelectedTopsBJet; }
     const std::vector<float>& getNotSelectedTopsMVA() const { return fNotSelectedTopsMVA; }
+    const size_t getNotSelectedTopsSize() const { return fNotSelectedTopsMVA.size(); }
+
     const std::vector<Jet>& getAllTopsJet1() const { return fAllTopsJet1; }
     const std::vector<Jet>& getAllTopsJet2() const { return fAllTopsJet2; }
     const std::vector<Jet>& getAllTopsBJet() const { return fAllTopsBJet; }
     const std::vector<float>& getAllTopsMVA() const { return fAllTopsMVA; }
+    const size_t getAllTopsSize() const { return fAllTopsMVA.size(); }
+
     const std::vector<Jet>& getSelectedCleanedTopsJet1() const { return fSelectedCleanedTopsJet1; }
     const std::vector<Jet>& getSelectedCleanedTopsJet2() const { return fSelectedCleanedTopsJet2; }
     const std::vector<Jet>& getSelectedCleanedTopsBJet() const { return fSelectedCleanedTopsBJet; }
     const std::vector<float>& getSelectedCleanedTopsMVA() const { return fSelectedCleanedTopsMVA; }
+    const size_t getSelectedCleanedTopsSize() const { return fSelectedCleanedTopsMVA.size(); }
+
     const std::vector<Jet>& getAllCleanedTopsJet1() const { return fAllCleanedTopsJet1; }
     const std::vector<Jet>& getAllCleanedTopsJet2() const { return fAllCleanedTopsJet2; }
     const std::vector<Jet>& getAllCleanedTopsBJet() const { return fAllCleanedTopsBJet; }
     const std::vector<float>& getAllCleanedTopsMVA() const { return fAllCleanedTopsMVA; }
+    const size_t getAllCleanedTopsSize() const { return fAllCleanedTopsMVA.size(); }
     
     /// Obtain the b-tagging event weight 
     const double getTopTaggingScaleFactorEventWeight() const { return fTopTaggingScaleFactorEventWeight; }
@@ -230,6 +243,7 @@ public:
   private:
     /// Boolean for passing selection
     bool bPassedSelection;
+    bool bHasTwoTopsAndFreeB;
     bool bPassedBothMVA;
     bool bPassedLdgMVA;
     bool bPassedSubldgMVA;

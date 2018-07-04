@@ -145,7 +145,7 @@ metSelection = PSet(
 # Top selection BDT                                               
 #================================================================================================        
 topSelectionBDT = PSet(
-    MVACutValue            = 0.40,    # [default: 0.40]
+    MVACutValue            = 0.40,    # [default: 0.40] NOTE: Only use numbers with 2 decimals (e.g 0.40, 0.30, 0.00)
     MVACutDirection        =  ">=",   # [default: ">="]
     TopMassLowCutValue     =   0.0,   # [default: 0.0]
     TopMassLowCutDirection =  ">=",   # [default: ">="]
@@ -157,9 +157,9 @@ topSelectionBDT = PSet(
     WMassUppCutDirection   =  ">=",   # [default: ">="]
     CSV_bDiscCutValue      = 0.8484,  # [default: 0.8484] # Do not evaluate top candidate if b-jet assigned as b from top fails this cut
     CSV_bDiscCutDirection  = ">=",    # [default: ">="]
-    #WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32.weights.xml", # (All XML files located in data/TopTaggerWeights/)
     WeightFile             = "TopRecoTree_180523_DeltaR0p3_DeltaPtOverPt0p32_TopPtReweighting_BDTG.weights.xml", # (All XML files located in data/TopTaggerWeights/)
 )
+
 
 #================================================================================================
 # FakeB Measurement Options
@@ -170,7 +170,7 @@ fakeBBjetSelection = PSet(
     jetPtCuts                 = bjetSelection.jetPtCuts,
     jetEtaCuts                = bjetSelection.jetEtaCuts,
     bjetDiscr                 = bjetSelection.bjetDiscr,    
-    bjetDiscrWorkingPoint     = "Loose", # [default: "Loose"] (options: "Loose", "Medium") NOTE: defines SR, VR, CR1, and CR2
+    bjetDiscrWorkingPoint     = "Loose", # NOTE: Defines VR and CR2
     numberOfBJetsCutValue     = bjetSelection.numberOfBJetsCutValue,
     numberOfBJetsCutDirection = bjetSelection.numberOfBJetsCutDirection,
     )
@@ -179,43 +179,22 @@ scaleFactors.setupBtagSFInformation(btagPset               = fakeBBjetSelection,
                                     btagEfficiencyFilename = "btageff_HToTB.json",
                                     direction              = "nominal")
 
-fakeBTopSelectionBDT = PSet(
-    MVACutValue            = -1.0,   # [default: -1.0] NOTE: defines SR, VR, CR1, and CR2
-    MVACutDirection        = ">",    # [default: ">"] (NOTE: Crashes if set to ">=" -1)
-    LdgTopDefinition       = "MVA",  # [default: "MVA"] (options: "MVA", "Pt")
-    TopMassLowCutValue     = 600.0, #topSelectionBDT.TopMassCutValue,  # [default: 600.0] #topSelectionBDT.MassCutValue, (800.0 is way too much. TTbar takes > 24 hours)
-    TopMassLowCutDirection = "<=",
-    TopMassUppCutValue     =   0.0,
-    TopMassUppCutDirection = ">=", 
-    WMassLowCutValue       = 0.0,    # [default: ?] #topSelectionBDT.WMassCutValue,
-    WMassLowCutDirection   = ">",    # [default: ?] #topSelectionBDT.WMassCutDirection,
-    WMassUppCutValue       = 0.0,    # [default: ?] #topSelectionBDT.WMassCutValue,
-    WMassUppCutDirection   = ">",    # [default: ?] #topSelectionBDT.WMassCutDirection,
-    CSV_bDiscCutValue      = topSelectionBDT.CSV_bDiscCutValue,
-    CSV_bDiscCutDirection  = topSelectionBDT.CSV_bDiscCutDirection,
-    WeightFile             = topSelectionBDT.WeightFile,
-)
-
 fakeBMeasurement = PSet(
+    # b-jets
     baselineBJetsCutValue          = 2,
     baselineBJetsCutDirection      = "==",
     baselineBJetsDiscr             = bjetSelection.bjetDiscr,
     baselineBJetsDiscrWP           = bjetSelection.bjetDiscrWorkingPoint,
+    # Tops
     LdgTopMVACutValue              = topSelectionBDT.MVACutValue,
     LdgTopMVACutDirection          = topSelectionBDT.MVACutDirection, 
-    # Define CR1, CR2
-    # SubldgTopMVACutValue           = 0.4, #[default: 0.4] #buffer
-    SubldgTopMVACutValue           = topSelectionBDT.MVACutValue, #default
+    SubldgTopMVACutValue           = topSelectionBDT.MVACutValue,
     SubldgTopMVACutDirection       = "<",
-    # CR3, CR4 are automatically defined as:
-    # BDT <  topSelectionBDT.MVACutValue
-    # BDT >= (topSelectionBDT.MVACutValue-fakeBMeasurement.SubldgTopMVACutValue)
     )
 
 #================================================================================================
 # Scale Factors (SFs)
 #================================================================================================
-# b-tagging
 if bjetSelection.bjetDiscr == "pfCombinedInclusiveSecondaryVertexV2BJetTags":
     scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
                                         btagPayloadFilename    = "CSVv2.csv",
@@ -228,19 +207,13 @@ elif bjetSelection.bjetDiscr == "pfCombinedMVAV2BJetTags":
                                         btagEfficiencyFilename = "btageff_Hybrid_TT+WJetsHT.json", # use with taunu analysis and WJetsHT samples
                                         direction              = "nominal")
 else:
-    # should crash
-    pass
+    raise Exception("This should never be reached!")
 
 # top-tagging (json files available for: defaut, fatJet, ldgJet)
+MVAstring = "%.2f" % topSelectionBDT.MVACutValue
 scaleFactors.setupToptagSFInformation(topTagPset               = topSelectionBDT, 
-                                      topTagMisidFilename      = "toptagMisid_BDT0p40_fatJet.json", 
-                                      topTagEfficiencyFilename = "toptagEff_BDT0p40_GenuineTT_fatJet.json",
-                                      direction                = "nominal",
-                                      variationInfo            = None)
-
-scaleFactors.setupToptagSFInformation(topTagPset               = fakeBTopSelectionBDT, 
-                                      topTagMisidFilename      = "toptagMisid_BDT0p40_fatJet.json",
-                                      topTagEfficiencyFilename = "toptagEff_BDT0p40_GenuineTT_fatJet.json",
+                                      topTagMisidFilename      = "toptagMisid_BDT%s_fatJet.json" % MVAstring.replace(".", "p"), 
+                                      topTagEfficiencyFilename = "toptagEff_BDT%s_GenuineTT_fatJet.json" % MVAstring.replace(".", "p"),
                                       direction                = "nominal",
                                       variationInfo            = None)
 
@@ -288,7 +261,6 @@ allSelections = PSet(
     # FatJetSelection       = fatjetVeto,
     FakeBMeasurement      = fakeBMeasurement,
     FakeBBjetSelection    = fakeBBjetSelection,
-    FakeBTopSelectionBDT  = fakeBTopSelectionBDT,
     CommonPlots           = commonPlotsOptions,
     HistogramAmbientLevel = histogramAmbientLevel,
 )

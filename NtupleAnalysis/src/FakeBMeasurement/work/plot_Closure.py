@@ -109,8 +109,8 @@ def main(opts):
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
-    style.setGridX(False)
-    style.setGridY(False)
+    style.setGridX(opts.gridX)
+    style.setGridY(opts.gridY)
     style.setOptStat(False)
 
     # Obtain dsetMgrCreator and register it to module selector
@@ -453,11 +453,8 @@ def GetHistoKwargs(histoName, ext, opts):
         _format = "%0.0f " + _units
         _xlabel = "m_{jjb} (%s)" % _units
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        if "standardelections" in hName:
-            _rebinX = 4
-            _opts["xmax"] = 800.0
-        else:
-            _opts["xmax"] = 500.0 #300.0
+        _opts["xmax"] = 1000.0
+        ROOT.gStyle.SetNdivisions(8, "X")
     if "pt" in hName:
         #_rebinX = 2
         _rebinX = 1        
@@ -481,14 +478,14 @@ def GetHistoKwargs(histoName, ext, opts):
             _opts["xmax"] = 1000.0
             _cutBox = {"cutValue": 200.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
             ROOT.gStyle.SetNdivisions(8, "X")
-        elif "dijet" in hName:
-            _cutBox = {"cutValue": 200.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         elif "trijet" in hName:
-            _opts["xmax"] = 800.0
+            _opts["xmax"] = 1000.0
+            ROOT.gStyle.SetNdivisions(8, "X")
+            _cutBox = {"cutValue": 1000.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         else:
             _opts["xmax"] = 600.0
         #_opts["xmax"] = 400.0
-        #ROOT.gStyle.SetNdivisions(10, "X")
+        ROOT.gStyle.SetNdivisions(10, "X")
 
     if "eta" in hName:
         _format = "%0.2f"
@@ -642,6 +639,8 @@ if __name__ == "__main__":
     NORMALISE    = True
     FOLDER       = "ForFakeBMeasurement"
     RATIOTYPE    = "errorPropagation" # "errorPropagation", "errorScale", "binomial"
+    GRIDX        = False
+    GRIDY        = False
     SIGNALMASS   = 500
     USEMC        = False
 
@@ -686,6 +685,12 @@ if __name__ == "__main__":
 
     parser.add_option("-n", "--normaliseToOne", dest="normaliseToOne", action="store_true", default=NORMALISE, 
                       help="Normalise the baseline and inverted shapes to one? [default: %s]" % (NORMALISE) )
+
+    parser.add_option("--gridX", dest="gridX", action="store_true", default=GRIDX, 
+                      help="Enable x-axis grid? [default: %s]" % (GRIDX) )
+
+    parser.add_option("--gridY", dest="gridY", action="store_true", default=GRIDY, 
+                      help="Enable y-axis grid? [default: %s]" % (GRIDY) )
 
     parser.add_option("--folder", dest="folder", type="string", default = FOLDER,
                       help="ROOT file folder under which all histograms to be plotted are located [default: %s]" % (FOLDER) )

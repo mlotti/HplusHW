@@ -14,6 +14,7 @@ Examples:
 
 Last Used:
 ./plotMC_HPlusMass.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_15June18_BDT0p40_Masscut300_NewTop_BugFix/ --folder topbdtSelection_ --url -v
+./plotMC_HPlusMass.py -m TestTopSF_180625_SF_GenuineTT_fatJet_BDT0p4/ --folder topSelectionBDT_ -v -e "QCD_b" --url
 '''
 
 #================================================================================================ 
@@ -131,6 +132,8 @@ def main(opts, signalMass):
         # Determine integrated Lumi before removing data
 #        intLumi = datasetsMgr.getDataset("Data").getLuminosity()
         intLumi = 35200
+        # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
+        plots.mergeRenameReorderForDataMC(datasetsMgr) 
 
         # Remove datasets
         if 1:
@@ -138,6 +141,7 @@ def main(opts, signalMass):
             #datasetsMgr.remove(filter(lambda name: "QCD_b" in name, datasetsMgr.getAllDatasetNames()))
             #datasetsMgr.remove(filter(lambda name: "QCD_HT" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "SingleTop" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr.remove(filter(lambda name: "ZJetsToQQ_HT600toInf" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "DYJetsToQQHT" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "TTZToQQ" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "TTWJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
@@ -151,8 +155,6 @@ def main(opts, signalMass):
             datasetsMgr.remove(filter(lambda name: "QCD_b" in name, datasetsMgr.getAllDatasetNames()))  
             datasetsMgr.remove(filter(lambda name: "QCD_HT" in name, datasetsMgr.getAllDatasetNames()))
 
-        # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
-        plots.mergeRenameReorderForDataMC(datasetsMgr) 
 
         # Merge EWK samples
         if opts.mergeEWK:
@@ -203,7 +205,7 @@ def main(opts, signalMass):
 
         histoPaths = histoPaths1 + histoPaths2
         for h in histoPaths:
-            if "Vs" in h: # Skip TH2D
+            if "toptag" not in h.lower(): # Skip TH2D
                 continue
             PlotMC(datasetsMgr, h, intLumi)
 
@@ -327,6 +329,15 @@ def PlotMC(datasetsMgr, histo, intLumi):
     elif "bdt" in histo.lower():
         _format = "%0.1f"
 
+
+    if "topTagSF" in histo:
+        _rebinX = 5
+        #kwargs["ylabel"] = "Events / %.3f "
+        _format = "%0.2f "
+        _opts["xmax"] = +10
+        _opts["xmin"] = 0.0
+        _xlabel = "topTag SF"
+
     else:
         pass
 
@@ -343,12 +354,14 @@ def PlotMC(datasetsMgr, histo, intLumi):
     else:
         yMaxFactor = 1.2
 
+
+
     _opts["ymaxfactor"] = yMaxFactor
     if opts.normaliseToOne:
         _opts["ymin"] = 1e-3
         #_opts   = {"ymin": 1e-3, "ymaxfactor": yMaxFactor, "xmax": None}
     else:
-        _opts["ymin"] = 1e0
+        _opts["ymin"] = 1e-3
         #_opts["ymaxfactor"] = yMaxFactor
         #_opts   = {"ymin": 1e0, "ymaxfactor": yMaxFactor, "xmax": None}
 
@@ -430,15 +443,14 @@ if __name__ == "__main__":
     '''
     
     # Default Settings
-    ANALYSISNAME = "TopTaggerEfficiency"
+    ANALYSISNAME = "TestTopSF"
     MVACUT       = "MVA"
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
     OPTMODE      = ""
     BATCHMODE    = True
     PRECISION    = 3
-    SIGNALMASS   = [200, 400, 500, 650, 1000]
-    #SIGNALMASS   = [500]
+    SIGNALMASS   = [500]
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False
