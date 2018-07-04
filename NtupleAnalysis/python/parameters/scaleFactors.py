@@ -443,7 +443,8 @@ def _setupToptagEfficiency(topTagPset, topTagEfficiencyFilename, direction, vari
     '''
     runrange = "runs_273150_284044" #fixme
     era      = "2016" #fixme
-    fullname = os.path.join(os.getenv("HIGGSANALYSIS_BASE"), "NtupleAnalysis", "data", topTagEfficiencyFilename)
+    fileName = topTagEfficiencyFilename
+    fullname = os.path.join(os.getenv("HIGGSANALYSIS_BASE"), "NtupleAnalysis", "data", fileName)
     if not os.path.exists(fullname):
         raise Exception("Could not find the top-tag efficiency json file! (tried: %s)" % fullname)
 
@@ -456,23 +457,23 @@ def _setupToptagEfficiency(topTagPset, topTagEfficiencyFilename, direction, vari
     # Obtain data efficiencies
     param = "dataParameters"
     if not param in contents.keys():
-        raise Exception("Missing key '%s' in json '%s'! Options: %s"%(param,filename,", ".join(map(str,contents.keys()))))
+        raise Exception("Missing key '%s' in json '%s'! Options: %s"%(param,fileName,", ".join(map(str,contents.keys()))))
     if not runrange in contents[param].keys():
-        raise Exception("Missing run range '%s' for data in json '%s'! Options: %s"(runrange,filename,", ".join(map(str,contents[param].keys()))))
+        raise Exception("Missing run range '%s' for data in json '%s'! Options: %s"(runrange,fileName,", ".join(map(str,contents[param].keys()))))
     datadict = readValues(contents[param][runrange], "data")
 
     # Obtain MC efficiencies
     param = "mcParameters"
     if not param in contents.keys():
-        raise Exception("Missing key '%s' in json '%s'! Options: %s"%(param,filename,", ".join(map(str,contents.keys()))))
+        raise Exception("Missing key '%s' in json '%s'! Options: %s"%(param,fileName,", ".join(map(str,contents.keys()))))
     if not era in contents[param].keys():
-        raise Exception("Error: missing era '%s' for mc in json '%s'! Options: %s"(runrange,filename,", ".join(map(str,contents[param].keys()))))
+        raise Exception("Error: missing era '%s' for mc in json '%s'! Options: %s"(runrange,fileName,", ".join(map(str,contents[param].keys()))))
     mcdict = readValues(contents[param][era], "mc")
 
     # Calculate the SF = Eff(Data)/Eff(MC)
     keys = datadict.keys()
     if len(keys) != len(mcdict.keys()):
-        raise Exception("Different number of bins for data and mc in json '%s'!"%filename)
+        raise Exception("Different number of bins for data and mc in json '%s'!"%fileName)
     
     keys.sort()
     result = {}
@@ -512,11 +513,11 @@ def _setupToptagEfficiency(topTagPset, topTagEfficiencyFilename, direction, vari
         result["SFUp"].append(sfUp)
         result["SFDown"].append(sfDown)
         if abs(mcdict[pT]["mceffdown"]) < 0.00001:
-            raise Exception("Down variation in bin '%s' is zero in json '%s'"%(pT, filename))
+            raise Exception("Down variation in bin '%s' is zero in json '%s'"%(pT, fileName))
 
         # Sanity check
         if result["SF"][len(result["SF"])-1] < 0.00001:
-            raise Exception("In file '%s' bin %s the SF is zero! Please fix!" % (filename, pT) )
+            raise Exception("In file '%s' bin %s the SF is zero! Please fix!" % (fileName, pT) )
     
 
         # Define the PSet
