@@ -125,7 +125,7 @@ def CheckOptions(config):
         msgs.append(msg)
 
     if not config.BlindAnalysis:
-        msg = ErrorStyle() + "Unblinding analysis results forced been forced (flag BlindAnalysis in the datacard file)"
+        msg = ErrorStyle() + "Unblinding analysis results! (flag BlindAnalysis in the datacard file)"
         msgs.append(msg)
 
     if len(msgs) < 1:
