@@ -500,6 +500,13 @@ def GetHistoKwargs(h, opts):
         kwargs["ylabel"] = _yLabel
         kwargs["opts"]   = {"xmin": 0.0, "xmax": +180.0, "ymin": yMin, "ymaxfactor": yMaxF}
         kwargs["cutBox"] = {"cutValue": 2.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+
+    if "nallcleanedtops" in h.lower():
+        kwargs["rebinX"] = 1
+        kwargs["xlabel"] = "top multiplicity"
+        kwargs["ylabel"] = _yLabel
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +8.0, "ymin": yMin, "ymaxfactor": yMaxF}
+        kwargs["cutBox"] = {"cutValue": 2.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
                 
     if "counters" in opts.folder:
         ROOT.gStyle.SetLabelSize(16.0, "X")
