@@ -214,7 +214,7 @@ else:
 # top-tagging (json files available for: defaut, fatJet, ldgJet)
 MVAstring = "%.2f" % topSelectionBDT.TopMVACutValue
 scaleFactors.setupToptagSFInformation(topTagPset               = topSelectionBDT, 
-                                      topTagMisidFilename      = "toptagMisid_BDT%s_fatJet.json" % MVAstring.replace(".", "p"), 
+                                      topTagMisidFilename      = "topMisID_BDT%s_fatJet.json" % MVAstring.replace(".", "p"), 
                                       topTagEfficiencyFilename = "toptagEff_BDT%s_GenuineTT_fatJet.json" % MVAstring.replace(".", "p"),
                                       direction                = "nominal",
                                       variationInfo            = None)
