@@ -1885,9 +1885,8 @@ void FakeBMeasurement::DoBaselineAnalysis(Long64_t entry,
 	  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hLdgTetrajetMass_CRfour, isGenuineB, topData.getLdgTetrajet().M());
 	}
 
-      // If top fails determine if event falls into  Control Region 2 (CR2)
+      // If top fails determine if event falls into  Control Region 1 (CR1)
       if (!bPass_InvertedTop) return;
-
       if (0) std::cout << "=== Baseline: Control Region 1 (CRone)" << std::endl;
       cCRone.increment();
 
@@ -2330,6 +2329,8 @@ void FakeBMeasurement::DoInvertedAnalysis(Long64_t entry,
 
       // If top fails determine if event falls into  Control Region 2 (CR2)
       if (!bPass_InvertedTop) return;
+      if (topData.getLdgTrijetBJet().bjetDiscriminator() < 0.8484) return; // fixme - test - iro
+
       if (0) std::cout << "=== Inverted BJet: Control Region 2 (CR2)" << std::endl;
       cCRtwo.increment();
 
@@ -2501,6 +2502,8 @@ void FakeBMeasurement::DoInvertedAnalysis(Long64_t entry,
   // Verification Region (VR)
   //================================================================================================
   if (!topData.passedSelection()) return;
+  if (topData.getLdgTrijetBJet().bjetDiscriminator() < 0.8484) return; // fixme - test - iro
+
   if (0) std::cout << "=== Inverted BJet: Verification Region (VR)" << std::endl;
   cVR.increment();
   

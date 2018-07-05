@@ -89,7 +89,6 @@ class AnalysisConfig:
 
 		# top-tag SF
 		elif value.startswith("TopTagSF") or value.startswith("TopMistagSF"):
-                    self.Print("************************* This is still under construction. Never tested before!", True)
                     variationType = None
                     if value.startswith("TopTagSF"):
                         variationType = "tag"
