@@ -809,6 +809,7 @@ _plotStyles = {
     "QCDdata"       : styles.qcdStyle,
     "SingleTop"     : styles.stStyle,
     "TT"            : styles.ttStyle,
+    "TT_Mtt"        : styles.ttStyle,
     "TTBB"          : styles.ttbbStyle, 
     "TTJets"        : styles.ttjetsStyle,
     "TTTT"          : styles.ttttStyle, 
