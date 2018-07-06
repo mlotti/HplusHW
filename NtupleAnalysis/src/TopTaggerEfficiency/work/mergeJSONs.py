@@ -5,7 +5,7 @@
   Simple script to merge the uncertainties JSONs into one JSON file.
   
   USAGE:
-  ./mergeJSONs.py
+  ./mergeJSONs.py --bdt 0.40
    
 '''
 
@@ -35,7 +35,9 @@ def Verbose(msg, printHeader=True, verbose=False):
 # ==========================
 def main(opts):
     
-    merged = open("uncertainties_GenuineTT.json", "w")
+
+    jsonname = "uncertainties_GenuineTT_BDT_%s.json" % (opts.BDT)
+    merged = open(jsonname, "w")
     
     myList = [opts.mtop, opts.showerScales, opts.highPtRadiation, opts.partonShower, opts.evtGen, opts.matching]
     myLines= []
@@ -45,11 +47,9 @@ def main(opts):
         count = len(myfile.readlines())
         myLines.append(count)
         myfile.close()
-        
-        
 
     merged.write("{\n")
-
+    
     for k, myfile in enumerate(myList):
         
         i = open(myfile, "r")
@@ -75,7 +75,10 @@ def main(opts):
                     if cnt < myLines[k]-2:
                         merged.write(line)
                     elif cnt == myLines[k]-2:
-                        merged.write("      },\n")
+                        if k == len(myList)-1:
+                            merged.write("      } \n")
+                        else:
+                            merged.write("      }, \n")
                     else:
                         pass
                 else:
@@ -118,7 +121,8 @@ if __name__ == "__main__":
     PARTONSHOWER    = "uncertainties_partonShower.json"
     EVTGEN          = "uncertainties_evtGen.json"
     MATCHING        = "uncertainties_matching.json"
-
+    BDT             = "0.4"
+    
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE, help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
@@ -128,9 +132,17 @@ if __name__ == "__main__":
     parser.add_option("--partonShower", dest="partonShower", action="store", help="Path to the partonShower JSON file", default=PARTONSHOWER)
     parser.add_option("--evtGen", dest="evtGen", action="store", help="Path to the evtGen JSON file", default=EVTGEN)
     parser.add_option("--matching", dest="matching", action="store", help="Path to the matching JSON file", default=MATCHING)
-    
+    parser.add_option("--bdt", dest="BDT", action="store", help="BDT Cut", default=BDT)
     (opts, parseArgs) = parser.parse_args()
-
+    
+    opts.BDT = opts.BDT.replace('.', 'p')
+    opts.mtop            = "uncertainties_mTop_BDT_%s.json" % (opts.BDT)
+    opts.showerScales    = "uncertainties_showerScales_BDT_%s.json" % (opts.BDT)
+    opts.highPtRadiation = "uncertainties_highPtRadiation_BDT_%s.json" % (opts.BDT)
+    opts.partonShower    = "uncertainties_partonShower_BDT_%s.json" % (opts.BDT)
+    opts.evtGen          = "uncertainties_evtGen_BDT_%s.json" % (opts.BDT)
+    opts.matching        = "uncertainties_matching_BDT_%s.json" %(opts.BDT)
+    
     if opts.mtop == None or opts.showerScales == None or opts.highPtRadiation == None or opts.partonShower == None or opts.evtGen == None or opts.matching == None:
         Print("Not enough arguments passed to script execution. Printing docstring & EXIT.")
         parser.print_help()

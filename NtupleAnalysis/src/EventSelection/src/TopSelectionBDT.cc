@@ -63,7 +63,8 @@ TopSelectionBDT::Data::~Data() { }
 TopSelectionBDT::TopSelectionBDT(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix)
   : BaseSelection(eventCounter, histoWrapper, commonPlots, postfix),
     // Input parameters
-    cfg_MVACut(config, "MVACut"),
+    cfg_AnyTopMVACut(config , "AnyTopMVACut"),
+    cfg_TopMVACut(config    , "TopMVACut"),
     cfg_TopMassLowCut(config, "TopMassLowCut"),
     cfg_TopMassUppCut(config, "TopMassUppCut"),
     cfg_WMassLowCut(config  , "WMassLowCut"),
@@ -94,7 +95,8 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config, EventCounter& event
 TopSelectionBDT::TopSelectionBDT(const ParameterSet& config)
 : BaseSelection(),
   // Input parameters
-  cfg_MVACut(config, "MVACut"),
+  cfg_AnyTopMVACut(config , "AnyTopMVACut"), 
+  cfg_TopMVACut(config    , "TopMVACut"),
   cfg_TopMassLowCut(config, "TopMassLowCut"),
   cfg_TopMassUppCut(config, "TopMassUppCut"),
   cfg_WMassLowCut(config  , "WMassLowCut"),
@@ -439,7 +441,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   TrijetSelection fAllCleanedTops;
 
   // For-loop: All b-jets
-  // for (auto& bjet: jets) // OldTop (Between ~March-June 2018)
+  // mafor (auto& bjet: jets) // OldTop (Between ~March-June 2018)
   for (auto& bjet: bjets) // NewTop (Testing since 01/06/2018)
     {
       int index1 = 0;
@@ -529,10 +531,10 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	      fAllTops.Jet2.push_back(getLeadingSubleadingJet(jet1, jet2, "subleading"));
 	      fAllTops.BJet.push_back(bjet);
 	      fAllTops.isGenuine.push_back(false);
-	      fAllTops.isTagged.push_back(cfg_MVACut.passedCut(MVAoutput)); // fixme: which MVA cut? ldg, subldg
+	      fAllTops.isTagged.push_back(cfg_TopMVACut.passedCut(MVAoutput));
 
 	      // Get top candidates above MVA cut
-	      if (cfg_MVACut.passedCut(MVAoutput))
+	      if (cfg_TopMVACut.passedCut(MVAoutput))
 		{
 		  cTopsPassBDTCut.increment();
 		  fSelectedTops.MVA.push_back(MVAoutput);
@@ -901,7 +903,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
     }
   else if (fAllCleanedTops.MVA.size() == 1)
     {
-      bPass_LdgMVA    = cfg_MVACut.passedCut( fAllCleanedTops.MVA.at(0) );
+      bPass_LdgMVA    = cfg_TopMVACut.passedCut( fAllCleanedTops.MVA.at(0) );
       bPass_SubldgMVA = false;
 
       // Leading-in-MVA top
@@ -914,8 +916,8 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
     }
   else // size > 1
     {
-      bPass_LdgMVA     = cfg_MVACut.passedCut( fAllCleanedTops.MVA.at(0) );
-      bPass_SubldgMVA  = cfg_MVACut.passedCut( fAllCleanedTops.MVA.at(1) );
+      bPass_LdgMVA     = cfg_TopMVACut.passedCut( fAllCleanedTops.MVA.at(0) );
+      bPass_SubldgMVA  = cfg_TopMVACut.passedCut( fAllCleanedTops.MVA.at(1) );
 
       // Leading-in-MVA top
       output.fMVAmax1           = fAllCleanedTops.MVA.at(0);
@@ -938,7 +940,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   bool bPass_BothMVA    = bPass_LdgMVA * bPass_SubldgMVA;
   bool bPass_Selection  = bPass_FreeBjet * bPass_BothMVA;
   bool bPass_AnyTwoTops = false; // at least TWO tops with BDT > -1.0
-  if (fAllCleanedTops.MVA.size() > 1) bPass_AnyTwoTops = (fAllCleanedTops.MVA.at(1) > -1.0); 
+  if (fAllCleanedTops.MVA.size() > 1) bPass_AnyTwoTops = cfg_AnyTopMVACut.passedCut(fAllCleanedTops.MVA.at(1) );
   
   // Fill in remaining data
   output.bPassedLdgMVA       = bPass_LdgMVA;

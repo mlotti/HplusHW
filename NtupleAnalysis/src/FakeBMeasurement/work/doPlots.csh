@@ -29,7 +29,7 @@ set PSEUDO_MCRAB_DIR = ${1}
 ./plot_DataMC.py -m $PSEUDO_MCRAB_DIR --folder counters/weighted --url --ratio
 ./getABCD_TF.py -m $PSEUDO_MCRAB_DIR --url --histoKey TetrajetBJetPt
 ./getABCD_TF.py -m $PSEUDO_MCRAB_DIR --url --histoKey TetrajetBJetEta
-#./getABCD_TF.py -m $PSEUDO_MCRAB_DIR --url --histoKey TetrajetMass
+./getABCD_TF.py -m $PSEUDO_MCRAB_DIR --url --histoKey TetrajetMass
 ./getABCD_TF.py -m $PSEUDO_MCRAB_DIR --url --histoKey TetrajetPt
 ./getABCD_TF.py -m $PSEUDO_MCRAB_DIR --url --histoKey LdgTrijetPt
 ./getABCD_TF.py -m $PSEUDO_MCRAB_DIR --url --histoKey LdgTrijetMass

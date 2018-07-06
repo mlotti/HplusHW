@@ -3,7 +3,7 @@ import json
 import csv
 import os
 import sys
-
+import math
 
 DEBUG = False
 
@@ -176,14 +176,15 @@ def setupBtagSFInformation(btagPset, btagPayloadFilename, btagEfficiencyFilename
     #print btagPset
     return
 
-def setupToptagSFInformation(topTagPset, topTagMisidFilename, topTagEfficiencyFilename, direction, variationInfo=None):
+def setupToptagSFInformation(topTagPset, topTagMisidFilename, topTagEfficiencyFilename, topTagEffUncertaintiesFilename, direction, variationInfo=None):
     '''
     Top-tagging SF
     \param topTagPset   PSet of topSelection
     \param topTagMisifFilename  Filename to the json file containing the Misidintification rates (SystTopBDT + PythonWriter)
     \param topTagEfficiencyFilename  Filename to the json file containing the tagging effifiencies (SystTopBDT + PythonWriter)
+    \param topTagEffUncertaintiesFilename Filename to the json file containing the tagging efficiencies uncertainties (TopTaggerEfficiency + UncertaintyWriter.py)
     \param direction  "nominal"/"down"/"up"
-    \param variationInfo  "tag"/"mistag" This parameter specifies if the variation is applied for the b->b component or non-b->b component
+    \param variationInfo  "tag"/"mistag" This parameter specifies if the variation is applied for the top->top component or non-top->top component
     '''
     if not variationInfo in [None, "tag", "mistag"]:
         raise Exception("Error: unknown parameter for variationInfo given (%s)! Valid options are: %s" % (variationInfo, ", ".join(variationInfo)) )
@@ -195,7 +196,11 @@ def setupToptagSFInformation(topTagPset, topTagMisidFilename, topTagEfficiencyFi
     # Process the tagging efficiencies (MC and data)
     Print("Setting top-tag tagging efficiency (data and MC) filename to \"%s\"" % (topTagEfficiencyFilename), False)
     _setupToptagEfficiency(topTagPset, topTagEfficiencyFilename, direction, variationInfo)
-
+    
+    # Process the tagging efficiency uncertainties (MC)
+    Print("Setting top-tag tagging efficiency uncertainties (MC) filename to \"%s\"" % (topTagEffUncertaintiesFilename), False)
+    _setupToptagEffUncertainties(topTagPset, topTagEffUncertaintiesFilename, direction, variationInfo)
+    
     # Set syst. uncert. variation information
     topTagPset.topTagSFVariationDirection = direction
     if variationInfo == None:
@@ -436,6 +441,73 @@ def _setupToptagMisid(topTagPset, topTagMisidFilename, direction, variationInfo)
         #print topTagPset.topTagMisid
     return
 
+def _setupToptagEffUncertainties(topTagPset, topTagEffUncertaintiesFilename, direction, variationInfo):
+    '''
+    Helper function accessed through setupToptagSFInformation
+    '''
+    fullname = os.path.join(os.getenv("HIGGSANALYSIS_BASE"), "NtupleAnalysis", "data", topTagEffUncertaintiesFilename)
+    if not os.path.exists(fullname):
+        raise Exception("Could not find the top-tagging eff. uncertainties file! (tried: %s)" % fullname)
+    
+    # Read the json file
+    Print("Opening file \"%s\" for reading the top-tag efficiency ucertainties" % (fullname), True)
+    f = open(fullname)
+    contents = json.load(f)
+    f.close()
+    
+    # Obtain uncertainties
+    params = ["TT_hdampUP", "TT_mtop1715", "TT_mtop1755", "TT_fsrdown", "TT_fsrup", "TT_isrdown", "TT_mtop1735", "TT_mtop1785", "TT_TuneEE5C",
+              "TT_hdampDOWN", "TT_mtop1695", "TT_evtgen", "TT_isrup", "TT_mtop1665", "matching"]
+    
+    for param in params:
+        if not param in contents.keys():
+            raise Exception("Missing key '%s' in json '%s'! Options: %s"%(param, fullname,", ".join(map(str,contents.keys()))))
+    
+    psetList = []
+    first = contents[params[0]]
+    firstBins = first["bins"]
+    
+    for i in range(0, len(firstBins)):
+        
+        dSF2 = 0.0
+        pt = firstBins[i]["pt"]
+        
+        for param in params:
+            paramDict = contents[param]
+            binsList = paramDict["bins"]
+            
+            case = binsList[i]
+            pT = case["pt"]
+            uncertainty = case["uncertainty"] 
+            
+            dSF2 += uncertainty * uncertainty
+                        
+        dSF = math.sqrt(dSF2)
+                
+        # Find pTMin, pTMax
+        pTMin = pt
+        if i == len(firstBins)-1:
+            pTMax = 100000.0 # overflow bin (fixme?)
+        else:
+            pTMax = firstBins[i+1]["pt"]
+            
+        # Uncertainty Up
+        dSFUp = dSF
+        
+        # Uncertainty Down
+        dSFDown = -dSF
+        
+        # Define a PSet
+        p = PSet(ptMin       = pTMin,
+                 ptMax       = pTMax,
+                 dsfUp       = dSFUp,
+                 dsfDown     = dSFDown,
+                 )
+        psetList.append(p)
+        
+    # Save the PSet
+    topTagPset.topTagEffUncertainties = psetList
+    return
 
 def _setupToptagEfficiency(topTagPset, topTagEfficiencyFilename, direction, variationInfo):
     '''
@@ -443,7 +515,8 @@ def _setupToptagEfficiency(topTagPset, topTagEfficiencyFilename, direction, vari
     '''
     runrange = "runs_273150_284044" #fixme
     era      = "2016" #fixme
-    fullname = os.path.join(os.getenv("HIGGSANALYSIS_BASE"), "NtupleAnalysis", "data", topTagEfficiencyFilename)
+    fileName = topTagEfficiencyFilename
+    fullname = os.path.join(os.getenv("HIGGSANALYSIS_BASE"), "NtupleAnalysis", "data", fileName)
     if not os.path.exists(fullname):
         raise Exception("Could not find the top-tag efficiency json file! (tried: %s)" % fullname)
 
@@ -456,23 +529,23 @@ def _setupToptagEfficiency(topTagPset, topTagEfficiencyFilename, direction, vari
     # Obtain data efficiencies
     param = "dataParameters"
     if not param in contents.keys():
-        raise Exception("Missing key '%s' in json '%s'! Options: %s"%(param,filename,", ".join(map(str,contents.keys()))))
+        raise Exception("Missing key '%s' in json '%s'! Options: %s"%(param,fileName,", ".join(map(str,contents.keys()))))
     if not runrange in contents[param].keys():
-        raise Exception("Missing run range '%s' for data in json '%s'! Options: %s"(runrange,filename,", ".join(map(str,contents[param].keys()))))
+        raise Exception("Missing run range '%s' for data in json '%s'! Options: %s"(runrange,fileName,", ".join(map(str,contents[param].keys()))))
     datadict = readValues(contents[param][runrange], "data")
 
     # Obtain MC efficiencies
     param = "mcParameters"
     if not param in contents.keys():
-        raise Exception("Missing key '%s' in json '%s'! Options: %s"%(param,filename,", ".join(map(str,contents.keys()))))
+        raise Exception("Missing key '%s' in json '%s'! Options: %s"%(param,fileName,", ".join(map(str,contents.keys()))))
     if not era in contents[param].keys():
-        raise Exception("Error: missing era '%s' for mc in json '%s'! Options: %s"(runrange,filename,", ".join(map(str,contents[param].keys()))))
+        raise Exception("Error: missing era '%s' for mc in json '%s'! Options: %s"(runrange,fileName,", ".join(map(str,contents[param].keys()))))
     mcdict = readValues(contents[param][era], "mc")
 
     # Calculate the SF = Eff(Data)/Eff(MC)
     keys = datadict.keys()
     if len(keys) != len(mcdict.keys()):
-        raise Exception("Different number of bins for data and mc in json '%s'!"%filename)
+        raise Exception("Different number of bins for data and mc in json '%s'!"%fileName)
     
     keys.sort()
     result = {}
@@ -512,11 +585,11 @@ def _setupToptagEfficiency(topTagPset, topTagEfficiencyFilename, direction, vari
         result["SFUp"].append(sfUp)
         result["SFDown"].append(sfDown)
         if abs(mcdict[pT]["mceffdown"]) < 0.00001:
-            raise Exception("Down variation in bin '%s' is zero in json '%s'"%(pT, filename))
+            raise Exception("Down variation in bin '%s' is zero in json '%s'"%(pT, fileName))
 
         # Sanity check
         if result["SF"][len(result["SF"])-1] < 0.00001:
-            raise Exception("In file '%s' bin %s the SF is zero! Please fix!" % (filename, pT) )
+            raise Exception("In file '%s' bin %s the SF is zero! Please fix!" % (fileName, pT) )
     
 
         # Define the PSet

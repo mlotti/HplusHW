@@ -247,6 +247,48 @@ def getBinningForTetrajetMass(binLevel=0):
             myBins.append(i)
         for i in range(2500, 3000, 500):# Up to 2500?
             myBins.append(i)
+    elif binLevel == 14:
+        for i in range(0, 800, 25):
+            myBins.append(i)
+        for i in range(800, 1200, 50):
+            myBins.append(i)
+        for i in range(1200, 1500, 100):
+            myBins.append(i)
+        for i in range(1500, 2500, 250):
+            myBins.append(i)
+        for i in range(2500, 3000, 500):
+            myBins.append(i)
+    elif binLevel == 15:
+        for i in range(0, 700, 25):
+            myBins.append(i)
+        for i in range(700, 1000, 50):
+            myBins.append(i)
+        for i in range(1000, 1400, 100):
+            myBins.append(i)
+        for i in range(1400, 2000, 200):
+            myBins.append(i)
+        for i in range(2000, 3000, 500):
+            myBins.append(i)
+    elif binLevel == 16:
+        for i in range(0, 600, 25):
+            myBins.append(i)
+        for i in range(600, 800, 50):
+            myBins.append(i)
+        for i in range(800, 1200, 100):
+            myBins.append(i)
+        for i in range(1400, 2000, 200):
+            myBins.append(i)
+        for i in range(2000, 3000, 500):
+            myBins.append(i)
+    elif binLevel == 17:
+        for i in range(0, 800, 50):
+            myBins.append(i)
+        for i in range(800, 1200, 100):
+            myBins.append(i)
+        for i in range(1400, 2000, 200):
+            myBins.append(i)
+        for i in range(2000, 3000, 500):
+            myBins.append(i)
     else:
         raise Exception(ShellStyles.ErrorStyle() + "Please choose bin-level from -1 to 2" + ShellStyles.NormalStyle())
     return myBins
@@ -395,8 +437,8 @@ _dataDrivenCtrlPlotBinning = {
     "TetrajetBjetEta_AfterAllSelections"    : None,
     "LdgTetrajetPt_AfterAllSelections"      : [j for j in range(0, 500, 20)] + [k for k in range(500, 700, 50)] + [k for k in range(700, 900+100, 100)],
     "SubldgTetrajetPt_AfterAllSelections"   : [j for j in range(0, 500, 20)] + [k for k in range(500, 700, 50)] + [k for k in range(700, 900+100, 100)],
-    "LdgTetrajetMass_AfterAllSelections"    : getBinningForTetrajetMass(12),
-    "SubldgTetrajetMass_AfterAllSelections" : getBinningForTetrajetMass(12),
+    "LdgTetrajetMass_AfterAllSelections"    : getBinningForTetrajetMass(17),
+    "SubldgTetrajetMass_AfterAllSelections" : getBinningForTetrajetMass(17),
     #"LdgTetrajetMass_AfterAllSelections"    : getBinningForTetrajetMass(13),
     #"SubldgTetrajetMass_AfterAllSelections" : getBinningForTetrajetMass(13),
     "Njets_AfterAllSelections"  : [i for i in range(7, 19, 1)],

@@ -136,7 +136,7 @@ def GetHistoKwargs(histoName, opts):
         "opts"             : {"ymin": 0.0, "xmax":600, "ymaxfactor": 1.2},
         "opts2"            : {"ymin": 0.6, "ymax": 1.4},
         "log"              : False,
-        "moveLegend"       : {"dx": -0.25, "dy": -0.50, "dh": +0.05*(-4+opts.nDatasets)},  #"dh": +0.18}, 
+        "moveLegend"       : {"dx": -0.25, "dy": -0.50, "dh": -0.1},
         "cutBoxY"          : {"cutValue": 1.10, "fillColor": ROOT.kGray+1, "fillStyle": 3001, "box": False, "line": True, "greaterThan": True, "mainCanvas": False, "ratioCanvas": True, "mirror": True}
         }
     
@@ -331,7 +331,7 @@ def PlotEfficiency(datasetMgr1, datasetMgr2, numPath, denPath, eff_def):
     # Write the JSON file 
     if eff_def == "genuineTop":
         uncWriter = UncertaintyWriter()
-        jsonName = "uncertainties_matching.json"
+        jsonName = "uncertainties_matching_BDT_%s.json" % (opts.BDT)
         analysis = opts.analysisName
         saveDir  =  os.path.join("", jsonName)
         uncWriter.addParameters("matching", analysis, saveDir, gEff1, gEff2)
@@ -450,6 +450,7 @@ if __name__ == "__main__":
     VERBOSE      = False
     NORMALISE    = False
     FOLDER       = "topbdtSelection_"
+    BDT          = "0.4"
     
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -460,6 +461,8 @@ if __name__ == "__main__":
     parser.add_option("-s", "--mcrab2", dest="mcrab2", action="store", 
                       help="Path to the second multicrab directory for input")
     
+    parser.add_option("--bdt", dest="BDT", action="store", default=BDT, help="BDT cut [default: %s]" % BDT)
+
     parser.add_option("-o", "--optMode", dest="optMode", type="string", default=OPTMODE, 
                       help="The optimization mode when analysis variation is enabled  [default: %s]" % OPTMODE)
 
@@ -511,6 +514,8 @@ if __name__ == "__main__":
         parser.print_help()
         #print __doc__
         sys.exit(1)
+
+    opts.BDT = opts.BDT.replace('.', 'p')
 
     # Append folder to save directory path
     if opts.saveDir == None:

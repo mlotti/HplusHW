@@ -145,8 +145,10 @@ metSelection = PSet(
 # Top selection BDT                                               
 #================================================================================================        
 topSelectionBDT = PSet(
-    MVACutValue            = 0.40,    # [default: 0.40] NOTE: Only use numbers with 2 decimals (e.g 0.40, 0.30, 0.00)
-    MVACutDirection        =  ">=",   # [default: ">="]
+    AnyTopMVACutValue      = -0.95,   # [default: -1.0] NOTE: Defines StandardSelections
+    AnyTopMVACutDirection  =  ">",    # [default: ">"]
+    TopMVACutValue         =  0.40,   # [default: 0.40] NOTE: Only use numbers with 2 decimals (e.g 0.40, 0.30, 0.00)
+    TopMVACutDirection     =  ">=",   # [default: ">="]
     TopMassLowCutValue     =   0.0,   # [default: 0.0]
     TopMassLowCutDirection =  ">=",   # [default: ">="]
     TopMassUppCutValue     = 300.0,   # [default: 400 or 500.0]  # Do not evaluate top candidate if top mass greater than this cut
@@ -186,9 +188,9 @@ fakeBMeasurement = PSet(
     baselineBJetsDiscr             = bjetSelection.bjetDiscr,
     baselineBJetsDiscrWP           = bjetSelection.bjetDiscrWorkingPoint,
     # Tops
-    LdgTopMVACutValue              = topSelectionBDT.MVACutValue,
-    LdgTopMVACutDirection          = topSelectionBDT.MVACutDirection, 
-    SubldgTopMVACutValue           = topSelectionBDT.MVACutValue,
+    LdgTopMVACutValue              = topSelectionBDT.TopMVACutValue,
+    LdgTopMVACutDirection          = topSelectionBDT.TopMVACutDirection, 
+    SubldgTopMVACutValue           = topSelectionBDT.TopMVACutValue,
     SubldgTopMVACutDirection       = "<",
     )
 
@@ -210,12 +212,13 @@ else:
     raise Exception("This should never be reached!")
 
 # top-tagging (json files available for: defaut, fatJet, ldgJet)
-MVAstring = "%.2f" % topSelectionBDT.MVACutValue
-scaleFactors.setupToptagSFInformation(topTagPset               = topSelectionBDT, 
-                                      topTagMisidFilename      = "toptagMisid_BDT%s_fatJet.json" % MVAstring.replace(".", "p"), 
-                                      topTagEfficiencyFilename = "toptagEff_BDT%s_GenuineTT_fatJet.json" % MVAstring.replace(".", "p"),
-                                      direction                = "nominal",
-                                      variationInfo            = None)
+MVAstring = "%.2f" % topSelectionBDT.TopMVACutValue
+scaleFactors.setupToptagSFInformation(topTagPset                     = topSelectionBDT, 
+                                      topTagMisidFilename            = "topMisID_BDT%s_fatJet.json" % MVAstring.replace(".", "p"), 
+                                      topTagEfficiencyFilename       = "toptagEff_BDT%s_GenuineTT_fatJet.json" % MVAstring.replace(".", "p"),
+                                      topTagEffUncertaintiesFilename = "toptagEffUncert_BDT%s_GenuineTT_fatJet.json" % MVAstring.replace(".", "p"),
+                                      direction                      = "nominal",
+                                      variationInfo                  = None)
 
 #================================================================================================
 # Common plots options
