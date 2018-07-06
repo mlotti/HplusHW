@@ -655,6 +655,7 @@ def PlotHistos(d_noSF, d_withSF, num_histoList, den_histoList,  opts):
         "log"              : False,
         "createLegend"     : {"x1": 0.64, "y1": 0.80, "x2": 0.95, "y2": 0.92},
         }
+    _kwargs["cutBoxY"] = {"cutValue": 1.10, "fillColor": ROOT.kGray+1, "fillStyle": 3001, "box": False, "line": True, "greaterThan": True, "mainCanvas": False, "ratioCanvas": True, "mirror": True}
 
     bins  = [0, 100, 200, 300, 400, 500, 600]
     xBins = array.array('d', bins)
@@ -696,7 +697,7 @@ def PlotHistos(d_noSF, d_withSF, num_histoList, den_histoList,  opts):
     saveName = "Efficiency_InclusiveTT_SR"
     savePath = os.path.join(opts.saveDir, opts.optMode)
     plots.drawPlot(p, savePath, **_kwargs)
-    SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf"])
+    SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf", ".C"])
     
     '''
     jsonName = "toptagEff_InclusiveTT_fatJet.json"
@@ -807,7 +808,8 @@ def PlotHistos(d_noSF, d_withSF, num_histoList, den_histoList,  opts):
         "log"              : False,
         "createLegend"     : {"x1": 0.54, "y1": 0.80, "x2": 0.95, "y2": 0.92},
         }
-
+    _kwargs["cutBoxY"] = {"cutValue": 1.10, "fillColor": ROOT.kGray+1, "fillStyle": 3001, "box": False, "line": True, "greaterThan": True, "mainCanvas": False, "ratioCanvas": True, "mirror": True}
+    
     bins  = [0, 100, 200, 300, 400, 500, 600]
     xBins = array.array('d', bins)
     nx    = len(xBins)-1
@@ -848,7 +850,7 @@ def PlotHistos(d_noSF, d_withSF, num_histoList, den_histoList,  opts):
     saveName = "Efficiency_GenuineTT_SR"
     savePath = os.path.join(opts.saveDir, opts.optMode)
     plots.drawPlot(pp, savePath, **_kwargs)
-    SavePlot(pp, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf"])
+    SavePlot(pp, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf", ".C"])
     
     
     jsonName = "toptagEff_GenuineTT_fatJet.json"

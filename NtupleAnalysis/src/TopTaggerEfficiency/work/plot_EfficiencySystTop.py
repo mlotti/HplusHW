@@ -287,11 +287,8 @@ def main(opts):
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
         
-        print "=============================================="
         datasetsMgr.PrintInfo()
-
-
-
+        
         counter =  0
         opts.nDatasets = len(datasetsMgr.getAllDatasets())
         nPlots  = len(Numerator)
@@ -426,7 +423,6 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, eff_def):
         if nx > 0:
             numTT = numTT.Rebin(nx, "", xBins) #num.Rebin(nx, "", xBins)
             denTT = denTT.Rebin(nx, "", xBins) #den.Rebin(nx, "", xBins)
-            
 
         '''
         for i in range(1, num.GetNbinsX()+1):
@@ -526,12 +522,11 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, eff_def):
     if eff_def == "genuineTop":
         
         uncWriter = UncertaintyWriter()
-        jsonName = "uncertainties_%s.json" % (opts.type)
+        jsonName = "uncertainties_%s_BDT_%s.json" % (opts.type, opts.BDT)
         analysis = opts.analysisName
         saveDir  =  os.path.join("", jsonName)
         
         for i in range(0, len(datasetList)):
-            
             uncWriter.addParameters(datasetList[i], analysis, saveDir, default_eff, ttVariationEff[i])
 
             #print "i = ", i, " Dataset = ",  datasetList[i]
@@ -623,6 +618,7 @@ if __name__ == "__main__":
     PRECISION    = 3
     INTLUMI      = -1.0
     URL          = False
+    BDT          = "0.4"
     SAVEDIR      = None
     VERBOSE      = False
     NORMALISE    = False
@@ -634,7 +630,10 @@ if __name__ == "__main__":
 
     parser.add_option("-m", "--mcrab", dest="mcrab", action="store", 
                       help="Path to the multicrab directory for input")
-
+    
+    parser.add_option("--bdt", dest="BDT", type="string", default=BDT,
+                      help="The BDT cut used [default: %s]" % BDT)
+    
     parser.add_option("-o", "--optMode", dest="optMode", type="string", default=OPTMODE, 
                       help="The optimization mode when analysis variation is enabled  [default: %s]" % OPTMODE)
 
@@ -678,7 +677,10 @@ if __name__ == "__main__":
                       help="ROOT file folder under which all histograms to be plotted are located [default: %s]" % (FOLDER) )
 
     (opts, parseArgs) = parser.parse_args()
-
+    
+    
+    opts.BDT = opts.BDT.replace('.', 'p')
+    
     # Require at least two arguments (script-name, path to multicrab)
     if len(sys.argv) < 2:
         parser.print_help()

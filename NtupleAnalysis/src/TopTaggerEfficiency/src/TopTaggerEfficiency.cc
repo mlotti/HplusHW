@@ -62,7 +62,6 @@ public:
 private:
   // Input parameters
   const DirectionalCut<double> cfg_PrelimTopMVACut;
-  const std::string cfg_LdgTopDefinition;
 
   // Common plots
   CommonPlots fCommonPlots;
@@ -221,8 +220,7 @@ REGISTER_SELECTOR(TopTaggerEfficiency);
 
 TopTaggerEfficiency::TopTaggerEfficiency(const ParameterSet& config, const TH1* skimCounters)
   : BaseSelector(config, skimCounters),
-    cfg_PrelimTopMVACut(config, "TopSelectionBDT.MVACut"),
-    cfg_LdgTopDefinition(config.getParameter<std::string>("FakeBTopSelectionBDT.LdgTopDefinition")),
+    cfg_PrelimTopMVACut(config, "TopSelectionBDT.TopMVACut"),
     fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kHplus2tbAnalysis, fHistoWrapper),
     cAllEvents(fEventCounter.addCounter("all events")),
     cTrigger(fEventCounter.addCounter("passed trigger")),
@@ -894,10 +892,10 @@ void TopTaggerEfficiency::setupBranches(BranchManager& branchManager) {
 void TopTaggerEfficiency::process(Long64_t entry) {
 
   // Sanity check
-  if (cfg_LdgTopDefinition != "MVA" &&  cfg_LdgTopDefinition != "Pt")
-    {
-      throw hplus::Exception("config") << "Unsupported method of defining the leading top (=" << cfg_LdgTopDefinition << "). Please select from \"MVA\" and \"Pt\".";
-    }
+  //if (cfg_LdgTopDefinition != "MVA" &&  cfg_LdgTopDefinition != "Pt")
+  //  {
+  //    throw hplus::Exception("config") << "Unsupported method of defining the leading top (=" << cfg_LdgTopDefinition << "). Please select from \"MVA\" and \"Pt\".";
+  //  }
 
   //====== Initialize
   fCommonPlots.initialize();

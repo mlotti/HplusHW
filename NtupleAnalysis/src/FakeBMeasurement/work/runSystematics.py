@@ -147,9 +147,10 @@ def main():
         #PSet(label="TetrajetBjetPt" , binLowEdges=[55], useAbsoluteValues=False),
         #PSet(label="TetrajetBjetPt" , binLowEdges=[55, 110], useAbsoluteValues=False), # set1 (works)
         #PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True), # set1 (works)
-        PSet(label="TetrajetBjetPt" , binLowEdges=[55, 110], useAbsoluteValues=False),  #works
-        PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6], useAbsoluteValues=True), 
+        #PSet(label="TetrajetBjetPt" , binLowEdges=[60, 110, 200], useAbsoluteValues=False),
         #PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True), #AN_v4
+        PSet(label="TetrajetBjetPt" , binLowEdges=[60], useAbsoluteValues=False),  # if subldg-in-pT allowed to be CSVv2-L bjet
+        PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6, 2.0], useAbsoluteValues=True), # if subldg-in-pT allowed to be CSVv2-L bjet
         ]
 
     # allSelections.TopSelectionBDT.TopMassLowCutDirection = ">="   # [default: ">="]
@@ -162,7 +163,7 @@ def main():
     # allSelections.TopSelectionBDT.WMassUppCutValue       =   0.0  # [default: 0.0]  # 150.0
     # allSelections.TopSelectionBDT.CSV_bDiscCutDirection  = ">="
     allSelections.TopSelectionBDT.CSV_bDiscCutValue      = 0.5426 # [default: 0.8484], 0.5426
-    # allSelections.TopSelectionBDT.TopMVACutValue            =  0.40 # [default:  0.40]
+    # allSelections.TopSelectionBDT.TopMVACutValue            =  0.40 # [default:  0.40] #WARNING! DO NOT CHANGE IT HERE (tagEff/MisId files must also change!)
     # allSelections.FakeBMeasurement.LdgTopMVACutValue     = allSelections.TopSelectionBDT.MVACutValue
     # allSelections.FakeBMeasurement.SubldgTopMVACutValue  = allSelections.TopSelectionBDT.MVACutValue
 

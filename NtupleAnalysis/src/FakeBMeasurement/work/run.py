@@ -203,7 +203,7 @@ def main():
     # allSelections.TopSelectionBDT.WMassUppCutDirection   = ">="   # [default: ">="] # "<="
     # allSelections.TopSelectionBDT.CSV_bDiscCutValue      = 0.8484 # [default: 0.8484] # 0.5426
     # allSelections.TopSelectionBDT.CSV_bDiscCutDirection  = ">="   # [default: ">="]
-    # allSelections.TopSelectionBDT.TopMVACutValue             =  -0.99  # [default:  0.40]
+    # allSelections.TopSelectionBDT.TopMVACutValue             =  -0.99  # [default:  0.40] # WARNING! This will NOT take correct topTag eff file!
     # allSelections.FakeBMeasurement.LdgTopMVACutValue      = allSelections.TopSelectionBDT.MVACutValue
     # allSelections.FakeBMeasurement.SubldgTopMVACutValue   = allSelections.TopSelectionBDT.MVACutValue
     

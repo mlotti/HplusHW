@@ -35,8 +35,9 @@ private:
   BJetSelection fBJetSelection;
   Count cBTaggingSFCounter;
   METSelection fMETSelection;
-  TopSelectionBDT fTopSelection;
+  Count cTopCleaningCounter;
   Count cTopTaggingSFCounter;
+  TopSelectionBDT fTopSelection;
   // FatJetSelection fFatJetSelection;
   Count cSelected;
     
@@ -62,8 +63,9 @@ Hplus2tbAnalysis::Hplus2tbAnalysis(const ParameterSet& config, const TH1* skimCo
     fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cBTaggingSFCounter(fEventCounter.addCounter("b-tag SF")),
     fMETSelection(config.getParameter<ParameterSet>("METSelection")), // no subcounter in main counter
-    fTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    cTopCleaningCounter(fEventCounter.addCounter("top cleaning")),
     cTopTaggingSFCounter(fEventCounter.addCounter("top-tag SF")),
+    fTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     // fFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
     cSelected(fEventCounter.addCounter("Selected Events"))
 { }
@@ -204,6 +206,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   const TopSelectionBDT::Data topData = fTopSelection.analyze(fEvent, jetData, bjetData);
   if (!topData.passedAnyTwoTopsAndFreeB()) return;
   if (topData.getAllCleanedTopsSize() != 2) return;
+  cTopCleaningCounter.increment();
 
   // Apply top-tag SF
   if (fEvent.isMC()) 
