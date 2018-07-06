@@ -31,10 +31,13 @@ analysis = "QCDMeasurement"
 #==== Set rebin factor for normalization plots 
 #     Histograms are generated with 1 GeV bin width, so 
 #     10 here means that the fit is done on 10 GeV bins
-_rebinFactor = 10
+_rebinFactor = 20
 
 #=== Set to true if you want to use HT binned WJets samples instead of inclusive
+#    NB! Remember to check also that _generalOptions["ewkDatasetsForMerging"]
+#    in makeQCDInvertedPseudoMulticrabForDatacards.py is consistent with this!
 useWJetsHT = True
+useTT_Mtt = True
 
 #=== Set tau pT bins to be used
 selectOnlyBins = [] #["1"] # use all bins
@@ -117,6 +120,12 @@ def main(argv, dsetMgr, moduleInfoString):
     else:
         dsetMgr.remove(filter(lambda name: "WJetsHT" in name, dsetMgr.getAllDatasetNames()), close=False)
 
+    # Only TT or TT_Mtt_* should be used (not both)
+    if useTT_Mtt:
+        dsetMgr.remove(filter(lambda name: "TT"==name, dsetMgr.getAllDatasetNames()), close=False)    
+    else:
+        dsetMgr.remove(filter(lambda name: "TT_Mtt" in name, dsetMgr.getAllDatasetNames()), close=False)
+
     print "Datasets used for EWK (after choosing between WJets or WJetsHT sample):"
     print dsetMgr.getMCDatasetNames()
 
@@ -130,8 +139,12 @@ def main(argv, dsetMgr, moduleInfoString):
     myMergeList = []
 
     # Always use TT (or TTJets) as a part of the EWK background
-    if "TT" in dsetMgr.getMCDatasetNames():
+    if useTT_Mtt:
+        myMergeList.append("TT_Mtt")
+
+    elif "TT" in dsetMgr.getMCDatasetNames():
         myMergeList.append("TT") # Powheg, no neg. weights -> large stats.
+    
     else:
         myMergeList.append("TTJets") # Madgraph with negative weights
         print "Warning: using TTJets as input, but this is suboptimal. Please switch to the TT sample (much more stats.)."
@@ -271,7 +284,7 @@ def main(argv, dsetMgr, moduleInfoString):
         # par[1] = mean
         # par[3] = sigma
         # par[4] = beta in the exponential tail
-        boundary = 190
+        boundary = 170 # 170 good for RtauMore, 180 better for RtauLess
         # QCD
         template_EWKInclusive_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=boundary, norm=1, rejectPoints=1),FITMIN, FITMAX)
         template_EWKInclusive_Baseline.setDefaultFitParam(defaultLowerLimit=[0.5,  90, 30, 0.0001],

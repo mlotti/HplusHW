@@ -2,6 +2,29 @@ from HiggsAnalysis.NtupleAnalysis.main import PSet
 import json
 import csv
 import os
+import sys
+
+
+DEBUG = False
+
+def Print(msg, printHeader=False):
+    fName = __file__.split("/")[-1]
+    if printHeader==True:
+        print "=== ", fName
+        print "\t", msg
+    else:
+        print "\t", msg
+    return
+
+def Verbose(msg, printHeader=False):
+    if not DEBUG:
+        return
+    if printHeader==True:
+        print "=== ", fName
+        print "\t", msg
+    else:
+        print "\t", msg
+    return
 
 # This file contains all the scale factors and their uncertainties used in the analysis
 # There are two types of scale factors:
@@ -66,7 +89,7 @@ def _assignJetToTauSF(tauSelectionPset, dirNumber):
     tauSelectionPset.tauMisidetificationJetToTauEndcapSF = 1.0 + dirNumber*0.20
 #    tauSelectionPset.tauMisidetificationJetToTauSF = 1.0 + dirNumber*0.20
 
-# Marina
+# Top-tagging
 def assignMisIDSF(pset, direction, jsonfile, variationType="MC"):
     reader = TriggerSFJsonReader("2016", "runs_273150_284044", jsonfile)
     result = reader.getResult()
@@ -151,15 +174,63 @@ def setupBtagSFInformation(btagPset, btagPayloadFilename, btagEfficiencyFilename
     else:
         btagPset.btagSFVariationInfo = variationInfo
     #print btagPset
+    return
 
-# A helper function to update b-tag SF information in AnalysisBuilder for syst. variations
+def setupToptagSFInformation(topTagPset, topTagMisidFilename, topTagEfficiencyFilename, direction, variationInfo=None):
+    '''
+    Top-tagging SF
+    \param topTagPset   PSet of topSelection
+    \param topTagMisifFilename  Filename to the json file containing the Misidintification rates (SystTopBDT + PythonWriter)
+    \param topTagEfficiencyFilename  Filename to the json file containing the tagging effifiencies (SystTopBDT + PythonWriter)
+    \param direction  "nominal"/"down"/"up"
+    \param variationInfo  "tag"/"mistag" This parameter specifies if the variation is applied for the b->b component or non-b->b component
+    '''
+    if not variationInfo in [None, "tag", "mistag"]:
+        raise Exception("Error: unknown parameter for variationInfo given (%s)! Valid options are: %s" % (variationInfo, ", ".join(variationInfo)) )
+
+    # Process the misidentification rates (MC and data)
+    Print("Setting top-tag misid (data and MC) filename to \"%s\"" % (topTagMisidFilename), True)
+    _setupToptagMisid(topTagPset, topTagMisidFilename, direction, variationInfo)
+
+    # Process the tagging efficiencies (MC and data)
+    Print("Setting top-tag tagging efficiency (data and MC) filename to \"%s\"" % (topTagEfficiencyFilename), False)
+    _setupToptagEfficiency(topTagPset, topTagEfficiencyFilename, direction, variationInfo)
+
+    # Set syst. uncert. variation information
+    topTagPset.topTagSFVariationDirection = direction
+    if variationInfo == None:
+        topTagPset.topTagSFVariationInfo = "None"
+    else:
+        topTagPset.topTagSFVariationInfo = variationInfo
+
+    if 0:
+        Print("Printing topTag PSet", True)
+        print topTagPset
+    return
+
 def updateBtagSFInformationForVariations(btagPset, direction, variationInfo=None):
+    '''
+    A helper function to update b-tag SF information in AnalysisBuilder for syst. variations
+    '''
     # Set syst. uncert. variation information
     btagPset.btagSFVariationDirection = direction
     if variationInfo == None:
         btagPset.btagSFVariationInfo = "None"
     else:
         btagPset.btagSFVariationInfo = variationInfo
+    return
+
+def updateTopTagSFInformationForVariations(topTagPset, direction, variationInfo=None):
+    '''
+    A helper function to update top-tag SF information in AnalysisBuilder for syst. variations
+    '''
+    # Set syst. uncert. variation information
+    topTagPset.topTagSFVariationDirection = direction
+    if variationInfo == None:
+        topTagPset.topTagSFVariationInfo = "None"
+    else:
+        topTagPset.topTagSFVariationInfo = variationInfo
+    return
 
 
 ## Helper function accessed through setupBtagSFInformation
@@ -263,6 +334,237 @@ def _setupBtagEfficiency(btagPset, btagEfficiencyFilename, direction, variationI
                     effUp=float(row["effUp"]))
             psetList.append(p)
     btagPset.btagEfficiency = psetList
+    return
+
+def _setupToptagMisid(topTagPset, topTagMisidFilename, direction, variationInfo):
+    '''
+    Helper function accessed through setupToptagSFInformation
+    '''
+    runrange = "runs_273150_284044" #fixme
+    era      = "2016" #fixme
+    fullname = os.path.join(os.getenv("HIGGSANALYSIS_BASE"), "NtupleAnalysis", "data", topTagMisidFilename)
+    if not os.path.exists(fullname):
+        raise Exception("Could not find the btag efficiency json file! (tried: %s)"%fullname)
+
+    # Read the json file
+    Verbose("Opening file \"%s\" for reading the top-tag misidentification rates" % (fullname), True)
+    f = open(fullname)
+    contents = json.load(f)
+    f.close()
+
+    # Obtain data efficiencies
+    param = "dataParameters"
+    if not param in contents.keys():
+        raise Exception("Missing key '%s' in json '%s'! Options: %s"%(param,filename,", ".join(map(str,contents.keys()))))
+    if not runrange in contents[param].keys():
+        raise Exception("Missing run range '%s' for data in json '%s'! Options: %s"(runrange,filename,", ".join(map(str,contents[param].keys()))))
+    datadict = readValues(contents[param][runrange], "data")
+
+    # Obtain MC efficiencies
+    param = "mcParameters"
+    if not param in contents.keys():
+        raise Exception("Missing key '%s' in json '%s'! Options: %s"%(param,filename,", ".join(map(str,contents.keys()))))
+    if not era in contents[param].keys():
+        raise Exception("Error: missing era '%s' for mc in json '%s'! Options: %s"(runrange,filename,", ".join(map(str,contents[param].keys()))))
+    mcdict = readValues(contents[param][era], "mc")
+
+    # Calculate the SF = Eff(Data)/Eff(MC)
+    keys = datadict.keys()
+    if len(keys) != len(mcdict.keys()):
+        raise Exception("Different number of bins for data and mc in json '%s'!" % filename)
+    
+    keys.sort()
+    result = {}
+    result["binEdges"] = []
+    result["SF"]       = []
+    result["SFUp"]     = []
+    result["SFDown"]   = []
+    psetList = []
+
+    for i, pT in enumerate(keys, 0):
+        
+        if i > 0:
+            result["binEdges"].append(pT)
+
+        pTMin = pT
+        if i == len(keys)-1:
+            pTMax = 100000.0 # overflow bin (fixme?)
+        else:
+            pTMax = keys[i+1]
+
+        # Get the efficiencies and their errors
+        effData     = datadict[pT]["dataeff"]
+        effDataUp   = datadict[pT]["dataeffup"]
+        effDataDown = datadict[pT]["dataeffdown"]
+        effMC       = mcdict[pT]["mceff"]
+        effMCUp     = mcdict[pT]["mceffup"]
+        effMCDown   = mcdict[pT]["mceffdown"]
+        
+        # Define the Scale Factor (SF) as: SF = Eff_Data / Eff_MC
+        sf     = effData / effMC
+        sfUp   = effDataUp / effMC   # fixme
+        sfDown = effDataDown / effMC # fixme
+        Verbose("pT = %.1f, sf = %0.3f, sf+ = %0.3f, sf- = %0.3f" % (pT, sf, sfUp, sfDown), i==0)
+
+        result["SF"].append(sf)
+        result["SFUp"].append(sfUp)
+        result["SFDown"].append(sfDown)
+        if abs(mcdict[pT]["mceffdown"]) < 0.00001:
+            raise Exception("Down variation in bin '%s' is zero in json '%s'"%(pT, filename))
+
+        # Sanity check
+        if result["SF"][len(result["SF"])-1] < 0.00001:
+            raise Exception("In file '%s' bin %s the SF is zero! Please fix!" % (filename, pT) )
+    
+        # Define the PSet
+        p = PSet(ptMin         = pTMin,
+                 ptMax         = pTMax,
+                 misidMC       = effMC,
+                 misidMCUp     = effMCUp,
+                 misidMCDown   = effMCDown,
+                 misidData     = effData,
+                 misidDataUp   = effDataUp,
+                 misidDataDown = effDataDown,
+                 sf            = sf,
+                 sfUp          = sfUp,
+                 sfDown        = sfDown,
+                 )
+        psetList.append(p)
+    topTagPset.topTagMisid = psetList
+    if 0:
+        print topTagPset
+        #print topTagPset.topTagMisid
+    return
+
+
+def _setupToptagEfficiency(topTagPset, topTagEfficiencyFilename, direction, variationInfo):
+    '''
+    Helper function accessed through setupToptagSFInformation
+    '''
+    runrange = "runs_273150_284044" #fixme
+    era      = "2016" #fixme
+    fullname = os.path.join(os.getenv("HIGGSANALYSIS_BASE"), "NtupleAnalysis", "data", topTagEfficiencyFilename)
+    if not os.path.exists(fullname):
+        raise Exception("Could not find the btag efficiency json file! (tried: %s)" % fullname)
+
+    # Read the json file
+    Print("Opening file \"%s\" for reading the top-tag efficiencies" % (fullname), True)
+    f = open(fullname)
+    contents = json.load(f)
+    f.close()
+
+    # Obtain data efficiencies
+    param = "dataParameters"
+    if not param in contents.keys():
+        raise Exception("Missing key '%s' in json '%s'! Options: %s"%(param,filename,", ".join(map(str,contents.keys()))))
+    if not runrange in contents[param].keys():
+        raise Exception("Missing run range '%s' for data in json '%s'! Options: %s"(runrange,filename,", ".join(map(str,contents[param].keys()))))
+    datadict = readValues(contents[param][runrange], "data")
+
+    # Obtain MC efficiencies
+    param = "mcParameters"
+    if not param in contents.keys():
+        raise Exception("Missing key '%s' in json '%s'! Options: %s"%(param,filename,", ".join(map(str,contents.keys()))))
+    if not era in contents[param].keys():
+        raise Exception("Error: missing era '%s' for mc in json '%s'! Options: %s"(runrange,filename,", ".join(map(str,contents[param].keys()))))
+    mcdict = readValues(contents[param][era], "mc")
+
+    # Calculate the SF = Eff(Data)/Eff(MC)
+    keys = datadict.keys()
+    if len(keys) != len(mcdict.keys()):
+        raise Exception("Different number of bins for data and mc in json '%s'!"%filename)
+    
+    keys.sort()
+    result = {}
+    result["binEdges"] = []
+    result["SF"]       = []
+    result["SFUp"]     = []
+    result["SFDown"]   = []
+    psetList = []
+
+    # For-loop: All keys
+    for i, pT in enumerate(keys, 0):
+        
+        if i > 0:
+            result["binEdges"].append(pT)
+
+        pTMin = pT
+        if i == len(keys)-1:
+            pTMax = 100000.0 # overflow bin (fixme?)
+        else:
+            pTMax = keys[i+1]
+
+        # Get the efficiencies and their errors
+        effData     = datadict[pT]["dataeff"]
+        effDataUp   = datadict[pT]["dataeffup"]
+        effDataDown = datadict[pT]["dataeffdown"]
+        effMC       = mcdict[pT]["mceff"]
+        effMCUp     = mcdict[pT]["mceffup"]
+        effMCDown   = mcdict[pT]["mceffdown"]
+        
+        # Define the Scale Factor (SF) as: SF = Eff_Data / Eff_MC
+        sf     = effData / effMC
+        sfUp   = effDataUp / effMC
+        sfDown = effDataDown / effMC
+        Verbose("pT = %.1f, sf = %0.3f, sf+ = %0.3f, sf- = %0.3f" % (pT, sf, sfUp, sfDown), i==0)
+        
+        result["SF"].append(sf)
+        result["SFUp"].append(sfUp)
+        result["SFDown"].append(sfDown)
+        if abs(mcdict[pT]["mceffdown"]) < 0.00001:
+            raise Exception("Down variation in bin '%s' is zero in json '%s'"%(pT, filename))
+
+        # Sanity check
+        if result["SF"][len(result["SF"])-1] < 0.00001:
+            raise Exception("In file '%s' bin %s the SF is zero! Please fix!" % (filename, pT) )
+    
+
+        # Define the PSet
+        p = PSet(ptMin       = pTMin,
+                 ptMax       = pTMax,
+                 effMC       = effMC,
+                 effMCUp     = effMCUp,
+                 effMCDown   = effMCDown,
+                 effData     = effData,
+                 effDataUp   = effDataUp,
+                 effDataDown = effDataDown,
+                 sf          = sf,
+                 sfUp       = sfUp,
+                 sfDown     = sfDown,
+                 )
+        psetList.append(p)
+        topTagPset.topTagEfficiency = psetList
+    if 0:
+        print topTagPset
+        #print topTagPset.topTagEfficiency
+    return
+
+def readValues(inputdict, label):
+    '''
+    read the dictionary in json file 
+    and return a dictionary with the following mapping:
+    efficiency       -> label + eff
+    uncertaintyPlus  -> label + effup
+    uncertaintyMinus -> label + effdown
+    '''
+    outdict = {}
+    for item in inputdict["bins"]:
+        bindict = {}
+        bindict[label+"eff"] = item["efficiency"]
+        value = item["efficiency"]+item["uncertaintyPlus"]
+        if value > 1.0:
+            bindict[label+"effup"] = 1.0
+        else:
+            bindict[label+"effup"] = value
+
+        value = item["efficiency"]-item["uncertaintyMinus"]
+        if value < 0.0:
+            bindict[label+"effdown"] = 0.000001
+        else:
+            bindict[label+"effdown"] = value
+        outdict[item["pt"]] = bindict
+    return outdict
+
 
 ## Helper function
 def _assignTrgSF(name, binEdges, SF, SFup, SFdown, pset, direction):

@@ -56,7 +56,7 @@ import aux
 _lightHplusMasses        = [ 80,  90, 100, 120, 140, 150, 155, 160]
 _intermediateHplusMasses = [145,150,155,160,165,170,175,180,190,200]
 _heavyHplusToTBbarMasses = [180, 200, 220, 250, 300, 350, 400, 500, 600, 650, 800, 1000, 1500, 2000, 2500, 3000, 5000, 7000, 10000]
-_heavyHplusMasses        = [180, 200, 220, 250, 300, 350, 400, 500, 600, 700, 750,  800, 1000, 1500, 2000, 3000] #HToTauNu
+_heavyHplusMasses        = [180, 200, 220, 250, 300, 350, 400, 500, 600, 700, 750,  800, 1000, 1500, 2000, 2500, 3000] #HToTauNu
 
 ## These MC datasets must be added together before any
 ## merging/renaming. They are split to two datasets just for more
@@ -156,7 +156,16 @@ _physicalMcAdd = {
     "DYJetsToLL_M_50"            : "DYJetsToLL_M_50",
     "DYJetsToLL_M_50_ext"        : "DYJetsToLL_M_50",
     "DYJetsToLL_M_50_ext1"       : "DYJetsToLL_M_50",
+    "DYJetsToLL_M_50_ext2"       : "DYJetsToLL_M_50",
 
+    "DYJetsToLL_M_50_HT_100to200"      : "DYJetsToLL_M_50_HT_100to200",    
+    "DYJetsToLL_M_50_HT_100to200_ext1" : "DYJetsToLL_M_50_HT_100to200",    
+    "DYJetsToLL_M_50_HT_200to400"      : "DYJetsToLL_M_50_HT_200to400",
+    "DYJetsToLL_M_50_HT_200to400_ext1" : "DYJetsToLL_M_50_HT_200to400",
+    "DYJetsToLL_M_50_HT_400to600"      : "DYJetsToLL_M_50_HT_400to600",
+    "DYJetsToLL_M_50_HT_400to600_ext1" : "DYJetsToLL_M_50_HT_400to600",
+
+    "ChargedHiggs_HplusTB_HplusToTauNu_M_500" : "ChargedHiggs_HplusTB_HplusToTauNu_M_500",
     "ChargedHiggs_HplusTB_HplusToTauNu_M_500_ext1" : "ChargedHiggs_HplusTB_HplusToTauNu_M_500",
     "ChargedHiggs_HplusTB_HplusToTauNu_M_750_reHLT" : "ChargedHiggs_HplusTB_HplusToTauNu_M_750",
     "ChargedHiggs_HplusTB_HplusToTauNu_M_800_reHLT" : "ChargedHiggs_HplusTB_HplusToTauNu_M_800",
@@ -275,7 +284,8 @@ for mass in _lightHplusMasses:
     _physicalToLogical["ChargedHiggs_TTToHplusBWB_HplusToTauNu_M_%d"%(mass)] = "TTToHplusBWB_M%d"%mass
 
 for mass in _intermediateHplusMasses:
-    _physicalToLogical[" ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTBNoNeutral_M%d"%mass
+    _physicalToLogical["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTBintermediate_NoNeutral_M%d"%mass
+    _physicalToLogical["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassWithNeutral_M_%d"%(mass)] = "HplusTBintermediate_WithNeutral_M%d"%mass
 
 for mass in _heavyHplusMasses:
     _physicalToLogical["ChargedHiggs_HplusTB_HplusToTauNu_M_%d"%(mass)] = "HplusTB_M%d"%mass
@@ -478,6 +488,10 @@ _datasetMerge = {
     #"TTJets_SemiLept": "TTJets",
     #"TTJets_Hadronic": "TTJets",
 
+    "TT_Mtt_0to700"      : "TT_Mtt",
+    "TT_Mtt_700to1000"      : "TT_Mtt",
+    "TT_Mtt_1000toInf"      : "TT_Mtt",
+
     "WJetsToLNu": "WJets",
     # "W1Jets"    : "WJets",
     # "W2Jets"    : "WJets",
@@ -496,9 +510,14 @@ _datasetMerge = {
 
     "DYJetsToLL_M_10to50"        : "DYJetsToLLHT",
     "DYJetsToLL_M_50"            : "DYJetsToLL",
+    "DYJetsToLL_M_50_HT_70to100": "DYJetsToLLHT",
     "DYJetsToLL_M_50_HT_100to200": "DYJetsToLLHT",
     "DYJetsToLL_M_50_HT_200to400": "DYJetsToLLHT",
     "DYJetsToLL_M_50_HT_400to600": "DYJetsToLLHT",
+    "DYJetsToLL_M_50_HT_600to800": "DYJetsToLLHT",
+    "DYJetsToLL_M_50_HT_800to1200": "DYJetsToLLHT",
+    "DYJetsToLL_M_50_HT_1200to2500": "DYJetsToLLHT",
+    "DYJetsToLL_M_50_HT_2500toInf": "DYJetsToLLHT",
     "DYJetsToLL_M_50_HT_600toInf": "DYJetsToLLHT",
     "DYJetsToQQ_HT180"           : "DYJetsToQQHT",
 
@@ -532,9 +551,9 @@ _datasetMerge = {
     }
 
 for mass in _intermediateHplusMasses:
-    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTB_M%d"%mass
-#    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTBintermediate_M%d"%mass
-#    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassWithNeutral_M_%d"%(mass)] = "HplusTB_M%d"%mass # NB! Commented out to avoid merging of the WithNeutral samples that have been dropped out of the analysis
+#    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTB_M%d"%mass
+    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTBintermediate_M%d"%mass
+    _datasetMerge["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassWithNeutral_M_%d"%(mass)] = "HplusTBintermediate_withNeutral_M%d"%mass # NB! Commented out to avoid merging of the WithNeutral samples that have been dropped out of the analysis
 
 #================================================================================================
 # Dataset ordering (default)
@@ -544,7 +563,7 @@ for process in ["TTToHplusBWB_M%d", "TTToHplusBHminusB_M%d", "TTToHplus_M%d", "H
     for mass in _lightHplusMasses:
         _datasetOrder.append(process%mass)
 for mass in _intermediateHplusMasses:
-    _datasetOrder.append("HplusTB_M%d"%mass)
+    _datasetOrder.append("HplusTBintermediate_M%d"%mass)
 for mass in _heavyHplusMasses:
     _datasetOrder.append("HplusTB_M%d"%mass)
 for mass in _heavyHplusToTBbarMasses:
@@ -571,6 +590,7 @@ _datasetOrder.extend([
     "WToTauNu",
     "TTJets",
     "TT",
+    "TT_Mtt",
     "ZJetsToQQ_HT600toInf", # Htb
     "TTandSingleTop", #merged
     "DYJetsToLL",
@@ -716,6 +736,7 @@ _legendLabels = {
     "MCStatError"            : "Sim. stat. unc.",
     "MCSystError"            : "Sim. syst. unc.",
     "MCStatSystError"        : "Sim. stat.#oplussyst. unc.",
+    "PostFitError"           : "Post-fit unc."
     }
 
 for mass in _lightHplusMasses:
@@ -762,6 +783,18 @@ _plotStyles = {
     "ChargedHiggs_HplusTB_HplusToTB_M_7000" : styles.signal7000Style,
     "ChargedHiggs_HplusTB_HplusToTB_M_10000": styles.signal1000Style,
 
+    "HplusTBintermediate_M145": styles.mcStyle,
+    "HplusTBintermediate_withNeutral_M145": styles.mcStyle2,
+    "HplusTBintermediate_M165": styles.mcStyle,
+    "HplusTBintermediate_withNeutral_M165": styles.mcStyle2,
+    "HplusTBintermediate_M170": styles.mcStyle,
+    "HplusTBintermediate_withNeutral_M170": styles.mcStyle2,
+    "HplusTBintermediate_M175": styles.mcStyle,
+    "HplusTBintermediate_withNeutral_M175": styles.mcStyle2,
+    "HplusTBintermediate_M200": styles.mcStyle,
+    "HplusTBintermediate_withNeutral_M200": styles.mcStyle2,
+
+
     "DYJetsToLL"    : styles.dyStyle,
     "DYJetsToLLHT"  : styles.dyStyle,
     "DYJetsToQQHT"  : styles.dyStyle,
@@ -776,6 +809,7 @@ _plotStyles = {
     "QCDdata"       : styles.qcdStyle,
     "SingleTop"     : styles.stStyle,
     "TT"            : styles.ttStyle,
+    "TT_Mtt"        : styles.ttStyle,
     "TTBB"          : styles.ttbbStyle, 
     "TTJets"        : styles.ttjetsStyle,
     "TTTT"          : styles.ttttStyle, 
@@ -1609,32 +1643,42 @@ def _createCutBoxAndLine(frame, cutValue, fillColor=18, box=True, line=True, **k
 # \param box        If true, draw cut box
 # \param line       If true, draw cut line
 # \param kwargs     Keyword arguments (\a lessThan or \a greaterThan, forwarded to histograms.isLessThan())
-def _createCutBoxAndLineY(frame, cutValue, fillColor=18, fillStyle=3001, box=True, line=True, **kwargs):
+def _createCutBoxAndLineY(frame, cutValue, fillColor=18, fillStyle=3001, box=True, line=True, mirror=False, **kwargs):
     xmin = frame.GetXaxis().GetXmin()
     xmax = frame.GetXaxis().GetXmax()
     ymin = cutValue
     ymax = cutValue
     ret  = []
 
+    # Mirror calculations
+    dy = 1.0-cutValue
+    if dy < 0:
+        cutValueMirror = 1.0-abs(dy)
+    else:
+        cutValueMirror = 1.0+abs(dy)
+
+    if line:
+        l1 = ROOT.TLine(xmin, cutValue, xmax, cutValue)
+        l1.SetLineWidth(3)
+        l1.SetLineStyle(ROOT.kDashed)
+        l1.SetLineColor(fillColor) #ROOT.kBlack
+        if mirror:
+            l2 = ROOT.TLine(xmin, cutValueMirror, xmax, cutValueMirror)
+            l2.SetLineWidth(3)
+            l2.SetLineStyle(ROOT.kDashed)
+            l2.SetLineColor(fillColor)
+
+        # Append objects to list for drawing
+        ret.append(l1)
+        if mirror:
+            ret.append(l2)
+
     if box:
-        if histograms.isLessThan(**kwargs):
-            ymin = frame.GetYaxis().GetXmin()
-            ymax = cutValue
-        else:
-            ymin = cutValue
-            ymax = frame.GetYaxis().GetXmax()
-        b = ROOT.TBox(xmin, ymin, xmax, ymax)
+        b = ROOT.TBox(xmin, cutValue, xmax, cutValueMirror)
         b.SetFillColor(fillColor)
         b.SetFillStyle(fillStyle)
         ret.append(b)
-
-    if line:
-        l = ROOT.TLine(xmin, cutValue, xmax, cutValue)
-        l.SetLineWidth(3)
-        l.SetLineStyle(ROOT.kDashed)
-        l.SetLineColor(ROOT.kBlack)
-        ret.append(l)
-
+        
     return ret
 
 ## Helper function for creating a histograms.Histo object from a ROOT object based on the ROOT object type
@@ -1858,25 +1902,28 @@ class PlotBase:
     # \param kwargs  Keyword arguments (forwarded to plots._createCutBoxAndLine())
     def addCutBoxAndLineY(self, *args, **kwargs):
         objs = _createCutBoxAndLineY(self.getFrame(), *args, **kwargs)
-        for o in objs:
+        for o in objs:            
             if "mainCanvas" in kwargs:
                 if kwargs["mainCanvas"]:
-                    self.appendPlotObject(o)
-            else:
-                self.appendPlotObject(o)
+                    self.prependPlotObject(o)
+                    #self.appendPlotObject(o)
             if "ratioCanvas" in kwargs:
                 if kwargs["ratioCanvas"]:
                     self.prependPlotObjectToRatio(o)
-            else:
-                self.prependPlotObjectToRatio(o) 
-                
+                    #self.appendPlotObjectToRatio(o)
 
     ## Add MC uncertainty histogram
-    def addMCUncertainty(self):
+    def addMCUncertainty(self, postfit=False):
         systKey = "MCSystError"
         if histograms.uncertaintyMode.addStatToSyst():
             systKey = "MCStatSystError"
-        self.histoMgr.addMCUncertainty(styles.getErrorStyle(), legendLabel=_legendLabels["MCStatError"], uncertaintyLegendLabel=_legendLabels[systKey])
+        if postfit:
+            legendLabel=_legendLabels["PostFitError"]
+            uncertaintyLegendLabel=_legendLabels["PostFitError"]
+        else:
+            legendLabel=_legendLabels["MCStatError"]
+            uncertaintyLegendLabel=_legendLabels[systKey]
+        self.histoMgr.addMCUncertainty(styles.getErrorStyle(), legendLabel=legendLabel, uncertaintyLegendLabel=uncertaintyLegendLabel)
 
     ## Create TCanvas and frames for the histogram and a data/MC ratio
     #
@@ -2687,13 +2734,15 @@ class DataMCPlot2(PlotBase, PlotRatioBase):
         self.histoMgr.stackHistograms("StackedMCSignal", mcSignal)
 
     ## Add MC uncertainty band
-    def addMCUncertainty(self):
+    def addMCUncertainty(self, postfit=False):
         if not self.histoMgr.hasHisto("StackedMC"):
             raise Exception("Must call stackMCHistograms() before addMCUncertainty()")
         systKey = "MCSystError"
         if histograms.uncertaintyMode.addStatToSyst():
             systKey = "MCStatSystError"
-        if histograms.uncertaintyMode.equal(histograms.Uncertainty.SystOnly):
+        if postfit:
+            self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"], legendLabel=_legendLabels["PostFitError"], uncertaintyLegendLabel=_legendLabels["PostFitError"])
+        elif histograms.uncertaintyMode.equal(histograms.Uncertainty.SystOnly):
             self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"], legendLabel=_legendLabels[systKey])
         else:
             self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"], legendLabel=_legendLabels["MCStatError"], uncertaintyLegendLabel=_legendLabels[systKey])

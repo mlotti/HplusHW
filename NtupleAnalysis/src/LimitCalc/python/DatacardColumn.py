@@ -555,23 +555,27 @@ class DatacardColumn():
             mySystematics = dataset.Systematics(allShapes=True)
 
             if not dsetMgr.hasDataset(self.getDatasetMgrColumn()):
-                msg = "Cannot find merged dataset by key '%s' in multicrab dir! Did you forget to merge the root files with hplusMergeHistograms.py?" % self.getDatasetMgrColumn()
-                dsetMgr.PrintInfo()
-                raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
+                dset = self.getDatasetMgrColumn()
+                if not dsetMgr.hasDataset(dset):
+                    dset += "_ext1"
+                    if not dsetMgr.hasDataset(dset):
+                        msg = "Cannot find merged dataset by key '%s' in multicrab dir! Did you forget to merge the root files with hplusMergeHistograms.py?" % dset
+                        dsetMgr.PrintInfo()
+                        raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
 
             myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
 
             if myDatasetRootHisto.isMC():
                 # Set signal cross section for light H+
                 # Check the options in configuration
-                limitOnSigmaBr = False # use heavy signal model by default
+                limitOnSigmaBr = True # use heavy signal model by default
                 if hasattr(config, 'OptionLimitOnSigmaBr'):
-                    OptionLimitOnSigmaBr = config.OptionLimitOnSigmaBr
+                    limitOnSigmaBr = config.OptionLimitOnSigmaBr
                 limitOnBrBr = False # do not use light signal model by default
                 if hasattr(config, 'OptionLimitOnBrBr'):
-                    OptionLimitOnBrBr = config.OptionLimitOnBrBr
+                    limitOnBrBr = config.OptionLimitOnBrBr
                 # For light H+, use 13 TeV ttbar xsect from https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
-                if not limitOnSigmaBr and (limitOnBrBr or (self._label.startswith("HW") or self._label.startswith("HH") or self._label.startswith("WH"))):
+                if self._landsProcess <= 0 and not limitOnSigmaBr and (limitOnBrBr or (self._label.startswith("HW") or self._label.startswith("HH") or self._label.startswith("WH"))):
                      ttbarxsect = xsect.backgroundCrossSections.crossSection("TT", energy="13")
                      if abs(dsetMgr.getDataset(self.getDatasetMgrColumn()).getCrossSection() - ttbarxsect) > 0.0001:
                          print ShellStyles.WarningLabel()+"Forcing light H+ signal sample %s to 13 TeV ttbar cross section %f in DatacardColumn.py"%(self._label,ttbarxsect)
@@ -867,7 +871,11 @@ class DatacardColumn():
                     minimumError=error
             if minimumError > 0.0:
                 minStatUncert = minimumError
-            print "Determined the min. stat. error to be used to be %f"%minStatUncert
+            if minStatUncert > 0.5 and not "data" in self.getLabel():
+                minStatUncert = 0.5
+                print ShellStyles.WarningLabel() + "Determined the min. stat. error for column %s to be %f, which is very large. Setting the uncertainty manually to 0.5. THIS IS NOT CORRECT. You need to rebin for more statistics!"%(self.getLabel(),minStatUncert)
+            else:
+                print "Determined the min. stat. error for column %s to be %f"%(self.getLabel(),minStatUncert)
 
         self.Verbose("Setting the minimum stat. uncertainty for histogram %s to be %f"%(myTitle,minStatUncert))
 
@@ -879,10 +887,10 @@ class DatacardColumn():
             binError = self._rateResult._histograms[0].GetBinError(k)
             if binRate < minStatUncert: # FIXME: is this correct?
                 # Treat zero or sightly positive rates
-                if binRate == 0.0 or binError < minStatUncert:
-                    msg  = "Rate value is zero or below min.stat.uncert. in bin %d for column '%s' (it was %f)! " % (k, self.getLabel(), binRate)
+                if binRate < 0.000000001 and binError > 0.5:
+                    msg  = "Rate value is zero and it has large uncertainty of %.3f in bin %d for column '%s', you need to rebin for more statistics! " % (binError, k, self.getLabel())
                     msg += "Compensating up stat uncertainty to %f!" % (minStatUncert)
-                    self.Verbose(ShellStyles.WarningLabel() + msg)
+                    print ShellStyles.WarningLabel() + msg
                     self._rateResult._histograms[0].SetBinError(k, minStatUncert)                   
                     nBelowMinStatUncert += 1
                 # Treat negative rates

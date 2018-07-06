@@ -92,14 +92,14 @@ def GetLumi(datasetsMgr):
 #    return ["QCD_HT1000to1500", "QCD_HT1500to2000","QCD_HT2000toInf","QCD_HT300to500","QCD_HT500to700","QCD_HT700to1000"]
 def GetListOfQCDatasets():
     Verbose("Getting list of QCD datasets")
-    return ["QCD_bEnriched_HT200to300",
-            "QCD_bEnriched_HT300to500",
-            "QCD_bEnriched_HT500to700",
-            "QCD_bEnriched_HT700to1000",
+    return [#"QCD_bEnriched_HT200to300",
+            #"QCD_bEnriched_HT300to500",
+            #"QCD_bEnriched_HT500to700",
+            #"QCD_bEnriched_HT700to1000",
             "QCD_HT1000to1500",
-            "QCD_bEnriched_HT1000to1500",
-            "QCD_bEnriched_HT1500to2000",
-            "QCD_bEnriched_HT2000toInf",
+            #"QCD_bEnriched_HT1000to1500",
+            #"QCD_bEnriched_HT1500to2000",
+            #"QCD_bEnriched_HT2000toInf",
             "QCD_HT1500to2000_ext1",
             "QCD_HT2000toInf",
             "QCD_HT2000toInf_ext1",
@@ -201,11 +201,11 @@ def GetHistoKwargs(histoName, opts):
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
         #"opts"             : {"ymin": 0.0, "ymax": 1.09},
-        "opts"             : {"ymin": 0.0, "ymaxfactor": 1.2},
+        "opts"             : {"ymin": 0.0, "ymaxfactor": 1.1},
         "opts2"            : {"ymin": 0.6, "ymax": 1.4},
         "log"              : False,
 #        "moveLegend"       : {"dx": -0.08, "dy": -0.01, "dh": -0.08},
-        "moveLegend"       : {"dx": -0.05, "dy": -0.005, "dh": -0.08},
+        "moveLegend"       : {"dx": -0.05, "dy": -0.005, "dh": -0.1},
 #        "moveLegend"       : {"dx": -0.57, "dy": -0.007, "dh": -0.18},
         "cutBoxY"          : {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
         }
@@ -220,7 +220,7 @@ def GetHistoKwargs(histoName, opts):
         
         if "topquark" in h:
             #kwargs["moveLegend"] = {"dx": -0.55, "dy": -0.55, "dh": -0.08}
-            kwargs["moveLegend"] = {"dx": -0.05, "dy": -0.55, "dh": -0.08}
+            kwargs["moveLegend"] = {"dx": -0.05, "dy": -0.59, "dh": -0.11}
             xlabel = "generated top p_{T} (%s)" % (units)
         if 0:
             ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
@@ -231,7 +231,7 @@ def GetHistoKwargs(histoName, opts):
 
         if "event" in h:
             #kwargs["moveLegend"] = {"dx": -0.55, "dy": -0.55, "dh": -0.08}
-            kwargs["moveLegend"] = {"dx": -0.05, "dy": -0.55, "dh": -0.08}
+            kwargs["moveLegend"] = {"dx": -0.05, "dy": -0.57, "dh": -0.11}
             myBins  = [0, 100, 200, 300, 400, 500, 800]
         if 0:
             ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
@@ -533,10 +533,10 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
 
 
     # Save plot in all formats
-    savePath = os.path.join(opts.saveDir, "HplusMasses", numPath.split("/")[0], opts.optMode)
+    savePath = os.path.join(opts.saveDir, numPath.split("/")[0], opts.optMode)
     #savePath = os.path.join(opts.saveDir, numPath.split("/")[0], opts.optMode)
     save_path = savePath + opts.MVAcut
-    SavePlot(p, saveName, save_path, saveFormats = [".png", ".pdf"])
+    SavePlot(p, saveName, save_path, saveFormats = [".png", ".pdf", ".C"])
     return
 
 
@@ -858,7 +858,7 @@ def PlotEfficiency_comparison(datasetsMgr,  datasetsMgr30, datasetsMgr40, datase
     savePath = os.path.join(opts.saveDir, "HplusMasses", numPath.split("/")[0], opts.optMode)
     #savePath = os.path.join(opts.saveDir, numPath.split("/")[0], opts.optMode)
     save_path = savePath + opts.MVAcut
-    SavePlot(p, saveName, save_path, saveFormats = [".png", ".pdf"])
+    SavePlot(p, saveName, save_path, saveFormats = [".png", ".pdf", ".C"])
     return
 
 

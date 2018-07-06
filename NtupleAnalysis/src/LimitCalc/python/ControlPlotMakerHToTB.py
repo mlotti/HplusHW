@@ -259,6 +259,8 @@ class ControlPlotMakerHToTB:
         return
 
     def _setYlabelWidthSuffix(self, histo, myParams):
+        # self.Print(histo.GetName(), True)
+
         ylabelBinInfo = True
         if "ylabelBinInfo" in myParams:
             ylabelBinInfo = myParams["ylabelBinInfo"]
