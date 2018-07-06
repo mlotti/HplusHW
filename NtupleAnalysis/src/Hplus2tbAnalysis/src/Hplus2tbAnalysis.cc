@@ -35,8 +35,9 @@ private:
   BJetSelection fBJetSelection;
   Count cBTaggingSFCounter;
   METSelection fMETSelection;
-  TopSelectionBDT fTopSelection;
+  Count cTopCleaningCounter;
   Count cTopTaggingSFCounter;
+  TopSelectionBDT fTopSelection;
   // FatJetSelection fFatJetSelection;
   Count cSelected;
     
@@ -62,8 +63,9 @@ Hplus2tbAnalysis::Hplus2tbAnalysis(const ParameterSet& config, const TH1* skimCo
     fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cBTaggingSFCounter(fEventCounter.addCounter("b-tag SF")),
     fMETSelection(config.getParameter<ParameterSet>("METSelection")), // no subcounter in main counter
-    fTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    cTopCleaningCounter(fEventCounter.addCounter("top cleaning")),
     cTopTaggingSFCounter(fEventCounter.addCounter("top-tag SF")),
+    fTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     // fFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
     cSelected(fEventCounter.addCounter("Selected Events"))
 { }
@@ -150,6 +152,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   const MuonSelection::Data muData = fMuonSelection.analyze(fEvent);
   if (muData.hasIdentifiedMuons()) return;
 
+
   //================================================================================================   
   // 6) Tau Veto (HToTauNu Orthogonality)
   //================================================================================================   
@@ -201,10 +204,9 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   //================================================================================================
   if (0) std::cout << "=== Top (BDT) selection" << std::endl;
   const TopSelectionBDT::Data topData = fTopSelection.analyze(fEvent, jetData, bjetData);
-  if (!topData.passedSelection()) return;  
-
-  // Fill histos after StandardSelections: (After top-selections but BEFORE top-tag SF)
-  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, QuarkGluonLikelihoodRatio::Data(), topData, bjetData.isGenuineB());
+  if (!topData.passedAnyTwoTopsAndFreeB()) return;
+  if (topData.getAllCleanedTopsSize() != 2) return;
+  cTopCleaningCounter.increment();
 
   // Apply top-tag SF
   if (fEvent.isMC()) 
@@ -212,7 +214,11 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
       fEventWeight.multiplyWeight(topData.getTopTaggingScaleFactorEventWeight());
     }
   cTopTaggingSFCounter.increment();
-  std::cout << "\nentry = " << entry << ", topData.getMVAmax1() = " << topData.getMVAmax1() << ", topData.getMVAmax2() = " << topData.getMVAmax2() << std::endl;
+
+  // Fill histos after StandardSelections: Require any two tops with BDT > -1.0 and presence of free b-jet (not taken up by any of the two best (in MVA) tops)
+  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, QuarkGluonLikelihoodRatio::Data(), topData, bjetData.isGenuineB());
+  if (!topData.passedSelection()) return;  
+  // std::cout << "\nentry = " << entry << ", topData.getMVAmax1() = " << topData.getMVAmax1() << ", topData.getMVAmax2() = " << topData.getMVAmax2() << ", free-b pT = " << topData.getTetrajetBJet().pt() << std::endl;
 
   //================================================================================================
   // All Selections

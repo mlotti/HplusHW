@@ -190,10 +190,12 @@ def main():
     allSelections.verbose = opts.verbose
     allSelections.histogramAmbientLevel = opts.histoLevel
 
-    allSelections.TopSelectionBDT.MVACutValue      = 0.40
-    allSelections.TopSelectionBDT.MVACutDirection  =  ">="
-    #allSelections.TopSelectionBDT.WeightFile       = "TopRecoTree_12June18_DeltaR0p3_TopPtReweighting_BDTG.weights.xml" 
-    #  Default: "TopRecoTree_180523_DeltaR0p3_DeltaPtOverPt0p32_TopPtReweighting_BDTG.weights.xml"  
+    allSelections.TopSelectionBDT.TopMVACutValue      = 0.40
+    allSelections.TopSelectionBDT.TopMVACutDirection  =  ">="
+    
+    #allSelections.TopSelectionBDT.WeightFile = "TopRecoTree_12June18_DeltaR0p3_TopPtReweighting_BDTG.weights.xml" 
+    #                                  Default: "TopRecoTree_180523_DeltaR0p3_DeltaPtOverPt0p32_TopPtReweighting_BDTG.weights.xml"  
+    #                                  Other:   "TopRecoTree_12June18_DeltaR0p3_TopPtReweighting_BDTG.weights.xml"   
     
     # ================================================================================================
     # Add Analysis Variations

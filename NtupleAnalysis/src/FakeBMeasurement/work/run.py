@@ -183,13 +183,11 @@ def main():
     allSelections.histogramAmbientLevel = opts.histoLevel
 
     # Set splitting of phase-space (first bin is below first edge value and last bin is above last edge value)
-    allSelections.CommonPlots.histogramSplitting = [        
-        ### 2D-binning (Pt, Eta)
-        #PSet(label="TetrajsetBjetPt", binLowEdges=[55, 110], useAbsoluteValues=False),
-        #PSet(label="TetrajsetBjetPt", binLowEdges=[60, 100, 150], useAbsoluteValues=False),
-        PSet(label="TetrajsetBjetPt", binLowEdges=[60, 150], useAbsoluteValues=False),
+    allSelections.CommonPlots.histogramSplitting = [                
+        # PSet(label="TetrajsetBjetPt", binLowEdges=[60, 100, 150], useAbsoluteValues=False),
+        # PSet(label="TetrajsetBjetPt", binLowEdges=[60, 150], useAbsoluteValues=False),
+        PSet(label="TetrajsetBjetPt", binLowEdges=[55, 110], useAbsoluteValues=False),
         PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True),
-        ### 1D-binning (Eta)
         #PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True),  #AN v4
         ]
     
@@ -205,10 +203,9 @@ def main():
     # allSelections.TopSelectionBDT.WMassUppCutDirection   = ">="   # [default: ">="] # "<="
     # allSelections.TopSelectionBDT.CSV_bDiscCutValue      = 0.8484 # [default: 0.8484] # 0.5426
     # allSelections.TopSelectionBDT.CSV_bDiscCutDirection  = ">="   # [default: ">="]
-    allSelections.TopSelectionBDT.MVACutValue             =  -0.99  # [default:  0.40]
+    # allSelections.TopSelectionBDT.TopMVACutValue             =  -0.99  # [default:  0.40] # WARNING! This will NOT take correct topTag eff file!
     # allSelections.FakeBMeasurement.LdgTopMVACutValue      = allSelections.TopSelectionBDT.MVACutValue
     # allSelections.FakeBMeasurement.SubldgTopMVACutValue   = allSelections.TopSelectionBDT.MVACutValue
-    print "=== run.py: Default parameters overwritten!"
     
     # ================================================================================================
     # Command Line Options

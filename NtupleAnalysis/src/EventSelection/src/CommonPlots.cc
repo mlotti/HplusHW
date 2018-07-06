@@ -115,7 +115,7 @@ CommonPlots::~CommonPlots() {
   // fHistoSplitter.deleteHistograms(hCtrlQGLRNJetsAfterStdSelections);
   // fHistoSplitter.deleteHistograms(hCtrlQGLRNLightJetsAfterStdSelections);
   // fHistoSplitter.deleteHistograms(hCtrlQGLRNGluonJetsAfterStdSelections);  
-  fHistoSplitter.deleteHistograms(hCtrlNAllTopsAfterStdSelections);
+  fHistoSplitter.deleteHistograms(hCtrlNAllCleanedTopsAfterStdSelections);
   fHistoSplitter.deleteHistograms(hCtrlNSelectedCleanedTopsAfterStdSelections);
   fHistoSplitter.deleteHistograms(hCtrlLdgTrijetPtAfterStdSelections);
   fHistoSplitter.deleteHistograms(hCtrlLdgTrijetDijetPtAfterStdSelections);
@@ -208,7 +208,7 @@ CommonPlots::~CommonPlots() {
   // fHistoSplitter.deleteHistograms(hCtrlQGLRNJetsAfterAllSelections);
   // fHistoSplitter.deleteHistograms(hCtrlQGLRNLightJetsAfterAllSelections);
   // fHistoSplitter.deleteHistograms(hCtrlQGLRNGluonJetsAfterAllSelections);  
-  fHistoSplitter.deleteHistograms(hCtrlNAllTopsAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlNAllCleanedTopsAfterAllSelections);
   fHistoSplitter.deleteHistograms(hCtrlNSelectedCleanedTopsAfterAllSelections);
   fHistoSplitter.deleteHistograms(hCtrlLdgTrijetPtAfterAllSelections);
   fHistoSplitter.deleteHistograms(hCtrlLdgTrijetDijetPtAfterAllSelections);
@@ -491,8 +491,8 @@ void CommonPlots::book(TDirectory *dir, bool isData) {
 //						       "QGLRNGLuonJets_AfterStandardSelections", ";QGLR gluon jets;N_{events}", 
 //						       fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());                 
 
-      fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlNAllTopsAfterStdSelections,
-						       "NAllTops_AfterStandardSelections", ";top multiplicity;N_{events}",
+      fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlNAllCleanedTopsAfterStdSelections,
+						       "NAllCleanedTops_AfterStandardSelections", ";top multiplicity;N_{events}",
 						       fNjetsBinSettings.bins()*10, fNjetsBinSettings.min(), fNjetsBinSettings.max()*10);
 
       fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlNSelectedCleanedTopsAfterStdSelections,
@@ -611,8 +611,8 @@ void CommonPlots::book(TDirectory *dir, bool isData) {
 //						       "QGLRNGLuonJets_AfterAllSelections", ";QGLR gluon jets;N_{events}", 
 //						       fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
 
-      fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlNAllTopsAfterAllSelections,
-						       "NAllTops_AfterAllSelections", ";top multiplicity;N_{events}",
+      fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlNAllCleanedTopsAfterAllSelections,
+						       "NAllCleanedTops_AfterAllSelections", ";top multiplicity;N_{events}",
 						       fNjetsBinSettings.bins()*10, fNjetsBinSettings.min(), fNjetsBinSettings.max()*10);
 
       fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlNSelectedCleanedTopsAfterAllSelections,
@@ -1285,7 +1285,7 @@ void CommonPlots::fillControlPlotsAfterStandardSelections(const Event& event,
       fHistoSplitter.fillShapeHistogramTriplet(hCtrlBJetEtaAfterStdSelections       , bIsGenuineB, p.eta() );
       fHistoSplitter.fillShapeHistogramTriplet(hCtrlBDiscriminatorAfterStdSelections, bIsGenuineB, p.bjetDiscriminator() );
     }
-
+  
   // MET
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlMETAfterStdSelections   , bIsGenuineB, fMETData.getMET().R() );
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlMETPhiAfterStdSelections, bIsGenuineB, fMETData.getMET().Phi() );
@@ -1297,7 +1297,7 @@ void CommonPlots::fillControlPlotsAfterStandardSelections(const Event& event,
   // fHistoSplitter.fillShapeHistogramTriplet(hCtrlQGLRNGluonJetsAfterStdSelections,bIsGenuineB, fQGLRData.getNumberOfGluonJets());					   
 
   // TopSelection histograms
-  fHistoSplitter.fillShapeHistogramTriplet(hCtrlNAllTopsAfterStdSelections, bIsGenuineB, fTopData.getAllTopsMVA().size() );
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlNAllCleanedTopsAfterStdSelections, bIsGenuineB, fTopData.getAllCleanedTopsMVA().size() );
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNSelectedCleanedTopsAfterStdSelections, bIsGenuineB, fTopData.getSelectedCleanedTopsMVA().size() );
 
   // NOTE: fTopData.getLdgTrijet() and fTopData.getSubldgTrijet() methods only work with selected tops (i.e. pass BDT value)
@@ -1451,7 +1451,7 @@ void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event, int isG
   // fHistoSplitter.fillShapeHistogramTriplet(hCtrlQGLRNGluonJetsAfterAllSelections,bIsGenuineB, fQGLRData.getNumberOfGluonJets());
 
   // TopSelection histograms
-  fHistoSplitter.fillShapeHistogramTriplet(hCtrlNAllTopsAfterAllSelections, bIsGenuineB, fTopData.getAllTopsMVA().size() );
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlNAllCleanedTopsAfterAllSelections, bIsGenuineB, fTopData.getAllCleanedTopsMVA().size() );
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNSelectedCleanedTopsAfterAllSelections, bIsGenuineB, fTopData.getSelectedCleanedTopsMVA().size() );
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlLdgTrijetPtAfterAllSelections        , bIsGenuineB, fTopData.getLdgTrijet().pt() );
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlLdgTrijetDijetPtAfterAllSelections   , bIsGenuineB, fTopData.getLdgTrijetDijet().pt() );
