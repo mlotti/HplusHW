@@ -211,11 +211,12 @@ else:
 
 # top-tagging (json files available for: defaut, fatJet, ldgJet)
 MVAstring = "%.2f" % topSelectionBDT.MVACutValue
-scaleFactors.setupToptagSFInformation(topTagPset               = topSelectionBDT, 
-                                      topTagMisidFilename      = "toptagMisid_BDT%s_fatJet.json" % MVAstring.replace(".", "p"), 
-                                      topTagEfficiencyFilename = "toptagEff_BDT%s_GenuineTT_fatJet.json" % MVAstring.replace(".", "p"),
-                                      direction                = "nominal",
-                                      variationInfo            = None)
+scaleFactors.setupToptagSFInformation(topTagPset                     = topSelectionBDT, 
+                                      topTagMisidFilename            = "toptagMisid_BDT%s_fatJet.json" % MVAstring.replace(".", "p"), 
+                                      topTagEfficiencyFilename       = "toptagEff_BDT%s_GenuineTT_fatJet.json" % MVAstring.replace(".", "p"),
+                                      topTagEffUncertaintiesFilename = "toptagEffUncert_BDT%s_GenuineTT_fatJet.json" % MVAstring.replace(".", "p"),
+                                      direction                      = "nominal",
+                                      variationInfo                  = None)
 
 #================================================================================================
 # Common plots options
