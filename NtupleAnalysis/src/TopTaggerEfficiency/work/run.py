@@ -24,6 +24,9 @@ Example:
 ./run.py -m <multicrab-directory> -e TT_extOB
 ./run.py -m <multicrab_directory> -n 10 -e "QCD_bEnriched_HT300|2016|ST_"
 
+LAST USED:
+./run.py -m /uscms_data/d3/mkolosov/workspace/multicrab/multicrab_TopSystBDT_v8030_20180605T0710 > & lpc28_TopTaggerEfficiency_BDT_0p00.txt
+
 ROOT:
 The available ROOT options for the Error-Ignore-Level are (const Int_t):
         kUnset    =  -1
@@ -187,15 +190,10 @@ def main():
     allSelections.verbose = opts.verbose
     allSelections.histogramAmbientLevel = opts.histoLevel
 
-
-    allSelections.TopSelectionBDT.MVACutValue            = 0.40
-    allSelections.TopSelectionBDT.MVACutDirection        =  ">="
-    # allSelections.TopSelectionBDT.WeightFile             = "TopRecoTree_180523_DeltaR0p3_DeltaPtOverPt0p32_TopPtReweighting_BDTG.weights.xml"
-    # allSelections.BjetSelection.triggerMatchingApply = True
-    # allSelections.TopSelection.ChiSqrCutValue = 100.0
-    # allSelections.BJetSelection.numberOfBJetsCutValue = 0
-    # allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
-
+    allSelections.TopSelectionBDT.MVACutValue      = 0.40
+    allSelections.TopSelectionBDT.MVACutDirection  =  ">="
+    #allSelections.TopSelectionBDT.WeightFile       = "TopRecoTree_12June18_DeltaR0p3_TopPtReweighting_BDTG.weights.xml" 
+    #  Default: "TopRecoTree_180523_DeltaR0p3_DeltaPtOverPt0p32_TopPtReweighting_BDTG.weights.xml"  
     
     # ================================================================================================
     # Add Analysis Variations

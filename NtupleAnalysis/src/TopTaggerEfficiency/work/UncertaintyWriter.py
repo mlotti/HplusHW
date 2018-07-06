@@ -98,7 +98,7 @@ class UncertaintyWriter:
             ratio = float(default.GetY()[i])/float(variation.GetY()[i])
             unc = 0.5*(1.0-ratio)
             
-            print "Bin = ", i, " Default TT=", default.GetY()[i], "   Variation TT=", variation.GetY()[i], "  Ratio=", ratio, "  Unc=", unc
+            #print "Bin = ", i, " Default TT=", default.GetY()[i], "   Variation TT=", variation.GetY()[i], "  Ratio=", ratio, "  Unc=", unc
             
             binLowEdge = default.GetX()[i]
             binLowEdge-= default.GetErrorXlow(i)
