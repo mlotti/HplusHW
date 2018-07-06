@@ -278,7 +278,7 @@ myQCDSystematics+=["QCDscale_ttbar_forQCD","pdf_ttbar_forQCD","mass_top_forQCD",
 if OptionIncludeSystematics: 
     if not LightAnalysis:
         myQCDSystematics += ["CMS_eff_t_highpt"]
-    myQCDSystematics += ["CMS_Hptntj_fake_t_fit","CMS_Hptntj_fake_t_shape"] #these can be used only if QCDMeasurement has been run with systematics
+    myQCDSystematics += ["CMS_Hptntj_fake_t_transfer_factors","CMS_Hptntj_fake_t_shape"] #these can be used only if QCDMeasurement has been run with systematics
 
 # Set label prefix (or use postfix when signal model requires the name to start in a specifi way)
 labelPrefix="CMS_Hptntj_"
@@ -647,9 +647,9 @@ Nuisances.append(Nuisance(id="lumi_13TeV_forQCD", label="lumi_13TeVnosity",
 
 #===== QCD measurement
 if OptionIncludeSystematics:
-    Nuisances.append(Nuisance(id="CMS_Hptntj_fake_t_fit", label="QCDInv: fit", 
-        distr="lnN", function="Constant", value=0.03))
-    Nuisances.append(Nuisance(id="CMS_Hptntj_fake_t_shape", label="QCD mT shape syst.",
+    Nuisances.append(Nuisance(id="CMS_Hptntj_fake_t_transfer_factors", label="Jet to tau BG transfer factors",
+        distr="lnN", function="Constant", value=0.05)) #0.05032 for RtauMore, 0.03857 for RtauLess
+    Nuisances.append(Nuisance(id="CMS_Hptntj_fake_t_shape", label="Jet to tau BG mT shape",
         distr="shapeQ", function="QCDShapeVariation", systVariation="QCDNormSource"))
 
 #===== Embedding

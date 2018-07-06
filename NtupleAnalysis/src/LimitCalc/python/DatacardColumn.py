@@ -872,7 +872,8 @@ class DatacardColumn():
             if minimumError > 0.0:
                 minStatUncert = minimumError
             if minStatUncert > 0.5 and not "data" in self.getLabel():
-                print ShellStyles.WarningLabel() + "Determined the min. stat. error for column %s to be %f, which is very large. You need to rebin for more statistics!"%(self.getLabel(),minStatUncert)
+                minStatUncert = 0.5
+                print ShellStyles.WarningLabel() + "Determined the min. stat. error for column %s to be %f, which is very large. Setting the uncertainty manually to 0.5. THIS IS NOT CORRECT. You need to rebin for more statistics!"%(self.getLabel(),minStatUncert)
             else:
                 print "Determined the min. stat. error for column %s to be %f"%(self.getLabel(),minStatUncert)
 
