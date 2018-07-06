@@ -736,6 +736,7 @@ _legendLabels = {
     "MCStatError"            : "Sim. stat. unc.",
     "MCSystError"            : "Sim. syst. unc.",
     "MCStatSystError"        : "Sim. stat.#oplussyst. unc.",
+    "PostFitError"           : "Post-fit unc."
     }
 
 for mass in _lightHplusMasses:
@@ -1911,11 +1912,17 @@ class PlotBase:
                     #self.appendPlotObjectToRatio(o)
 
     ## Add MC uncertainty histogram
-    def addMCUncertainty(self):
+    def addMCUncertainty(self, postfit=False):
         systKey = "MCSystError"
         if histograms.uncertaintyMode.addStatToSyst():
             systKey = "MCStatSystError"
-        self.histoMgr.addMCUncertainty(styles.getErrorStyle(), legendLabel=_legendLabels["MCStatError"], uncertaintyLegendLabel=_legendLabels[systKey])
+        if postfit:
+            legendLabel=_legendLabels["PostFitError"]
+            uncertaintyLegendLabel=_legendLabels["PostFitError"]
+        else:
+            legendLabel=_legendLabels["MCStatError"]
+            uncertaintyLegendLabel=_legendLabels[systKey]
+        self.histoMgr.addMCUncertainty(styles.getErrorStyle(), legendLabel=legendLabel, uncertaintyLegendLabel=uncertaintyLegendLabel)
 
     ## Create TCanvas and frames for the histogram and a data/MC ratio
     #
@@ -2726,13 +2733,15 @@ class DataMCPlot2(PlotBase, PlotRatioBase):
         self.histoMgr.stackHistograms("StackedMCSignal", mcSignal)
 
     ## Add MC uncertainty band
-    def addMCUncertainty(self):
+    def addMCUncertainty(self, postfit=False):
         if not self.histoMgr.hasHisto("StackedMC"):
             raise Exception("Must call stackMCHistograms() before addMCUncertainty()")
         systKey = "MCSystError"
         if histograms.uncertaintyMode.addStatToSyst():
             systKey = "MCStatSystError"
-        if histograms.uncertaintyMode.equal(histograms.Uncertainty.SystOnly):
+        if postfit:
+            self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"], legendLabel=_legendLabels["PostFitError"], uncertaintyLegendLabel=_legendLabels["PostFitError"])
+        elif histograms.uncertaintyMode.equal(histograms.Uncertainty.SystOnly):
             self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"], legendLabel=_legendLabels[systKey])
         else:
             self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"], legendLabel=_legendLabels["MCStatError"], uncertaintyLegendLabel=_legendLabels[systKey])
