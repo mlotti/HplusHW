@@ -156,7 +156,16 @@ _physicalMcAdd = {
     "DYJetsToLL_M_50"            : "DYJetsToLL_M_50",
     "DYJetsToLL_M_50_ext"        : "DYJetsToLL_M_50",
     "DYJetsToLL_M_50_ext1"       : "DYJetsToLL_M_50",
+    "DYJetsToLL_M_50_ext2"       : "DYJetsToLL_M_50",
 
+    "DYJetsToLL_M_50_HT_100to200"      : "DYJetsToLL_M_50_HT_100to200",    
+    "DYJetsToLL_M_50_HT_100to200_ext1" : "DYJetsToLL_M_50_HT_100to200",    
+    "DYJetsToLL_M_50_HT_200to400"      : "DYJetsToLL_M_50_HT_200to400",
+    "DYJetsToLL_M_50_HT_200to400_ext1" : "DYJetsToLL_M_50_HT_200to400",
+    "DYJetsToLL_M_50_HT_400to600"      : "DYJetsToLL_M_50_HT_400to600",
+    "DYJetsToLL_M_50_HT_400to600_ext1" : "DYJetsToLL_M_50_HT_400to600",
+
+    "ChargedHiggs_HplusTB_HplusToTauNu_M_500" : "ChargedHiggs_HplusTB_HplusToTauNu_M_500",
     "ChargedHiggs_HplusTB_HplusToTauNu_M_500_ext1" : "ChargedHiggs_HplusTB_HplusToTauNu_M_500",
     "ChargedHiggs_HplusTB_HplusToTauNu_M_750_reHLT" : "ChargedHiggs_HplusTB_HplusToTauNu_M_750",
     "ChargedHiggs_HplusTB_HplusToTauNu_M_800_reHLT" : "ChargedHiggs_HplusTB_HplusToTauNu_M_800",
@@ -275,7 +284,8 @@ for mass in _lightHplusMasses:
     _physicalToLogical["ChargedHiggs_TTToHplusBWB_HplusToTauNu_M_%d"%(mass)] = "TTToHplusBWB_M%d"%mass
 
 for mass in _intermediateHplusMasses:
-    _physicalToLogical[" ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTBNoNeutral_M%d"%mass
+    _physicalToLogical["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassNoNeutral_M_%d"%(mass)] = "HplusTBintermediate_NoNeutral_M%d"%mass
+    _physicalToLogical["ChargedHiggs_HplusTB_HplusToTauNu_IntermediateMassWithNeutral_M_%d"%(mass)] = "HplusTBintermediate_WithNeutral_M%d"%mass
 
 for mass in _heavyHplusMasses:
     _physicalToLogical["ChargedHiggs_HplusTB_HplusToTauNu_M_%d"%(mass)] = "HplusTB_M%d"%mass
@@ -478,6 +488,10 @@ _datasetMerge = {
     #"TTJets_SemiLept": "TTJets",
     #"TTJets_Hadronic": "TTJets",
 
+    "TT_Mtt_0to700"      : "TT_Mtt",
+    "TT_Mtt_700to1000"      : "TT_Mtt",
+    "TT_Mtt_1000toInf"      : "TT_Mtt",
+
     "WJetsToLNu": "WJets",
     # "W1Jets"    : "WJets",
     # "W2Jets"    : "WJets",
@@ -496,9 +510,14 @@ _datasetMerge = {
 
     "DYJetsToLL_M_10to50"        : "DYJetsToLLHT",
     "DYJetsToLL_M_50"            : "DYJetsToLL",
+    "DYJetsToLL_M_50_HT_70to100": "DYJetsToLLHT",
     "DYJetsToLL_M_50_HT_100to200": "DYJetsToLLHT",
     "DYJetsToLL_M_50_HT_200to400": "DYJetsToLLHT",
     "DYJetsToLL_M_50_HT_400to600": "DYJetsToLLHT",
+    "DYJetsToLL_M_50_HT_600to800": "DYJetsToLLHT",
+    "DYJetsToLL_M_50_HT_800to1200": "DYJetsToLLHT",
+    "DYJetsToLL_M_50_HT_1200to2500": "DYJetsToLLHT",
+    "DYJetsToLL_M_50_HT_2500toInf": "DYJetsToLLHT",
     "DYJetsToLL_M_50_HT_600toInf": "DYJetsToLLHT",
     "DYJetsToQQ_HT180"           : "DYJetsToQQHT",
 
@@ -544,7 +563,7 @@ for process in ["TTToHplusBWB_M%d", "TTToHplusBHminusB_M%d", "TTToHplus_M%d", "H
     for mass in _lightHplusMasses:
         _datasetOrder.append(process%mass)
 for mass in _intermediateHplusMasses:
-    _datasetOrder.append("HplusTB_M%d"%mass)
+    _datasetOrder.append("HplusTBintermediate_M%d"%mass)
 for mass in _heavyHplusMasses:
     _datasetOrder.append("HplusTB_M%d"%mass)
 for mass in _heavyHplusToTBbarMasses:
@@ -571,6 +590,7 @@ _datasetOrder.extend([
     "WToTauNu",
     "TTJets",
     "TT",
+    "TT_Mtt",
     "ZJetsToQQ_HT600toInf", # Htb
     "TTandSingleTop", #merged
     "DYJetsToLL",
@@ -716,6 +736,7 @@ _legendLabels = {
     "MCStatError"            : "Sim. stat. unc.",
     "MCSystError"            : "Sim. syst. unc.",
     "MCStatSystError"        : "Sim. stat.#oplussyst. unc.",
+    "PostFitError"           : "Post-fit unc."
     }
 
 for mass in _lightHplusMasses:
@@ -788,6 +809,7 @@ _plotStyles = {
     "QCDdata"       : styles.qcdStyle,
     "SingleTop"     : styles.stStyle,
     "TT"            : styles.ttStyle,
+    "TT_Mtt"        : styles.ttStyle,
     "TTBB"          : styles.ttbbStyle, 
     "TTJets"        : styles.ttjetsStyle,
     "TTTT"          : styles.ttttStyle, 
@@ -1891,11 +1913,17 @@ class PlotBase:
                     #self.appendPlotObjectToRatio(o)
 
     ## Add MC uncertainty histogram
-    def addMCUncertainty(self):
+    def addMCUncertainty(self, postfit=False):
         systKey = "MCSystError"
         if histograms.uncertaintyMode.addStatToSyst():
             systKey = "MCStatSystError"
-        self.histoMgr.addMCUncertainty(styles.getErrorStyle(), legendLabel=_legendLabels["MCStatError"], uncertaintyLegendLabel=_legendLabels[systKey])
+        if postfit:
+            legendLabel=_legendLabels["PostFitError"]
+            uncertaintyLegendLabel=_legendLabels["PostFitError"]
+        else:
+            legendLabel=_legendLabels["MCStatError"]
+            uncertaintyLegendLabel=_legendLabels[systKey]
+        self.histoMgr.addMCUncertainty(styles.getErrorStyle(), legendLabel=legendLabel, uncertaintyLegendLabel=uncertaintyLegendLabel)
 
     ## Create TCanvas and frames for the histogram and a data/MC ratio
     #
@@ -2706,13 +2734,15 @@ class DataMCPlot2(PlotBase, PlotRatioBase):
         self.histoMgr.stackHistograms("StackedMCSignal", mcSignal)
 
     ## Add MC uncertainty band
-    def addMCUncertainty(self):
+    def addMCUncertainty(self, postfit=False):
         if not self.histoMgr.hasHisto("StackedMC"):
             raise Exception("Must call stackMCHistograms() before addMCUncertainty()")
         systKey = "MCSystError"
         if histograms.uncertaintyMode.addStatToSyst():
             systKey = "MCStatSystError"
-        if histograms.uncertaintyMode.equal(histograms.Uncertainty.SystOnly):
+        if postfit:
+            self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"], legendLabel=_legendLabels["PostFitError"], uncertaintyLegendLabel=_legendLabels["PostFitError"])
+        elif histograms.uncertaintyMode.equal(histograms.Uncertainty.SystOnly):
             self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"], legendLabel=_legendLabels[systKey])
         else:
             self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"], legendLabel=_legendLabels["MCStatError"], uncertaintyLegendLabel=_legendLabels[systKey])
