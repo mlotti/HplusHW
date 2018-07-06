@@ -149,7 +149,7 @@ def main():
     
     # marina
     allSelections.SystTopBDTSelection.MVACutValue = 0.40
-    allSelections.TopSelectionBDT.MVACutValue     = 0.40
+    allSelections.TopSelectionBDT.TopMVACutValue  = 0.40
     
     # BDT MisID SF
     MisIDSF = PSet(
