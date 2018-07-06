@@ -89,7 +89,6 @@ class AnalysisConfig:
 
 		# top-tag SF
 		elif value.startswith("TopTagSF") or value.startswith("TopMistagSF"):
-                    self.Print("************************* This is still under construction. Never tested before!", True)
                     variationType = None
                     if value.startswith("TopTagSF"):
                         variationType = "tag"
@@ -302,6 +301,9 @@ class AnalysisBuilder:
 
         # PU weight systematics
         items.extend(["PUWeight"])
+        
+        # TopTagSF weight systematics
+        items.extend(["TopTagSF"])
         return items
 
     def _processSystematicsVariations(self):
