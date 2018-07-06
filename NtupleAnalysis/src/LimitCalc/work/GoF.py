@@ -1,25 +1,51 @@
+#!/usr/bin/env python
+'''
+DESCRIPTION:
+Plots goodness-of-fit plots
+See https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideHiggsAnalysisCombinedLimit#Goodness_of_fit_tests
+for more details.
 
+
+USAGE:
+python GoF.py [opts]
+
+
+EXAMPLES:
+python GoF.py
+
+
+LAST USED:
+python GoF.py
+
+'''
+
+#================================================================================================ 
+# Imports
+#================================================================================================ 
 import ROOT
-import sys,os
+import sys
+import os
 from subprocess import call, check_output
 
-ROOT.gROOT.SetBatch()
-ROOT.gStyle.SetOptStat(0)
-ROOT.gStyle.SetOptTitle(0)
+#================================================================================================ 
+# Function definition
+#================================================================================================ 
+def main():
+    
+    # ROOT
+    ROOT.gROOT.SetBatch()
+    ROOT.gStyle.SetOptStat(0)
+    ROOT.gStyle.SetOptTitle(0)
 
-analysis = "H^{+}#rightarrow#tau_{h}#nu fully hadronic"
-
-if __name__ == "__main__":
-
+    # Settings
+    analysis = "H^{+}#rightarrow tb fully hadronic"
+    #analysis = "H^{+}#rightarrow#tau_{h}#nu fully hadronic"
+    
     ### hadd
     if not os.path.isfile("higgsCombineToys.GoodnessOfFit.mH120.root"):
         call("hadd higgsCombineToys.GoodnessOfFit.mH120.root higgsCombinetoys*.GoodnessOfFit.mH120.*.root", shell=True)
         
-
-
-
     ### perform GoF calculations
-
     fToys = ROOT.TFile("higgsCombineToys.GoodnessOfFit.mH120.root")
     fData = ROOT.TFile("higgsCombineData.GoodnessOfFit.mH120.root")
 
@@ -34,8 +60,6 @@ if __name__ == "__main__":
     tData.GetEntry(0)
     GoF_DATA = tData.limit
     print GoF_DATA
-
-
 
     GoF_TOYS_TOT = 0
     pval = 0
@@ -59,7 +83,6 @@ if __name__ == "__main__":
 
 
     ### start plotting
-
     c = ROOT.TCanvas("c", "c", 800, 800)
     c.SetTopMargin(0.055)
     c.SetRightMargin(0.05)
@@ -128,10 +151,19 @@ if __name__ == "__main__":
     tt.DrawLatex(.13,.80, "# toys: %d" % nToys)
     tt.DrawLatex(.13,.75, "p-value: %.2f" % pval)
 
+    c.SaveAs("GoF.C")
     c.SaveAs("GoF.png")
     c.SaveAs("GoF.pdf")
-
 
     print "----------------------------"
     print "toys", nToys
     print "p-value", pval
+    return
+
+#================================================================================================ 
+# Function definition
+#================================================================================================ 
+if __name__ == "__main__":
+
+
+    main()
