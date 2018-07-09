@@ -9,17 +9,20 @@ for more details.
 USAGE:
 cd <datacards_dir>
 ./GoF.sh 500 <algorithm>
-python GoF.py [opts]
+cd GoF_<algo>
+python ../../../GoF.py [opts]
 
 
 EXAMPLES:
 cd <datacards_dir>
-./GoF.sh 500 saturated
-python GoF.py --h2tb --mass 500
+./GoF.sh 500 saturated && ./GoF.sh 500 AD && ./GoF.sh 500 KS
+cd GoF_saturated
+python ../../../GoF.py --h2tb --mass 180 && python ../../../GoF.py --h2tb --mass 500
 
 
 LAST USED:
-python GoF.py --h2tb --mass 500 && cp GoF_*.png ~/public/html/tmp/.
+cd GoF_AD/
+python ../../../GoF.py --h2tb --mass 180 && cp GoF_*.png ~/public/html/tmp/.
 
 '''
 
