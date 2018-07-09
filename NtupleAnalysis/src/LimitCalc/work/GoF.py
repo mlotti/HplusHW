@@ -163,6 +163,7 @@ def main(opts):
 
     # Customise canvas & histogram
     c = ROOT.TCanvas("canvas", "canvas")
+    ROOT.gStyle.SetNdivisions(8, "X")
     hist.GetYaxis().SetTitle("Entries")
     hist.GetXaxis().SetTitle("#chi^{2}_{%s}" % (opts.algorithm) )
     hist.SetLineColor(ROOT.kRed)
@@ -214,8 +215,8 @@ def main(opts):
 
     # For-loop: Formats
     for i, ext in enumerate(opts.formats, 0):
-        saveName = "GoF_%s%s" % (opts.algorithm, ext)
-        Print("Saving %s" % (saveName), i==0)
+        saveName = "GoF_m%s_%s%s" % (opts.mass, opts.algorithm, ext)
+        Print("%s" % (saveName), i==0)
         c.SaveAs(saveName)
     return
 

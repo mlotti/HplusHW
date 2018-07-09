@@ -3,9 +3,15 @@
 # DESCRIPTION:
 # 
 #
+# EXAMPLES:
+# ./GoF.sh 500 saturated
+# ./GoF.sh 500 AD
+# ./GoF.sh 500 KS
+#
 #
 # LAST USED:
-# ./GoF.csh combine_datacard_hplushadronic_m500.txt
+# ./GoF.sh 180 saturated && ./GoF.sh 180 KS && ./GoF.sh 180 KS
+#
 #
 # USEFUL LINKS:
 #
