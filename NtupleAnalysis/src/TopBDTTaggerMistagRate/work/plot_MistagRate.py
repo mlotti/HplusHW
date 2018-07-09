@@ -200,9 +200,9 @@ def GetHistoKwargs(histoName, opts):
     myBins  = []
     #myBins  = [0, 100, 150, 200, 300, 400, 500, 600, 800]
     
-    if "csv" in h:
+    if "bdisc" in h:
         units   = ""
-        xlabel  = "CSV"
+        xlabel  = "b-discriminator"
         kwargs["opts"]   = {"xmin": 0.8, "xmax": 1.0, "ymin": 0.0, "ymaxfactor": 1.2}
         myBins  = [0.8, 0.86, 0.88, 0.90, 0.92, 0.94, 0.96, 0.98, 1.0]
         kwargs["xmin"] = 0.8
@@ -461,6 +461,7 @@ def main(opts, signalMass):
     name = opts.mcrab.split("_")[-1]
     name = name.replace(opts.analysisName, "")
     jsonName = "topMisID_"+ name +".json"
+    jsonName = jsonName.replace("/","")
     #runRange = "273150-284044"
     analysis = opts.analysisName
     label = "2016"
