@@ -38,8 +38,8 @@
   --withSF SystTopBDT_180621_162205_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p00_withSF \
   --url -e "TTW"
   
-  BDT 0.10: ./getEfficiencies.py --noSF SystTopBDT_180621_112722_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p10_noSF \
-  --withSF SystTopBDT_180621_162205_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p00_withSF \
+  BDT 0.10: ./getEfficiencies.py --noSF SystTopBDT_180706_040812_BDTCut0p10_noSF \
+  --withSF SystTopBDT_180706_093714_BDTCut0p10_withSF \
   --url -e "TTW"
   
   BDT 0.20: ./getEfficiencies.py --noSF SystTopBDT_180621_090053_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p20_noSF \
@@ -699,7 +699,7 @@ def PlotHistos(d_noSF, d_withSF, num_histoList, den_histoList,  opts):
     plots.drawPlot(p, savePath, **_kwargs)
     SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf", ".C"])
     
-    '''
+    
     jsonName = "toptagEff_InclusiveTT_fatJet.json"
     # Save results in JSON
     runRange = "273150-284044"
@@ -710,7 +710,7 @@ def PlotHistos(d_noSF, d_withSF, num_histoList, den_histoList,  opts):
     pythonWriter.addMCParameters(label, geff_mc)
     fileName_json = jsonName
     pythonWriter.writeJSON(fileName_json)
-    '''
+    
     
     
     
@@ -852,7 +852,7 @@ def PlotHistos(d_noSF, d_withSF, num_histoList, den_histoList,  opts):
     plots.drawPlot(pp, savePath, **_kwargs)
     SavePlot(pp, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf", ".C"])
     
-    
+    '''
     jsonName = "toptagEff_GenuineTT_fatJet.json"
     # Save results in JSON
     runRange = "273150-284044"
@@ -863,7 +863,8 @@ def PlotHistos(d_noSF, d_withSF, num_histoList, den_histoList,  opts):
     pythonWriter.addMCParameters(label, geffi_mc)
     fileName_json = jsonName
     pythonWriter.writeJSON(fileName_json)
-    
+    '''
+
     return
 
 

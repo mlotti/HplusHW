@@ -153,9 +153,10 @@ def main():
     
     # BDT MisID SF
     MisIDSF = PSet(
-        MisIDSFJsonName = "topMisID_BDTCut0p40.json",
+        MisIDSFJsonName = "topMisID_BDT0p40_fatJet.json",
         ApplyMisIDSF    = False, 
         )
+    
     scaleFactors.assignMisIDSF(MisIDSF, "nominal", MisIDSF.MisIDSFJsonName)
     allSelections.MisIDSF = MisIDSF
     
