@@ -62,6 +62,7 @@ public:
 private:
   // Input parameters
   const DirectionalCut<double> cfg_PrelimTopMVACut;
+  //const std::string cfg_LdgTopDefinition;
 
   // Common plots
   CommonPlots fCommonPlots;
@@ -112,6 +113,11 @@ private:
   WrappedTH1 *h_TopMultiplicity_SelectedTops;
   WrappedTH1 *h_TopMultiplicity_AllTops_cleaned;
   WrappedTH1 *h_TopMultiplicity_SelectedTops_cleaned;
+
+  WrappedTH1 *h_TopMultiplicity_AllTops_AfterAllSelections;
+  WrappedTH1 *h_TopMultiplicity_SelectedTops_AfterAllSelections;
+  WrappedTH1 *h_TopMultiplicity_AllTops_cleaned_AfterAllSelections;
+  WrappedTH1 *h_TopMultiplicity_SelectedTops_cleaned_AfterAllSelections;
 
   //More Efficiency plots
   WrappedTH1 *hTrijetPt_LdgOrSldg;
@@ -212,6 +218,10 @@ private:
   WrappedTH2* hSubldgTrijet_BDT_Vs_WMass;
   WrappedTH2* hBothTopCandidates_BDT_Vs_TopMass;
   WrappedTH2* hBothTopCandidates_BDT_Vs_WMass;
+  WrappedTH2 *h_TopMult_AllTops_cleaned_Vs_JetMult;
+  WrappedTH2 *h_TopMult_SelectedTops_cleaned_Vs_JetMult;
+  WrappedTH2 *h_TopMult_AllTops_cleaned_Vs_JetMult_AfterAllSelections;
+  WrappedTH2 *h_TopMult_SelectedTops_cleaned_Vs_JetMult_AfterAllSelections;
 
 };
 
@@ -220,7 +230,8 @@ REGISTER_SELECTOR(TopTaggerEfficiency);
 
 TopTaggerEfficiency::TopTaggerEfficiency(const ParameterSet& config, const TH1* skimCounters)
   : BaseSelector(config, skimCounters),
-    cfg_PrelimTopMVACut(config, "TopSelectionBDT.TopMVACut"),
+    cfg_PrelimTopMVACut(config, "TopSelectionBDT.MVACut"),
+    //cfg_LdgTopDefinition(config.getParameter<std::string>("FakeBTopSelectionBDT.LdgTopDefinition")),
     fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kHplus2tbAnalysis, fHistoWrapper),
     cAllEvents(fEventCounter.addCounter("all events")),
     cTrigger(fEventCounter.addCounter("passed trigger")),
@@ -440,11 +451,15 @@ void TopTaggerEfficiency::book(TDirectory *dir) {
   hLdgInBDTTrijetBDT              = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "LdgInBDTTrijetBDT",   ";top candidate BDT", 40, -1.0, 1.0);
   hSubldgInBDTTrijetBDT           = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "SubldgInBDTTrijetBDT",";top candidate BDT", 40, -1.0, 1.0);
 
-  //Top candidates multiplicity
+  //Top candidates multiplicity 
   h_TopMultiplicity_AllTops              = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TopMultiplicity_AllTops",             ";top multiplicity", 20, 0, 20);
   h_TopMultiplicity_SelectedTops         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TopMultiplicity_SelectedTops",        ";top multiplicity", 20, 0, 20);
   h_TopMultiplicity_AllTops_cleaned      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TopMultiplicity_AllTops_cleaned",     ";top multiplicity", 10, 0, 10);
   h_TopMultiplicity_SelectedTops_cleaned = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TopMultiplicity_SelectedTops_cleaned",";top multiplicity", 10, 0, 10);
+  h_TopMultiplicity_AllTops_AfterAllSelections              = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TopMultiplicity_AllTops_AfterAllSelections",  ";top multiplicity", 20, 0, 20);
+  h_TopMultiplicity_SelectedTops_AfterAllSelections         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TopMultiplicity_SelectedTops_AfterAllSelections", ";top multiplicity", 20, 0, 20);
+  h_TopMultiplicity_AllTops_cleaned_AfterAllSelections      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TopMultiplicity_AllTops_cleaned_AfterAllSelections",";top multiplicity", 10, 0, 10);
+  h_TopMultiplicity_SelectedTops_cleaned_AfterAllSelections = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TopMultiplicity_SelectedTops_cleaned_AfterAllSelections",";top multiplicity", 10, 0, 10);
 
   hTopBDT_AllCleanedCandidates  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "TopBDT_AllCleanedCandidates",";top candidate BDT", 40, -1.0, 1.0);
   hTrijet1_BDT                  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdirTH1, "Trijet1_BDT", ";top candidate BDT", 40, -1.0, 1.0);
@@ -503,13 +518,22 @@ void TopTaggerEfficiency::book(TDirectory *dir) {
   hBothTopCandidates_BDT_Vs_WMass = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "BothTopCandidates_BDT_Vs_WMass", ";top candidate BDT;m_{W} GeV/c^{2}",
 							       40, -1.0, 1.0, nWMassBins, fWMassMin, fWMassMax);
 
+  h_TopMult_AllTops_cleaned_Vs_JetMult      = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "TopMult_AllTops_cleaned_Vs_JetMult", ";top multiplicity;jet multiplicity",
+									 20, 0, 20,  20, 0,20);
+  h_TopMult_SelectedTops_cleaned_Vs_JetMult = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "TopMult_SelectedTops_cleaned_Vs_JetMult", ";top multiplicity;jet multiplicity",
+									 20, 0, 20,  20, 0,20);
+
+  h_TopMult_AllTops_cleaned_Vs_JetMult_AfterAllSelections      = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "TopMult_AllTops_cleaned_Vs_JetMult_AfterAllSelections", 
+											    ";top multiplicity;jet multiplicity", 20, 0, 20,  20, 0,20);
+  h_TopMult_SelectedTops_cleaned_Vs_JetMult_AfterAllSelections = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdirTH2, "TopMult_SelectedTops_cleaned_Vs_JetMult_AfterAllSelections", 
+											    ";top multiplicity;jet multiplicity", 20, 0, 20,  20, 0,20);									 
 
   return;
 }
 
 bool TopTaggerEfficiency::HasMother(const Event& event, const genParticle &p, const int mom_pdgId){
-  //  Description:                                                                                         //  Returns true if the particle has a mother with pdgId equal to mom_pdgId.                           
-
+  //  Description:
+  //  Returns true if the particle has a mother with pdgId equal to mom_pdgId.
   // Ensure the particle has a mother!
   if (p.mothers().size() < 1) return false;
   // For-loop: All mothers
@@ -1317,7 +1341,7 @@ void TopTaggerEfficiency::process(Long64_t entry) {
     } //if (doMatching)
   
   if (0){
-    std::cout<<GenHTop.pt()<<have_Wa<<have_Wh<<std::endl;
+    std::cout<<"after matching "<<GenHTop.pt()<<have_Wa<<have_Wh<<std::endl;
   }
 
   vector <int> AllTopCandIndex_cleaned, SelectedTopCandIndex_cleaned, AllTopCandIndexSortPt, AllTopCandIndexSortPt_cleaned;
@@ -1366,7 +1390,7 @@ void TopTaggerEfficiency::process(Long64_t entry) {
     Jet jet2 = topData.getAllTopsJet2().at(AllTopCandIndexSortPt_cleaned.at(i));
     Jet bjet = topData.getAllTopsBJet().at(AllTopCandIndexSortPt_cleaned.at(i));
     // std::cout<<jet1.index()<<" "<<jet2.index()<<" "<<bjet.index()<<std::endl;
-    // std::cout<<"Pt "<<(jet1.p4() + jet2.p4() + bjet.p4()).Pt()<<std::endl;
+    //std::cout<<"Pt "<<(jet1.p4() + jet2.p4() + bjet.p4()).Pt()<<std::endl;
   }
   
   //std::cout<<"==="<<std::endl;
@@ -1377,7 +1401,9 @@ void TopTaggerEfficiency::process(Long64_t entry) {
   h_TopMultiplicity_AllTops_cleaned      -> Fill(AllTopCandIndex_cleaned.size());
   h_TopMultiplicity_SelectedTops_cleaned -> Fill(SelectedTopCandIndex_cleaned.size());
 
-  
+  h_TopMult_AllTops_cleaned_Vs_JetMult   -> Fill(topData.getAllCleanedTopsBJet().size(), jetData.getSelectedJets().size());
+  h_TopMult_SelectedTops_cleaned_Vs_JetMult -> Fill(topData.getSelectedCleanedTopsBJet().size(), jetData.getSelectedJets().size());
+
   for (size_t i = 0; i < topData.getAllTopsBJet().size(); i++){      	
     Jet jet1 = topData.getAllTopsJet1().at(i);
     Jet jet2 = topData.getAllTopsJet2().at(i);
@@ -1761,12 +1787,13 @@ void TopTaggerEfficiency::process(Long64_t entry) {
   
   
   SelectedTrijet LdgTop, SubldgTop;
-
+  if (0) std::cout<<"get LdgTop"<<std::endl;
   LdgTop.Jet1 = topData.getLdgTrijetJet1();
   LdgTop.Jet2 = topData.getLdgTrijetJet2();
   LdgTop.BJet = topData.getLdgTrijetBJet();
   //topData.getLdgTrijet;
   //LdgTop.TrijetP4;
+  if (0) std::cout<<"get SubldgTop"<<std::endl;
   if (areSameJets(LdgTop.BJet, topData.getTrijet1BJet())){
     SubldgTop.Jet1 = topData.getTrijet2Jet1();
     SubldgTop.Jet2 = topData.getTrijet2Jet2();
@@ -1800,7 +1827,7 @@ void TopTaggerEfficiency::process(Long64_t entry) {
     // bool sameJ2B = sameJ2 && sameB;
     //if (!LdgTopIsTopFromH && !LdgWIsWFromH) LdgJBIsJBFromH = (sameJ1B || sameJ2B);  //If Ldg top not matched: check if W is matched with the W from Higgs                              
   }
-
+  if (0) std::cout<<"calculations"<<std::endl;
   double LdgTrijet_Rapidity = 0.5*log((topData.getLdgTrijet().E() + topData.getLdgTrijet().Pz())/(topData.getLdgTrijet().E() - topData.getLdgTrijet().Pz()));
   double SubldgTrijet_Rapidity = 0.5*log((topData.getSubldgTrijet().E() + topData.getSubldgTrijet().Pz())/(topData.getSubldgTrijet().E() - topData.getSubldgTrijet().Pz()));
   double TetrajetBjet_Rapidity = 0.5*log((topData.getTetrajetBJet().p4().E() + topData.getTetrajetBJet().p4().Pz())/
@@ -1836,6 +1863,7 @@ void TopTaggerEfficiency::process(Long64_t entry) {
   double deltaY_SubldgTrijet_TetrajetBjet = std::abs(SubldgTrijet_Rapidity - TetrajetBjet_Rapidity);
 
   //Fill Histograms
+  if (0) std::cout<<"Fill Histograms"<<std::endl;
   //Pt
   hLdgTrijetPt         -> Fill(LdgTopIsTopFromH, topData.getLdgTrijet().Pt());
   hLdgTrijetDijetPt    -> Fill(LdgTopIsTopFromH, topData.getLdgTrijetDijet().Pt());
@@ -1902,6 +1930,14 @@ void TopTaggerEfficiency::process(Long64_t entry) {
   hSubldgInPtTrijetBDT  -> Fill(topData.getMVASubldgInPt());
   hLdgInBDTTrijetBDT    -> Fill(topData.getMVAmax1());
   hSubldgInBDTTrijetBDT -> Fill(topData.getMVAmax2());
+
+  //Top candidates multiplicity
+  h_TopMultiplicity_AllTops_AfterAllSelections              -> Fill(topData.getAllTopsBJet().size());
+  h_TopMultiplicity_SelectedTops_AfterAllSelections         -> Fill(topData.getSelectedTopsBJet().size());
+  h_TopMultiplicity_AllTops_cleaned_AfterAllSelections      -> Fill(AllTopCandIndex_cleaned.size());
+  h_TopMultiplicity_SelectedTops_cleaned_AfterAllSelections -> Fill(SelectedTopCandIndex_cleaned.size());
+  h_TopMult_AllTops_cleaned_Vs_JetMult_AfterAllSelections   -> Fill(topData.getAllCleanedTopsBJet().size(), jetData.getSelectedJets().size());
+  h_TopMult_SelectedTops_cleaned_Vs_JetMult_AfterAllSelections -> Fill(topData.getSelectedCleanedTopsBJet().size(), jetData.getSelectedJets().size());
 
   //================================================================================================
   // Finalize
