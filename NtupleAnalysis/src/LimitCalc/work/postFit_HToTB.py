@@ -6,10 +6,19 @@ Script for plotting post-fit invariant mass shapes
 
 USAGE:
 0) Create a new directory, copy the combine input datacard txt file and the corresponding root file(s) in there
-1) Produce fitDiagnostics.root file containing post-fit shapes by running combine with this set of command line parameters:
-combine -M FitDiagnostics --robustFit=1  --X-rtd MINIMIZER_analytic ws.root --saveShapes --saveWithUncertainties --saveOverallShapes --saveNormalizations  --saveWorkspace --plots --expectSignal=0 --rMin=-4 #<path-to-datacard-txt-file>
-2) Copy this script inside the directory and do necessary modifications, e.g. update DATAROOTFILE variable to point to your combine input root file
+
+1) First create the workspace, which will produce an <output> ROOT file that will be used as input for Step 2)
+text2workspace.py <datacard>
+
+2) Produce fitDiagnostics.root file containing post-fit shapes by running combine with this set of command line parameters:
+combine -m 500 -M FitDiagnostics --robustFit=1 --X-rtd MINIMIZER_analytic <output> --saveShapes --saveWithUncertainties --saveOverallShapes --saveNormalizations  --saveWorkspace --plots --expectSignal=0 --rMin=-4 
+# combine -M FitDiagnostics -t -1 --expectSignal 0 --rMin $RMIN --rMax $RMAX $DATACARD_ROOT --seed $SEED --minos $MINOS >> $FILE
+
+3) Copy this script inside the directory and do necessary modifications, e.g. update DATAROOTFILE variable to point to your combine input root file
+
+
 3) Run this script
+./postFit_HToTB.py
 
 
 LAST USED:
@@ -49,7 +58,7 @@ XBIN_MIN = 0     #left edge of the first bin in rebinned input data histogram
 XBIN_MAX = 10000 #right edge of the last bin in re-binned input datahistogram
 XMAX_IN_PLOT = 1000.0
 
-DATAROOTFILE    = "combineCards_taunu_mH200_combined.root"
+DATAROOTFILE    = "combine_datacard_hplushadronic_m500.root" #"combineCards_taunu_mH200_combined.root"
 POSTFITROOTFILE = "fitDiagnostics.root"
 
 #================================================================================================  
