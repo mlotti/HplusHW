@@ -102,6 +102,7 @@ def main(opts):
     ROOT.gROOT.SetBatch()
     ROOT.gStyle.SetOptStat(0)
     ROOT.gStyle.SetOptTitle(0)
+    ROOT.gStyle.SetNdivisions(5, "X")
 
     # Settings
     if opts.h2tb:
@@ -166,7 +167,6 @@ def main(opts):
 
     # Customise canvas & histogram
     c = ROOT.TCanvas("canvas", "canvas")
-    ROOT.gStyle.SetNdivisions(8, "X")
     hist.GetYaxis().SetTitle("Entries")
     hist.GetXaxis().SetTitle("#chi^{2}_{%s}" % (opts.algorithm) )
     hist.SetLineColor(ROOT.kRed)
