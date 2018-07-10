@@ -15,6 +15,8 @@ EXAMPLES:
 
 LAST USED:
 ./dcardGenerator_v2.py -x dcardDefault_h2tb_2016.py -d limits2016/ --h2tb
+OR
+./dcardGenerator_v2.py -x dcardDefault_h2tb_2016_new.py -d limits2016/ --h2tb
 
 '''
 #================================================================================================  
@@ -111,8 +113,9 @@ def getFakeBSystematics(myTTBarSystematics, OptionShapeSystematics, verbose=Fals
 #================================================================================================  
 OptionTest                             = False
 OptionPaper                            = True
-OptionIncludeSystematics               = False # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
-OptionShapeSystematics                 = False # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
+OptionIncludeRares                     = True  # [default: True]
+OptionIncludeSystematics               = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
+OptionShapeSystematics                 = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionDoControlPlots                   = True  # [default: True]   (Produce control plots defined at end of this file)
 MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
 DataCardName                           = "Hplus2tb_13TeV"
@@ -120,7 +123,7 @@ OptionMassShape                        = "LdgTetrajetMass_AfterAllSelections" #"
 #OptionMassShape                        = "SubldgTetrajetMass_AfterAllSelections"
 OptionBr                               = 1.0   # [default: 1.0]    (The Br(t->bH+) used in figures and tables)
 OptionSqrtS                            = 13    # [default: 13]     (The sqrt(s) used in figures and tables)
-BlindAnalysis                          = True  # [default: True]   (True, unless you have a green light for unblinding)
+BlindAnalysis                          = False  # [default: True]   (True, unless you have a green light for unblinding)
 OptionBlindThreshold                   = None  # [default: 0.2]    (If signal exceeds this fraction of expected events, data is blinded; set to None to disable)
 MinimumStatUncertainty                 = 0.5   # [default: 0.5]    (Minimum stat. uncertainty to set to bins with zero events)
 UseAutomaticMinimumStatUncertainty     = False # Do NOT use the MinimumStatUncertainty value above for ~empty bins, but determine the value from the lowest non-zero rate for each dataset   
@@ -326,10 +329,11 @@ DataGroups.append(TT)
 DataGroups.append(SingleTop)
 DataGroups.append(TTZ)
 DataGroups.append(TTTT)
-DataGroups.append(DYJets)
-DataGroups.append(TTWJets)
-DataGroups.append(WJets)
-DataGroups.append(Diboson)
+if OptionIncludeRares:
+    DataGroups.append(DYJets)
+    DataGroups.append(TTWJets)
+    DataGroups.append(WJets)
+    DataGroups.append(Diboson)
 
 #================================================================================================  
 # Shape Nuisance Parameters (aka Systematics)  (= rows in datacard) 
@@ -597,7 +601,7 @@ hMET = ControlPlotInput(
                          "log"                : True,
                          "legendPosition"     : "NE",
                          "ratioLegendPosition": "right",
-                         "opts"               : {"ymin": 1e-2, "ymaxfactor": 10}#, "xmax": 400.0} }#,
+                         "opts"               : {"ymin": 1e-2, "ymaxfactor": 10, "xmax": 300.0}
                          },
     #blindedRange=[100.0, 400.0], # specify range min,max if blinding applies to this control plot      
     )
@@ -1423,9 +1427,9 @@ ControlPlots.append(hNjets)
 ### ControlPlots.append(hBtagDiscriminator) #No agreement expected
 ControlPlots.append(hSubldgTopPt)
 ControlPlots.append(hSubldgTopMass)
-ControlPlots.append(hSubldgTopBjetPt)  # No agreement expected
-ControlPlots.append(hSubldgTopBjetEta) # No agreement expected
-ControlPlots.append(hSubldgTopBjetBdisc) # No agreement expected
+#ControlPlots.append(hSubldgTopBjetPt)  # No agreement expected
+#ControlPlots.append(hSubldgTopBjetEta) # No agreement expected
+#ControlPlots.append(hSubldgTopBjetBdisc) # No agreement expected
 ControlPlots.append(hSubldgTopDijetPt)
 ControlPlots.append(hSubldgTopDijetMass)
 ### ControlPlots.append(hSubldgTopR32)
@@ -1438,13 +1442,14 @@ ControlPlots.append(hJet4Pt)
 ControlPlots.append(hJet5Pt)
 ControlPlots.append(hJet6Pt)
 ControlPlots.append(hJet7Pt)
-ControlPlots.append(hJet1Eta)
-ControlPlots.append(hJet2Eta)
-ControlPlots.append(hJet3Eta)
-ControlPlots.append(hJet4Eta)
-ControlPlots.append(hJet5Eta)
-ControlPlots.append(hJet6Eta)
-ControlPlots.append(hJet7Eta)
+if 0:
+    ControlPlots.append(hJet1Eta)
+    ControlPlots.append(hJet2Eta)
+    ControlPlots.append(hJet3Eta)
+    ControlPlots.append(hJet4Eta)
+    ControlPlots.append(hJet5Eta)
+    ControlPlots.append(hJet6Eta)
+    ControlPlots.append(hJet7Eta)
 # No agreement expected
 if 0:
     ControlPlots.append(hBJet1Pt)
