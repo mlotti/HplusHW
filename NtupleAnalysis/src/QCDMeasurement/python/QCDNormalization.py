@@ -621,6 +621,7 @@ class QCDNormalizationManagerBase:
         self._combinedFakesNormalizationUp = {}
         self._combinedFakesNormalizationDown = {}
         self._dqmKeys = OrderedDict()
+        self._totalErrorRelativeForDatacards = -1.0
         
         if not isinstance(binLabels, list):
             raise Exception("Error: binLabels needs to be a list of strings")
@@ -674,7 +675,7 @@ class QCDNormalizationManagerBase:
             if wDown < 0.0:
                 wDown = 0.0
         lines.append("\033[44m   QCD fraction = w = nQCD/(nQCD+nEWKfakes) = %f +- %f \033[0m\n"%(w, wError))
-        # Calculate the combined normalization factor (f_fakes = w*f_QCD + (1-w)*f_EWKfakes)
+        # Calculate the combined normalization factor (f_fakes = w*f_QCD + (1-w)*f_EWKfakes) and its errors
         binLabel = self._templates[self._requiredTemplateList[0]].getBinLabel()
         fakeRate = None
         fakeRateError = None
@@ -691,6 +692,13 @@ class QCDNormalizationManagerBase:
         self._combinedFakesNormalizationError[binLabel] = fakeRateError
         self._combinedFakesNormalizationUp[binLabel] = fakeRateUp
         self._combinedFakesNormalizationDown[binLabel] = fakeRateDown
+        # Calculate the overall error from transfer factors, to be used in datacards
+        nEvents = 0.0
+        totalErrorSquared = 0.0
+        for k in self._qcdNormalization.keys():
+            nEvents += self._combinedFakesNormalization[k]
+            totalErrorSquared += self._combinedFakesNormalizationError[k]*self._combinedFakesNormalizationError[k]   
+        self._totalErrorRelativeForDatacards = ROOT.TMath.Sqrt(totalErrorSquared)/nEvents
         # Print output and store comments
         self._commentLines.extend(lines)
         for l in lines:
@@ -741,6 +749,8 @@ class QCDNormalizationManagerBase:
         s += "QCDPlusEWKFakeTausNormalizationError = {\n"
         for k in self._combinedFakesNormalizationError:
             s += '    "%s": %f,\n'%(k, self._combinedFakesNormalizationError[k])
+        # Add the relative error to be used in datacards
+        s += '    "relErrorforDatacard": %f,\n'%self._totalErrorRelativeForDatacards
         s += "}\n"
         s += "QCDPlusEWKFakeTausNormalizationSystFakeWeightingVarDown = {\n"
         for k in self._combinedFakesNormalizationDown:
@@ -841,15 +851,27 @@ class QCDNormalizationManagerBase:
         if "Inclusive" in keys and "Inclusive" not in keyList:
             keyList.append("Inclusive")
 
+        # Test prints
+        for k in keys:
+            print "For key %s the QCD transfer factor relative error is %.3f"%(k, self._qcdNormalizationError[k]/self._qcdNormalization[k])
+        for k in keys:
+            print "For key %s the EWK+tt transfer factor relative error is %.3f"%(k, self._ewkFakesNormalizationError[k]/self._ewkFakesNormalization[k])
+
         # Create graphs
         gQCD = makeGraph(24, ROOT.kRed, keyList, self._qcdNormalization, self._qcdNormalizationError, self._qcdNormalizationError)
         gFake = makeGraph(27, ROOT.kBlue, keyList, self._ewkFakesNormalization, self._ewkFakesNormalizationError, self._ewkFakesNormalizationError)
+        # Old implementation, only waking into account the uncertainty in weight w and not in individual transfer factors
         upError = {}
         downError = {}
         for k in keys:
-            upError[k] = self._combinedFakesNormalizationUp[k] - self._combinedFakesNormalization[k]
-            downError[k] = self._combinedFakesNormalization[k] - self._combinedFakesNormalizationDown[k]
+            #upError[k] = abs(self._combinedFakesNormalizationUp[k] - self._combinedFakesNormalization[k])
+            #downError[k] = abs(self._combinedFakesNormalization[k] - self._combinedFakesNormalizationDown[k])
+            print "For key %s the combined transfer factor relative error is %.3f"%(k, self._combinedFakesNormalizationError[k]/self._combinedFakesNormalization[k])
+        # New, correct implementation
+        upError = self._combinedFakesNormalizationError
+        downError = self._combinedFakesNormalizationError
         gCombined = makeGraph(20, ROOT.kBlack, keyList, self._combinedFakesNormalization, upError, downError)
+        print "Total relative error from combined transfer factors: %.3f"%(self._totalErrorRelativeForDatacards)        
         # Make plot
         hFrame = ROOT.TH1F("frame","frame",len(keyList),0,len(keyList))
         for i in range(len(keyList)):
@@ -859,24 +881,24 @@ class QCDNormalizationManagerBase:
         # hFrame.SetMinimum(0.0005)
         # hFrame.SetMaximum(0.01)
  ## original
-        hFrame.SetMinimum(0.05)
-        hFrame.SetMaximum(0.5)                 
-        hFrame.GetYaxis().SetTitle("Normalization coefficient")
-        hFrame.GetXaxis().SetLabelSize(7)
+        hFrame.SetMinimum(0.0)
+        hFrame.SetMaximum(0.65)                 
+        hFrame.GetYaxis().SetTitle("Transfer factor")
+        hFrame.GetXaxis().SetLabelSize(8)
         c = ROOT.TCanvas()
-        c.SetLogy()
+        #c.SetLogy()
         hFrame.Draw()
         gQCD.Draw("p same")
         gFake.Draw("p same")
         gCombined.Draw("p same")
         histograms.addStandardTexts(cmsTextPosition="outframe")
-        #l = ROOT.TLegend(0.2,0.7,0.5,0.9) #original
-        l = ROOT.TLegend(0.3,0.3,0.6,0.5)
+        l = ROOT.TLegend(0.2,0.7,0.5,0.9) #original
+        #l = ROOT.TLegend(0.3,0.3,0.6,0.5)
        
         l.SetFillStyle(-1)
         l.SetBorderSize(0)
-        l.AddEntry(gQCD, "Multijets", "p")
-        l.AddEntry(gFake, "EWK+tt mis-id #tau", "p")
+        l.AddEntry(gQCD, "QCD multijets", "p")
+        l.AddEntry(gFake, "EWK+tt jet #rightarrow #tau", "p")
         l.AddEntry(gCombined, "Combined", "p")
         l.Draw()
         backup = ROOT.gErrorIgnoreLevel

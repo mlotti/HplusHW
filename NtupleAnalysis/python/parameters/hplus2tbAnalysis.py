@@ -151,7 +151,7 @@ topSelectionBDT = PSet(
     TopMVACutDirection     =  ">=",   # [default: ">="]
     TopMassLowCutValue     =   0.0,   # [default: 0.0]
     TopMassLowCutDirection =  ">=",   # [default: ">="]
-    TopMassUppCutValue     = 300.0,   # [default: 400 or 500.0]  # Do not evaluate top candidate if top mass greater than this cut
+    TopMassUppCutValue     = 250.0,   # [default: 300.0]  # Do not evaluate top candidate if top mass greater than this cut
     TopMassUppCutDirection =  "<=",   # [default: "<"]
     WMassLowCutValue       =   0.0,   # [default: 0.0] 
     WMassLowCutDirection   =  ">=",   # [default: ">="]
