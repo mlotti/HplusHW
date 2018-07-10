@@ -20,6 +20,7 @@ cd <datacards_dir>
 
 1) Run the recommended closure checks commands and save all relevant plots:
 ../../doClosureChecks.csh 180
+WARNING! the output file is not suited for post-fit plots
 
 2) Execute this script from inside the <datacards_dir>
 ../.././postFit_HToTB.py --mass 180 --url
@@ -31,7 +32,7 @@ as input.
 
 
 LAST USED:
-../.././postFit_HToTB.py --mass 500 --url && ../.././postFit_HToTB.py --mass 500 --prefit --url 
+../.././postFit_HToTB.py --mass 500 --prefit && ../.././postFit_HToTB.py --mass 500 && ../.././postFit_HToTB.py --mass 180 --prefit && ../.././postFit_HToTB.py --mass 180 --url
 
 
 '''
@@ -85,9 +86,14 @@ def Print(msg, printHeader=True):
 
 class Category:
     def __init__(self, name, opts):
+        xMin = 0
+        if opts.logX:
+            xMin = 1
         if opts.logY:
-            yMin = 1e-1
+            yMin = 1e-2
             yMaxFactor = 10.0
+            if opts.fitUncert:
+                yMaxFactor = 30.0
         else:
             yMin = 0.0
             yMaxFactor = 1.2
@@ -99,9 +105,9 @@ class Category:
         self.colors     = {}
         self.h_data     = None
         self.histograms = {}
-        self.opts       = {"xmin": 2.0, "xmax" : self.gOpts.xMax, "ymin" : yMin, "ymaxfactor": yMaxFactor}
-        self.optsLogx   = {"xmin": 2.0, "xmax": opts.xMax}
-        self.opts2      = {"ymin": 0.0, "ymax": 2.00}
+        self.opts       = {"xmin": xMin, "xmax" : self.gOpts.xMax, "ymin" : yMin, "ymaxfactor": yMaxFactor}
+        self.optsLogx   = {"xmin": xMin, "xmax": opts.xMax}
+        self.opts2      = {"ymin": 0.3, "ymax": 1.7}
         self.moveLegend = {}
         return
 
@@ -160,7 +166,7 @@ class Category:
     def fetchHistograms(self, fINdata, fINpost):
         
         histoName  = "data_obs"
-        Print("Getting histogram \"%s\" from ROOT file \"%s\"" % (histoName, fINdata.GetName()), True)
+        Print("Getting data histogram \"%s\" from ROOT file \"%s\"" % (histoName, fINdata.GetName()), True)
         histoData   = fINdata.Get(histoName)
         self.h_data = histoData.Clone("Data")
         Verbose("Entries = %.1f" % (histoData.GetEntries()), False)
@@ -188,7 +194,6 @@ class Category:
 
         # For-loop: All histos
         for i, hname in enumerate(self.histonames, 1):
-            Print("Getting histogram \"%s\" from ROOT file \"%s\"" % (hname, self.h_data.GetName()), i==1)
             template = self.h_data.Clone(hname)
             template.Reset()
             
@@ -202,7 +207,7 @@ class Category:
 
             # Get the histograms
             histo = fINpost.Get(histoName)
-            Print("Getting histogram \"%s\" from ROOT file \"%s\"" % (histoName, fINpost.GetName()), False)
+            Print("Getting bkg histogram \"%s\" from ROOT file \"%s\"" % (histoName, fINpost.GetName()), i==1)
 
             # For-loop: All bins
             for iBin in range(0, histo.GetNbinsX()+1):
@@ -228,13 +233,13 @@ class Category:
             hhp.setIsDataMC(isData=False,isMC=True)
             histolist.append(hhp)
 
-
         style = tdrstyle.TDRStyle()
         p = plots.DataMCPlot2(histolist)
         p.setDefaultStyles()
         p.stackMCHistograms()
         p.setLuminosity(opts.lumi)
-        p.addMCUncertainty(postfit=True)
+        if opts.fitUncert:
+            p.addMCUncertainty(postfit=not opts.prefit) # boolean changes only the legend
         p.setLegendHeader("Post-Fit")
 
         # Customise histogram 
@@ -250,7 +255,7 @@ class Category:
         myParams["opts"]              = self.opts
         myParams["optsLogx"]          = self.optsLogx
         myParams["opts2"]             = self.opts2
-        # myParams["divideByBinWidth"]  = True #Invalid for "TGraphAsymmErrors"
+        myParams["divideByBinWidth"]  = not opts.fitUncert #Invalid for "TGraphAsymmErrors"
         myParams["errorBarsX"]        = True
         myParams["xlabelsize"]        = 25
         myParams["ylabelsize"]        = 25
@@ -346,7 +351,7 @@ if __name__=="__main__":
 
     # Default options
     VERBOSE         = False
-    SAVEDIR         = "/afs/cern.ch/user/%s/%s/public/html/PostFit" % (getpass.getuser()[0], getpass.getuser())
+    SAVEDIR         = "/afs/cern.ch/user/%s/%s/public/html/FitDiagnostics" % (getpass.getuser()[0], getpass.getuser())
     SAVENAME        = None
     LUMI            = "35.9"
     URL             = False
@@ -357,12 +362,13 @@ if __name__=="__main__":
     XMINREBIN       = 0.0
     XMAXREBIN       = 10000
     XMIN            = 0.0
-    XMAX            = 3000
+    XMAX            = 2500 # 3000
     MASS            = "500"
     POSTFITROOTFILE = None
     DATAROOTFILE    = None
     PREFIT          = False
-    
+    FITUNCERT       = False
+
     parser = OptionParser(usage="Usage: %prog [options]", add_help_option=True, conflict_handler="resolve")
 
     parser.add_option("-v", "--verbose", dest="verbose", default=VERBOSE, action="store_true",
@@ -416,10 +422,14 @@ if __name__=="__main__":
     parser.add_option("--prefit", dest="prefit", default=PREFIT, action="store_true",
                       help="Draw the pre-fit histogams (not the post-fit ones) [default: %s]" % (PREFIT) )
 
+    parser.add_option("--fitUncert", dest="fitUncert", default=FITUNCERT, action="store_true",
+                      help="Include fit-uncertainty (and disable \"divideByBinWidth\" option) [default: %s]" % (FITUNCERT) )
+
     (opts, args) = parser.parse_args()
 
     if opts.postfitFile == None:
-        opts.postfitFile = "fitDiagnostics_m%s_BkgAsimov.root" % (opts.mass)
+        #opts.postfitFile = "fitDiagnostics_m%s_BkgAsimov.root" % (opts.mass)
+        opts.postfitFile = "fitDiagnostics_ws.root"
 
     if opts.dataFile == None:
         opts.dataFile    = "combine_histograms_hplushadronic_m%s.root" % (opts.mass)
@@ -428,7 +438,7 @@ if __name__=="__main__":
         postfix = "postFit"
         if opts.prefit:
             postfix = "preFit"
-        opts.saveName = "LdgTetrajetMass_m%s_%s" % (opts.mass, postfix)
+        opts.saveName = "LdgTetrajetMass_m%s_%s" % (opts.mass, postfix) #results should be the same for bkg-only fit (expectedSignal=0)
 
     if opts.saveDir == None:
         opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="Closure")
