@@ -25,16 +25,10 @@
 #===========================================================
 # Ensure all script arguments are passed from command line
 #===========================================================
-if ($#argv != 1) then
-    #echo "=== You must give exactly 3 arguments:"
-    #echo "1 = Your datacard txt file,  e.g. combine_datacard_hplushadronic_m500.txt"
-    #echo "2 = Your datacard root file, e.g. higgsCombineblinded_m500.AsymptoticLimits.mH500.root"
-    #echo "3 = The mass point you want to examine, e.g. 500"
-    #echo "\n=== For example:"
-    #echo "./doPulls.csh combine_datacard_hplushadronic_m500.txt higgsCombineblinded_m500.AsymptoticLimits.mH500.root 500"
-    echo "=== You must give exactly 1 argument; The mass point you want to examine, e.g. 500"
+if ($#argv != 2) then
+    echo "=== You must give exactly 2 arguments; The mass point you want to examine, e.g. 500 and 0 (False) or 1 (True) if you want unblinded pulls."
     echo "\n=== For example:"
-    echo "./doPulls.csh 500"
+    echo "./doPulls.csh 500 0"
     echo
     exit 1
 endif
@@ -42,17 +36,16 @@ endif
 #===================
 # Define Variables
 #===================
-#set DATACARD_TXT  = ${1}
-#set DATACARD_ROOT = ${2}
-#set MASS          = ${3}
 set MASS          = ${1}
+set UNBLIND       = ${2}
 set DATACARD_TXT  = combine_datacard_hplushadronic_m${MASS}.txt  
 set DATACARD_ROOT = higgsCombineblinded_m${MASS}.AsymptoticLimits.mH${MASS}.root
 set SEED          = 123456
 set BACKGROUND    = "Impacts_BkgOnly_m${MASS}.txt"
 set SIGNAL        = "Impacts_SB_m${MASS}.txt"
-set RMIN          = -10 #0
-set RMAX          = +20
+set UNBLINDED     = "Impacts_Unblinded_m${MASS}.txt"
+set RMIN          = -10 # Combine Default = 0
+set RMAX          = +20 # Combine Default = 20
 
 echo "=== Building workspace"
 text2workspace.py $DATACARD_TXT -m $MASS -o $DATACARD_ROOT
@@ -88,3 +81,21 @@ combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS -t -1 -o impacts_SBAsimov_$
 
 echo "=== Plot Impacts"
 plotImpacts.py -i impacts_SBAsimov_$MASS.json -o impacts_SBAsimov_$MASS >> $SIGNAL
+
+if ($UNBLIND) then
+   echo "**********************"
+   echo "    Unblinded pulls   "
+   echo "**********************"
+
+   echo "=== Fit for each POI"
+   combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS --doInitialFit --robustFit 1 --rMin $RMIN --rMax $RMAX --seed $SEED > $UNBLINDED
+   
+   echo "=== Fit scan for each nuisance parameter"
+   combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS --robustFit 1 --doFits --rMin $RMIN --rMax $RMAX --parallel 8 --seed $SEED >> $UNBLINDED
+
+   echo "=== Collect the output and write results into a json file"
+   combineTool.py -M Impacts -d $DATACARD_ROOT -m $MASS -o impacts_Unblinded_$MASS.json --seed $SEED >> $UNBLINDED
+    
+   echo "=== Plot Impacts"
+   plotImpacts.py -i impacts_Unblinded_$MASS.json -o impacts_Unblinded_$MASS >> $UNBLINDED 
+endif
