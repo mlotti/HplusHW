@@ -51,8 +51,8 @@ set DATACARD_ROOT = higgsCombineblinded_m${MASS}.AsymptoticLimits.mH${MASS}.root
 set SEED          = 123456
 set BACKGROUND    = "Impacts_BkgOnly_m${MASS}.txt"
 set SIGNAL        = "Impacts_SB_m${MASS}.txt"
-set RMIN          = 0
-set RMAX          = 20
+set RMIN          = -10 #0
+set RMAX          = +20
 
 echo "=== Building workspace"
 text2workspace.py $DATACARD_TXT -m $MASS -o $DATACARD_ROOT
