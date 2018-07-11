@@ -33,7 +33,7 @@ as input.
 
 LAST USED:
 ../.././postFit_HToTB.py --mass 500 --prefit && ../.././postFit_HToTB.py --mass 500 && ../.././postFit_HToTB.py --mass 180 --prefit && ../.././postFit_HToTB.py --mass 180 --url
-
+../.././postFit_HToTB.py --mass 500 --prefit --fitUncert
 
 '''
 
@@ -312,11 +312,12 @@ def main(opts):
     h2tb_1.addHisto("TT_GenuineB"                   , "t#bar{t}"         , color=ROOT.kMagenta-2)
     h2tb_1.addHisto("SingleTop_GenuineB"            , "Single t"         , color=ROOT.kSpring+4)
     h2tb_1.addHisto("TTZToQQ_GenuineB"              , "t#bar{t}+Z"       , color=ROOT.kAzure-4)
-    h2tb_1.addHisto("TTTT_GenuineB"                 , "t#bar{t}t#bar{t}" , color=ROOT.kYellow-9)
-    h2tb_1.addHisto("DYJetsToQQ_GenuineB"           , "Z/#gamma^{*}+jets", color=ROOT.kTeal-9)
-    h2tb_1.addHisto("TTWJetsToQQ_GenuineB"          , "t#bar{t}+W"       , color=ROOT.kSpring+9)
-    h2tb_1.addHisto("WJetsToQQ_HT_600ToInf_GenuineB", "W+jets"           , color=ROOT.kOrange+9)
-    h2tb_1.addHisto("Diboson_GenuineB"              , "Diboson"          , color=ROOT.kBlue-4)
+    if not opts.removeRares:
+        h2tb_1.addHisto("TTTT_GenuineB"                 , "t#bar{t}t#bar{t}" , color=ROOT.kYellow-9)
+        h2tb_1.addHisto("DYJetsToQQ_GenuineB"           , "Z/#gamma^{*}+jets", color=ROOT.kTeal-9)
+        h2tb_1.addHisto("TTWJetsToQQ_GenuineB"          , "t#bar{t}+W"       , color=ROOT.kSpring+9)
+        h2tb_1.addHisto("WJetsToQQ_HT_600ToInf_GenuineB", "W+jets"           , color=ROOT.kOrange+9)
+        h2tb_1.addHisto("Diboson_GenuineB"              , "Diboson"          , color=ROOT.kBlue-4)
     categories = [h2tb_1]
 
     if os.path.isfile(opts.dataFile):
@@ -368,6 +369,7 @@ if __name__=="__main__":
     DATAROOTFILE    = None
     PREFIT          = False
     FITUNCERT       = False
+    REMOVERARES     = False
 
     parser = OptionParser(usage="Usage: %prog [options]", add_help_option=True, conflict_handler="resolve")
 
@@ -424,6 +426,9 @@ if __name__=="__main__":
 
     parser.add_option("--fitUncert", dest="fitUncert", default=FITUNCERT, action="store_true",
                       help="Include fit-uncertainty (and disable \"divideByBinWidth\" option) [default: %s]" % (FITUNCERT) )
+
+    parser.add_option("--removeRares", dest="removeRares", default=REMOVERARES, action="store_true",
+                      help="Remove rare datasets (v. small contribution to final count) [default: %s]" % (REMOVERARES) )
 
     (opts, args) = parser.parse_args()
 
