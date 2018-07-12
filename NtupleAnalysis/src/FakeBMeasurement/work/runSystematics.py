@@ -144,25 +144,24 @@ def main():
 
     # Set splitting of phase-space (first bin is below first edge value and last bin is above last edge value)
     allSelections.CommonPlots.histogramSplitting = [               
-        #PSet(label="TetrajetBjetPt" , binLowEdges=[55], useAbsoluteValues=False),
-        #PSet(label="TetrajetBjetPt" , binLowEdges=[55, 110], useAbsoluteValues=False), # set1 (works)
-        #PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True), # set1 (works)
-        #PSet(label="TetrajetBjetPt" , binLowEdges=[60, 110, 200], useAbsoluteValues=False),
-        #PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True), #AN_v4
-        PSet(label="TetrajetBjetPt" , binLowEdges=[60], useAbsoluteValues=False),  # if subldg-in-pT allowed to be CSVv2-L bjet
-        PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6, 2.0], useAbsoluteValues=True), # if subldg-in-pT allowed to be CSVv2-L bjet
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[60, 90, 160, 300], useAbsoluteValues=False), # BEST (v1)
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True),          # BEST (v1)
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[60, 90, 160, 300], useAbsoluteValues=False), # BEST (v2)
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True), # BEST v2
+        PSet(label="TetrajetBjetPt" , binLowEdges=[60, 90, 160, 300], useAbsoluteValues=False), # BEST (v2)
+        PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.4, 2.0], useAbsoluteValues=True), # BEST v2
         ]
 
     # allSelections.TopSelectionBDT.TopMassLowCutDirection = ">="   # [default: ">="]
     # allSelections.TopSelectionBDT.TopMassLowCutValue     =  0.0   # [default: 0.0] # 90.0
-    # allSelections.TopSelectionBDT.TopMassUppCutDirection = "<="   # [default: "<="]
-    # allSelections.TopSelectionBDT.TopMassUppCutValue     = 600.0  # [default: 600.0] #250
+    #allSelections.TopSelectionBDT.TopMassUppCutDirection = "<="   # [default: "<="]
+    allSelections.TopSelectionBDT.TopMassUppCutValue     = 9000.0  # [default: 600.0] #250
     # allSelections.TopSelectionBDT.WMassLowCutDirection   = ">="   # [default: ">="]
     # allSelections.TopSelectionBDT.WMassLowCutValue       =   0.0  # [default: 0.0]
     # allSelections.TopSelectionBDT.WMassUppCutDirection   = ">="   # [default: ">="] # "<="
     # allSelections.TopSelectionBDT.WMassUppCutValue       =   0.0  # [default: 0.0]  # 150.0
     # allSelections.TopSelectionBDT.CSV_bDiscCutDirection  = ">="
-    allSelections.TopSelectionBDT.CSV_bDiscCutValue      = 0.5426 # [default: 0.8484], 0.5426
+    allSelections.TopSelectionBDT.CSV_bDiscCutValue      = 0.54 # [default: 0.8484], 0.5426
     # allSelections.TopSelectionBDT.TopMVACutValue            =  0.40 # [default:  0.40] #WARNING! DO NOT CHANGE IT HERE (tagEff/MisId files must also change!)
     # allSelections.FakeBMeasurement.LdgTopMVACutValue     = allSelections.TopSelectionBDT.MVACutValue
     # allSelections.FakeBMeasurement.SubldgTopMVACutValue  = allSelections.TopSelectionBDT.MVACutValue
