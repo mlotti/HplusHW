@@ -102,6 +102,7 @@ def CleanFiles(opts):
 
 def doPlots(i, opts):
 
+    Print("Processing %s%s%s algorithm" % (ShellStyles.NoteStyle(), opts.algorithm, ShellStyles.NormalStyle(), ), True)
     # Settings
     if opts.h2tb:
         analysis = "H^{+}#rightarrow tb fully hadronic"
@@ -123,7 +124,7 @@ def doPlots(i, opts):
     if not os.path.isfile(opts.outputfile):
         raise Exception("The output ROOT file \"%s\" does not exist!" % (opts.outputfile) )
     else:
-        Print("Opening merged ROOT file \"%s\" to read results" % (opts.outputfile), i==1)
+        Print("Opening merged ROOT file \"%s\" to read results" % (opts.outputfile), False)
     fToys = ROOT.TFile(opts.outputfile)
     fData = ROOT.TFile(opts.outputfile)
     tToys = fToys.Get("limit")
@@ -135,6 +136,8 @@ def doPlots(i, opts):
 
     if opts.verbose:
         tData.Print()
+
+    # Store the goodness-of-fit value observed in data
     Verbose("NData = %.1f, NToys = %.1f" % (tData.GetEntries(), tToys.GetEntries()), False)
     tData.GetEntry(0)
     GoF_DATA = tData.limit
@@ -142,10 +145,10 @@ def doPlots(i, opts):
 
     # Setting (Toys)
     GoF_TOYS_TOT = 0
-    pval   = 0
-    toys   = []
-    minToy = +99999999
-    maxToy = -99999999
+    pval_cum = 0
+    toys     = []
+    minToy   = +99999999
+    maxToy   = -99999999
 
     # For-loop: All toys
     for i in range(0, tToys.GetEntries()):
@@ -154,12 +157,15 @@ def doPlots(i, opts):
         # Toys counter
         GoF_TOYS_TOT += tToys.limit
         toys.append(tToys.limit)
-
+        
+        # Accumulate p-Value if GoF_toy > GoF_data
         if tToys.limit > GoF_DATA: 
-            pval += tToys.limit
-
-    # Calculate p-value
-    pval = pval / GoF_TOYS_TOT
+            Verbose("GoF (toy) = %.3f, GoF (data) = %.3f, p-Value += %d (%d)" % (tToys.limit, GoF_DATA, tToys.limit, pval_cum), i==1)
+            pval_cum += tToys.limit
+        
+    # Finalise p-value calculation by dividing by number of toys total
+    pval = pval_cum / GoF_TOYS_TOT
+    Print("p-Value = %d/%d = %.3f" % (pval_cum, GoF_TOYS_TOT, pval), False)
 
     # Create GoF histo & fill it
     hist = ROOT.TH1D("GoF", "", 50, round(min(toys)), round(max(toys)))
@@ -191,7 +197,8 @@ def doPlots(i, opts):
     left.SetTextFont(43)
     left.SetTextSize(22)
     left.SetTextAlign(11)
-    left.DrawLatex(GoF_DATA*0.9, (hist.GetMaximum()/8.0)*1.05, "#color[4]{data_{obs}}")
+    #left.DrawLatex(GoF_DATA*0.9, (hist.GetMaximum()/8.0)*1.05, "#color[4]{data_{obs}}")
+    left.DrawLatex(GoF_DATA*0.9, (hist.GetMaximum()/8.0)*1.05, "#color[4]{data}")
 
     # Analysis text
     anaText = ROOT.TLatex()
@@ -208,10 +215,13 @@ def doPlots(i, opts):
     pvalText.SetTextSize(22)
     pvalText.SetTextAlign(31) #11
     pvalText.DrawLatex(0.92, 0.80, "# toys: %d" % nToys)
-    pvalText.DrawLatex(0.92, 0.75, "p-value: %.2f" % pval)
+    pvalText.DrawLatex(0.92, 0.74, "p-value: %.2f" % pval)
+    # pvalText.DrawLatex(0.92, 0.74, "  #alpha=#int^{#infty}_{#chi^{2}_{obs}} f(#chi^{2}) d#chi^{2}=%.2f" % pval)
+    # pvalText.DrawLatex(0.92, 0.58, "1-#alpha=#int^{#chi^{2}_{obs}}_{0} f(#chi^{2}) d#chi^{2}=%.2f" % (1.0-pval))
 
     # Print some info
     Verbose("Toys = %.0f" % (nToys), True)
+    Verbose("GoF_TOYS_TOT = %.0f" % (GoF_TOYS_TOT), True)
     Verbose("p-value = %.2f" % (pval), False)
 
     # Add default texts
@@ -238,7 +248,7 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     for i, ext in enumerate(saveFormats):
         saveNameURL = saveName + ext
         saveNameURL = aux.convertToURL(saveNameURL, opts.url)
-        Verbose(saveNameURL, i==0)
+        Print(saveNameURL, False) #i==0)
         plot.SaveAs(saveName + ext)
     return
 
@@ -287,7 +297,7 @@ def main(opts):
         opts.outputfile = "GoF_%s/GoF_%s_mH%s.root" % (algo, algo, opts.mass)
         doPlots(i, opts)
 
-    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)
+    Verbose("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)
 
     return
 
