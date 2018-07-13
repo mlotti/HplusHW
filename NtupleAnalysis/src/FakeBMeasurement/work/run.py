@@ -190,22 +190,10 @@ def main():
         PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True),
         #PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True),  #AN v4
         ]
-    
-    # allSelections.BJetSelection.triggerMatchingApply = True # at least 1 trg b-jet matched to offline b-jets
-    # allSelections.Trigger.triggerOR = ["HLT_PFHT450_SixJet40_BTagCSV_p056", "HLT_PFJet450"]
-    # allSelections.TopSelectionBDT.TopMassLowCutValue     =  0.0   # [default: 0.0] #90.0
-    # allSelections.TopSelectionBDT.TopMassLowCutDirection = ">="   # [default: ">="]
-    # allSelections.TopSelectionBDT.TopMassUppCutValue     = 300.0  # [default: 600.0] # 250
-    # allSelections.TopSelectionBDT.TopMassUppCutDirection = "<="   # [default: "<="]
-    # allSelections.TopSelectionBDT.WMassLowCutValue       =   0.0  # [default: 0.0]
-    # allSelections.TopSelectionBDT.WMassLowCutDirection   = ">="   # [default: ">="]
-    # allSelections.TopSelectionBDT.WMassUppCutValue       = 0.0    # [default: "0.0] # 150.0
-    # allSelections.TopSelectionBDT.WMassUppCutDirection   = ">="   # [default: ">="] # "<="
-    # allSelections.TopSelectionBDT.CSV_bDiscCutValue      = 0.8484 # [default: 0.8484] # 0.5426
-    # allSelections.TopSelectionBDT.CSV_bDiscCutDirection  = ">="   # [default: ">="]
-    # allSelections.TopSelectionBDT.TopMVACutValue             =  -0.99  # [default:  0.40] # WARNING! This will NOT take correct topTag eff file!
-    # allSelections.FakeBMeasurement.LdgTopMVACutValue      = allSelections.TopSelectionBDT.MVACutValue
-    # allSelections.FakeBMeasurement.SubldgTopMVACutValue   = allSelections.TopSelectionBDT.MVACutValue
+
+    # Overwrite values
+    # allSelections.TopSelectionBDT.CSV_bDiscCutDirection  = ">="
+    allSelections.TopSelectionBDT.CSV_bDiscCutValue = 0.54 # allow CSVv2-L for inverted top
     
     # ================================================================================================
     # Command Line Options

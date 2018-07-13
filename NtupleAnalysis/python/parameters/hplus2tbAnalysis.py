@@ -151,12 +151,8 @@ topSelectionBDT = PSet(
     TopMVACutDirection     =  ">=",   # [default: ">="]
     TopMassLowCutValue     =   0.0,   # [default: 0.0]
     TopMassLowCutDirection =  ">=",   # [default: ">="]
-    TopMassUppCutValue     = 250.0,   # [default: 300.0]  # Do not evaluate top candidate if top mass greater than this cut
+    TopMassUppCutValue     =  600.0,  # [default: 300.0]  # Do not evaluate top candidate if top mass greater than this cut
     TopMassUppCutDirection =  "<=",   # [default: "<"]
-    WMassLowCutValue       =   0.0,   # [default: 0.0] 
-    WMassLowCutDirection   =  ">=",   # [default: ">="]
-    WMassUppCutValue       =   0.0,   # [default: 0.0]
-    WMassUppCutDirection   =  ">=",   # [default: ">="]
     CSV_bDiscCutValue      = 0.8484,  # [default: 0.8484] # Do not evaluate top candidate if b-jet assigned as b from top fails this cut
     CSV_bDiscCutDirection  = ">=",    # [default: ">="]
     WeightFile             = "TopRecoTree_180523_DeltaR0p3_DeltaPtOverPt0p32_TopPtReweighting_BDTG.weights.xml", # (All XML files located in data/TopTaggerWeights/)

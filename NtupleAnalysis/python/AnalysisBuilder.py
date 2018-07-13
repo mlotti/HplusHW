@@ -303,7 +303,8 @@ class AnalysisBuilder:
         items.extend(["PUWeight"])
         
         # TopTagSF weight systematics
-        items.extend(["TopTagSF"])
+        self.Print("Disabled top-tag SF systematic variations (temporary", True)
+        # items.extend(["TopTagSF"])
         return items
 
     def _processSystematicsVariations(self):
