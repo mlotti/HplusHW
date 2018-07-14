@@ -328,8 +328,8 @@ else:
 DataGroups.append(TT)
 DataGroups.append(SingleTop)
 DataGroups.append(TTZ)
-DataGroups.append(TTTT)
 if OptionIncludeRares:
+    DataGroups.append(TTTT)
     DataGroups.append(DYJets)
     DataGroups.append(TTWJets)
     DataGroups.append(WJets)

@@ -67,8 +67,6 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config, EventCounter& event
     cfg_TopMVACut(config    , "TopMVACut"),
     cfg_TopMassLowCut(config, "TopMassLowCut"),
     cfg_TopMassUppCut(config, "TopMassUppCut"),
-    cfg_WMassLowCut(config  , "WMassLowCut"),
-    cfg_WMassUppCut(config  , "WMassUppCut"),
     cfg_CSV_bDiscCut(config , "CSV_bDiscCut"),
     // Event counter for passing selection
     cPassedTopSelectionBDT(fEventCounter.addCounter("passed top selection ("+postfix+")")),
@@ -82,8 +80,6 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config, EventCounter& event
     cTopsAll(fEventCounter.addSubCounter("top candidates ("+postfix+")", "All candidates")),
     cTopsPassTopMassLowCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed top mass low cut")),
     cTopsPassTopMassUppCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed top mass upp cut")),
-    cTopsPassWMassLowCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed W mass low cut")),
-    cTopsPassWMassUppCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed W mass upp cut")),
     cTopsPassBDiscCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed b-disc cut")),
     cTopsPassBDTCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed BDT cut")),
     cTopsPassCrossCleanCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed cross-clean cut")),
@@ -99,8 +95,6 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config)
   cfg_TopMVACut(config    , "TopMVACut"),
   cfg_TopMassLowCut(config, "TopMassLowCut"),
   cfg_TopMassUppCut(config, "TopMassUppCut"),
-  cfg_WMassLowCut(config  , "WMassLowCut"),
-  cfg_WMassUppCut(config  , "WMassUppCut"),
   cfg_CSV_bDiscCut(config , "CSV_bDiscCut"),
   // Event counter for passing selection
   cPassedTopSelectionBDT(fEventCounter.addCounter("passed top selection")),
@@ -114,8 +108,6 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config)
   cTopsAll(fEventCounter.addSubCounter("top candidates", "All candidates")),
   cTopsPassTopMassLowCut(fEventCounter.addSubCounter("top candidates", "Passed top mass low cut")),
   cTopsPassTopMassUppCut(fEventCounter.addSubCounter("top candidates", "Passed top mass upp cut")),
-  cTopsPassWMassLowCut(fEventCounter.addSubCounter("top candidates", "Passed W mass low cut")),
-  cTopsPassWMassUppCut(fEventCounter.addSubCounter("top candidates", "Passed W mass upp cut")),
   cTopsPassBDiscCut(fEventCounter.addSubCounter("top candidates", "Passed b-disc cut")),
   cTopsPassBDTCut(fEventCounter.addSubCounter("top candidates", "Passed BDT cut")),
   cTopsPassCrossCleanCut(fEventCounter.addSubCounter("top candidates", "Passed cross-clean cut")),
@@ -474,17 +466,13 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	      top_p4 = bjet.p4() + jet1.p4() + jet2.p4();
 	      w_p4   = jet1.p4() + jet2.p4();
 	      
-	      // Skip trijet combinations which do not fulfil the top invariant mass
+	      // Skip trijet combinations which do not fulfil the top invariant mass (lower threshold)
 	      if (!cfg_TopMassLowCut.passedCut(top_p4.M())) continue;
 	      cTopsPassTopMassLowCut.increment();
+
+	      // Skip trijet combinations which do not fulfil the top invariant mass (upper threshold)
 	      if (!cfg_TopMassUppCut.passedCut(top_p4.M())) continue;
 	      cTopsPassTopMassUppCut.increment();
-
-	      // Skip trijet combinations which do not fulfil the W invariant mass
-	      if (!cfg_WMassLowCut.passedCut(w_p4.M())) continue;
-	      cTopsPassWMassLowCut.increment();
-	      if (!cfg_WMassUppCut.passedCut(w_p4.M())) continue;
-	      cTopsPassWMassUppCut.increment();
 
 	      // Skip trijet combinations which do not fulfil bjet_CSV threshold
 	      if (!cfg_CSV_bDiscCut.passedCut(bjet.bjetDiscriminator())) continue;
@@ -517,6 +505,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 
 	      // Evaluate the MVA discriminator value
 	      float MVAoutput = reader->EvaluateMVA("BTDG method");
+	      // std::cout << "MVA = " << MVAoutput << ", Pt = " << top_p4.pt() << ", M = " << TrijetMass << std::endl;
 
 	      // Fill top candidate BDT values
 	      hTopBDT_AllCandidates -> Fill(MVAoutput);
@@ -885,7 +874,6 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 
       // Calculate and store b-jet scale factor weight and it's uncertainty
       output.fTopTaggingScaleFactorEventWeight = fTopTagSFCalculator.calculateSF(fAllCleanedTops.TrijetP4, fAllCleanedTops.MVA, fAllCleanedTops.isTagged, fAllCleanedTops.isGenuine);
-
     }
 
     
