@@ -67,11 +67,11 @@ scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection,
 #=================================================================================================
 # QGL selection
 #================================================================================================= 
-qglrSelection = hplus2tbAnalysis.qglrSelection
+#qglrSelection = hplus2tbAnalysis.qglrSelection
 
-jsonReader.setupQGLInformation(QGLRPset  = qglrSelection,
-                               jsonname_Light  = "QGLdiscriminator_QCD_LightJets.json",
-                               jsonname_Gluon  = "QGLdiscriminator_QCD_GluonJets.json")
+#jsonReader.setupQGLInformation(QGLRPset  = qglrSelection,
+#                               jsonname_Light  = "QGLdiscriminator_QCD_LightJets.json",
+#                               jsonname_Gluon  = "QGLdiscriminator_QCD_GluonJets.json")
 
 #================================================================================================
 # Top selection BDT
@@ -91,8 +91,6 @@ scaleFactors.setupBtagSFInformation(btagPset               = fakeBBjetSelection,
                                     btagPayloadFilename    = "CSVv2.csv",
                                     btagEfficiencyFilename = "btageff_HToTB.json",
                                     direction              = "nominal")
-
-fakeBTopSelectionBDT = hplus2tbAnalysis.fakeBTopSelectionBDT
 
 fakeBMeasurement = hplus2tbAnalysis.fakeBMeasurement
 
@@ -135,9 +133,8 @@ allSelections = PSet(
     FatJetSelection       = fatjetVeto,
     FakeBMeasurement      = fakeBMeasurement,
     FakeBBjetSelection    = fakeBBjetSelection,
-    FakeBTopSelectionBDT  = fakeBTopSelectionBDT,
     CommonPlots           = commonPlotsOptions,
     HistogramAmbientLevel = histogramAmbientLevel,
-    QGLRSelection         = qglrSelection,
+    #QGLRSelection         = qglrSelection,
     SystTopBDTSelection   = systTopBDTSelection,
 )
