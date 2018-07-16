@@ -535,7 +535,7 @@ def GetHistoKwargs(h, opts):
 
     if h == "counter":
         xMin = 15.0 # 7 jets
-        xMax = 21.0 # all
+        xMax = 22.0 # all
         if 0:
             kwargs["opts"]   = {"xmin": xMin, "xmax": xMax, "ymin": 1e0, "ymax": 3e11}
         else:
@@ -859,9 +859,8 @@ def replaceBinLabels(p, histoName):
     '''
     myBinList = []
     if histoName == "counter" or histoName == "weighted/counter":
-        myBinList = ["#geq 7 jets", "#geq 3 b-jets", "b-jets SF", "#geq 2 tops", "top-tag SF", "All"]
-        #myBinList = ["#geq 7 jets", "#geq 3 b-jets", "b-jets SF", "#geq 2 tops", "fat-jet veto", "All"]
-        #myBinList = ["#geq 7 jets", "#geq 3 b-jets", "b-jets SF", "#geq 2 tops", "fat-jet veto", "All"]
+        #myBinList = ["#geq 7 jets", "#geq 3 b-jets", "b-jets SF", "#geq 2 tops", "top-tag SF", "All"]
+        myBinList = ["#geq 7 jets", "#geq 3 b-jets", "b-jets SF", "clean tops", "#geq 2 tops", "top SF", "All"]
     elif "bjet" in histoName:
         myBinList = ["All", "#eta", "p_{T}", "CSVv2 (M)", "Trg Match", "#geq 3"]
     elif "jet" in histoName:
