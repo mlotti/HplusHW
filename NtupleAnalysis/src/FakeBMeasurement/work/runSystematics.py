@@ -148,8 +148,12 @@ def main():
         # PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True),          # BEST (v1)
         # PSet(label="TetrajetBjetPt" , binLowEdges=[60, 90, 160, 300], useAbsoluteValues=False), # BEST (v2)
         # PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True), # BEST (v2)
-        PSet(label="TetrajetBjetPt" , binLowEdges=[60, 90, 160, 300], useAbsoluteValues=False), # BEST (v3)
-        PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.4, 2.0], useAbsoluteValues=True), # BEST (v3)
+        #PSet(label="TetrajetBjetPt" , binLowEdges=[60, 90, 160, 300], useAbsoluteValues=False), # BEST (v3)
+        #PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.4, 2.0], useAbsoluteValues=True), # BEST (v3)
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[50, 65, 130, 330], useAbsoluteValues=False), # BEST (v4)
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.4, 2.0], useAbsoluteValues=True), # BEST (v4)
+        PSet(label="TetrajetBjetPt" , binLowEdges=[50, 65, 95, 130, 330], useAbsoluteValues=False), # BEST (v5)
+        PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.4, 2.0], useAbsoluteValues=True), # BEST (v5)
         ]
 
     # Overwrite values
