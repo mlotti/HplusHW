@@ -53,6 +53,8 @@ private:
   BJetSelection fBaselineBJetSelection;
   METSelection fBaselineMETSelection;
   TopSelectionBDT fBaselineTopSelection;
+  Count cBaselineAnyTwoTopsAndFreeBCounter;
+  Count cBaselineTwoCleanTopsCounter;
   Count cBaselineTopTaggingSFCounter;
   Count ccSR;
   Count cCRone;
@@ -62,6 +64,8 @@ private:
   BJetSelection fInvertedBJetSelection;
   METSelection fInvertedMETSelection;
   TopSelectionBDT fInvertedTopSelection;
+  Count cInvertedAnyTwoTopsAndFreeBCounter;
+  Count cInvertedTwoCleanTopsCounter;
   Count cInvertedTopTaggingSFCounter;
   Count cVR;
   Count cCRtwo;
@@ -425,7 +429,9 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
     fBaselineBJetSelection(config.getParameter<ParameterSet>("BJetSelection")),// fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fBaselineMETSelection(config.getParameter<ParameterSet>("METSelection")),
     fBaselineTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
-    cBaselineTopTaggingSFCounter(fEventCounter.addCounter("SR: top SF")),
+    cBaselineAnyTwoTopsAndFreeBCounter(fEventCounter.addCounter("any 2 tops & free b")),
+    cBaselineTwoCleanTopsCounter(fEventCounter.addCounter("2 clean tops")),
+    cBaselineTopTaggingSFCounter(fEventCounter.addCounter("top SF")),
     ccSR(fEventCounter.addCounter("SR")),
     cCRone(fEventCounter.addCounter("CR1")),
     cInvertedBTaggingCounter(fEventCounter.addCounter("== 2 b-jets")),
@@ -433,7 +439,9 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
     fInvertedBJetSelection(config.getParameter<ParameterSet>("FakeBBjetSelection")),//, fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fInvertedMETSelection(config.getParameter<ParameterSet>("METSelection")),
     fInvertedTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
-    cInvertedTopTaggingSFCounter(fEventCounter.addCounter("CR: top SF")),
+    cInvertedAnyTwoTopsAndFreeBCounter(fEventCounter.addCounter("any 2 tops & free b")),
+    cInvertedTwoCleanTopsCounter(fEventCounter.addCounter("2 clean tops")),
+    cInvertedTopTaggingSFCounter(fEventCounter.addCounter("top SF")),
     cVR(fEventCounter.addCounter("VR")),
     cCRtwo(fEventCounter.addCounter("CR2"))
 { }
@@ -1840,13 +1848,18 @@ void FakeBMeasurement::DoBaselineAnalysis(Long64_t entry,
   // 10) Top selection
   //================================================================================================
   if (0) std::cout << "=== Baseline: Top selection" << std::endl;
-  const TopSelectionBDT::Data topData = fBaselineTopSelection.analyze(fEvent, jetData, bjetData); 
+  // const TopSelectionBDT::Data topData = fBaselineTopSelection.analyze(fEvent, jetData, bjetData); 
+  const TopSelectionBDT::Data topData = fBaselineTopSelection.silentAnalyze(fEvent, jetData, bjetData);  // disable counters & histograms (misleading)
 
   // Ensure 2 tops with BDT > -1.0 and free b-jet are present
   if (!topData.passedAnyTwoTopsAndFreeB()) return;
-  if (topData.getAllCleanedTopsSize() != 2) return;
+  cBaselineAnyTwoTopsAndFreeBCounter.increment();
 
-  if (0) std::cout << "=== Baseline: Top-tag SF" << std::endl;
+  // Require exactly 2 clean tops (no BDT cut yet)
+  if (topData.getAllCleanedTopsSize() != 2) return;
+  cBaselineTwoCleanTopsCounter.increment();
+
+  if (0) std::cout << "\n=== Baseline: Top-tag SF" << std::endl;
   // Apply top-tag SF 
   if (fEvent.isMC()) 
     {
@@ -1861,7 +1874,7 @@ void FakeBMeasurement::DoBaselineAnalysis(Long64_t entry,
   bool bPass_SubldgTopMVA = cfg_LdgTopMVACut.passedCut(subldgMVA);
   bool bPass_BothMVA      = bPass_LdgTopMVA * bPass_SubldgTopMVA;
   bool bPass_InvertedTop  = bPass_LdgTopMVA * cfg_SubldgTopMVACut.passedCut(subldgMVA);
-
+  
   // Defining the splitting of phase-space as the eta of the Tetrajet b-jet
   std::vector<float> myFactorisationInfo;
   myFactorisationInfo.push_back(topData.getTetrajetBJet().pt() );
@@ -2060,7 +2073,6 @@ void FakeBMeasurement::DoBaselineAnalysis(Long64_t entry,
   if (!topData.passedSelection()) return;
   if (0) std::cout << "=== Baseline: Signal Region (SR)" << std::endl;
   ccSR.increment();
-  // std::cout << "\nentry = " << entry << ", topData.getMVAmax1() = " << topData.getMVAmax1() << ", topData.getMVAmax2() = " << topData.getMVAmax2() << ", free-b pT = " << topData.getTetrajetBJet().pt() << std::endl;
 
   // Fill histos
   hBaseline_Njets_AfterAllSelections->Fill(isGenuineB, jetData.getSelectedJets().size());
@@ -2282,11 +2294,16 @@ void FakeBMeasurement::DoInvertedAnalysis(Long64_t entry,
   // 10) Top selection
   //================================================================================================
   if (0) std::cout << "=== Inverted BJet: Top selection" << std::endl;
-  const TopSelectionBDT::Data topData = fInvertedTopSelection.analyze(fEvent, jetData, invBjetData);
+  // const TopSelectionBDT::Data topData = fInvertedTopSelection.analyze(fEvent, jetData, invBjetData);
+  const TopSelectionBDT::Data topData = fInvertedTopSelection.silentAnalyze(fEvent, jetData, invBjetData); // disable counters & histograms (misleading)
 
   // Ensure 2 tops with BDT > -1.0 and free b-jet are present
   if (!topData.passedAnyTwoTopsAndFreeB()) return;
+  cInvertedAnyTwoTopsAndFreeBCounter.increment();
+
+  // Require exactly 2 clean tops (no BDT cut yet)
   if (topData.getAllCleanedTopsSize() != 2) return;
+  cInvertedTwoCleanTopsCounter.increment();
 
   if (0) std::cout << "=== Inverted BJet: Top-tag SF" << std::endl;
   // Apply top-tag SF

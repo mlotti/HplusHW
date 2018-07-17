@@ -44,6 +44,10 @@ public:
 private:
   // Input parameters
   const DirectionalCut<double> cfg_PrelimTopMVACut;
+<<<<<<< HEAD
+=======
+  //const std::string cfg_LdgTopDefinition;
+>>>>>>> alexandros/master
   const DirectionalCut<double> cfg_MiniIsoCut;
   const DirectionalCut<double> cfg_MiniIsoInvCut;
   const DirectionalCut<double> cfg_METCut;
@@ -340,6 +344,10 @@ REGISTER_SELECTOR(SystTopBDT);
 SystTopBDT::SystTopBDT(const ParameterSet& config, const TH1* skimCounters)
   : BaseSelector(config, skimCounters),
     cfg_PrelimTopMVACut(config, "SystTopBDTSelection.MVACut"),
+<<<<<<< HEAD
+=======
+    //cfg_LdgTopDefinition(config.getParameter<std::string>("FakeBTopSelectionBDT.LdgTopDefinition")),
+>>>>>>> alexandros/master
     cfg_MiniIsoCut(config, "SystTopBDTSelection.MiniIsoCut"),
     cfg_MiniIsoInvCut(config, "SystTopBDTSelection.MiniIsoInvCut"),
     cfg_METCut(config, "SystTopBDTSelection.METCut"),
@@ -725,6 +733,15 @@ void SystTopBDT::setupBranches(BranchManager& branchManager) {
 
 void SystTopBDT::process(Long64_t entry) {
 
+<<<<<<< HEAD
+=======
+  // Sanity check
+  //if (cfg_LdgTopDefinition != "MVA" &&  cfg_LdgTopDefinition != "Pt")
+  //  {
+  //    throw hplus::Exception("config") << "Unsupported method of defining the leading top (=" << cfg_LdgTopDefinition << "). Please select from \"MVA\" and \"Pt\".";
+  //  }
+
+>>>>>>> alexandros/master
   int Debug = 0;
 
 

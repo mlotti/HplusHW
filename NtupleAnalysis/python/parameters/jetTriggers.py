@@ -68,7 +68,10 @@ scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection,
 # QGL selection
 #================================================================================================= 
 #qglrSelection = hplus2tbAnalysis.qglrSelection
+<<<<<<< HEAD
 
+=======
+>>>>>>> alexandros/master
 #jsonReader.setupQGLInformation(QGLRPset  = qglrSelection,
 #                               jsonname_Light  = "QGLdiscriminator_QCD_LightJets.json",
 #                               jsonname_Gluon  = "QGLdiscriminator_QCD_GluonJets.json")
@@ -92,6 +95,11 @@ scaleFactors.setupBtagSFInformation(btagPset               = fakeBBjetSelection,
                                     btagEfficiencyFilename = "btageff_HToTB.json",
                                     direction              = "nominal")
 
+<<<<<<< HEAD
+=======
+#fakeBTopSelectionBDT = hplus2tbAnalysis.fakeBTopSelectionBDT
+
+>>>>>>> alexandros/master
 fakeBMeasurement = hplus2tbAnalysis.fakeBMeasurement
 
 systTopBDTSelection = PSet(
@@ -133,8 +141,15 @@ allSelections = PSet(
     FatJetSelection       = fatjetVeto,
     FakeBMeasurement      = fakeBMeasurement,
     FakeBBjetSelection    = fakeBBjetSelection,
+<<<<<<< HEAD
     CommonPlots           = commonPlotsOptions,
     HistogramAmbientLevel = histogramAmbientLevel,
     #QGLRSelection         = qglrSelection,
+=======
+#    FakeBTopSelectionBDT  = fakeBTopSelectionBDT,
+    CommonPlots           = commonPlotsOptions,
+    HistogramAmbientLevel = histogramAmbientLevel,
+#    QGLRSelection         = qglrSelection,
+>>>>>>> alexandros/master
     SystTopBDTSelection   = systTopBDTSelection,
 )

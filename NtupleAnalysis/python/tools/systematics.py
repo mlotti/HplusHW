@@ -417,8 +417,10 @@ _dataDrivenCtrlPlotBinning = {
     "HT_AfterAllSelections"   : [i for i in range(500, 1500, 50)] + [i for i in range(1500, 2000, 100)] + [i for i in range(2000, 3000+200, 200)],
     "MHT_AfterAllSelections"  : [i for i in range(0, 140, 10)] + [i for i in range(140, 240, 20)] + [i for i in range(240, 400, 50)],
     "QGLR_AfterAllSelections" : [float(i)/100.0 for i in range(0, 105, 5)],
-    "LdgTrijetPt_AfterAllSelections"        : [j for j in range(0, 500, 20)] + [k for k in range(500, 700, 50)] + [k for k in range(700, 900+100, 100)],
-    "SubldgTrijetPt_AfterAllSelections"     : [j for j in range(0, 500, 20)] + [k for k in range(500, 700, 50)] + [k for k in range(700, 900+100, 100)],
+    #"LdgTrijetPt_AfterAllSelections"        : [j for j in range(0, 500, 20)] + [k for k in range(500, 700, 50)] + [k for k in range(700, 900+100, 100)],
+    #"SubldgTrijetPt_AfterAllSelections"     : [j for j in range(0, 500, 20)] + [k for k in range(500, 700, 50)] + [k for k in range(700, 900+100, 100)],
+    "LdgTrijetPt_AfterAllSelections"        : [j for j in range(0, 400, 25)] + [k for k in range(400, 600, 50)] + [k for k in range(600, 900+100, 100)],
+    "SubldgTrijetPt_AfterAllSelections"     : [j for j in range(0, 400, 25)] + [k for k in range(400, 600, 50)] + [k for k in range(600, 900+100, 100)],
     "LdgTrijetMass_AfterAllSelections"      : [i for i in range(50, 360, 10)],
     "SubldgTrijetMass_AfterAllSelections"   : [i for i in range(50, 360, 10)],
     "LdgTrijetBjetPt_AfterAllSelections"    : [j for j in range(0, 300, 10)] + [k for k in range(300, 700+40, 40)],
@@ -462,10 +464,10 @@ _dataDrivenCtrlPlotBinning = {
     "BJet1Eta_AfterAllSelections" : None,
     "BJet2Eta_AfterAllSelections" : None,
     "BJet3Eta_AfterAllSelections" : None,
-    "MET_AfterAllSelections_TB"      : [0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 250, 300],
-    "JetEta_AfterStandardSelections_TB": [-2.5,-2.2,-2.0,-1.8,-1.6,-1.4,-1.2,-1.0,-0.8,-0.6,-0.4,-0.2,-0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2,2.5],
-    "JetEta_AfterAllSelections_TB": [-2.5,-2.0,-1.5,-1.0,-0.5,0.0,0.5,1.0,1.5,2.0,2.5],
-    "NVertices_AfterAllSelections_TB": [j for j in range(0, 40, 2)] + [j for j in range(40, 60, 5)] + [j for j in range(60, 80+10, 10)],
+    #"MET_AfterAllSelections_TB"      : [0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 250, 300],
+    #"JetEta_AfterStandardSelections_TB": [-2.5,-2.2,-2.0,-1.8,-1.6,-1.4,-1.2,-1.0,-0.8,-0.6,-0.4,-0.2,-0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2,2.5],
+    #"JetEta_AfterAllSelections_TB": [-2.5,-2.0,-1.5,-1.0,-0.5,0.0,0.5,1.0,1.5,2.0,2.5],
+    #"NVertices_AfterAllSelections_TB": [j for j in range(0, 40, 2)] + [j for j in range(40, 60, 5)] + [j for j in range(60, 80+10, 10)],
 }
 
 
