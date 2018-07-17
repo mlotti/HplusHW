@@ -226,7 +226,7 @@ def GetHistoKwargs(histoName, opts):
         myBins  = [0, 100, 200, 300, 400, 500, 600]#, 800]
         kwargs["xmax"] = 600
         kwargs["cutBox"] = {"cutValue": 100.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
-        kwargs["opts"]   = {"xmin": 0, "xmax": 600, "ymin": 0.0, "ymax": 0.322}
+        kwargs["opts"]   = {"xmin": 0, "xmax": 600, "ymin": 0.0, "ymax": 0.35} #0.322
 
     elif "eta" in h:
         units   = ""
