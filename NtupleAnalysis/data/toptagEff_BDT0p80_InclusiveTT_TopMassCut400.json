@@ -1,0 +1,92 @@
+{
+  "_timestamp":   "Generated on Thu Jul 19 05:04:40 2018 by HiggsAnalysis/NtupleAnalysis/src/SystTopBDT/work/PythonWriter.py",
+  "_rootVersion": "6.05/03",
+  "dataParameters": {
+      "runs_273150_284044": {
+          "era": "2016",
+          "firstRun"  :273150,
+          "lastRun"   :284044,
+          "luminosity": 35916.636,
+          "bins" : [
+             {
+               "pt"              :0.0,
+               "efficiency"      :0.0614002117283,
+               "uncertaintyPlus" :0.00607970523434,
+               "uncertaintyMinus":0.00607970523434
+             },
+             {
+               "pt"              :100.0,
+               "efficiency"      :0.19275087131,
+               "uncertaintyPlus" :0.00680786473756,
+               "uncertaintyMinus":0.00680786473756
+             },
+             {
+               "pt"              :200.0,
+               "efficiency"      :0.305862046802,
+               "uncertaintyPlus" :0.00513037273315,
+               "uncertaintyMinus":0.00513037273315
+             },
+             {
+               "pt"              :300.0,
+               "efficiency"      :0.401138304383,
+               "uncertaintyPlus" :0.00698272518037,
+               "uncertaintyMinus":0.00698272518037
+             },
+             {
+               "pt"              :400.0,
+               "efficiency"      :0.393599964893,
+               "uncertaintyPlus" :0.011416292,
+               "uncertaintyMinus":0.011416292
+             },
+             {
+               "pt"              :500.0,
+               "efficiency"      :0.282393216867,
+               "uncertaintyPlus" :0.0189744879869,
+               "uncertaintyMinus":0.0189744879869
+             }
+          ]
+      }
+  },
+  "mcParameters": {
+      "2016": {
+          "bins" : [
+             {
+               "pt"              :0.0,
+               "efficiency"      :0.0598373288494,
+               "uncertaintyPlus" :0.002538922939,
+               "uncertaintyMinus":0.002538922939
+             },
+             {
+               "pt"              :100.0,
+               "efficiency"      :0.182300985869,
+               "uncertaintyPlus" :0.00201418254422,
+               "uncertaintyMinus":0.00201418254422
+             },
+             {
+               "pt"              :200.0,
+               "efficiency"      :0.314526874947,
+               "uncertaintyPlus" :0.00239045775657,
+               "uncertaintyMinus":0.00239045775657
+             },
+             {
+               "pt"              :300.0,
+               "efficiency"      :0.406376547338,
+               "uncertaintyPlus" :0.00371496422851,
+               "uncertaintyMinus":0.00371496422851
+             },
+             {
+               "pt"              :400.0,
+               "efficiency"      :0.423541216994,
+               "uncertaintyPlus" :0.00636861587881,
+               "uncertaintyMinus":0.00636861587881
+             },
+             {
+               "pt"              :500.0,
+               "efficiency"      :0.331755899549,
+               "uncertaintyPlus" :0.0114602672836,
+               "uncertaintyMinus":0.0114602672836
+             }
+          ]
+      }
+  }
+}

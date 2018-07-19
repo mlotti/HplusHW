@@ -7,8 +7,8 @@ dataset has its own directory with the results (ROOT files with histograms). The
 used as input to plotting scripts to get the desired results.
 
  USAGE:
- ./runTop.py -m /uscms_data/d3/skonstan/CMSSW_8_0_30/src/HiggsAnalysis/MiniAOD2TTree/test/multicrab_JetTriggers_v8030_20180405T1450 -e "TT_"           
- ./runTop.py -m /uscms_data/d3/skonstan/CMSSW_8_0_30/src/HiggsAnalysis/MiniAOD2TTree/test/multicrab_JetTriggers_v8030_20180405T1450 -e "TT_|Single"    
+ ./runTop.py -m /uscms_data/d3/skonstan/CMSSW_8_0_30/src/HiggsAnalysis/MiniAOD2TTree/test/multicrab_JetTriggers_v8030_20180405T1450 -e "TT_" >& lpc28_BDT_0p00_massCut400_NewTraining_noSF.txt"          
+ ./runTop.py -m /uscms_data/d3/skonstan/CMSSW_8_0_30/src/HiggsAnalysis/MiniAOD2TTree/test/multicrab_JetTriggers_v8030_20180405T1450 -e "TT_|Single" >& lpc28_BDT_0p00_massCut400_NewTraining_withSF.txt"
  
 '''
 
@@ -153,7 +153,7 @@ def main():
     
     # BDT MisID SF
     MisIDSF = PSet(
-        MisIDSFJsonName = "topMisID_BDT0p40_fatJet.json",
+        MisIDSFJsonName = "topMisID_BDT0p40_TopMassCut400.json",
         ApplyMisIDSF    = False, 
         )
     
@@ -170,13 +170,13 @@ def main():
     
     # Jets
     allSelections.JetSelection.numberOfJetsCutValue = 4
-    allSelections.JetSelection.jetPtCuts = [40.0, 40.0, 40.0, 30.0]
+    allSelections.JetSelection.jetPtCuts = [40.0, 40.0, 40.0, 40.0]
         
     # Trigger 
     allSelections.Trigger.triggerOR = ["HLT_Mu50"]
 
     # Bjets
-    allSelections.BJetSelection.jetPtCuts = [40.0, 30.0]
+    allSelections.BJetSelection.jetPtCuts = [40.0, 40.0]
     allSelections.BJetSelection.numberOfBJetsCutValue = 2
     
     # ================================================================================================

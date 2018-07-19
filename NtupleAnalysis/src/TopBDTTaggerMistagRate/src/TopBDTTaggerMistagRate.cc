@@ -108,7 +108,7 @@ TopBDTTaggerMistagRate::TopBDTTaggerMistagRate(const ParameterSet& config, const
   : BaseSelector(config, skimCounters),
     // cfg_PrelimTopMVACut(config, "FakeBTopSelectionBDT.MVACut"),
     // cfg_LdgTopDefinition(config.getParameter<std::string>("FakeBTopSelectionBDT.LdgTopDefinition")),
-    cfg_MVACut(config, "TopSelectionBDT.MVACut"),
+    cfg_MVACut(config, "TopSelectionBDT.TopMVACut"),
     cfg_NBjets(config.getParameter<unsigned int>("BJetSelection.numberOfBJetsCutValue")),
     cfg_JetPtCuts(config.getParameter<std::vector<float>>("JetSelection.jetPtCuts")),
     fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kHplus2tbAnalysis, fHistoWrapper),
