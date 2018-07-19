@@ -28,6 +28,11 @@ The available ROOT options for the Error-Ignore-Level are (const Int_t):
         kError    =   3000
         kBreak    =   4000
 
+
+LAST USED:
+./runSystematics.py -m /uscms_data/d3/aattikis/workspace/multicrab/multicrab_Hplus2tbAnalysis_v8030_20180508T0644 --systVars JES,JER
+
+
 HistoLevel:
 For the histogramAmbientLevel each DEEPER level is a SUBSET of the rest. 
 For example "kDebug" will include all kDebug histos but also kInformative, kVital, kSystematics, and kNever.  
@@ -234,7 +239,8 @@ def main():
                               useTopPtReweighting    = opts.useTopPtReweighting,
                               doSystematicVariations = opts.doSystematics,
                               analysisType="HToTB",
-                              verbose=opts.verbose)
+                              verbose=opts.verbose,
+                              systVarsList=opts.systVarsList)
 
     # Add variations (e.g. for optimisation)
     # builder.addVariation("METSelection.METCutValue", [100,120,140])
@@ -530,6 +536,7 @@ if __name__ == "__main__":
     TOPPTREWEIGHT = True
     DOSYSTEMATICS = False
     GROUP         = "A"
+    SYSTVARS      = None
 
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
     parser.add_option("-m", "--mcrab", dest="mcrab", action="store", 
@@ -562,6 +569,9 @@ if __name__ == "__main__":
     parser.add_option("--doSystematics", dest="doSystematics", action="store_true", default = DOSYSTEMATICS, 
                       help="Do systematics variations  (default: %s)" % (DOSYSTEMATICS) )
 
+    parser.add_option("--systVars", dest="systVars", default = SYSTVARS, 
+                        help="List of comma-separated (NO SPACE!) systematic variations to  perform. Overwrites the default list of systematics (default: %s)" % SYSTVARS)
+
     parser.add_option("--group", dest="group", default = GROUP, 
                       help="The group of datasets to run on. Capital letter from \"A\" to \"I\"  (default: %s)" % (GROUP) )
 
@@ -573,5 +583,9 @@ if __name__ == "__main__":
     allowedLevels = ['Never', 'Systematics', 'Vital', 'Informative', 'Debug']
     if opts.histoLevel not in allowedLevels:
         raise Exception("Invalid ambient histogram level \"%s\"! Valid options are: %s" % (opts.histoLevel, ", ".join(allowedLevels)))
+
+    if opts.systVars != None:
+        opts.doSystematics = True
+        opts.systVarsList = opts.systVars.split(",")
 
     main()

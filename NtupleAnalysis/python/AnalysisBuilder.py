@@ -195,6 +195,7 @@ class AnalysisBuilder:
                  doSystematicVariations=False, # Enable/disable adding modules for systematic uncertainty variation
                  analysisType="HToTauNu", # Define the analysis type (e.g. "HToTauNu", "HToTB")
                  verbose=False,
+                 systVarsList = [], # Overwrite the default systematics
                 ):
         self._name = name
         self._dataEras = []
@@ -213,7 +214,7 @@ class AnalysisBuilder:
         self._doSystematics = doSystematicVariations    
         self._analysisType  = self._getAnalysisType(analysisType)
         self._verbose = verbose
-        self._processSystematicsVariations()
+        self._processSystematicsVariations(systVarsList)
         return
 
     def Verbose(self, msg, printHeader=False):
@@ -307,12 +308,16 @@ class AnalysisBuilder:
         # items.extend(["TopTagSF"])
         return items
 
-    def _processSystematicsVariations(self):
+    def _processSystematicsVariations(self, systVarsList=[]):
         if not self._doSystematics:
             return
 
         # Process systematic uncertainty variations
-        items = self.getListOfSystematics()
+        if len(systVarsList) < 1:
+            items = self.getListOfSystematics()
+        else:
+            items = systVarsList
+
         # Create configs
         self._variations["systematics"] = []
         for item in items:
