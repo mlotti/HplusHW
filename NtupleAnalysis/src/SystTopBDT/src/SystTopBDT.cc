@@ -40,14 +40,11 @@ public:
   bool IsGenuineTop(const TopSelectionBDT::Data& topData, string topType, Muon mu, Jet BJet_LeptonicBr, bool searchForLeptonicTop,
 		    const std::vector<Jet>& MCtrue_LdgJet,  const std::vector<Jet>& MCtrue_SubldgJet, const std::vector<Jet>& MCtrue_Bjet);
   vector <int> GetTopsIndex( const TopSelectionBDT::Data& topData, string topType, Jet BJet_LeptonicBr, Muon mu, bool searchForLeptonicTop, bool askTopFarFromMu);
-  int getLeadingBDTTopIndex(const TopSelectionBDT::Data& topData, string topType, Muon mu, Jet BJet_LeptonicBr, bool searchForLeptonicTop);
+
 private:
   // Input parameters
   const DirectionalCut<double> cfg_PrelimTopMVACut;
-<<<<<<< HEAD
-=======
   //const std::string cfg_LdgTopDefinition;
->>>>>>> alexandros/master
   const DirectionalCut<double> cfg_MiniIsoCut;
   const DirectionalCut<double> cfg_MiniIsoInvCut;
   const DirectionalCut<double> cfg_METCut;
@@ -114,7 +111,6 @@ private:
   WrappedTH1Triplet* h_AfterStandardSelections_Trijets_Pt_SR;
   WrappedTH1Triplet* h_AfterStandardSelections_Trijets_Eta_SR;
   WrappedTH1Triplet* h_AfterStandardSelections_Trijets_Phi_SR;
-  WrappedTH1Triplet* h_AfterStandardSelections_AllTopsMultiplicity_SR;
   //
   WrappedTH1Triplet* h_AfterAllSelections_MET_SR;
   WrappedTH1Triplet* h_AfterAllSelections_HT_SR;
@@ -143,8 +139,7 @@ private:
   WrappedTH1Triplet* h_AfterAllSelections_Trijets_Pt_SR;
   WrappedTH1Triplet* h_AfterAllSelections_Trijets_Eta_SR;
   WrappedTH1Triplet* h_AfterAllSelections_Trijets_Phi_SR;
-  WrappedTH1Triplet* h_AfterAllSelections_AllTopsMultiplicity_SR;
-
+    
   WrappedTH1 *hCEvts_TopPassBDT_SR;
   WrappedTH1 *hCEvts_PassSelections_SR;
 
@@ -344,10 +339,7 @@ REGISTER_SELECTOR(SystTopBDT);
 SystTopBDT::SystTopBDT(const ParameterSet& config, const TH1* skimCounters)
   : BaseSelector(config, skimCounters),
     cfg_PrelimTopMVACut(config, "SystTopBDTSelection.MVACut"),
-<<<<<<< HEAD
-=======
     //cfg_LdgTopDefinition(config.getParameter<std::string>("FakeBTopSelectionBDT.LdgTopDefinition")),
->>>>>>> alexandros/master
     cfg_MiniIsoCut(config, "SystTopBDTSelection.MiniIsoCut"),
     cfg_MiniIsoInvCut(config, "SystTopBDTSelection.MiniIsoInvCut"),
     cfg_METCut(config, "SystTopBDTSelection.METCut"),
@@ -495,7 +487,6 @@ void SystTopBDT::book(TDirectory *dir) {
   h_AfterStandardSelections_Trijets_Pt_SR  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_Trijets_Pt_SR", "Trijets p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
   h_AfterStandardSelections_Trijets_Eta_SR  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_Trijets_Eta_SR", "Trijets #eta", nEtaBins, fEtaMin, fEtaMax);
   h_AfterStandardSelections_Trijets_Phi_SR  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_Trijets_Phi_SR", "Trijets #phi", nPhiBins, fPhiMin, fPhiMax);
-  h_AfterStandardSelections_AllTopsMultiplicity_SR = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterStandardSelections_AllTopsMultiplicity_SR", "top multiplicity", 10, 0, 10);
 
   // After All Selections
   h_AfterAllSelections_MET_SR = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_MET_SR", "MET", nMetBins, fMetMin, fMetMax);
@@ -526,11 +517,10 @@ void SystTopBDT::book(TDirectory *dir) {
   h_AfterAllSelections_Trijets_Pt_SR  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_Trijets_Pt_SR", "Trijets p_{T} (GeV/c)", nPtBins, fPtMin, fPtMax);
   h_AfterAllSelections_Trijets_Eta_SR  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_Trijets_Eta_SR", "Trijets #eta", nEtaBins, fEtaMin, fEtaMax);
   h_AfterAllSelections_Trijets_Phi_SR  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_Trijets_Phi_SR", "Trijets #phi", nPhiBins, fPhiMin, fPhiMax);
-  h_AfterAllSelections_AllTopsMultiplicity_SR = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myDirs, "AfterAllSelections_AllTopsMultiplicity_SR", "top multiplicity", 10, 0, 10);
-  
+    
   hCEvts_TopPassBDT_SR        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dirTH1, "CEvts_TopPassBDT",       ";"                        , 2,       0,      2     );
   hCEvts_PassSelections_SR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dirTH1, "CEvts_PassSelections",   ";"                        , 5,       0,      5     );
-  
+
   //====================================================================
   //Control Region 1
   //====================================================================
@@ -733,15 +723,12 @@ void SystTopBDT::setupBranches(BranchManager& branchManager) {
 
 void SystTopBDT::process(Long64_t entry) {
 
-<<<<<<< HEAD
-=======
   // Sanity check
   //if (cfg_LdgTopDefinition != "MVA" &&  cfg_LdgTopDefinition != "Pt")
   //  {
   //    throw hplus::Exception("config") << "Unsupported method of defining the leading top (=" << cfg_LdgTopDefinition << "). Please select from \"MVA\" and \"Pt\".";
   //  }
 
->>>>>>> alexandros/master
   int Debug = 0;
 
 
@@ -935,7 +922,6 @@ void SystTopBDT::process(Long64_t entry) {
   
   // At least 1 top candidate far from muon
   if (nTopCandidatesFarFromMuon < 1) return;
-  //if (nTopCandidatesFarFromMuon != 1) return; //Soti: Exactly one top candidate far from muon
   hCEvts_PassSelections_SR -> Fill("Top far from Mu", 1);
   hMET_vs_MuonMiniIso      -> Fill(met, mu.effAreaMiniIso());
   //=======================================================================
@@ -969,9 +955,7 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
   vector<int> vAllTops_index      = GetTopsIndex(topData, "all", BJet_LeptonicBr, mu, searchForLeptonicTop, true);
   vector<int> vSelectedTops_index = GetTopsIndex(topData, "selected", BJet_LeptonicBr, mu, searchForLeptonicTop, true);
 
-  if (Debug) std::cout<<"Baseline: AllTops, SelectedTops "<<vAllTops_index.size()<<" "<<vSelectedTops_index.size()<<std::endl;
-  //int ldgTopIndex = getLeadingTopIndex(topData, "all", mu, BJet_LeptonicBr, searchForLeptonicTop);
-  int ldgTopIndex = getLeadingBDTTopIndex(topData, "all", mu, BJet_LeptonicBr, searchForLeptonicTop);
+  int ldgTopIndex = getLeadingTopIndex(topData, "all", mu, BJet_LeptonicBr, searchForLeptonicTop);
   int nTopCandidatesFarFromMuonPassBDT = vSelectedTops_index.size();
 
   Jet  ldgTop_Jet1 =  topData.getAllTopsJet1().at(ldgTopIndex);
@@ -1180,8 +1164,6 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
       h_AfterStandardSelections_BJets_CSV_SR -> Fill(isGenuineTop_StandardSelections, bjet.bjetDiscriminator());
     }
 
-    h_AfterStandardSelections_AllTopsMultiplicity_SR -> Fill(isGenuineTop_StandardSelections, vAllTops_index.size());
-
     for (size_t i=0; i < vAllTops_index.size(); i++){
       int index = vAllTops_index.at(i);
       Jet bjet = topData.getAllTopsBJet().at(index);
@@ -1232,8 +1214,7 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
       }
     cMisIDSFCounter.increment();
     
-    //int selected_ldgTopIndex = getLeadingTopIndex(topData, "selected", mu, BJet_LeptonicBr, searchForLeptonicTop);
-    int selected_ldgTopIndex = getLeadingBDTTopIndex(topData, "selected", mu, BJet_LeptonicBr, searchForLeptonicTop);
+    int selected_ldgTopIndex = getLeadingTopIndex(topData, "selected", mu, BJet_LeptonicBr, searchForLeptonicTop);
 
     Jet ldgSelTop_Jet1 =  topData.getAllTopsJet1().at(selected_ldgTopIndex);
     Jet ldgSelTop_Jet2 =  topData.getAllTopsJet2().at(selected_ldgTopIndex);
@@ -1284,9 +1265,6 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
       h_AfterAllSelections_BJets_Phi_SR -> Fill(isGenuineTop_AllSelections, bjet.phi());
       h_AfterAllSelections_BJets_CSV_SR -> Fill(isGenuineTop_AllSelections, bjet.bjetDiscriminator());
     }
-
-    h_AfterAllSelections_AllTopsMultiplicity_SR -> Fill(isGenuineTop_AllSelections, vSelectedTops_index.size());
-
     for (size_t i=0; i < vSelectedTops_index.size(); i++){
       int index = vSelectedTops_index.at(i);
       Jet bjet = topData.getSelectedTopsBJet().at(index);
@@ -1390,8 +1368,7 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
     cMisIDSFCounter.increment();
     // ----------------------------------------------------------------------------------
     
-    //int selected_ldgTopIndex = getLeadingTopIndex(topData, "selected", mu, BJet_LeptonicBr, searchForLeptonicTop);
-    int selected_ldgTopIndex = getLeadingBDTTopIndex(topData, "selected", mu, BJet_LeptonicBr, searchForLeptonicTop);
+    int selected_ldgTopIndex = getLeadingTopIndex(topData, "selected", mu, BJet_LeptonicBr, searchForLeptonicTop);
 
     Jet ldgSelTop_Jet1 =  topData.getAllTopsJet1().at(selected_ldgTopIndex);
     Jet ldgSelTop_Jet2 =  topData.getAllTopsJet2().at(selected_ldgTopIndex);
@@ -1490,9 +1467,7 @@ void SystTopBDT::DoInvertedAnalysis(const JetSelection::Data& jetData, const BJe
   vector<int> vAllTops_index      = GetTopsIndex(topData, "all", BJet_LeptonicBr, mu, searchForLeptonicTop, true);
   vector<int> vSelectedTops_index = GetTopsIndex(topData, "selected", BJet_LeptonicBr, mu, searchForLeptonicTop, true);
 
-  if (Debug) std::cout<<"Inverted: AllTops, SelectedTops "<<vAllTops_index.size()<<" "<<vSelectedTops_index.size()<<std::endl;
-  //int ldgTopIndex = getLeadingTopIndex(topData, "all", mu, BJet_LeptonicBr, searchForLeptonicTop);
-  int ldgTopIndex = getLeadingBDTTopIndex(topData, "all", mu, BJet_LeptonicBr, searchForLeptonicTop);
+  int ldgTopIndex = getLeadingTopIndex(topData, "all", mu, BJet_LeptonicBr, searchForLeptonicTop);
   int nTopCandidatesFarFromMuonPassBDT = vSelectedTops_index.size();
 
   /*
@@ -1764,8 +1739,7 @@ void SystTopBDT::DoInvertedAnalysis(const JetSelection::Data& jetData, const BJe
     cMisIDSFCounter.increment();
     // ----------------------------------------------------------------------------------
 
-    //int selected_ldgTopIndex = getLeadingTopaIndex(topData, "selected", mu, BJet_LeptonicBr, searchForLeptonicTop);
-    int selected_ldgTopIndex = getLeadingBDTTopIndex(topData, "selected", mu, BJet_LeptonicBr, searchForLeptonicTop);
+    int selected_ldgTopIndex = getLeadingTopIndex(topData, "selected", mu, BJet_LeptonicBr, searchForLeptonicTop);
 
     Jet ldgSelTop_Jet1 =  topData.getAllTopsJet1().at(selected_ldgTopIndex);
     Jet ldgSelTop_Jet2 =  topData.getAllTopsJet2().at(selected_ldgTopIndex);
@@ -1913,8 +1887,7 @@ void SystTopBDT::DoInvertedAnalysis(const JetSelection::Data& jetData, const BJe
     cMisIDSFCounter.increment();  
     // ----------------------------------------------------------------------------------
 
-    //int selected_ldgTopIndex = getLeadingTopIndex(topData, "selected", mu, BJet_LeptonicBr, searchForLeptonicTop);
-    int selected_ldgTopIndex = getLeadingBDTTopIndex(topData, "selected", mu, BJet_LeptonicBr, searchForLeptonicTop);
+    int selected_ldgTopIndex = getLeadingTopIndex(topData, "selected", mu, BJet_LeptonicBr, searchForLeptonicTop);
 
     Jet ldgSelTop_Jet1 =  topData.getAllTopsJet1().at(selected_ldgTopIndex);
     Jet ldgSelTop_Jet2 =  topData.getAllTopsJet2().at(selected_ldgTopIndex);
@@ -2048,64 +2021,6 @@ int SystTopBDT::getLeadingTopIndex(const TopSelectionBDT::Data& topData, string 
     }
   return LdgTrijet_Index;
 }
-
-
-int SystTopBDT::getLeadingBDTTopIndex(const TopSelectionBDT::Data& topData, string topType, Muon mu, Jet BJet_LeptonicBr, bool searchForLeptonicTop){
-  //double dRmin_mu_top = 999.999;
-  float LdgTrijet_MaxMVA = -999.99;
-  int LdgTrijet_Index = -1;
-  size_t nTops = 0;
-
-  if (topType == "all") nTops = topData.getAllTopsMVA().size();
-  else if (topType == "selected") nTops = topData.getSelectedTopsMVA().size();
-  else return -1;
-  
-  for (size_t i=0; i < nTops; i++)
-    {
-      Jet bjet, jet1, jet2;
-      float mva;
-      if (topType == "all")
-	{
-	  bjet = topData.getAllTopsBJet().at(i);
-	  jet1 = topData.getAllTopsJet1().at(i);
-	  jet2 = topData.getAllTopsJet2().at(i);
-	  mva  = topData.getAllTopsMVA().at(i);
-	}
-      else
-	{
-	  bjet = topData.getSelectedTopsBJet().at(i);
-	  jet1 = topData.getSelectedTopsJet1().at(i);
-	  jet2 = topData.getSelectedTopsJet2().at(i);
-	  mva  = topData.getSelectedTopsMVA().at(i);
-	}
-
-      if (searchForLeptonicTop)
-	{
-	  // Skip jet given to the leptonic branch
-	  if (areSameJets(bjet, BJet_LeptonicBr)) continue;
-	  if (areSameJets(jet1, BJet_LeptonicBr)) continue;		  
-	  if (areSameJets(jet2, BJet_LeptonicBr)) continue;
-	}
-      
-      // Get 4-momentum of top (trijet)
-      math::XYZTLorentzVector Top_p4;
-      Top_p4 = bjet.p4() + jet1.p4() + jet2.p4();
-      
-      //DeltaR(mu, top)
-      double dR_mu_top = ROOT::Math::VectorUtil::DeltaR(mu.p4(), Top_p4);
-      
-      // Find min and max DR(mu, top candidate)
-      //if (dR_mu_top < dRmin_mu_top) dRmin_mu_top = dR_mu_top;
-
-      // Consider only top candidates that are far from the muon (back-to-back)
-      if (!cfg_MuTrijetDRCut.passedCut(dR_mu_top)) continue;	      
-      if (mva < LdgTrijet_MaxMVA) continue;
-      LdgTrijet_MaxMVA = mva;
-      LdgTrijet_Index = i;
-    }
-  return LdgTrijet_Index;
-}
-
 
 bool SystTopBDT::IsGenuineTop(const TopSelectionBDT::Data& topData, string topType, Muon mu, Jet BJet_LeptonicBr, bool searchForLeptonicTop,
 			      const std::vector<Jet>& MCtrue_LdgJet,  const std::vector<Jet>& MCtrue_SubldgJet, const std::vector<Jet>& MCtrue_Bjet){
