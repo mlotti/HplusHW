@@ -419,7 +419,7 @@ def main(opts):
     # Save results in JSON
     name = opts.mcrab.split("_")[-3]
     name = name.replace(opts.analysisName, "")
-    jsonName = "topMisID_"+ name +"_fatJet_TopMassCut400_TrainingBJets40.json"
+    jsonName = "topMisID_"+ name +"_TopMassCut400.json"
     analysis = opts.analysisName
     label = "2016"
     plotDir =  os.path.join(opts.folder, jsonName)
