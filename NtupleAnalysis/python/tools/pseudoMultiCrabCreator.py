@@ -30,8 +30,10 @@ import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 # Clas definition
 #================================================================================================
 class PseudoMultiCrabCreator:
-    ## Constructor
-    # title is a string that goes to the multicrab directory name
+    '''
+    Constructor
+    title is a string that goes to the multicrab directory name
+    '''
     def __init__(self, title, inputMulticrabDir, verbose=False):
         suffix = ""
         s = inputMulticrabDir.split("_")
@@ -45,6 +47,7 @@ class PseudoMultiCrabCreator:
         self._myBaseDir = None
         self._energy = None
         self._dataVersion = None
+        self._rootFilePath = None
         #self._codeVersion = None
         return
 
@@ -63,7 +66,15 @@ class PseudoMultiCrabCreator:
         self.Print(msg, printHeader)
         return
 
-    def addModule(self, module):
+    def addModule(self, module, altMode=False):
+        '''
+        The "altMode" added to accommodate a new script that merges
+        a list of datasets into a new dataset (e.g. Rares for HToTB).
+        
+        It requires a new function for writing the module as the histograms
+        themeselves have their own full paths so the default version (with hardcoded
+        folders) will not work.
+        '''
         if self._energy == None:
             self._energy = module._energy
             self._dataVersion = module._dataVersion.Clone()
@@ -72,16 +83,22 @@ class PseudoMultiCrabCreator:
             self._dataVersion = None # No need to delete from gDirectory, since they were saved to disk already
             #self._codeVersion = None
 
-        # Open root file
-        myFilename = "%s/%s/res/histograms-%s.root" % (self._myBaseDir,self._title+self._mySubTitles[-1],self._title+self._mySubTitles[-1])
+        # Open ROOT file in UPDATE or CREATE mode
         myRootFile = None
-        if os.path.exists(myFilename):
-            myRootFile = ROOT.TFile(myFilename,"UPDATE")
+        if os.path.exists(self._rootFilePath):
+            mode = "UPDATE"
         else:
-            myRootFile = ROOT.TFile(myFilename,"CREATE")
+            mode = "CREATE"
+            
+        self.Verbose("Opening ROOT file \"%s\" in \"%s\" mode" % (self._rootFilePath, mode), True)
+        myRootFile = ROOT.TFile(self._rootFilePath, mode)
 
         # Write module
-        module.writeModuleToRootFile(myRootFile)
+        if altMode:
+            module.writeModuleToRootFileAlt(myRootFile)
+        else:
+            module.writeModuleToRootFile(myRootFile)
+        
         myRootFile.Write()
         myRootFile.Close()
         module.delete()
@@ -90,10 +107,14 @@ class PseudoMultiCrabCreator:
     def _createBaseDirectory(self, prefix):
         if self._myBaseDir != None:
             return
+
         # Create directory structure
         self._myBaseDir = os.path.join(self._inputMulticrabDir, "%s%s" % (prefix, self._title) )
         if os.path.exists(self._myBaseDir):
-            shutil.rmtree(self._myBaseDir)
+            self.Verbose("Directory %s already exists! Removing contents before proceeding" % (self._myBaseDir), True)
+            shutil.rmtree(os.path.join(os.getcwd(), self._myBaseDir))
+            #cmd = "rm -rf %s" % ( os.path.join(os.getcwd(), self._myBaseDir)  )
+            #os.system(cmd)
 
         self.Verbose("Creating dir %s" % (self._myBaseDir), True)
         os.mkdir(self._myBaseDir)
@@ -107,14 +128,20 @@ class PseudoMultiCrabCreator:
         self._mySubTitles.append(subTitle)
         self._currentSubTitle = subTitle
 
-        datasetDir = os.path.join(self._myBaseDir, self._title + subTitle)
+        if len(subTitle) > 0:
+            datasetDir = os.path.join(self._myBaseDir, self._title + subTitle)
+        else:
+            datasetDir = os.path.join(self._myBaseDir)
         resDir = os.path.join(datasetDir, "res")
 
-        self.Verbose("Creating dir %s" % (datasetDir), True)
-        os.mkdir(datasetDir)
+        if not os.path.exists(datasetDir):
+            self.Verbose("Creating dir %s" % (datasetDir), True)
+            os.mkdir(datasetDir)
+
 
         self.Verbose("Creating sub-dir %s" % (resDir), False)
-        os.mkdir(resDir)
+        if not os.path.exists(resDir):
+            os.mkdir(resDir)
         return
 
     def finalize(self, silent=False):
@@ -149,28 +176,52 @@ class PseudoMultiCrabCreator:
         return self._myBaseDir
 
     def _writeRootFileToDisk(self, subTitle):
-        # Open root file
-        myRootFile = ROOT.TFile("%s/%s/res/histograms-%s.root"%(self._myBaseDir,self._title+self._mySubTitles[-1],self._title+self._mySubTitles[-1]),"UPDATE")
+
+        # Determine full path to new ROOT file
+        dirName  = os.path.join(self._myBaseDir, self._title, self._mySubTitles[-1], "res")
+        fileName = "histograms-%s.root" % (self._title + self._mySubTitles[-1])
+        if not os.path.isdir(dirName):
+            dirName = os.path.join(self._myBaseDir, self._mySubTitles[-1], "res")
+            if not os.path.isdir(dirName):            
+                raise Exception("%sDirectory \"%s\" does not exist!%s" % (ShellStyles.ErrorStyle(), dirName, ShellStyles.NormalStyle() ) )
+        fullPath = os.path.join(dirName, fileName)
+        self._rootFilePath = fullPath
+
+        self.Verbose("Opening ROOT file %s" % (self._rootFilePath), True)
+        myRootFile = ROOT.TFile(self._rootFilePath, "UPDATE")
+
         # Write modules
         #for m in self._modulesList:
         #    m.writeModuleToRootFile(myRootFile)
         # Create config info histogram
 
+        # Write information to ROOT file
         myRootFile.cd("/")
         myConfigInfoDir = myRootFile.mkdir("configInfo")
-        hConfigInfo = ROOT.TH1F("configinfo","configinfo",2,0,2)
-        hConfigInfo.GetXaxis().SetBinLabel(1,"control")
+        hConfigInfo = ROOT.TH1F("configinfo", "configinfo", 2, 0, 2)
+
+        self.Verbose("Writing \"control\" bin to histogram \"%s\"" % (hConfigInfo.GetName()), True)
+        hConfigInfo.GetXaxis().SetBinLabel(1, "control")
         hConfigInfo.SetBinContent(1, 1)
-        hConfigInfo.GetXaxis().SetBinLabel(2,"energy")
+
+        self.Verbose("Writing \"energy\" bin to histogram \"%s\"" % (hConfigInfo.GetName()), True)
+        hConfigInfo.GetXaxis().SetBinLabel(2, "energy")
         hConfigInfo.SetBinContent(2, self._energy)
+
+        #self.Verbose("Writing \"luminosity\" bin (=\"%s\") to histogram \"%s\"" % (self._dataVersion.GetTitle(), hConfigInfo.GetName()), True)
         #hConfigInfo.GetXaxis().SetBinLabel(3,"luminosity")
         #hConfigInfo.SetBinContent(3, 1)
-        hConfigInfo.SetDirectory(myConfigInfoDir)
+
         # Write a copy of data version and code version
+        self.Verbose("Writing \"dataVersion\" (=\"%s\") to TDirectory \"%s\"" % (self._dataVersion.GetTitle(), myConfigInfoDir.GetName()), True)
+        hConfigInfo.SetDirectory(myConfigInfoDir)
         myConfigInfoDir.Add(self._dataVersion)
-        #myConfigInfoDir.Add(self._codeVersion)
-        # Write and close the root file
+        # myConfigInfoDir.Add(self._codeVersion)
+
+        self.Verbose("Writing to ROOT file %s" % (fullPath), True)
         myRootFile.Write()
+
+        self.Verbose("Closing the ROOT file %s" % (fullPath), True)
         myRootFile.Close()
         return
 
@@ -337,12 +388,14 @@ class PseudoMultiCrabModule:
                     myValue += h.GetBinContent(i)
                     myUncert += h.GetBinError(i)**2
                 self._counters[plotName] = myValue
+                # print "plotName = %s, myValue = %s" % (plotName, myValue) 
                 self._counterUncertainties[plotName] = sqrt(myUncert)
             h.SetName(plotName)
             self._dataDrivenControlPlots.append(h)
         return
 
     def writeModuleToRootFile(self, rootfile):
+
         # Create module directory
         rootfile.cd("/")
         myModuleDir = rootfile.mkdir(self._moduleName)
@@ -384,4 +437,76 @@ class PseudoMultiCrabModule:
         #myConfigInfoDir.Add(self._codeVersion)
         #.SetDirectory(rootfile)
         #self._codeVersion.SetDirectory(rootfile)
+        return
+
+    def writeModuleToRootFileAlt(self, rootfile):
+        '''
+        By default when an histogram is created, it is added to the list
+        of histogram objects in the current directory in memory.
+        Remove reference to this histogram from current directory and add
+        reference to new directory dir. dir can be 
+        0 in which case the
+        histogram does not belong to any directory.
+        '''
+        self.Verbose("Dumping all objects to ROOT file %s" % (rootfile.GetName()), True)
+        
+        # Go to base directory
+        rootfile.cd("/")
+
+        # Create TDirectory
+        self.Verbose("Creating directory %s%s%s in ROOT file %s" % (ShellStyles.HighlightAltStyle(), self._moduleName, ShellStyles.NormalStyle(), os.path.basename(rootfile.GetName())), True)
+        myModuleDir = rootfile.mkdir(self._moduleName)
+
+        # Save information
+        for h in self._shapes:
+            h.SetDirectory(myModuleDir)
+
+        folders = []
+        # For-loop: All plots        
+        for h in self._dataDrivenControlPlots:
+            
+            # Got to base dir
+            rootfile.cd("/")
+
+            # Determine names
+            hName  = h.GetName().split("/")[-1]
+            path   = h.GetName().replace("/" + hName, "")
+            nDepth = len(path.split("/"))
+            h.SetName(hName)
+
+            if nDepth > 1:
+                folder = os.path.join(self._moduleName, path)        
+                 #raise Exception("Histogram %s has more than 1 folder structure. Such a provision does not exists and must be added!" % (h.GetName()) )
+            else:
+                folder = os.path.join(self._moduleName, path)
+
+            # Keep track of existing folders
+            if folder not in folders:                
+                self.Verbose("Creating TDirectory %s in ROOT file %s" % (folder, rootfile.GetName()), True)
+                rootfile.mkdir(folder)
+                folders.append(folder)
+
+            # Go to folder
+            rootfile.cd(folder)
+            myDir = rootfile.CurrentDirectory()
+            
+            self.Verbose("Setting directory  %s for histogram %s" % (folder, h.GetName()), True)
+            h.SetDirectory(myDir)
+
+        # For debugging
+        if 0:
+            rootfile.ls()
+
+        # Save splittedBinInfo
+        self._hSplittedBinInfo.SetDirectory(myModuleDir)
+
+        # Create config info for the module
+        myConfigInfoDir = myModuleDir.mkdir("configInfo")
+        self._hConfigInfo = ROOT.TH1F("configinfo","configinfo",2,0,2)
+        self._hConfigInfo.GetXaxis().SetBinLabel(1,"control")
+        self._hConfigInfo.SetBinContent(1, 1)
+        self._hConfigInfo.GetXaxis().SetBinLabel(2,"luminosity")
+        self._hConfigInfo.SetBinContent(2, self._luminosity)
+        self._hConfigInfo.SetDirectory(myConfigInfoDir)
+        myConfigInfoDir.Add(self._dataVersion)
         return
