@@ -111,13 +111,13 @@ def getFakeBSystematics(myTTBarSystematics, OptionShapeSystematics, verbose=Fals
 #================================================================================================  
 # Options
 #================================================================================================  
-OptionTest                             = False
+OptionTest                             = True
 OptionPaper                            = True
-OptionIncludeRares                     = True  # [default: True]
+OptionMergeRares                       = True  # [default: True]
 OptionIncludeSystematics               = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionShapeSystematics                 = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionDoControlPlots                   = True  # [default: True]   (Produce control plots defined at end of this file)
-MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
+MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800]#, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
 DataCardName                           = "Hplus2tb_13TeV"
 OptionMassShape                        = "LdgTetrajetMass_AfterAllSelections" #"SubldgTetrajetMass_AfterAllSelections"
 #OptionMassShape                        = "SubldgTetrajetMass_AfterAllSelections"
@@ -317,6 +317,16 @@ Diboson = DataGroup(label             = labelPrefix + "Diboson" + labelPostfix,
                     nuisances         = mySystematics["Diboson"]
                     )
 
+Rares = DataGroup(label             = labelPrefix + "Rares" + labelPostfix,
+                    landsProcess      = 11,
+                    shapeHistoName    = OptionMassShape,
+                    histoPath         = histoPathEWK, 
+                    datasetType       = dsetTypeEWK,
+                    datasetDefinition = "Rares",
+                    validMassPoints   = MassPoints,
+                    nuisances         = mySystematics["TTWJetsToQQ"]
+                    )
+
 
 # Append datasets in order you want them to appear in the data-driven control plot stack
 DataGroups = []
@@ -327,8 +337,10 @@ else:
     DataGroups.append(myQCD)
 DataGroups.append(TT)
 DataGroups.append(SingleTop)
-DataGroups.append(TTZ)
-if OptionIncludeRares:
+if OptionMergeRares:
+    DataGroups.append(Rares)
+else:
+    DataGroups.append(TTZ)
     DataGroups.append(TTTT)
     DataGroups.append(DYJets)
     DataGroups.append(TTWJets)
@@ -1464,11 +1476,8 @@ if OptionTest:
     ControlPlots.append(hLdgHiggsMass)
     ControlPlots.append(hTetrajetBjetPt)
     ControlPlots.append(hTetrajetBjetEta)
-    #ControlPlots.append(hTetrajetBjetBdisc) #no agreement expected
-    ControlPlots.append(hLdgTopBjetPt)  # No agreement expected
-    ControlPlots.append(hLdgTopBjetEta) # No agreement expected
-    ControlPlots.append(hLdgTopBjetBdisc) # No agreement expected
-    ControlPlots.append(hSubldgTopBjetPt)  # No agreement expected
-    ControlPlots.append(hSubldgTopBjetEta) # No agreement expected
-    ControlPlots.append(hSubldgTopBjetBdisc) # No agreement expected
-    MassPoints = [500, 650]
+    ControlPlots.append(hLdgTopPt)
+    ControlPlots.append(hLdgTopMass)
+    ControlPlots.append(hMET)
+    ControlPlots.append(hHT)
+    MassPoints = [500]

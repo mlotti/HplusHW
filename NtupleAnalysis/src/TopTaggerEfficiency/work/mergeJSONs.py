@@ -136,6 +136,9 @@ if __name__ == "__main__":
     (opts, parseArgs) = parser.parse_args()
     
     opts.BDT = opts.BDT.replace('.', 'p')
+    if "-" in opts.BDT:
+        opts.BDT = opts.BDT.replace("-", "m")
+    
     opts.mtop            = "uncertainties_mTop_BDT_%s.json" % (opts.BDT)
     opts.showerScales    = "uncertainties_showerScales_BDT_%s.json" % (opts.BDT)
     opts.highPtRadiation = "uncertainties_highPtRadiation_BDT_%s.json" % (opts.BDT)

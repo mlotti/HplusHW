@@ -228,6 +228,10 @@ class TableProducer:
         self._timestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime(time.time()))
         self._outputFileStem = "combine_datacard_hplushadronic_m"
         self._outputRootFileStem = "combine_histograms_hplushadronic_m"
+        if hasattr(self._config, 'OptionMergeRares'):
+            self._Rares = self._config.OptionMergeRares
+        else:
+            self._Rares = False
         if self._h2tb:
             self.channelLabel = "tbhadr"
         else:
@@ -1243,9 +1247,14 @@ class TableProducer:
 
 
         if self._h2tb:
-            myColumnOrder = ["Hp",  "FakeB", "TT_GenuineB", "SingleTop_GenuineB", "TTZToQQ_GenuineB",
-                             "TTTT_GenuineB", "DYJetsToQQ_GenuineB",  "TTWJetsToQQ_GenuineB", 
-                             "WJetsToQQ_HT_600ToInf_GenuineB", "Diboson_GenuineB"]
+            myColumnOrder = ["Hp",  "FakeB", "TT_GenuineB", "SingleTop_GenuineB"]
+            if self._Rares:
+                myColumnOrder.append("Rares_GenuineB")  
+            else:
+                rares = []
+                for d in aux.GetListOfRareDatasets():
+                    dName = d + "_GenuineB"
+                    myColumnOrder.append(dName)
 
             myNuisanceOrder = [["CMS_eff_trg_MC", "trigger efficiency"],
                                ["CMS_eff_e_veto", "electron veto eff."],
@@ -1410,7 +1419,7 @@ class TableProducer:
                 if (abs(myMaxErrorUp) > 9000 or abs(myMinErrorUp) > 9000 or abs(myMaxErrorDown) > 9000 or abs(myMinErrorDown) > 9000):
                     myStr = "$-$"
                 # if result found and no need for writing range
-                elif ( (myMaxErrorUp-myMinErrorUp)<0.001 and (myMaxErrorDown-myMinErrorDown)<0.001 ): #PROBLEM HERE!
+                elif ( (myMaxErrorUp-myMinErrorUp)<0.001 and (myMaxErrorDown-myMinErrorDown)<0.001 ):
                     if abs(myMaxErrorDown-myMaxErrorUp) < 0.001: # if symmetric error
                         myStr = self._getFormattedSystematicsNumber(myMaxErrorUp)
                     else: # if asymmetric
@@ -1481,17 +1490,21 @@ class TableProducer:
     def getSystematicsTableHToTB(self, myTable):
         myOutput  = "\\renewcommand{\\arraystretch}{1.2}\n"
         myOutput += "\\resizebox{1.0\\linewidth}{!}{%\n"
-        #myOutput += "\\begin{table}%%[h]\n"
-        #myOutput += "\\begin{center}\n"
-        #myOutput += "\\caption{The systematic uncertainties (in \\%) for signal and the backgrounds. The uncertainties, which depend on the final distribution bin, are marked with (S) and for them the maximum contracted value of the negative or positive variation is displayed.}"
         myOutput += "\\label{tab:summary:systematics}\n"
-        #myOutput += "\\vskip 0.1 in\n"
-        #myOutput += "\\noindent\\makebox[\\textwidth]{\n"
-        myOutput += "\\begin{tabular}{l|c|c|cccccccc}\n"
+        if self._Rares: #can do this much smarter!
+            myOutput += "\\begin{tabular}{l|c|c|ccc}\n"
+        else:
+            myOutput += "\\begin{tabular}{l|c|c|cccccccc}\n"            
         myOutput += "\\hline\n"
-        myOutput += "& Signal & Fake b & \multicolumn{8}{c}{Genuine b}"
+        if self._Rares: #can do this much smarter!
+            myOutput += "& Signal & Fake b & \multicolumn{3}{c}{Genuine b}"
+        else:
+            myOutput += "& Signal & Fake b & \multicolumn{8}{c}{Genuine b}"
         myOutput += "\n \\\\"
-        myCaptionLine = [["","","","$t\\bar{t}$", "Single top", "$t\\bar{t}$+Z", "$t\\bar{t}t\\bar{t}$", "$Z/\gamma^{*}$+jets", "$t\\bar{t}$+W", "W+jets", "Diboson"]] 
+        if self._Rares:
+            myCaptionLine = [["","","","$t\\bar{t}$", "Single top", "Rares"]] 
+        else:
+            myCaptionLine = [["","","","$t\\bar{t}$", "Single top", "$t\\bar{t}$+Z", "$t\\bar{t}t\\bar{t}$", "$Z/\gamma^{*}$+jets", "$t\\bar{t}$+W", "W+jets", "Diboson"]] 
         # Calculate dimensions of tables
         myWidths = []
         myWidths = calculateCellWidths(myWidths, myTable)

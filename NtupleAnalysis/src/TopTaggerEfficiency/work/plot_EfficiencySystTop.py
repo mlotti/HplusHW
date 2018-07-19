@@ -680,7 +680,9 @@ if __name__ == "__main__":
     
     
     opts.BDT = opts.BDT.replace('.', 'p')
-    
+    if "-" in opts.BDT:
+        opts.BDT = opts.BDT.replace("-", "m")
+        
     # Require at least two arguments (script-name, path to multicrab)
     if len(sys.argv) < 2:
         parser.print_help()

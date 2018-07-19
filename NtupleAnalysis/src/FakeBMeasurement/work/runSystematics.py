@@ -148,7 +148,8 @@ def main():
 
     # Set splitting of phase-space (first bin is below first edge value and last bin is above last edge value)
     allSelections.CommonPlots.histogramSplitting = [               
-        PSet(label="TetrajetBjetPt" , binLowEdges=[50, 120,  300], useAbsoluteValues=False), # last (quite good)
+        PSet(label="TetrajetBjetPt" , binLowEdges=[50, 160,  300], useAbsoluteValues=False), # last (not bad)
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[50, 120,  300], useAbsoluteValues=False), # last (not bad)
         # PSet(label="TetrajetBjetPt" , binLowEdges=[50, 150,  300], useAbsoluteValues=False), # last (quite good)
         # PSet(label="TetrajetBjetPt" , binLowEdges=[50, 60,  150], useAbsoluteValues=False),
         # PSet(label="TetrajetBjetPt" , binLowEdges=[60, 90, 160, 300], useAbsoluteValues=False), # BEST (v1)
@@ -502,8 +503,9 @@ if __name__ == "__main__":
     if opts.histoLevel not in allowedLevels:
         raise Exception("Invalid ambient histogram level \"%s\"! Valid options are: %s" % (opts.histoLevel, ", ".join(allowedLevels)))
     
+    # Overwrite default systematics ?
+    opts.systVarsList = []
     if opts.systVars != None:
         opts.doSystematics = True
         opts.systVarsList = opts.systVars.split(",")
-
     main()

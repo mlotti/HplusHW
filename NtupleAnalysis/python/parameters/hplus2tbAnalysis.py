@@ -91,7 +91,7 @@ jetSelection = PSet(
     jetIDDiscr               = "IDloose", # [default: "IDloose"] (options: IDloose, IDtight, IDtightLeptonVeto)
     jetPUIDDiscr             = "",        # [default: ""]
     tauMatchingDeltaR        = 0.4,       # [default: 0.4] (does nothing for h2tb)
-    HTCutValue               = 500.0,     # [default: 500.0]
+    HTCutValue               = 400.0,     # [default: 500.0]
     HTCutDirection           = ">=",      # [default: ">="]
     JTCutValue               = 0.0,       # [default: 0.0]
     JTCutDirection           = ">=",      # [default: ">="]
@@ -155,7 +155,7 @@ topSelectionBDT = PSet(
     TopMassUppCutDirection =  "<=",   # [default: "<"]
     CSV_bDiscCutValue      = 0.8484,  # [default: 0.8484] # Do not evaluate top candidate if b-jet assigned as b from top fails this cut
     CSV_bDiscCutDirection  = ">=",    # [default: ">="]
-    WeightFile             = "TopRecoTree_180523_DeltaR0p3_DeltaPtOverPt0p32_TopPtReweighting_BDTG.weights.xml", # (All XML files located in data/TopTaggerWeights/)
+    WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_14July2018.weight.xml", # (All XML files located in data/TopTaggerWeights/)
 )
 
 
@@ -210,9 +210,9 @@ else:
 # top-tagging (json files available for: defaut, fatJet, ldgJet)
 MVAstring = "%.2f" % topSelectionBDT.TopMVACutValue
 scaleFactors.setupToptagSFInformation(topTagPset                     = topSelectionBDT, 
-                                      topTagMisidFilename            = "topMisID_BDT%s_fatJet.json" % MVAstring.replace(".", "p"), 
-                                      topTagEfficiencyFilename       = "toptagEff_BDT%s_GenuineTT_fatJet.json" % MVAstring.replace(".", "p"),
-                                      topTagEffUncertaintiesFilename = "toptagEffUncert_BDT%s_GenuineTT_fatJet.json" % MVAstring.replace(".", "p"),
+                                      topTagMisidFilename            = "topMisID_BDT%s_TopMassCut400.json" % MVAstring.replace(".", "p").replace("-", "m"), 
+                                      topTagEfficiencyFilename       = "toptagEff_BDT%s_GenuineTT_TopMassCut400.json" % MVAstring.replace(".", "p").replace("-", "m"),
+                                      topTagEffUncertaintiesFilename = "toptagEffUncert_BDT%s_GenuineTT_TopMassCut400.json" % MVAstring.replace(".", "p").replace("-", "m"),
                                       direction                      = "nominal",
                                       variationInfo                  = None)
 

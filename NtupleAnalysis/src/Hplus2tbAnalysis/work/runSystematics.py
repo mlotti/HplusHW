@@ -584,6 +584,8 @@ if __name__ == "__main__":
     if opts.histoLevel not in allowedLevels:
         raise Exception("Invalid ambient histogram level \"%s\"! Valid options are: %s" % (opts.histoLevel, ", ".join(allowedLevels)))
 
+    # Overwrite default systematics ?
+    opts.systVarsList = []
     if opts.systVars != None:
         opts.doSystematics = True
         opts.systVarsList = opts.systVars.split(",")
