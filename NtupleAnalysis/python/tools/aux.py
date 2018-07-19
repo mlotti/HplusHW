@@ -32,6 +32,19 @@ def Print(msg, printHeader=True):
     print "\t", msg
     return
 
+def PrintFlushed(msg, printHeader=True):
+    '''                                                                                                                                                                                                                        
+    Useful when printing progress in a loop
+    '''
+    msg = "\r\t" + msg
+    ERASE_LINE = '\x1b[2K'
+    if printHeader:
+        print "=== aux.py"
+    sys.stdout.write(ERASE_LINE)
+    sys.stdout.write(msg)
+    sys.stdout.flush()
+    return
+
 def IsTH1(h, raiseExcept=False):
     if not isinstance(h, ROOT.TH1):
         msg = "Expected object of type ROOT.TH1, got \"%s\" instead" % (type(h))
@@ -78,6 +91,7 @@ def PrintTH1Info(myTH1):
     with the properties of a ROOT.TH1 instance object
     '''
     if not IsTH1(myTH1):
+        Print("Cannot print TH1 Info. Not a ROOT.TH1 object type (type=%s)" % (type(myTH1)), True)
         return
 
     # Constuct the table
@@ -102,7 +116,7 @@ def PrintTH1Info(myTH1):
         binError      = "%.2f" % h.GetBinError(j)
         integralError = ROOT.Double(0.0)
         integral      = h.IntegralAndError(0, j, integralError, "")
-        table.append(align.format(j, binWidth, binRange, binContent, "+/-", binError,"%.1f" % integral, "+/-", "%.1f" % integralError))
+        table.append(align.format(j, binWidth, binRange, binContent, "+/-", binError,"%.2f" % integral, "+/-", "%.2f" % integralError))
     table.append(hLine)
     table.append("")
 
