@@ -864,7 +864,7 @@ if __name__ == "__main__":
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False
-    SIGNALMASS   = 500
+    SIGNALMASS   = 0
     MERGEEWK     = False
     URL          = False
     NOERROR      = True
