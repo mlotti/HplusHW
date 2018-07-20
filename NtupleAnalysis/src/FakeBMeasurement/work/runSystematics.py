@@ -148,7 +148,7 @@ def main():
 
     # Set splitting of phase-space (first bin is below first edge value and last bin is above last edge value)
     allSelections.CommonPlots.histogramSplitting = [               
-        PSet(label="TetrajetBjetPt" , binLowEdges=[50, 160,  300], useAbsoluteValues=False), # last (not bad)
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[50, 160,  300], useAbsoluteValues=False), # last (not bad)
         # PSet(label="TetrajetBjetPt" , binLowEdges=[50, 120,  300], useAbsoluteValues=False), # last (not bad)
         # PSet(label="TetrajetBjetPt" , binLowEdges=[50, 150,  300], useAbsoluteValues=False), # last (quite good)
         # PSet(label="TetrajetBjetPt" , binLowEdges=[50, 60,  150], useAbsoluteValues=False),
@@ -156,7 +156,7 @@ def main():
         # PSet(label="TetrajetBjetPt" , binLowEdges=[50, 60, 90, 160, 330], useAbsoluteValues=False),
         # PSet(label="TetrajetBjetPt" , binLowEdges=[60, 90, 160, 300], useAbsoluteValues=False), # BEST (v2)
         # PSet(label="TetrajetBjetPt" , binLowEdges=[60, 90, 160, 300], useAbsoluteValues=False), # BEST (v3)
-        # PSet(label="TetrajetBjetPt" , binLowEdges=[50, 65, 130, 330], useAbsoluteValues=False), # BEST (v4)
+        PSet(label="TetrajetBjetPt" , binLowEdges=[50, 65, 130, 330], useAbsoluteValues=False), # BEST (v4)
         # PSet(label="TetrajetBjetPt" , binLowEdges=[50, 65, 95, 130, 330], useAbsoluteValues=False), # BEST (v5)
         # PSet(label="TetrajetBjetPt" , binLowEdges=[45, 50, 60, 90, 160, 330], useAbsoluteValues=False), # BEST (v5)
         #

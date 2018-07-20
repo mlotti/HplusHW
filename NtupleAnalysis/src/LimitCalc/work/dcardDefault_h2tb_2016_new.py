@@ -23,9 +23,19 @@ OR
 # Imports
 #================================================================================================  
 import HiggsAnalysis.NtupleAnalysis.tools.systematics as systematics
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import sys
 import re
+
+#================================================================================================
+# Definitions
+#================================================================================================
+ss = ShellStyles.SuccessStyle()
+ns = ShellStyles.NormalStyle()
+ts = ShellStyles.NoteStyle()
+hs = ShellStyles.HighlightAltStyle()
+es = ShellStyles.ErrorStyle()
 
 #================================================================================================
 # Function Definition
@@ -111,34 +121,33 @@ def getFakeBSystematics(myTTBarSystematics, OptionShapeSystematics, verbose=Fals
 #================================================================================================  
 # Options
 #================================================================================================  
-OptionTest                             = True
-OptionPaper                            = True
+OptionTest                             = False  # [default: False]
+OptionPaper                            = True  # [default: True]
 OptionMergeRares                       = True  # [default: True]
-OptionIncludeSystematics               = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
+OptionIncludeSystematics               = False  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionShapeSystematics                 = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionDoControlPlots                   = True  # [default: True]   (Produce control plots defined at end of this file)
 MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800]#, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
 DataCardName                           = "Hplus2tb_13TeV"
-OptionMassShape                        = "LdgTetrajetMass_AfterAllSelections" #"SubldgTetrajetMass_AfterAllSelections"
-#OptionMassShape                        = "SubldgTetrajetMass_AfterAllSelections"
-OptionBr                               = 1.0   # [default: 1.0]    (The Br(t->bH+) used in figures and tables)
-OptionSqrtS                            = 13    # [default: 13]     (The sqrt(s) used in figures and tables)
-BlindAnalysis                          = False  # [default: True]   (True, unless you have a green light for unblinding)
-OptionBlindThreshold                   = None  # [default: 0.2]    (If signal exceeds this fraction of expected events, data is blinded; set to None to disable)
-MinimumStatUncertainty                 = 0.5   # [default: 0.5]    (Minimum stat. uncertainty to set to bins with zero events)
-UseAutomaticMinimumStatUncertainty     = False # Do NOT use the MinimumStatUncertainty value above for ~empty bins, but determine the value from the lowest non-zero rate for each dataset   
-OptionCombineSingleColumnUncertainties = False # [default: False]  (Approxmation that makes limit running faster)
-OptionDisplayEventYieldSummary         = False # [default: False]  (Print "Event yield summary", using the TableProducer.py)
-OptionDoWithoutSignal                  = False # [default: False]  (Also do control plots without any signal present)
+OptionMassShape                        = "LdgTetrajetMass_AfterAllSelections"
+OptionBr                               = 1.0          # [default: 1.0]    (The Br(t->bH+) used in figures and tables)
+OptionSqrtS                            = 13           # [default: 13]     (The sqrt(s) used in figures and tables)
+BlindAnalysis                          = False        # [default: True]   (Change only if "green light" for unblinding)
+OptionBlindThreshold                   = None         # [default: None]   (If signal exceeds this fraction of expected events, data is blinded)
+MinimumStatUncertainty                 = 0.5          # [default: 0.5]    (min. stat. uncert. to set to bins with zero events)
+UseAutomaticMinimumStatUncertainty     = False        # [default: False]  (Do NOT use the MinimumStatUncertainty; determine value from lowest non-zero rate for each dataset   )
+OptionCombineSingleColumnUncertainties = False        # [default: False]  (Approxmation that makes limit running faster)
+OptionDisplayEventYieldSummary         = False        # [default: False]  (Print "Event yield summary", using the TableProducer.py)
+OptionDoWithoutSignal                  = False        # [default: False]  (Also do control plots without any signal present)
 OptionFakeBMeasurementSource           = "DataDriven" # [default: "DataDriven"] (options: "DataDriven", "MC")
-OptionLimitOnSigmaBr                   = True  # [default: True]   (Set to true for heavy H+)
-OptionNumberOfDecimalsInSummaries      = 1     # [defaul: 1]       (Self explanatory)
-ToleranceForLuminosityDifference       = 0.05  # [default: 0.05]   (Tolerance for throwing error on luminosity difference; "0.01" means that a 1% is required) 
-ToleranceForMinimumRate                = 0.0   # [default: 0.0]    (Tolerance for almost zero rate columns with smaller rate are suppressed) 
-labelPrefix                            = ""    # [default: ""]     (Prefix for the labels of datacard columns; e.g. "CMS_Hptntj_", "CMS_H2tb_")
-labelPostfix                           = "_GenuineB"
-OptionConvertFromShapeToConstantList   = []    # [default: []]     (Convert these nuisances from shape to constant; Makes limits run faster & converge more easily)
-OptionSeparateShapeAndNormFromSystList = []    # [default: []]     (Separate in the following shape nuisances the shape and normalization components)
+OptionLimitOnSigmaBr                   = True         # [default: True]   (Set to true for heavy H+)
+OptionNumberOfDecimalsInSummaries      = 1            # [defaul: 1]       (Self explanatory)
+ToleranceForLuminosityDifference       = 0.05         # [default: 0.05]   (Tolerance for throwing error on luminosity difference; "0.01" means that a 1% is required) 
+ToleranceForMinimumRate                = 0.0          # [default: 0.0]    (Tolerance for almost zero rate columns with smaller rate are suppressed) 
+labelPrefix                            = ""           # [default: ""]     (Prefix for the labels of datacard columns; e.g. "CMS_Hptntj_", "CMS_H2tb_")
+labelPostfix                           = "_GenuineB"  # [default: "_GenuineB"]
+OptionConvertFromShapeToConstantList   = []           # [default: []]     (Convert these nuisances from shape to constant; Makes limits run faster & converge more easily)
+OptionSeparateShapeAndNormFromSystList = []           # [default: []]     (Separate in the following shape nuisances the shape and normalization components)
 
 #================================================================================================  
 # Counter and histogram path definitions
@@ -177,7 +186,7 @@ myBtagSystematics          = ["CMS_eff_b"]
 
 # Define systematics dictionary (easier access)
 mySystematics = {}
-mySystematics["MC"]          =  myLumiSystematics + myPileupSystematics + myTrgEffSystematics + myLeptonVetoSystematics + myJetSystematics + myBtagSystematics + myTopTagSystematics
+mySystematics["MC"]          = myLumiSystematics + myPileupSystematics + myTrgEffSystematics + myLeptonVetoSystematics + myJetSystematics + myBtagSystematics + myTopTagSystematics
 mySystematics["Signal"]      = mySystematics["MC"] + ["CMS_HPTB_mu_RF_HPTB","CMS_HPTB_pdf_HPTB"]
 mySystematics["FakeB"]       = []
 mySystematics["QCD"]         = mySystematics["MC"]
@@ -185,11 +194,13 @@ mySystematics["TT"]          = mySystematics["MC"] + ["QCDscale_ttbar", "pdf_ttb
 mySystematics["SingleTop"]   = mySystematics["MC"] + ["QCDscale_singleTop", "pdf_singleTop"] + ["CMS_HPTB_mu_RF_top","CMS_HPTB_pdf_top"]
 mySystematics["TTZToQQ"]     = mySystematics["MC"] + ["QCDscale_ttZ", "pdf_ttZ"] + ["CMS_HPTB_mu_RF_ewk","CMS_HPTB_pdf_ewk"]
 mySystematics["TTTT"]        = mySystematics["MC"] + ["CMS_HPTB_mu_RF_top","CMS_HPTB_pdf_top"]
-mySystematics["DYJets"]      = mySystematics["MC"] + ["QCDscale_DY", "pdf_DY"] + ["CMS_HPTB_mu_RF_ewk","CMS_HPTB_pdf_ewk"]
+mySystematics["DYJetsToQQHT"]= mySystematics["MC"] + ["QCDscale_DY", "pdf_DY"] + ["CMS_HPTB_mu_RF_ewk","CMS_HPTB_pdf_ewk"]
 mySystematics["TTWJetsToQQ"] = mySystematics["MC"] + ["QCDscale_ttW", "pdf_ttW"] + ["CMS_HPTB_mu_RF_top","CMS_HPTB_pdf_top"]
 mySystematics["WJetsToQQ_HT_600ToInf"]  = mySystematics["MC"] + ["QCDscale_Wjets", "pdf_Wjets"] + ["CMS_HPTB_mu_RF_ewk","CMS_HPTB_pdf_ewk"]
 mySystematics["Diboson"]     = mySystematics["MC"] + ["QCDscale_VV", "pdf_VV"] + ["CMS_HPTB_mu_RF_ewk","CMS_HPTB_pdf_ewk"]
 mySystematics["FakeB"]       = getFakeBSystematics(mySystematics["TT"], OptionShapeSystematics, verbose=False)
+mySystematics["Rares"]       = mySystematics["MC"] #+ ["QCDscale_ttW", "pdf_ttW"] + ["CMS_HPTB_mu_RF_top","CMS_HPTB_pdf_top"]
+
 if not OptionIncludeSystematics:
     msg = "Disabled systematics for all datasets (Stat. only datacards)"
     # For-loop: All dataset-systematics pairs
@@ -277,14 +288,14 @@ TTTT = DataGroup(label             = labelPrefix + "TTTT" + labelPostfix,
                  nuisances         = mySystematics["TTTT"]
                  )
 
-DYJets = DataGroup(label             = labelPrefix + "DYJetsToQQ" + labelPostfix, 
+DYJets = DataGroup(label             = labelPrefix + "DYJetsToQQHT" + labelPostfix, 
                    landsProcess      = 7,
                    shapeHistoName    = OptionMassShape,
                    histoPath         = histoPathEWK,
                    datasetType       = dsetTypeEWK,
                    datasetDefinition = "DYJetsToQQHT",
                    validMassPoints   = MassPoints,
-                   nuisances         = mySystematics["DYJets"]
+                   nuisances         = mySystematics["DYJetsToQQHT"]
                    )
 
 TTWJets = DataGroup(label             = labelPrefix + "TTWJetsToQQ" + labelPostfix, 
@@ -318,13 +329,13 @@ Diboson = DataGroup(label             = labelPrefix + "Diboson" + labelPostfix,
                     )
 
 Rares = DataGroup(label             = labelPrefix + "Rares" + labelPostfix,
-                    landsProcess      = 11,
+                    landsProcess      = 5,
                     shapeHistoName    = OptionMassShape,
                     histoPath         = histoPathEWK, 
                     datasetType       = dsetTypeEWK,
                     datasetDefinition = "Rares",
                     validMassPoints   = MassPoints,
-                    nuisances         = mySystematics["TTWJetsToQQ"]
+                    nuisances         = mySystematics["Rares"]
                     )
 
 
@@ -338,6 +349,8 @@ else:
 DataGroups.append(TT)
 DataGroups.append(SingleTop)
 if OptionMergeRares:
+    rares = aux.GetListOfRareDatasets()
+    Print("Replacing rare datasets with single new dataset: [%s] -> %s" % ( ts + ", ".join(rares) + ns, ss + "Rares" + ns), True)
     DataGroups.append(Rares)
 else:
     DataGroups.append(TTZ)
@@ -1480,4 +1493,4 @@ if OptionTest:
     ControlPlots.append(hLdgTopMass)
     ControlPlots.append(hMET)
     ControlPlots.append(hHT)
-    MassPoints = [500]
+    MassPoints = [500, 650]

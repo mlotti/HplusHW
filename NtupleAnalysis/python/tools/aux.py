@@ -192,7 +192,16 @@ def getSaveDirPath(pseudocrabDir, prefix="", postfix="", pseudocrabDir2=None):
     return saveDir
 
 def GetListOfEwkDatasets():
+    '''
+    HToTB use
+    '''
     return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+
+def GetListOfRareDatasets():
+    '''
+    HToTB use
+    '''
+    return ["TTZToQQ", "TTTT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "Diboson"]
 
 def cmsswVersion():
     if "CMSSW_VERSION" in os.environ:
