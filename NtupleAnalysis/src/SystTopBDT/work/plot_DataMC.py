@@ -10,14 +10,14 @@ USAGE:
 
 
 EXAMPLES:
-./plot_DataMC.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_TopCut10_171012_011451 --folder jetSelection_ --url
-./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurement --ratio
-./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurementEWKGenuineB --onlyMC
-./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --folder ForFakeBMeasurementEWKFakeB --onlyMC --nostack
-./plot_DataMC.py -m FakeBMeasurement_GE2Medium_GE1Loose0p80_StdSelections_BDTm0p80_AllSelections_BDT0p90_RandomSort_171120_100657 --url --mergeEWK --nostack --onlyMC
+./plot_DataMC.py -m SystTopBDT_180620_045023_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p40_noSF/ --url --folder SystTopBDT_Fake --ratio -e "TTW" -v
+./plot_DataMC.py -m SystTopBDT_180620_045023_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p40_noSF/ --url --folder SystTopBDT_Genuine --ratio -e "TTW" -v
+./plot_DataMC.py -m SystTopBDT_180620_045023_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p40_noSF/ --url --folder SystTopBDT_ --ratio -e "TTW" -v --onlyMC
 
 LAST USED:
-./plot_DataMC.py -m FakeBMeasurement_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_InvSel_EE2CSVM_MVA0p50to085_180129_133455/ --folder counters/weighted --url --ratio
+./plot_DataMC.py -m SystTopBDT_180620_045023_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p40_noSF/ --url --folder SystTopBDT_Fake --ratio -e "TTW" -v
+./plot_DataMC.py -m SystTopBDT_180620_045023_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p40_noSF/ --url --folder SystTopBDT_Genuine --ratio -e "TTW" -v
+./plot_DataMC.py -m SystTopBDT_180620_045023_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p40_noSF/ --url --folder SystTopBDT_ --ratio -e "TTW" -v
 
 '''
 
@@ -201,7 +201,10 @@ def main(opts):
 
         # For-loop: All histograms
         for i, h in enumerate(histoPaths2, 1):
-            if  "_LeadingTrijet_BDT" not in h:
+            #if  "_LeadingTrijet_BDT" not in h:
+            #if  "NJets" not in h:
+            #if "Trijet_Eta" not in h:
+            if "Multiplicity" not in h:
                 continue
             msg   = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % i, "/", "%s:" % (nHistos), h)
             Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), i==1)
@@ -314,6 +317,8 @@ def GetHistoKwargs(h, opts):
         kwargs["cutBox"] = {"cutValue": 2.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
 
     if "_LeadingTrijet_BDT" in h:
+        _yLabel = "Events / %.2f "
+        kwargs["ylabel"] = _yLabel
         kwargs["xlabel"] = "BDTG response"
         kwargs["opts"]   = {"xmin": 0.0, "xmax": +1.0, "ymin": yMin, "ymaxfactor": yMaxF}
         
@@ -548,6 +553,8 @@ def PlotHistograms(datasetsMgr, histoName, intLumi):
         skipStrings = ["_Vs_"]
     if "ForDataDrivenCtrlPlots" in opts.folder:
         skipStrings = ["_Vs_", "JetEtaPhi", "MinDeltaPhiJet", "MaxDeltaPhiJet", "MinDeltaRJet", "SubldgTetrajet"]
+    if opts.folder == "SystTopBDT_":
+        skipStrings = ["CR1", "CR2", "VR"]
 
     # Skip histograms if they contain a given string
     for keyword in skipStrings:
@@ -799,7 +806,7 @@ if __name__ == "__main__":
                       "topbdtSelectionTH2_Inverted", "ForFakeBNormalization", "fatjetSelection_Inverted",
                       "ForFakeBNormalizationEWKFakeB", "ForFakeBNormalizationEWKGenuineB",
                       "FailedBJet", "FailedBJetFakeB", "FailedBJetGenuineB", "ForFakeBMeasurement", 
-                      "ForFakeBMeasurementEWKFakeB", "ForFakeBMeasurementEWKGenuineB", "SystTopBDT_"]
+                      "ForFakeBMeasurementEWKFakeB", "ForFakeBMeasurementEWKGenuineB", "SystTopBDT_", "SystTopBDT_Genuine","SystTopBDT_Fake"]
 
 
     if opts.folder not in allowedFolders:
