@@ -205,7 +205,7 @@ def main(opts, signalMass):
         for h in histoPaths:
             if "Vs" in h: # Skip TH2D
                 continue
-            if "dijetmass" not in h.lower():
+            if "tetrajet" not in h.lower():
                 continue
             PlotMC(datasetsMgr, h, intLumi)
 
@@ -461,7 +461,7 @@ if __name__ == "__main__":
     OPTMODE      = ""
     BATCHMODE    = True
     PRECISION    = 3
-    SIGNALMASS   = [200, 400, 500, 650, 1000]
+    SIGNALMASS   = [200, 500, 650]
     #SIGNALMASS   = [500, 200]
     INTLUMI      = -1.0
     SUBCOUNTERS  = False

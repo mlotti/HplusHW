@@ -27,6 +27,7 @@ Example:
  LAST USED:
  ./run.py -m /uscms_data/d3/skonstan/workspace/multicrab/multicrab_Hplus2tbAnalysis_v8030_20180526T0746 -i "JetHT|QCD"
 
+
 ROOT:
 The available ROOT options for the Error-Ignore-Level are (const Int_t):
         kUnset    =  -1
@@ -206,8 +207,8 @@ def main():
     allSelections.METSelection.METCutDirection            = ">"
 
     # Study MisID vs BDT Cut
-    allSelections.TopSelectionBDT.TopMVACutValue = 0.40
-    #allSelections.TopSelectionBDT.WeightFile = "TopRecoTree_14July18_DeltaR0p3_DeltaPtOverPt0p32_BJetBt40_TopPtReweighting13Tev.weight.xml"
+    #allSelections.TopSelectionBDT.MVACutValue = 0.40
+    
     # ================================================================================================
     # Add Analysis Variations
     # ================================================================================================

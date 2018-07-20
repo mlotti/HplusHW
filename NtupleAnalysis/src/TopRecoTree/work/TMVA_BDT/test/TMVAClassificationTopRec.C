@@ -224,7 +224,8 @@ void TMVAClassificationTopRec( TString myMethodList = "", TString fout = "TMVA_T
 
    // Read training and test data
    // (it is also possible to use ASCII format as input -> see TMVA Users Guide)OA
-  TString pseudomulticrab = "TopRecoTree_180714_DeltaR0p3_DeltaPtOverPt0p32_BJetBt40_TopPtReweighting13Tev"; //"TopRecoTree_180523_DeltaR0p3_DeltaPtOverPt0p32_TopPtReweighting";
+  //TString pseudomulticrab = "TopRecoTree_180714_DeltaR0p3_DeltaPtOverPt0p32_BJetBt40_TopPtReweighting13Tev"; //"TopRecoTree_180523_DeltaR0p3_DeltaPtOverPt0p32_TopPtReweighting";
+  TString pseudomulticrab = "TopRecoTree_180717_DeltaR0p3_BJetBt40_TopPtReweighting13Tev";
   TString fnameS_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_30/src/HiggsAnalysis/NtupleAnalysis/src/TopRecoTree/work/"+pseudomulticrab+"/TT/res/histograms-TT.root";
   TString fnameB_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_30/src/HiggsAnalysis/NtupleAnalysis/src/TopRecoTree/work/"+pseudomulticrab+"/TT/res/histograms-TT.root";
    //   if (gSystem->AccessPathName( fname ))  // file does not exist in local directory
