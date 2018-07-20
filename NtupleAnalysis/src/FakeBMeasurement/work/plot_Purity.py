@@ -691,7 +691,7 @@ def GetPurityHisto(hData, hOther, kwargs, subtractFromOne=True, printValues=Fals
 
         # Sanity check
         if myPurity > 1.0:
-            Print ("Bin %d) %.3f/%.3f = %.3f" % (i, otherSum, dataSum, myPurity), True)
+            Verbose("Bin %d) %.3f/%.3f = %.3f" % (i, otherSum, dataSum, myPurity), True)
             newPurity = 1.0
             newUncert = myPurityUncert
             Print("Purity exceeds 1.0 (P=%.3f +/- %.3f). Forcing value to P=%.3f +/- %.3f" % (myPurity,  myPurityUncert, newPurity, newUncert), False)

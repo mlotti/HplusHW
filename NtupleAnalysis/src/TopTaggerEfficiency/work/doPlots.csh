@@ -2,16 +2,28 @@
 #================================
 # LAST USED:
 #================================
-# BDT cut 0.00: ./doPlots.csh TopTaggerEfficiency_180704_034821_BDT_0p00_DefaultTraining TopTaggerEfficiency_180704_062045_BDT_0p00_OtherTraining 0.00
-# BDT cut 0.10: ./doPlots.csh TopTaggerEfficiency_180704_035600_BDT_0p10_DefaultTraining TopTaggerEfficiency_180704_062956_BDT_0p10_OtherTraining 0.10
-# BDT cut 0.20: ./doPlots.csh TopTaggerEfficiency_180704_041515_BDT_0p20_DefaultTraining TopTaggerEfficiency_180704_063844_BDT_0p20_OtherTraining 0.20
-# BDT cut 0.30: ./doPlots.csh TopTaggerEfficiency_180704_042126_BDT_0p30_DefaultTraining TopTaggerEfficiency_180704_072414_BDT_0p30_OtherTraining 0.30
-# BDT cut 0.40: ./doPlots.csh TopTaggerEfficiency_180704_042603_BDT_0p40_DefaultTraining TopTaggerEfficiency_180704_072108_BDT_0p40_OtherTraining 0.40
-# BDT cut 0.50: ./doPlots.csh TopTaggerEfficiency_180704_042603_BDT_0p40_DefaultTraining TopTaggerEfficiency_180704_072108_BDT_0p40_OtherTraining 0.50
-# BDT cut 0.60: ./doPlots.csh TopTaggerEfficiency_180704_043957_BDT_0p60_DefaultTraining TopTaggerEfficiency_180704_073136_BDT_0p60_OtherTraining 0.60
-# BDT cut 0.70: ./doPlots.csh TopTaggerEfficiency_180704_044510_BDT_0p70_DefaultTraining TopTaggerEfficiency_180704_073451_BDT_0p70_OtherTraining 0.70
-# BDT cut 0.80: ./doPlots.csh TopTaggerEfficiency_180704_051420_BDT_0p80_DefaultTraining TopTaggerEfficiency_180704_073738_BDT_0p80_OtherTraining 0.80
-# BDT cut 0.90: ./doPlots.csh TopTaggerEfficiency_180704_055838_BDT_0p90_DefaultTraining TopTaggerEfficiency_180704_074041_BDT_0p90_OtherTraining 0.90
+# Default Training:   DR < 0.3 && DPt/Pt < 0.32
+# Other Training:     DR < 0.3
+#
+# BDT -0.90: ./doPlots.csh TopTaggerEfficiency_180717_033003_BDT_m0p90_TopMassCut400_TrainingBJet40_DefaultTraining TopTaggerEfficiency_180718_034243_BDT_m0p90_TopMassCut400_TrainingBJet40_OtherTraining -0.90
+# BDT -0.80: ./doPlots.csh TopTaggerEfficiency_180717_033905_BDT_m0p80_TopMassCut400_TrainingBJet40_DefaultTraining TopTaggerEfficiency_180718_034729_BDT_m0p80_TopMassCut400_TrainingBJet40_OtherTraining -0.80
+# BDT -0.70: ./doPlots.csh TopTaggerEfficiency_180717_040055_BDT_m0p70_TopMassCut400_TrainingBJet40_DefaultTraining TopTaggerEfficiency_180718_040045_BDT_m0p70_TopMassCut400_TrainingBJet40_OtherTraining -0.70
+# BDT -0.60: ./doPlots.csh TopTaggerEfficiency_180717_043046_BDT_m0p60_TopMassCut400_TrainingBJet40_DefaultTraining TopTaggerEfficiency_180718_041859_BDT_m0p60_TopMassCut400_TrainingBJet40_OtherTraining -0.60
+# BDT -0.50: ./doPlots.csh TopTaggerEfficiency_180717_043850_BDT_m0p50_TopMassCut400_TrainingBJet40_DefaultTraining TopTaggerEfficiency_180718_042316_BDT_m0p50_TopMassCut400_TrainingBJet40_OtherTraining -0.50
+# BDT -0.40: ./doPlots.csh TopTaggerEfficiency_180717_045258_BDT_m0p40_TopMassCut400_TrainingBJet40_DefaultTraining TopTaggerEfficiency_180718_042959_BDT_m0p40_TopMassCut400_TrainingBJet40_OtherTraining -0.40
+# BDT -0.30: ./doPlots.csh TopTaggerEfficiency_180717_050121_BDT_m0p30_TopMassCut400_TrainingBJet40_DefaultTraining TopTaggerEfficiency_180718_043421_BDT_m0p30_TopMassCut400_TrainingBJet40_OtherTraining -0.30
+# BDT -0.20: ./doPlots.csh TopTaggerEfficiency_180717_051813_BDT_m0p20_TopMassCut400_TrainingBJet40_DefaultTraining TopTaggerEfficiency_180718_044543_BDT_m0p20_TopMassCut400_TrainingBJet40_OtherTraining -0.20
+# BDT -0.10: ./doPlots.csh TopTaggerEfficiency_180717_052713_BDT_m0p10_TopMassCut400_TrainingBJet40_DefaultTraining TopTaggerEfficiency_180718_044957_BDT_m0p10_TopMassCut400_TrainingBJet40_OtherTraining -0.10
+# BDT  0.00: ./doPlots.csh TopTaggerEfficiency_180717_065545_BDT_0p00_TopMassCut400_TrainingBJet40_DefaultTraining  TopTaggerEfficiency_180718_045359_BDT_0p00_TopMassCut400_TrainingBJet40_OtherTraining   0.00
+# BDT  0.10: ./doPlots.csh TopTaggerEfficiency_180717_070547_BDT_0p10_TopMassCut400_TrainingBJet40_DefaultTraining  TopTaggerEfficiency_180718_050251_BDT_0p10_TopMassCut400_TrainingBJet40_OtherTraining   0.10
+# BDT  0.20: ./doPlots.csh TopTaggerEfficiency_180717_074103_BDT_0p20_TopMassCut400_TrainingBJet40_DefaultTraining  TopTaggerEfficiency_180718_050733_BDT_0p20_TopMassCut400_TrainingBJet40_OtherTraining   0.20
+# BDT  0.30: ./doPlots.csh TopTaggerEfficiency_180717_074911_BDT_0p30_TopMassCut400_TrainingBJet40_DefaultTraining  TopTaggerEfficiency_180718_051149_BDT_0p30_TopMassCut400_TrainingBJet40_OtherTraining   0.30
+# BDT  0.40: ./doPlots.csh TopTaggerEfficiency_180717_081727_BDT_0p40_TopMassCut400_TrainingBJet40_DefaultTraining  TopTaggerEfficiency_180718_051601_BDT_0p40_TopMassCut400_TrainingBJet40_OtherTraining   0.40
+# BDT  0.50: ./doPlots.csh TopTaggerEfficiency_180717_083328_BDT_0p50_TopMassCut400_TrainingBJet40_DefaultTraining  TopTaggerEfficiency_180718_061343_BDT_0p50_TopMassCut400_TrainingBJet40_OtherTraining   0.50
+# BDT  0.60: ./doPlots.csh TopTaggerEfficiency_180717_084203_BDT_0p60_TopMassCut400_TrainingBJet40_DefaultTraining  TopTaggerEfficiency_180718_061835_BDT_0p60_TopMassCut400_TrainingBJet40_OtherTraining   0.60
+# BDT  0.70: ./doPlots.csh TopTaggerEfficiency_180717_084936_BDT_0p70_TopMassCut400_TrainingBJet40_DefaultTraining  TopTaggerEfficiency_180718_062208_BDT_0p70_TopMassCut400_TrainingBJet40_OtherTraining   0.70
+# BDT  0.80: ./doPlots.csh TopTaggerEfficiency_180717_085614_BDT_0p80_TopMassCut400_TrainingBJet40_DefaultTraining  TopTaggerEfficiency_180718_062549_BDT_0p80_TopMassCut400_TrainingBJet40_OtherTraining   0.80
+# BDT  0.90: ./doPlots.csh TopTaggerEfficiency_180717_090250_BDT_0p90_TopMassCut400_TrainingBJet40_DefaultTraining  TopTaggerEfficiency_180718_062921_BDT_0p90_TopMassCut400_TrainingBJet40_OtherTraining   0.90
 
 #================================================================================================
 # Ensure all script arguments are passed from command line

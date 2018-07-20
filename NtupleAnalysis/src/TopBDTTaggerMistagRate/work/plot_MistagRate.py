@@ -10,22 +10,21 @@ USAGE:
 EXAMPLES:
 ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180603_JetPt100_40_40_40_1bjet_HT500/ --folder TopBDTTagger_QCDMistagRate
 
-LAST USD:
-./plot_MistagRate.py -m TopBDTTaggerMistagRate_180609_PFHT900_FatJet_HT1000_massCut300/ --folder TopBDTTagger_QCDMistagRate
-./plot_MistagRate.py -m TopBDTTaggerMistagRate_180609_PFHT900_ldgJetPT100_HT1000_massCut300/ --folder TopBDTTagger_QCDMistagRate
-
-
- BDT 0.00:  ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180621_083003_BDTCut0p00 --folder TopBDTTagger_QCDMistagRate
- BDT 0.10:  ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180621_083431_BDTCut0p10 --folder TopBDTTagger_QCDMistagRate
- BDT 0.20:  ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180621_083835_BDTCut0p20 --folder TopBDTTagger_QCDMistagRate
- BDT 0.30:  ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180621_084625_BDTCut0p30 --folder TopBDTTagger_QCDMistagRate
- BDT 0.40:  ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180620_123333_BDTCut0p40 --folder TopBDTTagger_QCDMistagRate
- BDT 0.50:  ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180620_125801_BDTCut0p50 --folder TopBDTTagger_QCDMistagRate
- BDT 0.60:  ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180620_130203_BDTCut0p60 --folder TopBDTTagger_QCDMistagRate
- BDT 0.70:  ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180620_130608_BDTCut0p70 --folder TopBDTTagger_QCDMistagRate
- BDT 0.80:  ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180620_131348_BDTCut0p80 --folder TopBDTTagger_QCDMistagRate
- BDT 0.90:  ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180620_131730_BDTCut0p90 --folder TopBDTTagger_QCDMistagRate
-
+LAST USED:
+ BDT -0.50: ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180717_070749_BDTm0p50_TopMassCut400_BDTtrainingBjetsPt40 --folder TopBDTTagger_QCDMistagRate
+ BDT -0.40: ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180717_071727_BDTm0p40_TopMassCut400_BDTtrainingBjetsPt40 --folder TopBDTTagger_QCDMistagRate
+ BDT -0.30: ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180717_072442_BDTm0p30_TopMassCut400_BDTtrainingBjetsPt40 --folder TopBDTTagger_QCDMistagRate
+ BDT -0.20: ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180717_073443_BDTm0p20_TopMassCut400_BDTtrainingBjetsPt40 --folder TopBDTTagger_QCDMistagRate
+ BDT -0.10: ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180717_074228_BDTm0p10_TopMassCut400_BDTtrainingBjetsPt40 --folder TopBDTTagger_QCDMistagRate
+ BDT  0.00: ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180717_074701_BDT0p00_TopMassCut400_BDTtrainingBjetsPt40  --folder TopBDTTagger_QCDMistagRate
+ BDT  0.10: ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180717_080922_BDT0p10_TopMassCut400_BDTtrainingBjetsPt40  --folder TopBDTTagger_QCDMistagRate 
+ BDT  0.20: ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180717_083255_BDT0p20_TopMassCut400_BDTtrainingBjetsPt40  --folder TopBDTTagger_QCDMistagRate
+ BDT  0.30: ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180717_085259_BDT0p30_TopMassCut400_BDTtrainingBjetsPt40  --folder TopBDTTagger_QCDMistagRate
+ BDT  0.40: ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180717_085259_BDT0p40_TopMassCut400_BDTtrainingBjetsPt40  --folder TopBDTTagger_QCDMistagRate
+ BDT  0.50: ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180717_091928_BDT0p50_TopMassCut400_BDTtrainingBjetsPt40  --folder TopBDTTagger_QCDMistagRate
+ BDT  0.60: ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180717_093012_BDT0p60_TopMassCut400_BDTtrainingBjetsPt40  --folder TopBDTTagger_QCDMistagRate
+ BDT  0.70: ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180717_093715_BDT0p70_TopMassCut400_BDTtrainingBjetsPt40  --folder TopBDTTagger_QCDMistagRate
+ BDT  0.80: ./plot_MistagRate.py -m TopBDTTaggerMistagRate_180717_094402_BDT0p80_TopMassCut400_BDTtrainingBjetsPt40  --folder TopBDTTagger_QCDMistagRate
 
 STATISTICS OPTIONS:
 https://iktp.tu-dresden.de/~nbarros/doc/root/TEfficiency.html
@@ -106,12 +105,8 @@ def GetLumi(datasetsMgr):
     Verbose("Luminosity = %s (pb)" % (lumi), True)
     return lumi
 
-#def GetListOfQCDatasets():
-#    Verbose("Getting list of QCD datasets")
-#    return ["QCD_HT1000to1500", "QCD_HT1500to2000","QCD_HT2000toInf","QCD_HT300to500","QCD_HT500to700","QCD_HT700to1000"]
 def GetRunRange(datasetsMgr):
-    '''                                                                                                                                                                                                                 
-    '''
+    '''                                                                                                                                                                                                                '''
     minRunRange = None
     maxRunRange = None
     nDataDatasets = len(datasetsMgr.getDataDatasets())
@@ -173,8 +168,7 @@ def GetHistoKwargs(histoName, opts):
         "ratioYlabel"      : "Data/MC",
         "ratio"            : True,
         "ratioInvert"      : False,
-        #"ratioType"        : "errorScale",
-        "ratioType"        : "errorPropagation",
+        "ratioType"        : "errorPropagation",  # "errorPropagation", "errorScale"
         "ratioCreateLegend": True,
         "ratioMoveLegend"  : {"dx": -0.51, "dy": 0.03, "dh": -0.08},
         "ratioErrorOptions": {"numeratorStatSyst": False, "denominatorStatSyst": False},
@@ -184,25 +178,20 @@ def GetHistoKwargs(histoName, opts):
         "addLuminosityText": False,
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
-        "opts"             : {"ymin": 0.0, "ymaxfactor": 2.0, "xmax" : 600},
+        "opts"             : {"ymin": 0.0, "ymaxfactor": 1.8, "xmax" : 600},
         "opts2"            : {"ymin": 0.30, "ymax": 1.70},
         "log"              : False,
         "createLegend"     : {"x1": 0.75, "y1": 0.72, "x2": 0.95, "y2": 0.88},
         }
 
 
-    #kwargs = copy.deepcopy(_kwargs)
-    #Soti Fix Me
     xlabel = "xlabel"
     units = ""
-    #kwargs["xlabel"]  = "xlabel"
-    #kwargs["ylabel"] += "units"
     myBins  = []
-    #myBins  = [0, 100, 150, 200, 300, 400, 500, 600, 800]
-    
-    if "bdisc" in h:
+        
+    if "csv" in h:
         units   = ""
-        xlabel  = "b-discriminator"
+        xlabel  = "CSV"
         kwargs["opts"]   = {"xmin": 0.8, "xmax": 1.0, "ymin": 0.0, "ymaxfactor": 1.2}
         myBins  = [0.8, 0.86, 0.88, 0.90, 0.92, 0.94, 0.96, 0.98, 1.0]
         kwargs["xmin"] = 0.8
@@ -211,15 +200,11 @@ def GetHistoKwargs(histoName, opts):
     elif "mass" in h:
         units   = "GeV/c^{2}"
         xlabel  = "m_{T} (%s)" % (units)
-        #myBins  = [0, 50, 100, 150, 200, 250, 300, 400, 500, 600, 800]
-        #myBins  = [0, 100, 200, 300, 400, 500, 800]
         myBins  = [0, 100, 200, 300, 400, 500, 600, 800, 1000]
         kwargs["cutBox"] = {"cutValue": 100.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         if "wmass" in h:
                     myBins  = [0, 20, 40, 60, 80, 100, 150, 200]
                     kwargs["opts"]   = {"xmin": 0, "xmax": 800, "ymin": 0.0, "ymaxfactor": 1.2}
-
-        
     elif "pt" in h:
         units   = "GeV/c"
         xlabel  = "p_{T} (%s)" % (units)
@@ -241,6 +226,7 @@ def GetHistoKwargs(histoName, opts):
         kwargs["opts"]   = {"xmin": -3.2, "xmax": 3.2, "ymin": 0.0, "ymaxfactor": 1.2}
         kwargs["cutBox"] = {"cutValue": 100.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         myBins  = [-3.0, -2.0, -1.0,  0.0, 1.0, 2.0, 3.0]
+
     elif "ht" in h:
         units   = "GeV/c"
         xlabel  = "H_{T} (%s)" % (units)
@@ -267,19 +253,14 @@ def GetHistoKwargs(histoName, opts):
         kwargs["opts"]   = {"xmin": 2, "xmax": 7, "ymin": 0.0, "ymaxfactor": 1.2}
         kwargs["cutBox"] = {"cutValue": 100.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
 
-
-
     kwargs["xlabel"]  = xlabel
-    #if units != "":
-    #    kwargs["ylabel"] += (" / "+units)
-
 
     if len(myBins) > 0:
         kwargs["binList"] = array.array('d', myBins)
     return kwargs
 
 
-def main(opts, signalMass):
+def main(opts):
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
@@ -315,25 +296,20 @@ def main(opts, signalMass):
             if "ChargedHiggs" in d.getName():
                 datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
 
-
-        # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
-        #plots.mergeRenameReorderForDataMC(datasetsMgr) 
-
         # Print dataset information before removing anything?
         datasetsMgr.PrintInfo()
 
         # Determine integrated Lumi before removing data
         if "Data" in datasetsMgr.getAllDatasetNames():
             intLumi = datasetsMgr.getDataset("Data").getLuminosity()
+
         # Remove datasets
         filterKeys = ["TTW"]
         for key in filterKeys:
             datasetsMgr.remove(filter(lambda name: key in name, datasetsMgr.getAllDatasetNames()))
         else:
             intLumi = 35920
-        # Remove datasets
-        #filterKeys = ["Data",  "TTZToQQ", "TTWJets", "TTTT", "QCD"]
-        #filterKeys = ["Data", "TTZToQQ", "TTWJets", "TTTT"]
+
         for key in filterKeys:
             datasetsMgr.remove(filter(lambda name: key in name, datasetsMgr.getAllDatasetNames()))
         
@@ -341,37 +317,27 @@ def main(opts, signalMass):
         datasetOrder = []
         haveQCD = False
         for d in datasetsMgr.getAllDatasets():
-            if "Charged" in d.getName():
-                if d not in signalMass:
-                    continue
             if "QCD" in d.getName():
                 haveQCD = True
             datasetOrder.append(d.getName())
-            
-        # Append signal datasets
-        for m in signalMass:
-            datasetOrder.insert(0, m)
         datasetsMgr.selectAndReorder(datasetOrder)
 
         # Define the mapping histograms in numerator->denominator pairs
         VariableList = [
             "LdgTop_Pt",
-            #"Tops_Pt"
             ]
+
         minRunRange, maxRunRange, runRange = GetRunRange(datasetsMgr)
-        print "run range:", minRunRange, maxRunRange, runRange
-        #runRange = datasetsMgr.loadRunRange()
+
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
         
         datasets_  = datasetsMgr.getAllDatasets()
-        #datasetsMgr.mergeMC()
         dataset_Data = datasetsMgr.getDataDatasets()
         dataset_MC   = datasetsMgr.getMCDatasets()
 
         # Print dataset information
         datasetsMgr.PrintInfo()
-
 
         # For-loop: All numerator-denominator pairs
         counter =  0
@@ -411,12 +377,9 @@ def main(opts, signalMass):
                     i+=1
                         
                 my_xvalue = num.GetXaxis().GetBinUpEdge(my_bin)+0.5*num.GetXaxis().GetBinWidth(my_bin)
-                #print "test ", my_bin, my_xvalue
                 total = den.Integral(0, x_bins) #my_bin
                 selected = num.Integral(0, x_bins) #my_bin
-                #print dataset.getName(), ":", selected, " events"
-            #PlotEfficiency(datasetsMgr, numerator, denominator, intLumi)
-            
+                            
             plotName     = "Eff_%s" % (var)
             # Get Efficiency Plots  
             _kwargs  = GetHistoKwargs(var, opts)
@@ -438,31 +401,25 @@ def main(opts, signalMass):
                     }
                 )
 
-            # Apply default style (according to dataset name)
-            #plots._plotStyles[dataset.getName()].apply(eff_Data)
             # Append in list
             myList = []
             myList.append(histograms.HistoGraph(eff_Data, plots._legendLabels["Data"], "lp", "P"))
 
             p.setLuminosity(intLumi)
             _kwargs["ratio"] = True
-            #_kwargs["ratioInvert"] = True
+            _kwargs["opts"]   = {"xmin": 0.0, "xmax": 600.0, "ymin": 0.0, "ymax": 0.16, "ymaxfactor": 1.8}
             _kwargs["cutBoxY"] = {"cutValue": 1.10, "fillColor": ROOT.kGray+1, "fillStyle": 3001, "box": False, "line": True, "greaterThan": True, "mainCanvas": False, 
-                                   "ratioCanvas": True, "mirror": True}
-            ##_kwargs["cutBoxY"] = {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": True}
+                                  "ratioCanvas": True, "mirror": True}
             plots.drawPlot(p, plotName, **_kwargs)
+
             # Draw 
-            #savePath = os.path.join(opts.saveDir, "MistagRate", opts.optMode)
-            #savePath = os.path.join(opts.saveDir, histoN.split("/")[0], opts.optMode)
             savePath = os.path.join(opts.saveDir, opts.optMode)
             SavePlot(p, plotName, savePath, saveFormats = [".png", ".pdf", ".C"])
         
     # Save results in JSON
-    name = opts.mcrab.split("_")[-1]
+    name = opts.mcrab.split("_")[-3]
     name = name.replace(opts.analysisName, "")
-    jsonName = "topMisID_"+ name +".json"
-    jsonName = jsonName.replace("/","")
-    #runRange = "273150-284044"
+    jsonName = "topMisID_"+ name +"_TopMassCut400.json"
     analysis = opts.analysisName
     label = "2016"
     plotDir =  os.path.join(opts.folder, jsonName)
@@ -532,10 +489,6 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
 
         if "Fake" in numPath and "TT" in dataset.getName():
             continue
-            #dataset = datasetsMgr.getDataset("QCD")
-        # Get the histograms
-        #num = dataset.getDatasetRootHisto(numPath).getHistogram()
-        #den = dataset.getDatasetRootHisto(denPath).getHistogram()
 
         if dataset.isMC():
             n = dataset.getDatasetRootHisto(numPath)
@@ -605,15 +558,11 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
     p = plots.PlotBase(datasetRootHistos=myList, saveFormats=[])
     plots.drawPlot(p, saveName, **_kwargs)
 
-    #p1 = plots.ComparisonManyPlot(histograms.HistoGraph(eff_Data, "data",  drawStyle="AP"), myList_MC, saveFormats=[])
     p1 = plots.ComparisonManyPlot(histograms.HistoGraph(eff_Data, "Data",  drawStyle="P"), 
-                                  #[histograms.HistoGraph(eff_QCD, "qcd", drawStyle="P"), 
-                                  # histograms.HistoGraph(eff_TT, "tt", drawStyle="P")], saveFormats=[])
                                   myList_MC, saveFormats=[])
 
     # Save plot in all formats
     savePath = os.path.join(opts.saveDir, "HplusMasses", numPath.split("/")[0], opts.optMode)
-    #savePath = os.path.join(opts.saveDir, numPath.split("/")[0], opts.optMode)
     save_path = savePath + opts.MVAcut
     print "save_path", save_path
     # Draw and save the plot                                                                                                                                                     
@@ -622,7 +571,6 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
     _kwargs["ratioInvert"] = True
     _kwargs["cutBoxY"] = {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": True}
     plots.drawPlot(p1, save_path1, **_kwargs)
-    #SavePlot(p, saveName, save_path, saveFormats = [".png", ".pdf"])
     SavePlot(p1, saveName, save_path, saveFormats = [".png", ".pdf", ".C"])
     return
 
@@ -759,8 +707,6 @@ if __name__ == "__main__":
     OPTMODE      = ""
     BATCHMODE    = True
     PRECISION    = 3
-    #SIGNALMASS   = [300, 500, 1000]
-    SIGNALMASS   = []
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False
@@ -770,7 +716,7 @@ if __name__ == "__main__":
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
     NORMALISE    = False
-    FOLDER       = "" #"topSelection_" #"ForDataDrivenCtrlPlots" #"topologySelection_"
+    FOLDER       = "" 
     MVACUT       = "Eff"
 
     # Define the available script options
@@ -796,9 +742,6 @@ if __name__ == "__main__":
 
     parser.add_option("--dataEra", dest="dataEra", type="string", default=DATAERA, 
                       help="Override default dataEra [default: %s]" % DATAERA)
-
-    #parser.add_option("--signalMass", dest="signalMass", type=float, default=SIGNALMASS, 
-                      #help="Mass value of signal to use [default: %s]" % SIGNALMASS)
 
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR, 
                       help="Directory where all pltos will be saved [default: %s]" % SAVEDIR)
@@ -843,14 +786,8 @@ if __name__ == "__main__":
     if opts.saveDir == None:
         opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="")
 
-    # Sanity check
-    allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 2000, 3000]
-    signalMass = []
-    for m in sorted(SIGNALMASS, reverse=True):
-        signalMass.append("ChargedHiggs_HplusTB_HplusToTB_M_%.f" % m)
-
     # Call the main function
-    main(opts, signalMass)
+    main(opts)
 
     if not opts.batchMode:
         raw_input("=== plot_Efficiency.py: Press any key to quit ROOT ...")

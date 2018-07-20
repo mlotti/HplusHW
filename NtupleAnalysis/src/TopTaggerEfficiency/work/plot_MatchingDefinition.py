@@ -516,7 +516,9 @@ if __name__ == "__main__":
         sys.exit(1)
 
     opts.BDT = opts.BDT.replace('.', 'p')
-
+    if "-" in opts.BDT:
+        opts.BDT = opts.BDT.replace("-", "m")
+        
     # Append folder to save directory path
     if opts.saveDir == None:
         opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="TopTagSystematics")

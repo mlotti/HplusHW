@@ -25,10 +25,11 @@ set PSEUDO_MCRAB_DIR = ${1}
 ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --ratio --folder  jetSelection_ --url
 ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --ratio --folder  bjetSelection_ --url
 ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --ratio --folder  topSelectionBDT_ --url
-./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --folder  fatjetSelection_Veto --url
+### ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --folder  fatjetSelection_Veto --url
 ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --ratio --folder  ForDataDrivenCtrlPlots --url
 ### ./plotDataMC_ControlPlots.py -m $PSEUDO_MCRAB_DIR --ratio --folder  QGLRSelection_ --url
-./plotMC_ValueVsCutflow.py -m $PSEUDO_MCRAB_DIR --acceptance -e "5000|10000" --gridX --gridY --yMax 400
+#./plotMC_ValueVsCutflow.py -m $PSEUDO_MCRAB_DIR --acceptance -e "5000|10000" --gridX --gridY --yMax 400
+./plotMC_ValueVsCutflow.py -m $PSEUDO_MCRAB_DIR --acceptance -i "500" --gridX --gridY --yMax 400
 
 ./plotTH2.py -m $PSEUDO_MCRAB_DIR --folder  ForDataDrivenCtrlPlots --dataset ChargedHiggs_HplusTB_HplusToTB_M_650 --normalizeToLumi --logZ --gridX --gridY  --url
 ./plotTH2.py -m $PSEUDO_MCRAB_DIR --folder  ForDataDrivenCtrlPlots --dataset ChargedHiggs_HplusTB_HplusToTB_M_800 --normalizeToLumi --logZ --gridX --gridY  --url

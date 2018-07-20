@@ -372,8 +372,6 @@ private:
   const DirectionalCut<double> cfg_TopMVACut;
   const DirectionalCut<double> cfg_TopMassLowCut;
   const DirectionalCut<double> cfg_TopMassUppCut;
-  const DirectionalCut<double> cfg_WMassLowCut;
-  const DirectionalCut<double> cfg_WMassUppCut;
   const DirectionalCut<double> cfg_CSV_bDiscCut;
 
   // Event counter for passing selection
@@ -389,8 +387,6 @@ private:
   Count cTopsAll;
   Count cTopsPassTopMassLowCut;
   Count cTopsPassTopMassUppCut;
-  Count cTopsPassWMassLowCut;
-  Count cTopsPassWMassUppCut;
   Count cTopsPassBDiscCut;
   Count cTopsPassBDTCut;
   Count cTopsPassCrossCleanCut;

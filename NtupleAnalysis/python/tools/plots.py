@@ -628,6 +628,7 @@ _legendLabels = {
     "TTJets"        : "t#bar{t}+jets",
     "TT"            : "t#bar{t}",
     "TTTT"          : "t#bar{t}t#bar{t}",
+    "Rares"         : "Rares",
     "TTWJetsToQQ"   : "t#bar{t}+W", # (W#rightarrowq#bar{q'})
     "TTZToQQ"       : "t#bar{t}+Z", # (Z#rightarrowq#bar{q'})
     "WWTo4Q"        : "WW",         # (W#rightarrowq#bar{q'})
@@ -764,24 +765,24 @@ for mass in _heavyHplusToTBbarMasses:
 
 ## Map the logical dataset names to plot styles
 _plotStyles = {
-    "ChargedHiggs_HplusTB_HplusToTB_M_180"  : styles.signal180Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_200"  : styles.signal200Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_220"  : styles.signal220Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_250"  : styles.signal250Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_300"  : styles.signal300Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_350"  : styles.signal350Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_400"  : styles.signal400Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_500"  : styles.signal500Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_650"  : styles.signal650Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_800"  : styles.signal800Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_1000" : styles.signal1000Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_1500" : styles.signal1500Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_2000" : styles.signal2000Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_2500" : styles.signal2500Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_3000" : styles.signal3000Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_5000" : styles.signal5000Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_7000" : styles.signal7000Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_10000": styles.signal1000Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_180"  : styles.signalStyleHToTB,
+    "ChargedHiggs_HplusTB_HplusToTB_M_200"  : styles.signalStyleHToTB,
+    "ChargedHiggs_HplusTB_HplusToTB_M_220"  : styles.signalStyleHToTB,
+    "ChargedHiggs_HplusTB_HplusToTB_M_250"  : styles.signalStyleHToTB,
+    "ChargedHiggs_HplusTB_HplusToTB_M_300"  : styles.signalStyleHToTB,
+    "ChargedHiggs_HplusTB_HplusToTB_M_350"  : styles.signalStyleHToTB,
+    "ChargedHiggs_HplusTB_HplusToTB_M_400"  : styles.signalStyleHToTB,
+    "ChargedHiggs_HplusTB_HplusToTB_M_500"  : styles.signalStyleHToTB,
+    "ChargedHiggs_HplusTB_HplusToTB_M_650"  : styles.signalStyleHToTB,
+    "ChargedHiggs_HplusTB_HplusToTB_M_800"  : styles.signalStyleHToTB,
+    "ChargedHiggs_HplusTB_HplusToTB_M_1000" : styles.signalStyleHToTB,
+    "ChargedHiggs_HplusTB_HplusToTB_M_1500" : styles.signalStyleHToTB,
+    "ChargedHiggs_HplusTB_HplusToTB_M_2000" : styles.signalStyleHToTB,
+    "ChargedHiggs_HplusTB_HplusToTB_M_2500" : styles.signalStyleHToTB,
+    "ChargedHiggs_HplusTB_HplusToTB_M_3000" : styles.signalStyleHToTB,
+    "ChargedHiggs_HplusTB_HplusToTB_M_5000" : styles.signalStyleHToTB,
+    "ChargedHiggs_HplusTB_HplusToTB_M_7000" : styles.signalStyleHToTB,
+    "ChargedHiggs_HplusTB_HplusToTB_M_10000": styles.signalStyleHToTB,
 
     "HplusTBintermediate_M145": styles.mcStyle,
     "HplusTBintermediate_withNeutral_M145": styles.mcStyle2,
@@ -824,6 +825,7 @@ _plotStyles = {
     "WWTo4Q"        : styles.dibStyle,
     "WZ"            : styles.dibStyle,
     "ZZ"            : styles.dibStyle,
+    "Rares"         : styles.raresStyle,
 
     "WJets_0bquark": styles.Style(ROOT.kFullTriangleDown, ROOT.kRed+1),
     "WJets_1bquark": styles.Style(ROOT.kFullTriangleDown, ROOT.kRed+4),

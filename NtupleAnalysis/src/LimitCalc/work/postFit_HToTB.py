@@ -2,27 +2,38 @@
 '''
 DESCRIPTION:
 Script for plotting post-fit invariant mass shapes
+In a nutshell, We use combine command to produce post-fit plots.
+
+First we create a workspace with:
+text2workspace.py combine_datacard_hplushadronic_m500.txt -o ws.root
+
+This creates an output ROOT file called "ws.root" which we will use as
+input to combine to produced fitDiagnonstics.root file as follows:
+combine -M FitDiagnostics --robustFit=1 --X-rtd MINIMIZER_analytic ws.root --saveShapes --saveWithUncertainties --saveOverallShapes --saveNormalizations --saveWorkspace --plots --expectSignal=0 --rMin=-4 
+
+The fitDiagnostics.root is created, this contains the post-fit histos and is the input for this plotting script.
 
 
 USAGE:
-0) Create a new directory, copy the combine input datacard txt file and the corresponding root file(s) in there
+0) Go to the datacards directory you want to investigate
+cd <datacards_dir>
 
-1) First create the workspace, which will produce an <output> ROOT file that will be used as input for Step 2)
-text2workspace.py <datacard>
+1) Run the recommended closure checks commands and save all relevant plots:
+../../doClosureChecks.csh 180
+WARNING! the output file is not suited for post-fit plots
 
-2) Produce fitDiagnostics.root file containing post-fit shapes by running combine with this set of command line parameters:
-combine -m 500 -M FitDiagnostics --robustFit=1 --X-rtd MINIMIZER_analytic <output> --saveShapes --saveWithUncertainties --saveOverallShapes --saveNormalizations  --saveWorkspace --plots --expectSignal=0 --rMin=-4 
-# combine -M FitDiagnostics -t -1 --expectSignal 0 --rMin $RMIN --rMax $RMAX $DATACARD_ROOT --seed $SEED --minos $MINOS >> $FILE
-
-3) Copy this script inside the directory and do necessary modifications, e.g. update DATAROOTFILE variable to point to your combine input root file
+2) Execute this script from inside the <datacards_dir>
+../.././postFit_HToTB.py --mass 180 --url
 
 
-3) Run this script
-./postFit_HToTB.py
+NOTE:
+Results should be irrelevant of the mass point chosen since we are using the Bkg-only fit-result
+as input.
 
 
 LAST USED:
-
+../.././postFit_HToTB.py --mass 500 --prefit && ../.././postFit_HToTB.py --mass 500 && ../.././postFit_HToTB.py --mass 180 --prefit && ../.././postFit_HToTB.py --mass 180 --url
+../.././postFit_HToTB.py --mass 500 --prefit --fitUncert
 
 '''
 
@@ -32,7 +43,9 @@ LAST USED:
 import os
 import sys
 import re
-import array
+import array 
+import getpass
+from optparse import OptionParser
 
 import ROOT
 
@@ -41,78 +54,98 @@ import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
 
-
-#================================================================================================  
-# Settings
-#================================================================================================  
-
-formats = [".pdf",".png"] #,".C"]
-plotDir = "" #PostFitMt2016"
-lumi = "35.9"
-
-XBIN_MIN = 0     #left edge of the first bin in rebinned input data histogram
-XBIN_MAX = 10000 #right edge of the last bin in re-binned input datahistogram
-XMAX_IN_PLOT = 1000.0
-
-DATAROOTFILE    = "combine_datacard_hplushadronic_m500.root" #"combineCards_taunu_mH200_combined.root"
-POSTFITROOTFILE = "fitDiagnostics.root"
-
 #================================================================================================  
 # Class definition
 #================================================================================================  
+def Verbose(msg, printHeader=False):
+    '''
+    Calls Print() only if verbose options is set to true.
+    '''
+    if not opts.verbose:
+        return
+    Print(msg, printHeader)
+    return
+
+
+def Print(msg, printHeader=True):
+    '''
+    Simple print function. If verbose option is enabled prints, otherwise does nothing.
+    '''
+    fName = __file__.split("/")[-1]
+    if printHeader:
+        print "=== ", fName
+    print "\t", msg
+    return
+
+
 class Category:
-    def __init__(self,name):
-        self.name = name
+    def __init__(self, name, opts):
+        xMin = 0
+        if opts.logX:
+            xMin = 1
+        if opts.logY:
+            yMin = 1e-2
+            yMaxFactor = 10.0
+            if opts.fitUncert:
+                yMaxFactor = 30.0
+        else:
+            yMin = 0.0
+            yMaxFactor = 1.2
+
+        self.name       = name
+        self.gOpts      = opts
         self.histonames = []
-        self.labels = {}
-        self.colors = {}
-        self.h_data = None
+        self.labels     = {}
+        self.colors     = {}
+        self.h_data     = None
         self.histograms = {}
-        self.opts = {"xmin": 2.0, "xmax" : XMAX_IN_PLOT, "ymin" : 0}
-        self.optsLogx = {"xmin": 2.0, "xmax": XMAX_IN_PLOT}
-        self.opts2 = {"ymin": 0.00, "ymax": 2.00}
+        self.opts       = {"xmin": xMin, "xmax" : self.gOpts.xMax, "ymin" : yMin, "ymaxfactor": yMaxFactor}
+        self.optsLogx   = {"xmin": xMin, "xmax": opts.xMax}
+        self.opts2      = {"ymin": 0.3, "ymax": 1.7}
         self.moveLegend = {}
+        return
 
     def addData(self,datarootfile):
         self.datafile = datarootfile
+        return
 
     def addHisto(self,histo,legendlabel,color=0):
         self.histonames.append(histo)
         self.labels[histo] = legendlabel
         self.colors[histo] = color
+        return
 
     def setXmax(self,xmax):
         self.opts["xmax"] = xmax
         self.optsLogx["xmax"] = xmax
+        return
 
     def setXmin(self,xmin):
         self.opts["xmin"] = xmin
         self.optsLogx["xmin"] = xmin
+        return
 
     def setMoveLegend(self,move):
         self.moveLegend = move
-
+        return
 
     def clone(self,name):
-        returnCat = Category(name)
+        returnCat = Category(name, self.gOpts)
         returnCat.histonames = self.histonames
-        returnCat.labels = self.labels
-        returnCat.colors = self.colors
-        returnCat.opts = self.opts
-        returnCat.opts2 = self.opts2
+        returnCat.labels     = self.labels
+        returnCat.colors     = self.colors
+        returnCat.opts       = self.opts
+        returnCat.opts2      = self.opts2
         returnCat.moveLegend = self.moveLegend
-#        returnCat.histograms = self.histograms
-#        returnCat.h_data = self.h_data
-#        if not self.h_data == None:
-#            print "check clone1",self.h_data.GetEntries()
-#            print "check clone2",returnCat.h_data.GetEntries()
         return returnCat
 
-    def __add__(self,cat):
+    def __add__(self, cat):
         returnCat = Category("sum")
         returnCat.colors = self.colors
         returnCat.histonames = self.histonames
@@ -130,51 +163,67 @@ class Category:
                 returnCat.histograms.append(h_sum)
         return returnCat
 
-    def fetchHistograms(self,fINdata,fINpost):
-
-        histoData = fINdata.Get(os.path.join(self.name,"data_obs"))
+    def fetchHistograms(self, fINdata, fINpost):
+        
+        histoName  = "data_obs"
+        Print("Getting data histogram \"%s\" from ROOT file \"%s\"" % (histoName, fINdata.GetName()), True)
+        histoData   = fINdata.Get(histoName)
         self.h_data = histoData.Clone("Data")
+        Verbose("Entries = %.1f" % (histoData.GetEntries()), False)
+
+        # Inspect histogram contents?
+        if opts.verbose:
+            aux.PrintTH1Info(self.h_data)
+
         nbins = 0
         binning = []
+        # For-loop: All bins
         for iBin in range(self.h_data.GetNbinsX()+1):
-            #print "Data",iBin,self.h_data.GetBinLowEdge(iBin),self.h_data.GetBinWidth(iBin)
             binLowEdge = self.h_data.GetBinLowEdge(iBin)
-            if binLowEdge >= XBIN_MIN and binLowEdge < XBIN_MAX:
+            if binLowEdge >= opts.xMinRebin and binLowEdge < opts.xMaxRebin:
                 nbins += 1
                 binning.append(binLowEdge)
-        binning.append(min(self.optsLogx["xmax"],XBIN_MAX))
 
+        binning.append(min(self.optsLogx["xmax"], opts.xMaxRebin))
         n = len(binning)-1
-        self.h_data.SetBins(nbins,array.array("d",binning))
+        self.h_data.SetBins(nbins, array.array("d", binning) )
+        
+        # Inspect histogram contents?
+        if opts.verbose:
+            aux.PrintTH1Info(self.h_data)
 
-        for hname in self.histonames:
+        # For-loop: All histos
+        for i, hname in enumerate(self.histonames, 1):
             template = self.h_data.Clone(hname)
             template.Reset()
-
+            
             n = len(binning)-1
-            template.SetBins(n,array.array("d",binning))
+            template.SetBins(n, array.array("d",binning) )
+            
+            if opts.prefit:
+                histoName = os.path.join("shapes_prefit", self.name, hname)
+            else:
+                histoName = os.path.join("shapes_fit_b", self.name, hname)
 
-            #for iBin in range(template.GetNbinsX()+1):
-            #    print "template",iBin,template.GetBinLowEdge(iBin),template.GetBinWidth(iBin)
-            #print hname
-            histo = fINpost.Get(os.path.join("shapes_fit_b",self.name,hname))
-#            histo = fINpost.Get(os.path.join("shapes_prefit",self.name,hname))
-            for iBin in range(0,histo.GetNbinsX()+1):
-                template.SetBinContent(iBin,histo.GetBinContent(iBin))
-                template.SetBinError(iBin,histo.GetBinError(iBin))
-#                print "Content of bin %d set to %.3f, low edge is %.1f"%(iBin,histo.GetBinContent(iBin),template.GetBinLowEdge(iBin))
+            # Get the histograms
+            histo = fINpost.Get(histoName)
+            Print("Getting bkg histogram \"%s\" from ROOT file \"%s\"" % (histoName, fINpost.GetName()), i==1)
+
+            # For-loop: All bins
+            for iBin in range(0, histo.GetNbinsX()+1):
+                template.SetBinContent(iBin, histo.GetBinContent(iBin) )
+                template.SetBinError(iBin, histo.GetBinError(iBin) )
+
+            # Customise histogram
             template.SetFillColor(self.colors[hname])
-            ####template.SetLineColor(self.colors[hname])
+            template.SetLineWidth(0)
             self.histograms[hname] = template
-            #print "check histo",template.GetEntries()
-    
+        return
 
 
-    def plot(self,plotDir):
+    def plot(self):
 
         histolist = []
-#        self.h_data.SetMarkerStyle(21)
-#        self.h_data.SetMarkerSize(2)
         styles.dataStyle.apply(self.h_data)
         hhd = histograms.Histo(self.h_data,"Data",legendStyle="PL", drawStyle="E1P")
         hhd.setIsDataMC(isData=True,isMC=False)
@@ -184,127 +233,219 @@ class Category:
             hhp.setIsDataMC(isData=False,isMC=True)
             histolist.append(hhp)
 
-
-        name = "postFitMt_"+self.name
-#        name = "preFitMt_"+self.name
-
         style = tdrstyle.TDRStyle()
-
         p = plots.DataMCPlot2(histolist)
         p.setDefaultStyles()
         p.stackMCHistograms()
-        p.setLuminosity(lumi)
+        p.setLuminosity(opts.lumi)
+        if opts.fitUncert:
+            p.addMCUncertainty(postfit=not opts.prefit) # boolean changes only the legend
+        p.setLegendHeader("Post-Fit")
 
-        p.addMCUncertainty(postfit=True)
-#        p.addText(0.7, 0.84, "2016", size=20) #FIXME
-        p.setLegendHeader("2016")
-
+        # Customise histogram 
         myParams = {}
-        myParams["xlabel"] = "m_{T} (GeV)"
-        myParams["ylabel"] = "< Events / bin >"
-        myParams["ratio"] = True
-        myParams["ratioYlabel"] = "Data/Bkg. "
-        myParams["logx"] = True
-        myParams["ratioType"] ="errorScale" 
+        myParams["xlabel"]            = "m_{jjbb} (GeV/c^{2})"
+        myParams["ylabel"]            = "< Events / bin >"
+        myParams["ratio"]             = True
+        myParams["ratioYlabel"]       = "Data/Bkg. "
+        myParams["logx"]              = self.gOpts.logX
+        myParams["log"]               = self.gOpts.logY
+        myParams["ratioType"]         = "errorScale" 
         myParams["ratioErrorOptions"] = {"numeratorStatSyst": False, "denominatorStatSyst": True}
-        myParams["opts"] = self.opts
-        myParams["optsLogx"] = self.optsLogx
-        myParams["opts2"] = self.opts2
-        myParams["errorBarsX"] = True
-        myParams["xlabelsize"] = 25
-        myParams["ylabelsize"] = 25
-        myParams["addMCUncertainty"] = True
-        myParams["addLuminosityText"] = True #FIXME
-        myParams["moveLegend"] = self.moveLegend
-        plots.drawPlot(p,os.path.join(plotDir, name),**myParams)
-        print "Saved plot",os.path.join(plotDir, name)
+        myParams["opts"]              = self.opts
+        myParams["optsLogx"]          = self.optsLogx
+        myParams["opts2"]             = self.opts2
+        myParams["divideByBinWidth"]  = not opts.fitUncert #Invalid for "TGraphAsymmErrors"
+        myParams["errorBarsX"]        = True
+        myParams["xlabelsize"]        = 25
+        myParams["ylabelsize"]        = 25
+        myParams["addMCUncertainty"]  = True
+        myParams["addLuminosityText"] = True
+        myParams["moveLegend"]        = self.moveLegend
+        myParams["saveFormats"]       = []
+        
+        # Draw the plot
+        if not os.path.exists(opts.saveDir):
+            os.makedirs(opts.saveDir)
+        plots.drawPlot(p, os.path.join(opts.saveDir, self.gOpts.saveName), **myParams)
 
-# List categories and add the histogram names
-taunuHadr_1 = Category("taunuhadr_a")
-hadrMoveLegend = {"dx": -0.07, "dy": -0.05, "dh": 0.}
-taunuHadr_1.setMoveLegend(hadrMoveLegend)
-taunuHadr_1.addHisto("qcdfaketau","Jets#rightarrow#tau_{h} (data)",color=ROOT.kOrange-2)
-taunuHadr_1.addHisto("ttbar","t#bar{t}",color=ROOT.kMagenta-2)
-taunuHadr_1.addHisto("wjets","W+jets",color=ROOT.kOrange+9)
-taunuHadr_1.addHisto("singletop","Single t",color=ROOT.kSpring+4)
-taunuHadr_1.addHisto("dy","Z/#gamma^{*}+jets",color=ROOT.kTeal-9)
-taunuHadr_1.addHisto("diboson","Diboson",color=ROOT.kBlue-4)
-taunuHadr_2 = taunuHadr_1.clone("taunuhadr_b")
+        # Save the plot (not needed - drawPlot saves the canvas already)
+        # SavePlot(p, self.gOpts.saveName, opts.saveDir, saveFormats = [".png", ".pdf"])
 
-#categories = [taunuHadr_1,taunuHadr_2]
+        Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)
+        return
 
 
-#--------------------------------------------------
+def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
+    Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
 
-taunuLept_1 = Category("ch1_R1_0_1El")
-leptMoveLegend = {"dx": -0.05, "dy": -0.03, "dh": 0.}
-taunuLept_1.setMoveLegend(leptMoveLegend)
-taunuLept_1.addHisto("ttlf","ttlf",color=ROOT.kRed-7)
-taunuLept_1.addHisto("ttcc","ttcc",color=ROOT.kRed-3)
-taunuLept_1.addHisto("ttb","ttb",color=ROOT.kRed-5)
-taunuLept_1.addHisto("ttbb","ttbb",color=ROOT.kRed+3)
-#taunuLept_1.addHisto("wjets","W+jets",color=ROOT.kOrange+9)
-taunuLept_1.addHisto("wjets","W+jets",color=ROOT.kOrange+7)
-taunuLept_1.addHisto("singletop","Single t",color=ROOT.kSpring+4)
-taunuLept_1.addHisto("vv","Diboson",color=ROOT.kBlue-4)
-taunuLept_1.addHisto("dy","Z/#gamma^{*}+jets",color=ROOT.kTeal-9)
-taunuLept_1.setXmin(9.95)
-taunuLept_1.setXmax(1000.0)
+     # Check that path exists
+    if not os.path.exists(saveDir):
+        os.makedirs(saveDir)
 
-taunuLept_2  = taunuLept_1.clone("ch1_R1_0_1Mu")
-taunuLept_3  = taunuLept_1.clone("ch1_R1_1_1El")
-taunuLept_4  = taunuLept_1.clone("ch1_R1_1_1Mu")
-taunuLept_5  = taunuLept_1.clone("ch1_R2_0_1El")
-taunuLept_6  = taunuLept_1.clone("ch1_R2_0_1Mu")
-taunuLept_7  = taunuLept_1.clone("ch1_R2_1_1El")
-taunuLept_8  = taunuLept_1.clone("ch1_R2_1_1Mu")
-taunuLept_9  = taunuLept_1.clone("ch1_R3_0_1El")
-taunuLept_10 = taunuLept_1.clone("ch1_R3_0_1Mu")
-taunuLept_11 = taunuLept_1.clone("ch1_R3_1_1El")
-taunuLept_12 = taunuLept_1.clone("ch1_R3_1_1Mu")
-taunuLept_13 = taunuLept_1.clone("ch1_R4_0_1El")
-taunuLept_14 = taunuLept_1.clone("ch1_R4_0_1Mu")
-taunuLept_15 = taunuLept_1.clone("ch1_R4_1_1El")
-taunuLept_16 = taunuLept_1.clone("ch1_R4_1_1Mu")
+    # Create the name under which plot will be saved
+    saveName = os.path.join(saveDir, plotName.replace("/", "_"))
 
-categories = [taunuLept_1,taunuLept_2,taunuLept_3,taunuLept_4,taunuLept_5,taunuLept_6,taunuLept_7,taunuLept_8,taunuLept_9,taunuLept_10,taunuLept_11,taunuLept_12,taunuLept_13,taunuLept_14,taunuLept_15,taunuLept_16]
+    # For-loop: All save formats
+    for i, ext in enumerate(saveFormats):
+        saveNameURL = saveName + ext
+        saveNameURL = aux.convertToURL(saveNameURL, opts.url)
+        Verbose(saveNameURL, i==0)
+        plot.saveAs(saveName, formats=saveFormats)
+    return
 
-# ttlf kRed-7
-# ttcc kRed-3
-# ttbb kRed+3
-# ttb  kRed-5
-
-#--------------------------------------------------
 
 def usage():
     print
-    print "### Usage:   "+sys.argv[0]+" <combine fitDiagnostics rootfile>"
+    print "### Usage: " + sys.argv[0]+" <combine fitDiagnostics rootfile>"
     print
     sys.exit()
 
         
-def main():
+def main(opts):
 
+    # List categories and add the histogram names
+    h2tb_1 = Category("tbhadr", opts) #iro
+    hadrMoveLegend = {"dx": -0.08, "dy": -0.02, "dh": 0.14} #{"dx": -0.07, "dy": -0.05, "dh": 0.}
+    h2tb_1.setMoveLegend(hadrMoveLegend)
+    h2tb_1.addHisto("FakeB"                         , "Fake b (data)"    , color=ROOT.kOrange-3)
+    h2tb_1.addHisto("TT_GenuineB"                   , "t#bar{t}"         , color=ROOT.kMagenta-2)
+    h2tb_1.addHisto("SingleTop_GenuineB"            , "Single t"         , color=ROOT.kSpring+4)
+    h2tb_1.addHisto("TTZToQQ_GenuineB"              , "t#bar{t}+Z"       , color=ROOT.kAzure-4)
+    if not opts.removeRares:
+        h2tb_1.addHisto("TTTT_GenuineB"                 , "t#bar{t}t#bar{t}" , color=ROOT.kYellow-9)
+        h2tb_1.addHisto("DYJetsToQQ_GenuineB"           , "Z/#gamma^{*}+jets", color=ROOT.kTeal-9)
+        h2tb_1.addHisto("TTWJetsToQQ_GenuineB"          , "t#bar{t}+W"       , color=ROOT.kSpring+9)
+        h2tb_1.addHisto("WJetsToQQ_HT_600ToInf_GenuineB", "W+jets"           , color=ROOT.kOrange+9)
+        h2tb_1.addHisto("Diboson_GenuineB"              , "Diboson"          , color=ROOT.kBlue-4)
+    categories = [h2tb_1]
+
+    if os.path.isfile(opts.dataFile):
+        Print("Opening file \"%s\"" % (opts.dataFile), True)
+    else:
+        raise Exception("File \"%s\" not found." % (opts.dataFile) )
+
+    if os.path.isfile(opts.postfitFile):
+        Print("Opening file \"%s\"" % (opts.postfitFile), False)
+    else:
+        raise Exception("File \"%s\" not found." % (opts.postfitFile) )
     
-#    if len(sys.argv) < 2:
-#        usage()
-
-#    fIN = ROOT.TFile.Open(sys.argv[1],"R")
-    fIN_data = ROOT.TFile.Open(DATAROOTFILE,"R")
-    fIN_post = ROOT.TFile.Open(POSTFITROOTFILE,"R")
-
+    # Open ROOT files
+    fIN_data = ROOT.TFile.Open(opts.dataFile, "R")
+    fIN_post = ROOT.TFile.Open(opts.postfitFile, "R")
 
     categorySum = categories[0].clone("sum")
     for c in categories:
-        c.fetchHistograms(fIN_data,fIN_post)
-#### DIFFERENT BINNING!!        categorySum = categorySum + c
-#### DIFFERENT BINNING!!    categories.append(categorySum)
-    for c in categories:
-        c.plot(plotDir)
-    
+        c.fetchHistograms(fIN_data, fIN_post) 
 
+    # For-loop: All categories (Only HToTB currently)
+    for c in categories:
+        c.plot() 
+    
+    # Close ROOT files
     fIN_data.Close()
     fIN_post.Close()
+    return
+
 
 if __name__=="__main__":
-    main()
+
+    # Default options
+    VERBOSE         = False
+    SAVEDIR         = "/afs/cern.ch/user/%s/%s/public/html/FitDiagnostics" % (getpass.getuser()[0], getpass.getuser())
+    SAVENAME        = None
+    LUMI            = "35.9"
+    URL             = False
+    LOGX            = False
+    LOGY            = True
+    GRIDX           = False
+    GRIDY           = False
+    XMINREBIN       = 0.0
+    XMAXREBIN       = 10000
+    XMIN            = 0.0
+    XMAX            = 2500 # 3000
+    MASS            = "500"
+    POSTFITROOTFILE = None
+    DATAROOTFILE    = None
+    PREFIT          = False
+    FITUNCERT       = False
+    REMOVERARES     = False
+
+    parser = OptionParser(usage="Usage: %prog [options]", add_help_option=True, conflict_handler="resolve")
+
+    parser.add_option("-v", "--verbose", dest="verbose", default=VERBOSE, action="store_true",
+                      help="Verbose mode for debugging purposes [default: %s]" % (VERBOSE) )
+    
+    parser.add_option("--url", dest="url", action="store_true", default=URL,
+                      help="Don't print the actual save path the plots are saved, but print the URL instead [default: %s]" % URL)
+
+    parser.add_option("--xMinRebin", dest="xMinRebin", default=XMINREBIN, type="float",
+                      help="Left edge of the last bin in re-binned input data-histogram  [default: %s]" % (XMINREBIN) )
+
+    parser.add_option("--xMaxRebin", dest="xMaxRebin", default=XMAXREBIN, type="float",
+                      help="Right edge of the last bin in re-binned input data-histogram [default: %s]" % (XMAXREBIN) )
+
+    parser.add_option("--xMin", dest="xMin", default=XMIN, type="float",
+                      help="Overwrite minimum value of x-axis [default: %s]" % (XMIN) )
+
+    parser.add_option("--xMax", dest="xMax", default=XMAX, type="float",
+                      help="Overwrite maximum value of x-axis [default: %s]" % (XMAX) )
+
+    parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR,
+                      help="Directory where all plots will be saved [default: %s]" % SAVEDIR)
+
+    parser.add_option("--mass", dest="mass", type="string", default=MASS,
+                      help="Mass point to be used [default: %s]" % MASS)
+
+    parser.add_option("--saveName", dest="saveName", type="string", default=SAVENAME,
+                      help="Name for the invariant massplot to be saved as [default: %s]" % SAVENAME)
+
+    parser.add_option("--lumi", dest="lumi", type="string", default=LUMI,
+                      help="Integrated luminosity to be printed on the canvas [default: %s]" % LUMI)
+
+    parser.add_option("--postfitFile", dest="postfitFile", type="string", default=POSTFITROOTFILE,
+                      help="The post-fit input ROOT file [default: %s]" % POSTFITROOTFILE)
+
+    parser.add_option("--dataFile", dest="dataFile", type="string", default=DATAROOTFILE,
+                      help="The data input ROOT file [default: %s]" % DATAROOTFILE)
+
+    parser.add_option("--logX", dest="logX", action="store_true", default=LOGX,
+                      help="Plot x-axis (mass) as logarithmic [default: %s]" % (LOGX) )
+    
+    parser.add_option("--logY", dest="logY", action="store_true", default=LOGY,
+                      help="Plot y-axis (exlusion limit) as logarithmic [default: %s]" % (LOGY) )
+    
+    parser.add_option("--gridX", dest="gridX", default=GRIDX, action="store_true",
+                      help="Enable the grid for the x-axis [default: %s]" % (GRIDX) )
+
+    parser.add_option("--gridY", dest="gridY", default=GRIDY, action="store_true",
+                      help="Enable the grid for the y-axis [default: %s]" % (GRIDY) )
+
+    parser.add_option("--prefit", dest="prefit", default=PREFIT, action="store_true",
+                      help="Draw the pre-fit histogams (not the post-fit ones) [default: %s]" % (PREFIT) )
+
+    parser.add_option("--fitUncert", dest="fitUncert", default=FITUNCERT, action="store_true",
+                      help="Include fit-uncertainty (and disable \"divideByBinWidth\" option) [default: %s]" % (FITUNCERT) )
+
+    parser.add_option("--removeRares", dest="removeRares", default=REMOVERARES, action="store_true",
+                      help="Remove rare datasets (v. small contribution to final count) [default: %s]" % (REMOVERARES) )
+
+    (opts, args) = parser.parse_args()
+
+    if opts.postfitFile == None:
+        #opts.postfitFile = "fitDiagnostics_m%s_BkgAsimov.root" % (opts.mass)
+        opts.postfitFile = "fitDiagnostics_ws.root"
+
+    if opts.dataFile == None:
+        opts.dataFile    = "combine_histograms_hplushadronic_m%s.root" % (opts.mass)
+
+    if opts.saveName == None:
+        postfix = "postFit"
+        if opts.prefit:
+            postfix = "preFit"
+        opts.saveName = "LdgTetrajetMass_m%s_%s" % (opts.mass, postfix) #results should be the same for bkg-only fit (expectedSignal=0)
+
+    if opts.saveDir == None:
+        opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="Closure")
+
+    main(opts)

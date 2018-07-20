@@ -31,52 +31,23 @@
   USAGE:
   ./getEfficiencies.py --noSF <pseudo multicrab with no SF applied> --withSF <pseudo multicrab with SF applied> [opts]
   
-  
   LAST USED:
-  
-  BDT 0.00: ./getEfficiencies.py --noSF SystTopBDT_180621_085413_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p00_noSF \
-  --withSF SystTopBDT_180621_162205_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p00_withSF \
-  --url -e "TTW"
-  
-  BDT 0.10: ./getEfficiencies.py --noSF SystTopBDT_180621_112722_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p10_noSF \
-  --withSF SystTopBDT_180621_162205_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p00_withSF \
-  --url -e "TTW"
-  
-  BDT 0.20: ./getEfficiencies.py --noSF SystTopBDT_180621_090053_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p20_noSF \
-  --withSF SystTopBDT_180621_163417_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p20_withSF \
-  --url -e "TTW"
-  
-  BDT 0.30: ./getEfficiencies.py --noSF SystTopBDT_180621_090339_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p30_noSF \
-  --withSF SystTopBDT_180621_163417_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p20_withSF \
-  --url -e "TTW"
-
-  BDT 0.40: ./getEfficiencies.py --noSF SystTopBDT_180620_045023_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p40_noSF \
-  --withSF SystTopBDT_180621_093037_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p40_withSF \
-  --url -e "TTW"
-  
-  BDT 0.50: ./getEfficiencies.py --noSF SystTopBDT_180620_045528_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p50_noSF \
-  --withSF SystTopBDT_180621_094207_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p50_withSF \
-  --url -e "TTW"
-  
-  BDT 0.60: ./getEfficiencies.py --noSF SystTopBDT_180620_050745_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p60_noSF \
-  --withSF SystTopBDT_180621_094642_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p60_withSF \
-  --url -r "TTW"
-  
-  BDT 0.70: ./getEfficiencies.py --noSF SystTopBDT_180620_052556_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p70_noSF \
-  --withSF SystTopBDT_180621_095138_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p70_withSF \
-  --url -e "TTW"
-  
-  BDT 0.80: ./getEfficiencies.py --noSF SystTopBDT_180620_054613_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p80_noSF \
-  --withSF SystTopBDT_180621_095603_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p80_withSF \
-  --url -e "TTW"
-  
-  BDT 0.90: ./getEfficiencies.py --noSF SystTopBDT_180620_055650_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p90_noSF \
-  --withSF SystTopBDT_180621_095852_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_BDTCut0p90_withSF \
-  --url -e "TTW"
-  
+  BDT -0.50: ./getEfficiencies.py --noSF SystTopBDT_180717_100635_BDT_m0p50_massCut400_NewTraining_noSF --withSF SystTopBDT_180718_063417_BDT_m0p50_massCut400_NewTraining_withSF --url -e "TTW"
+  BDT -0.40: ./getEfficiencies.py --noSF SystTopBDT_180717_100906_BDT_m0p40_massCut400_NewTraining_noSF --withSF SystTopBDT_180718_063646_BDT_m0p40_massCut400_NewTraining_withSF --url -e "TTW"
+  BDT -0.30: ./getEfficiencies.py --noSF SystTopBDT_180717_101728_BDT_m0p30_massCut400_NewTraining_noSF --withSF SystTopBDT_180718_064029_BDT_m0p30_massCut400_NewTraining_withSF --url -e "TTW"
+  BDT -0.20: ./getEfficiencies.py --noSF SystTopBDT_180717_102217_BDT_m0p20_massCut400_NewTraining_noSF --withSF SystTopBDT_180718_064325_BDT_m0p20_massCut400_NewTraining_withSF --url -e "TTW"
+  BDT -0.10: ./getEfficiencies.py --noSF SystTopBDT_180717_102608_BDT_m0p10_massCut400_NewTraining_noSF --withSF SystTopBDT_180718_064533_BDT_m0p10_massCut400_NewTraining_withSF --url -e "TTW"
+  BDT  0.00: ./getEfficiencies.py --noSF SystTopBDT_180717_102835_BDT_0p00_massCut400_NewTraining_noSF  --withSF SystTopBDT_180718_064819_BDT_0p00_massCut400_NewTraining_withSF  --url -e "TTW"
+  BDT  0.10: ./getEfficiencies.py --noSF SystTopBDT_180717_103055_BDT_0p10_massCut400_NewTraining_noSF  --withSF SystTopBDT_180718_065055_BDT_0p10_massCut400_NewTraining_withSF  --url -e "TTW"
+  BDT  0.20: ./getEfficiencies.py --noSF SystTopBDT_180717_105443_BDT_0p20_massCut400_NewTraining_noSF  --withSF SystTopBDT_180718_065542_BDT_0p20_massCut400_NewTraining_withSF  --url -e "TTW"
+  BDT  0.30: ./getEfficiencies.py --noSF SystTopBDT_180717_110647_BDT_0p30_massCut400_NewTraining_noSF  --withSF SystTopBDT_180718_065806_BDT_0p30_massCut400_NewTraining_withSF  --url -e "TTW"
+  BDT  0.40: ./getEfficiencies.py --noSF SystTopBDT_180717_111432_BDT_0p40_massCut400_NewTraining_noSF  --withSF SystTopBDT_180718_070331_BDT_0p40_massCut400_NewTraining_withSF  --url -e "TTW"
+  BDT  0.50: ./getEfficiencies.py --noSF SystTopBDT_180717_111648_BDT_0p50_massCut400_NewTraining_noSF  --withSF SystTopBDT_180718_070752_BDT_0p50_massCut400_NewTraining_withSF  --url -e "TTW"
+  BDT  0.60: ./getEfficiencies.py --noSF SystTopBDT_180717_112012_BDT_0p60_massCut400_NewTraining_noSF  --withSF SystTopBDT_180718_071052_BDT_0p60_massCut400_NewTraining_withSF  --url -e "TTW"
+  BDT  0.70: ./getEfficiencies.py --noSF SystTopBDT_180717_112243_BDT_0p70_massCut400_NewTraining_noSF  --withSF SystTopBDT_180718_071308_BDT_0p70_massCut400_NewTraining_withSF  --url -e "TTW"
+  BDT  0.80: ./getEfficiencies.py --noSF SystTopBDT_180717_112500_BDT_0p80_massCut400_NewTraining_noSF  --withSF SystTopBDT_180718_071517_BDT_0p80_massCut400_NewTraining_withSF  --url -e "TTW"
 '''
-#================================================================================================ 
-# Imports
+  
 #================================================================================================ 
 import sys
 import math
@@ -538,7 +509,7 @@ def PlotHistos(d_noSF, d_withSF, num_histoList, den_histoList,  opts):
     # =========================================================================================
     # Normalization Factors (see: getNormalization.py)
     # =========================================================================================
-    f1=0.619886; f2=0.904877;
+    f1=0.626877; f2=0.880767;
     
     # =========================================================================================
     # (A) Apply Normalization Factors (see: getNormalizations.py)
@@ -699,9 +670,11 @@ def PlotHistos(d_noSF, d_withSF, num_histoList, den_histoList,  opts):
     plots.drawPlot(p, savePath, **_kwargs)
     SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf", ".C"])
     
-    '''
-    jsonName = "toptagEff_InclusiveTT_fatJet.json"
     # Save results in JSON
+    name = opts.noSFcrab.split("_")[-4]
+    name = name.replace(opts.analysisName, "")
+    print "name = ", name
+    jsonName = "toptagEff_BDT"+name+"_InclusiveTT_TopMassCut400.json"
     runRange = "273150-284044"
     analysis = opts.analysisName
     label = "2016"
@@ -710,8 +683,7 @@ def PlotHistos(d_noSF, d_withSF, num_histoList, den_histoList,  opts):
     pythonWriter.addMCParameters(label, geff_mc)
     fileName_json = jsonName
     pythonWriter.writeJSON(fileName_json)
-    '''
-    
+        
     
     
     # ==========================================================================================
@@ -852,9 +824,11 @@ def PlotHistos(d_noSF, d_withSF, num_histoList, den_histoList,  opts):
     plots.drawPlot(pp, savePath, **_kwargs)
     SavePlot(pp, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf", ".C"])
     
-    
-    jsonName = "toptagEff_GenuineTT_fatJet.json"
     # Save results in JSON
+    '''
+    name = opts.noSFcrab.split("_")[-4]
+    name = name.replace(opts.analysisName, "")
+    jsonName = "toptagEff_BDT"+name+"_GenuineTT_TopMassCut400.json"
     runRange = "273150-284044"
     analysis = opts.analysisName
     label = "2016"
@@ -863,7 +837,8 @@ def PlotHistos(d_noSF, d_withSF, num_histoList, den_histoList,  opts):
     pythonWriter.addMCParameters(label, geffi_mc)
     fileName_json = jsonName
     pythonWriter.writeJSON(fileName_json)
-    
+    '''
+
     return
 
 
