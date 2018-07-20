@@ -91,7 +91,7 @@ jetSelection = PSet(
     jetIDDiscr               = "IDloose", # [default: "IDloose"] (options: IDloose, IDtight, IDtightLeptonVeto)
     jetPUIDDiscr             = "",        # [default: ""]
     tauMatchingDeltaR        = 0.4,       # [default: 0.4] (does nothing for h2tb)
-    HTCutValue               = 400.0,     # [default: 500.0]
+    HTCutValue               = 500.0,     # [default: 500.0]
     HTCutDirection           = ">=",      # [default: ">="]
     JTCutValue               = 0.0,       # [default: 0.0]
     JTCutDirection           = ">=",      # [default: ">="]
@@ -151,7 +151,7 @@ topSelectionBDT = PSet(
     TopMVACutDirection     =  ">=",   # [default: ">="]
     TopMassLowCutValue     =   0.0,   # [default: 0.0]
     TopMassLowCutDirection =  ">=",   # [default: ">="]
-    TopMassUppCutValue     =  500.0,  # [default: 300.0]  # Do not evaluate top candidate if top mass greater than this cut (600 takes TOO long!)
+    TopMassUppCutValue     =  400.0,  # [default: 400.0]  # Do not evaluate top candidate if top mass greater than this cut (600 takes TOO long!)
     TopMassUppCutDirection =  "<=",   # [default: "<"]
     CSV_bDiscCutValue      = 0.8484,  # [default: 0.8484] # Do not evaluate top candidate if b-jet assigned as b from top fails this cut
     CSV_bDiscCutDirection  = ">=",    # [default: ">="]
