@@ -874,7 +874,7 @@ void TopRecoTree::process(Long64_t entry) {
   //================================================================================================//
 
   //START
-  const double twoSigma = 9999.99; //0.32
+  const double twoSigma = 0.32
   const double dRcut    = 0.3;
   if (fEvent.isMC()){
 

@@ -588,8 +588,8 @@ def _setupToptagEfficiency(topTagPset, topTagEfficiencyFilename, direction, vari
             raise Exception("Down variation in bin '%s' is zero in json '%s'"%(pT, fileName))
 
         # Sanity check
-        #if result["SF"][len(result["SF"])-1] < 0.00001:
-        #    raise Exception("In file '%s' bin %s the SF is zero! Please fix!" % (fileName, pT) )
+        if result["SF"][len(result["SF"])-1] < 0.00001:
+            raise Exception("In file '%s' bin %s the SF is zero! Please fix!" % (fileName, pT) )
     
 
         # Define the PSet
