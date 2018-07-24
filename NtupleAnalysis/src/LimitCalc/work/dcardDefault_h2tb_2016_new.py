@@ -100,7 +100,7 @@ def getFakeBSystematics(myTTBarSystematics, OptionShapeSystematics, verbose=Fals
         if "veto" in syst.lower():
             continue 
         # Only append to name if it is NOT a shape uncertainty!
-        if syst not in myJetSystematics + myPileupSystematics + myBtagSystematics + ["CMS_topreweight"]:
+        if syst not in myJetSystematics + myPileupSystematics + myBtagSystematics + ["CMS_topreweight"] + myTopTagSystematics:
             newSyst = syst + "_forFakeB"
         else:
             if OptionShapeSystematics:
@@ -121,13 +121,13 @@ def getFakeBSystematics(myTTBarSystematics, OptionShapeSystematics, verbose=Fals
 #================================================================================================  
 # Options
 #================================================================================================  
-OptionTest                             = False  # [default: False]
+OptionTest                             = False # [default: False]
 OptionPaper                            = True  # [default: True]
 OptionMergeRares                       = True  # [default: True]
-OptionIncludeSystematics               = False  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
+OptionIncludeSystematics               = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionShapeSystematics                 = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionDoControlPlots                   = True  # [default: True]   (Produce control plots defined at end of this file)
-MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800]#, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
+MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
 DataCardName                           = "Hplus2tb_13TeV"
 OptionMassShape                        = "LdgTetrajetMass_AfterAllSelections"
 OptionBr                               = 1.0          # [default: 1.0]    (The Br(t->bH+) used in figures and tables)
@@ -372,6 +372,7 @@ bTagSF_Shape   = Nuisance(id="CMS_eff_b"      , label="b tagging", distr="shapeQ
 topPt_Shape    = Nuisance(id="CMS_topreweight", label="Top pT reweighting", distr="shapeQ", function="ShapeVariation", systVariation="TopPt")
 PU_Shape       = Nuisance(id="CMS_pileup"     , label="Pileup", distr="shapeQ", function="ShapeVariation", systVariation="PUWeight")
 tf_FakeB_Shape = Nuisance(id="CMS_HPTB_fakeB_transferfactor", label="Transfer Factor uncertainty",  distr="shapeQ", function="QCDShapeVariation", systVariation="TransferFactor")
+topTag_Shape   = Nuisance(id="CMS_HPTB_toptagging", label="TopTag", distr="shapeQ", function="ShapeVariation", systVariation="TopTagSF")
 # NOTE: systVariation key is first declared in HiggsAnalysis/NtupleAnalysis/python/AnalysisBuilder.py
 
 #================================================================================================  
@@ -486,6 +487,7 @@ if OptionShapeSystematics:
     Nuisances.append(JER_Shape)
     Nuisances.append(topPt_Shape)
     Nuisances.append(bTagSF_Shape) 
+    Nuisances.append(topTag_Shape)
     Nuisances.append(tf_FakeB_Shape)
 else:
     Nuisances.append(PU_Const)
@@ -499,12 +501,14 @@ else:
     Nuisances.append(bTagSF_Const) 
     Nuisances.append(bTagSF_FakeB_Const)
     Nuisances.append(tf_FakeB_Const)
+    Nuisances.append(topTag_Const)
+    Nuisances.append(topTag_FakeB_Const)
+
 # Common in Shapes/Constants
 Nuisances.append(lumi13TeV_FakeB_Const)
 Nuisances.append(trgMC_Const)
 Nuisances.append(trgMC_FakeB_Const)
-Nuisances.append(topTag_Const)
-Nuisances.append(topTag_FakeB_Const)
+
 # Approximation 2: lepton and tau-veto neglected (negligible contribution)
 Nuisances.append(eVeto_Const)
 Nuisances.append(muVeto_Const)
@@ -512,6 +516,7 @@ Nuisances.append(tauVeto_Const)
 # Nuisances.append(eVeto_FakeB_Const)
 # Nuisances.append(muVeto_FakeB_Const)
 # Nuisances.append(tauVeto_FakeB_Const)
+
 # Approximation 1: only ttbar xsect uncertainty applied to FakeB, as ttbar dominates the EWK GenuineB (but uncertainty is scaled according to 1-purity)
 Nuisances.append(ttbar_scale_Const) 
 Nuisances.append(ttbar_scale_FakeB_Const) 
@@ -533,7 +538,8 @@ Nuisances.append(ttZ_pdf_Const)
 Nuisances.append(ttZ_scale_Const)
 # Nuisances.append(tttt_pdf_Const)
 # Nuisances.append(tttt_scale_Const)
-### New: Fixme
+
+# RF/QCD Scale
 Nuisances.append(RF_QCDscale_top_const)
 Nuisances.append(RF_QCDscale_ewk_const)
 Nuisances.append(RF_QCDscale_HPTB_const)
@@ -573,10 +579,9 @@ MergeNuisances.append(["CMS_eff_trg_MC"   , "CMS_eff_trg_MC_forFakeB"])
 #MergeNuisances.append(["CMS_eff_e_veto"   , "CMS_eff_e_veto_forFakeB"])
 #MergeNuisances.append(["CMS_eff_m_veto"   , "CMS_eff_m_veto_forFakeB"])
 #MergeNuisances.append(["CMS_eff_tau_veto" , "CMS_eff_tau_veto_forFakeB"])
-MergeNuisances.append(["CMS_HPTB_toptagging", "CMS_HPTB_toptagging_forFakeB"])
 MergeNuisances.append(["mass_top"   , "mass_top_forFakeB"])
-MergeNuisances.append(["CMS_HPTB_mu_RF_top", "CMS_HPTB_mu_RF_top_forFakeB"]) #new fixme
-MergeNuisances.append(["CMS_HPTB_pdf_top", "CMS_HPTB_pdf_top_forFakeB"]) #new fixme
+MergeNuisances.append(["CMS_HPTB_mu_RF_top", "CMS_HPTB_mu_RF_top_forFakeB"])
+MergeNuisances.append(["CMS_HPTB_pdf_top", "CMS_HPTB_pdf_top_forFakeB"])
 
 if not OptionShapeSystematics:
     MergeNuisances.append(["CMS_pileup"   , "CMS_pileup_forFakeB"])
@@ -584,7 +589,8 @@ if not OptionShapeSystematics:
     MergeNuisances.append(["CMS_scale_j"  , "CMS_scale_j_forFakeB"])
     MergeNuisances.append(["CMS_res_j"    , "CMS_res_j_forFakeB"])
     MergeNuisances.append(["CMS_topreweight", "CMS_topreweight_forFakeB"])
-
+    #MergeNuisances.append(["CMS_HPTB_toptagging", "CMS_HPTB_toptagging_forFakeB"]) #iro
+    
 #================================================================================================ 
 # Convert shape systematics to constants if asked
 #================================================================================================ 
