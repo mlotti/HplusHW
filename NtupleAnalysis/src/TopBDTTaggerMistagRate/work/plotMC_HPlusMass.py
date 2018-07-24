@@ -206,8 +206,6 @@ def main(opts, signalMass):
             if "Vs" in h: # Skip TH2D
                 continue
             PlotMC(datasetsMgr, h, intLumi)
-
-
         
     return
 
@@ -271,6 +269,14 @@ def PlotMC(datasetsMgr, histo, intLumi):
         _xlabel = "p_{T} (%s)" % _units
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         _opts["xmax"] = 805 #1005
+
+    if "bdisc" in histo.lower():
+        _rebinX = 2
+        _units  = ""
+        _format = "%0.2f " + _units
+        _xlabel = "b-discriminator" #(%s)" % _units
+        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        _opts["xmax"] = 1.2
 
     if "ht" in histo.lower():
         _rebinX = 2
