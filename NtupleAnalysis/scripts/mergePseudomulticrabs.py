@@ -14,9 +14,16 @@ USAGE:
 EXAMPLES:
 ./merge_systematics.py -m Hplus2tbAnalysis_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystBTagSF_22Jul2018,Hplus2tbAnalysis_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystPUWeight_22Jul2018,Hplus2tbAnalysis_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystTopPt_22Jul2018,Hplus2tbAnalysis_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystTopTagSF_22Jul2018,Hplus2tbAnalysis_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystJES_22Jul2018,Hplus2tbAnalysis_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystJER_22Jul2018
 
+mergePseudomulticrabs.py -m FakeBMeasurement_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystBTagSF_22Jul2018,FakeBMeasurement_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystPUWeight_22Jul2018,FakeBMeasurement_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystTopPt_22Jul2018,FakeBMeasurement_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystTopTagSF_22Jul2018,FakeBMeasurement_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystJES_22Jul2018,FakeBMeasurement_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystJER_22Jul2018
+
+merge_systematics.py -m Hplus2tbAnalysis
+merge_systematics.py -m FakeBMeasurement
+
 
 LAST USED:
-./merge_systematics.py -m Hplus2tbAnalysis_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystBTagSF_22Jul2018,Hplus2tbAnalysis_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystPUWeight_22Jul2018,Hplus2tbAnalysis_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystTopPt_22Jul2018,Hplus2tbAnalysis_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystTopTagSF_22Jul2018,Hplus2tbAnalysis_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystJES_22Jul2018,Hplus2tbAnalysis_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystJER_22Jul2018
+merge_systematics.py -m Hplus2tbAnalysis
+
+mergePseudomulticrabs.py -m FakeBMeasurement -i "QCD" & mergePseudomulticrabs.py -m FakeBMeasurement -i "JetHT" & mergePseudomulticrabs.py -m FakeBMeasurement -i "ST_" & mergePseudomulticrabs.py -m FakeBMeasurement -i "DY" & mergePseudomulticrabs.py -m FakeBMeasurement -i "ZJets" & mergePseudomulticrabs.py -m FakeBMeasurement -i "TT" & mergePseudomulticrabs.py -m FakeBMeasurement -i "WZ" & mergePseudomulticrabs.py -m FakeBMeasurement -i "WZ" & mergePseudomulticrabs.py -m FakeBMeasurement -i "ZZ" & mergePseudomulticrabs.py -m FakeBMeasurement -i "WJets"
 
 
 '''
@@ -30,6 +37,7 @@ import copy
 import os
 import shutil
 from optparse import OptionParser
+#from multiprocessing import Process
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -139,11 +147,12 @@ def main(opts):
             os.makedirs(dirTree)
             
         # Output file Name
-        outputFileName = "histograms-%s.root" % (dsetName)
+        outputFileName = "/histograms-%s.root" % (dsetName)
         outputFileName = dirTree + outputFileName
 
-        # Create output root file
-        outputFile = ROOT.TFile.Open(outputFileName, "recreate")
+
+        Verbose("Creating ROOT file %s" % (outputFileName), True)
+        outputFile = ROOT.TFile.Open(outputFileName, "RECREATE")
             
         # For-loop: All pseudo-multicrabs in list
         for j, dirName in enumerate(opts.mcrabs, 1):
@@ -156,28 +165,31 @@ def main(opts):
             inputFile = ROOT.TFile.Open(filePath)
             outputFile.cd()
 
-            nKeys = len(inputFile.GetListOfKeys())
-            # For-loop: All jeys in ROOT file
+            nFolders = len(inputFile.GetListOfKeys())
+            # For-loop: All folders  in ROOT file
             for k, key in enumerate(inputFile.GetListOfKeys(), 1):
-                keyName = key.GetName()
+                folderName = key.GetName()
 
                 # Inform user of progress                
-                msg = "{:<10} {:<2} {:>1} {:<2}  {:<10} {:<2} {:>1} {:<2}  {:<10} {:<2} {:>1} {:<2}".format("%sDataset" % (ShellStyles.HighlightAltStyle()), "%d" % i, "/", "%d" % (nDatasets), "%sPseudomulticrab" % (ShellStyles.NoteStyle()), "%d" % j, "/", "%d" % (nDirs), "%sKey" % (ShellStyles.HighlightStyle()), "%d" % k, "/", "%d%s: " % (nKeys, ShellStyles.NormalStyle()) )
+                msg = "{:<10} {:<2} {:>1} {:<2} {:<10} {:<2} {:>1} {:<2} {:<10} {:<2} {:>1} {:<2}".format("%sDataset" % (ShellStyles.HighlightAltStyle()), "%d" % i, "/", "%d" % (nDatasets), "%sPseudomulticrab" % (ShellStyles.NoteStyle()), "%d" % j, "/", "%d" % (nDirs), "%sFolder" % (ShellStyles.HighlightStyle()), "%d" % k, "/", "%d%s" % (nFolders, ShellStyles.NormalStyle()) )
                 aux.PrintFlushed(msg, i*j*k==1)        
 
                 # Skip if object already exists
-                if (keyName in outputFile.GetListOfKeys()):
+                if (folderName in outputFile.GetListOfKeys()):
                     continue
                 
-                Verbose("Merging %s" % keyName, False)
-                MergeFiles(inputFile.Get(keyName), outputFile, msg,)
+                Verbose("Merging %s" % folderName, False)
+                MergeFiles(inputFile.Get(folderName), outputFile, msg)
+
+                #p = Process(target=MergeFiles(inputFile.Get(folderName), outputFile, msg))
+                #p.start()
+                #p.join()
         
         Verbose("Writing & closing file %s" % (outputFile.GetName()), True)
         outputFile.Write()
         outputFile.Close()
-
     print
-    Print("Directory %s created" % (len(opts.mcrabs), ShellStyles.SuccessStyle() + opts.outputDir + ShellStyles.NormalStyle()), True)
+    Print("Results saved in %s" % (ShellStyles.SuccessStyle() + opts.outputDir + ShellStyles.NormalStyle()), True)
     return
 
 
@@ -189,7 +201,8 @@ def MergeFiles(target, parent, msg):
     if target.Class().InheritsFrom(ROOT.TDirectory.Class()) :
         
         parent.mkdir(target.GetName())
-        dest = parent.Get(target.GetName())
+        dest  = parent.Get(target.GetName())
+        nKeys = len(target.GetListOfKeys())
 
         # Change directory
         dest.cd()
@@ -197,7 +210,8 @@ def MergeFiles(target, parent, msg):
         # For-loop: All keys
         for i, key in enumerate(target.GetListOfKeys(), 1):
             keyName = key.GetName()
-            aux.PrintFlushed(msg + keyName, False)
+            msg_postfix = " {:<5} {:<2} {:>1} {:<2}: {:<20}".format("Key", "%d" % i, "/", "%d" % (nKeys), "%s" % (keyName))
+            aux.PrintFlushed(msg + msg_postfix, False)
             targets = [MergeFiles(target.Get(keyName), dest, msg)]
         parent.cd()
     else:  # Copy all objects
@@ -320,7 +334,7 @@ if __name__ == "__main__":
         m = re.search('_Syst(.+?)_', opts.mcrabs[0])
         if m:
             syst = m.group(1)
-        opts.outputDir = opts.mcrabs[0].replace("_Syst" + syst, "")
+        opts.outputDir = opts.mcrabs[0].replace("_Syst" + syst, "_Syst")
 
 
     newDir = ShellStyles.HighlightAltStyle() + opts.outputDir + ShellStyles.NormalStyle()
