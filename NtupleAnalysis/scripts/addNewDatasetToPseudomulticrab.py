@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 '''
 USAGE:
-/addNewDatasetToPseudomulticrab.py  -m <same_pseudo_multicrab> [opts]
+addNewDatasetToPseudomulticrab.py  -m <same_pseudo_multicrab> [opts]
 
 
 EXAMPLES:
-/addNewDatasetToPseudomulticrab.py  -m Hplus2tbAnalysis_AfterPreapproval_TopMassLE400_BDT0p40_17July2018 --newDsetName Rares
+addNewDatasetToPseudomulticrab.py  -m Hplus2tbAnalysis_AfterPreapproval_TopMassLE400_BDT0p40_17July2018 --newDsetName Rares
 
 
 LAST USED:
-/addNewDatasetToPseudomulticrab.py  -m Hplus2tbAnalysis_AfterPreapproval_MVA0p40_NewTopAndBugFixAndSF_FixedStdSelections_Only2CleanTopsBeforeBDT_Syst_07Jul2018 --newDsetName Rares
+addNewDatasetToPseudomulticrab.py  -m Hplus2tbAnalysis_AfterPreapproval_MVA0p40_NewTopAndBugFixAndSF_FixedStdSelections_Only2CleanTopsBeforeBDT_Syst_07Jul2018 --newDsetName Rares
 
 '''
 #================================================================================================ 

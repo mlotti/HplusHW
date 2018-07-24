@@ -300,6 +300,21 @@ def GetHistoKwargs(h, opts):
         ROOT.gStyle.SetNdivisions(8, "X")
         ROOT.gStyle.SetNdivisions(8, "Y")
 
+
+    if "cleaned_Vs_JetMult" in h:
+        units             = ""
+        kwargs["xlabel"]  = "top multiplicity"
+        kwargs["ylabel"]  = "jet multiplicity"
+        kwargs["cutBox"]  = cutBox
+        kwargs["cutBoxY"] = cutBoxY
+        kwargs["rebinX"]  = 1
+        kwargs["rebinY"]  = 1
+        kwargs["opts"]    = {"xmin": 0.0, "xmax": 5, "ymin": 5, "ymax": 20} #, "ymaxfactor": yMaxF}
+        # if  "AfterStandardSelections" in h:
+        # if  "AfterAllSelections" in h:
+        ROOT.gStyle.SetNdivisions(8, "X")
+        ROOT.gStyle.SetNdivisions(8, "Y")
+        
     return kwargs
     
 

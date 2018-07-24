@@ -258,7 +258,7 @@ class PythonWriter:
         fOUT = open(fName,"w")
         fOUT.write("{\n")
         time = self.timeStamp()
-        fOUT.write("  \"_timestamp\":   \"Generated on "+time+" by HiggsAnalysis/NtupleAnalysis/src/SystTopBDT/work/PythonWriter.py\",\n")
+        fOUT.write("  \"_timestamp\":   \"Generated on "+time+" by HiggsAnalysis/NtupleAnalysis/src/TopBDTTaggerMistagRate/work/PythonWriter.py\",\n")
         fOUT.write("  \"_rootVersion\": \"%s\",\n"%self.rootVersion)
 #        fOUT.write("  \"_statOption\" : %s,\n"%self.statOption)
 #        fOUT.write("  \"_selection\"  : \""+selection+"\",\n")

@@ -1115,6 +1115,7 @@ void TopRecoTree::process(Long64_t entry) {
     //================================================================================================//                      
     //                                    Top Candidates                                              //
     //================================================================================================//
+    bool applyBjetPtCut = true;
     TrijetSelections TopCandidates;
     int index0 = -1;
     for (auto& jet0: jetData.getSelectedJets()){
@@ -1135,18 +1136,21 @@ void TopRecoTree::process(Long64_t entry) {
 	  //********************************** Bjet Matched OR dijet matched*********************************//
 	  //	  if ( isBJet(jet0, MCtrue_Bjet)    ||    ((isMatchedJet(jet1,MCtrue_LdgJet)||isMatchedJet(jet1,MCtrue_SubldgJet))  &&  (isMatchedJet(jet2,MCtrue_LdgJet)||isMatchedJet(jet2,MCtrue_SubldgJet)))  ){
 	  if ( isBJet(jet0, MCtrue_Bjet)    ||    (isWsubjet(jet1,MCtrue_LdgJet, MCtrue_SubldgJet)  &&  isWsubjet(jet2,MCtrue_LdgJet, MCtrue_SubldgJet))){
+	    if (applyBjetPtCut && (jet0.pt() < 40)) continue;
 	    TopCandidates.BJet.push_back(jet0);
 	    TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet1,jet2,"leading"));
 	    TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet1,jet2,"subleading"));
 	  }
 	  
 	  else if ( isBJet(jet1, MCtrue_Bjet)    ||  (isWsubjet(jet0,MCtrue_LdgJet, MCtrue_SubldgJet)  &&  isWsubjet(jet2,MCtrue_LdgJet, MCtrue_SubldgJet))){
+	    if (applyBjetPtCut && (jet1.pt() < 40)) continue;
 	    TopCandidates.BJet.push_back(jet1);
 	    TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet0,jet2,"leading"));
 	    TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet0,jet2,"subleading"));
 
 	  }
 	  else if ( isBJet(jet2, MCtrue_Bjet)    ||  (isWsubjet(jet0,MCtrue_LdgJet, MCtrue_SubldgJet)  &&  isWsubjet(jet1,MCtrue_LdgJet, MCtrue_SubldgJet))){
+	    if (applyBjetPtCut && (jet2.pt() < 40)) continue;
 	    TopCandidates.BJet.push_back(jet2);
 	    TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet0,jet1,"leading"));
 	    TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet0,jet1,"subleading"));
@@ -1158,11 +1162,13 @@ void TopRecoTree::process(Long64_t entry) {
 	  else if (isWsubjet(jet0,MCtrue_LdgJet, MCtrue_SubldgJet)){
 
 	    if (jet1.bjetDiscriminator() > jet2.bjetDiscriminator()){
+	      if (applyBjetPtCut && (jet1.pt() < 40)) continue;
 	      TopCandidates.BJet.push_back(jet1);
 	      TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet0,jet2,"leading"));
 	      TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet0,jet2,"subleading"));
 	    }
 	    else{
+	      if (applyBjetPtCut && (jet2.pt() < 40)) continue;
 	      TopCandidates.BJet.push_back(jet2);
 	      TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet0,jet1,"leading"));
 	      TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet0,jet1,"subleading"));
@@ -1171,11 +1177,13 @@ void TopRecoTree::process(Long64_t entry) {
 	  else if (isWsubjet(jet1,MCtrue_LdgJet, MCtrue_SubldgJet)){
 
             if (jet0.bjetDiscriminator() > jet2.bjetDiscriminator()){
+	      if (applyBjetPtCut && (jet0.pt() < 40)) continue;
 	      TopCandidates.BJet.push_back(jet0);
 	      TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet1,jet2,"leading"));
 	      TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet1,jet2,"subleading"));
             }
             else{
+	      if (applyBjetPtCut && (jet2.pt() < 40)) continue;
 	      TopCandidates.BJet.push_back(jet2);
 	      TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet0,jet1,"leading"));
 	      TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet0,jet1,"subleading"));
@@ -1184,11 +1192,13 @@ void TopRecoTree::process(Long64_t entry) {
 	  else if (isWsubjet(jet2,MCtrue_LdgJet, MCtrue_SubldgJet)){
 
             if (jet0.bjetDiscriminator() > jet1.bjetDiscriminator()){
+	      if (applyBjetPtCut && (jet0.pt() < 40)) continue;
 	      TopCandidates.BJet.push_back(jet0);
 	      TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet1,jet2,"leading"));
 	      TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet1,jet2,"subleading"));
             }
             else{
+	      if (applyBjetPtCut && (jet1.pt() < 40)) continue;
 	      TopCandidates.BJet.push_back(jet1);
 	      TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet0,jet2,"leading"));
 	      TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet0,jet2,"subleading"));
@@ -1201,23 +1211,26 @@ void TopRecoTree::process(Long64_t entry) {
 	  //********************** Non of the three subjets is matched************************//
 	  
 	  else if (jet0.bjetDiscriminator() > jet1.bjetDiscriminator() && jet0.bjetDiscriminator() > jet2.bjetDiscriminator()){            
+	    if (applyBjetPtCut && (jet0.pt() < 40)) continue;
 	    TopCandidates.BJet.push_back(jet0);
 	    TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet1,jet2,"leading"));
 	    TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet1,jet2,"subleading"));	    
 	  }
 	  else if (jet1.bjetDiscriminator() > jet0.bjetDiscriminator() && jet1.bjetDiscriminator() > jet2.bjetDiscriminator()){
+	    if (applyBjetPtCut && (jet1.pt() < 40)) continue;
 	    TopCandidates.BJet.push_back(jet1);	    
 	    TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet0,jet2,"leading"));
 	    TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet0,jet2,"subleading"));
 	  }
 	  else if (jet2.bjetDiscriminator() > jet0.bjetDiscriminator() && jet2.bjetDiscriminator() > jet1.bjetDiscriminator()){
+	    if (applyBjetPtCut && (jet2.pt() < 40)) continue;
 	    TopCandidates.BJet.push_back(jet2);
 	    TopCandidates.Jet1.push_back(getLeadingSubleadingJet(jet0,jet1,"leading"));
 	    TopCandidates.Jet2.push_back(getLeadingSubleadingJet(jet0,jet1,"subleading"));
 	  }
-	}	  	 	  
-      }
-    }
+	} //for (auto& jet2: jetData.getSelectedJets()){
+      } //for (auto& jet1: jetData.getSelectedJets()){
+    } //for (auto& jet0: jetData.getSelectedJets()){
     
     
     
@@ -1294,6 +1307,9 @@ void TopRecoTree::process(Long64_t entry) {
       dijetp4 = TopCandidates.Jet1.at(i).p4()+TopCandidates.Jet2.at(i).p4();
       TopCandidates.TrijetP4.push_back(trijetp4);                                                                                                                                      
       TopCandidates.DijetP4.push_back(dijetp4);                                                                                                                                        
+
+      //Debug:
+      if (applyBjetPtCut && TopCandidates.BJet.at(i).pt() < 40) std::cout<<"never reach here"<<std::endl;
 
       isGenuineTop = GenuineTop.at(i);
       
