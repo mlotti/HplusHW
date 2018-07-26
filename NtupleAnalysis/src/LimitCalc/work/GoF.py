@@ -15,8 +15,8 @@ python ../../../GoF.py [opts]
 
 
 EXAMPLES:
-python .././../GoF.py --h2tb --mass 180 --url
-python .././../GoF.py --h2tb --mass 500 --url
+python ../../GoF.py --h2tb --mass 180 --url
+python ../../GoF.py --h2tb --mass 500 --url
 
 
 LAST USED:
@@ -110,12 +110,19 @@ def doPlots(i, opts):
         analysis = "H^{+}#rightarrow#tau_{h}#nu fully hadronic"
     
     # Hadd ROOT files
-    rootFiles = glob.glob1(os.getcwd(), "higgsCombinetoys*.root")
+    #rootFiles = glob.glob1(filePath, "higgsCombinetoys*.root")
+    rootFiles = glob.glob1(opts.inputDir, "higgsCombinetoys*.root")
+
+    Verbose("Attempting to merge all toy ROOT files", True)
     if len(rootFiles) > 0:
         if os.path.isfile(opts.outputfile):
             os.remove(opts.outputfile)
         Print("Merging \"%s\" ROOT files into \"%s\"" % (opts.inputfile, opts.inputfile), True)
         call("hadd %s %s" % (opts.outputfile, opts.inputfile), shell=True)
+    else:
+        msg = "%sFound %d toy ROOT files to merge%s" % (ShellStyles.NoteStyle(), len(rootFiles), ShellStyles.NormalStyle() )
+        Print(msg, True)
+        sys.exit()
     
     # Clean auxiliary jobs files?
     CleanFiles(opts)
@@ -216,6 +223,7 @@ def doPlots(i, opts):
     pvalText.SetTextAlign(31) #11
     pvalText.DrawLatex(0.92, 0.80, "# toys: %d" % nToys)
     pvalText.DrawLatex(0.92, 0.74, "p-value: %.2f" % pval)
+    pvalText.DrawLatex(0.92, 0.68, "H^{+} m_{H^{+}}= %s GeV" % opts.mass)
     # pvalText.DrawLatex(0.92, 0.74, "  #alpha=#int^{#infty}_{#chi^{2}_{obs}} f(#chi^{2}) d#chi^{2}=%.2f" % pval)
     # pvalText.DrawLatex(0.92, 0.58, "1-#alpha=#int^{#chi^{2}_{obs}}_{0} f(#chi^{2}) d#chi^{2}=%.2f" % (1.0-pval))
 
@@ -293,6 +301,7 @@ def main(opts):
 
         # Definitions
         opts.algorithm  = algo
+        opts.inputDir   = "%s/GoF_%s" % (os.getcwd(), algo)
         opts.inputfile  = "GoF_%s/higgsCombinetoys*.GoodnessOfFit.mH%s.*.root" % (algo, opts.mass)
         opts.outputfile = "GoF_%s/GoF_%s_mH%s.root" % (algo, algo, opts.mass)
         doPlots(i, opts)
