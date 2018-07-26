@@ -141,7 +141,9 @@ def GetJobsWithKeyword(dirName, analysis= "FakeBMeasurement", keyword="Results a
     process  = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
     output, err = process.communicate()
     if len(err) > 0:
-        raise Exception(es + err + ns)
+        #raise Exception(es + err + ns)
+        Print(es + err + ns)
+        return jdlList, errList, outList, logList, eosList
     else:
         jobs = output.splitlines()
 
@@ -271,12 +273,11 @@ def GetSummary(nRunTotal, nDoneTotal, infoDict, printSummary=True):
     jobsDict["total"]     = str( nRunTotal )
     jobsDict["done"]      = str( nDoneTotal )
     jobsDict["run"]       = str( infoDict["running"] )
-    jobsDict["fail"]      = str( nRunTotal-nDoneTotal-infoDict["running"] )
     jobsDict["removed"]   = str( infoDict["removed"] )
     jobsDict["idle"]      = str( infoDict["idle"] ) 
     jobsDict["held"]      = str( infoDict["held"] )
     jobsDict["suspended"] = str( infoDict["suspended"] )
-
+    jobsDict["fail"]      = str( nRunTotal-nDoneTotal-infoDict["running"]-infoDict["removed"]-infoDict["idle"]-infoDict["held"]-infoDict["suspended"])
 
     # Create table
     table   = []
@@ -343,7 +344,8 @@ def GetJobStatusDict(username, keyword="Total for query: "):
     infoDict  = {}
 
     # Executed command
-    cmd     = "condor_q --submitter %s" % username
+    cmd = "condor_q --submitter %s" % (username)
+    Verbose(cmd, True)
     process = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
 
     output, err = process.communicate()
@@ -351,7 +353,7 @@ def GetJobStatusDict(username, keyword="Total for query: "):
         raise Exception(es + err + ns)
     else:
         filledOnce = False
-        for l in output.splitlines():
+        for l in output.splitlines():            
             if keyword in l and "Total for all users" not in l:
                 infoList  = [int(s) for s in l.split() if s.isdigit()]
 
@@ -557,9 +559,9 @@ def main(opts):
     nFailH2tb  = 0
     nFailFakeB = 0
     if nErrorH2tb > 0:
-        nFailH2tb  = GetNumberOfJobsWithKeyword(opts.dirName, "error_Hplus2tbAnalysis*.txt", "Results are in")
+        nFailH2tb  = GetNumberOfJobsWithKeyword(opts.dirName, "error_Hplus2tbAnalysis*.txt", "There was a crash.")
     if nErrorFakeB > 0:
-        nFailFakeB = GetNumberOfJobsWithKeyword(opts.dirName, "error_FakeBMeasurement*.txt", "Results are in")
+        nFailFakeB = GetNumberOfJobsWithKeyword(opts.dirName, "error_FakeBMeasurement*.txt", "There was a crash.")
     nFailTotal = nFailH2tb + nFailFakeB
     Verbose("Found %s%d%s jobs failed (Hplus2tbAnalysis=%d, FakeBMeasurement=%d)" % (ts, nFailTotal, ns, nFailH2tb, nFailFakeB), False)
 
@@ -577,7 +579,7 @@ def main(opts):
         table.append(align.format(infoDict["jobs"], infoDict["completed"], infoDict["removed"], infoDict["idle"], infoDict["running"], infoDict["held"], infoDict["suspended"]) )
     table.append(hLine)
     for i, row in enumerate(table, 1):
-        Print(row, i==1)
+        Verbose(row, i==1)
 
         
     Verbose("Get the jobs dictionary and the summary table", True)
@@ -593,7 +595,7 @@ def main(opts):
 
 
     if opts.getoutput:
-        if nErrorH2tb > 0 or nErrorFakeB > 0:
+        if nFailH2tb > 0 or nFailFakeB > 0:
             Print(es + "Not all jobs are in \"done\" mode. Aborting retrieval of output!" + ns, True)
             return
 
@@ -604,7 +606,6 @@ def main(opts):
             
         files, filesH2tb, filesFakeB = GetOutputFiles(opts.eosdir)
         Print("Found %d files in %s (Hplus2tbAnalysis=%d, FakeBMeasurement=%d)" % (len(files), opts.eosdir, len(filesH2tb), len(filesFakeB)), True)
-        
 
         Verbose("Get mapping of systematic->fileList", True)
         filesSystH2tb  = GetSystToOutputDict(filesH2tb)
