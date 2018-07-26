@@ -19,7 +19,8 @@ set INITIAL = `echo $USER | cut -c1-1`
 set PSEUDO_MCRAB_DIR = ${1}
 
 ./plot_Closure.py -m $PSEUDO_MCRAB_DIR -n --url
-./plot_ClosureBinned.py -m $PSEUDO_MCRAB_DIR -n --url --ratio
+#./plot_ClosureBinned.py -m $PSEUDO_MCRAB_DIR -n --url --ratio
+./plot_ClosureBinned.py -m $PSEUDO_MCRAB_DIR -n --url
 ###./plot_ClosureBinnedBuffer.py -m $PSEUDO_MCRAB_DIR -n --url --ratio
 ###./plot_FailedBJet.py -m  $PSEUDO_MCRAB_DIR --url
 ./plot_Purity.py -m $PSEUDO_MCRAB_DIR --url --type FakeB
@@ -29,11 +30,11 @@ set PSEUDO_MCRAB_DIR = ${1}
 ./plot_DataMC.py -m $PSEUDO_MCRAB_DIR --folder counters/weighted --url --ratio
 ./getABCD_TF.py -m $PSEUDO_MCRAB_DIR --url --histoKey TetrajetBJetPt
 ./getABCD_TF.py -m $PSEUDO_MCRAB_DIR --url --histoKey TetrajetBJetEta
-./getABCD_TF.py -m $PSEUDO_MCRAB_DIR --url --histoKey TetrajetMass
 ./getABCD_TF.py -m $PSEUDO_MCRAB_DIR --url --histoKey TetrajetPt
-./getABCD_TF.py -m $PSEUDO_MCRAB_DIR --url --histoKey LdgTrijetPt
-./getABCD_TF.py -m $PSEUDO_MCRAB_DIR --url --histoKey LdgTrijetMass
+./getABCD_TF.py -m $PSEUDO_MCRAB_DIR --url --histoKey TetrajetMass
+# ./getABCD_TF.py -m $PSEUDO_MCRAB_DIR --url --histoKey LdgTrijetPt
+# ./getABCD_TF.py -m $PSEUDO_MCRAB_DIR --url --histoKey LdgTrijetMass
 ./makePseudoMulticrab.py -m  $PSEUDO_MCRAB_DIR --url
-./plot_MediumVsLoose.py -m $PSEUDO_MCRAB_DIR --dataset EWK --refBdisc Medium --url
-./plot_MediumAndLoose.py -m $PSEUDO_MCRAB_DIR --dataset EWK --normalizeToOne --url
+# ./plot_MediumVsLoose.py -m $PSEUDO_MCRAB_DIR --dataset EWK --refBdisc Medium --url
+# ./plot_MediumAndLoose.py -m $PSEUDO_MCRAB_DIR --dataset EWK --normalizeToOne --url
 cp -rf $PSEUDO_MCRAB_DIR/normalisationPlots /publicweb/$INITIAL/$USER/$PSEUDO_MCRAB_DIR/.
