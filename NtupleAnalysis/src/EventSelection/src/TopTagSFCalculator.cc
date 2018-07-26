@@ -364,7 +364,7 @@ const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzV
 	  // up variation (!t|gen-t)
 	  if (fVariationInfo == kVariationTagUp && flavor == TopTagSFInputStash::kGenuineTop)
 	    {
-	      double effDelta = fEfficienciesUp.getInputValueByPt(flavor, pt);
+	      double effDelta = fEfficienciesUp.getInputValueByPt(flavor, pt) - eff;
 	      double sfDelta = fSFUp.getInputValueByPt(flavor, pt) + fdSFUp.getInputValueByPt(flavor, pt) - sf_value;
 	      // error propagation
 	      double a = (1-sf_value) / (1.0-eff) / (1.0-eff);  // d/deff((1-eff*SF)/(1-eff))
@@ -378,7 +378,7 @@ const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzV
 	  // up variation (!t|!gen-t)
 	  else if (fVariationInfo == kVariationMistagUp && flavor == TopTagSFInputStash::kFakeTop)
 	    {
-	      double effDelta = fEfficienciesUp.getInputValueByPt(flavor, pt);
+	      double effDelta = fEfficienciesUp.getInputValueByPt(flavor, pt) - eff;
 	      double sfDelta = fSFUp.getInputValueByPt(flavor, pt) - sf_value;
 	      // error propagation (same as above)
 	      double a = (1-sf_value) / (1.0-eff) / (1.0-eff);
@@ -390,7 +390,7 @@ const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzV
 	  // down variation (!t|gen-t)
 	  else if (fVariationInfo == kVariationTagDown && flavor == TopTagSFInputStash::kGenuineTop)
 	    {
-	      double effDelta = fEfficienciesDown.getInputValueByPt(flavor, pt);
+	      double effDelta = fEfficienciesDown.getInputValueByPt(flavor, pt) - eff;
 	      double sfDelta = fSFDown.getInputValueByPt(flavor, pt) + fdSFDown.getInputValueByPt(flavor, pt) - sf_value;
 	      // error propagation (same as above)
               double a = (1-sf_value) / (1.0-eff) / (1.0-eff);
@@ -402,7 +402,7 @@ const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzV
 	  // down variation (!t|!gen-t)
 	  else if (fVariationInfo == kVariationMistagDown && flavor == TopTagSFInputStash::kFakeTop)
 	    {
-	      double effDelta = fEfficienciesDown.getInputValueByPt(flavor, pt);
+	      double effDelta = fEfficienciesDown.getInputValueByPt(flavor, pt) - eff;
 	      double sfDelta = fSFDown.getInputValueByPt(flavor, pt) - sf_value;
 	      // error propagation (same as above)
               double a = (1-sf_value) / (1.0-eff) / (1.0-eff);
@@ -428,6 +428,9 @@ const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzV
 	    }
 	}
       
+      // If SF is negative, set to zero
+      if (sf < 0.0) sf=0.0;
+      
       // Event weight to correct simulations is a product of SFs and MC tagging effiencies
       totalSF *= sf;
       if (debug) std::cout << i+1 << "/" << cleanTopP4.size() << ": pT = " << pt << " m(jjb) = " << mass << " MVA " << mva	       
@@ -437,7 +440,7 @@ const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzV
       
     }
   if (debug) std::cout << "\n" << std::endl;
-
+  
   // Fill histograms
   hTopTagSF->Fill(totalSF);
   
