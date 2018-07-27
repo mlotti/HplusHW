@@ -9,11 +9,15 @@ submitCondor.py [options]
 
 
 EXAMPLE:
-submitCondor.py --topMass 400 --bdt 0p40
+submitCondor.py --topMass 500 --bdt 0p40 --codeTarball HiggsAnalysis.tgz --binning 4Eta5Pt --mcrabTarball multicrab_Hplus2tbAnalysis_v8030_20180508T0644.tgz
 
 
 LAST USED:
-submitCondor.py --topMass 500 --bdt 0p40 --codeTarball HiggsAnalysis.tgz --binning 4Eta5Pt --mcrabTarball multicrab_Hplus2tbAnalysis_v8030_20180508T0644.tgz
+submitCondor.py --topMass 800 --bdt 0p40 --binning 4Eta5Pt --mcrabTarball multicrab_Hplus2tbAnalysis_v8030_20180508T0644.tgz --codeTarball HiggsAnalysis_TopMassLE800_BDT0p40_AbsEta0p8_1p4_2p0_Pt_60_90_160_300_27July2018.tgz
+submitCondor.py --topMass 700 --bdt 0p40 --binning 4Eta5Pt --mcrabTarball multicrab_Hplus2tbAnalysis_v8030_20180508T0644.tgz --codeTarball HiggsAnalysis_TopMassLE700_BDT0p40_AbsEta0p8_1p4_2p0_Pt_60_90_160_300_27July2018.tgz
+submitCondor.py --topMass 600 --bdt 0p40 --binning 4Eta5Pt --mcrabTarball multicrab_Hplus2tbAnalysis_v8030_20180508T0644.tgz --codeTarball HiggsAnalysis_TopMassLE600_BDT0p40_AbsEta0p8_1p4_2p0_Pt_60_90_160_300_27July2018.tgz
+submitCondor.py --topMass 500 --bdt 0p40 --binning 4Eta5Pt --mcrabTarball multicrab_Hplus2tbAnalysis_v8030_20180508T0644.tgz --codeTarball HiggsAnalysis_TopMassLE500_BDT0p40_AbsEta0p8_1p4_2p0_Pt_60_90_160_300_27July2018.tgz
+submitCondor.py --topMass 400 --bdt 0p40 --binning 4Eta5Pt --mcrabTarball multicrab_Hplus2tbAnalysis_v8030_20180508T0644.tgz --codeTarball HiggsAnalysis_TopMassLE400_BDT0p40_AbsEta0p8_1p4_2p0_Pt_60_90_160_300_27July2018.tgz
 
 '''
 
@@ -267,7 +271,7 @@ def main(opts):
                 f.write("Log    = log_%s.txt\n"    % (fileName) )
                 f.write("x509userproxy = /tmp/x509up_u52142\n")
                 #f.write("Arguments = %s NewTopAndBugFixAndSF_TopMassLE%s_BDT%s_Group%s_Syst%s %s %s\n" % (analysis, opts.topMass, opts.BDT, group, syst, group, syst) )
-                f.write("Arguments = %s TopMassLE%s_BDT%s_Binningg%s_Group%s_Syst%s %s %s\n" % (analysis, opts.topMass, opts.BDT, opts.binning, group, syst, group, syst) )
+                f.write("Arguments = %s TopMassLE%s_BDT%s_Binning%s_Group%s_Syst%s %s %s\n" % (analysis, opts.topMass, opts.BDT, opts.binning, group, syst, group, syst) )
                 f.write("Queue 1\n")
                 f.close()
                 jdlList.append(jdl)
@@ -329,8 +333,9 @@ if __name__ == "__main__":
     parser.add_option("--mcrabTarball", dest="mcrabTarball", action="store", default = MCRABTARBALL,
                       help="Path to the multicrab tarball for input [default: %s]" % (MCRABTARBALL) )
 
-    parser.add_option("-d", "--dirName", dest="dirName", action="store",
-                      help="Name of directory to be created where all the output will be stored [default: %s]" % (DIRNAME) )
+    # Do not allow manual name. checkCondor.py relies on name assumptions to work!
+    #parser.add_option("-d", "--dirName", dest="dirName", action="store",
+    #                  help="Name of directory to be created where all the output will be stored [default: %s]" % (DIRNAME) )
 
     parser.add_option("--topMass", dest="topMass", action="store", default=None,
                       help="Top mass cut used in analuysis [default: %s]" % (None) )
@@ -373,11 +378,13 @@ if __name__ == "__main__":
 
     # Define output dir name
     date = datetime.date.today().strftime('%d%b%Y')    #date = datetime.date.today().strftime('%d-%b-%Y')
-    if opts.dirName == None:
-        #opts.dirName = "TopMassLE%s_BDT%s_AbsEta0p8_1p4_2p0_Pt_60_90_160_300_Stat_%s" % (opts.topMass, opts.BDT, date) #iro
-        opts.dirName = "TopMassLE%s_BDT%s_Binning%s_Syst_%s" % (opts.topMass, opts.BDT, opts.binning, date)
-    else:
-        opts.dirName += "_%s" % (date)
+    # if opts.dirName == None:
+    #     #opts.dirName = "TopMassLE%s_BDT%s_AbsEta0p8_1p4_2p0_Pt_60_90_160_300_Stat_%s" % (opts.topMass, opts.BDT, date) #iro
+    #     opts.dirName = "TopMassLE%s_BDT%s_Binning%s_Syst_%s" % (opts.topMass, opts.BDT, opts.binning, date)
+    # else:
+    #     opts.dirName += "_%s" % (date)
+    opts.dirName = "TopMassLE%s_BDT%s_Binning%s_Syst_%s" % (opts.topMass, opts.BDT, opts.binning, date)
+
 
     # Overwrite default systematics
     opts.systVarsList = []
