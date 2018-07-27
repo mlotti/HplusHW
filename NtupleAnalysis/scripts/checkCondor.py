@@ -581,7 +581,7 @@ def PrintCondorQ(condorQ):
     if len(condorQ.values()) < 1:
         msg = "No active jobs found!"
         Print(es + msg + ns, True)
-        return nActive, nRun, nHeld, nIdle
+        return nActive, nRun, nHeld, nIdle, nIO
 
     # For-loop: All values for all keys
     nActive = len(condorQ["STATUS"])
