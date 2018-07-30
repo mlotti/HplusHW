@@ -12,19 +12,20 @@ USAGE:
 
 
 EXAMPLES:
-./merge_systematics.py -m Hplus2tbAnalysis_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystBTagSF_22Jul2018,Hplus2tbAnalysis_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystPUWeight_22Jul2018,Hplus2tbAnalysis_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystTopPt_22Jul2018,Hplus2tbAnalysis_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystTopTagSF_22Jul2018,Hplus2tbAnalysis_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystJES_22Jul2018,Hplus2tbAnalysis_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystJER_22Jul2018
+./mergePseudomulticrabs.py -m Hplus2tbAnalysis_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystBTagSF_22Jul2018,Hplus2tbAnalysis_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystPUWeight_22Jul2018,Hplus2tbAnalysis_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystTopPt_22Jul2018,Hplus2tbAnalysis_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystTopTagSF_22Jul2018,Hplus2tbAnalysis_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystJES_22Jul2018,Hplus2tbAnalysis_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystJER_22Jul2018
 
 mergePseudomulticrabs.py -m FakeBMeasurement_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystBTagSF_22Jul2018,FakeBMeasurement_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystPUWeight_22Jul2018,FakeBMeasurement_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystTopPt_22Jul2018,FakeBMeasurement_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystTopTagSF_22Jul2018,FakeBMeasurement_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystJES_22Jul2018,FakeBMeasurement_NewTopAndBugFixAndSF_TopMassLE400_BDT0p40_SystJER_22Jul2018
 
-merge_systematics.py -m Hplus2tbAnalysis
-merge_systematics.py -m FakeBMeasurement
+mergePseudomulticrabs.py -m Hplus2tbAnalysis
+mergePseudomulticrabs.py -m FakeBMeasurement
 
 
 LAST USED:
-merge_systematics.py -m Hplus2tbAnalysis
+mergePseudomulticrabs.py -m Hplus2tbAnalysis
 
-mergePseudomulticrabs.py -m FakeBMeasurement -i "QCD" & mergePseudomulticrabs.py -m FakeBMeasurement -i "JetHT" & mergePseudomulticrabs.py -m FakeBMeasurement -i "ST_" & mergePseudomulticrabs.py -m FakeBMeasurement -i "DY" & mergePseudomulticrabs.py -m FakeBMeasurement -i "ZJets" & mergePseudomulticrabs.py -m FakeBMeasurement -i "TT" & mergePseudomulticrabs.py -m FakeBMeasurement -i "WZ" & mergePseudomulticrabs.py -m FakeBMeasurement -i "WZ" & mergePseudomulticrabs.py -m FakeBMeasurement -i "ZZ" & mergePseudomulticrabs.py -m FakeBMeasurement -i "WJets"
-
+1. sh
+2. declare -a dsets=("QCD_HT50to100|QCD_HT100to200|QCD_HT200to300|QCD_HT300to500|QCD_HT500to700|QCD_HT700to1000|QCD_HT1000to1500|QCD_HT1500to2000|QCD_HT2000toInf" "QCD_HT200to300_ext1|QCD_HT300to500_ext1|QCD_HT500to700_ext1|QCD_HT700to1000_ext1|QCD_HT1000to1500_ext1|QCD_HT1500to2000_ext1|QCD_HT2000toInf_ext1" "JetHT" "ST_" "DY" "ZJets" "TT" "WZ" "WW" "ZZ" "WJets")
+3. for d in "${dsets[@]}"; do nice -n 19 mergePseudomulticrabs.py -m FakeBMeasurement -i "$d" & done
 
 '''
 #================================================================================================ 

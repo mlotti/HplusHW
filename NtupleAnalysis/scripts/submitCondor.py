@@ -9,12 +9,15 @@ submitCondor.py [options]
 
 
 EXAMPLE:
-submitCondor.py --topMass 400 --bdt 0p40
+submitCondor.py --topMass 500 --bdt 0p40 --codeTarball HiggsAnalysis.tgz --binning 4Eta5Pt --mcrabTarball multicrab_Hplus2tbAnalysis_v8030_20180508T0644.tgz
 
 
 LAST USED:
-submitCondor.py --topMass 500 --bdt 0p40 
-
+submitCondor.py --topMass 800 --bdt 0p40 --binning 4Eta5Pt --mcrabTarball multicrab_Hplus2tbAnalysis_v8030_20180508T0644.tgz --codeTarball HiggsAnalysis_TopMassLE800_BDT0p40_AbsEta0p8_1p4_2p0_Pt_60_90_160_300_27July2018.tgz
+submitCondor.py --topMass 700 --bdt 0p40 --binning 4Eta5Pt --mcrabTarball multicrab_Hplus2tbAnalysis_v8030_20180508T0644.tgz --codeTarball HiggsAnalysis_TopMassLE700_BDT0p40_AbsEta0p8_1p4_2p0_Pt_60_90_160_300_27July2018.tgz
+submitCondor.py --topMass 600 --bdt 0p40 --binning 4Eta5Pt --mcrabTarball multicrab_Hplus2tbAnalysis_v8030_20180508T0644.tgz --codeTarball HiggsAnalysis_TopMassLE600_BDT0p40_AbsEta0p8_1p4_2p0_Pt_60_90_160_300_27July2018.tgz
+submitCondor.py --topMass 500 --bdt 0p40 --binning 4Eta5Pt --mcrabTarball multicrab_Hplus2tbAnalysis_v8030_20180508T0644.tgz --codeTarball HiggsAnalysis_TopMassLE500_BDT0p40_AbsEta0p8_1p4_2p0_Pt_60_90_160_300_27July2018.tgz
+submitCondor.py --topMass 400 --bdt 0p40 --binning 4Eta5Pt --mcrabTarball multicrab_Hplus2tbAnalysis_v8030_20180508T0644.tgz --codeTarball HiggsAnalysis_TopMassLE400_BDT0p40_AbsEta0p8_1p4_2p0_Pt_60_90_160_300_27July2018.tgz
 
 '''
 
@@ -106,6 +109,110 @@ def CheckForValidProxy():
     return
 
 
+def CreateRunningScript(scriptName, opts):
+    '''
+    This create a new csh script (e.g. runSystOnCondor.csh) 
+    that will be used to run the CONDOR jobs
+    '''
+
+    # Create the file
+    filePath = os.path.join(opts.dirName, scriptName)
+    Print("Creating newfile %s" % (ss + filePath + ns), True)
+    f = open(filePath, "w")
+
+    # Write the contents
+    f.write('#!/bin/tcsh\n')
+    f.write('#================================================================================================\n')
+    f.write('# Get command line parameters\n')
+    f.write('#================================================================================================\n')
+    f.write('if ($#argv < 3) then\n')
+    f.write('    echo "=== You must give at least 3 arguments:"\n')
+    f.write('    echo "1=ANALYSISDIR"\n')
+    f.write('    echo "2=LABEL"\n')
+    f.write('    echo "3=GROUP"\n')
+    f.write('    echo "4=SYSTEMATICS (optional)"\n')
+    f.write('    echo\n')
+    f.write('    exit 1\n')
+    f.write('endif\n')
+    f.write('\n')
+    f.write('#================================================================================================\n')
+    f.write('# Define variables\n')
+    f.write('#================================================================================================\n')
+    f.write('set ANALYSISDIR = ${1}\n')
+    f.write('set LABEL       = ${2}\n')
+    f.write('set GROUP       = ${3}\n')
+    f.write('set SYSTEMATICS = ${4}\n')
+    f.write('\n')
+    f.write('set TARBALL = %s\n' % (opts.mcrabTarball.replace(".tgz", "")) )
+    f.write('\n')
+    f.write('echo "\\n=== Running on:" \n')
+    f.write('hostname -A\n')
+    f.write('pwd\n')
+    f.write('echo ${_CONDOR_SCRATCH_DIR}\n')
+    f.write('source /cvmfs/cms.cern.ch/cmsset_default.csh\n')
+    f.write('\n')
+    f.write('echo "\\n=== Untarring the code tarball"\n')
+    f.write('tar -xf %s\n' % (opts.codeTarball) )
+    f.write('rm -rf %s\n' % (opts.codeTarball) )
+    f.write('\n')
+    f.write('echo "\\n=== Untarring the multicrab dir tarball"\n')
+    f.write('tar -xf $TARBALL.tgz\n')
+    f.write('\n')
+    f.write('# Source the environment settings script\n')
+    f.write('echo "\\n=== Changing dir to HiggsAnalysis and sourcing setup.csh"\n')
+    f.write('cd HiggsAnalysis\n')
+    f.write('source setup.csh\n')
+    f.write('echo `pwd`\n')
+    f.write('\n')
+    f.write('# Go to work directory to run the analysis\n')
+    f.write('set WORKDIR = NtupleAnalysis/src/$ANALYSISDIR/work/\n')
+    f.write('echo "\\n=== Changing dir to $WORKDIR"\n')
+    f.write('cd $WORKDIR\n')
+    f.write('\n')
+    f.write('# Save the submit/start time for future use\n')
+    f.write('set STIME = `date \'+%Hh-%Mm-%Ss-%d%h%Y\'`\n')
+    f.write('\n')
+    f.write('# Run the analyser\n')
+    f.write('echo "\\n=== Running the analysis by executing runSystematics.py as follows:"\n')
+    f.write('echo "./runSystematics.py -m ${_CONDOR_SCRATCH_DIR}/$TARBALL/ --doSystematics --group $GROUP\\n"\n')
+    f.write('./runSystematics.py -m ${_CONDOR_SCRATCH_DIR}/$TARBALL/ --group $GROUP --systVars $SYSTEMATICS \n')
+    f.write('\n')
+    f.write('echo "\\n=== Listing all directories"\n')
+    f.write('echo`ls -alt | grep ^d` #| grep $ANALYSISDIR`\n')
+    f.write('\n')
+    f.write('echo "\\n=== Listing the latest directory"\n')
+    f.write('echo `ls -td */ | head -1`\n')
+    f.write('\n')
+    f.write('echo "\\n=== Determining output dir using ls and grep commands"\n')
+    f.write('set OUTPUTDIR = `ls -td */ | head -1`\n')
+    f.write('echo "\\n=== Output dir determined to be $OUTPUTDIR"\n')
+    f.write('# -t orders by time (latest first)\n')
+    f.write('# -d only lists items from this folder\n')
+    f.write('# */ only lists directories\n')
+    f.write('# head -1 returns the first item\n')
+    f.write('\n')
+    f.write('# Create the tarball name\n')
+    f.write('set FTIME = `date \'+%Hh-%Mm-%Ss-%d%h%Y\'`\n')
+    f.write('echo "\\n=== Tarball name will be ${ANALYSISDIR}_${LABEL}_${STIME}_${FTIME}.tgz"\n')
+    f.write('set TARBALL = "${ANALYSISDIR}_${LABEL}_${STIME}_${FTIME}.tgz"\n')
+    f.write('\n')
+    f.write('# Make the output directory to a tarball\n')
+    f.write('echo "\\n=== Compressing the output dir $OUTPUTDIR into tarball file $TARBALL"\n')
+    f.write('tar -cvzf $TARBALL $OUTPUTDIR\n')
+    f.write('\n')
+    f.write('#echo "\\n=== Copying output directory $OUTPUTDIR to EOS"\n')
+    f.write('#xrdcp -rf $OUTPUTDIR  root://cmseos.fnal.gov//store/user/$USER/.\n')
+    f.write('set EOSDIR = store/user/$USER/CONDOR_TransferData\n')
+    f.write('echo "\\n=== Copying output tarball $TARBALL to $EOSDIR"\n')
+    f.write('xrdcp $TARBALL  root://cmseos.fnal.gov//$EOSDIR/\n')
+    f.write('\n')
+    f.write('echo "\\n=== Delete everything from ${_CONDOR_SCRATCH_DIR} before exiting"\n')
+    f.write('cd ${_CONDOR_SCRATCH_DIR}\n')
+    f.write('rm -rf HiggsAnalysis\n')
+    f.close()
+    return
+
+
 def main(opts):
 
     Verbose("Check that a CMS VO proxy exists (voms-proxy-init)", True)
@@ -119,7 +226,9 @@ def main(opts):
     else:
         Print("Creating directory %s" % (ss + opts.dirName + ns), True)
         os.mkdir(opts.dirName)
-    os.system("cp %s %s/." % ("runSystOnCondor.csh", opts.dirName) )
+
+    Verbose("Create the runSystOnCondor.csh script that will create the job", True)
+    CreateRunningScript("runSystOnCondor.csh", opts)
     os.chdir(opts.dirName)
 
     # Settings
@@ -156,12 +265,13 @@ def main(opts):
                 f.write("Executable = runSystOnCondor.csh\n")
                 f.write("Should_Transfer_Files = YES\n")
                 f.write("WhenToTransferOutput = ON_EXIT\n")
-                f.write("Transfer_Input_Files = runSystOnCondor.csh, %s/HiggsAnalysis.tgz, %s/%s.tgz\n" % (opts.codePath, opts.mcrabPath, opts.mcrab) )
+                f.write("Transfer_Input_Files = runSystOnCondor.csh, %s, %s\n" % (opts.HiggsAnalysisTGZ, opts.MulticrabTGZ) )
                 f.write("Output = output_%s.txt\n" % (fileName) )
                 f.write("Error  = error_%s.txt\n"  % (fileName) )
                 f.write("Log    = log_%s.txt\n"    % (fileName) )
                 f.write("x509userproxy = /tmp/x509up_u52142\n")
-                f.write("Arguments = %s NewTopAndBugFixAndSF_TopMassLE%s_BDT%s_Group%s_Syst%s %s %s\n" % (analysis, opts.topMass, opts.BDT, group, syst, group, syst) )
+                #f.write("Arguments = %s NewTopAndBugFixAndSF_TopMassLE%s_BDT%s_Group%s_Syst%s %s %s\n" % (analysis, opts.topMass, opts.BDT, group, syst, group, syst) )
+                f.write("Arguments = %s TopMassLE%s_BDT%s_Binning%s_Group%s_Syst%s %s %s\n" % (analysis, opts.topMass, opts.BDT, opts.binning, group, syst, group, syst) )
                 f.write("Queue 1\n")
                 f.close()
                 jdlList.append(jdl)
@@ -194,12 +304,13 @@ if __name__ == "__main__":
     '''
 
     # Default settings
-    VERBOSE   = False
-    SYSTVARS  = None
-    CODEPATH  = "/uscms_data/d3/aattikis/workspace/cmssw/CMSSW_8_0_30/src"
-    MCRABPATH = "/uscms_data/d3/aattikis/workspace/multicrab"
-    MCRAB     = "multicrab_Hplus2tbAnalysis_v8030_20180508T0644"
-    DIRNAME   = None
+    VERBOSE     = False
+    SYSTVARS    = None
+    CODEPATH    = "/uscms_data/d3/aattikis/workspace/cmssw/CMSSW_8_0_30/src"
+    CODETARBALL = None #"HiggsAnalysis.tgz"
+    MCRABPATH   = "/uscms_data/d3/aattikis/workspace/multicrab"
+    MCRABTARBALL= None #"multicrab_Hplus2tbAnalysis_v8030_20180508T0644.tgz"
+    DIRNAME     = None
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]", add_help_option=True, conflict_handler="resolve")
@@ -213,14 +324,18 @@ if __name__ == "__main__":
     parser.add_option("--codePath", dest="codePath", default = CODEPATH,
                       help="Full path to HiggsAnalysis code tarball to be ran on [default: %s]" % CODEPATH)
 
+    parser.add_option("--codeTarball", dest="codeTarball", default = CODETARBALL,
+                      help="Name of HiggsAnalysis tarball for input [default: %s]" % CODETARBALL)
+
     parser.add_option("--mcrabPath", dest="mcrabPath", default = MCRABPATH,
                       help="Full path to multicrab Ntuples to be ran on [default: %s]" % MCRABPATH)
 
-    parser.add_option("--mcrab", dest="mcrab", action="store", default = MCRAB,
-                      help="Path to the multicrab directory for input [default: %s]" % (MCRAB) )
+    parser.add_option("--mcrabTarball", dest="mcrabTarball", action="store", default = MCRABTARBALL,
+                      help="Path to the multicrab tarball for input [default: %s]" % (MCRABTARBALL) )
 
-    parser.add_option("-d", "--dirName", dest="dirName", action="store",
-                      help="Name of directory to be created where all the output will be stored [default: %s]" % (DIRNAME) )
+    # Do not allow manual name. checkCondor.py relies on name assumptions to work!
+    #parser.add_option("-d", "--dirName", dest="dirName", action="store",
+    #                  help="Name of directory to be created where all the output will be stored [default: %s]" % (DIRNAME) )
 
     parser.add_option("--topMass", dest="topMass", action="store", default=None,
                       help="Top mass cut used in analuysis [default: %s]" % (None) )
@@ -228,20 +343,48 @@ if __name__ == "__main__":
     parser.add_option("--bdt", dest="BDT", action="store", default=None,
                       help="BDT cut used in analuysis [default: %s]" % (None) )
 
+    parser.add_option("--binning", dest="binning", action="store", default=None,
+                      help="Pt-Eta binning used for FakeBMeasument [default: %s]" % (None) )
+
     (opts, parseArgs) = parser.parse_args()
+
+    if opts.codeTarball == None:
+        Print("Please provide a top mass cut value (--codeTarball HiggsAnalysis.tgz)", True)
+        sys.exit()
+    else:        
+        opts.HiggsAnalysisTGZ = os.path.join(opts.codePath, opts.codeTarball)
+        if not os.path.isfile(opts.HiggsAnalysisTGZ):
+            raise Exception("The tarball %s does not exist!" % opts.HiggsAnalysisTGZ)
+
+    if opts.mcrabTarball == None:
+        Print("Please provide a top mass cut value (--mcrabTarball multicrab_Hplus2tbAnalysis_v8030_20180508T0644.tgz)", True)
+        sys.exit()
+    else:        
+        opts.MulticrabTGZ = os.path.join(opts.mcrabPath, opts.mcrabTarball)
+        if not os.path.isfile(opts.MulticrabTGZ):
+            raise Exception("The tarball %s does not exist!" % opts.MulticrabTGZ)
 
     if opts.topMass == None:
         Print("Please provide a top mass cut value (--topMass 500)", True)
+        sys.exit()
 
     if opts.BDT == None:
         Print("Please provide a BDT cut value (--bdt 0p40)", True)
+        sys.exit()
+
+    if opts.binning == None:
+        Print("Please provide binning string value (--binning 4Eta5Pt)", True)
+        sys.exit()
 
     # Define output dir name
     date = datetime.date.today().strftime('%d%b%Y')    #date = datetime.date.today().strftime('%d-%b-%Y')
-    if opts.dirName == None:
-        opts.dirName = "TopMassLE%s_BDT%s_AbsEta0p8_1p4_2p0_Pt_60_90_160_300_Stat_%s" % (opts.topMass, opts.BDT, date)
-    else:
-        opts.dirName += "_%s" % (date)
+    # if opts.dirName == None:
+    #     #opts.dirName = "TopMassLE%s_BDT%s_AbsEta0p8_1p4_2p0_Pt_60_90_160_300_Stat_%s" % (opts.topMass, opts.BDT, date) #iro
+    #     opts.dirName = "TopMassLE%s_BDT%s_Binning%s_Syst_%s" % (opts.topMass, opts.BDT, opts.binning, date)
+    # else:
+    #     opts.dirName += "_%s" % (date)
+    opts.dirName = "TopMassLE%s_BDT%s_Binning%s_Syst_%s" % (opts.topMass, opts.BDT, opts.binning, date)
+
 
     # Overwrite default systematics
     opts.systVarsList = []

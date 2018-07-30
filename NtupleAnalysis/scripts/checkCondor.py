@@ -10,7 +10,7 @@ checkCondor.py [options]
 
 
 EXAMPLE:
-.heckCondor.py -d TopMassLE400_BDT0p40_AbsEta0p8_1p4_2p0_Pt_60_90_160_300_Stat_22Jul2018
+checkCondor.py -d TopMassLE400_BDT0p40_AbsEta0p8_1p4_2p0_Pt_60_90_160_300_Stat_22Jul2018
 
 
 LAST USED:
@@ -19,8 +19,10 @@ checkCondor.py -d TopMassLE500_BDT0p40_AbsEta0p8_1p4_2p0_Pt_60_90_160_300_Stat_2
 
 
 USEFUL LINKS:
+https://uscms.org/uscms_at_work/computing/setup/condor_worker_node.shtml#userInputFile
 https://uscms.org/uscms_at_work/computing/setup/batch_systems.shtml#condor_6
-
+http://research.cs.wisc.edu/htcondor/manual/v8.6/2_6Managing_Job.html
+http://pages.cs.wisc.edu/~adesmet/status.html
 '''
 
 #================================================================================================ 
@@ -44,7 +46,8 @@ import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 ss = ShellStyles.SuccessStyle()
 ns = ShellStyles.NormalStyle()
 ts = ShellStyles.NoteStyle()
-hs = ""#ShellStyles.HighlightAltStyle()
+hs = ShellStyles.HighlightAltStyle()
+ls = ShellStyles.HighlightStyle()
 es = ShellStyles.ErrorStyle()
 cs = ShellStyles.CaptionStyle()
 
@@ -127,7 +130,7 @@ def GetJobsWithKeyword(dirName, analysis= "FakeBMeasurement", keyword="Results a
     eosList = []
 
     # Get EOS files (if job fails corresponding file must be removed!)
-    files, filesH2tb, filesFakeB = GetOutputFiles(opts.eosdir)
+    files, filesH2tb, filesFakeB = GetFilesInEOS(opts.eosdir)
     if analysis == "FakeBMeasurement":
         filesInEOS = filesFakeB
     elif analysis == "Hplus2tbAnalysis":
@@ -141,7 +144,9 @@ def GetJobsWithKeyword(dirName, analysis= "FakeBMeasurement", keyword="Results a
     process  = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
     output, err = process.communicate()
     if len(err) > 0:
-        raise Exception(es + err + ns)
+        #raise Exception(es + err + ns)
+        Verbose(es + err + ns)
+        return jdlList, errList, outList, logList, eosList
     else:
         jobs = output.splitlines()
 
@@ -199,14 +204,17 @@ def ResubmitFailedJobs(jdlList, errList, outList, logList, eosList):
     else:
         msg = "Copy/paste the commands below to resubmit & clean all failed jobs"
     Print(ts + msg + ns, True)
-    
+
+    cwd = os.cwd()
+    os.chdir(opts.dirName)
     # For-loop: All job resubmits
     for i, jdl in enumerate(jdlList, 1):
-        cmd = "condor_submit %s" % (jdl)
+        cmd = "condor_submit %s" % (os.path.basename(jdl))
         Print(ss + cmd + ns, i==0)
         if opts.resubmit:
             process = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
             output, err = process.communicate()
+    os.chdir(cwd)
 
     #print
     # For-loop: All EOS files to be removed
@@ -265,49 +273,65 @@ def GetNumberOfJobs(dirName, fileName="run*.jdl"):
     return nJobs
 
 
-def GetSummary(nRunTotal, nDoneTotal, infoDict, printSummary=True):
+def PrintSummaryTable(nTotal, nDone, nFilesEOS, nFail, nActive, nRun, nHeld, nIdle, nIO, condorQ, printSummary=True):
+
     Verbose("Fill the dictionaries with all the information retrieved", True)
     jobsDict = {}
-    jobsDict["total"]     = str( nRunTotal )
-    jobsDict["done"]      = str( nDoneTotal )
-    jobsDict["run"]       = str( infoDict["running"] )
-    jobsDict["fail"]      = str( nRunTotal-nDoneTotal-infoDict["running"] )
-    jobsDict["removed"]   = str( infoDict["removed"] )
-    jobsDict["idle"]      = str( infoDict["idle"] ) 
-    jobsDict["held"]      = str( infoDict["held"] )
-    jobsDict["suspended"] = str( infoDict["suspended"] )
-
+    jobsDict["total"]     = str( nTotal )
+    jobsDict["done"]      = str( nDone )
+    jobsDict["eos"]       = str( nFilesEOS )
+    jobsDict["fail"]      = str( nFail )
+    jobsDict["active"]    = str( nActive )
+    jobsDict["run"]       = str( nRun ) 
+    jobsDict["idle"]      = str( nIdle )
+    jobsDict["IO"]        = str( nIO ) #Input/Output
+    jobsDict["held"]      = str( nHeld )
 
     # Create table
     table   = []
-    align  = "{:>20} {:>20} {:>20} {:>20} {:>20} {:>20} {:>20}"
-    header = align.format(ns + "TOTAL" + ns, ss + "DONE" + ns, ts + "RUN" + ns, es + "FAIL" + ns, ns + "REMOVE" + ns, ns + "SUSPEND" + ns, ns + "IDLE" + ns )
+    align  = "{:^20} {:^20} {:^20} {:^20} {:^20} : {:^20} {:^20} {:^20} {:^20}"
+    header = align.format(ns + "TOTAL" + ns, ss + "DONE" + ns, ss + "EOS" + ns, es + "FAIL" + ns, hs + "ACTIVE" + ns, ts + "RUN" + ns, ls + "HELD" + ns, ns + "I/O" + ns, ns + "IDLE" + ns )
     hLine  = "="*80
-    # table.append("{:^80}".format(opts.dirName))
+    table.append("{:^80}".format(opts.dirName))
     table.append(hLine)
     table.append(header)
     table.append(hLine)
     for k in jobsDict:
-        table.append( align.format(ns + jobsDict["total"] + ns, ss + jobsDict["done"] + ns, ts + jobsDict["run"] + ns, es + jobsDict["fail"] + ns, ns + jobsDict["removed"] + ns, ns + jobsDict["suspended"] + ns, ns + jobsDict["idle"] + ns ) )
-    table.append(hLine)
+        table.append( align.format(ns + jobsDict["total"] + ns, ss + jobsDict["done"] + ns, ss + jobsDict["eos"] + ns, es + jobsDict["fail"] + ns, hs + jobsDict["active"] + ns, ts + jobsDict["run"] + ns, ls + jobsDict["held"] + ns, ns + jobsDict["IO"] + ns, ns + jobsDict["idle"] + ns ) )
+        break
+    table.append("\n")
+    #table.append(hLine)
+
+    # For-loop: All table rows
     for i, row in enumerate(table, 1):
         Print(row, i==1)
 
     return jobsDict, table
 
 
-def GetOutputFiles(eosdir):
+def GetFilesInEOS(eosdir):
     cmd = "eos root://cmseos.fnal.gov ls %s" % (eosdir)
     process = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
     output, err = process.communicate()
 
     # Get list of contents 
-    output = output.splitlines()
+    outputAll = output.splitlines()
+    output = []
 
     # Remove anything not ending in ".tgz"
-    for o in output:
+    for o in outputAll:
+        # Is this a file?
         if o.endswith(".tgz") == False:
-            output.remove(o)
+            #output.remove(o)
+            continue
+
+        # Does the filebelong to this specific job?
+        if opts.job not in o:
+            #output.remove(o)
+            continue
+        output.append(o)
+        #print "%s (%s)" % (o, opts.job)
+
     
     # Separate into "Hplus2tbAnalysis" and "FakeBMeasurement"
     outputH2tb  = []
@@ -325,10 +349,11 @@ def GetOutputFiles(eosdir):
     # If no results found
     if len(output) < 1:
         return [], [], []
+    
     return output, outputH2tb, outputFakeB
     
 
-def GetJobStatusDict(username, keyword="Total for query: "):
+def GetCondorQDict(username, keyword="Total for query: "):
     '''
     When executing:
     condor_q --submitter aattikis
@@ -338,47 +363,75 @@ def GetJobStatusDict(username, keyword="Total for query: "):
 
     this is the starting point forthis method
     '''
-    
-    # Define variables
-    infoDict  = {}
 
-    # Executed command
-    cmd     = "condor_q --submitter %s" % username
+    # The "most -w" option will cause (or force) long lines to wrap instead of being truncated!
+    # https://stackoverflow.com/questions/2159860/viewing-full-output-of-ps-command
+    opts.job = opts.dirName.split("_Syst")[0] # see submitCondor.py to undertand why
+    cmd      = "condor_q --submitter %s most -w" % (username)
+    Verbose(cmd, True)
+
+    # Calling subprocess.Popen() works but truncates output!
     process = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
-
     output, err = process.communicate()
     if len(err) > 0:
         raise Exception(es + err + ns)
+
+    # Define variables
+    condorQ = {}
+    lpc     = "None"
+
+    # For-loop: All output lines
+    for iLine, l in enumerate(output.splitlines(), True):
+
+        # Definitions
+        if "fnal.gov" in l:
+            m = re.search('cmslpc(.+?).fnal.gov', l)
+            if m:
+                lpc = m.group(1)
+
+        # Inspect only jobs related to this directory!
+        if opts.job in l:
+            Verbose(es + l + ns, iLine==1)
+
+            # For command range
+            nWords = len(l.split())-8
+            cmd    = " ".join(l.split()[-nWords:])
+                    
+            # Crete/Fill dictionaries
+            if len(condorQ) < 1:
+                condorQ["ID"]         = [ l.split()[0] ]
+                condorQ["OWNER"]      = [ l.split()[1] ]
+                condorQ["SUBMITDATE"] = [ l.split()[2] ]
+                condorQ["SUBMITTIME"] = [ l.split()[3] ]
+                condorQ["RUNTIME"]    = [ l.split()[4] ]
+                condorQ["STATUS"]     = [ l.split()[5] ]
+                condorQ["PRI"]        = [ l.split()[6] ]
+                condorQ["SIZE"]       = [ l.split()[7] ]
+                condorQ["CMD"]        = [ cmd ] 
+                condorQ["LPC"]        = [ lpc ] 
+            else:
+                condorQ["ID"].append(l.split()[0])
+                condorQ["OWNER"].append(l.split()[1])
+                condorQ["SUBMITDATE"].append(l.split()[2])
+                condorQ["SUBMITTIME"].append(l.split()[3])
+                condorQ["RUNTIME"].append(l.split()[4])
+                condorQ["STATUS"].append(l.split()[5])
+                condorQ["PRI"].append(l.split()[6])
+                condorQ["SIZE"].append(l.split()[7])
+                condorQ["CMD"].append( cmd )
+                condorQ["LPC"].append( lpc )
+                
+    # For-loop: All keys
+    if opts.verbose:
+        for i, key in enumerate(condorQ.keys(), 1):
+            Print("condorQ[%s] = %s" % (key, condorQ[key]), i==1)
+
+    if len(condorQ.keys()) < 1:
+        Verbose("No active jobs found!", True)
+        return {}
+        # raise Exception("Something went wrong and could not determing the jobs running, idle, held, etc..")
     else:
-        filledOnce = False
-        for l in output.splitlines():
-            if keyword in l and "Total for all users" not in l:
-                infoList  = [int(s) for s in l.split() if s.isdigit()]
-
-                # Fill the dictionary
-                if filledOnce:
-                    infoDict["jobs"]      += infoList[0]
-                    infoDict["completed"] += infoList[1]
-                    infoDict["removed"]   += infoList[2]
-                    infoDict["idle"]      += infoList[3]
-                    infoDict["running"]   += infoList[4]
-                    infoDict["held"]      += infoList[5]
-                    infoDict["suspended"] += infoList[6]
-                else:
-                    infoDict["jobs"]      = infoList[0]
-                    infoDict["completed"] = infoList[1]
-                    infoDict["removed"]   = infoList[2]
-                    infoDict["idle"]      = infoList[3]
-                    infoDict["running"]   = infoList[4]
-                    infoDict["held"]      = infoList[5]
-                    infoDict["suspended"] = infoList[6]
-                filledOnce = True
-        else:
-            Verbose("Found zero jobs", True)
-
-    if len(infoDict.keys()) < 1:
-        raise Exception("Something went wrong and could not determing the jobs running, idle, held, etc..")
-    return infoDict
+        return condorQ
 
 
 def GetSystToOutputDict(filesList):
@@ -506,6 +559,72 @@ def RetrieveUnpackCleanupFiles(filesSyst, analysis):
     print
     return
 
+
+def PrintCondorQ(condorQ):
+
+    # Define variables
+    nActive = 0
+    nRun    = 0 
+    nHeld   = 0
+    nIdle   = 0
+    nIO     = 0 # The arrow statuses mean the job is transferring input or output.
+    table   = []
+    align   = "{:>3} {:^10} {:^10} {:^10} {:^15} {:^10} {:^15} {:^10} {:>25} "
+    header  = align.format("#", "LPC", "ID", "SUBMITTED", "RUNTIME", "STATUS", "ANALYSIS", "GROUP", "PSET")
+    hLine   = "="*150
+    table.append("{:^150}".format(opts.dirName))
+    table.append(hLine)
+    table.append(header)
+    table.append(hLine)
+
+    # Sanity check
+    if len(condorQ.values()) < 1:
+        msg = "No active jobs found!"
+        Print(es + msg + ns, True)
+        return nActive, nRun, nHeld, nIdle, nIO
+
+    # For-loop: All values for all keys
+    nActive = len(condorQ["STATUS"])
+    for i in range(0, nActive): #len(condorQ.values())-2):
+
+        if opts.verbose:
+            PrintFlushed("%d / %d" % (i+1, nActive), i==0)
+
+        status = condorQ["STATUS"][i] 
+
+        if status== "R":
+            nRun += 1        
+        elif status== "H":
+            nHeld += 1
+        elif status== "I":
+            nIdle += 1
+        elif "<" in status:
+            # Each individual condor job will transfer files from NFS disk to the worker node before starting the job 
+            nIO += 1
+        else:
+            raise Exception("Unexpected job STATUS = \"%s\"" % (condorQ["STATUS"][i]) )
+    
+        # Fill the table
+        analysis = condorQ["CMD"][i].split()[1]
+        pset     = condorQ["CMD"][i].split()[2]
+        group    = condorQ["CMD"][i].split()[3]
+        table.append(align.format(i+1, condorQ["LPC"][i], condorQ["ID"][i], condorQ["SUBMITDATE"][i] + " " + condorQ["SUBMITTIME"][i], condorQ["RUNTIME"][i], condorQ["STATUS"][i], analysis, group, pset) )
+
+        if i == (nActive-1):
+            Verbose("", False)
+    table.append(hLine)
+
+    # For-loop: All rows
+    for i, row in enumerate(table, 1):
+        Print(row, i==1)
+
+    # Sanity Check:
+    if nActive == (nRun + nHeld + nIdle + nIO):
+        return  nActive, nRun, nHeld, nIdle, nIO
+    else:
+        raise Exception("Jobs don't add up!")
+
+
 def main(opts):
     
     Verbose("Check that a CMS VO proxy exists (voms-proxy-init)", True)
@@ -519,7 +638,6 @@ def main(opts):
         Print("Directory %s does not exist! EXIT" % (es + opts.dirName + ns), True)
         os.mkdir(opts.dirName)
         sys.exit()
-
 
     # Determine total number of jobs (using jdl files)
     nRunH2tb  = GetNumberOfJobs(opts.dirName, "run_Hplus2tbAnalysis*.jdl")
@@ -557,43 +675,41 @@ def main(opts):
     nFailH2tb  = 0
     nFailFakeB = 0
     if nErrorH2tb > 0:
-        nFailH2tb  = GetNumberOfJobsWithKeyword(opts.dirName, "error_Hplus2tbAnalysis*.txt", "Results are in")
+        nFailH2tb  = GetNumberOfJobsWithKeyword(opts.dirName, "error_Hplus2tbAnalysis*.txt", "There was a crash.")
     if nErrorFakeB > 0:
-        nFailFakeB = GetNumberOfJobsWithKeyword(opts.dirName, "error_FakeBMeasurement*.txt", "Results are in")
+        nFailFakeB = GetNumberOfJobsWithKeyword(opts.dirName, "error_FakeBMeasurement*.txt", "There was a crash.")
     nFailTotal = nFailH2tb + nFailFakeB
     Verbose("Found %s%d%s jobs failed (Hplus2tbAnalysis=%d, FakeBMeasurement=%d)" % (ts, nFailTotal, ns, nFailH2tb, nFailFakeB), False)
 
 
     Verbose("Create a job status summary table", True)
-    infoDict  = GetJobStatusDict(opts.userName)
-    table   = []
-    align  = "{:>15} {:>15} {:>15} {:>15} {:>15} {:>15} {:>15}"
-    header = align.format("Jobs", "Completed", "Removed", "Idle", "Running", "Held", "Suspended")
-    hLine  = "="*15*(7+1)
-    table.append(hLine)
-    table.append(header)
-    table.append(hLine)
-    for k in infoDict:
-        table.append(align.format(infoDict["jobs"], infoDict["completed"], infoDict["removed"], infoDict["idle"], infoDict["running"], infoDict["held"], infoDict["suspended"]) )
-    table.append(hLine)
-    for i, row in enumerate(table, 1):
-        Print(row, i==1)
+    condorQ  = GetCondorQDict(opts.userName)
 
-        
+
+    Verbose("Printing currently active jobs (from \"condor_q\" output)", True)
+    nActive, nRun, nHeld, nIdle, nIO = PrintCondorQ(condorQ)
+
+
+    Verbose("Determine number of output files in EOS", True)
+    files, filesH2tb, filesFakeB = GetFilesInEOS(opts.eosdir)
+    nFilesEOS = len(files)
+    Verbose("Found %d files in %s (Hplus2tbAnalysis=%d, FakeBMeasurement=%d)" % (len(files), opts.eosdir, len(filesH2tb), len(filesFakeB)), True)
+
+
     Verbose("Get the jobs dictionary and the summary table", True)
-    jobsDict, table = GetSummary(nRunTotal, nDoneTotal, infoDict, printSummary=True)
+    jobsDict, table = PrintSummaryTable(nRunTotal, nDoneTotal, nFilesEOS, nFailTotal, nActive, nRun, nHeld, nIdle, nIO, condorQ, printSummary=True)
 
 
     Verbose("Get the failed jobs", True)
     jdlList, errList, outList, logList, eosList = GetJobsWithKeyword(opts.dirName, analysis="Hplus2tbAnalysis", keyword="There was a crash.") 
     ResubmitFailedJobs(jdlList, errList, outList, logList, eosList)
 
+
     jdlList_, errList_, outList_, logList_, eosList_ = GetJobsWithKeyword(opts.dirName, analysis="FakeBMeasurement", keyword="There was a crash.") 
     ResubmitFailedJobs(jdlList_, errList_, outList_, logList_, eosList_)
 
-
     if opts.getoutput:
-        if nErrorH2tb > 0 or nErrorFakeB > 0:
+        if nFailH2tb > 0 or nFailFakeB > 0:
             Print(es + "Not all jobs are in \"done\" mode. Aborting retrieval of output!" + ns, True)
             return
 
@@ -602,10 +718,6 @@ def main(opts):
         else:
             Verbose("Found %s jobs in %s state!" % (jobsDict["done"], ss + "DONE" + ns), True)
             
-        files, filesH2tb, filesFakeB = GetOutputFiles(opts.eosdir)
-        Print("Found %d files in %s (Hplus2tbAnalysis=%d, FakeBMeasurement=%d)" % (len(files), opts.eosdir, len(filesH2tb), len(filesFakeB)), True)
-        
-
         Verbose("Get mapping of systematic->fileList", True)
         filesSystH2tb  = GetSystToOutputDict(filesH2tb)
         filesSystFakeB = GetSystToOutputDict(filesFakeB)
@@ -669,6 +781,11 @@ if __name__ == "__main__":
     if opts.dirName == None:
         Print("Please provide a directory as argument (-d or --dirName option). EXIT!", True)
         sys.exit()
+
+    if not os.path.isdir(opts.dirName):
+        Print("The directory %s does not exist. EXIT!" % (opts.dirName), True)
+        sys.exit()
+
 
     if opts.userName == None:
         opts.userName = getpass.getuser()

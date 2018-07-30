@@ -445,6 +445,7 @@ def GetHistoKwargs(histoName, opts):
         _xlabel  = "H_{T} (GeV)"
         myBins   = systematics._dataDrivenCtrlPlotBinning["HT_AfterAllSelections"]
         _cutBox  = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
 
     if "met" in h.lower():
         _xlabel  = "E_{T}^{miss} (GeV)"
@@ -496,7 +497,7 @@ def GetHistoKwargs(histoName, opts):
         _xlabel = "m_{jjbb} (%s)" % (_units)
         #myBins  = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetMass_AfterAllSelections"]
         myBins  = systematics.getBinningForTetrajetMass(0)
-        ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
+        ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")        
 
     _kwargs["opts"]    = {"ymin": _yMin, "ymax": _yMax}
     _kwargs["xlabel"]  = _xlabel
