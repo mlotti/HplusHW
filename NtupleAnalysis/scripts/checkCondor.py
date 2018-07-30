@@ -205,11 +205,11 @@ def ResubmitFailedJobs(jdlList, errList, outList, logList, eosList):
         msg = "Copy/paste the commands below to resubmit & clean all failed jobs"
     Print(ts + msg + ns, True)
 
-    cwd = os.cwd()
+    cwd = os.getcwd()
     os.chdir(opts.dirName)
     # For-loop: All job resubmits
     for i, jdl in enumerate(jdlList, 1):
-        cmd = "condor_submit %s" % (os.path.basename(jdl))
+        cmd = "cd %s && condor_submit %s" % (opts.dirName, os.path.basename(jdl))
         Print(ss + cmd + ns, i==0)
         if opts.resubmit:
             process = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
@@ -586,7 +586,7 @@ def PrintCondorQ(condorQ):
     # For-loop: All values for all keys
     nActive = len(condorQ["STATUS"])
     for i in range(0, nActive): #len(condorQ.values())-2):
-
+        
         if opts.verbose:
             PrintFlushed("%d / %d" % (i+1, nActive), i==0)
 
@@ -615,8 +615,19 @@ def PrintCondorQ(condorQ):
     table.append(hLine)
 
     # For-loop: All rows
-    for i, row in enumerate(table, 1):
-        Print(row, i==1)
+    for i, row in enumerate(table, 0):
+        colour = ns
+
+        if i > 3: # header and 2xhLines
+            if "R" in row:
+                colour = ts
+            elif "H" in row:
+                colour = ls
+            else:
+                colour = hs
+        else:
+            pass
+        Print(colour + row + ns, i==0)
 
     # Sanity Check:
     if nActive == (nRun + nHeld + nIdle + nIO):
