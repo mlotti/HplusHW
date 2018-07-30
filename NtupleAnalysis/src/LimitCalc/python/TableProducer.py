@@ -1281,7 +1281,7 @@ class TableProducer:
                                ["pdf_VV", "Diboson pdf"],
                                ["lumi_13TeV", "luminosity (13 TeV)"],
                                ["CMS_HPTB_pdf_HPTB"  , "pdf acceptance (signal)"],
-                               ["CMS_HPTB_pdf_top"   , "pdf acceptance (top"],
+                               ["CMS_HPTB_pdf_top"   , "pdf acceptance (top)"],
                                ["CMS_HPTB_pdf_ewk"   , "pdf acceptance (EWK)"],
                                ["CMS_HPTB_mu_RF_HPTB", "RF scale acceptance (signal)"],
                                ["CMS_HPTB_mu_RF_top" , "RF scale acceptance (top)"],

@@ -480,8 +480,9 @@ def GetHistoKwargs(histoName, ext, opts):
         elif "jet7" in hName:
             _opts["xmax"] = 200.0
         elif "tetrajet" in hName:
-            _opts["xmax"] = 1000.0
-            _cutBox = {"cutValue": 200.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+            #_opts["xmax"] = 1000.0
+            #_cutBox = {"cutValue": 200.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+            _rebinX  = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetPt_AfterAllSelections"]
             ROOT.gStyle.SetNdivisions(8, "X")
         elif "trijet" in hName:
             _rebinX  = systematics._dataDrivenCtrlPlotBinning["LdgTrijetPt_AfterAllSelections"]

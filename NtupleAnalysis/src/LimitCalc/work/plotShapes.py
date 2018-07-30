@@ -291,8 +291,8 @@ class DatasetContainer:
         def rebin(h, rebinList):
             if rebinList == None or h == None:
                 return h
-            myArray = array.array("d",rebinList)
-            hnew = h.Rebin(len(rebinList)-1,h.GetTitle(),myArray)
+            myArray = array.array("d", rebinList)
+            hnew = h.Rebin(len(rebinList)-1, h.GetTitle(), myArray)
             h.Delete()
             return hnew
         self.Verbose("Doing plots for dataset \"%s\"" % (self._name), False)
@@ -577,8 +577,8 @@ def main(opts):
     # Print signal table
     Print("Max contracted uncertainty for signal:", True)    
     table = []
-    align = "{:>15} {:>15} {:>15}"
-    hLine = "="*50
+    align = "{:>30} {:>15} {:>15}"
+    hLine = "="*60
     table.append(hLine)
     table.append(align.format("Systematic", "Minimum", "Maximum"))
     table.append(hLine)
