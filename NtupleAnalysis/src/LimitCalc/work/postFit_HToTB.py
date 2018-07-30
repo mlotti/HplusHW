@@ -9,7 +9,7 @@ text2workspace.py combine_datacard_hplushadronic_m500.txt -o ws.root
 
 This creates an output ROOT file called "ws.root" which we will use as
 input to combine to produced fitDiagnonstics.root file as follows:
-combine -M FitDiagnostics --robustFit=1 --X-rtd MINIMIZER_analytic ws.root --saveShapes --saveWithUncertainties --saveOverallShapes --saveNormalizations --saveWorkspace --plots --expectSignal=0 --rMin=-4 
+combine -M FitDiagnostics --robustFit=1 --X-rtd MINIMIZER_analytic ws.root --saveShapes --saveWithUncertainties --saveOverallShapes --saveNormalizations --saveWorkspace --plots --expectSignal=0 --rMin=-10
 
 The fitDiagnostics.root is created, this contains the post-fit histos and is the input for this plotting script.
 
