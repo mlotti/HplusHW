@@ -124,7 +124,7 @@ def getFakeBSystematics(myTTBarSystematics, OptionShapeSystematics, verbose=Fals
 OptionTest                             = False # [default: False]
 OptionPaper                            = True  # [default: True]
 OptionMergeRares                       = True  # [default: True]
-OptionIncludeSystematics               = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
+OptionIncludeSystematics               = True # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionShapeSystematics                 = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionDoControlPlots                   = True  # [default: True]   (Produce control plots defined at end of this file)
 MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
@@ -1499,4 +1499,4 @@ if OptionTest:
     ControlPlots.append(hLdgTopMass)
     ControlPlots.append(hMET)
     ControlPlots.append(hHT)
-    MassPoints = [500, 650]
+    MassPoints = [500]#, 650]
