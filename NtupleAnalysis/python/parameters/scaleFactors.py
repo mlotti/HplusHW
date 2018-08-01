@@ -411,7 +411,7 @@ def _setupToptagMisid(topTagPset, topTagMisidFilename, direction, variationInfo)
         dsf    = (sfUp-sf)
         sfDown = sf-dsf                # gives symmetric shape
         #sfDown = effDataDown / effMC  # gives asymmetric shape 
-        Print("pT = %.1f, sf = %0.3f, sf+ = %0.3f, sf- = %0.3f" % (pT, sf, sfUp, sfDown), i==0)
+        Verbose("pT = %.1f, sf = %0.3f, sf+ = %0.3f, sf- = %0.3f" % (pT, sf, sfUp, sfDown), i==0)
 
         result["SF"].append(sf)
         result["SFUp"].append(sfUp)
@@ -585,7 +585,7 @@ def _setupToptagEfficiency(topTagPset, topTagEfficiencyFilename, direction, vari
         dsf    = (sfUp-sf)
         sfDown = sf-dsf                # gives symmetric shape
         #sfDown = effDataDown / effMC  # gives asymmetric shape 
-        Print("pT = %.1f, sf = %0.3f, sf+ = %0.3f, sf- = %0.3f" % (pT, sf, sfUp, sfDown), i==0)
+        Verbose("pT = %.1f, sf = %0.3f, sf+ = %0.3f, sf- = %0.3f" % (pT, sf, sfUp, sfDown), i==0)
         
         result["SF"].append(sf)
         result["SFUp"].append(sfUp)
