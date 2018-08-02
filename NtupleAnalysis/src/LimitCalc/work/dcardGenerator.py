@@ -278,7 +278,7 @@ def main(opts, moduleSelector, multipleDirs):
                             raise Exception(ErrorLabel() + msg +NormalStyle())
 
                     Verbose("Create the datacard generator & check config file contents")
-                    dcgen = DataCard.DataCardGenerator(opts, config, qcdMethod, verbose=opts.verbose)
+                    dcgen = DataCard.DataCardGenerator(opts, config, qcdMethod) #, verbose=opts.verbose)
 
                     # Tweak to provide the correct datasetMgrCreator to the generator
                     qcd = "Unset"

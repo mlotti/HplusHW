@@ -140,7 +140,7 @@ class DatasetMgrCreatorManager:
             #    myProperty = myDsetMgr.getAllDatasets()[0].getProperty("analysisName")
 
         # Sanity check for luminosity
-        self._checkLuminosityMatching()
+        #self._checkLuminosityMatching()
         return
 
     
@@ -199,8 +199,17 @@ class DatasetMgrCreatorManager:
                 self._mainCounterTables.append(None)
             else:
                 # Obtain main counter tables
+		print "taalla jokin normitus"
+		print "------------"
                 myEventCounter = counter.EventCounter(self.getDatasetMgr(i), countNameFunction=None, counters=None, mainCounterOnly=True)
-                myEventCounter.normalizeMCToLuminosity(self.getLuminosity(i))
+                print self.getDatasetMgr(i)
+		print "------------"
+		print "lumi", self.getLuminosity(i)
+		myEventCounter.normalizeMCToLuminosity(self.getLuminosity(i))
+		print myEventCounter
+		print "------------"
+		print "myEventCounter.getMainCounterTable() ", myEventCounter.getMainCounterTable()
+		print "*------------*"
                 self._mainCounterTables.append(myEventCounter.getMainCounterTable())
 
     def getNmax(self):
@@ -307,8 +316,8 @@ class DatasetMgrCreatorManager:
         same for all dataset managers
         '''
         # For-loop: All lumis
-        for i, lumi in enumerate(self._luminosities, 0):
-            self.Verbose("Lumi for dataset manager \"%s\" is set to %.1f 1/pb" % (self.getDatasetMgrLabel(i), lumi), i==0)
+        #for i, lumi in enumerate(self._luminosities, 0):
+        #    self.Verbose("Lumi for dataset manager \"%s\" is set to %.1f 1/pb" % (self.getDatasetMgrLabel(i), lumi), i==0)
 
         # Compare luminosities to signal analysis
         if len(self._luminosities) == 0:
@@ -448,6 +457,11 @@ class DataCardGenerator:
                     if not h.GetXaxis().GetBinLowEdge(i) + 0.0001 < myJsonBins[myWeightBin+1]["mt"]:
                         myWeightBin += 1
                 self.Print("hbin edge=",h.GetXaxis().GetBinLowEdge(i),"weight edge=",myJsonBins[myWeightBin]["mt"], True)
+
+		print "-----------------"
+		print "ollaankos asettamassa efficiencyja?" #(tanne ei tulla)
+		print "-----------------"
+
                 h.SetBinContent(i, h.GetBinContent(i) * myJsonBins[myWeightBin]["efficiency"])
             return
 
@@ -455,7 +469,7 @@ class DataCardGenerator:
         self._getFinalOutputPrefix(era, searchMode, optimizationMode)
 
         self.Verbose("Get dataset managers for the era / searchMode / optimizationMode combination")
-        self._dsetMgrManager.obtainDatasetMgrs(era, searchMode, optimizationMode, self.verbose)
+        self._dsetMgrManager.obtainDatasetMgrs(era, searchMode, optimizationMode)#, self.verbose)
 
         self.Verbose("Create columns (dataset groups)")
         self.createDatacardColumns()

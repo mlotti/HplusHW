@@ -989,16 +989,16 @@ class TableProducer:
                         HW = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                     elif c.getLabel().startswith("HST") or c.getLabel().startswith("CMS_Hptntj_HST"):
                         HST = c.getCachedShapeRootHistogramWithUncertainties().Clone()
-                    elif c.typeIsQCD() or c.typeIsFakeB():
-                        containsQCDdataset = True
-                        if QCD == None:
-                            try:
-                                QCD = c.getCachedShapeRootHistogramWithUncertainties().Clone()
-                            except AttributeError:
-                                msg = "Did you create the pseudo-Multicrab containing the correctly normalized QCD background? Step 3) in the QCD background measurement instructions."
-                                raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
-                        else:
-                            QCD.Add(c.getCachedShapeRootHistogramWithUncertainties())
+                    #elif c.typeIsQCD() or c.typeIsFakeB():
+                    #    containsQCDdataset = True
+                    #    if QCD == None:
+                    #        try:
+                    #            QCD = c.getCachedShapeRootHistogramWithUncertainties().Clone()
+                    #        except AttributeError:
+                    #            msg = "Did you create the pseudo-Multicrab containing the correctly normalized QCD background? Step 3) in the QCD background measurement instructions."
+                    #            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
+                    #    else:
+                    #        QCD.Add(c.getCachedShapeRootHistogramWithUncertainties())
                     elif c.typeIsEWK() or (c.typeIsEWKfake() and self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated") or c.typeIsEWKMC() or c.typeIsGenuineB():
                         # fixme: what a mess! c.typeIsEWKMC() and c.typeIsGenuineB() ORs added for h2tb. must make a proper code!
                         if Embedding == None:
@@ -1010,9 +1010,10 @@ class TableProducer:
                             EWKFakes = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                         else:
                             EWKFakes.Add(c.getCachedShapeRootHistogramWithUncertainties())
-                    else:
-                        msg = "Unknown dataset type for dataset %s!%s" % (c.getLabel(), ShellStyles.NormalStyle())
-                        raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
+                    #else:
+		    #	print "yllatys"
+                    #    msg = "Unknown dataset type for dataset %s!%s" % (c.getLabel(), ShellStyles.NormalStyle())
+                    #    raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
                     
 
             # Calculate signal yield

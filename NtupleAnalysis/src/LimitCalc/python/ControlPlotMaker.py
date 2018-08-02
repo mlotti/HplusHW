@@ -17,11 +17,18 @@ import os
 import sys
 import ROOT
 
+
+print "-----"
+print "nyt tehdaan controlliplotteja jee!"
+print "-----"
+
 _legendLabelQCD = "QCD" 
-_legendLabelQCDdata = "Mis-ID. #tau_{h} (data)" 
+_legendLabelQCDdata = "QCD MC"
 _legendLabelEmbedding = "EWK+t#bar{t} with #tau_{h} (data)"
 _legendLabelEWKFakes = "EWK+t#bar{t} no #tau_{h} (sim.)"
 #_legendLabelEWKFakes = "EWK+tt with e/#mu/jet#rightarrow#tau_{h} (sim.)"
+
+print "testataanpas: ", _legendLabelQCDdata 
 
 drawPlot = plots.PlotDrawer(ratio=True, ratioYlabel="Data/Bkg. ", ratioCreateLegend=True,
                             ratioType="errorScale", ratioErrorOptions={"numeratorStatSyst": False},
@@ -99,14 +106,18 @@ class ControlPlotMaker:
                                 else:
                                     hSignal.Add(h)
                             elif c.typeIsQCDinverted():
+				print "------------"
+				print "ollaanko nyt vaarassa paikassa"
                                 if hQCDdata == None:
                                     hQCDdata = h.Clone()
                                 else:
                                     hQCDdata.Add(h)
                             elif c.typeIsQCD():
                                 if hQCD == None:
+				    print "hQCD add kai onnistuu"
                                     hQCD = h.Clone()
                                 else:
+				    print "hQCD add onnistuu"
                                     hQCD.Add(h)
                             elif c.typeIsEWK():
                                 #print "EWK genuine:",c.getLabel(),h.getRootHisto().Integral(0,h.GetNbinsX()+2)

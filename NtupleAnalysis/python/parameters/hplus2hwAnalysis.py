@@ -17,7 +17,7 @@ muonSelection = PSet(
             muonEtaCut = 2.1,
                 muonID = "muIDMedium", # options: muIDLoose, muIDMedium, muIDTight
          muonIsolation = "tight", # for selecting, not vetoing
-	muonIsolType   = "mini",      # options: "mini", "default" 
+	muonIsolType   = "default",      # options: "mini", "default" 
 )
 
 
@@ -26,19 +26,18 @@ muonSelection = PSet(
 ##########
 
 tauSelection = PSet(
-#  applyTriggerMatching = True,
-#   triggerMatchingCone = 0.1,   # DeltaR for matching offline tau with trigger tau
+  applyTriggerMatching = False,
+   triggerMatchingCone = 0.0,   # DeltaR for matching offline tau with trigger tau
               tauPtCut = 20.0,
              tauEtaCut = 2.1,
-#        tauLdgTrkPtCut = 10.0,
-#                prongs = 13,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
-#                prongs = 1,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
-#                  rtau = 0.75,   # to disable set to 0.0
-#  againstElectronDiscr = "againstElectronLooseMVA6",
-#  againstElectronDiscr = "",
-#      againstMuonDiscr = "againstMuonLoose3",
+        tauLdgTrkPtCut = 10.0,
+                prongs = 1,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
+                  rtau = 0.0,   # to disable set to 0.0
+#  againstElectronDiscr = "againstElectronTightMVA6",
+  againstElectronDiscr = "againstElectronLooseMVA6",
+      againstMuonDiscr = "againstMuonTight",
 #        isolationDiscr = "byMediumIsolationMVA3oldDMwLT",
-#        isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
+        isolationDiscr = "byLooseIsolationMVArun2v1DBnewDMwLT",
 )
 
 ##########

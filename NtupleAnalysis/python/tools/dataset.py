@@ -675,6 +675,7 @@ def _normalizeToFactor(h, f):
     ROOT.gErrorIgnoreLevel = ROOT.kError
     h.Sumw2() # errors are also scaled after this call 
     ROOT.gErrorIgnoreLevel = backup
+    print "nyt normitetaan arvolla: ", f
     h.Scale(f)
     return h
 
@@ -2084,7 +2085,8 @@ class DatasetRootHisto(DatasetRootHistoBase):
         if self.normalization == "byCrossSection":
             return h
         elif self.normalization == "toLuminosity":
-            return _normalizeToFactor(h, self.luminosity)
+            print "vihdoin taisi osua"
+	    return _normalizeToFactor(h, self.luminosity)
         else:
             raise Exception("Internal error")
 
@@ -2115,7 +2117,7 @@ class DatasetRootHisto(DatasetRootHistoBase):
     def normalizeToLuminosity(self, lumi):
         if not self.dataset.isMC():
             raise Exception("Can't normalize non-MC histogram to luminosity")
-
+	print "ja nyt ollaan datasets.py:ssa"
         self.normalization = "toLuminosity"
         self.luminosity = lumi
     
@@ -2547,7 +2549,8 @@ class DatasetRootHistoAddedMC(DatasetRootHistoCompoundBase):
         if self.normalization == "byCrossSection":
             return hsum
         elif self.normalization == "toLuminosity":
-            return _normalizeToFactor(hsum, self.luminosity)
+            print "no nyt normitetaan huolella je!"
+	    return _normalizeToFactor(hsum, self.luminosity)
         else:
             raise Exception("Internal error, got normalization %s" % self.normalization)
 

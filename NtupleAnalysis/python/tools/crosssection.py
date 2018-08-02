@@ -117,6 +117,9 @@ class CrossSectionList:
 # [18] top mass 172.5, https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
 # [19] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
 
+print "xsection listaus "
+print "----------------"
+
 backgroundCrossSections = CrossSectionList(
     CrossSection("QCD_Pt_15to30", {
             "13": 2237000000., # [12]
@@ -221,8 +224,9 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("WW", {
             "7": 43.0, # [3]
             "8": 54.838, # [9], took value for CTEQ PDF since CTEQ6L1 was used in pythia simulation
-            #"13": 64.46, # [13] from Andrea: WW -> lnqq : 52pb + WW -> lnln : 12.46pb
+#            "13": 64.46, # [13] from Andrea: WW -> lnqq : 52pb + WW -> lnln : 12.46pb
             "13": 118.7, # [13] from Andrea: WW -> lnqq : 52pb + WW -> lnln : 12.46pb
+
             }),
     CrossSection("WWToLNuQQ", {
             "13": 49.997, #[17] 
@@ -292,7 +296,7 @@ backgroundCrossSections = CrossSectionList(
             #}),
     CrossSection("WJetsToLNu", {
             "13": 20508.9*3, # [13,17] 20508.9*3, McM for the MLM dataset: 5.069e4
-            }),
+	    }),
     CrossSection("WJetsToLNu_HT_0To70", {
             "13": 20508.9*3, # set to inclusive xsect as HT_0To70 is skimmed from the inclusive sample
             }),
