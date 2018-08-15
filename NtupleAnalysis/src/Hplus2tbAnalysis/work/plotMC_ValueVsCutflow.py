@@ -153,18 +153,6 @@ def main(opts):
                     if not opts.acceptance:
                         datasetsMgr.remove(d.getName())
 
-        # For acceptance plot use all available masses
-        if opts.acceptance:
-            opts.signal = []
-            opts.signalMasses = []
-            for d in datasetsMgr.getAllDatasets():
-                if "ChargedHiggs" in d.getName():
-                    s = d.getName()
-                    dName = d.getName().replace("_ext1", "").split("M_")
-                    m = int(dName[-1])
-                    opts.signal.append(s)
-                    opts.signalMasses.append(m)
-
         if opts.verbose:
             datasetsMgr.PrintCrossSections()
             datasetsMgr.PrintLuminosities()
@@ -174,6 +162,18 @@ def main(opts):
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
 
         # Get Luminosity
+        # For acceptance plot use all available masses
+        if opts.acceptance:
+            opts.signal = []
+            opts.signalMasses = []
+            for d in datasetsMgr.getAllDatasets():
+                if "ChargedHiggs" in d.getName():
+                    #dName = d.getName().replace("_ext1", "").split("M_")
+                    dName = d.getName().split("M_")
+                    m = int(dName[-1])
+                    opts.signal.append(d.getName())
+                    opts.signalMasses.append(m)
+
         if opts.intLumi < 0:
             if "Data" in datasetsMgr.getAllDatasetNames():
                 opts.intLumi = datasetsMgr.getDataset("Data").getLuminosity()

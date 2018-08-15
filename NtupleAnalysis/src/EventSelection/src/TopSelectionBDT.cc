@@ -14,6 +14,7 @@
 TopSelectionBDT::Data::Data()
 :
   bPassedSelection(false),
+  bHasTwoTopsAndFreeB(false),
   bPassedBothMVA(false),
   bPassedLdgMVA(false),
   bPassedSubldgMVA(false),
@@ -62,11 +63,10 @@ TopSelectionBDT::Data::~Data() { }
 TopSelectionBDT::TopSelectionBDT(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix)
   : BaseSelection(eventCounter, histoWrapper, commonPlots, postfix),
     // Input parameters
-    cfg_MVACut(config, "MVACut"),
+    cfg_AnyTopMVACut(config , "AnyTopMVACut"),
+    cfg_TopMVACut(config    , "TopMVACut"),
     cfg_TopMassLowCut(config, "TopMassLowCut"),
     cfg_TopMassUppCut(config, "TopMassUppCut"),
-    cfg_WMassLowCut(config  , "WMassLowCut"),
-    cfg_WMassUppCut(config  , "WMassUppCut"),
     cfg_CSV_bDiscCut(config , "CSV_bDiscCut"),
     // Event counter for passing selection
     cPassedTopSelectionBDT(fEventCounter.addCounter("passed top selection ("+postfix+")")),
@@ -80,8 +80,6 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config, EventCounter& event
     cTopsAll(fEventCounter.addSubCounter("top candidates ("+postfix+")", "All candidates")),
     cTopsPassTopMassLowCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed top mass low cut")),
     cTopsPassTopMassUppCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed top mass upp cut")),
-    cTopsPassWMassLowCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed W mass low cut")),
-    cTopsPassWMassUppCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed W mass upp cut")),
     cTopsPassBDiscCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed b-disc cut")),
     cTopsPassBDTCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed BDT cut")),
     cTopsPassCrossCleanCut(fEventCounter.addSubCounter("top candidates ("+postfix+")", "Passed cross-clean cut")),
@@ -93,11 +91,10 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config, EventCounter& event
 TopSelectionBDT::TopSelectionBDT(const ParameterSet& config)
 : BaseSelection(),
   // Input parameters
-  cfg_MVACut(config, "MVACut"),
+  cfg_AnyTopMVACut(config , "AnyTopMVACut"), 
+  cfg_TopMVACut(config    , "TopMVACut"),
   cfg_TopMassLowCut(config, "TopMassLowCut"),
   cfg_TopMassUppCut(config, "TopMassUppCut"),
-  cfg_WMassLowCut(config  , "WMassLowCut"),
-  cfg_WMassUppCut(config  , "WMassUppCut"),
   cfg_CSV_bDiscCut(config , "CSV_bDiscCut"),
   // Event counter for passing selection
   cPassedTopSelectionBDT(fEventCounter.addCounter("passed top selection")),
@@ -111,8 +108,6 @@ TopSelectionBDT::TopSelectionBDT(const ParameterSet& config)
   cTopsAll(fEventCounter.addSubCounter("top candidates", "All candidates")),
   cTopsPassTopMassLowCut(fEventCounter.addSubCounter("top candidates", "Passed top mass low cut")),
   cTopsPassTopMassUppCut(fEventCounter.addSubCounter("top candidates", "Passed top mass upp cut")),
-  cTopsPassWMassLowCut(fEventCounter.addSubCounter("top candidates", "Passed W mass low cut")),
-  cTopsPassWMassUppCut(fEventCounter.addSubCounter("top candidates", "Passed W mass upp cut")),
   cTopsPassBDiscCut(fEventCounter.addSubCounter("top candidates", "Passed b-disc cut")),
   cTopsPassBDTCut(fEventCounter.addSubCounter("top candidates", "Passed BDT cut")),
   cTopsPassCrossCleanCut(fEventCounter.addSubCounter("top candidates", "Passed cross-clean cut")),
@@ -438,7 +433,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   TrijetSelection fAllCleanedTops;
 
   // For-loop: All b-jets
-  // for (auto& bjet: jets) // OldTop (Between ~March-June 2018)
+  // mafor (auto& bjet: jets) // OldTop (Between ~March-June 2018)
   for (auto& bjet: bjets) // NewTop (Testing since 01/06/2018)
     {
       int index1 = 0;
@@ -471,17 +466,13 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	      top_p4 = bjet.p4() + jet1.p4() + jet2.p4();
 	      w_p4   = jet1.p4() + jet2.p4();
 	      
-	      // Skip trijet combinations which do not fulfil the top invariant mass
+	      // Skip trijet combinations which do not fulfil the top invariant mass (lower threshold)
 	      if (!cfg_TopMassLowCut.passedCut(top_p4.M())) continue;
 	      cTopsPassTopMassLowCut.increment();
+
+	      // Skip trijet combinations which do not fulfil the top invariant mass (upper threshold)
 	      if (!cfg_TopMassUppCut.passedCut(top_p4.M())) continue;
 	      cTopsPassTopMassUppCut.increment();
-
-	      // Skip trijet combinations which do not fulfil the W invariant mass
-	      if (!cfg_WMassLowCut.passedCut(w_p4.M())) continue;
-	      cTopsPassWMassLowCut.increment();
-	      if (!cfg_WMassUppCut.passedCut(w_p4.M())) continue;
-	      cTopsPassWMassUppCut.increment();
 
 	      // Skip trijet combinations which do not fulfil bjet_CSV threshold
 	      if (!cfg_CSV_bDiscCut.passedCut(bjet.bjetDiscriminator())) continue;
@@ -514,6 +505,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 
 	      // Evaluate the MVA discriminator value
 	      float MVAoutput = reader->EvaluateMVA("BTDG method");
+	      // std::cout << "MVA = " << MVAoutput << ", Pt = " << top_p4.pt() << ", M = " << TrijetMass << std::endl;
 
 	      // Fill top candidate BDT values
 	      hTopBDT_AllCandidates -> Fill(MVAoutput);
@@ -528,14 +520,11 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	      fAllTops.Jet2.push_back(getLeadingSubleadingJet(jet1, jet2, "subleading"));
 	      fAllTops.BJet.push_back(bjet);
 	      fAllTops.isGenuine.push_back(false);
-	      fAllTops.isTagged.push_back(cfg_MVACut.passedCut(MVAoutput)); // fixme: which MVA cut? ldg, or subldg, or?
-
-	      // std::cout << "MVAoutput = " << MVAoutput << " " << cfg_MVACut.getCutDirectionString() << " " << cfg_MVACut.getCutValue() << "?" <<  std::endl;
+	      fAllTops.isTagged.push_back(cfg_TopMVACut.passedCut(MVAoutput));
 
 	      // Get top candidates above MVA cut
-	      if (cfg_MVACut.passedCut(MVAoutput))
+	      if (cfg_TopMVACut.passedCut(MVAoutput))
 		{
-		  // std::cout << "\tMVAoutput = " << MVAoutput << " " << cfg_MVACut.getCutDirectionString() << " " << cfg_MVACut.getCutValue() << " ?" <<  std::endl;
 		  cTopsPassBDTCut.increment();
 		  fSelectedTops.MVA.push_back(MVAoutput);
 		  fSelectedTops.TrijetP4.push_back(top_p4);
@@ -543,7 +532,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 		  fSelectedTops.Jet1.push_back(getLeadingSubleadingJet(jet1, jet2, "leading"));
 		  fSelectedTops.Jet2.push_back(getLeadingSubleadingJet(jet1, jet2, "subleading"));
 		  fSelectedTops.BJet.push_back(bjet);
-		  fSelectedTops.isGenuine.push_back(false); // fixme
+		  fSelectedTops.isGenuine.push_back(false);
 		  fSelectedTops.isTagged.push_back(true);  // fixme: which MVA cut? ldg, or subldg, or?
 		}
 	      else
@@ -603,7 +592,7 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
       if (!isCrossCleaned) continue;
       cTopsPassCrossCleanCut.increment();
 
-      // Save the top selected && cross-cleaned top candidate
+      // Save the top selected && cross-cleaned top candidate (sorted in MVA)
       fSelectedCleanedTops.Jet1.push_back( fSelectedTops.Jet1.at(i) );
       fSelectedCleanedTops.Jet2.push_back( fSelectedTops.Jet2.at(i) );
       fSelectedCleanedTops.BJet.push_back( fSelectedTops.BJet.at(i) );
@@ -681,8 +670,10 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   double tetrajetBjetPt_max = -999.99;
   math::XYZTLorentzVector ldgTetrajet_P4;
   math::XYZTLorentzVector subLdgTetrajet_P4;
-  SelectedTrijets top_ldgInPt    = getLdgOrSubldgTop(fSelectedCleanedTops, "leading");
-  SelectedTrijets top_subLdgInPt = getLdgOrSubldgTop(fSelectedCleanedTops, "subleading");
+  // SelectedTrijets top_ldgInPt    = getLdgOrSubldgTop(fSelectedCleanedTops, "leading");
+  // SelectedTrijets top_subLdgInPt = getLdgOrSubldgTop(fSelectedCleanedTops, "subleading");
+  SelectedTrijets top_ldgInPt    = getLdgOrSubldgTop(fAllCleanedTops, "leading");
+  SelectedTrijets top_subLdgInPt = getLdgOrSubldgTop(fAllCleanedTops, "subleading");
 
   if (0) std::cout << "=== TopSelectionBDT:: Tetrajet bjet loop" << std::endl;
   // For-loop: All selected b-jets
@@ -691,8 +682,8 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
       // Skip if tetrajet bjet pT is greater that this pt
       if (tetrajetBjetPt_max > bjet.pt()) continue;
 
-      // Check if this bjet is matched with one of the jets assigned to the two tops (if the tops exist, else match is false)
-      if (isMatchedJet(bjet, fSelectedCleanedTops, 0) || isMatchedJet(bjet, fSelectedCleanedTops, 1)) continue;
+      // Check if this bjet is matched with one of the jets assigned to the best TWO tops
+      if (isMatchedJet(bjet, fAllCleanedTops, 0) || isMatchedJet(bjet, fAllCleanedTops, 1)) continue;
 
       // Save variables
       tetrajetBjetPt_max = bjet.pt();
@@ -882,10 +873,8 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
 	}
 
       // Calculate and store b-jet scale factor weight and it's uncertainty
-      output.fTopTaggingScaleFactorEventWeight = fTopTagSFCalculator.calculateSF(fAllCleanedTops.TrijetP4, fAllCleanedTops.isTagged, fAllCleanedTops.isGenuine);
-
+      output.fTopTaggingScaleFactorEventWeight = fTopTagSFCalculator.calculateSF(fAllCleanedTops.TrijetP4, fAllCleanedTops.MVA, fAllCleanedTops.isTagged, fAllCleanedTops.isGenuine);
     }
-
 
     
   //================================================================================================
@@ -894,57 +883,63 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   if (0) std::cout << "=== TopSelectionBDT:: Fill output" << std::endl;
   bool bPass_LdgMVA     = false;
   bool bPass_SubldgMVA  = false;
-  if (fSelectedCleanedTops.MVA.size() < 1) 
+
+  if (fAllCleanedTops.MVA.size() < 1) 
     {
       bPass_LdgMVA    = false;
       bPass_SubldgMVA = false;
     }
-  else if (fSelectedCleanedTops.MVA.size() == 1)
+  else if (fAllCleanedTops.MVA.size() == 1)
     {
-      bPass_LdgMVA    = cfg_MVACut.passedCut( fSelectedCleanedTops.MVA.at(0) );
+      bPass_LdgMVA    = cfg_TopMVACut.passedCut( fAllCleanedTops.MVA.at(0) );
       bPass_SubldgMVA = false;
+
       // Leading-in-MVA top
-      output.fMVAmax1           = fSelectedCleanedTops.MVA.at(0);
-      output.fTrijet1Jet1       = fSelectedCleanedTops.Jet1.at(0);
-      output.fTrijet1Jet2       = fSelectedCleanedTops.Jet2.at(0);
-      output.fTrijet1BJet       = fSelectedCleanedTops.BJet.at(0);
-      output.fTrijet1Dijet_p4   = fSelectedCleanedTops.Jet1.at(0).p4() + fSelectedCleanedTops.Jet2.at(0).p4();
-      output.fTrijet1_p4        = fSelectedCleanedTops.TrijetP4.at(0);      
+      output.fMVAmax1           = fAllCleanedTops.MVA.at(0);
+      output.fTrijet1Jet1       = fAllCleanedTops.Jet1.at(0);
+      output.fTrijet1Jet2       = fAllCleanedTops.Jet2.at(0);
+      output.fTrijet1BJet       = fAllCleanedTops.BJet.at(0);
+      output.fTrijet1Dijet_p4   = fAllCleanedTops.Jet1.at(0).p4() + fAllCleanedTops.Jet2.at(0).p4();
+      output.fTrijet1_p4        = fAllCleanedTops.TrijetP4.at(0);      
     }
   else // size > 1
     {
-      bPass_LdgMVA    = cfg_MVACut.passedCut( fSelectedCleanedTops.MVA.at(0) );
-      bPass_SubldgMVA = cfg_MVACut.passedCut( fSelectedCleanedTops.MVA.at(1) );
+      bPass_LdgMVA     = cfg_TopMVACut.passedCut( fAllCleanedTops.MVA.at(0) );
+      bPass_SubldgMVA  = cfg_TopMVACut.passedCut( fAllCleanedTops.MVA.at(1) );
 
       // Leading-in-MVA top
-      output.fMVAmax1           = fSelectedCleanedTops.MVA.at(0);
-      output.fTrijet1Jet1       = fSelectedCleanedTops.Jet1.at(0);
-      output.fTrijet1Jet2       = fSelectedCleanedTops.Jet2.at(0);
-      output.fTrijet1BJet       = fSelectedCleanedTops.BJet.at(0);
-      output.fTrijet1Dijet_p4   = fSelectedCleanedTops.Jet1.at(0).p4() + fSelectedCleanedTops.Jet2.at(0).p4();
-      output.fTrijet1_p4        = fSelectedCleanedTops.TrijetP4.at(0);
+      output.fMVAmax1           = fAllCleanedTops.MVA.at(0);
+      output.fTrijet1Jet1       = fAllCleanedTops.Jet1.at(0);
+      output.fTrijet1Jet2       = fAllCleanedTops.Jet2.at(0);
+      output.fTrijet1BJet       = fAllCleanedTops.BJet.at(0);
+      output.fTrijet1Dijet_p4   = fAllCleanedTops.Jet1.at(0).p4() + fAllCleanedTops.Jet2.at(0).p4();
+      output.fTrijet1_p4        = fAllCleanedTops.TrijetP4.at(0);
       // Subleading-in-MVA top
-      output.fMVAmax2           = fSelectedCleanedTops.MVA.at(1);
-      output.fTrijet2Jet1       = fSelectedCleanedTops.Jet1.at(1);
-      output.fTrijet2Jet2       = fSelectedCleanedTops.Jet2.at(1);
-      output.fTrijet2BJet       = fSelectedCleanedTops.BJet.at(1);
-      output.fTrijet2Dijet_p4   = fSelectedCleanedTops.Jet1.at(1).p4() + fSelectedCleanedTops.Jet2.at(1).p4();
-      output.fTrijet2_p4        = fSelectedCleanedTops.TrijetP4.at(1);
+      output.fMVAmax2           = fAllCleanedTops.MVA.at(1);
+      output.fTrijet2Jet1       = fAllCleanedTops.Jet1.at(1);
+      output.fTrijet2Jet2       = fAllCleanedTops.Jet2.at(1);
+      output.fTrijet2BJet       = fAllCleanedTops.BJet.at(1);
+      output.fTrijet2Dijet_p4   = fAllCleanedTops.Jet1.at(1).p4() + fAllCleanedTops.Jet2.at(1).p4();
+      output.fTrijet2_p4        = fAllCleanedTops.TrijetP4.at(1);
     }
+
+  // Booleans
   bool bPass_FreeBjet   = (tetrajetBjetPt_max > 0);
   bool bPass_BothMVA    = bPass_LdgMVA * bPass_SubldgMVA;
   bool bPass_Selection  = bPass_FreeBjet * bPass_BothMVA;
+  bool bPass_AnyTwoTops = false; // at least TWO tops with BDT > -1.0
+  if (fAllCleanedTops.MVA.size() > 1) bPass_AnyTwoTops = cfg_AnyTopMVACut.passedCut(fAllCleanedTops.MVA.at(1) );
   
   // Fill in remaining data
-  output.bPassedLdgMVA      = bPass_LdgMVA;
-  output.bPassedSubldgMVA   = bPass_SubldgMVA;
-  output.bPassedBothMVA     = bPass_BothMVA;
-  output.bHasFreeBJet       = bPass_FreeBjet;
-  output.bPassedSelection   = bPass_Selection;
-  output.fTetrajetBJet      = tetrajetBjet;
-  output.fLdgTetrajet_p4    = ldgTetrajet_P4;
-  output.fSubldgTetrajet_p4 = subLdgTetrajet_P4;
-
+  output.bPassedLdgMVA       = bPass_LdgMVA;
+  output.bPassedSubldgMVA    = bPass_SubldgMVA;
+  output.bPassedBothMVA      = bPass_BothMVA;
+  output.bHasFreeBJet        = bPass_FreeBjet;
+  output.bPassedSelection    = bPass_Selection;
+  output.bHasTwoTopsAndFreeB = bPass_AnyTwoTops * bPass_FreeBjet;
+  output.fTetrajetBJet       = tetrajetBjet;
+  output.fLdgTetrajet_p4     = ldgTetrajet_P4;
+  output.fSubldgTetrajet_p4  = subLdgTetrajet_P4;
 
   for (size_t i = 0; i < fSelectedTops.MVA.size(); i++)
     {
@@ -990,11 +985,9 @@ TopSelectionBDT::Data TopSelectionBDT::privateAnalyze(const Event& event, const 
   // Increment counters
   //================================================================================================
   if (0) std::cout << "=== TopSelectionBDT:: Increment counters" << std::endl;
-  // Sub-counters
   if (bPass_LdgMVA) cSubPassedLdgMVACut.increment();
   if (bPass_SubldgMVA) cSubPassedSubldgMVACut.increment();
   if (bPass_Selection) cSubPassedFreeBjetCut.increment();
-  // Main counter
   if (bPass_Selection) cPassedTopSelectionBDT.increment();
    
   //================================================================================================
@@ -1150,34 +1143,42 @@ TrijetSelection TopSelectionBDT::SortInMVAvalue(TrijetSelection TopCand){
     {
       for  (size_t j=i+1; j<size; j++)
 	{
-	  Jet Jet1_i = TopCand.Jet1.at(i);
-	  Jet Jet2_i = TopCand.Jet2.at(i);
-	  Jet BJet_i = TopCand.BJet.at(i);
+	  Jet Jet1_i   = TopCand.Jet1.at(i);
+	  Jet Jet2_i   = TopCand.Jet2.at(i);
+	  Jet BJet_i   = TopCand.BJet.at(i);
 	  double mva_i = TopCand.MVA.at(i);
 	  math::XYZTLorentzVector TrijetP4_i = TopCand.TrijetP4.at(i);
-	  math::XYZTLorentzVector DijetP4_i = TopCand.DijetP4.at(i);
+	  math::XYZTLorentzVector DijetP4_i  = TopCand.DijetP4.at(i);
+	  bool isGenuine_i = TopCand.isGenuine.at(i);
+          bool isTagged_i  = TopCand.isTagged.at(i);
 
-	  Jet Jet1_j = TopCand.Jet1.at(j);
-	  Jet Jet2_j = TopCand.Jet2.at(j);
-	  Jet BJet_j = TopCand.BJet.at(j);
+	  Jet Jet1_j   = TopCand.Jet1.at(j);
+	  Jet Jet2_j   = TopCand.Jet2.at(j);
+	  Jet BJet_j   = TopCand.BJet.at(j);
 	  double mva_j = TopCand.MVA.at(j);
 	  math::XYZTLorentzVector TrijetP4_j = TopCand.TrijetP4.at(j);
-	  math::XYZTLorentzVector DijetP4_j = TopCand.DijetP4.at(j);
+	  math::XYZTLorentzVector DijetP4_j  = TopCand.DijetP4.at(j);
+	  bool isGenuine_j = TopCand.isGenuine.at(j);
+          bool isTagged_j  = TopCand.isTagged.at(j);
 
 	  if (mva_i >= mva_j) continue;
 	  TopCand.Jet1.at(i) = Jet1_j;
 	  TopCand.Jet2.at(i) = Jet2_j;
 	  TopCand.BJet.at(i) = BJet_j;
 	  TopCand.MVA.at(i)  = mva_j;
-	  TopCand.TrijetP4.at(i) = TrijetP4_j;
-	  TopCand.DijetP4.at(i) = DijetP4_j;
+	  TopCand.TrijetP4.at(i)  = TrijetP4_j;
+	  TopCand.DijetP4.at(i)   = DijetP4_j;
+	  TopCand.isGenuine.at(i) = isGenuine_j;
+          TopCand.isTagged.at(i)  = isTagged_j;
 
-	  TopCand.Jet1.at(j) = Jet1_i;
-	  TopCand.Jet2.at(j) = Jet2_i;
-	  TopCand.BJet.at(j) = BJet_i;
-	  TopCand.MVA.at(j)  = mva_i;
-	  TopCand.TrijetP4.at(j) = TrijetP4_i;
-	  TopCand.DijetP4.at(j) = DijetP4_i;
+	  TopCand.Jet1.at(j)      = Jet1_i;
+	  TopCand.Jet2.at(j)      = Jet2_i;
+	  TopCand.BJet.at(j)      = BJet_i;
+	  TopCand.MVA.at(j)       = mva_i;
+	  TopCand.TrijetP4.at(j)  = TrijetP4_i;
+	  TopCand.DijetP4.at(j)   = DijetP4_i;
+	  TopCand.isGenuine.at(j) = isGenuine_i;
+          TopCand.isTagged.at(j)  = isTagged_i;
 	}
     }
   return TopCand;
@@ -1211,47 +1212,58 @@ SelectedTrijets TopSelectionBDT::getLdgOrSubldgTop(TrijetSelection myTops, strin
   if ( myTops.MVA.size() == 0) return top_ldgInPt;
   if ( myTops.MVA.size() == 1) 
     {
-      top_ldgInPt.Jet1     = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "leading");
-      top_ldgInPt.Jet2     = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "subleading");
-      top_ldgInPt.BJet     = myTops.BJet.at(0);
-      top_ldgInPt.DijetP4  = myTops.DijetP4.at(0);
-      top_ldgInPt.TrijetP4 = myTops.TrijetP4.at(0);
-      top_ldgInPt.MVA      = myTops.MVA.at(0);
+      top_ldgInPt.Jet1      = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "leading");
+      top_ldgInPt.Jet2      = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "subleading");
+      top_ldgInPt.BJet      = myTops.BJet.at(0);
+      top_ldgInPt.DijetP4   = myTops.DijetP4.at(0);
+      top_ldgInPt.TrijetP4  = myTops.TrijetP4.at(0);
+      top_ldgInPt.MVA       = myTops.MVA.at(0);
+      top_ldgInPt.isGenuine = myTops.isGenuine.at(0);
+      top_ldgInPt.isTagged  = myTops.isTagged.at(0);
       return top_ldgInPt;
     }
 
   // Assuming myTops are selected and cross-cleaned
   if(myTops.TrijetP4.at(0).Pt() > myTops.TrijetP4.at(1).Pt())
     {
-      top_ldgInPt.Jet1     = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "leading");
-      top_ldgInPt.Jet2     = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "subleading");
-      top_ldgInPt.BJet     = myTops.BJet.at(0);
-      top_ldgInPt.DijetP4  = myTops.DijetP4.at(0);
-      top_ldgInPt.TrijetP4 = myTops.TrijetP4.at(0);
-      top_ldgInPt.MVA      = myTops.MVA.at(0);
+      top_ldgInPt.Jet1      = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "leading");
+      top_ldgInPt.Jet2      = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "subleading");
+      top_ldgInPt.BJet      = myTops.BJet.at(0);
+      top_ldgInPt.DijetP4   = myTops.DijetP4.at(0);
+      top_ldgInPt.TrijetP4  = myTops.TrijetP4.at(0);
+      top_ldgInPt.MVA       = myTops.MVA.at(0);
+      top_ldgInPt.isGenuine = myTops.isGenuine.at(0);
+      top_ldgInPt.isTagged  = myTops.isTagged.at(0);
 
-      top_subLdgInPt.Jet1     = getLeadingSubleadingJet(myTops.Jet1.at(1), myTops.Jet2.at(1), "leading");
-      top_subLdgInPt.Jet2     = getLeadingSubleadingJet(myTops.Jet1.at(1), myTops.Jet2.at(1), "subleading");
-      top_subLdgInPt.BJet     = myTops.BJet.at(1);
-      top_subLdgInPt.DijetP4  = myTops.DijetP4.at(1);
-      top_subLdgInPt.TrijetP4 = myTops.TrijetP4.at(1);
-      top_subLdgInPt.MVA      = myTops.MVA.at(1);
+      top_subLdgInPt.Jet1      = getLeadingSubleadingJet(myTops.Jet1.at(1), myTops.Jet2.at(1), "leading");
+      top_subLdgInPt.Jet2      = getLeadingSubleadingJet(myTops.Jet1.at(1), myTops.Jet2.at(1), "subleading");
+      top_subLdgInPt.BJet      = myTops.BJet.at(1);
+      top_subLdgInPt.DijetP4   = myTops.DijetP4.at(1);
+      top_subLdgInPt.TrijetP4  = myTops.TrijetP4.at(1);
+      top_subLdgInPt.MVA       = myTops.MVA.at(1);
+      top_subLdgInPt.isGenuine = myTops.isGenuine.at(1);
+      top_subLdgInPt.isTagged  = myTops.isTagged.at(1);
+
     }
   else  // if(myTops.TrijetP4.at(1).Pt() > myTops.TrijetP4.at(0).Pt())
     {
-      top_ldgInPt.Jet1     = getLeadingSubleadingJet(myTops.Jet1.at(1), myTops.Jet2.at(1), "leading");
-      top_ldgInPt.Jet2     = getLeadingSubleadingJet(myTops.Jet1.at(1), myTops.Jet2.at(1), "subleading");
-      top_ldgInPt.BJet     = myTops.BJet.at(1);
-      top_ldgInPt.DijetP4  = myTops.DijetP4.at(1);
-      top_ldgInPt.TrijetP4 = myTops.TrijetP4.at(1);
-      top_ldgInPt.MVA      = myTops.MVA.at(1);
+      top_ldgInPt.Jet1      = getLeadingSubleadingJet(myTops.Jet1.at(1), myTops.Jet2.at(1), "leading");
+      top_ldgInPt.Jet2      = getLeadingSubleadingJet(myTops.Jet1.at(1), myTops.Jet2.at(1), "subleading");
+      top_ldgInPt.BJet      = myTops.BJet.at(1);
+      top_ldgInPt.DijetP4   = myTops.DijetP4.at(1);
+      top_ldgInPt.TrijetP4  = myTops.TrijetP4.at(1);
+      top_ldgInPt.MVA       = myTops.MVA.at(1);
+      top_ldgInPt.isGenuine = myTops.isGenuine.at(1);
+      top_ldgInPt.isTagged  = myTops.isTagged.at(1);
 
-      top_subLdgInPt.Jet1     = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "leading");
-      top_subLdgInPt.Jet2     = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "subleading");
-      top_subLdgInPt.BJet     = myTops.BJet.at(0);
-      top_subLdgInPt.DijetP4  = myTops.DijetP4.at(0);
-      top_subLdgInPt.TrijetP4 = myTops.TrijetP4.at(0);
-      top_subLdgInPt.MVA      = myTops.MVA.at(0);
+      top_subLdgInPt.Jet1      = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "leading");
+      top_subLdgInPt.Jet2      = getLeadingSubleadingJet(myTops.Jet1.at(0), myTops.Jet2.at(0), "subleading");
+      top_subLdgInPt.BJet      = myTops.BJet.at(0);
+      top_subLdgInPt.DijetP4   = myTops.DijetP4.at(0);
+      top_subLdgInPt.TrijetP4  = myTops.TrijetP4.at(0);
+      top_subLdgInPt.MVA       = myTops.MVA.at(0);
+      top_subLdgInPt.isGenuine = myTops.isGenuine.at(0);
+      top_subLdgInPt.isTagged  = myTops.isTagged.at(0);
     }
 
   if (selectedTrijet == "subleading") return top_subLdgInPt;
@@ -1263,9 +1275,11 @@ SelectedTrijets TopSelectionBDT::GetSelectedTopCandidate(TrijetSelection TopCand
   trijet.Jet1 = TopCand.Jet1.at(index);
   trijet.Jet2 = TopCand.Jet2.at(index);
   trijet.BJet = TopCand.BJet.at(index);
-  trijet.MVA = TopCand.MVA.at(index);
-  trijet.TrijetP4 = TopCand.TrijetP4.at(index);
-  trijet.DijetP4 = TopCand.DijetP4.at(index);
+  trijet.MVA  = TopCand.MVA.at(index);
+  trijet.TrijetP4  = TopCand.TrijetP4.at(index);
+  trijet.DijetP4   = TopCand.DijetP4.at(index);
+  trijet.isGenuine = TopCand.isGenuine.at(index);
+  trijet.isTagged  = TopCand.isTagged.at(index);
   return trijet;
 }
 

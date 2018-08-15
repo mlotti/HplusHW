@@ -6,43 +6,10 @@ a pseudo multiCRAB with name "analysis_YYMMDD_HHMMSS/" will be created, inside w
 dataset has its own directory with the results (ROOT files with histograms). These can be later
 used as input to plotting scripts to get the desired results.
 
-
-PROOF:
-Enable only if your analysis is CPU-limited (e.g. limit calculation) With one analyzer at
-a time most probably you are I/O -limited. The limit is how much memory one process is using.
-
-
-USAGE:
-./run.py -m <multicrab_directory> -j <numOfCores> -i <DatasetName>
-or
-./run.py -m <multicrab_directory> -n 10 -e "Keyword1|Keyword2|Keyword3"
-
-Example:
-./run.py -m /multicrab_CMSSW752_Default_07Jan2016/
-./run.py -m multicrab_CMSSW752_Default_07Jan2016/ -j 16
-./run.py -m multicrab_Hplus2tbAnalysis_v8014_20160818T1956 -n 1000 -e QCD
-./run.py -m <multicrab-directory> -e TT_extOB
-./run.py -m <multicrab_directory> -n 10 -e "QCD_bEnriched_HT300|2016|ST_"
-
-ROOT:
-The available ROOT options for the Error-Ignore-Level are (const Int_t):
-        kUnset    =  -1
-        kPrint    =   0
-        kInfo     =   1000
-        kWarning  =   2000
-        kError    =   3000
-        kBreak    =   4000
-
-HistoLevel:
-For the histogramAmbientLevel each DEEPER level is a SUBSET of the rest. 
-For example "kDebug" will include all kDebug histos but also kInformative, kVital, kSystematics, and kNever.  
-Setting histogramAmbientLevel=kSystematics will include kSystematics AND kNever.
-    1. kNever = 0,
-    2. kSystematics,
-    3. kVital,
-    4. kInformative,
-    5. kDebug,
-    6. kNumberOfLevels
+ USAGE:
+ ./runTop.py -m /uscms_data/d3/skonstan/CMSSW_8_0_30/src/HiggsAnalysis/MiniAOD2TTree/test/multicrab_JetTriggers_v8030_20180405T1450 -e "TT_" >& lpc28_BDT_0p00_massCut400_NewTraining_noSF.txt"          
+ ./runTop.py -m /uscms_data/d3/skonstan/CMSSW_8_0_30/src/HiggsAnalysis/MiniAOD2TTree/test/multicrab_JetTriggers_v8030_20180405T1450 -e "TT_|Single" >& lpc28_BDT_0p00_massCut400_NewTraining_withSF.txt"
+ 
 '''
 
 #================================================================================================
@@ -179,12 +146,17 @@ def main():
     #==========================
     #  Systematics selections
     #==========================
-
+    
+    # marina
+    allSelections.SystTopBDTSelection.MVACutValue = 0.40
+    allSelections.TopSelectionBDT.TopMVACutValue  = 0.40
+    
     # BDT MisID SF
     MisIDSF = PSet(
-        MisIDSFJsonName = "Efficiency_SystBDT_CR2_MET50_MuIso0p1_InvMET20_InvMuIso0p1.json", # For Fake TT:  CR1, qcd+ewk+st CR2
-        ApplyMisIDSF    = True, 
+        MisIDSFJsonName = "topMisID_BDT0p40_TopMassCut400.json",
+        ApplyMisIDSF    = False, 
         )
+    
     scaleFactors.assignMisIDSF(MisIDSF, "nominal", MisIDSF.MisIDSFJsonName)
     allSelections.MisIDSF = MisIDSF
     
@@ -198,13 +170,13 @@ def main():
     
     # Jets
     allSelections.JetSelection.numberOfJetsCutValue = 4
-    allSelections.JetSelection.jetPtCuts = [40.0, 40.0, 40.0, 30.0]
+    allSelections.JetSelection.jetPtCuts = [40.0, 40.0, 40.0, 40.0]
         
     # Trigger 
     allSelections.Trigger.triggerOR = ["HLT_Mu50"]
 
     # Bjets
-    allSelections.BJetSelection.jetPtCuts = [40.0, 30.0]
+    allSelections.BJetSelection.jetPtCuts = [40.0, 40.0]
     allSelections.BJetSelection.numberOfBJetsCutValue = 2
     
     # ================================================================================================
@@ -220,7 +192,6 @@ def main():
     # from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import applyAnalysisCommandLineOptions
     # applyAnalysisCommandLineOptions(sys.argv, allSelections)
 
-    
     #================================================================================================
     # Build analysis modules
     #================================================================================================

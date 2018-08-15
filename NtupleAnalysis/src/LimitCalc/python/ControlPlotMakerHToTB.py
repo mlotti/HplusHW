@@ -1,4 +1,3 @@
-
 '''
 ## \package ControlPlotMaker
 
@@ -186,7 +185,8 @@ class ControlPlotMakerHToTB:
                 
                 # Add signal
                 if m > 0:
-                    mySignalLabel = "HplusTB_M%d" % m
+                    #mySignalLabel = "HplusTB_M%d" % m
+                    mySignalLabel = "ChargedHiggs_HplusTB_HplusToTB_M_%d" % (m)
                     myHisto = histograms.Histo(hSignal, mySignalLabel)
                     myHisto.setIsDataMC(isData=False, isMC=True)
                     myStackList.insert(1, myHisto)
@@ -433,8 +433,6 @@ class ControlPlotMakerHToTB:
                     hData.getRootHisto().SetBinError(k, 0.0)
         return myBlindingString
                         
-
-
 class SignalAreaEvaluator:
     def __init__(self):
         self._output = ""

@@ -278,7 +278,10 @@ def main(opts, signalMass):
     ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X") #ROOT.gStyle.SetNdivisions(8, "X")
     plots.drawPlot(p_Eff, savePath, **_kwargs)
     rightAxis.Draw()
-    SavePlot(p_Eff, saveName_eff, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf", ".C"])
+    
+    saveDir = opts.rootfile.split("/")[-1]
+    saveDir = saveDir.replace(".root","")
+    SavePlot(p_Eff, saveName_eff, os.path.join(opts.saveDir, saveDir, opts.optMode), saveFormats = [".png", ".pdf", ".C"])
 
     _kwargs["log"]  = True
     _kwargs["opts"]["ymin"] = 3e-2
@@ -289,7 +292,7 @@ def main(opts, signalMass):
     style.setWide(False, 0.15)
     ROOT.gStyle.SetNdivisions(6 + 100*5 + 10000*2, "X")
     plots.drawPlot(p_BDT, savePath, **_kwargs)
-    SavePlot(p_BDT, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf", ".C"])
+    SavePlot(p_BDT, saveName, os.path.join(opts.saveDir, saveDir, opts.optMode), saveFormats = [".png", ".pdf", ".C"])
     return
 
 

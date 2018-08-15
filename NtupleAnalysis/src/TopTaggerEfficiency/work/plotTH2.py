@@ -251,7 +251,7 @@ def GetHistoKwargs(h, opts):
 
     if "WMass" in h:
         print "here1"
-        kwargs["xlabel"]  = "BDTG cut value"
+        kwargs["xlabel"]  = "BDTG value"
         kwargs["ylabel"]  = "m_{W} GeV/c^{2}"
         cutBox      = {"cutValue": 0.85, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         cutBoxY     = {"cutValue": 80.3, "fillColor": 16, "box": False, "line": True, "greaterThan": True,
@@ -263,7 +263,7 @@ def GetHistoKwargs(h, opts):
 
     if "TopMass" in h:
         print "here2"
-        kwargs["xlabel"]  = "BDTG cut value"
+        kwargs["xlabel"]  = "BDTG value"
         kwargs["ylabel"]  = "m_{top} GeV/c^{2}"
         cutBox      = {"cutValue": 0.85, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         cutBoxY     = {"cutValue": 173, "fillColor": 16, "box": False, "line": True, "greaterThan": True,
@@ -300,6 +300,21 @@ def GetHistoKwargs(h, opts):
         ROOT.gStyle.SetNdivisions(8, "X")
         ROOT.gStyle.SetNdivisions(8, "Y")
 
+
+    if "cleaned_Vs_JetMult" in h:
+        units             = ""
+        kwargs["xlabel"]  = "top multiplicity"
+        kwargs["ylabel"]  = "jet multiplicity"
+        kwargs["cutBox"]  = cutBox
+        kwargs["cutBoxY"] = cutBoxY
+        kwargs["rebinX"]  = 1
+        kwargs["rebinY"]  = 1
+        kwargs["opts"]    = {"xmin": 0.0, "xmax": 5, "ymin": 5, "ymax": 20} #, "ymaxfactor": yMaxF}
+        # if  "AfterStandardSelections" in h:
+        # if  "AfterAllSelections" in h:
+        ROOT.gStyle.SetNdivisions(8, "X")
+        ROOT.gStyle.SetNdivisions(8, "Y")
+        
     return kwargs
     
 

@@ -11,7 +11,7 @@
 # cd HiggsAnalysis/CombinedLimit
 # cd $CMSSW_BASE/src/HiggsAnalysis/CombinedLimit
 # git fetch origin
-# git checkout v7.0.8 -b v7.0.8
+# git checkout v7.0.9 -b v7.0.9
 # scramv1 b clean; scramv1 b # always make a clean build
 #
 # In order to run this script cd to the CombineResults directory inside the datacard:
@@ -55,10 +55,12 @@ endif
 #===================
 set MASS          = ${1}
 set MINOS         = "poi" # [Options: "all" "poi" "none"]
+set RMIN          = -10 #0
+set RMAX          = 20
 set NUISANCES     = "diffNuisances.py"
-set DATACARD_TXT  = "combine_datacard_hplushadronic_m${1}.txt"
-set DATACARD_ROOT = "combine_datacard_hplushadronic_m${1}.root"
-set FILE          = "ClosureChecks_m${1}.txt"
+set DATACARD_TXT  = "combine_datacard_hplushadronic_m${MASS}.txt"
+set DATACARD_ROOT = "combine_datacard_hplushadronic_m${MASS}.root"
+set FILE          = "ClosureChecks_m${MASS}.txt"
 set NEWLINE       = "\n======================================================================================================="
 set LINE          = "======================================================================================================="
 
@@ -70,8 +72,11 @@ text2workspace.py $DATACARD_TXT >> $FILE
 echo $NEWLINE>> $FILE
 echo "Step 1) Run combine to produce a background-only Asimov toy and fit it. The result of the fit should be r=0" >> $FILE
 echo $LINE >> $FILE
-# combine -M MaxLikelihoodFit -t -1 --expectSignal 0 $DATACARD_ROOT >> $FILE #obsolete (30 May 2018)
-combine -M FitDiagnostics -t -1 --expectSignal 0 $DATACARD_ROOT --seed $SEED --minos $MINOS >> $FILE
+combine -m ${MASS} -M FitDiagnostics -t -1 --expectSignal 0 --rMin $RMIN --rMax $RMAX $DATACARD_ROOT --seed $SEED --minos $MINOS >> $FILE
+#combine -m ${MASS} -M FitDiagnostics -t -1 --expectSignal 0 --rMin $RMIN --rMax $RMAX $DATACARD_ROOT --seed $SEED --minos $MINOS --saveShapes --saveWithUncertainties --saveOverallShapes --saveNormalizations --saveWorkspace --plots >> $FILE 
+
+echo "Renaming fitDiagnostics.root as fitDiagnostics_m${MASS}_BkgAsimov.root"
+mv fitDiagnostics.root fitDiagnostics_m${MASS}_BkgAsimov.root
 
 echo $NEWLINE >> $FILE
 echo "Step 2) Run diffNuisances.py" >> $FILE
@@ -82,22 +87,34 @@ else
     echo " Nuisances script not found. Dowloading it with wget"
     wget https://raw.githubusercontent.com/cms-analysis/HiggsAnalysis-CombinedLimit/master/test/$NUISANCES
 endif
-python diffNuisances.py -a fitDiagnostics.root -g pulls_BkgAsimov_m${1}.root >> $FILE
+python diffNuisances.py -a fitDiagnostics_m${MASS}_BkgAsimov.root -g pulls_BkgAsimov_m${MASS}.root >> $FILE
 #python diffNuisances.py -a fitDiagnostics.root -g pulls_BkgAsimov_m${1}.root --absolute >> $FILE
 
 echo $NEWLINE >> $FILE
 echo "Step 3) Run combine to produce a signal+background Asimov toy and fit it. The result of the fit should be r=1" >> $FILE
 echo $LINE >> $FILE
 #combine -M MaxLikelihoodFit -t -1 --expectSignal 1 $DATACARD_ROOT --seed $SEED >> $FILE #obsolete (30 May 2018)
-combine -M FitDiagnostics -t -1 --expectSignal 1 $DATACARD_ROOT --seed $SEED --minos $MINOS >> $FILE
+combine -m ${MASS} -M FitDiagnostics -t -1 --expectSignal 1 --rMin $RMIN --rMax $RMAX $DATACARD_ROOT --seed $SEED --minos $MINOS >> $FILE
+
+echo "Renaming fitDiagnostics.root as fitDiagnostics_m${MASS}_SBAsimov.root"
+mv fitDiagnostics.root fitDiagnostics_m${MASS}_SBAsimov.root
 
 echo $NEWLINE >> $FILE
 echo "Step 4) Run diffNuisances.py" >> $FILE
 echo $LINE >> $FILE
-python diffNuisances.py -a fitDiagnostics.root -g pulls_SBAsimov_m${1}.root >> $FILE
+python diffNuisances.py -a fitDiagnostics_m${MASS}_SBAsimov.root -g pulls_SBAsimov_m${MASS}.root >> $FILE
 #python diffNuisances.py -a fitDiagnostics.root -g pulls_SBAsimov_m${1}.root --absolute >> $FILE
+
+
+echo $NEWLINE >> $FILE
+echo "Step 5) Create fit-diagnostics file for post-fit plots!" >> $FILE
+echo $LINE >> $FILE
+text2workspace.py $DATACARD_TXT -o ws.root
+combine -M FitDiagnostics --robustFit=1 --X-rtd MINIMIZER_analytic ws.root --saveShapes --saveWithUncertainties --saveOverallShapes --saveNormalizations --saveWorkspace --plots --expectSignal=0 --rMin=-4   
+mv fitDiagnostics.root fitDiagnostics_ws.root
 
 echo $NEWLINE >> $FILE
 echo "DONE" >> $FILE
 echo $LINE >> $FILE
+
 

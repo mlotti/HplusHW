@@ -26,10 +26,13 @@ USAGE:
 EXAMPLES:
 ./dcardGenerator.py -x <datacard-config-file> -d <dir-with-results>
 ./dcardGenerator_v2.py -x dcardDefault_h2tb_2016.py -d limits2016/ --h2tb
-
+./dcardGenerator_v2.py -x dcardDefault_h2tb_2016.py -d limits2016/ --h2tb --tarball
 
 LAST USED:
-./dcardGenerator_v2.py -x dcardDefault_h2tb_2016.py -d limits2016/ --h2tb --tarball
+./dcardGenerator_v2.py -x dcardDefault_h2tb_2016.py -d limits2016/ --h2tb
+OR
+./dcardGenerator_v2.py -x dcardDefault_h2tb_2016_new.py -d limits2016/ --h2tb
+
 
 '''
 
@@ -122,7 +125,7 @@ def CheckOptions(config):
         msgs.append(msg)
 
     if not config.BlindAnalysis:
-        msg = ErrorStyle() + "Unblinding analysis results forced been forced (flag BlindAnalysis in the datacard file)"
+        msg = ErrorStyle() + "Unblinding analysis results! (flag BlindAnalysis in the datacard file)"
         msgs.append(msg)
 
     if len(msgs) < 1:

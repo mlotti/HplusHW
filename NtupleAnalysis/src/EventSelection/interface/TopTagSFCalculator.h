@@ -96,12 +96,16 @@ public:
   /// Book histograms
   void bookHistograms(TDirectory* dir, HistoWrapper& histoWrapper);
   /// Calculate scale factor for the event
-  const float calculateSF(const std::vector<math::XYZTLorentzVector> cleanTopP4, const std::vector<bool> cleanTopIsTagged, const std::vector<bool> cleanTopIsGenuine);
+  const float calculateSF(const std::vector<math::XYZTLorentzVector> cleanTopP4, 
+			  const std::vector<double> cleanTopMVA,
+			  const std::vector<bool> cleanTopIsTagged, const std::vector<bool> cleanTopIsGenuine);
 
   /// Returns the size of the efficiency config items
   const size_t sizeOfEfficiencyList(TopTagSFInputStash::TopTagJetFlavorType flavor, const std::string& direction) const;
   /// Returns the size of the SF config items
   const size_t sizeOfSFList(TopTagSFInputStash::TopTagJetFlavorType flavor, const std::string& direction) const;
+  /// Returns the size of the SF uncertainties config items
+  const size_t sizeOfdSFList(TopTagSFInputStash::TopTagJetFlavorType flavor, const std::string& direction) const;
   
 private:
   /// Method for handling the misidentification rateinput
@@ -109,10 +113,13 @@ private:
 
   /// Method for handling the efficiency input
   void handleEfficiencyInput(boost::optional<std::vector<ParameterSet>> psets);
-
+  
   /// Method for handling the SF input
   void handleSFInput(boost::optional<std::vector<ParameterSet>> psets);
-
+  
+  /// Method for handling the deltaSF input
+  void handleEffUncertaintiesInput(boost::optional<std::vector<ParameterSet>> psets);
+  
   /// Method for converting flavor string to flavor type
   TopTagSFInputStash::TopTagJetFlavorType getFlavorTypeForEfficiency(const std::string& str) const;
   
@@ -134,12 +141,17 @@ private:
   TopTagSFInputStash fSF; // SF =  Eff_Data/Eff_MC
   TopTagSFInputStash fSFUp;
   TopTagSFInputStash fSFDown;
-
+  TopTagSFInputStash fdSFUp;
+  TopTagSFInputStash fdSFDown;  
+  
   /// Validity of input
   bool isActive;
   // Histograms
   WrappedTH1* hTopTagSF;
   WrappedTH1* hTopTagSFRelUncert;
+  WrappedTH2* hTopEff_Vs_TopPt_Inclusive;
+  WrappedTH2* hTopEff_Vs_TopPt_Fake;
+  WrappedTH2* hTopEff_Vs_TopPt_Genuine;
 };
 
 #endif
