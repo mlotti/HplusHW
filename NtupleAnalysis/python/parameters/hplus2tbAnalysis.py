@@ -8,13 +8,12 @@ import HiggsAnalysis.NtupleAnalysis.parameters.jsonReader as jsonReader
 # General parameters
 #================================================================================================
 verbose               = True
-histogramAmbientLevel = "Debug"  # Options: Systematics, Vital, Informative, Debug
+histogramAmbientLevel = "Debug"  # (options: "Systematics", "Vital", "Informative", "Debug")
 
 #================================================================================================
-# Trigger
+# Trigger [scanned in range _v1--_v100 (=>remove the '_v' suffix)]
 #================================================================================================
 trigger = PSet(
-    # scanned in range _v1--_v100 (=>remove the '_v' suffix)
     triggerOR = [
         "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056",
         "HLT_PFHT450_SixJet40_BTagCSV_p056",       
@@ -115,37 +114,6 @@ bjetSelection = PSet(
     numberOfBJetsCutDirection = ">=",     # [default: ">="] (options: ==, !=, <, <=, >, >=)
 )
 
-#================================================================================================
-# Scale Factors
-#================================================================================================
-if bjetSelection.bjetDiscr == "pfCombinedInclusiveSecondaryVertexV2BJetTags":
-    scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
-                                        btagPayloadFilename    = "CSVv2.csv",
-                                        #btagEfficiencyFilename = "btageff_hybrid_HToTB.json",
-                                        btagEfficiencyFilename = "btageff_HToTB.json",
-                                        direction              = "nominal")
-elif bjetSelection.bjetDiscr == "pfCombinedMVAV2BJetTags":
-    scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
-                                        btagPayloadFilename    = "cMVAv2_Moriond17_B_H.csv", # use this for MVA b-tagging
-                                        btagEfficiencyFilename = "btageff_Hybrid_TT+WJetsHT.json", # use with taunu analysis and WJetsHT samples
-                                        direction              = "nominal")
-else:
-    pass #should crash
-
-#=================================================================================================
-# QGL selection
-#=================================================================================================
-qglrSelection = PSet(
-    QGLRCutValue             = -1.0, # [default: -1.0] (to disable choose ">=" than -ve value)
-    QGLRCutDirection         = ">=", # [default: ">="] 
-    numberOfJetsCutValue     = 8,   # [default: 10]   (needed to suppress combinatorics => run time)
-    numberOfJetsCutDirection = "<=", # [default: "<="] 
-)
-
-jsonReader.setupQGLInformation(QGLRPset  = qglrSelection,
-                               jsonname_Light  = "QGLdiscriminator_QCD_LightJets.json",
-                               jsonname_Gluon  = "QGLdiscriminator_QCD_GluonJets.json")
-
 #=================================================================================================
 # Fat jet selection
 #=================================================================================================
@@ -177,15 +145,19 @@ metSelection = PSet(
 # Top selection BDT                                               
 #================================================================================================        
 topSelectionBDT = PSet(
-    MVACutValue            = 0.40,    # [default: 0.40]
-    MVACutDirection        =  ">=",   # [default: ">="]
-    MassCutValue           = 300.0,   # [default: 400 or 500.0]  # Do not evaluate top candidate if mass greater than this cut
-    MassCutDirection       = "<=",    # [default: "<"]
+    AnyTopMVACutValue      = -0.95,   # [default: -1.0] NOTE: Defines StandardSelections
+    AnyTopMVACutDirection  =  ">",    # [default: ">"]
+    TopMVACutValue         =  0.40,   # [default: 0.40] NOTE: Only use numbers with 2 decimals (e.g 0.40, 0.30, 0.00)
+    TopMVACutDirection     =  ">=",   # [default: ">="]
+    TopMassLowCutValue     =   0.0,   # [default: 0.0]
+    TopMassLowCutDirection =  ">=",   # [default: ">="]
+    TopMassUppCutValue     =  400.0,  # [default: 400.0]  # Do not evaluate top candidate if top mass greater than this cut (600 takes TOO long!)
+    TopMassUppCutDirection =  "<=",   # [default: "<"]
     CSV_bDiscCutValue      = 0.8484,  # [default: 0.8484] # Do not evaluate top candidate if b-jet assigned as b from top fails this cut
     CSV_bDiscCutDirection  = ">=",    # [default: ">="]
-    #WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32.weights.xml", # (All XML files located in data/TopTaggerWeights/)
-    WeightFile             = "TopRecoTree_180523_DeltaR0p3_DeltaPtOverPt0p32_TopPtReweighting_BDTG.weights.xml", # (All XML files located in data/TopTaggerWeights/)
+    WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_14July2018.weight.xml", # (All XML files located in data/TopTaggerWeights/)
 )
+
 
 #================================================================================================
 # FakeB Measurement Options
@@ -196,7 +168,7 @@ fakeBBjetSelection = PSet(
     jetPtCuts                 = bjetSelection.jetPtCuts,
     jetEtaCuts                = bjetSelection.jetEtaCuts,
     bjetDiscr                 = bjetSelection.bjetDiscr,    
-    bjetDiscrWorkingPoint     = "Loose", # [default: "Loose"] (options: "Loose", "Medium") NOTE: defines SR, VR, CR1, and CR2
+    bjetDiscrWorkingPoint     = "Loose", # NOTE: Defines VR and CR2
     numberOfBJetsCutValue     = bjetSelection.numberOfBJetsCutValue,
     numberOfBJetsCutDirection = bjetSelection.numberOfBJetsCutDirection,
     )
@@ -205,32 +177,44 @@ scaleFactors.setupBtagSFInformation(btagPset               = fakeBBjetSelection,
                                     btagEfficiencyFilename = "btageff_HToTB.json",
                                     direction              = "nominal")
 
-fakeBTopSelectionBDT = PSet(
-    MVACutValue            = -1.0,   # [default: -1.0] NOTE: defines SR, VR, CR1, and CR2
-    MVACutDirection        = ">",    # [default: ">"] (NOTE: Crashes if set to ">=" -1)
-    LdgTopDefinition       = "MVA",  # [default: "MVA"] (options: "MVA", "Pt")
-    MassCutValue           = topSelectionBDT.MassCutValue,  # [default: 600.0] #topSelectionBDT.MassCutValue, (800.0 is way too much. TTbar takes > 24 hours)
-    MassCutDirection       = topSelectionBDT.MassCutDirection,
-    CSV_bDiscCutValue      = topSelectionBDT.CSV_bDiscCutValue,
-    CSV_bDiscCutDirection  = topSelectionBDT.CSV_bDiscCutDirection,
-    WeightFile             = topSelectionBDT.WeightFile,
-)
-
 fakeBMeasurement = PSet(
+    # b-jets
     baselineBJetsCutValue          = 2,
     baselineBJetsCutDirection      = "==",
     baselineBJetsDiscr             = bjetSelection.bjetDiscr,
     baselineBJetsDiscrWP           = bjetSelection.bjetDiscrWorkingPoint,
-    LdgTopMVACutValue              = topSelectionBDT.MVACutValue,
-    LdgTopMVACutDirection          = topSelectionBDT.MVACutDirection, 
-    # Define CR1, CR2
-    #SubldgTopMVACutValue           = 0.4, #[default: 0.4] #buffer
-    SubldgTopMVACutValue           = topSelectionBDT.MVACutValue, #default
+    # Tops
+    LdgTopMVACutValue              = topSelectionBDT.TopMVACutValue,
+    LdgTopMVACutDirection          = topSelectionBDT.TopMVACutDirection, 
+    SubldgTopMVACutValue           = topSelectionBDT.TopMVACutValue,
     SubldgTopMVACutDirection       = "<",
-    # CR3, CR4 are automatically defined as:
-    # BDT <  topSelectionBDT.MVACutValue
-    # BDT >= (topSelectionBDT.MVACutValue-fakeBMeasurement.SubldgTopMVACutValue)
     )
+
+#================================================================================================
+# Scale Factors (SFs)
+#================================================================================================
+if bjetSelection.bjetDiscr == "pfCombinedInclusiveSecondaryVertexV2BJetTags":
+    scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
+                                        btagPayloadFilename    = "CSVv2.csv",
+                                        #btagEfficiencyFilename = "btageff_hybrid_HToTB.json",
+                                        btagEfficiencyFilename = "btageff_HToTB.json",
+                                        direction              = "nominal")
+elif bjetSelection.bjetDiscr == "pfCombinedMVAV2BJetTags":
+    scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
+                                        btagPayloadFilename    = "cMVAv2_Moriond17_B_H.csv", # use this for MVA b-tagging
+                                        btagEfficiencyFilename = "btageff_Hybrid_TT+WJetsHT.json", # use with taunu analysis and WJetsHT samples
+                                        direction              = "nominal")
+else:
+    raise Exception("This should never be reached!")
+
+# top-tagging (json files available for: defaut, fatJet, ldgJet)
+MVAstring = "%.2f" % topSelectionBDT.TopMVACutValue
+scaleFactors.setupToptagSFInformation(topTagPset                     = topSelectionBDT, 
+                                      topTagMisidFilename            = "topMisID_BDT%s_TopMassCut400.json" % MVAstring.replace(".", "p").replace("-", "m"), 
+                                      topTagEfficiencyFilename       = "toptagEff_BDT%s_GenuineTT_TopMassCut400.json" % MVAstring.replace(".", "p").replace("-", "m"),
+                                      topTagEffUncertaintiesFilename = "toptagEffUncert_BDT%s_GenuineTT_TopMassCut400.json" % MVAstring.replace(".", "p").replace("-", "m"),
+                                      direction                      = "nominal",
+                                      variationInfo                  = None)
 
 #================================================================================================
 # Common plots options
@@ -276,8 +260,6 @@ allSelections = PSet(
     # FatJetSelection       = fatjetVeto,
     FakeBMeasurement      = fakeBMeasurement,
     FakeBBjetSelection    = fakeBBjetSelection,
-    FakeBTopSelectionBDT  = fakeBTopSelectionBDT,
     CommonPlots           = commonPlotsOptions,
     HistogramAmbientLevel = histogramAmbientLevel,
-    # QGLRSelection         = qglrSelection,
 )

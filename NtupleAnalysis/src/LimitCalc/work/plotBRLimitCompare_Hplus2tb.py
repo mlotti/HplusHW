@@ -160,12 +160,16 @@ def main():
         myList    = GetHToTBCombinationMay2018v2()
         doOverlap(opts.name, myList)
 
-    if 1:
+    if 0:
         opts.name = "FakeBBinning"
         myList    = GetHToTBFakeBBinningJune2018()
         doCompare(opts.name, myList)
         #doOverlap(opts.name, myList)
 
+    if 1:
+        opts.name = "BinwiseVsAutoMCStats"
+        myList    = GetStatUncertaintyJune2018()
+        doCompare(opts.name, myList)
 
     # Inform user and exit
     Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + savePath + ShellStyles.NormalStyle()), True)    
@@ -253,6 +257,23 @@ def GetStatOnlyListMar2018():
         myList.extend(GetBoostedStatOnly())
     return myList
 
+
+def GetStatUncertaintyJune2018():
+    '''
+    '''
+    homeDir = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/"
+    myDirs  = {}
+    myDirs["binwise-04may"]     = "Binning13_04May2018/"
+    myDirs["autoMCstats-04may"] = "Binning13_04May2018_autoMCstats/"
+
+    for k in myDirs:
+        myDirs[k] = os.path.join(homeDir, "datacards_Hplus2tb_13TeV_EraRun2016_DataDriven_mH180to3000_Systematics_BDT0p40_" + myDirs[k])
+
+    myList = [
+        ("binwise"    , myDirs["binwise-04may"]    + "CombineResults*"),
+        ("autoMCstats", myDirs["autoMCstats-04may"] + "CombineResults*"),
+        ]
+    return myList
 
 def GetHToTBFakeBBinningJune2018():
     '''
@@ -715,7 +736,7 @@ def doPlot(limits, legendLabels, graphs, name, ylabel, _opts={}, yTitle=None):
     if opts.bandValue != 0:
         if "relative" in name.lower():
             # https://root.cern.ch/doc/master/classTAttFill.html
-            kwargs = {"cutValue": 1.0 + float(opts.bandValue)/100.0, "fillColor": ROOT.kGray, "fillStyle": 3001, "box": True, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": False, "mirror": True}
+            kwargs = {"cutValue": 1.0 + float(opts.bandValue)/100.0, "fillColor": ROOT.kGray, "fillStyle": 3001, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": False, "mirror": True}
             plot.addCutBoxAndLineY(**kwargs)    
     
 

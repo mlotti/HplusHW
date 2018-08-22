@@ -18,8 +18,7 @@ EXAMPLES:
 
 
 LAST USED:
-./plotTH2.py -m Hplus2tbAnalysis_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900 --folder ForDataDrivenCtrlPlots --gridX --gridY --dataset QCD --normalizeToLumi --logZ 
-
+./plotTH2.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_15June18_BDT0p40_Masscut300_NewTop_BugFix/ --folder topbdtSelectionTH2_ --gridX --gridY --dataset ChargedHiggs_HplusTB_HplusToTB_M_500 --normalizeToLumi --logZ --intLumi 35920 -v --url
 '''
 
 #================================================================================================ 
@@ -249,6 +248,30 @@ def GetHistoKwargs(h, opts):
         "zlabel"           : zLabel
         }
 
+
+    if "WMass" in h:
+        print "here1"
+        kwargs["xlabel"]  = "BDTG value"
+        kwargs["ylabel"]  = "m_{W} GeV/c^{2}"
+        cutBox      = {"cutValue": 0.85, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        cutBoxY     = {"cutValue": 80.3, "fillColor": 16, "box": False, "line": True, "greaterThan": True,
+                       "mainCanvas": True, "ratioCanvas": False} # box = True not working                
+        kwargs["cutBox"]  = cutBox
+        kwargs["cutBoxY"] = cutBoxY
+        kwargs["opts"]    = {"xmin": -1.0, "xmax": +1.0, "ymin": 0, "ymax": 200} #, "ymaxfactor": yMaxF}          
+
+
+    if "TopMass" in h:
+        print "here2"
+        kwargs["xlabel"]  = "BDTG value"
+        kwargs["ylabel"]  = "m_{top} GeV/c^{2}"
+        cutBox      = {"cutValue": 0.85, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        cutBoxY     = {"cutValue": 173, "fillColor": 16, "box": False, "line": True, "greaterThan": True,
+                       "mainCanvas": True, "ratioCanvas": False} # box = True not working                
+        kwargs["cutBox"]  = cutBox
+        kwargs["cutBoxY"] = cutBoxY
+        kwargs["opts"]    = {"xmin": -1.0, "xmax": +1.0, "ymin": 0, "ymax": 300} #, "ymaxfactor": yMaxF}          
+
     if "LdgTrijetPt_Vs_LdgTrijetDijetPt" in h:
         units             = "(GeV/c)"
         kwargs["xlabel"]  = "p_{T}^{jjb} " + units
@@ -277,6 +300,21 @@ def GetHistoKwargs(h, opts):
         ROOT.gStyle.SetNdivisions(8, "X")
         ROOT.gStyle.SetNdivisions(8, "Y")
 
+
+    if "cleaned_Vs_JetMult" in h:
+        units             = ""
+        kwargs["xlabel"]  = "top multiplicity"
+        kwargs["ylabel"]  = "jet multiplicity"
+        kwargs["cutBox"]  = cutBox
+        kwargs["cutBoxY"] = cutBoxY
+        kwargs["rebinX"]  = 1
+        kwargs["rebinY"]  = 1
+        kwargs["opts"]    = {"xmin": 0.0, "xmax": 5, "ymin": 5, "ymax": 20} #, "ymaxfactor": yMaxF}
+        # if  "AfterStandardSelections" in h:
+        # if  "AfterAllSelections" in h:
+        ROOT.gStyle.SetNdivisions(8, "X")
+        ROOT.gStyle.SetNdivisions(8, "Y")
+        
     return kwargs
     
 
@@ -368,7 +406,7 @@ if __name__ == "__main__":
     '''
     
     # Default Settings
-    ANALYSISNAME = "Hplus2tbAnalysis"
+    ANALYSISNAME = "TopTaggerEfficiency"
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
     OPTMODE      = None
@@ -482,7 +520,7 @@ if __name__ == "__main__":
                       "eSelection_Veto", "muSelection_Veto", "tauSelection_Veto",
                       "ForDataDrivenCtrlPlotsEWKFakeB", "ForDataDrivenCtrlPlotsEWKGenuineB",
                       "jetSelection_", "bjetSelection_", "metSelection_", 
-                      "topologySelection_", "topbdtSelection_", "ForDataDrivenCtrlPlots"]
+                      "topologySelection_", "topbdtSelectionTH2_", "ForDataDrivenCtrlPlots"]
 
     if opts.folder not in allowedFolders:
         Print("Invalid folder \"%s\"! Please select one of the following:" % (opts.folder), True)

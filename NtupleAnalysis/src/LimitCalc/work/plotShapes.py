@@ -291,11 +291,10 @@ class DatasetContainer:
         def rebin(h, rebinList):
             if rebinList == None or h == None:
                 return h
-            myArray = array.array("d",rebinList)
-            hnew = h.Rebin(len(rebinList)-1,h.GetTitle(),myArray)
+            myArray = array.array("d", rebinList)
+            hnew = h.Rebin(len(rebinList)-1, h.GetTitle(), myArray)
             h.Delete()
             return hnew
-        
         self.Verbose("Doing plots for dataset \"%s\"" % (self._name), False)
         hNominal = f.Get(self._cardReader.getHistoNameForColumn(self._name))
         hNominal = rebin(hNominal, rebinList)
@@ -444,7 +443,7 @@ def customizeMarker(p):
             th1.SetPointEYhigh(i, 0)
             th1.SetPointEYlow(i, 0)
 
-def doPlot(opts,mass,nameList,allShapeNuisances,luminosity,myDatacardPattern,rootFilePattern,signalTable):
+def doPlot(opts, mass, nameList, allShapeNuisances, luminosity, myDatacardPattern, rootFilePattern, signalTable):
     fName = rootFilePattern % mass
     f = ROOT.TFile.Open(fName)
 
@@ -458,6 +457,7 @@ def doPlot(opts,mass,nameList,allShapeNuisances,luminosity,myDatacardPattern,roo
     # Find the datacard and nuisance names
     myCardReader = DatacardReader.DataCardReader(".", mass, myDatacardPattern, rootFilePattern)
     myDatasetNames = myCardReader.getDatasetNames()
+
     # Find the name stem and the name of the uncertainties
     datasets = []
     shapes = []
@@ -566,17 +566,19 @@ def main(opts):
 
     # For-loop: All mass points
     for i, m in enumerate(massPoints, 1):
+
         # Obtain luminosity from the datacard
         myLuminosity = float(limitTools.readLuminosityFromDatacard(".", myDatacardPattern % m ) )
 
         # Do the plots
         doPlot(opts, int(m), nameList, allShapeNuisances, myLuminosity, myDatacardPattern, myRootfilePattern, signalTable)
 
+
     # Print signal table
     Print("Max contracted uncertainty for signal:", True)    
     table = []
-    align = "{:>15} {:>15} {:>15}"
-    hLine = "="*50
+    align = "{:>30} {:>15} {:>15}"
+    hLine = "="*60
     table.append(hLine)
     table.append(align.format("Systematic", "Minimum", "Maximum"))
     table.append(hLine)

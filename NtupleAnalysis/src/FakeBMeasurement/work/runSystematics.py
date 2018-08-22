@@ -18,6 +18,10 @@ The available ROOT options for the Error-Ignore-Level are (const Int_t):
         kBreak    =   4000
 
 
+LAST USED:
+./runSystematics.py -m /uscms_data/d3/aattikis/workspace/multicrab/multicrab_Hplus2tbAnalysis_v8030_20180508T0644 --systVars JES,JER
+
+
 HistoLevel:
 For the histogramAmbientLevel each DEEPER level is a SUBSET of the rest. 
 For example "kDebug" will include all kDebug histos but also kInformative, kVital, kSystematics, and kNever.  
@@ -144,16 +148,24 @@ def main():
 
     # Set splitting of phase-space (first bin is below first edge value and last bin is above last edge value)
     allSelections.CommonPlots.histogramSplitting = [               
-        ### 2D binning (Pt, Eta)
-        PSet(label="TetrajetBjetPt" , binLowEdges=[50, 110], useAbsoluteValues=False),
-        PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True),
-        ### 1D binning (Eta) 
-        #PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True), #AN_v4
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[50, 160,  300], useAbsoluteValues=False), # last (not bad)
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[50, 120,  300], useAbsoluteValues=False), # last (not bad)
+        #PSet(label="TetrajetBjetPt" , binLowEdges=[50, 150,  300], useAbsoluteValues=False), # last (quite good)
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[50, 60,  150], useAbsoluteValues=False),
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[60, 90, 160, 300], useAbsoluteValues=False), # BEST (v1)
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[50, 60, 90, 160, 330], useAbsoluteValues=False),
+        PSet(label="TetrajetBjetPt" , binLowEdges=[60, 90, 160, 300], useAbsoluteValues=False), # BEST (v2)
+        #PSet(label="TetrajetBjetPt" , binLowEdges=[60, 90, 160, 300], useAbsoluteValues=False), # BEST (v3)
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[50, 65, 130, 330], useAbsoluteValues=False), # BEST (v4)
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[50, 65, 95, 130, 330], useAbsoluteValues=False), # BEST (v5)
+        # PSet(label="TetrajetBjetPt" , binLowEdges=[45, 50, 60, 90, 160, 330], useAbsoluteValues=False), # BEST (v5)
+        #
+        PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.4, 2.0], useAbsoluteValues=True), # optimised
         ]
-    
-    # allSelections.BJetSelection.triggerMatchingApply = True # at least 1 trg b-jet matched to offline b-jets
-    # allSelections.Trigger.triggerOR = ["HLT_PFHT400_SixJet30_DoubleBTagCSV_p056"]
-    # allSelections.Trigger.triggerOR = ["HLT_PFHT450_SixJet40_BTagCSV_p056"]
+
+    # Overwrite values
+    # allSelections.TopSelectionBDT.CSV_bDiscCutDirection  = ">="
+    allSelections.TopSelectionBDT.CSV_bDiscCutValue = 0.54 # allow CSVv2-L for inverted top
 
     # ================================================================================================
     # Command Line Options
@@ -173,7 +185,8 @@ def main():
                               useTopPtReweighting    = opts.useTopPtReweighting,
                               doSystematicVariations = opts.doSystematics,
                               analysisType="HToTB",
-                              verbose=opts.verbose)
+                              verbose=opts.verbose,
+                              systVarsList=opts.systVarsList)
 
     # Add variations (e.g. for optimisation)
     # builder.addVariation("BJetSelection.triggerMatchingApply", [True, False]) # At least 1 trg b-jet dR-matched to offline b-jets
@@ -441,6 +454,7 @@ if __name__ == "__main__":
     TOPPTREWEIGHT = True
     DOSYSTEMATICS = False
     GROUP         = "A"
+    SYSTVARS      = None
 
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
     parser.add_option("-m", "--mcrab", dest="mcrab", action="store", 
@@ -473,6 +487,9 @@ if __name__ == "__main__":
     parser.add_option("--doSystematics", dest="doSystematics", action="store_true", default = DOSYSTEMATICS, 
                       help="Do systematics variations  (default: %s)" % (DOSYSTEMATICS) )
 
+    parser.add_option("--systVars", dest="systVars", default = SYSTVARS, 
+                        help="List of comma-separated (NO SPACE!) systematic variations to  perform. Overwrites the default list of systematics (default: %s)" % SYSTVARS)
+
     parser.add_option("--group", dest="group", default = GROUP, 
                       help="The group of datasets to run on. Capital letter from \"A\" to \"I\"  (default: %s)" % (GROUP) )
 
@@ -486,4 +503,9 @@ if __name__ == "__main__":
     if opts.histoLevel not in allowedLevels:
         raise Exception("Invalid ambient histogram level \"%s\"! Valid options are: %s" % (opts.histoLevel, ", ".join(allowedLevels)))
     
+    # Overwrite default systematics ?
+    opts.systVarsList = []
+    if opts.systVars != None:
+        opts.doSystematics = True
+        opts.systVarsList = opts.systVars.split(",")
     main()

@@ -23,6 +23,7 @@ Example:
 ./run.py -m multicrab_Hplus2tbAnalysis_v8014_20160818T1956 -n 1000 -e QCD
 ./run.py -m <multicrab-directory> -e TT_extOB
 ./run.py -m <multicrab_directory> -n 10 -e "QCD_bEnriched_HT300|2016|ST_"
+./run.py -m /uscms_data/d3/aattikis/workspace/multicrab/multicrab_Hplus2tbAnalysis_v8030_20180508T0644/ -i "TT"
 
 ROOT:
 The available ROOT options for the Error-Ignore-Level are (const Int_t):

@@ -34,36 +34,11 @@
    ./getNormalization.py -m <pseudo-multicrab> --url
     
    LAST USED:
-   
-   (1) ./getNormalization.py -m SystTopBDT_180528_151309_MET30_MuIso0p1_InvMET30_InvMuIso0p2_noSF -e "TTW|TTZ"
-   (2) ./getNormalization.py -m SystTopBDT_180528_151533_MET30_MuIso0p1_InvMET30_InvMuIso0p2_noSF -e "TTW|TTZ"
-   (3) ./getNormalization.py -m SystTopBDT_180528_152141_MET50_MuIso0p1_InvMET20_InvMuIso0p2_noSF -e "TTW|TTZ"
-   (4) ./getNormalization.py -m SystTopBDT_180528_152310_MET40_MuIso0p1_InvMET30_InvMuIso0p2_noSF -e "TTW|TTZ"
-   (5) ./getNormalization.py -m SystTopBDT_180528_152540_MET30_MuIso0p1_InvMET15_InvMuIso0p2_noSF -e "TTW|TTZ"
-   (6) ./getNormalization.py -m SystTopBDT_180528_152944_MET30_MuIso0p2_InvMET20_InvMuIso0p4_noSF -e "TTW|TTZ"
-   (7) ./getNormalization.py -m SystTopBDT_180529_093052_MET50_MuIso0p1_InvMET20_InvMuIso0p1_noSF -e "TTW|TTZ"
-   (8) ./getNormalization.py -m SystTopBDT_180529_165537_MET30_MuIso0p1_InvMET30_InvMuIso0p1_noSF -e "TTW|TTZ"
-   (9) ./getNormalization.py -m SystTopBDT_180529_170402_MET30_MuIso0p1_InvMET20_InvMuIso0p1_noSF -e "TTW|TTZ"   
-   (10)./getNormalization.py -m SystTopBDT_180529_094433_MET30_MuIso0p1_InvMET15_InvMuIso0p1_noSF -e "TTW|TTZ"
-   (11)./getNormalization.py -m SystTopBDT_180529_094647_MET50_MuIso0p2_InvMET30_InvMuIso0p2_noSF -e "TTW|TTZ"
-   (12)./getNormalization.py -m SystTopBDT_180529_094856_MET30_MuIso0p1_InvMET20_InvMuIso0p3_noSF -e "TTW|TTZ"x
-
-   ./getNormalization.py -m SystTopBDT_180524_074141_MET50_MuIso0p1_InvMET20_InvMuIso0p1_noSF -e "TTW|TTZ"
+   ./getNormalization.py -m SystTopBDT_180612_120857_MET50_MuIso0p1_InvMET20_InvMuIso0p1_massCut300_noSF -e "TTW|TTZ"
    
    USED for AN plots:
    ./getNormalization.py -m SystTopBDT_180513_101101_MET50_MuIso0p1_InvMET20_InvMuIso0p1_noSF -e "TTW|TTZ"
 
-   Other selections:
-   Selection A) ./getNormalization.py -m SystTopBDT_180513_100633_MET50_MuIso0p2_InvMET20_InvMuIso0p2_noSF -e "TTW|TTZ"
-   Selection C) ./getNormalization.py -m SystTopBDT_180513_101634_MET50_MuIso0p2_InvMET30_InvMuIso0p2_noSF -e "TTW|TTZ"
-   Selection D) ./getNormalization.py -m SystTopBDT_180513_102112_MET50_MuIso0p1_InvMET30_InvMuIso0p1_noSF -e "TTW|TTZ" 
-   Selection E) ./getNormalization.py -m SystTopBDT_180514_110341_MET40_MuIso0p1_InvMET20_InvMuIso0p1_noSF -e "TTW|TTZ"
-   Selection F) ./getNormalization.py -m SystTopBDT_180514_115524_MET40_MuIso0p1_InvMET30_InvMuIso0p1_noSF -e "TTW|TTZ"
-   Selection G) ./getNormalization.py -m SystTopBDT_180514_115629_MET30_MuIso0p1_InvMET20_InvMuIso0p1_noSF -e "TTW|TTZ"
-   Selection H) ./getNormalization.py -m SystTopBDT_180517_102420_MET40_MuIso0p1_InvMET20_InvMuIso0p1_noSF -e "TTW|TTZ"
-   Selection I) ./getNormalization.py -m SystTopBDT_180517_102638_MET30_MuIso0p1_InvMET20_InvMuIso0p2_noSF -e "TTW|TTZ"
-   Selection J) ./getNormalization.py -m SystTopBDT_180517_102808_MET30_MuIso0p1_InvMET30_InvMuIso0p2_noSF -e "TTW|TTZ"
-   Selection K) ./getNormalization.py -m SystTopBDT_180517_174526_TopDir_noSF -e "TTW|TTZ"
 '''
 
 #================================================================================================ 

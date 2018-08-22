@@ -13,7 +13,7 @@ Examples:
 ./plotMC_HPlusMass.py -m <peudo_mcrab> --normaliseToOne --url --signalMass 500
 
 Last Used:
-./plotMC_HPlusMass.py -m TopTaggerEfficiency_180529_TopEfficiency_vs_mass/ --folder topbdtSelection_ --normaliseToOne -v -e "TT" --url
+./plotMC_HPlusMass.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_15June18_BDT0p40_Masscut300_NewTop_BugFix/ --folder topbdtSelection_ --url -v
 '''
 
 #================================================================================================ 
@@ -136,7 +136,7 @@ def main(opts, signalMass):
         if 1:
             datasetsMgr.remove(filter(lambda name: "Data" in name, datasetsMgr.getAllDatasetNames()))
             #datasetsMgr.remove(filter(lambda name: "QCD_b" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "QCD_HT" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "QCD_HT" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "SingleTop" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "DYJetsToQQHT" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "TTZToQQ" in name, datasetsMgr.getAllDatasetNames()))
@@ -180,7 +180,7 @@ def main(opts, signalMass):
         # Apply TDR style
         style = tdrstyle.TDRStyle()
         style.setOptStat(True)
-        style.setGridX(True)
+        style.setGridX(False)
         style.setGridY(False)
 
         # Do the topSelection histos
@@ -204,6 +204,8 @@ def main(opts, signalMass):
         histoPaths = histoPaths1 + histoPaths2
         for h in histoPaths:
             if "Vs" in h: # Skip TH2D
+                continue
+            if "tetrajet" not in h.lower():
                 continue
             PlotMC(datasetsMgr, h, intLumi)
 
@@ -271,7 +273,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
         _xlabel = "p_{T} (%s)" % _units
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         #_opts["xmax"] = 505 #1005
-
+        
     if "eta" in histo.lower():
         _units  = ""
         _format = "%0.1f " + _units
@@ -287,30 +289,40 @@ def PlotMC(datasetsMgr, histo, intLumi):
         _xlabel = "m_{jjb} (%s)" % _units
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _opts["xmax"] = 505 #1005
-
+        if "ldg" in histo.lower():
+            _xlabel = "m_{jjb}^{ldg} (%s)" % _units
     elif "tetrajetmass" in histo.lower():
-        _rebinX = 5 #5 #10 #4
+        _rebinX = 8 #5 #10 #4
         _units  = "GeV/c^{2}"
         _format = "%0.0f " + _units
         _xlabel = "m_{jjbb} (%s)" % (_units)
         _format = "%0.0f " + _units
-        _opts["xmax"] = 1500 #3500.0
+        _opts["xmax"] = 2500 #3500.0
+
+    elif "tetrajetpt" in histo.lower():
+        _rebinX = 2 #5 #10 #4
+        _units  = "GeV/c"
+        _format = "%0.0f " + _units
+        _xlabel = "p_{T,jjbb} (%s)" % (_units)
+        _format = "%0.0f " + _units
+        _opts["xmax"] = 1000 #3500.0
 
     elif "dijetmass" in histo.lower():
-        _rebinX = 1 #5 #10 #4
+        _rebinX = 2 #5 #10 #4
         _units  = "GeV/c^{2}"
         _format = "%0.0f " + _units
-        _xlabel = "m_{W} (%s)" % (_units)
+        _xlabel = "m_{jj} (%s)" % (_units)
         _format = "%0.0f " + _units
         _opts["xmax"] = 800 #3500.0
         _cutBox = {"cutValue": 80.4, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _opts["xmax"] = 300
-
+        if "ldg" in histo.lower():
+            _xlabel = "m_{jj}^{ldg} (%s)" % (_units)
     elif "tetrajetbjetpt" in histo.lower():
         _rebinX = 2
         _units  = "GeV/c"
         _format = "%0.0f " + _units
-        _xlabel = "p_{T}  (%s)" % (_units)
+        _xlabel = "p_{T,bjet}  (%s)" % (_units)
         _format = "%0.0f " + _units
         _opts["xmax"] = 800
 
@@ -319,13 +331,25 @@ def PlotMC(datasetsMgr, histo, intLumi):
 #        logY    = False
         _units  = "GeV/c"
         _format = "%0.0f " + _units
-        _xlabel = "p_{T}  (%s)" % (_units)
+        _xlabel = "p_{T,jjb}^{ldg}  (%s)" % (_units)
+        _format = "%0.0f " + _units
+        _opts["xmax"] = 800
+
+    elif "ldgtrijetdijetpt" in histo.lower():
+        _rebinX = 2
+#        logY    = False
+        _units  = "GeV/c"
+        _format = "%0.0f " + _units
+        _xlabel = "p_{T,jj}^{ldg}  (%s)" % (_units)
         _format = "%0.0f " + _units
         _opts["xmax"] = 800
 
 
-    elif "bdtvalue" in histo.lower():
+    elif "topbdt_" in histo.lower():
         _format = "%0.1f"
+        _cutBox = {"cutValue": +0.40, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        _xlabel = "BDTG discriminant"
+            
 
     else:
         pass
@@ -356,7 +380,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
     p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineStyle(ROOT.kSolid))
 
     if "QCD" in datasetsMgr.getAllDatasetNames():
-        p.histoMgr.forHisto("QCD", styles.getQCDFillStyle() )
+        p.histoMgr.forHisto("QCD", styles.getQCDLineStyle()) #getQCDFillStyle() )
         p.histoMgr.setHistoDrawStyle("QCD", "HIST")
         p.histoMgr.setHistoLegendStyle("QCD", "F")
 
@@ -382,7 +406,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
                    ylabel       = Ylabel,
                    log          = logY,
                    rebinX       = _rebinX, cmsExtraText = "Preliminary", 
-                   createLegend = {"x1": 0.58, "y1": 0.65, "x2": 0.92, "y2": 0.92},
+                   createLegend = {"x1": 0.59, "y1": 0.65, "x2": 0.92, "y2": 0.92},
                    #createLegend = {"x1": 0.73, "y1": 0.85, "x2": 0.97, "y2": 0.77},
                    opts         = _opts,
                    opts2        = {"ymin": 0.6, "ymax": 1.4},
@@ -437,8 +461,8 @@ if __name__ == "__main__":
     OPTMODE      = ""
     BATCHMODE    = True
     PRECISION    = 3
-    SIGNALMASS   = [200, 400, 500, 650, 1000]
-    #SIGNALMASS   = []
+    SIGNALMASS   = [200, 500, 650]
+    #SIGNALMASS   = [500, 200]
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False

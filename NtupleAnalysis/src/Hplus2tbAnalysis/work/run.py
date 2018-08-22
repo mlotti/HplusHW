@@ -138,17 +138,17 @@ def main():
                        "ChargedHiggs_HplusTB_HplusToTB_M_350_ext1", 
                        "ChargedHiggs_HplusTB_HplusToTB_M_400_ext1", 
                        "ChargedHiggs_HplusTB_HplusToTB_M_500_ext1", 
-                       #"ChargedHiggs_HplusTB_HplusToTB_M_650",  #10M events!
                        "ChargedHiggs_HplusTB_HplusToTB_M_800_ext1", 
                        "ChargedHiggs_HplusTB_HplusToTB_M_1000_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_2000_ext1"
+                       "ChargedHiggs_HplusTB_HplusToTB_M_1500_ext1",
+                       "ChargedHiggs_HplusTB_HplusToTB_M_2000_ext1",
                        "ChargedHiggs_HplusTB_HplusToTB_M_2500_ext1", 
                        "ChargedHiggs_HplusTB_HplusToTB_M_3000_ext1", 
-                       # "ChargedHiggs_HplusTB_HplusToTB_M_1000",
-                       # "ChargedHiggs_HplusTB_HplusToTB_M_1500",   # Speeed things up
-                       # "ChargedHiggs_HplusTB_HplusToTB_M_2000",   # Speeed things up
-                       # "ChargedHiggs_HplusTB_HplusToTB_M_2500",   # Speeed things up
-                       # "ChargedHiggs_HplusTB_HplusToTB_M_3000",   # Speeed things up
+                       "ChargedHiggs_HplusTB_HplusToTB_M_1000",
+                       "ChargedHiggs_HplusTB_HplusToTB_M_1500",   # Speeed things up
+                       "ChargedHiggs_HplusTB_HplusToTB_M_2000",   # Speeed things up
+                       "ChargedHiggs_HplusTB_HplusToTB_M_2500",   # Speeed things up
+                       "ChargedHiggs_HplusTB_HplusToTB_M_3000",   # Speeed things up
                        "ChargedHiggs_HplusTB_HplusToTB_M_5000",   # Speeed things up
                        "ChargedHiggs_HplusTB_HplusToTB_M_7000",   # Speeed things up  
                        "ChargedHiggs_HplusTB_HplusToTB_M_10000",  # Speeed things up
@@ -176,8 +176,12 @@ def main():
     # allSelections.TopSelection.ChiSqrCutValue = 100.0
     # allSelections.BJetSelection.numberOfBJetsCutValue = 0
     # allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
-
     
+    #allSelections.TopSelectionBDT.MVACutValue           = 0.90 # [default: 0.4]
+    #allSelections.FakeBTopSelectionBDT.MVACutValue      = 0.00 # [default: -1.0]
+    #allSelections.FakeBMeasurement.LdgTopMVACutValue    = allSelections.TopSelectionBDT.MVACutValue
+    #allSelections.FakeBMeasurement.SubldgTopMVACutValue = allSelections.TopSelectionBDT.MVACutValue
+
     # ================================================================================================
     # Add Analysis Variations
     # ================================================================================================

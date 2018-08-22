@@ -206,8 +206,6 @@ def main(opts, signalMass):
             if "Vs" in h: # Skip TH2D
                 continue
             PlotMC(datasetsMgr, h, intLumi)
-
-
         
     return
 
@@ -271,6 +269,14 @@ def PlotMC(datasetsMgr, histo, intLumi):
         _xlabel = "p_{T} (%s)" % _units
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         _opts["xmax"] = 805 #1005
+
+    if "bdisc" in histo.lower():
+        _rebinX = 2
+        _units  = ""
+        _format = "%0.2f " + _units
+        _xlabel = "b-discriminator" #(%s)" % _units
+        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        _opts["xmax"] = 1.2
 
     if "ht" in histo.lower():
         _rebinX = 2
@@ -337,6 +343,11 @@ def PlotMC(datasetsMgr, histo, intLumi):
         _format = "%0.0f " + _units
         _opts["xmax"] = 800
 
+    elif "tau" in histo.lower():
+        _format = "%0.2f "
+
+    elif "deltar" in histo.lower():
+        _format = "%0.2f "
 
     elif "bdtvalue" in histo.lower():
         _format = "%0.1f"
@@ -396,7 +407,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
                    ylabel       = Ylabel,
                    log          = logY,
                    rebinX       = _rebinX, cmsExtraText = "Preliminary", 
-                   createLegend = {"x1": 0.58, "y1": 0.65, "x2": 0.92, "y2": 0.92},
+                   createLegend = {"x1": 0.68, "y1": 0.82, "x2": 1.0, "y2": 0.92},
                    #createLegend = {"x1": 0.73, "y1": 0.85, "x2": 0.97, "y2": 0.77},
                    opts         = _opts,
                    opts2        = {"ymin": 0.6, "ymax": 1.4},
