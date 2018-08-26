@@ -9,7 +9,7 @@ text2workspace.py combine_datacard_hplushadronic_m500.txt -o ws.root
 
 This creates an output ROOT file called "ws.root" which we will use as
 input to combine to produced fitDiagnonstics.root file as follows:
-combine -M FitDiagnostics --robustFit=1 --X-rtd MINIMIZER_analytic ws.root --saveShapes --saveWithUncertainties --saveOverallShapes --saveNormalizations --saveWorkspace --plots --expectSignal=0 --rMin=-4 
+combine -M FitDiagnostics --robustFit=1 --X-rtd MINIMIZER_analytic ws.root --saveShapes --saveWithUncertainties --saveOverallShapes --saveNormalizations --saveWorkspace --plots --expectSignal=0 --rMin=-10
 
 The fitDiagnostics.root is created, this contains the post-fit histos and is the input for this plotting script.
 
@@ -115,7 +115,7 @@ class Category:
         self.datafile = datarootfile
         return
 
-    def addHisto(self,histo,legendlabel,color=0):
+    def addHisto(self, histo, legendlabel, color=0):
         self.histonames.append(histo)
         self.labels[histo] = legendlabel
         self.colors[histo] = color
@@ -166,10 +166,9 @@ class Category:
     def fetchHistograms(self, fINdata, fINpost):
         
         histoName  = "data_obs"
-        Print("Getting data histogram \"%s\" from ROOT file \"%s\"" % (histoName, fINdata.GetName()), True)
         histoData   = fINdata.Get(histoName)
+        Print("Getting data histogram \"%s\" from ROOT file \"%s\" (Entries = %.1f)" % (histoName, fINdata.GetName(), histoData.GetEntries()), True)
         self.h_data = histoData.Clone("Data")
-        Verbose("Entries = %.1f" % (histoData.GetEntries()), False)
 
         # Inspect histogram contents?
         if opts.verbose:
@@ -207,7 +206,7 @@ class Category:
 
             # Get the histograms
             histo = fINpost.Get(histoName)
-            Print("Getting bkg histogram \"%s\" from ROOT file \"%s\"" % (histoName, fINpost.GetName()), i==1)
+            Print("Getting bkg histogram \"%s\" from ROOT file \"%s\" (Entries = %.1f)" % (histoName, fINpost.GetName(), histo.GetEntries()), i==1)
 
             # For-loop: All bins
             for iBin in range(0, histo.GetNbinsX()+1):
@@ -270,9 +269,9 @@ class Category:
         plots.drawPlot(p, os.path.join(opts.saveDir, self.gOpts.saveName), **myParams)
 
         # Save the plot (not needed - drawPlot saves the canvas already)
-        # SavePlot(p, self.gOpts.saveName, opts.saveDir, saveFormats = [".png", ".pdf"])
+        SavePlot(p, self.gOpts.saveName, opts.saveDir, saveFormats = [".png", ".pdf", ".C"])
 
-        Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)
+        #Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)
         return
 
 
@@ -290,7 +289,7 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     for i, ext in enumerate(saveFormats):
         saveNameURL = saveName + ext
         saveNameURL = aux.convertToURL(saveNameURL, opts.url)
-        Verbose(saveNameURL, i==0)
+        Print(saveNameURL, i==0)
         plot.saveAs(saveName, formats=saveFormats)
     return
 
@@ -308,11 +307,13 @@ def main(opts):
     h2tb_1 = Category("tbhadr", opts) #iro
     hadrMoveLegend = {"dx": -0.08, "dy": -0.02, "dh": 0.14} #{"dx": -0.07, "dy": -0.05, "dh": 0.}
     h2tb_1.setMoveLegend(hadrMoveLegend)
-    h2tb_1.addHisto("FakeB"                         , "Fake b (data)"    , color=ROOT.kOrange-3)
-    h2tb_1.addHisto("TT_GenuineB"                   , "t#bar{t}"         , color=ROOT.kMagenta-2)
-    h2tb_1.addHisto("SingleTop_GenuineB"            , "Single t"         , color=ROOT.kSpring+4)
-    h2tb_1.addHisto("TTZToQQ_GenuineB"              , "t#bar{t}+Z"       , color=ROOT.kAzure-4)
-    if not opts.removeRares:
+    h2tb_1.addHisto("FakeB"             , "Fake b (data)", color=ROOT.kBlue-1) #ROOT.kOrange-3)
+    h2tb_1.addHisto("TT_GenuineB"       , "t#bar{t}"     , color=ROOT.kMagenta-2)
+    h2tb_1.addHisto("SingleTop_GenuineB", "Single t"     , color=ROOT.kSpring+4)
+    if opts.mergeRares:        
+        h2tb_1.addHisto("Rares_GenuineB", "Rares"        , color=ROOT.kViolet+10)
+    else:
+        h2tb_1.addHisto("TTZToQQ_GenuineB"              , "t#bar{t}+Z"       , color=ROOT.kAzure-4)
         h2tb_1.addHisto("TTTT_GenuineB"                 , "t#bar{t}t#bar{t}" , color=ROOT.kYellow-9)
         h2tb_1.addHisto("DYJetsToQQ_GenuineB"           , "Z/#gamma^{*}+jets", color=ROOT.kTeal-9)
         h2tb_1.addHisto("TTWJetsToQQ_GenuineB"          , "t#bar{t}+W"       , color=ROOT.kSpring+9)
@@ -369,7 +370,7 @@ if __name__=="__main__":
     DATAROOTFILE    = None
     PREFIT          = False
     FITUNCERT       = False
-    REMOVERARES     = False
+    MERGERARES      = False
 
     parser = OptionParser(usage="Usage: %prog [options]", add_help_option=True, conflict_handler="resolve")
 
@@ -427,8 +428,8 @@ if __name__=="__main__":
     parser.add_option("--fitUncert", dest="fitUncert", default=FITUNCERT, action="store_true",
                       help="Include fit-uncertainty (and disable \"divideByBinWidth\" option) [default: %s]" % (FITUNCERT) )
 
-    parser.add_option("--removeRares", dest="removeRares", default=REMOVERARES, action="store_true",
-                      help="Remove rare datasets (v. small contribution to final count) [default: %s]" % (REMOVERARES) )
+    parser.add_option("--mergeRares", dest="mergeRares", default=MERGERARES, action="store_true",
+                      help="Merge rare datasets into a single dataset? (v. small contribution to final count) [default: %s]" % (MERGERARES) )
 
     (opts, args) = parser.parse_args()
 

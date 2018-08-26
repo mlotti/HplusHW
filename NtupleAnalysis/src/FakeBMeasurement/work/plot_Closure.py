@@ -184,7 +184,6 @@ def main(opts):
         # For-loop: All histogram paths
         for p in hPaths:
             if "AfterStandardSelections" in p:
-                #print p
                 continue
             
             if "Baseline" in p:
@@ -364,9 +363,12 @@ def GetHistoKwargs(histoName, ext, opts):
     _rebinX = 1
     _ylabel = None
     _yNorm  = "Events"
+    divideByBinWidth = False
+
     if opts.normaliseToOne:
         _yNorm  = "Arbitrary units"
-        _opts   = {"ymin": 0.7e-4, "ymaxfactor": 2.0}
+        #_opts   = {"ymin": 0.7e-4, "ymaxfactor": 2.0}
+        _opts   = {"ymin": 1e-6, "ymaxfactor": 2.0}
     else:
         _opts   = {"ymin": 1e0, "ymaxfactor": 2.0}
     _format = "%0.0f"
@@ -374,27 +376,33 @@ def GetHistoKwargs(histoName, ext, opts):
     _ratio  = True
         
     if "dijetm" in hName:
-        _rebinX = 2
         _units  = "GeV/c^{2}"
         _format = "%0.0f " + _units
         _xlabel = "m_{jj} (%s)" % (_units)
         _cutBox = {"cutValue": 80.399, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 200.0
+        _rebinX = systematics._dataDrivenCtrlPlotBinning["LdgTrijetDijetMass_AfterAllSelections"]
+        _ylabel = _yNorm + " / %.0f " + _units
+        #_opts["xmax"] = 200.0
+        #_ylabel = "<%s / %s>" % (_yNorm, _units)
+        #divideByBinWidth = True
+
     if "met" in hName:
         _units  = "GeV"
         _rebinX = systematics._dataDrivenCtrlPlotBinning["MET_AfterAllSelections"]  #2
-        _opts["xmax"] = 300.0
         binWmin, binWmax = GetBinWidthMinMax(_rebinX)
-        _ylabel = _yNorm + " / %.0f-%.0f %s" % (binWmin, binWmax, _units)
+        #_ylabel = _yNorm + " / %.0f-%.0f %s" % (binWmin, binWmax, _units)
+        _ylabel = "<%s / %s>" % (_yNorm, _units)
+        divideByBinWidth = True
+
     if "ht_" in hName:
         _units  = "GeV"
-        #_rebinX = 5 #2
         _rebinX = systematics._dataDrivenCtrlPlotBinning["HT_AfterAllSelections"]  #2
-        _opts["xmin"] =  400.0
-        _opts["xmax"] = 3000.0
         _cutBox       = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         binWmin, binWmax = GetBinWidthMinMax(_rebinX)
-        _ylabel = _yNorm + " / %.0f-%.0f %s" % (binWmin, binWmax, _units)
+        #_ylabel = _yNorm + " / %.0f-%.0f %s" % (binWmin, binWmax, _units)
+        _ylabel = "<%s / %s>" % (_yNorm, _units)
+        divideByBinWidth = True
+
     if "mvamax1" in hName:
         _rebinX = 1
         _units  = ""
@@ -402,6 +410,7 @@ def GetHistoKwargs(histoName, ext, opts):
         _xlabel = "top-tag discriminant"
         _opts["xmin"] =  0.0 #0.45
         _cutBox = {"cutValue": 0.40, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+
     if "mvamax2" in hName:
         _rebinX = 1
         _units  = ""
@@ -409,56 +418,52 @@ def GetHistoKwargs(histoName, ext, opts):
         _xlabel = "top-tag discriminant"
         #_opts["xmin"] = -1.0 #0.45
         _cutBox = {"cutValue": 0.40, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+
     if "nbjets" in hName:
         _units  = ""
         _format = "%0.0f " + _units
         _cutBox = {"cutValue": 3.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _opts["xmin"] =  2.0
         _opts["xmax"] = 10.0
+
     if "njets" in hName:
         _units  = ""
         _format = "%0.0f " + _units
-        #_cutBox = {"cutValue": 7.0, "fillColor": 16, "box": True, "line": True, "greaterThan": True}
-        _opts["xmin"] = 7.0
-        _opts["xmax"] = 20.0
+        _rebinX = systematics._dataDrivenCtrlPlotBinning["Njets_AfterAllSelections"]
+
     if "btagdisc" in hName:
-        _rebinX = 2
+        _rebinX = 4
         _units  = ""
         _format = "%0.2f " + _units
         _cutBox = {"cutValue": 0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-    if "chisqr" in hName:
-        _rebinX = 1
-        _units  = ""
-        _format = "%0.1f " + _units
-        _xlabel = "#chi^{2}"
-        _cutBox = {"cutValue": 10.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 100.0
+
     if "ldgdijetpt" in hName:
-        _rebinX = 1
         _units  = "GeV/c"
         _format = "%0.0f " + _units
         _xlabel = "p_{T} (%s)" % _units
         _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 800.0
-    if "ldgdijetm" in hName:
-        _rebinX = 1
-        _units  = "GeV/c^{2}"
-        _format = "%0.0f " + _units
-        _xlabel = "m_{jj} (%s)" % _units
-        _cutBox = {"cutValue": 80.385, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 400.0 #200
+        _rebinX = systematics._dataDrivenCtrlPlotBinning["LdgTrijetDijetPt_AfterAllSelections"]
+        #_opts["xmax"] = 800.0
+        _ylabel = "<%s / %s>" % (_yNorm, _units)
+        divideByBinWidth = True
+
     if "trijetm" in hName:
-        _rebinX = 2
+        # _rebinX = 2
+        # _opts["xmax"] = 1000.0
+        _rebinX = systematics._dataDrivenCtrlPlotBinning["LdgTrijetMass_AfterAllSelections"]
         _units  = "GeV/c^{2}"
         _format = "%0.0f " + _units
         _xlabel = "m_{jjb} (%s)" % _units
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 1000.0
+        _rebinX = systematics._dataDrivenCtrlPlotBinning["LdgTrijetMass_AfterAllSelections"]
+        _ylabel = "<%s / %s>" % (_yNorm, _units)
+        divideByBinWidth = True
         ROOT.gStyle.SetNdivisions(8, "X")
+
     if "pt" in hName:
-        #_rebinX = 2
+        _units  = "GeV/c"
         _rebinX = 1        
-        _format = "%0.0f GeV/c"
+        _format = "%0.0f " + _units
         _cutBox = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         if "jet1" in hName:
             _opts["xmax"] = 1000.0
@@ -475,16 +480,18 @@ def GetHistoKwargs(histoName, ext, opts):
         elif "jet7" in hName:
             _opts["xmax"] = 200.0
         elif "tetrajet" in hName:
-            _opts["xmax"] = 1000.0
-            _cutBox = {"cutValue": 200.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+            #_opts["xmax"] = 1000.0
+            #_cutBox = {"cutValue": 200.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+            _rebinX  = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetPt_AfterAllSelections"]
             ROOT.gStyle.SetNdivisions(8, "X")
         elif "trijet" in hName:
-            _opts["xmax"] = 1000.0
+            _rebinX  = systematics._dataDrivenCtrlPlotBinning["LdgTrijetPt_AfterAllSelections"]
             ROOT.gStyle.SetNdivisions(8, "X")
-            _cutBox = {"cutValue": 1000.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+            _cutBox = {"cutValue": 100.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         else:
             _opts["xmax"] = 600.0
-        #_opts["xmax"] = 400.0
+        _ylabel = "<%s / %s>" % (_yNorm, _units)
+        divideByBinWidth = True
         ROOT.gStyle.SetNdivisions(10, "X")
 
     if "eta" in hName:
@@ -494,12 +501,14 @@ def GetHistoKwargs(histoName, ext, opts):
         _opts["xmax"] = +2.4
         _rebinX = 1
         #ROOT.gStyle.SetNdivisions(10, "X")
+
     if "deltaeta" in hName:
         _format = "%0.2f"
         _opts["xmin"] = 0.0
         _opts["xmax"] = 6.0
         if "tetrajetbjet" in hName:
             _xlabel = "#Delta#eta (b_{jjb}, b_{free})"
+
     if "deltaphi" in hName:
         _units  = "rads"
         _format = "%0.2f " + _units
@@ -517,7 +526,7 @@ def GetHistoKwargs(histoName, ext, opts):
 
     if "bdisc" in hName:
         _format = "%0.2f"
-        _rebinX = 1 #2
+        _rebinX = 2
         _opts["xmin"] = 0.0
         _opts["xmax"] = 1.0
         #_cutBox = {"cutValue": 0.5426, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
@@ -526,16 +535,16 @@ def GetHistoKwargs(histoName, ext, opts):
         if "trijet" in hName:
             #_opts["xmin"] = 0.7
             _opts["xmin"] = 0.0
+
     if "tetrajetm" in hName:
-        #_rebinX = 4
         _units  = "GeV/c^{2}"
-        #_rebinX = systematics.getBinningForTetrajetMass(0)
-        _rebinX = systematics.getBinningForTetrajetMass(9)
-        #_rebinX  = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetMass_AfterAllSelections"]
+        #_rebinX = systematics.getBinningForTetrajetMass(9)
+        _rebinX  = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetMass_AfterAllSelections"]
         binWmin, binWmax = GetBinWidthMinMax(_rebinX)
-        _ylabel = _yNorm + " / %.0f-%.0f %s" % (binWmin, binWmax, _units)
+        #_ylabel = _yNorm + " / %.0f-%.0f %s" % (binWmin, binWmax, _units)
         _xlabel = "m_{jjbb} (%s)" % (_units)
-        #_opts["xmax"] = 3000.0
+        _ylabel = "<%s / %s>" % (_yNorm, _units)
+        divideByBinWidth = True
 
     if _ylabel == None:
         _ylabel = "Arbitrary Units/ %s" % (_format)
@@ -543,7 +552,7 @@ def GetHistoKwargs(histoName, ext, opts):
     _kwargs = {
         "ratioCreateLegend": True,
         "ratioType"        : opts.ratioType, #"errorPropagation", "errorScale", "binomial"
-        "divideByBinWidth" : False,
+        "divideByBinWidth" : divideByBinWidth,
         "ratioErrorOptions": {"numeratorStatSyst": False, "denominatorStatSyst": False}, # Include "stat.+syst." in legend? (if False just "stat.")
         "ratioMoveLegend"  : {"dx": -0.51, "dy": 0.03, "dh": -0.08},
         "errorBarsX"       : True,
@@ -551,7 +560,7 @@ def GetHistoKwargs(histoName, ext, opts):
         "ylabel"           : _ylabel,
         "rebinX"           : _rebinX, 
         "rebinY"           : None,
-        "ratioYlabel"      : ext.split("v")[0] + "/" + ext.split("v")[1],
+        "ratioYlabel"      : "Ratio ", #ext.split("v")[0] + "/" + ext.split("v")[1],
         "ratio"            : _ratio,
         "ratioInvert"      : True,  #CR1/CR2
         "addMCUncertainty" : True,
