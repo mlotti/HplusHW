@@ -34,7 +34,7 @@ def usage():
 def json2graph(jsonlimits):
     graphs = {}
     for k in jsonlimits.keys():
-        if k in ["exp2","exp1","obs","exp","Allowed"]:
+        if k in ["exp2","exp1","obs","exp","Allowed","Inaccessible"]:
             points = jsonlimits[k]
             x = array.array("d")
             y = array.array("d")
@@ -49,7 +49,7 @@ def xaminmax(jsonlimits):
     xmin = 999
     xmax = -999
     for k in jsonlimits.keys():
-        if k in ["exp2","exp1","obs","exp","Allowed"]:
+        if k in ["exp2","exp1","obs","exp","Allowed","Inaccessible"]:
             points = jsonlimits[k]
             for p in points:
                 x = float(p["x"])
@@ -92,10 +92,10 @@ def main():
     graphs         = json2graph(limits)
     xmin,xmax      = xaminmax(limits)
     regime         = str(limits["regime"])#"heavy"
-    if xmax < 175:
-        regime = "light"
-    if xmin < 175 and xmax > 175:
-        regime = "combined"
+    #if xmax < 175:
+    #    regime = "light"
+    #if xmin < 175 and xmax > 175:
+    #    regime = "combined"
     
     limit.doTanBetaPlotGeneric(name, graphs, lumi, finalstateText, mHplus, scenario, regime=regime)
 
