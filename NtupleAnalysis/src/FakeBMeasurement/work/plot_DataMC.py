@@ -771,7 +771,7 @@ def PlotHistograms(datasetsMgr, histoName, intLumi):
         replaceBinLabels(p, histoName)
 
     # Save the plots in custom list of saveFormats
-    SavePlot(p, saveName, os.path.join(opts.saveDir, opts.folder, opts.optMode), [".png", ".pdf"] )
+    SavePlot(p, saveName, os.path.join(opts.saveDir, opts.folder, opts.optMode), [".png", ".pdf", ".C"] )
     return
 
 def replaceBinLabels(p, histoName):
@@ -784,19 +784,19 @@ def replaceBinLabels(p, histoName):
 
     myBinDict = {
         "passed jet selection ()"         : "#geq 7j",
-        "passed b-jet selection ()"       : "#geq 3b",
-        "Baseline: passed b-jet selection": "SR: #geq 3b",
-        "Baseline: b tag SF"              : "SR: b-SF",
-        "passed MET selection (Baseline)" : "SR: MET",
-        "passed top selection (Baseline)" : "SR: Top",
-        "Baseline: selected events"       : "SR: All",
-        "Baseline: selected CR events"    : "CR1: All",
-        "Inverted: passed b-jet selection": "VR: =2b",
-        "Inverted: b tag SF"              : "VR: b-SF",
-        "passed MET selection (Inverted)" : "VR: MET",
-        "passed top selection (Inverted)" : "VR: Top",
-        "Inverted: selected events"       : "VR: All",
-        "Inverted: selected CR events"    : "CR2: All",
+        "passed b-jet selection ()"       : "#geq 3 b-jets",
+        "Baseline: passed b-jet selection": "#geq 3 b-jets",  # "SR: #geq 3b",
+        "Baseline: b tag SF"              : "b-tag SF", # "SR: b-SF",
+        "passed MET selection (Baseline)" : "MET",      # "SR: MET",
+        "passed top selection (Baseline)" : "#geq 2 tops", #"SR: Top",
+        "Baseline: selected events"       : "SR",     # "SR: All",
+        "Baseline: selected CR events"    : "CR1",    # "CR1: All",
+        "Inverted: passed b-jet selection": "== 2 b-jets",  # "VR: =2b",
+        "Inverted: b tag SF"              : "b-tag SF", # "VR: b-SF",
+        "passed MET selection (Inverted)" : "MET",      # "VR: MET",
+        "passed top selection (Inverted)" : "#geq 2 tops", # "VR: Top",
+        "Inverted: selected -events"       : "VR",    # "VR: All",
+        "Inverted: selected CR events"    : "CR2",   # "CR2: All",
         }
 
     nBinsX = p.getFrame().GetXaxis().GetNbins()
@@ -864,7 +864,7 @@ if __name__ == "__main__":
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False
-    SIGNALMASS   = 500
+    SIGNALMASS   = 0
     MERGEEWK     = False
     URL          = False
     NOERROR      = True
@@ -873,7 +873,7 @@ if __name__ == "__main__":
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug' 
     FOLDER       = "counters/weighted" #ForDataDrivenCtrlPlots" #"jetSelection_
     ONLYMC       = False
-    RATIO        = False
+    RATIO        = True
     NOSTACK      = False
 
     # Define the available script options

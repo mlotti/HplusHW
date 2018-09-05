@@ -44,12 +44,14 @@ public:
 private:
   // Input parameters
   const DirectionalCut<double> cfg_PrelimTopMVACut;
-  const std::string cfg_LdgTopDefinition;
+  //const std::string cfg_LdgTopDefinition;
   const DirectionalCut<double> cfg_MiniIsoCut;
   const DirectionalCut<double> cfg_MiniIsoInvCut;
   const DirectionalCut<double> cfg_METCut;
   const DirectionalCut<double> cfg_METInvCut;
-  
+  const DirectionalCut<double> cfg_MuTrijetDRCut;
+  const DirectionalCut<double> cfg_MuBJetDRCut;
+
   const float cfg_MuonPtCut;
   const float cfg_MuonEtaCut;
   
@@ -69,7 +71,7 @@ private:
   BJetSelection fBJetSelection;
   Count cBTaggingSFCounter;
   METSelection fMETSelection;
-  QuarkGluonLikelihoodRatio fQGLRSelection;
+  //QuarkGluonLikelihoodRatio fQGLRSelection;
   TopSelectionBDT fTopSelection;
   FatJetSelection fFatJetSelection;
   Count cSelected;
@@ -337,11 +339,13 @@ REGISTER_SELECTOR(SystTopBDT);
 SystTopBDT::SystTopBDT(const ParameterSet& config, const TH1* skimCounters)
   : BaseSelector(config, skimCounters),
     cfg_PrelimTopMVACut(config, "SystTopBDTSelection.MVACut"),
-    cfg_LdgTopDefinition(config.getParameter<std::string>("FakeBTopSelectionBDT.LdgTopDefinition")),
+    //cfg_LdgTopDefinition(config.getParameter<std::string>("FakeBTopSelectionBDT.LdgTopDefinition")),
     cfg_MiniIsoCut(config, "SystTopBDTSelection.MiniIsoCut"),
     cfg_MiniIsoInvCut(config, "SystTopBDTSelection.MiniIsoInvCut"),
     cfg_METCut(config, "SystTopBDTSelection.METCut"),
     cfg_METInvCut(config, "SystTopBDTSelection.METInvCut"),
+    cfg_MuTrijetDRCut(config, "SystTopBDTSelection.MuTrijetDRCut"),
+    cfg_MuBJetDRCut(config, "SystTopBDTSelection.MuBJetDRCut"),
     
     // Muon Selection Cuts
     cfg_MuonPtCut(config.getParameter<float>("MuonSelection.muonPtCut")),
@@ -359,13 +363,13 @@ SystTopBDT::SystTopBDT(const ParameterSet& config, const TH1* skimCounters)
     fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cBTaggingSFCounter(fEventCounter.addCounter("b tag SF")),
     fMETSelection(config.getParameter<ParameterSet>("METSelection")), // no subcounter in main counter
-    fQGLRSelection(config.getParameter<ParameterSet>("QGLRSelection")),// fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    //fQGLRSelection(config.getParameter<ParameterSet>("QGLRSelection")),// fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fTopSelection(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fFatJetSelection(config.getParameter<ParameterSet>("FatJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
     cSelected(fEventCounter.addCounter("Selected Events")),
     fMisIDSFReader(config.getParameterOptional<ParameterSet>("MisIDSF.MisIDSF")),
     cMisIDSFCounter(fEventCounter.addCounter("Mis-ID SF")),
-    cfg_ApplyMisIDSF(config.getParameterOptional<ParameterSet>("ApplyMisIDSF"))
+    cfg_ApplyMisIDSF(config.getParameter<bool>("MisIDSF.ApplyMisIDSF"))
 { }
 
 
@@ -383,7 +387,7 @@ void SystTopBDT::book(TDirectory *dir) {
   fJetSelection.bookHistograms(dir);
   fBJetSelection.bookHistograms(dir);
   fMETSelection.bookHistograms(dir);
-  fQGLRSelection.bookHistograms(dir);
+  //fQGLRSelection.bookHistograms(dir);
   fTopSelection.bookHistograms(dir);
   fFatJetSelection.bookHistograms(dir);
 
@@ -720,10 +724,10 @@ void SystTopBDT::setupBranches(BranchManager& branchManager) {
 void SystTopBDT::process(Long64_t entry) {
 
   // Sanity check
-  if (cfg_LdgTopDefinition != "MVA" &&  cfg_LdgTopDefinition != "Pt")
-    {
-      throw hplus::Exception("config") << "Unsupported method of defining the leading top (=" << cfg_LdgTopDefinition << "). Please select from \"MVA\" and \"Pt\".";
-    }
+  //if (cfg_LdgTopDefinition != "MVA" &&  cfg_LdgTopDefinition != "Pt")
+  //  {
+  //    throw hplus::Exception("config") << "Unsupported method of defining the leading top (=" << cfg_LdgTopDefinition << "). Please select from \"MVA\" and \"Pt\".";
+  //  }
 
   int Debug = 0;
 
@@ -810,9 +814,9 @@ void SystTopBDT::process(Long64_t entry) {
   //================================================================================================
   // 10) Quark-Gluon Likelihood Ratio Selection
   //================================================================================================
-  if (0) std::cout << "=== QGLR selection" << std::endl;
-  const QuarkGluonLikelihoodRatio::Data QGLRData = fQGLRSelection.analyze(fEvent, jetData, bjetData);
-  if (!QGLRData.passedSelection()) return;
+  //if (0) std::cout << "=== QGLR selection" << std::endl;
+  //const QuarkGluonLikelihoodRatio::Data QGLRData = fQGLRSelection.analyze(fEvent, jetData, bjetData);
+  //if (!QGLRData.passedSelection()) return;
 
   //================================================================================================
   // 11) Top selection
@@ -899,36 +903,23 @@ void SystTopBDT::process(Long64_t entry) {
 	{
 	  // DeltaR(mu, bjet)
 	  double dR = ROOT::Math::VectorUtil::DeltaR(mu.p4(), bjet.p4());
-      
+	  
 	  if (dR < dRmin_mu_bjet){
 	    BJet_LeptonicBr = bjet;
 	    dRmin_mu_bjet  = dR;
 	  }
 	}
       // Apply DR cut selection between b-jet and muon
-      if (dRmin_mu_bjet > 1.5) return;
+      if (!cfg_MuBJetDRCut.passedCut(dRmin_mu_bjet)) return;
     }
 
   hCEvts_PassSelections_SR -> Fill("B from mu", 1);
-  //if (Debug) std::cout<<"Muon pT = "<<mu.pt()<<"  BJet index="<<BJet_LeptonicBr.index()<<"  BJet pT="<<BJet_LeptonicBr.pt()<<"   ΔR( μ, bjet) = "<<dRmin_mu_bjet<<std::endl;
 
-  /*  
-  int nTopCandidates = 0;
-  int nTopCandidatesFarFromMuon = 0;
-  
-  nTopCandidates            = TopCandMultiplicity(topData, "all", BJet_LeptonicBr, mu, searchForLeptonicTop, false);
-  nTopCandidatesFarFromMuon = TopCandMultiplicity(topData, "all", BJet_LeptonicBr, mu, searchForLeptonicTop, true);
-  
-  if (0){
-    std::cout<<" Found "<<nTopCandidates            <<" candidates"<<std::endl;
-    std::cout<<" Found "<<nTopCandidatesFarFromMuon <<" candidates far from muon"<<std::endl;
-  }
-  */
   vector<int> vAllTops_index      = GetTopsIndex(topData, "all", BJet_LeptonicBr, mu, searchForLeptonicTop, true);
   vector<int> vSelectedTops_index = GetTopsIndex(topData, "selected", BJet_LeptonicBr, mu, searchForLeptonicTop, true);
   
   int nTopCandidatesFarFromMuon = vAllTops_index.size();
-
+  
   // At least 1 top candidate far from muon
   if (nTopCandidatesFarFromMuon < 1) return;
   hCEvts_PassSelections_SR -> Fill("Top far from Mu", 1);
@@ -956,9 +947,6 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
 
   int Debug = 0;
   double met    = METData.getMET().R();
-  // double dRmin_mu_bjet = 999.999;
-  // double dRmin_mu_top  = 999.999;
-  // size_t nTops = topData.getAllTopsMVA().size();
   
   // Calculate transverse W mass
   double deltaPhi_mu_met = std::abs(ROOT::Math::VectorUtil::DeltaPhi(mu.p4(), METData.getMET()));
@@ -969,11 +957,6 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
 
   int ldgTopIndex = getLeadingTopIndex(topData, "all", mu, BJet_LeptonicBr, searchForLeptonicTop);
   int nTopCandidatesFarFromMuonPassBDT = vSelectedTops_index.size();
-
-  /*
-  // Search for Tops passing the BDT cut
-  int nTopCandidatesFarFromMuonPassBDT = TopCandMultiplicity(topData, "selected", BJet_LeptonicBr, mu, searchForLeptonicTop, true);
-  */
 
   Jet  ldgTop_Jet1 =  topData.getAllTopsJet1().at(ldgTopIndex);
   Jet  ldgTop_Jet2 =  topData.getAllTopsJet2().at(ldgTopIndex);
@@ -1039,7 +1022,7 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
           }
         }
       }
-      //Soti: If top does not decay into W+b return
+      // If top does not decay into W+b return
       if (!foundB) return;   
       // Fill vectors for b-quarks, leading and subleading quarks coming from tops 
       GenTops_BQuark.push_back(bquark);
@@ -1147,11 +1130,7 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
 	MCtrue_Bjet.push_back(BJetCand.at(i));
       }
     }
-
-    //At least one trijet matched to partons
-    // isGenuineTop_StandardSelections = IsGenuineTop(topData, "all", mu, BJet_LeptonicBr, searchForLeptonicTop, MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet);
-    // isGenuineTop_AllSelections      = IsGenuineTop(topData, "selected", mu, BJet_LeptonicBr, searchForLeptonicTop, MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet);
-
+    
     //Leading in pt trijet matched to partons
     isGenuineTop_StandardSelections = isRealTop(ldgTop_Jet1, ldgTop_Jet2, ldgTop_BJet, MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet);
     isGenuineTop_AllSelections      = isRealTop(ldgTop_Jet1, ldgTop_Jet2, ldgTop_BJet, MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet);
@@ -1223,11 +1202,11 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
     //=======================================================================
     if (nTopCandidatesFarFromMuonPassBDT < 1) return;
     hCEvts_PassSelections_SR -> Fill("Top pass BDT", 1);
-    
+        
     // ==================================================================================
     //    Apply Mis-ID SF
     // ==================================================================================
-    if (fEvent.isMC())
+    if (fEvent.isMC() && cfg_ApplyMisIDSF)
       {
 	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
 	//std::cout<<"SR:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
@@ -1380,9 +1359,9 @@ void SystTopBDT::DoBaselineAnalysis(const JetSelection::Data& jetData, const BJe
     // ==================================================================================
     //    Apply Mis-ID SF
     // ==================================================================================
-    if (fEvent.isMC())
+    if (fEvent.isMC() && cfg_ApplyMisIDSF)
       {
-    	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
+      	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
 	//std::cout<<"VR:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
 	fEventWeight.multiplyWeight(MisIDweight);
       }
@@ -1559,7 +1538,7 @@ void SystTopBDT::DoInvertedAnalysis(const JetSelection::Data& jetData, const BJe
           }
         }
       }
-      //Soti: If top does not decay into W+b return
+      //If top does not decay into W+b return
       if (!foundB) return;   
       // Fill vectors for b-quarks, leading and subleading quarks coming from tops 
       GenTops_BQuark.push_back(bquark);
@@ -1751,7 +1730,7 @@ void SystTopBDT::DoInvertedAnalysis(const JetSelection::Data& jetData, const BJe
     // ==================================================================================
     //    Apply Mis-ID SF
     // ==================================================================================
-    if (fEvent.isMC())
+    if (fEvent.isMC() && cfg_ApplyMisIDSF)
       {
 	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
 	//std::cout<<"CR1:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
@@ -1899,7 +1878,7 @@ void SystTopBDT::DoInvertedAnalysis(const JetSelection::Data& jetData, const BJe
     // ==================================================================================
     //    Apply Mis-ID SF
     // ==================================================================================
-    if (fEvent.isMC())
+    if (fEvent.isMC() && cfg_ApplyMisIDSF)
       {
 	double MisIDweight = fMisIDSFReader.getScaleFactorValue(LdgTrijet_MaxPt);
 	//std::cout<<"CR2:  Leading Trijet pT = "<<LdgTrijet_MaxPt<<"   Mis-Id weight = "<<MisIDweight<<std::endl;
@@ -2035,10 +2014,10 @@ int SystTopBDT::getLeadingTopIndex(const TopSelectionBDT::Data& topData, string 
       //if (dR_mu_top < dRmin_mu_top) dRmin_mu_top = dR_mu_top;
 
       // Consider only top candidates that are far from the muon (back-to-back)
-      if (dR_mu_top < 2.0) continue;	      
+      if (!cfg_MuTrijetDRCut.passedCut(dR_mu_top)) continue;	      
       if (Top_p4.pt() < LdgTrijet_MaxPt) continue;
-       	LdgTrijet_MaxPt = Top_p4.pt();
-	LdgTrijet_Index = i;
+      LdgTrijet_MaxPt = Top_p4.pt();
+      LdgTrijet_Index = i;
     }
   return LdgTrijet_Index;
 }
@@ -2085,7 +2064,7 @@ bool SystTopBDT::IsGenuineTop(const TopSelectionBDT::Data& topData, string topTy
       double dR_mu_top = ROOT::Math::VectorUtil::DeltaR(mu.p4(), Top_p4);
       
       // Consider only top candidates that are far from the muon (back-to-back)
-      if (dR_mu_top < 2.0) continue;	      
+      if (!cfg_MuTrijetDRCut.passedCut(dR_mu_top)) continue;	      
       if (isRealTop(jet1, jet2, bjet, MCtrue_LdgJet, MCtrue_SubldgJet, MCtrue_Bjet)) return true;
     }
   return false;
@@ -2207,7 +2186,7 @@ vector <int> SystTopBDT::GetTopsIndex( const TopSelectionBDT::Data& topData, str
       if (dR_mu_top < dRmin_mu_top) dRmin_mu_top = dR_mu_top;
       
       // Consider only top candidates that are far from the muon (back-to-back)
-      if (dR_mu_top < 2.0) continue;	      
+      if (!cfg_MuTrijetDRCut.passedCut(dR_mu_top)) continue;	      
       vTops.push_back(i);
     }
   return vTops;

@@ -20,10 +20,11 @@ EXAMPLES:
 ./plotBRLimitCompare_Hplus2tb.py --logY --gridX --gridY --relative --url --yMax 10
 ./plotBRLimitCompare_Hplus2tb.py --logY --gridX --gridY --relative --url --xMax 1000
 ./plotBRLimitCompare_Hplus2tb.py --logY --gridX --gridY --relative --yMin 0.5 --xMax 800
-
-LAST USED:
 ./plotBRLimitCompare_Hplus2tb.py --logY --relative --yMin 0.1 --xMax 1000 --url
 
+
+LAST USED:
+./plotBRLimitCompare_Hplus2tb.py --logY --relative --yMin 0.1 --xMax 3000 --url --bandValue 5
 
 '''
 #================================================================================================
@@ -96,22 +97,27 @@ def main():
         savePath = opts.saveDir.replace("/afs/cern.ch/user/a/attikis/public/html", "https://cmsdoc.cern.ch/~%s" % getpass.getuser())
 
     # Do the Resolved H->tb fully hadronic final state comparison
-    if 1:
+    if 0:
         opts.name = "optimisationOfEtaBins"
         myList1   = GetOptimisationOfEtaBinsMar2018()
         doCompare(opts.name, myList1)
 
-    if 1:
+    if 0:
         opts.name = "optimisationOfMassBins"
         myList1   = GetPreapprovalMassBinningMar2018()
         doCompare(opts.name, myList1)
 
-    if 1:
-        opts.name = "optimisationOfBDT"
-        myList1   = GetOptimisationOfBDTMar2018()
+    if 0:
+        opts.name = "optimisationOfBDTStat"
+        myList1   = GetOptimisationOfBDTStatMar2018()
         doCompare(opts.name, myList1)
 
-    if 1:
+    if 0:
+        opts.name = "optimisationOfBDTSyst"
+        myList1   = GetOptimisationOfBDTSystApr2018()
+        doCompare(opts.name, myList1)
+
+    if 0:
         opts.name = "optimisationOfFatjetVeto"
         # do not overwrite xMax in this case
         xmax = opts.xMax
@@ -120,13 +126,13 @@ def main():
         doCompare(opts.name, myList1)
         opts.xMax = xmax #switch back to custom xMax
 
-    if 1:
+    if 0:
         opts.name = "stat"
         # myList1   = GetHexoListStat19Mar2018()
         myList1   = GetStatOnlyListMar2018()
         doCompare(opts.name, myList1)
 
-    if 1:
+    if 0:
         opts.name = "syst"
         # myList1   = GetHexoListSyst19Mar2018()    
         myList1   = GetPreapprovalTestsSystMar2018()
@@ -136,9 +142,34 @@ def main():
     # Do all H->tb fully hadronic final states comparison
     if 0:
         opts.name = "all"
-        myList2   = GetAllFinalStatesList()
-        myList2.extend(GetHexoListStat19Mar2018())
+        myList2 = GetHexoListStat19Mar2018()
         doCompare(opts.name, myList2)
+
+    if 0:
+        opts.name = "overlap1"
+        myList    = GetHToTBCombinationMay2018v1()
+        doCompare(opts.name, myList)
+
+    if 0:
+        opts.name = "overlap2"
+        myList    = GetHToTBCombinationMay2018v2()
+        doCompare(opts.name, myList)
+
+    if 0:
+        opts.name = "overlap"
+        myList    = GetHToTBCombinationMay2018v2()
+        doOverlap(opts.name, myList)
+
+    if 0:
+        opts.name = "FakeBBinning"
+        myList    = GetHToTBFakeBBinningJune2018()
+        doCompare(opts.name, myList)
+        #doOverlap(opts.name, myList)
+
+    if 1:
+        opts.name = "BinwiseVsAutoMCStats"
+        myList    = GetStatUncertaintyJune2018()
+        doCompare(opts.name, myList)
 
     # Inform user and exit
     Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + savePath + ShellStyles.NormalStyle()), True)    
@@ -150,6 +181,13 @@ def GetBoostedStatOnly():
         # Other final states
         ("H^{+}#rightarrow tb (boosted, 19-Dec-17)" , homeDir + "datacards_combine_MIT_approximate_19Dec2017/CombineResults_taujets_*"),
         ("H^{+}#rightarrow tb (boosted, 19-Mar-18)" , homeDir + "datacards_combine_MIT_approximate_19Mar2018/CombineResults_taujets_*"),
+        ]
+    return myList
+
+def GetBoostedSystematics():
+    homeDir = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/"
+    myList = [
+        ("H^{+}#rightarrow tb (boosted, v3)" , homeDir + "datacards_combine_MIT_AN-17-204_v3/CombineResults_taujets_*"),
         ]
     return myList
 
@@ -217,6 +255,49 @@ def GetStatOnlyListMar2018():
     # Add boosted results?
     if 1:
         myList.extend(GetBoostedStatOnly())
+    return myList
+
+
+def GetStatUncertaintyJune2018():
+    '''
+    '''
+    homeDir = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/"
+    myDirs  = {}
+    myDirs["binwise-04may"]     = "Binning13_04May2018/"
+    myDirs["autoMCstats-04may"] = "Binning13_04May2018_autoMCstats/"
+
+    for k in myDirs:
+        myDirs[k] = os.path.join(homeDir, "datacards_Hplus2tb_13TeV_EraRun2016_DataDriven_mH180to3000_Systematics_BDT0p40_" + myDirs[k])
+
+    myList = [
+        ("binwise"    , myDirs["binwise-04may"]    + "CombineResults*"),
+        ("autoMCstats", myDirs["autoMCstats-04may"] + "CombineResults*"),
+        ]
+    return myList
+
+def GetHToTBFakeBBinningJune2018():
+    '''
+    '''
+    myDirs = {}
+    myDirs["6AbsEtaBins"]             = "AbsEtaBins_0p4_0p8_1p6_2p0_2p2_Stat_03June2018_autoMCstats/"
+    myDirs["Pt55_3AbsEtaBins"]        = "Pt55_AbsEtaBins_0p8_1p6_Stat_06June2018_autoMCstats/"
+    myDirs["Pt60_3AbsEtaBins"]        = "Pt60_AbsEtaBins_0p8_1p6_Stat_06June2018_autoMCstats/"
+    myDirs["Pt50_80_3AbsEtaBins"]     = "Pt50_80_AbsEtaBins_0p8_1p6_Stat_06June2018_autoMCstats/"
+    myDirs["Pt50_110_3AbsEtaBins"]    = "Pt50_110_AbsEtaBins_0p8_1p6_Stat_06June2018_autoMCstats/"
+    myDirs["Pt50_80_160_3AbsEtaBins"] = "Pt50_80_160_AbsEtaBins_0p8_1p6_Stat_04June2018_autoMCstats/"
+
+    homeDir = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/"
+    for k in myDirs:
+        myDirs[k] = os.path.join(homeDir, "datacards_Hplus2tb_13TeV_AfterPreapproval_NewTop_" + myDirs[k])
+
+    myList = [
+        ("0 p_{T}, 6 |#eta| bins"     , myDirs["6AbsEtaBins"]             + "CombineResults*"),
+        ("2 p_{T}, 3 |#eta| bins (v1)", myDirs["Pt55_3AbsEtaBins"]        + "CombineResults*"),
+        ("2 p_{T}, 3 |#eta| bins (v2)", myDirs["Pt60_3AbsEtaBins"]        + "CombineResults*"),
+        ("3 p_{T}, 3 |#eta| bins (v1)", myDirs["Pt50_80_3AbsEtaBins"]     + "CombineResults*"),
+        ("3 p_{T}, 3 |#eta| bins (v2)", myDirs["Pt50_110_3AbsEtaBins"]    + "CombineResults*"),
+        ("4 p_{T}, 3 |#eta| bins"     , myDirs["Pt50_80_160_3AbsEtaBins"] + "CombineResults*"),
+        ]
     return myList
 
 
@@ -333,6 +414,40 @@ def GetPreapprovalTestsSystMar2018():
         myList.extend(GetBoostedStatOnly())
     return myList
 
+
+def GetHToTBCombinationMay2018v1():
+    homeDir1 = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/datacards_Hplus2tb_13TeV_EraRun2016_Search80to1000_OptNominal_limits2016_DataDriven_mH180to3000_Systematics_"
+    homeDir2 = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/datacards_Hplus2tb_13TeV_EraRun2016_DataDriven_mH180to3000_Systematics_"
+    myDirs  = {}
+    myDirs["BDT0p40_ANv5"] = homeDir1 + "20GeVBins_180412_070202/"
+    myDirs["BDT0p40_ANv6"] = homeDir2 + "BDT0p40_Binning12_28Apr2018/"
+
+    myList = [
+        ("H^{+}#rightarrow tb (resolved, v5)", myDirs["BDT0p40_ANv5"]  + "CombineResults*"),
+        #("H^{+}#rightarrow tb (resolved, v6)", myDirs["BDT0p40_ANv6"]  + "CombineResults*"),
+        ]
+
+    # Add boosted results
+    myList.extend(GetBoostedSystematics())
+    return myList
+
+def GetHToTBCombinationMay2018v2():
+    homeDir1 = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/datacards_Hplus2tb_13TeV_EraRun2016_Search80to1000_OptNominal_limits2016_DataDriven_mH180to3000_Systematics_"
+    homeDir2 = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/datacards_Hplus2tb_13TeV_EraRun2016_DataDriven_mH180to3000_Systematics_"
+    myDirs  = {}
+    myDirs["BDT0p40_ANv5"] = homeDir1 + "20GeVBins_180412_070202/"
+    myDirs["BDT0p40_ANv6"] = homeDir2 + "BDT0p40_Binning12_28Apr2018/"
+
+    myList = GetBoostedSystematics()
+    ext    = [
+        ("H^{+}#rightarrow tb (resolved, v5)", myDirs["BDT0p40_ANv5"]  + "CombineResults*"),
+        #("H^{+}#rightarrow tb (resolved, v6)", myDirs["BDT0p40_ANv6"]  + "CombineResults*"),
+        ]
+    myList.extend(ext)
+    # Add boosted results
+
+    return myList
+
 def GetOptimisationOfEtaBinsMar2018():
     myDirs = {}
     myDirs["b3Pt40_MVAm1p00to0p40_StatOnly_6AbsEtaBins"]            = "mH180to1000_MVAm0p10to0p40_6BinsAbsEta_0PtBins_NoFatjetVeto_StatOnly_180327_062621/" 
@@ -376,7 +491,7 @@ def GetOptimisationOfFatjetVetoMar2018():
     return myList
 
 
-def GetOptimisationOfBDTMar2018():
+def GetOptimisationOfBDTStatMar2018():
     myDirs = {}
     myDirs["b3Pt40_MVA1p00to0p30_NoFatJetVeto_StatOnly"]   = "mH180to3000_StatOnly_180406_052506/"
     myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto-OptBin"]     = "mH180to3000_StatOnly_180405_211015/" #test3
@@ -410,6 +525,31 @@ def GetOptimisationOfBDTMar2018():
         ("BDT > 0.85", myDirs["b3Pt40_MVA0p60to0p85_NoFatJetVeto_StatOnly"]  + "CombineResults*"),
         ("BDT > 0.90", myDirs["b3Pt40_MVA0p60to0p90_NoFatJetVeto_StatOnly"]  + "CombineResults*"),
         # ("b40, BDT > 0.40 (5#eta, 2p_{T} bins)", myDirs["b3Pt40_MVAm1p00to0p40_StatOnly_5AbsEtaBins_2PtBins"] + "CombineResults*"),
+        ]
+    return myList
+
+def GetOptimisationOfBDTSystApr2018():
+    
+    homeDir = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/datacards_Hplus2tb_13TeV_EraRun2016_DataDriven_mH180to3000_Systematics_"
+    myDirs  = {}
+    myDirs["b3Pt40_MVA1p00to0p00"]  = homeDir + "BDT0p00_Binning12_01May2018/"
+    myDirs["b3Pt40_MVA1p00to0p10"]  = homeDir + "BDT0p10_Binning12_01May2018/"
+    myDirs["b3Pt40_MVA1p00to0p30"]  = homeDir + "BDT0p30_Binning12_28Apr2018/"
+    myDirs["b3Pt40_MVA1p00to0p40"]  = homeDir + "BDT0p40_Binning12_28Apr2018/"
+    myDirs["b3Pt40_MVA1p00to0p50"]  = homeDir + "BDT0p50_Binning12_28Apr2018/"
+    myDirs["b3Pt40_MVA1p00to0p60"]  = homeDir + "BDT0p60_Binning12_28Apr2018/"
+    myDirs["b3Pt40_MVA1p00to0p70"]  = homeDir + "BDT0p70_Binning12_28Apr2018/"
+    myDirs["b3Pt40_MVA1p00to0p95"]  = homeDir + "BDT0p95_Binning12_01May2018/"
+
+    myList = [
+        ("BDT > 0.00", myDirs["b3Pt40_MVA1p00to0p00"]  + "CombineResults*"),
+        ("BDT > 0.10", myDirs["b3Pt40_MVA1p00to0p10"]  + "CombineResults*"),
+        ("BDT > 0.30", myDirs["b3Pt40_MVA1p00to0p30"]  + "CombineResults*"), #best
+        ("BDT > 0.40", myDirs["b3Pt40_MVA1p00to0p40"]  + "CombineResults*"),
+        ("BDT > 0.50", myDirs["b3Pt40_MVA1p00to0p50"]  + "CombineResults*"),
+        ("BDT > 0.60", myDirs["b3Pt40_MVA1p00to0p60"]  + "CombineResults*"),
+        ("BDT > 0.70", myDirs["b3Pt40_MVA1p00to0p70"]  + "CombineResults*"),
+        # ("BDT > 0.95", myDirs["b3Pt40_MVA1p00to0p95"]  + "CombineResults*"), #no need. v. bad limits - will add confusion
         ]
     return myList
 
@@ -489,6 +629,8 @@ def doCompare(name, compareList, **kwargs):
     else:
         _opts.yMin    = +0.65
         _opts.yMax    = +2.05
+        #_opts.yMin    = +0.85
+        #_opts.yMax    = +1.25
 
     # 1) Relative: median
     relLimits    = GetRelativeLimits(limits)
@@ -506,6 +648,33 @@ def doCompare(name, compareList, **kwargs):
     list2 = [limit.divideGraph(l.expectedGraph(sigma=-2), l.expectedGraph()) for l in limits]
     sigma2List = list1 + list2
     doPlot(limits, legendLabels2, sigma2List, opts.name + "_sigma2Relative", "Expected #pm2#sigma / median", _opts, yTitle="Expected #pm2#sigma / median")
+    return
+
+
+def doOverlap(name, compareList, **kwargs):
+    # Define lists
+    legendLabels = []
+    limits       = []
+
+    # For-loop: All label-path pairs
+    for label, path in compareList:
+        legendLabels.append(label)
+        dirs = glob.glob(path)
+        dirs.sort()
+
+        if len(dirs) == 0:
+            raise Exception("No directories for pattern '%s'" % path)
+        directory = dirs[-1]
+        
+        Verbose("Picked %s" % directory, True)
+        limits.append(limit.BRLimits(directory, excludeMassPoints=["155"]))
+
+    # ================================================================================================================
+    # Do the sigma bands
+    # ================================================================================================================
+    Verbose("Creating the sigma-bands plots", True)
+    _opts = copy.deepcopy(opts)
+    doPlotSigmaBandsAlt(limits, legendLabels, opts.name + "_sigmaBands", _opts)
     return
 
 def doPlot(limits, legendLabels, graphs, name, ylabel, _opts={}, yTitle=None):
@@ -563,7 +732,14 @@ def doPlot(limits, legendLabels, graphs, name, ylabel, _opts={}, yTitle=None):
     if opts.cutLineY != 999.9:
         kwargs = {"greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
         plot.addCutBoxAndLineY(cutValue=_opts.cutLineY, fillColor=ROOT.kRed, box=False, line=True, **kwargs)
+
+    if opts.bandValue != 0:
+        if "relative" in name.lower():
+            # https://root.cern.ch/doc/master/classTAttFill.html
+            kwargs = {"cutValue": 1.0 + float(opts.bandValue)/100.0, "fillColor": ROOT.kGray, "fillStyle": 3001, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": False, "mirror": True}
+            plot.addCutBoxAndLineY(**kwargs)    
     
+
     # Set axes titles
     plot.frame.GetXaxis().SetTitle(limit.mHplus())
     plot.frame.GetYaxis().SetTitle(ylabel)
@@ -579,7 +755,8 @@ def doPlot(limits, legendLabels, graphs, name, ylabel, _opts={}, yTitle=None):
     addPhysicsText(histograms, limit, x=0.53)
 
     # Save plots and return
-    SavePlot(plot, _opts.saveDir, saveName, [".png", ".C", ".eps"])
+    #SavePlot(plot, _opts.saveDir, saveName, [".png", ".C", ".pdf"])
+    SavePlot(plot, _opts.saveDir, saveName, [".png", ".C", ".pdf"])
     return
 
 def GetRelativeLimits(limits):
@@ -640,6 +817,7 @@ def getLegend(nPlots, limit, xLeg=0.40):
     if 0: #opts.excludedArea:
         legend.SetFillStyle(1001)
     return legend
+
 
 def doPlotSigmaBands(limits, legendLabels, saveName, _opts={}):
 
@@ -722,7 +900,98 @@ def doPlotSigmaBands(limits, legendLabels, saveName, _opts={}):
     addPhysicsText(histograms, limit, x=0.53)
 
     # Save the plots & return
-    SavePlot(plot, _opts.saveDir, saveName, [".png", ".C", ".eps"])
+    SavePlot(plot, _opts.saveDir, saveName, [".png", ".C", ".pdf"])
+    return
+
+def doPlotSigmaBandsAlt(limits, legendLabels, saveName, _opts={}):
+
+    graphs = [
+        histograms.HistoGraph(limits[1].expectedGraph(), "Resolved-Median", drawStyle="L"),
+        histograms.HistoGraph(limits[0].expectedGraph(), "Boosted-Median", drawStyle="L"),
+        histograms.HistoGraph(limits[1].expectedBandGraph(sigma=1), "Resolved-1Sigma", drawStyle="F", legendStyle="F"),
+        histograms.HistoGraph(limits[0].expectedBandGraph(sigma=1), "Boosted-1Sigma", drawStyle="F", legendStyle="F"),
+        histograms.HistoGraph(limits[1].expectedBandGraph(sigma=2), "Resolved-2Sigma", drawStyle="F", legendStyle="F"),
+        histograms.HistoGraph(limits[0].expectedBandGraph(sigma=2), "Boosted-2Sigma", drawStyle="F", legendStyle="F"),
+        ]
+    
+    # Create plot base object
+    if 0:
+        plot = plots.PlotBase(graphs)
+    else:
+        plot = plots.ComparisonManyPlot(graphs[0], graphs[1:])
+
+    # Customise legend
+    ll = {
+        "Resolved-Median": "Resolved Median",
+        "Boosted-Median" : "Boosted  Median",
+        "Boosted-1Sigma" : None,
+        "Boosted-2Sigma" : None,
+        "Resolved-1Sigma": "#pm 1#sigma",
+        "Resolved-2Sigma": "#pm 2#sigma",
+         }
+
+    # For-loop: All limits
+    for i, gr in enumerate(graphs, 1):
+        name = gr.getName().lower()
+        gr.getRootHisto().SetLineWidth(3)
+
+        if "resolved" in name:
+            gr.getRootHisto().SetLineStyle(8)
+            #gr.getRootHisto(s).SetFillStyle(3001)
+
+        if "boosted" in name:
+            gr.getRootHisto().SetLineStyle(3)
+            #gr.getRootHisto().SetFillStyle(3001)
+
+        if "sigma" in name:
+            gr.getRootHisto().SetLineStyle(ROOT.kSolid)
+            gr.getRootHisto().SetLineWidth(4)
+            gr.getRootHisto().SetFillStyle(1001)
+
+    # Set histo labels
+    plot.histoMgr.setHistoLegendLabelMany(ll)
+
+    # If sigma bands are drawn each legend entry is plotted twice. Correct this in the count
+    legend = getLegend(0, limit)
+    plot.setLegend(legend)
+    histograms.moveLegend(legend, dx=+0.10, dy=-0.01, dw=0.1, dh=+0.0)
+    
+    # Determine save name, minimum and maximum of y-axis
+    ymin, ymax, saveName = getYMinMaxAndName(limits, saveName)
+    if _opts.yMin == -1:
+        _opts.yMin = ymin
+    if _opts.yMax == -1:
+        _opts.yMax = ymax
+
+    # Create the frame and set axes titles
+    plot.createFrame(saveName, opts={"ymin": _opts.yMin, "ymax": _opts.yMax})
+    
+    # Add cut line?
+    if _opts.cutLine != 999.9:
+        kwargs = {"greaterThan": True}
+        plot.addCutBoxAndLine(cutValue=_opts.cutLine, fillColor=ROOT.kRed, box=False, line=True, **kwargs)
+    if opts.cutLineY != 999.9:
+        kwargs = {"greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
+        plot.addCutBoxAndLineY(cutValue=_opts.cutLineY, fillColor=ROOT.kRed, box=False, line=True, **kwargs)
+
+    # Set axes titles
+    limit.useSubscript(True) # convert H->tau nu to H->t b
+    plot.frame.GetXaxis().SetTitle(limit.mHplus())
+    plot.frame.GetYaxis().SetTitle(limit.sigmaBRlimit)
+
+    # Enable/Disable logscale for axes 
+    ROOT.gPad.SetLogy(_opts.logY)
+    ROOT.gPad.SetLogx(_opts.logX)
+
+    # Draw the plot with standard texts
+    plot.draw()
+ 
+    plot.setLuminosity(limits[0].getLuminosity())
+    plot.addStandardTexts(addLuminosityText=True, cmsTextPosition="outframe")
+    addPhysicsText(histograms, limit, x=0.53)
+
+    # Save the plots & return
+    SavePlot(plot, _opts.saveDir, saveName, [".png", ".C", ".pdf"])
     return
 
 def getYMinMaxAndName(limits, name, minIsMedian=False):
@@ -787,6 +1056,7 @@ if __name__ == "__main__":
     MAXY        = -1
     CUTLINE     = 999.9
     CUTLINEY    = 999.9
+    BANDVALUE   = 0
     RELATIVE    = False
     RELPAIRS    = False
     VERBOSE     = False
@@ -851,6 +1121,9 @@ if __name__ == "__main__":
 
     parser.add_option("--cutLineY", dest="cutLineY", type="float", default=CUTLINEY,
                       help="Add TLine on the y-axis at this value  [default: %s]" % (CUTLINEY) )
+
+    parser.add_option("--bandValue", dest="bandValue", type="int", default=BANDVALUE,
+                      help="Add a symmetric band around 1.0. Value passed should be the percentage (e.g 10 or 5)  [default: %s]" % (BANDVALUE) )
 
     (opts, args) = parser.parse_args()
 

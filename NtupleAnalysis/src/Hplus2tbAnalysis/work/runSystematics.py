@@ -28,6 +28,11 @@ The available ROOT options for the Error-Ignore-Level are (const Int_t):
         kError    =   3000
         kBreak    =   4000
 
+
+LAST USED:
+./runSystematics.py -m /uscms_data/d3/aattikis/workspace/multicrab/multicrab_Hplus2tbAnalysis_v8030_20180508T0644 --systVars JES,JER
+
+
 HistoLevel:
 For the histogramAmbientLevel each DEEPER level is a SUBSET of the rest. 
 For example "kDebug" will include all kDebug histos but also kInformative, kVital, kSystematics, and kNever.  
@@ -131,24 +136,41 @@ def main():
         Verbose("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
         process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=opts.excludeTasks)
     else:
-        myBlackList = ["QCD_b",
-                       "ChargedHiggs_HplusTB_HplusToTB_M_180_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_200_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_220_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_250_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_300_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_350_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_400_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_500_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_800_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_1000_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_2000_ext1"
-                       "ChargedHiggs_HplusTB_HplusToTB_M_2500_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_3000_ext1", 
-                       "ChargedHiggs_HplusTB_HplusToTB_M_5000",
-                       "ChargedHiggs_HplusTB_HplusToTB_M_7000",
-                       "ChargedHiggs_HplusTB_HplusToTB_M_10000",
-                       ]
+        myBlackList = [
+            "QCD_b"
+            "ChargedHiggs_HplusTB_HplusToTB_M_180",
+            "ChargedHiggs_HplusTB_HplusToTB_M_200",
+            "ChargedHiggs_HplusTB_HplusToTB_M_220",
+            "ChargedHiggs_HplusTB_HplusToTB_M_250",
+            "ChargedHiggs_HplusTB_HplusToTB_M_300",
+            "ChargedHiggs_HplusTB_HplusToTB_M_350",
+            "ChargedHiggs_HplusTB_HplusToTB_M_400",
+            "ChargedHiggs_HplusTB_HplusToTB_M_500",
+            "ChargedHiggs_HplusTB_HplusToTB_M_650",
+            "ChargedHiggs_HplusTB_HplusToTB_M_800",
+            "ChargedHiggs_HplusTB_HplusToTB_M_1000",
+            "ChargedHiggs_HplusTB_HplusToTB_M_1500",
+            "ChargedHiggs_HplusTB_HplusToTB_M_2000",
+            "ChargedHiggs_HplusTB_HplusToTB_M_2500",
+            "ChargedHiggs_HplusTB_HplusToTB_M_3000",
+            "ChargedHiggs_HplusTB_HplusToTB_M_5000",
+            "ChargedHiggs_HplusTB_HplusToTB_M_7000",
+            "ChargedHiggs_HplusTB_HplusToTB_M_10000",
+            # "ChargedHiggs_HplusTB_HplusToTB_M_180_ext1",
+            # "ChargedHiggs_HplusTB_HplusToTB_M_200_ext1",
+            # "ChargedHiggs_HplusTB_HplusToTB_M_220_ext1",
+            # "ChargedHiggs_HplusTB_HplusToTB_M_250_ext1",
+            # "ChargedHiggs_HplusTB_HplusToTB_M_300_ext1",
+            # "ChargedHiggs_HplusTB_HplusToTB_M_350_ext1",
+            # "ChargedHiggs_HplusTB_HplusToTB_M_400_ext1",
+            # "ChargedHiggs_HplusTB_HplusToTB_M_500_ext1",
+            # "ChargedHiggs_HplusTB_HplusToTB_M_800_ext1",
+            # "ChargedHiggs_HplusTB_HplusToTB_M_1000_ext1",
+            # "ChargedHiggs_HplusTB_HplusToTB_M_1500_ext1",
+            # "ChargedHiggs_HplusTB_HplusToTB_M_2000_ext1",
+            # "ChargedHiggs_HplusTB_HplusToTB_M_2500_ext1",
+            # "ChargedHiggs_HplusTB_HplusToTB_M_3000_ext1",
+            ]
         if opts.doSystematics:
             whiteList = GetDatasetWhitelist(opts)
 
@@ -164,6 +186,21 @@ def main():
             process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks="|".join(myBlackList))
         else:
             process.addDatasetsFromMulticrab(opts.mcrab)
+
+
+        # ***************************************
+        # Keep ONLY datasets in whitelist
+        # ***************************************
+        Verbose("Removing datasets NOT included in whitelist:")    
+        removeList = []
+        for i, d in enumerate(process.getDatasets()):
+            if d.getName() not in whiteList:
+                Verbose("Dataset to be removed: %s" % (d.getName()))
+                removeList.append(d) 
+
+        for d in removeList:
+            process._datasets.remove(d)
+        
 
     # ================================================================================================
     # Overwrite Default Settings  
@@ -202,7 +239,8 @@ def main():
                               useTopPtReweighting    = opts.useTopPtReweighting,
                               doSystematicVariations = opts.doSystematics,
                               analysisType="HToTB",
-                              verbose=opts.verbose)
+                              verbose=opts.verbose,
+                              systVarsList=opts.systVarsList)
 
     # Add variations (e.g. for optimisation)
     # builder.addVariation("METSelection.METCutValue", [100,120,140])
@@ -349,29 +387,6 @@ def GetDatasetWhitelist(opts):
         myWhitelist.append("JetHT_Run2016H_03Feb2017_ver2_v1_281613_284035")
         myWhitelist.append("JetHT_Run2016H_03Feb2017_ver3_v1_284036_284044")
     elif opts.group == "C":
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_180")
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_800")
-    elif opts.group == "D":
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_350")
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_400")
-    elif opts.group == "E":
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_650")
-    elif opts.group == "F":
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_220")
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_1500")
-    elif opts.group == "G":
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_250")
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_2500")
-    elif opts.group == "H":
-        myWhitelist.append("ZZTo4Q")
-        myWhitelist.append("ZJetsToQQ_HT600toInf")
-        myWhitelist.append("WZ_ext1")
-        myWhitelist.append("WZ")
-        myWhitelist.append("WWTo4Q")
-        myWhitelist.append("WJetsToQQ_HT_600ToInf")
-        #myWhitelist.append("TTZToQQ")
-        #myWhitelist.append("TTWJetsToQQ")
-    elif opts.group == "I":    
         myWhitelist.append("DYJetsToQQ_HT180")
         myWhitelist.append("QCD_HT50to100")
         myWhitelist.append("QCD_HT100to200")
@@ -396,21 +411,71 @@ def GetDatasetWhitelist(opts):
         myWhitelist.append("ST_tW_antitop_5f_inclusiveDecays_ext1")
         myWhitelist.append("ST_tW_top_5f_inclusiveDecays")
         myWhitelist.append("ST_tW_top_5f_inclusiveDecays_ext1")
-    elif opts.group == "J":
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_200")
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_2000")
-    elif opts.group == "K":
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_300")
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_3000")
-    elif opts.group == "L":
+    elif opts.group == "D":
         myWhitelist.append("TT")
         myWhitelist.append("TTTT")
+    elif opts.group == "E":
+        myWhitelist.append("WJetsToQQ_HT_600ToInf")
+        myWhitelist.append("ZJetsToQQ_HT600toInf")
+        myWhitelist.append("WWTo4Q")
+        myWhitelist.append("WZ")
+        myWhitelist.append("WZ_ext1")
+        myWhitelist.append("ZZTo4Q")
+        myWhitelist.append("TTZToQQ")
+        myWhitelist.append("TTWJetsToQQ")
+    elif opts.group == "F":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_180_ext1")
+    elif opts.group == "G":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_200_ext1")
+    elif opts.group == "H":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_220_ext1")
+    elif opts.group == "I":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_250_ext1")    
+    elif opts.group == "J":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_300_ext1")
+    elif opts.group == "K":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_350_ext1")
+    elif opts.group == "L":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_400_ext1")
     elif opts.group == "M":
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_500")
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_5000")
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_500_ext1")
     elif opts.group == "N":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_650")
+    elif opts.group == "O":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_800_ext1")
+    elif opts.group == "P":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_1000_ext1")
+        #myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_1000")
+    elif opts.group == "Q":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_1500_ext1")
+    elif opts.group == "R":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_2000_ext1")
+    elif opts.group == "S":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_2500_ext1")
+    elif opts.group == "T":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_3000_ext1")        
+        #myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_5000")
+        #myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_7000")
+        #myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_10000")
+    elif opts.group == "U":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_180")
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_800")
+    elif opts.group == "V":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_350")
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_400")
+    elif opts.group == "W":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_500")
         myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_1000")
-        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_10000")
+    elif opts.group == "X":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_220")
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_250")
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_2500")
+    elif opts.group == "Y":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_300")
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_3000")
+    elif opts.group == "Z":
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_200")
+        myWhitelist.append("ChargedHiggs_HplusTB_HplusToTB_M_2000")
     else:
         msg = "Unknown systematics submission dataset group \"%s\"%" % (opts.group)
         raise Exception(msg)
@@ -471,6 +536,7 @@ if __name__ == "__main__":
     TOPPTREWEIGHT = True
     DOSYSTEMATICS = False
     GROUP         = "A"
+    SYSTVARS      = None
 
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
     parser.add_option("-m", "--mcrab", dest="mcrab", action="store", 
@@ -503,6 +569,9 @@ if __name__ == "__main__":
     parser.add_option("--doSystematics", dest="doSystematics", action="store_true", default = DOSYSTEMATICS, 
                       help="Do systematics variations  (default: %s)" % (DOSYSTEMATICS) )
 
+    parser.add_option("--systVars", dest="systVars", default = SYSTVARS, 
+                        help="List of comma-separated (NO SPACE!) systematic variations to  perform. Overwrites the default list of systematics (default: %s)" % SYSTVARS)
+
     parser.add_option("--group", dest="group", default = GROUP, 
                       help="The group of datasets to run on. Capital letter from \"A\" to \"I\"  (default: %s)" % (GROUP) )
 
@@ -514,5 +583,11 @@ if __name__ == "__main__":
     allowedLevels = ['Never', 'Systematics', 'Vital', 'Informative', 'Debug']
     if opts.histoLevel not in allowedLevels:
         raise Exception("Invalid ambient histogram level \"%s\"! Valid options are: %s" % (opts.histoLevel, ", ".join(allowedLevels)))
+
+    # Overwrite default systematics ?
+    opts.systVarsList = []
+    if opts.systVars != None:
+        opts.doSystematics = True
+        opts.systVarsList = opts.systVars.split(",")
 
     main()

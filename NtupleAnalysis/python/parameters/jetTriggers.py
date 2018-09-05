@@ -67,22 +67,15 @@ scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection,
 #=================================================================================================
 # QGL selection
 #================================================================================================= 
-qglrSelection = hplus2tbAnalysis.qglrSelection
-
-jsonReader.setupQGLInformation(QGLRPset  = qglrSelection,
-                               jsonname_Light  = "QGLdiscriminator_QCD_LightJets.json",
-                               jsonname_Gluon  = "QGLdiscriminator_QCD_GluonJets.json")
-
-#================================================================================================
-# Topology selection
-#================================================================================================
-#topologySelection = hplus2tbAnalysis.topologySelection
+#qglrSelection = hplus2tbAnalysis.qglrSelection
+#jsonReader.setupQGLInformation(QGLRPset  = qglrSelection,
+#                               jsonname_Light  = "QGLdiscriminator_QCD_LightJets.json",
+#                               jsonname_Gluon  = "QGLdiscriminator_QCD_GluonJets.json")
 
 #================================================================================================
 # Top selection BDT
 #================================================================================================
 topSelectionBDT = hplus2tbAnalysis.topSelectionBDT
-
 
 #================================================================================================
 # MET selection
@@ -98,19 +91,22 @@ scaleFactors.setupBtagSFInformation(btagPset               = fakeBBjetSelection,
                                     btagEfficiencyFilename = "btageff_HToTB.json",
                                     direction              = "nominal")
 
-fakeBTopSelectionBDT = hplus2tbAnalysis.fakeBTopSelectionBDT
+#fakeBTopSelectionBDT = hplus2tbAnalysis.fakeBTopSelectionBDT
 
 fakeBMeasurement = hplus2tbAnalysis.fakeBMeasurement
 
-#Soti
 systTopBDTSelection = PSet(
+    MuTrijetDRCutValue       = "2.0",
+    MuTrijetDRCutDirection   = ">",
+    MuBJetDRCutValue         = "1.5",
+    MuBJetDRCutDirection     = "<=",
     MiniIsoCutValue          = "0.1",
     MiniIsoCutDirection      = "<=",
-    MiniIsoInvCutValue       = "0.2",
+    MiniIsoInvCutValue       = "0.1",
     MiniIsoInvCutDirection   = ">",
     METCutValue              = "50",
     METCutDirection          = ">=",
-    METInvCutValue           = "30",
+    METInvCutValue           = "20",
     METInvCutDirection       = "<",
     MVACutValue              = "0.4",
     MVACutDirection          = ">=",
@@ -138,9 +134,9 @@ allSelections = PSet(
     FatJetSelection       = fatjetVeto,
     FakeBMeasurement      = fakeBMeasurement,
     FakeBBjetSelection    = fakeBBjetSelection,
-    FakeBTopSelectionBDT  = fakeBTopSelectionBDT,
+#    FakeBTopSelectionBDT  = fakeBTopSelectionBDT,
     CommonPlots           = commonPlotsOptions,
     HistogramAmbientLevel = histogramAmbientLevel,
-    QGLRSelection         = qglrSelection,
+#    QGLRSelection         = qglrSelection,
     SystTopBDTSelection   = systTopBDTSelection,
 )

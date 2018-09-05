@@ -122,11 +122,12 @@ def GetHistoKwargs(histoName):
     _rebinX = 1
     _logY   = True
     _yNorm  = "Events"
-
+    divideByBinWidth = True
 
     if opts.normaliseToOne:
         _yNorm  = "Arbitrary units"
-        _opts   = {"ymin": 0.7e-4, "ymaxfactor": 2.0}
+        #_opts   = {"ymin": 0.7e-4, "ymaxfactor": 2.0}
+        _opts   = {"ymin": 1e-6, "ymaxfactor": 2.0}
     else:
         _opts   = {"ymin": 1e0, "ymaxfactor": 2.0}
     _ylabel = _yNorm + " / %.0f"
@@ -146,15 +147,11 @@ def GetHistoKwargs(histoName):
             _rebinX = 8
 
         if "tetrajet" in histoName.lower():
-            #_rebinX = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetPt_AfterAllSelections"]
-            _rebinX = 10
+            _rebinX = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetPt_AfterAllSelections"]
+
             if "tetrajetbjet" in histoName.lower():
-                #_rebinX = systematics._dataDrivenCtrlPlotBinning["TetrajetBjetPt_AfterAllSelections"] 
-                #_rebinX = 8
-                #_rebinX = 5
-                _rebinX = [i for i in range(0, 550, 50)] + [600, 800, 1000]
-                _rebinX = 2
-                
+                _rebinX = systematics._dataDrivenCtrlPlotBinning["TetrajetBjetPt_AfterAllSelections"] 
+                divideByBinWidth = True
 
     if "mass" in histoName.lower():
         _units        = "GeV/c^{2}"
@@ -163,17 +160,15 @@ def GetHistoKwargs(histoName):
         _cutBox       = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
 
         if "trijet" in histoName.lower():
-            #_rebinX = systematics._dataDrivenCtrlPlotBinning["LdgTrijetMass_AfterAllSelections"]
-            _rebinX = 8
+            _rebinX = systematics._dataDrivenCtrlPlotBinning["LdgTrijetMass_AfterAllSelections"]
+            divideByBinWidth = True
 
         if "tetrajet" in histoName.lower():
-            _xlabel       = "m_{jjbb} (%s)" % (_units)
-            #_rebinX       = systematics.getBinningForTetrajetMass(0)
-            #_rebinX       = systematics.getBinningForTetrajetMass(2)
-            #_rebinX       = systematics.getBinningForTetrajetMass(9)
-            _rebinX       = 10 #5
-            _opts["xmin"] =    0
-            _opts["xmax"] = 3000
+            _units  = "GeV/c^{2}"
+            _rebinX  = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetMass_AfterAllSelections"]
+            _xlabel = "m_{jjbb} (%s)" % (_units)
+            _ylabel = "<%s / %s>" % (_yNorm, _units)
+            divideByBinWidth = True
 
     if "met" in histoName.lower():
         _units        = "GeV"
@@ -184,9 +179,11 @@ def GetHistoKwargs(histoName):
         _rebinX = systematics._dataDrivenCtrlPlotBinning["MET_AfterAllSelections"]
         binWmin, binWmax = GetBinWidthMinMax(myBins)
         _ylabel = _yNorm + " / %.0f-%.0f %s" % (binWmin, binWmax, _units)
+        divideByBinWidth = True
 
     if "ht" in histoName.lower():
-        _rebinX = systematics._dataDrivenCtrlPlotBinning["MET_AfterAllSelections"]
+        _rebinX = systematics._dataDrivenCtrlPlotBinning["HT_AfterAllSelections"]
+        divideByBinWidth = True
 
     if "tetrajetbjeteta" in histoName.lower():
         _units   = ""
@@ -197,25 +194,20 @@ def GetHistoKwargs(histoName):
         _opts["xmin"] = -2.5
         _opts["xmax"] = +2.5
 
-    if "bdisc" in histoName.lower():
-        _format = "%0.2f"
-        _ylabel = _yNorm + " / " + _format
-        _rebinX = 2
-        _opts["xmin"] = 0.8
-        _opts["xmax"] = 1.0
-        _cutBox = {"cutValue": +0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _xlabel = "b-tag discriminant"
-        ROOT.gStyle.SetNdivisions(8, "X")
 
     # Variable bin width y-axis
     if isinstance(_rebinX, list):
         binWmin, binWmax = GetBinWidthMinMax(_rebinX)
         _ylabel = _yNorm + " / %.0f-%.0f %s" % (binWmin, binWmax, _units)
 
+    if divideByBinWidth:
+        _ylabel = "<%s / %s>" % (_yNorm, _units)
+
     # Define plotting options
     kwargs = {
         "ratioCreateLegend": True,
-        "ratioType"        : "errorScale", #"errorScale", #binomial #errorPropagation
+        "ratioType"        : opts.ratioType, #"errorPropagation", "errorScale", "binomial"        
+        "divideByBinWidth" : divideByBinWidth,
         "ratioErrorOptions": {"numeratorStatSyst": False, "denominatorStatSyst": False}, # Include stat.+syst. to numerator (if syst globally enabled)      
         "ratioMoveLegend"  : {"dx": -0.51, "dy": 0.03, "dh": -0.05},
         "errorBarsX"       : True,
@@ -229,8 +221,9 @@ def GetHistoKwargs(histoName):
         "stackMCHistograms": False,
         "addLuminosityText": True,
         "ratio"            : opts.ratio, 
-        "ratioYlabel"      : "CR1/CR2",
-        "ratioInvert"      : True, 
+        #"ratioYlabel"      : "CR1/CR2",
+        "ratioYlabel"      : "Ratio ",
+        "ratioInvert"      : False, 
         "cutBox"           : _cutBox,
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
@@ -315,30 +308,43 @@ def GetBinText(bin):
     if bin == "Inclusive":
         return "combined"
     else:
-        return "bin-" + str(bin)
+        #return "bin-" + str(bin)
+        bin = int(bin)
 
-    # if bin == "0":
-    #     return "p_{T} < 80 GeV/c, |#eta| < 0.8"
-    # elif bin == "1":
-    #     return "p_{T} = 80-200 GeV/c, |#eta| < 0.8"
-    # elif bin == "2":
-    #     return "p_{T} > 200 GeV/c, |#eta| < 0.8"
-    # elif bin == "3":
-    #     return "p_{T} < 80 GeV/c, |#eta| = 0.8-1.6"
-    # elif bin == "4":
-    #     return "p_{T} = 80-200 GeV/c, |#eta| = 0.8-1.6"
-    # elif bin == "5":
-    #     return "p_{T} > 200 GeV/c, |#eta| = 0.8-1.6"
-    # elif bin == "6":
-    #     return "p_{T} < 80 GeV/c, |#eta| > 1.6"
-    # elif bin == "7":
-    #     return "p_{T} = 80-200 GeV/c, |#eta| > 1.6"
-    # elif bin == "8":
-    #     return "p_{T} > 200 GeV/c, |#eta| > 1.6"
-    # elif bin == "Inclusive":
-    #     return "combined"
-    # else:
-    #     raise Exception(ShellStyles.ErrorStyle() + "Unexpected bin %s" % (bin)  + ShellStyles.NormalStyle())
+    # Definitions
+    ptBins  = [60, 90, 160, 300]
+    etaBins = [0.8, 1.4, 2.0]
+    labels  = []
+
+    # Nice trick to include last overflow bins
+    ptBins.append(ptBins[-1])
+    etaBins.append(etaBins[-1])
+
+    for i, eta in enumerate(etaBins, 0):
+        units = ""
+
+        if i == 0:
+            etaLabel = "|#eta| < %.1f %s" % (etaBins[i], units)
+        elif i == (len(etaBins)-1):
+            etaLabel = "|#eta| > %.1f %s" % (eta, units)
+        else:
+            etaLabel = "%.1f #leq |#eta| #leq %.1f %s" % (etaBins[i-1], eta, units)
+            
+    
+        for j, pt in enumerate(ptBins, 0):
+            units = "" #"GeV/c"
+
+            if j == 0:
+                ptLabel = "p_{T} < %.0f %s" % (ptBins[j], units)
+            elif j == (len(ptBins)-1):
+                ptLabel = "p_{T} > %.0f %s" % (pt, units)
+            else:
+                ptLabel = "%.0f #leq p_{T} #leq %.0f %s" % (ptBins[j-1], pt, units)
+
+            label = "%s , %s" % (ptLabel, etaLabel)
+            labels.append(label)
+
+    return labels[bin]
 
 #================================================================================================ 
 # Main
@@ -420,8 +426,8 @@ def main(opts):
         datasetsMgr.PrintInfo()
         
         # List of TDirectoryFile (_CRone, _CRtwo, _VR, _SR)
-        tdirs  = ["LdgTrijetPt_", "LdgTrijetMass_"  , "TetrajetBJetPt_", "TetrajetBJetEta_", "LdgTetrajetPt_", "LdgTetrajetMass_"] 
-        region = ["CRone", "CRtwo"]
+        tdirs  = ["LdgTetrajetMass_", "LdgTetrajetPt_", "LdgTrijetPt_", "LdgTrijetMass_", "TetrajetBJetPt_", "TetrajetBJetEta_"] 
+        region = ["CRone", "CRtwo", "SR", "VR"]
         hList  = []
         for d in tdirs:
             for r in region:
@@ -583,12 +589,18 @@ def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
         # Definitions
         region1      = "CRone"
         region2      = "CRtwo"
+        region3      = "VR"
+        region4      = "SR"
         key2         = key1.replace(region1, region2)
+        key3         = key1.replace(region1, region3)
+        key4         = key1.replace(region1, region4)
         dataset      = key1.split("-")[0]
         region       = key1.split("-")[1]
         bin          = key1.split("-")[2]
         hName1       = rhDict[key1].GetName()
         hName2       = rhDict[key2].GetName()
+        hName3       = rhDict[key3].GetName()
+        hName4       = rhDict[key4].GetName()
         bInclusive   = "Inclusive" in key1
 
         # Dataset and Region filter
@@ -608,6 +620,12 @@ def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
             rFakeB_CRtwo = rhDict[key2].Clone()
             rFakeB_CRtwo.Reset("ICES")
 
+            rFakeB_VR = rhDict[key3].Clone()
+            rFakeB_VR.Reset("ICES")
+            
+            rFakeB_SR = rhDict[key4].Clone()
+            rFakeB_SR.Reset("ICES")
+
             # For-loop: All fakeB bins (to add-up all binned histos)
             for i, b in enumerate(binLabels, 1):
                 if "Inclusive" in b:
@@ -619,49 +637,80 @@ def PlotHistograms(datasetsMgr, histoList, binLabels, opts):
                 # Determine keys
                 k1 = key1.replace("Inclusive", b)
                 k2 = key2.replace("Inclusive", b)
+                k3 = key3.replace("Inclusive", b)
+                k4 = key4.replace("Inclusive", b)
 
                 # Normalise bin histo to one (before adding to inclusive histo)
                 Verbose("Cloning histogram %s"  % (rhDict[k1].GetName()), False)
                 h1 = rhDict[k1].Clone()
                 h2 = rhDict[k2].Clone()
+                h3 = rhDict[k3].Clone()
+                h4 = rhDict[k4].Clone()
 
                 # First normalise the histos
                 h1.Scale(1.0/h1.Integral())
                 h2.Scale(1.0/h2.Integral())
+                h3.Scale(1.0/h3.Integral())
+                h4.Scale(1.0/h4.Integral())
 
                 # Add-up individual bins
                 rFakeB_CRone.Add(h1, +1)
                 rFakeB_CRtwo.Add(h2, +1)
+                rFakeB_VR.Add(h3, +1)
+                rFakeB_SR.Add(h4, +1)
         else:
             # Get the histos
             rFakeB_CRone = rhDict[key1]
             rFakeB_CRtwo = rhDict[key2]
+            rFakeB_VR    = rhDict[key3]
+            rFakeB_SR    = rhDict[key4]
 
         # Normalise the histos?
         if opts.normaliseToOne:
             rFakeB_CRone.Scale(1.0/rFakeB_CRone.Integral())
             rFakeB_CRtwo.Scale(1.0/rFakeB_CRtwo.Integral())
+            rFakeB_VR.Scale(1.0/rFakeB_VR.Integral())
+            rFakeB_SR.Scale(1.0/rFakeB_SR.Integral())
 
         # Apply histogram styles          
+        doAllRegions = False #iro
         styles.getABCDStyle("CRone").apply(rFakeB_CRone)
         styles.getABCDStyle("CRtwo").apply(rFakeB_CRtwo)
+        if doAllRegions:
+            styles.getABCDStyle("VR").apply(rFakeB_VR)
+            styles.getABCDStyle("SR").apply(rFakeB_SR)
         
         # Create the plot
-        p = plots.ComparisonManyPlot(rFakeB_CRone, [rFakeB_CRtwo], saveFormats=[])
+        if doAllRegions:
+            p = plots.ComparisonManyPlot(rFakeB_CRone, [rFakeB_VR, rFakeB_SR, rFakeB_CRtwo], saveFormats=[]) 
+        else:
+            p = plots.ComparisonManyPlot(rFakeB_CRone, [rFakeB_CRtwo], saveFormats=[])
         p.setLuminosity(opts.intLumi)
     
         # Set draw/legend style
         p.histoMgr.setHistoDrawStyle(hName1, "AP")
         p.histoMgr.setHistoLegendStyle(hName1, "LP")
-
         p.histoMgr.setHistoDrawStyle(hName2, "HIST")
         p.histoMgr.setHistoLegendStyle(hName2, "F")
+        if doAllRegions:
+            p.histoMgr.setHistoDrawStyle(hName3, "AP")
+            p.histoMgr.setHistoLegendStyle(hName3, "LP")
+            p.histoMgr.setHistoDrawStyle(hName4, "AP")
+            p.histoMgr.setHistoLegendStyle(hName4, "LP")
         
         # Set legend labels
-        p.histoMgr.setHistoLegendLabelMany({
-                hName1 : "CR1",
-                hName2 : "CR2",
-                })
+        if doAllRegions:
+            p.histoMgr.setHistoLegendLabelMany({
+                    hName1 : "CR1",
+                    hName2 : "CR2",
+                    hName3 : "VR",
+                    hName4 : "SR",
+                    })
+        else:
+            p.histoMgr.setHistoLegendLabelMany({
+                    hName1 : "CR1",
+                    hName2 : "CR2",
+                    })
 
         # Draw the plot and save it
         if bin == "Inclusive":
@@ -707,6 +756,7 @@ if __name__ == "__main__":
     RATIO        = False
     FOLDER       = "ForFakeBMeasurement"
     NORMALISE    = False
+    RATIOTYPE    = "errorPropagation" # "errorPropagation", "errorScale", "binomial"
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -756,6 +806,9 @@ if __name__ == "__main__":
     parser.add_option("--folder", dest="folder", default=FOLDER,
                       help="Folder in ROOT files under which all necessary histograms are located [default: %s]" % (FOLDER) )
 
+    parser.add_option("--ratioType", dest="ratioType", type="string", default = RATIOTYPE,
+                      help="Error type for to be used for the ratio [default: %s]" % (RATIOTYPE) )    
+
     (opts, parseArgs) = parser.parse_args()
 
     # Require at least two arguments (script-name, path to multicrab)
@@ -772,6 +825,10 @@ if __name__ == "__main__":
     
     if opts.saveDir == None:
         opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="Closure/Binned")
+
+    ratioTypes = ["errorPropagation", "errorScale", "binomial"]
+    if opts.ratioType not in ratioTypes:
+        raise Exception("Invalid ration type \"%s\". Please select from:%s" % (opts.ratioType, ", ".join(ratioTypes)  ))
 
     main(opts)
 

@@ -16,12 +16,14 @@ parser.add_option("-b", "--b", action="store", type="string", dest="dir2",
                   help="datacard directory for category B")
 parser.add_option("-c", "--c", action="store", type="string", dest="dir3",
                   help="datacard directory for category C", default = None)
+parser.add_option("-p", "--p", action="store", type="string", dest="postfix",
+                  help="posfix for output category name", default = "")                  
 (options, args) = parser.parse_args()
 
 # make a new directory for combined datacards
 date = datetime.date.today().strftime('%y%m%d') 
 t = datetime.datetime.now().strftime('%H%M%S')
-dirname = "datacards_combine_multicategory_%s_%s"%(date,t)
+dirname = "datacards_combine_multicategory_%s_%s%s"%(date,t,options.postfix)
 os.system("mkdir %s"%dirname)
 
 # copy and rename old category A root and txt files
@@ -75,21 +77,21 @@ for filename in os.listdir("."):
             firstline = f.readline()
             f.seek(0)
             s = f.read()
-            s = s.replace(".root", "_a.root")
+            s = s.replace(".root", "_a.root").replace("CMS_Hptn_mu_RF_Hptn_heavy","CMS_Hptn_mu_RF_Hptn      ")
             f.seek(0)
             f.write(s)
             f.truncate()
     if "_b.txt" in filename:
         with open(filename, "r+") as f:
             s = f.read()
-            s = s.replace(".root", "_b.root")
+            s = s.replace(".root", "_b.root").replace("CMS_Hptn_mu_RF_Hptn_heavy","CMS_Hptn_mu_RF_Hptn      ")
             f.seek(0)
             f.write(s)
             f.truncate()
     if "_c.txt" in filename:
         with open(filename, "r+") as f:
             s = f.read()
-            s = s.replace(".root", "_c.root")
+            s = s.replace(".root", "_c.root").replace("CMS_Hptn_mu_RF_Hptn_heavy","CMS_Hptn_mu_RF_Hptn      ")
             f.seek(0)
             f.write(s)
             f.truncate()

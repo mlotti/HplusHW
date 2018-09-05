@@ -262,10 +262,11 @@ def GetHistoKwargs(h, opts):
         units             = ""
         kwargs["xlabel"]  = "b-jet multiplicity (CSVv2-M)"
         kwargs["ylabel"] += " / %.0f " + units
-        kwargs["cutBox"]  = cutBox
+        kwargs["cutBox"]  = {"cutValue": 2.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         kwargs["cutBoxY"] = cutBoxY
         kwargs["rebinX"]  = 1
         kwargs["opts"]["xmax"] = 10.0
+        kwargs["opts"]["ymin"] = 1e-5
         #ROOT.gStyle.SetNdivisions(8, "X")
         #ROOT.gStyle.SetNdivisions(8, "Y")
 
@@ -283,9 +284,9 @@ def GetHistoKwargs(h, opts):
         kwargs["cutBox"]  = {"cutValue": 0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True} # Loose = 0.5426, Medium = 0.8484, Tight = 0.9535
         kwargs["cutBoxY"] = cutBoxY
         kwargs["rebinX"]  = 1
-        kwargs["opts"]["xmin"] = 0.5
+        kwargs["opts"]["xmin"] = 0.0 #0.5
         if "medium" in h.lower():
-            kwargs["opts"]["xmin"] = 0.8
+            kwargs["opts"]["xmin"] = 0.0 #0.8
         kwargs["opts"]["xmax"] = 1.0
         #kwargs["moveLegend"]   = {"dx": 0.05, "dy": -0.41, "dh": -0.12}
         ROOT.gStyle.SetNdivisions(8, "X")

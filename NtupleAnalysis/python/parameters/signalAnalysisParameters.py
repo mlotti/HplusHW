@@ -31,7 +31,8 @@ metFilter = PSet(
                     "Flag_goodVertices",
                     "Flag_globalTightHalo2016Filter",
                     "badPFMuonFilter",
-                    "badChargedCandidateFilter"]
+                    "badChargedCandidateFilter"],
+    runOnlyData = ["Flag_eeBadScFilter"]
 )
 
 #====== Tau selection
@@ -123,7 +124,7 @@ bjetSelection = PSet(
     triggerMatchingApply= False,
     triggerMatchingCone = 0.1,  # DeltaR for matching offline bjet with trigger::TriggerBjet 
               jetPtCuts = [30.0],
-             jetEtaCuts = [2.5],
+             jetEtaCuts = [2.4],
              bjetDiscr  = "pfCombinedInclusiveSecondaryVertexV2BJetTags", # default
 #             bjetDiscr  = "pfCombinedMVAV2BJetTags", # use this for MVA b-tagging
  bjetDiscrWorkingPoint  = "Medium", #optimal for CSVv2

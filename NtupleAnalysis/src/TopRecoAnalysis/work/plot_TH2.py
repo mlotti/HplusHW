@@ -43,6 +43,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 
+ROOT.gErrorIgnoreLevel = ROOT.kError
 #================================================================================================ 
 # Function Definition
 #================================================================================================ 
@@ -199,8 +200,244 @@ def main(opts):
         for h in histoPaths:
             if "Vs" not in h:
                 continue
+            if "DeltaMass_genH_recoH_Vs_BDT" not in h:
+                continue
             Plot2dHistograms(datasetsMgr, h)
+
+
+        #Marina
+        for hName in ["DeltaMass_genH_recoH_Vs_BDT",                 "DeltaMass_genH_recoH_Vs_BDT_matchedBjet", 
+                      "DeltaMass_genH_recoH_Vs_BDT_matchedChargedH", "DeltaMass_genH_recoH_Vs_BDT_unmatchedChargedH"]:
+
+            myList = []
+            #hName       = "DeltaMass_genH_recoH_Vs_BDT"
+            hPath       = os.path.join(opts.folder, hName)
+            histo      = GetHisto(datasetsMgr, opts.dataset, hPath, opts.intLumi)
+            histo.RebinX(10)
+            histo.RebinY(2)
+            #print "Number of bins:", histo.GetNbinsX(), histo.GetNbinsY()
+            ymin = 0
+            ymax = 1
+            ybins  = histo.GetNbinsY()
+            i = 1
+            xerrl = []
+            xerrh = []
+            yerrl = []
+            yerrh = []
+            xvalues = []
+            yvalues = []
+            myProf = []
+            while i< ybins:
+                tprofile   = ROOT.TProfile(histo.ProfileX("", i, ybins))
+                i+=1
+                #print histo.GetYaxis().GetBinLowEdge(i), histo.GetYaxis().GetBinLowEdge(ybins), tprofile.GetStdDev(), tprofile.GetStdDevError()
+                if histo.GetYaxis().GetBinLowEdge(i) < 0:
+                    #histoProf  = convertTProfile2TGraph(tprofile)
+                    continue
+                x = histo.GetYaxis().GetBinLowEdge(i)+0.5*histo.GetYaxis().GetBinWidth(i)
+                if x > 0 and x < 0.1:
+                    histoProf  = convertTProfile2TGraph(tprofile)
+                xvalues.append(histo.GetYaxis().GetBinLowEdge(i)+0.5*histo.GetYaxis().GetBinWidth(i))
+                #print histo.GetYaxis().GetBinLowEdge(i), tprofile.GetStdDev()
+                yvalues.append(tprofile.GetStdDev())
+                xerrl.append(0.5*histo.GetYaxis().GetBinWidth(i))
+                xerrh.append(0.5*histo.GetYaxis().GetBinWidth(i))
+                yerrl.append(tprofile.GetStdDevError())
+                yerrh.append(tprofile.GetStdDevError())
+                tprofile   = ROOT.TProfile(histo.ProfileX("",histo.GetNbinsY()-1, histo.GetNbinsY())) #histo.GetNbinsX()))
+                
+            #tgraph = ROOT.TGraph(len(xvalues), array.array("d", xvalues), array.array("d", yvalues))
+
+            tgraph     = ROOT.TGraphAsymmErrors(len(xvalues) ,
+                                                array.array("d",xvalues),
+                                                array.array("d",yvalues),
+                                                array.array("d",xerrl),
+                                                array.array("d",xerrh),
+                                                array.array("d",yerrl),
+                                                array.array("d",yerrh))
+
+            #Style = styles.ttStyle
+            #plots._plotStyles[opts.dataset].apply(tgraph)
+            counter = CounterStyle(opts.dataset)
+            styles.markerStyles[counter].apply(tgraph)
+            #Style.apply(tgraph)
+            legend = opts.dataset
+            legend = legend.replace("ChargedHiggs_HplusTB_HplusToTB_M_", "")
+            legend = "m_{H^{+}} = "+legend+"GeV/c^{2}"
+            myProf.append(histograms.HistoGraph(tgraph, legend, "lp", "P"))
+
+            #myList = [tgraph]
+            saveName = "MassRes_"+ hPath.split("/")[-1]
+            p_prof = plots.PlotBase(datasetRootHistos=myProf, saveFormats=[])
+            _kwargs = {           
+                "xlabel"           : "BDTG",
+                "ylabel"           : "#sigma(m_{H^{+},gen} - m_{H^{+},reco})", #/ %.1f ",                                                                
+                "ratioYlabel"      : "Ratio",
+                "ratio"            : False,
+                "ratioInvert"      : False,
+                "stackMCHistograms": False,
+                "addMCUncertainty" : False,
+                "addLuminosityText": False,
+                "addCmsText"       : True,
+                "cmsExtraText"     : "Preliminary",
+                #"opts"             : {"ymin": 0.0, "ymax": 1.09},
+                "opts"             : {"ymin": 150.0, "ymaxfactor": 1.1},
+                "opts2"            : {"ymin": 0.6, "ymax": 1.4},
+                "log"              : False,
+                "moveLegend"       : {"dx": -0.2, "dy": -0.005, "dh": -0.08},
+                "cutBoxY"          : {"cutValue": 1.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
+                }
+            #saveName = saveName + 
+            plots.drawPlot(p_prof, saveName, **_kwargs)
+            # Save plot in all formats                                                                                                                                                                                       
+            savePath = os.path.join(opts.saveDir, "MassRes", opts.optMode)
+            #savePath = os.path.join(opts.saveDir, numPath.split("/")[0], opts.optMode)
+            save_path = savePath
+            SavePlot(p_prof, saveName, save_path, saveFormats = [".png"])
+
+
+
+            # Apply default style (according to dataset name)
+            plots._plotStyles[opts.dataset].apply(histoProf)
+            # Append in list
+            myList = []
+            myList.append(histograms.HistoGraph(histoProf, plots._legendLabels[opts.dataset], "lp", "P"))
+
+            # Define save name
+            saveName = "Prof_" + hPath.split("/")[-1]
+            _kwargs = GetHistoKwargs_TH1(hPath, opts)
+            p = plots.PlotBase(datasetRootHistos=myList, saveFormats=[])
+            plots.drawPlot(p, saveName, **_kwargs)
+            ROOT.gStyle.SetNdivisions(10, "X")
+            # Save plot in all formats
+            SavePlot(p, saveName, os.path.join(opts.saveDir, "MassRes", opts.folder), [".png"])
+            #PlotMC(datasetsMgr, histoProf, opts.intLumi)
+            #> test = new TH2F("test","",100,0,10,100,0,10);
+            #> test2 = new TH1D(test.ProfileX("",0,100));
     return
+
+
+
+def CounterStyle(datasetName):
+    if "ChargedHiggs_HplusTB_HplusToTB_M_" in datasetName:
+        HplusMass = datasetName
+        HplusMass.replace("ChargedHiggs_HplusTB_HplusToTB_M_", "")
+        if "100" in HplusMass:
+            return 1
+        if "200" in HplusMass:
+            return 2
+        if "300" in HplusMass:
+            return 3
+        if "400" in HplusMass:
+            return 4
+        if "500" in HplusMass:
+            return 5
+        if "800" in HplusMass:
+            return 8
+
+    
+def GetHistoKwargs_TH1(histoName, opts):
+    h = histoName.lower()
+    kwargs     = {
+    "xlabel"           : "(m_{H^{+},gen} - m_{H^{+},reco}) (GeV/c^{2})",
+        "ylabel"           : "mean (BDTG) ", #/ %.1f ",                                                                                                                                                             
+        # "rebinX"           : 1,                                                                                                                                                                                    
+        "ratioYlabel"      : "Ratio",
+        "ratio"            : False,
+        "ratioInvert"      : False,
+        "stackMCHistograms": False,
+        "addMCUncertainty" : False,
+        "addLuminosityText": False,
+        "addCmsText"       : True,
+        "cmsExtraText"     : "Preliminary",
+        #"opts"             : {"ymin": 0.0, "ymax": 1.09},                                                                                                                                                           
+        "opts"             : {"xmin": -800, "xmax": 800, "ymin": 0.0, "ymaxfactor": 1.0},
+        "opts2"            : {"ymin": 0.6, "ymax": 1.4},
+        "log"              : False,
+        "moveLegend"       : {"dx": -0.2, "dy": -0.01, "dh": -0.18},
+        "cutBoxY"          : {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
+        }
+
+    kwargs["opts"] =  {"ymin": 0.0, "ymax": 2}
+    return kwargs
+
+def PlotMC(datasetsMgr, histo, intLumi):
+
+    kwargs = {}
+    if 0:
+        p = plots.MCPlot(datasetsMgr, histo, normalizeToOne=True, saveFormats=[], **kwargs)
+    else:
+        p = plots.MCPlot(datasetsMgr, histo, normalizeToLumi=intLumi, saveFormats=[], **kwargs)
+
+    # Draw the histograms                                                                                                                                                              
+    _cutBox = None
+    _rebinX = 1
+    _format = "%0.0f"
+    _xlabel = None
+    logY    = False
+    _opts   = {"ymin": 1e-3, "ymaxfactor": 1.0}
+
+    _opts["ymin"] = 1e0
+    # Customise styling
+    p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineStyle(ROOT.kSolid))
+        # Customise style                                                                                                                                                                  
+    p.histoMgr.forHisto("ChargedHiggs_HplusTB_HplusToTB_M_500", styles.getSignalStyleHToTB_M500)
+        
+    plots.drawPlot(p,
+                   histo,
+                   xlabel       = _xlabel,
+                   ylabel       = "Arbitrary Units / %s" % (_format),
+                   log          = logY,
+                   rebinX       = _rebinX, cmsExtraText = "Preliminary",
+                   createLegend = {"x1": 0.58, "y1": 0.65, "x2": 0.92, "y2": 0.92},
+                   opts         = _opts,
+                   opts2        = {"ymin": 0.6, "ymax": 1.4},
+                   cutBox       = _cutBox,
+                   )
+
+    # Save plot in all formats                                                                                                                                                         
+    saveName = histo.split("/")[-1]
+    savePath = os.path.join(opts.saveDir, "HplusMasses", histo.split("/")[0], opts.optMode)
+    SavePlot(p, saveName, savePath)
+    return
+
+
+def convertTProfile2TGraph(tprofile):
+    x     = []
+    y     = []
+    xerrl = []
+    xerrh = []
+    yerrl = []
+    yerrh = []
+    h = tprofile #.GetCopyTotalHisto()
+    n = h.GetNbinsX()
+    for i in range(1,n+1):
+        #print tprofile.GetBinContent(i)
+        x.append(h.GetBinLowEdge(i)+0.5*h.GetBinWidth(i))
+        xerrl.append(0.5*h.GetBinWidth(i))
+        xerrh.append(0.5*h.GetBinWidth(i))
+        y.append(tprofile.GetBinContent(i))
+        yerrl.append(tprofile.GetBinErrorLow(i))
+        # ugly hack to prevent error going above 1
+        errUp = tprofile.GetBinErrorUp(i)
+        if y[-1] == 1.0:
+            errUp = 0
+        yerrh.append(errUp)
+    return ROOT.TGraphAsymmErrors(n,array.array("d",x),
+                                  array.array("d",y),
+                                  array.array("d",xerrl),
+                                  array.array("d",xerrh),
+                                  array.array("d",yerrl),
+                                  array.array("d",yerrh))
+
+
+def GetHisto(datasetsMgr, dataset, hName, intLumi):
+    n = datasetsMgr.getDataset(dataset).getDatasetRootHisto(hName)
+    n.normalizeToLuminosity(intLumi)
+    #n.normalizeToOne()
+    histo = n.getHistogram()
+    return histo
+
 
 def GetHistoKwargs(h, opts):
 
@@ -219,7 +456,7 @@ def GetHistoKwargs(h, opts):
     zLabel      = "z-axis"
     if opts.normalizeToLumi:
         zLabel  = "Events"
-        #zMin    = 1e-1
+        zMin    = 1e-3
     elif opts.normalizeByCrossSection:
         zLabel  = "#sigma (pb)"
         #zMin    = 0 #1e-3
@@ -288,7 +525,6 @@ def GetHistoKwargs(h, opts):
     if "TrijetJets_DeltaRmax_Vs_BDT" in h:
         kwargs["rebinX"]  = 2
         kwargs["rebinY"]  = 2
-
         kwargs["xlabel"]  = "#Delta R_{max}"
         kwargs["ylabel"]  = "BDTG"
         kwargs["opts"]    = {"xmin": 0.0, "xmax": +3.5, "ymin": 0.79, "ymax": 1.0}
@@ -452,6 +688,20 @@ def GetHistoKwargs(h, opts):
         kwargs["cutBox"]  = cutBox
         kwargs["cutBoxY"] = cutBoxY
         kwargs["opts"]    = {"xmin": -1.0, "xmax": +1.0, "ymin": 0, "ymax": 5} #, "ymaxfactor": yMaxF}          
+
+    if "DeltaMass_genH_recoH_Vs_BDT" in h:
+        kwargs["rebinX"]  = 10
+        kwargs["rebinY"]  = 2
+        kwargs["zmin"]    = 1e-3
+        kwargs["ylabel"]  = "BDTG cut value"
+        kwargs["xlabel"]  = "#Delta M(H^{+}_{gen} - H^{+}_{reco})"
+        cutBox      = {"cutValue": 0.85, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        cutBoxY     = {"cutValue": 2, "fillColor": 16, "box": False, "line": False, "greaterThan": True,
+                       "mainCanvas": True, "ratioCanvas": False} # box = True not working                
+        kwargs["cutBox"]  = cutBox
+        kwargs["cutBoxY"] = cutBoxY
+        kwargs["opts"]    = {"ymin": 0.0, "ymax": +1.0, "xmin": -800, "xmax": 800} #, "ymaxfactor": yMaxF}          
+        ROOT.gStyle.SetNdivisions(10, "X")
     return kwargs
     
 
@@ -495,7 +745,7 @@ def Plot2dHistograms(datasetsMgr, histoName):
     plots.drawPlot(p, saveName, **kwargs) #the "**" unpacks the kwargs_ dictionary
 
     # Save the plots in custom list of saveFormats
-    SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode, opts.folder), [".pdf"])#, ".pdf"] )
+    SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode, opts.folder), [".png"])#, ".pdf"] )
     return
 
 
@@ -506,9 +756,8 @@ def HasKeys(keyList, **kwargs):
     return 
 
 
-def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
+def SavePlot(plot, plotName, saveDir, saveFormats = [".png"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
-
     # Check that path exists
     if not os.path.exists(saveDir):
         os.makedirs(saveDir)
@@ -516,11 +765,10 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
     # Create the name under which plot will be saved
     name = plotName.replace("/", "_").replace(" ", "").replace("(", "").replace(")", "") 
     saveName = os.path.join(saveDir, name)
-
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
         saveNameURL = saveName + ext
-        saveNameURL = saveNameURL.replace("/publicweb/s/skonstan/", "http://home.fnal.gov/~skonstan/")
+        saveNameURL = saveNameURL.replace(opts.saveDir, "http://home.fnal.gov/~%s/" % (getpass.getuser()))
         if opts.url:
             Print(saveNameURL, i==0)
         else:
@@ -561,7 +809,7 @@ if __name__ == "__main__":
     LOGY         = False
     LOGZ         = False
     URL          = False
-    SAVEDIR      = "/publicweb/s/skonstan/TH2/"
+    SAVEDIR      = "/publicweb/%s/%s/%s" % (getpass.getuser()[0], getpass.getuser(), ANALYSISNAME)
     VERBOSE      = False
     FOLDER       = "topbdtSelection_" #"topbdtSelection_" #jetSelection_
     DATASET      = "Data"

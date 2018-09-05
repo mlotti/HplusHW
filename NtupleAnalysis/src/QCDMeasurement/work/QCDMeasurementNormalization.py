@@ -31,10 +31,13 @@ analysis = "QCDMeasurement"
 #==== Set rebin factor for normalization plots 
 #     Histograms are generated with 1 GeV bin width, so 
 #     10 here means that the fit is done on 10 GeV bins
-_rebinFactor = 10
+_rebinFactor = 20
 
 #=== Set to true if you want to use HT binned WJets samples instead of inclusive
+#    NB! Remember to check also that _generalOptions["ewkDatasetsForMerging"]
+#    in makeQCDInvertedPseudoMulticrabForDatacards.py is consistent with this!
 useWJetsHT = True
+useTT_Mtt = True
 
 #=== Set tau pT bins to be used
 selectOnlyBins = [] #["1"] # use all bins
@@ -64,6 +67,9 @@ def main(argv, dsetMgr, moduleInfoString):
     COMBINEDHISTODIR = "ForQCDNormalization"
     FAKEHISTODIR = "ForQCDNormalizationEWKFakeTaus"
     GENUINEHISTODIR = "ForQCDNormalizationEWKGenuineTaus"
+    #QCDMCHISTODIR = "ForQCDNormalizationEWKFakeTaus"
+    QCDMCHISTODIR = "ForQCDNormalization"
+
     comparisonList = ["AfterStdSelections"]
 
     dirs = []
@@ -114,6 +120,12 @@ def main(argv, dsetMgr, moduleInfoString):
     else:
         dsetMgr.remove(filter(lambda name: "WJetsHT" in name, dsetMgr.getAllDatasetNames()), close=False)
 
+    # Only TT or TT_Mtt_* should be used (not both)
+    if useTT_Mtt:
+        dsetMgr.remove(filter(lambda name: "TT"==name, dsetMgr.getAllDatasetNames()), close=False)    
+    else:
+        dsetMgr.remove(filter(lambda name: "TT_Mtt" in name, dsetMgr.getAllDatasetNames()), close=False)
+
     print "Datasets used for EWK (after choosing between WJets or WJetsHT sample):"
     print dsetMgr.getMCDatasetNames()
 
@@ -127,8 +139,12 @@ def main(argv, dsetMgr, moduleInfoString):
     myMergeList = []
 
     # Always use TT (or TTJets) as a part of the EWK background
-    if "TT" in dsetMgr.getMCDatasetNames():
+    if useTT_Mtt:
+        myMergeList.append("TT_Mtt")
+
+    elif "TT" in dsetMgr.getMCDatasetNames():
         myMergeList.append("TT") # Powheg, no neg. weights -> large stats.
+    
     else:
         myMergeList.append("TTJets") # Madgraph with negative weights
         print "Warning: using TTJets as input, but this is suboptimal. Please switch to the TT sample (much more stats.)."
@@ -163,6 +179,12 @@ def main(argv, dsetMgr, moduleInfoString):
         if not item in dsetMgr.getMCDatasetNames():
             raise Exception("Error: tried to use dataset '%s' as part of the merged EWK dataset, but the dataset '%s' does not exist!"%(item,item))
     dsetMgr.merge("EWK", myMergeList)
+
+    myQCDMergeList = []
+    if "QCD" in dsetMgr.getMCDatasetNames():
+        myQCDMergeList.append("QCD")
+        dsetMgr.merge("QCDMC", myQCDMergeList)
+
 
     if verbose:
         print "\nFinal merged dataset list:\n"
@@ -247,6 +269,9 @@ def main(argv, dsetMgr, moduleInfoString):
         template_QCD_Inverted = manager.createTemplate("QCD_Inverted")
         template_FakeTau_Baseline = manager.createTemplate("FakeTau_Baseline")
         template_FakeTau_Inverted = manager.createTemplate("FakeTau_Inverted")
+        if "QCDMC" in dsetMgr.getMCDatasetNames():
+            template_QCDMC_Baseline = manager.createTemplate("QCDMC_Baseline")
+            template_QCDMC_Inverted = manager.createTemplate("QCDMC_Inverted")
                 
         #===== Define fit functions and fit parameters
         # The available functions are defined in the FitFunction class in the QCDMeasurement/python/QCDNormalization.py file
@@ -259,7 +284,7 @@ def main(argv, dsetMgr, moduleInfoString):
         # par[1] = mean
         # par[3] = sigma
         # par[4] = beta in the exponential tail
-        boundary = 190
+        boundary = 170 # 170 good for RtauMore, 180 better for RtauLess
         # QCD
         template_EWKInclusive_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=boundary, norm=1, rejectPoints=1),FITMIN, FITMAX)
         template_EWKInclusive_Baseline.setDefaultFitParam(defaultLowerLimit=[0.5,  90, 30, 0.0001],
@@ -322,6 +347,16 @@ def main(argv, dsetMgr, moduleInfoString):
             hmetInverted_EWKinclusive = hmetInverted_EWK_GenuineTaus.Clone("EWKinclusiveInv")
             hmetInverted_EWKinclusive.Add(hmetInverted_EWK_FakeTaus, 1.0)
 
+            #===== Obtain QCDMC histograms (not used, only for cross check)
+            histoName = QCDMCHISTODIR+"/"+BASELINETAUHISTONAME+binStr
+            hmetBase_QCDMC = None
+            if plots.DataMCPlot(dsetMgr, histoName).histoMgr.hasHisto("QCDMC"):
+                hmetBase_QCDMC = plots.DataMCPlot(dsetMgr, histoName).histoMgr.getHisto("QCDMC").getRootHisto().Clone(histoName)
+            histoName = QCDMCHISTODIR+"/"+INVERTEDTAUHISTONAME+binStr
+            hmetInverted_QCDMC = None
+            if plots.DataMCPlot(dsetMgr, histoName).histoMgr.hasHisto("QCDMC"):
+                hmetInverted_QCDMC = plots.DataMCPlot(dsetMgr, histoName).histoMgr.getHisto("QCDMC").getRootHisto().Clone(histoName)
+
             # Finalize histograms by rebinning
             for histogram in [hmetBase_data, hmetInverted_data, hmetBase_EWK_GenuineTaus, hmetInverted_EWK_GenuineTaus, hmetBase_EWKinclusive, hmetBase_EWK_FakeTaus, hmetInverted_EWK_FakeTaus, hmetInverted_EWKinclusive]:
                  histogram.Rebin(_rebinFactor)
@@ -340,6 +375,7 @@ def main(argv, dsetMgr, moduleInfoString):
             
             hmetInverted_FakeTau = hmetInverted_data.Clone("QCDinv")
             hmetInverted_FakeTau.Add(hmetInverted_EWK_GenuineTaus,-1)
+
             
             #===== Set histograms to the templates
             template_EWKFakeTaus_Inverted.setHistogram(hmetInverted_EWK_FakeTaus, binLabels[i])
@@ -347,13 +383,17 @@ def main(argv, dsetMgr, moduleInfoString):
             template_EWKInclusive_Inverted.setHistogram(hmetInverted_EWKinclusive, binLabels[i])
             template_QCD_Inverted.setHistogram(hmetInverted_QCD, binLabels[i])
             template_FakeTau_Inverted.setHistogram(hmetInverted_FakeTau, binLabels[i])
-            
+            if hmetInverted_QCDMC:
+                template_QCDMC_Inverted.setHistogram(hmetInverted_QCDMC, binLabels[i])
+
             template_EWKFakeTaus_Baseline.setHistogram(hmetBase_EWK_FakeTaus, binLabels[i])
             template_EWKGenuineTaus_Baseline.setHistogram(hmetBase_EWK_GenuineTaus, binLabels[i])
             template_EWKInclusive_Baseline.setHistogram(hmetBase_EWKinclusive, binLabels[i])
             template_QCD_Baseline.setHistogram(hmetBase_QCD, binLabels[i])
             template_FakeTau_Baseline.setHistogram(hmetBase_FakeTau, binLabels[i])
-            
+            if hmetBase_QCDMC:
+                template_QCDMC_Baseline.setHistogram(hmetBase_QCDMC, binLabels[i])
+
             #===== Make plots of templates
             manager.plotTemplates()
             

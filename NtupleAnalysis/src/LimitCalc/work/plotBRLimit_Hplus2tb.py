@@ -19,10 +19,14 @@ EXAMPLES:
 ../../../plotBRLimit_Hplus2tb.py --excludedArea --gridX --gridY --yMin 1e-1
 ../../../plotBRLimit_Hplus2tb.py --excludedArea --gridX --gridY --yMin 1e-1 --yMax 50 --subdir StatOnly --url
 ../../../plotBRLimit_Hplus2tb.py --excludedArea --gridX --gridY --yMin 1e-1 --yMax 50 --subdir StatPlusSyst --url
-
-LAST USED:
 ../../../plotBRLimit_Hplus2tb.py --excludedArea --yMin 0.1 --yMax 30 --subdir MVAm0p10to0p40_6BinsAbsEta_0PtBins_NoFatjetVeto
 ../../../plotBRLimit_Hplus2tb.py --excludedArea --yMin 0.1 --yMax 30 --subdir MVAm0p10to0p40_6BinsAbsEta_0PtBins_NoFatjetVeto_StatOnly
+
+LAST USED:
+../../../plotBRLimit_Hplus2tb.py --excludedArea --yMin 0.1 --yMax 30 --subdir BDT0p40_Binning12_StatOnly_28Apr2018
+../../../plotBRLimit_Hplus2tb.py --excludedArea --yMin 0.1 --yMax 30 --subdir BDT0p40_Binning12_StatOnly_autoMCStats_28Apr2018
+../../../plotBRLimit_Hplus2tb.py --excludedArea --yMin 0.1 --yMax 30 --subdir BDT0p40_Binning12_28Apr2018
+../../../plotBRLimit_Hplus2tb.py --excludedArea --yMin 0.1 --yMax 30 --subdir BDT0p40_Binning12_autoMCStats_28Apr2018
 
 '''
 

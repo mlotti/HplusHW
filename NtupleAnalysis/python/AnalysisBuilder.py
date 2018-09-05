@@ -87,6 +87,16 @@ class AnalysisConfig:
                     direction = value.replace("BTagSF","").replace("BMistagSF","").replace("Minus","down").replace("Plus","up")
                     scaleFactors.updateBtagSFInformationForVariations(self._config.BJetSelection, direction=direction, variationInfo=variationType)
 
+		# top-tag SF
+		elif value.startswith("TopTagSF") or value.startswith("TopMistagSF"):
+                    variationType = None
+                    if value.startswith("TopTagSF"):
+                        variationType = "tag"
+                    elif value.startswith("TopMistagSF"):
+                        variationType = "mistag"
+                    direction = value.replace("TopTagSF","").replace("TopMistagSF","").replace("Minus","down").replace("Plus","up")
+                    scaleFactors.updateTopTagSFInformationForVariations(self._config.TopSelectionBDT, direction=direction, variationInfo=variationType)
+
 		# top quarks
 		elif value.startswith("TopPt"):
                     self._config.topPtSystematicVariation = value.replace("TopPt","").replace("Plus","plus").replace("Minus","minus")
@@ -185,6 +195,7 @@ class AnalysisBuilder:
                  doSystematicVariations=False, # Enable/disable adding modules for systematic uncertainty variation
                  analysisType="HToTauNu", # Define the analysis type (e.g. "HToTauNu", "HToTB")
                  verbose=False,
+                 systVarsList = [], # Overwrite the default systematics
                 ):
         self._name = name
         self._dataEras = []
@@ -203,7 +214,7 @@ class AnalysisBuilder:
         self._doSystematics = doSystematicVariations    
         self._analysisType  = self._getAnalysisType(analysisType)
         self._verbose = verbose
-        self._processSystematicsVariations()
+        self._processSystematicsVariations(systVarsList)
         return
 
     def Verbose(self, msg, printHeader=False):
@@ -291,14 +302,22 @@ class AnalysisBuilder:
 
         # PU weight systematics
         items.extend(["PUWeight"])
+        
+        # TopTagSF weight systematics
+        self.Print("Disabled top-tag SF systematic variations (temporary", True)
+        # items.extend(["TopTagSF"])
         return items
 
-    def _processSystematicsVariations(self):
+    def _processSystematicsVariations(self, systVarsList=[]):
         if not self._doSystematics:
             return
 
         # Process systematic uncertainty variations
-        items = self.getListOfSystematics()
+        if len(systVarsList) < 1:
+            items = self.getListOfSystematics()
+        else:
+            items = systVarsList
+
         # Create configs
         self._variations["systematics"] = []
         for item in items:

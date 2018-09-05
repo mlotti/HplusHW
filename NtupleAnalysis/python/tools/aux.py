@@ -32,6 +32,98 @@ def Print(msg, printHeader=True):
     print "\t", msg
     return
 
+def PrintFlushed(msg, printHeader=True):
+    '''                                                                                                                                                                                                                        
+    Useful when printing progress in a loop
+    '''
+    msg = "\r\t" + msg
+    ERASE_LINE = '\x1b[2K'
+    if printHeader:
+        print "=== aux.py"
+    sys.stdout.write(ERASE_LINE)
+    sys.stdout.write(msg)
+    sys.stdout.flush()
+    return
+
+def IsTH1(h, raiseExcept=False):
+    if not isinstance(h, ROOT.TH1):
+        msg = "Expected object of type ROOT.TH1, got \"%s\" instead" % (type(h))
+        if raiseExcept:
+            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
+        return False
+    else:
+        return True
+
+def GetDecimalFormat(value):
+    if value == 0.0:
+        decFormat = "%.0f" % value
+    elif abs(value) >= 1.0:
+        decFormat = "%.0f" % value
+    elif abs(value) >= 0.1:
+        decFormat = "%.1f" % value
+    elif abs(value) >= 0.01:
+        decFormat = "%.2f" % value
+    elif abs(value) >= 0.001:
+        decFormat = "%.3f" % value
+    else:
+        decFormat = "%.4f" % value
+    return decFormat
+
+def GetTH1BinWidthString(myTH1, iBin):
+    IsTH1(myTH1, raiseExcept=True)
+     
+    width = myTH1.GetBinWidth(iBin)
+    return GetDecimalFormat(width)# + str(width)
+
+def GetTH1BinRangeString(myTH1, iBin):
+    IsTH1(myTH1, raiseExcept=True)
+
+    lowEdge   = myTH1.GetXaxis().GetBinLowEdge(iBin)
+    upEdge    = myTH1.GetXaxis().GetBinUpEdge(iBin)
+    rangeStr  = GetDecimalFormat(lowEdge)
+    rangeStr += " -> "
+    rangeStr += GetDecimalFormat(upEdge)
+    return rangeStr
+
+def PrintTH1Info(myTH1):
+    '''
+    Generic histogram prints detailed tabled
+    with the properties of a ROOT.TH1 instance object
+    '''
+    if not IsTH1(myTH1):
+        Print("Cannot print TH1 Info. Not a ROOT.TH1 object type (type=%s)" % (type(myTH1)), True)
+        return
+
+    # Constuct the table
+    table   = []
+    align  = "{:>5} {:>10} {:^20} {:>15} {:^3} {:<10} {:>15} {:^3} {:<10}"
+    header = align.format("Bin", "Bin Width", "Bin Range", "Bin Content", "+/-", "Error", "Cum. Integral", "+/-", "Error")
+    hLine  = "="*100
+
+    # Create table
+    table.append("{:^100}".format(myTH1.GetName()))    
+    table.append(hLine)
+    table.append(header)
+    table.append(hLine)
+
+    # For-loop: All bins
+    h = myTH1
+    for j in range(0, myTH1.GetNbinsX()+1):
+        binWidth      = GetTH1BinWidthString(myTH1, j)
+        #binRange      = "%.1f -> %.1f" % (h.GetXaxis().GetBinLowEdge(j), h.GetXaxis().GetBinUpEdge(j) )
+        binRange      = GetTH1BinRangeString(myTH1, j)
+        binContent    = "%.2f" % h.GetBinContent(j)
+        binError      = "%.2f" % h.GetBinError(j)
+        integralError = ROOT.Double(0.0)
+        integral      = h.IntegralAndError(0, j, integralError, "")
+        table.append(align.format(j, binWidth, binRange, binContent, "+/-", binError,"%.2f" % integral, "+/-", "%.2f" % integralError))
+    table.append(hLine)
+    table.append("")
+
+    for l in table:
+        Print(l, False)
+    return
+        
 def rchop(myString, endString):
     '''
     if myString ends with "/" return it without the "/"
@@ -100,7 +192,16 @@ def getSaveDirPath(pseudocrabDir, prefix="", postfix="", pseudocrabDir2=None):
     return saveDir
 
 def GetListOfEwkDatasets():
+    '''
+    HToTB use
+    '''
     return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+
+def GetListOfRareDatasets():
+    '''
+    HToTB use
+    '''
+    return ["TTZToQQ", "TTTT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "Diboson"]
 
 def cmsswVersion():
     if "CMSSW_VERSION" in os.environ:

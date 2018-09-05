@@ -63,13 +63,14 @@ def PrintFlushed(msg, printHeader=True):
     sys.stdout.flush()
     return
 
-def createBinByBinStatUncertHistograms(hRate, xmin=None, xmax=None):
+def createBinByBinStatUncertHistograms(hRate, xmin=None, xmax=None, binByBinLabel=""):
     '''
     Creates and returns a list of bin-by-bin stat. uncert. histograms
     Inputs:
     hRate  rate histogram
     xmin   float, specifies minimum value for which bin-by-bin histograms are created (default: all)
     xmax   float, specifies maximum value for which bin-by-bin histograms are created (default: all)
+    binByBinLabel string, specifies an optional postfix used to name bin-by-bin stat. nuisances (default: "")
     '''
     myList = []
     myName = hRate.GetTitle()
@@ -102,8 +103,8 @@ def createBinByBinStatUncertHistograms(hRate, xmin=None, xmax=None):
                 nNegativeRate += 1
 
             # Clone hRate histogram to hUp and hDown
-            hUp   = aux.Clone(hRate, "%s_%s_statBin%dUp"  % (myName, myName,i) )
-            hDown = aux.Clone(hRate, "%s_%s_statBin%dDown"% (myName, myName,i) )
+            hUp   = aux.Clone(hRate, "%s_%s_statBin%s%dUp"  % (myName, myName,binByBinLabel,i) )
+            hDown = aux.Clone(hRate, "%s_%s_statBin%s%dDown"% (myName, myName,binByBinLabel,i) )
             hUp.SetTitle(hUp.GetName())
             hDown.SetTitle(hDown.GetName())
 
@@ -146,7 +147,7 @@ def createBinByBinStatUncertHistograms(hRate, xmin=None, xmax=None):
 
     return myList
 
-def createBinByBinStatUncertNames(hRate):
+def createBinByBinStatUncertNames(hRate,binByBinLabel=""):
     '''
     Creates and returns a list of bin-by-bin stat. uncert. name strings
     Inputs:
@@ -155,7 +156,7 @@ def createBinByBinStatUncertNames(hRate):
     myList = []
     myName = hRate.GetTitle()
     for i in range(1, hRate.GetNbinsX()+1):
-        myList.append(myName+"_statBin%d"%i)
+        myList.append( myName+"_statBin%s%d"%(binByBinLabel,i) )
     return myList
 
 def calculateCellWidths(widths,table):
@@ -214,6 +215,9 @@ class TableProducer:
         '''
         self._opts = opts
         self._config = config
+        self._binByBinLabel = ""
+        if hasattr(self._config, 'OptionBinByBinLabel'):
+            self._binByBinLabel = self._config.OptionBinByBinLabel
         self._outputPrefix = outputPrefix
         self._luminosity = luminosity
         self._observation = observation
@@ -224,6 +228,10 @@ class TableProducer:
         self._timestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime(time.time()))
         self._outputFileStem = "combine_datacard_hplushadronic_m"
         self._outputRootFileStem = "combine_histograms_hplushadronic_m"
+        if hasattr(self._config, 'OptionMergeRares'):
+            self._Rares = self._config.OptionMergeRares
+        else:
+            self._Rares = False
         if self._h2tb:
             self.channelLabel = "tbhadr"
         else:
@@ -471,8 +479,8 @@ class TableProducer:
             myFile.close()
             Verbose("Written datacard to %s" % (ShellStyles.SuccessStyle() + myFilename + ShellStyles.NormalStyle() ))
 
-            # Save & close histograms to root file
-            self._saveHistograms(myRootFile,m),
+            # Save & close histograms to root file and create bin-by-bin stat. uncertainties
+            self._saveHistograms(myRootFile,m,binByBinLabel=self._binByBinLabel),
             myRootFile.Write()
             myRootFile.Close()
             Verbose("Written shape ROOT file to %s" % (ShellStyles.SuccessStyle() + myRootFilename + ShellStyles.NormalStyle() ))
@@ -758,7 +766,7 @@ class TableProducer:
         for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
             if c.isActiveForMass(mass,self._config):
                 hRate = c._rateResult.getHistograms()[0]
-                myNames = createBinByBinStatUncertNames(hRate)
+                myNames = createBinByBinStatUncertNames(hRate,binByBinLabel=self._binByBinLabel)
                 for name in myNames:
                     myRow = []
                     myRow.append(name)
@@ -858,7 +866,7 @@ class TableProducer:
                 myResult.append(myDownRow)
         return myResult
 
-    def _saveHistograms(self, rootFile, mass):
+    def _saveHistograms(self, rootFile, mass, binByBinLabel=""):
         '''
         Save histograms to root file
         '''
@@ -871,7 +879,7 @@ class TableProducer:
                 c.setResultHistogramsToRootFile(rootFile)
                 # Add bin-by-bin stat.uncert.
                 hRate = c._rateResult.getHistograms()[0]
-                myHistos = createBinByBinStatUncertHistograms(hRate)
+                myHistos = createBinByBinStatUncertHistograms(hRate, binByBinLabel=binByBinLabel)
                 for h in myHistos:
                     h.SetDirectory(rootFile)
                 c._rateResult._tempHistos.extend(myHistos)
@@ -1156,9 +1164,10 @@ class TableProducer:
             myOutputLatex += "\\GenuineB background              & %s \\\\ \n" % self.getLatexResultString(Embedding, self.formatStr, self.myPrecision)
         myOutputLatex += "  \\hline\n"
         myOutputLatex += "  Total expected from the SM              & %s \\\\ \n" % self.getLatexResultString(TotalExpected, self.formatStr, self.myPrecision)
-        if self._config.BlindAnalysis*0:
-            myOutputLatex += "  Observed: & BLINDED \\\\ \n"
-        myOutputLatex += "  Observed & %5d \\\\ \n"%self._observation.getCachedShapeRootHistogramWithUncertainties().getRate()
+        if self._config.BlindAnalysis:
+            myOutputLatex += "  Observed & BLINDED \\\\ \n"
+        else:
+            myOutputLatex += "  Observed & %5d \\\\ \n"%self._observation.getCachedShapeRootHistogramWithUncertainties().getRate()
         myOutputLatex += "  \\hline\n"
         myOutputLatex += "  \\end{tabular}\n"
         #myOutputLatex += "\\end{table}\n"
@@ -1229,6 +1238,7 @@ class TableProducer:
         if light:
             signalColumn="HW"
         myColumnOrder = [signalColumn, 
+                         "CMS_Hptntj_QCDandFakeTau", 
                          "ttbar_CMS_Hptntj", 
                          "CMS_Hptntj_W", 
                          "CMS_Hptntj_singleTop",
@@ -1237,9 +1247,14 @@ class TableProducer:
 
 
         if self._h2tb:
-            myColumnOrder = ["Hp",  "FakeB", "TT_GenuineB", "SingleTop_GenuineB", "TTZToQQ_GenuineB",
-                             "TTTT_GenuineB", "DYJetsToQQ_GenuineB",  "TTWJetsToQQ_GenuineB", 
-                             "WJetsToQQ_HT_600ToInf_GenuineB", "Diboson_GenuineB"]
+            myColumnOrder = ["Hp",  "FakeB", "TT_GenuineB", "SingleTop_GenuineB"]
+            if self._Rares:
+                myColumnOrder.append("Rares_GenuineB")  
+            else:
+                rares = []
+                for d in aux.GetListOfRareDatasets():
+                    dName = d + "_GenuineB"
+                    myColumnOrder.append(dName)
 
             myNuisanceOrder = [["CMS_eff_trg_MC", "trigger efficiency"],
                                ["CMS_eff_e_veto", "electron veto eff."],
@@ -1248,20 +1263,30 @@ class TableProducer:
                                ["CMS_eff_b", "b-tagging eff."],
                                ["CMS_scale_j", "jet energy scale"],
                                ["CMS_res_j", "jet energy resolution"],
-                               # ["CMS_topPtReweight","top $p_T$ reweighting"],
+                               ["CMS_topreweight","top $p_T$ reweighting"],
                                ["CMS_pileup", "pileup reweighting"],
-                               ["CMS_topTagging", "top tagging"],
-                               ["CMS_scale_ttbar", "$t\\bar{t}$ scale"],
-                               ["CMS_pdf_ttbar", "$t\\bar{t}$ pdf"],
-                               ["CMS_mass_ttbar", "$t\\bar{t}$ mass"],
-                               ["CMS_scale_Wjets", "W+jets scale"],
-                               ["CMS_pdf_Wjets", "W+jets pdf"],
-                               ["CMS_scale_DY",  "DY scale"],
-                               ["CMS_pdf_DY", "DY pdf"],
-                               ["CMS_scale_VV", "Diboson scale"],
-                               ["CMS_pdf_VV", "Diboson pdf"],
+                               ["CMS_HPTB_toptagging", "top tagging"],
+                               ["QCDscale_ttbar", "$t\\bar{t}$ scale"],
+                               ["pdf_ttbar", "$t\\bar{t}$ pdf"],
+                               ["mass_top", "top mass"],
+                               ["QCDscale_ttW", "$t\\bar{t}$W scale"],
+                               ["pdf_ttW", "$t\\bar{t}$W pdf"],
+                               ["QCDscale_ttZ", "$t\\bar{t}$Z scale"],
+                               ["pdf_ttZ", "$t\\bar{t}$Z pdf"],
+                               ["QCDscale_Wjets", "W+jets scale"],
+                               ["pdf_Wjets", "W+jets pdf"],
+                               ["QCDscale_DY",  "DY scale"],
+                               ["pdf_DY", "DY pdf"],
+                               ["QCDscale_VV", "Diboson scale"],
+                               ["pdf_VV", "Diboson pdf"],
                                ["lumi_13TeV", "luminosity (13 TeV)"],
-                               ["CMS_FakeB_transferFactor", "Fake $b$ transfer factors"]
+                               ["CMS_HPTB_pdf_HPTB"  , "pdf acceptance (signal)"],
+                               ["CMS_HPTB_pdf_top"   , "pdf acceptance (top)"],
+                               ["CMS_HPTB_pdf_ewk"   , "pdf acceptance (EWK)"],
+                               ["CMS_HPTB_mu_RF_HPTB", "RF scale acceptance (signal)"],
+                               ["CMS_HPTB_mu_RF_top" , "RF scale acceptance (top)"],
+                               ["CMS_HPTB_mu_RF_ewk" , "RF scale acceptance (EWK)"],
+                               ["CMS_HPTB_fakeB_transferfactor", "Fake $b$ transfer factors"]
                                ]
         else:
             myNuisanceOrder = [["CMS_eff_t","tau ID"], # first ID, then the text that goes to the table
@@ -1282,9 +1307,15 @@ class TableProducer:
                                ["CMS_res_j","jet energy resolution"],
                                ["CMS_topPtReweight","top $p_T$ reweighting"],
                                ["CMS_pileup","pileup reweighting"],
+                               ["CMS_Hptn_pdf_Hptn", "pdf acceptance (signal)"],
+                               ["CMS_Hptn_pdf_top", "pdf acceptance (top BG)"],
+                               ["CMS_Hptn_pdf_ewk", "pdf acceptance (EWK BG)"],
+                               ["CMS_Hptn_mu_RF_Hptn", "RF scale acceptance (signal)"],
+                               ["CMS_Hptn_mu_RF_top", "RF scale acceptance (top BG)"],
+                               ["CMS_Hptn_mu_RF_ewk", "RF scale acceptance (EWK BG)"],
                                ["QCDscale_ttbar", "ttbar scale"],
                                ["pdf_ttbar", "ttbar pdf"],
-                               ["mass_ttbar", "ttbar mass"],
+                               ["mass_top", "top mass"],
                                ["QCDscale_Wjets", "W+jets scale"],
                                ["pdf_Wjets", "W+jets pdf"],
                                ["QCDscale_DY", "DY scale"],
@@ -1293,7 +1324,7 @@ class TableProducer:
                                ["pdf_VV", "diboson pdf"],
                                ["lumi_13TeV","luminosity (13 TeV)"],
                                ["CMS_Hptntj_fake_t_fit","Fake tau template fit"],
-                               ["CMS_Hptntj_fake_t_shape","Fake tau MET shape"]
+                               ["CMS_Hptntj_fake_t_shape","Fake tau mT shape"]
                                ]
             
         # Make table - The horror!
@@ -1316,8 +1347,8 @@ class TableProducer:
 
                     # if column name matches to dataset group label
                     foundMatch = columnName in c.getLabel()
-                    if self._h2tb and not "Hp": # dirty but works (for now)
-                        foundMatch = (columnName == c.getLabel()) # exact match needed
+                    if self._h2tb and not "Hp" in c.getLabel():
+                        foundMatch = (columnName == c.getLabel())
                     if foundMatch: 
                         # if this column+nuisance combination matches to a list, loop over the list
                         if isinstance(n[0], list): 
@@ -1388,7 +1419,7 @@ class TableProducer:
                 if (abs(myMaxErrorUp) > 9000 or abs(myMinErrorUp) > 9000 or abs(myMaxErrorDown) > 9000 or abs(myMinErrorDown) > 9000):
                     myStr = "$-$"
                 # if result found and no need for writing range
-                elif ( (myMaxErrorUp-myMinErrorUp)<0.001 and (myMaxErrorDown-myMinErrorDown)<0.001 ): #PROBLEM HERE!
+                elif ( (myMaxErrorUp-myMinErrorUp)<0.001 and (myMaxErrorDown-myMinErrorDown)<0.001 ):
                     if abs(myMaxErrorDown-myMaxErrorUp) < 0.001: # if symmetric error
                         myStr = self._getFormattedSystematicsNumber(myMaxErrorUp)
                     else: # if asymmetric
@@ -1410,7 +1441,7 @@ class TableProducer:
                 myRow[0]+=" (S)"
             myTable.append(myRow)
 
-        # Make systematics table & save to file
+        # Make systematics table & save to file        
         myOutput = self.getSystematicsTable(myTable)
         fileName = self.getSystematicsFileName(light)
         myFile   = open(fileName, "w")
@@ -1459,17 +1490,21 @@ class TableProducer:
     def getSystematicsTableHToTB(self, myTable):
         myOutput  = "\\renewcommand{\\arraystretch}{1.2}\n"
         myOutput += "\\resizebox{1.0\\linewidth}{!}{%\n"
-        #myOutput += "\\begin{table}%%[h]\n"
-        #myOutput += "\\begin{center}\n"
-        #myOutput += "\\caption{The systematic uncertainties (in \\%) for signal and the backgrounds. The uncertainties, which depend on the final distribution bin, are marked with (S) and for them the maximum contracted value of the negative or positive variation is displayed.}"
         myOutput += "\\label{tab:summary:systematics}\n"
-        #myOutput += "\\vskip 0.1 in\n"
-        #myOutput += "\\noindent\\makebox[\\textwidth]{\n"
-        myOutput += "\\begin{tabular}{l|c|c|cccccccc}\n"
+        if self._Rares: #can do this much smarter!
+            myOutput += "\\begin{tabular}{l|c|c|ccc}\n"
+        else:
+            myOutput += "\\begin{tabular}{l|c|c|cccccccc}\n"            
         myOutput += "\\hline\n"
-        myOutput += "& Signal & Fake b & \multicolumn{8}{c}{Genuine b}"
+        if self._Rares: #can do this much smarter!
+            myOutput += "& Signal & Fake b & \multicolumn{3}{c}{Genuine b}"
+        else:
+            myOutput += "& Signal & Fake b & \multicolumn{8}{c}{Genuine b}"
         myOutput += "\n \\\\"
-        myCaptionLine = [["","","","$t\\bar{t}$", "Single top", "$t\\bar{t}$+Z", "$t\\bar{t}t\\bar{t}$", "$Z/\gamma^{*}$+jets", "$t\\bar{t}$+Z", "W+jets", "Diboson"]] 
+        if self._Rares:
+            myCaptionLine = [["","","","$t\\bar{t}$", "Single top", "Rares"]] 
+        else:
+            myCaptionLine = [["","","","$t\\bar{t}$", "Single top", "$t\\bar{t}$+Z", "$t\\bar{t}t\\bar{t}$", "$Z/\gamma^{*}$+jets", "$t\\bar{t}$+W", "W+jets", "Diboson"]] 
         # Calculate dimensions of tables
         myWidths = []
         myWidths = calculateCellWidths(myWidths, myTable)

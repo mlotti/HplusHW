@@ -1,4 +1,3 @@
-
 '''
 ## \package ControlPlotMaker
 
@@ -186,7 +185,8 @@ class ControlPlotMakerHToTB:
                 
                 # Add signal
                 if m > 0:
-                    mySignalLabel = "HplusTB_M%d" % m
+                    #mySignalLabel = "HplusTB_M%d" % m
+                    mySignalLabel = "ChargedHiggs_HplusTB_HplusToTB_M_%d" % (m)
                     myHisto = histograms.Histo(hSignal, mySignalLabel)
                     myHisto.setIsDataMC(isData=False, isMC=True)
                     myStackList.insert(1, myHisto)
@@ -259,6 +259,8 @@ class ControlPlotMakerHToTB:
         return
 
     def _setYlabelWidthSuffix(self, histo, myParams):
+        # self.Print(histo.GetName(), True)
+
         ylabelBinInfo = True
         if "ylabelBinInfo" in myParams:
             ylabelBinInfo = myParams["ylabelBinInfo"]
@@ -283,6 +285,8 @@ class ControlPlotMakerHToTB:
                 widthSuffix = "%s" % (minBinWidthString)
             if (myParams["unit"] == "" and widthSuffix == "1"):
                 return
+            elif "< Events / " in myParams["ylabel"]: # e.g. < Events / GeV >
+                return                
             else:
                 myParams["ylabel"] = "%s / %s %s" % (myParams["ylabel"], widthSuffix, myParams["unit"])
             return
@@ -429,8 +433,6 @@ class ControlPlotMakerHToTB:
                     hData.getRootHisto().SetBinError(k, 0.0)
         return myBlindingString
                         
-
-
 class SignalAreaEvaluator:
     def __init__(self):
         self._output = ""
