@@ -6,6 +6,8 @@ import array
 import os
 import json
 
+from optparse import OptionParser
+
 import ROOT
 ROOT.gROOT.SetBatch(True)
 
@@ -60,10 +62,9 @@ def xaminmax(jsonlimits):
             return xmin,xmax
     return None,None
 
-def main():
+def main(opts):
     if len(sys.argv) == 1:
         usage()
-
 
     # Enable OpenGL
     ROOT.gEnv.SetValue("OpenGL.CanvasPreferGL", 1)
@@ -74,9 +75,13 @@ def main():
     #    histograms.cmsTextMode = histograms.CMSMode.PAPER
     #histograms.cmsTextMode = histograms.CMSMode.PAPER # tmp
     #histograms.cmsTextMode = histograms.CMSMode.UNPUBLISHED # tmp
+    
     histograms.cmsTextMode = histograms.CMSMode.PRELIMINARY
     limit.forPaper = True # to get GeV without c^2
-                                       
+    if opts.paper:
+        print "check paper"
+        histograms.cmsTextMode = histograms.CMSMode.PAPER
+                
         
     jsonfile = sys.argv[1]
 
@@ -85,6 +90,8 @@ def main():
     f.close()
     
     name           = str(limits["name"])
+    if not opts.paper:
+        name += "_preliminary"
     scenario       = str(limits["scenario"])
     lumi           = float(limits["luminosity"])
     finalstateText = str(limits["finalStateText"])
@@ -101,4 +108,14 @@ def main():
 
         
 if __name__ == "__main__":
-    main()
+
+    # Default Values
+    PAPER       = False
+
+    parser = OptionParser(usage="Usage: %prog [options]")
+
+    parser.add_option("--paper", dest="paper", default=PAPER, action="store_true",
+                      help="Paper mode [default: %s]" % (PAPER) )
+
+    (opts, args) = parser.parse_args()
+    main(opts)

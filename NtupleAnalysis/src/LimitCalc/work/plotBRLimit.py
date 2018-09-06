@@ -161,6 +161,10 @@ def doBRlimit(limits, unblindedStatus, opts, log=False):
             ymax = 4e-2
     if leptonicFS:
         ymax = 10
+
+    if not opts.paper:
+        name += "_preliminary"
+        
     if len(limits.mass) == 1:
         plot.createFrame(name, opts={"xmin": limits.mass[0]-5.0, "xmax": limits.mass[0]+5.0, "ymin": ymin, "ymax": ymax})
     else:
@@ -209,6 +213,7 @@ def doBRlimit(limits, unblindedStatus, opts, log=False):
         histograms.addText(x, 0.79, limit.BRassumption, size=size)
 
     plot.save()
+    print "Created",name
     return
 
 

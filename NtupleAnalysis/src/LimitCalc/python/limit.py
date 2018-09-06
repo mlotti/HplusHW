@@ -1364,13 +1364,13 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
 #    isHeavy = regime != "light"
     tanbMax = 65
 
-    if forPaper:
-        if scenario in ["mhmaxup", "mhmodm"] and not "_mA" in name:
-            histograms.cmsTextMode = histograms.CMSMode.PAPER
-        else:
-            histograms.cmsTextMode = histograms.CMSMode.UNPUBLISHED
-    else:
-        histograms.cmsTextMode = histograms.CMSMode.PRELIMINARY
+#    if forPaper:
+#        if scenario in ["mhmaxup", "mhmodp", "mhmodm"] and not "_mA" in name:
+#            histograms.cmsTextMode = histograms.CMSMode.PAPER
+#        else:
+#            histograms.cmsTextMode = histograms.CMSMode.UNPUBLISHED
+#    else:
+#        histograms.cmsTextMode = histograms.CMSMode.PRELIMINARY
 
     blinded = True
     if "obs" in graphs.keys():
@@ -1656,6 +1656,7 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
         raise Exception("Unknown option for regime")
     y -= captionLineSpacing
     #print "check finalstateText",finalstateText,x,y
+    finalstateText = ""
     if isinstance(finalstateText, str):
         if regime == "mu":
             if scenario == "lowMHaltv-LHCHXSWG":
