@@ -65,6 +65,9 @@ builder = AnalysisBuilder("SignalAnalysis",
                           #### Options ####
                           usePUreweighting=True,
                           useTopPtReweighting=True,
+#                          intermediateSignalSF=0.408683 # for M145-M170
+#                          intermediateSignalSF=0.654405 #for M175-M200
+#                          intermediateSignalSF=1.0 #default                    
                           doSystematicVariations=True
                           )
 #builder.addVariation("METSelection.METCutValue", [100,120,140])

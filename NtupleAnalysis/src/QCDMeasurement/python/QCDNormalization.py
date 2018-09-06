@@ -878,8 +878,8 @@ class QCDNormalizationManagerBase:
             binLabelText = getFormattedBinLabelString(keyList[i])
             hFrame.GetXaxis().SetBinLabel(i+1,binLabelText)
 ## for 3-prongs
-        # hFrame.SetMinimum(0.0005)
-        # hFrame.SetMaximum(0.01)
+#        hFrame.SetMinimum(0.0)
+#        hFrame.SetMaximum(0.05)
  ## original
         hFrame.SetMinimum(0.0)
         hFrame.SetMaximum(0.65)                 

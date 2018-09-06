@@ -302,11 +302,8 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
   hTriggerBJets->Fill(nTrgBJets);
 
   // Determine if trigger matching requirement is satisfied
-  if (passedEta*passedPt*passedDiscr)
-    {
-      if (!bTriggerMatchingApply) passedTrgMatching = true;
-      else passedTrgMatching = (trgMatches >= 1); // fixme: need smarter implementation (according to trigger name)
-    }
+  if (!bTriggerMatchingApply) passedTrgMatching = true;
+  if (passedEta*passedPt*passedDiscr) passedTrgMatching = (trgMatches >= 1); // fixme: need smarter implementation (according to trigger name)
   
   // Determine if exact number of the selected bjets is found
   if (passedTrgMatching) 

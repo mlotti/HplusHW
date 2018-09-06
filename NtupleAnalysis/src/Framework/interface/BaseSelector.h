@@ -97,11 +97,12 @@ private:
   Count cTopPtReweighted;
   Count cExclusiveSamplesWeighted;
 
-  const bool fIsMC;
   bool bIsttbar;
   bool bIsIntermediateNN;
+  float fIntSF;
   int iTopPtVariation;
   int iPileupWeightVariation;
+  const bool fIsMC;
     
   // Internal histograms
   WrappedTH1* hNvtxBeforeVtxReweighting;
