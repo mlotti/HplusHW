@@ -210,7 +210,7 @@ def setExpectedStyle(graph):
     https://twiki.cern.ch/twiki/bin/viewauth/CMS/Internal/FigGuidelines
     as guideline
     '''
-    graph.SetLineStyle(5) #2)
+    graph.SetLineStyle(2) #5
     graph.SetLineWidth(3)
     graph.SetLineColor(ROOT.kBlack) #ROOT.kAzure+1
     graph.SetMarkerStyle(20)
