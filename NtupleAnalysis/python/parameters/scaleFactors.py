@@ -407,8 +407,10 @@ def _setupToptagMisid(topTagPset, topTagMisidFilename, direction, variationInfo)
         
         # Define the Scale Factor (SF) as: SF = Eff_Data / Eff_MC
         sf     = effData / effMC
-        sfUp   = effDataUp / effMC   # fixme
-        sfDown = effDataDown / effMC # fixme
+        sfUp   = effDataUp / effMC
+        dsf    = (sfUp-sf)
+        sfDown = sf-dsf                # gives symmetric shape
+        #sfDown = effDataDown / effMC  # gives asymmetric shape 
         Verbose("pT = %.1f, sf = %0.3f, sf+ = %0.3f, sf- = %0.3f" % (pT, sf, sfUp, sfDown), i==0)
 
         result["SF"].append(sf)
@@ -455,9 +457,10 @@ def _setupToptagEffUncertainties(topTagPset, topTagEffUncertaintiesFilename, dir
     contents = json.load(f)
     f.close()
     
-    # Obtain uncertainties
-    params = ["TT_hdampUP", "TT_mtop1715", "TT_mtop1755", "TT_fsrdown", "TT_fsrup", "TT_isrdown", "TT_mtop1735", "TT_mtop1785", "TT_TuneEE5C",
-              "TT_hdampDOWN", "TT_mtop1695", "TT_evtgen", "TT_isrup", "TT_mtop1665", "matching"]
+    # Obtain uncertainties (Use top-mass systematic only once! Take maximum deviation (31 July 2018)
+    #params = ["TT_hdampUP", "TT_mtop1715", "TT_mtop1755", "TT_fsrdown", "TT_fsrup", "TT_isrdown", "TT_mtop1735", "TT_mtop1785", "TT_TuneEE5C",
+    #          "TT_hdampDOWN", "TT_mtop1695", "TT_evtgen", "TT_ isrup", "TT_mtop1665", "matching"]
+    params = ["TT_hdampUP", "TT_fsrdown", "TT_fsrup", "TT_isrdown", "TT_TuneEE5C", "TT_hdampDOWN", "TT_evtgen", "TT_isrup", "TT_mtop1665", "matching"]
     
     for param in params:
         if not param in contents.keys():
@@ -467,6 +470,7 @@ def _setupToptagEffUncertainties(topTagPset, topTagEffUncertaintiesFilename, dir
     first = contents[params[0]]
     firstBins = first["bins"]
     
+    # For-loop: All loops
     for i in range(0, len(firstBins)):
         
         dSF2 = 0.0
@@ -483,7 +487,7 @@ def _setupToptagEffUncertainties(topTagPset, topTagEffUncertaintiesFilename, dir
             dSF2 += uncertainty * uncertainty
                         
         dSF = math.sqrt(dSF2)
-                
+        
         # Find pTMin, pTMax
         pTMin = pt
         if i == len(firstBins)-1:
@@ -493,7 +497,7 @@ def _setupToptagEffUncertainties(topTagPset, topTagEffUncertaintiesFilename, dir
             
         # Uncertainty Up
         dSFUp = dSF
-        
+
         # Uncertainty Down
         dSFDown = -dSF
         
@@ -578,7 +582,9 @@ def _setupToptagEfficiency(topTagPset, topTagEfficiencyFilename, direction, vari
         # Define the Scale Factor (SF) as: SF = Eff_Data / Eff_MC
         sf     = effData / effMC
         sfUp   = effDataUp / effMC
-        sfDown = effDataDown / effMC
+        dsf    = (sfUp-sf)
+        sfDown = sf-dsf                # gives symmetric shape
+        #sfDown = effDataDown / effMC  # gives asymmetric shape 
         Verbose("pT = %.1f, sf = %0.3f, sf+ = %0.3f, sf- = %0.3f" % (pT, sf, sfUp, sfDown), i==0)
         
         result["SF"].append(sf)

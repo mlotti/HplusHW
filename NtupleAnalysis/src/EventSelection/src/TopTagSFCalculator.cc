@@ -122,7 +122,7 @@ const float TopTagSFInputStash::getInputValueByPt(TopTagJetFlavorType flavor, fl
       return p->getValueByPt(pt);
     }
   }
-  std::cout << "=== TopTagSFCalculator::addInput() Jet pt " << pt << " flavor " << flavor << " is out of range for top-tag SF calculation!";
+  if (0) std::cout << "=== TopTagSFCalculator::addInput() Jet pt " << pt << " flavor " << flavor << " is out of range for top-tag SF calculation!";
   return 1.0;
 }
 
@@ -293,6 +293,7 @@ const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzV
   // Define the totalSF (the final number to be returned)
   float totalSF = 1.0;
   bool debug = false;
+  bool print = false;
 
   // For loop: All cleaned top-candidates
   for (size_t i = 0; i < cleanTopP4.size(); i++)
@@ -324,34 +325,42 @@ const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzV
       if (isGen) hTopEff_Vs_TopPt_Genuine -> Fill(eff, pt);
       else hTopEff_Vs_TopPt_Fake          -> Fill(eff, pt);
       
+      // Relative error
+      // if (cleanTopP4.size() == 2) print = true;
+      
       // Top candidate is tagged (t|?)
       if (isTag)
 	{
-	  
+
 	  // up variation (t|gen-t)
 	  if (fVariationInfo == kVariationTagUp && flavor == TopTagSFInputStash::kGenuineTop)
-	    {
+	    {	      
 	      sf = fSFUp.getInputValueByPt(flavor, pt) + fdSFUp.getInputValueByPt(flavor, pt);
+	      if (print) std::cout  << "\tkVariationTagUp) flavor = " << flavor << ", pt = " << pt << ", fSFUp = " <<  fSFUp.getInputValueByPt(flavor, pt) << ", fdSFUp = " <<  fdSFUp.getInputValueByPt(flavor, pt) << ", sf = " << sf << std::endl;
 	    }
 	  // up variation (t|!gen-t)
 	  else if (fVariationInfo == kVariationMistagUp && flavor == TopTagSFInputStash::kFakeTop)
 	    {
 	      sf = fSFUp.getInputValueByPt(flavor, pt);
+	      if (print) std::cout  << "\tkVariationMistagUp) = " << flavor << ", pt = " << pt << ", fSFUp = " <<  fSFUp.getInputValueByPt(flavor, pt) << ", sf = " << sf << std::endl;
 	    }
 	  // down variation (t|gen-t)
 	  else if (fVariationInfo == kVariationTagDown && flavor == TopTagSFInputStash::kGenuineTop)
 	    {
 	      sf = fSFDown.getInputValueByPt(flavor, pt) + fdSFDown.getInputValueByPt(flavor, pt); 
+	      if (print) std::cout  << "\tkVariationTagDown) flavor = " << flavor << ", pt = " << pt << ", fSFDown = " <<  fSFDown.getInputValueByPt(flavor, pt) << ", fdSFDown = " <<  fdSFDown.getInputValueByPt(flavor, pt) << ", sf = " << sf << std::endl;
 	    }
 	  // down variation (t|!gen-t)
 	  else if (fVariationInfo == kVariationMistagDown && flavor == TopTagSFInputStash::kFakeTop)
 	    {
 	      sf = fSFDown.getInputValueByPt(flavor, pt);
+	      if (print) std::cout  << "\tkVariationMistageDown) flavor = " << flavor << ", pt = " << pt << ", fSFDown = " <<  fSFDown.getInputValueByPt(flavor, pt) << ", sf = " << sf << std::endl;
 	    }
 	  // nominal
 	  else
 	    {
 	      sf = fSF.getInputValueByPt(flavor, pt);
+	      if (print) std::cout  << "\tkNominal) flavor = " << flavor << ", pt = " << pt << ", fSF = " <<  fSF.getInputValueByPt(flavor, pt) << ", sf = " << sf << std::endl;
 	    }
 	}
       // Top candidate is not tagged (!t|?)
@@ -365,14 +374,13 @@ const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzV
 	  if (fVariationInfo == kVariationTagUp && flavor == TopTagSFInputStash::kGenuineTop)
 	    {
 	      double effDelta = fEfficienciesUp.getInputValueByPt(flavor, pt) - eff;
-	      double sfDelta = fSFUp.getInputValueByPt(flavor, pt) + fdSFUp.getInputValueByPt(flavor, pt) - sf_value;
+	      double sfDelta  = fSFUp.getInputValueByPt(flavor, pt) + fdSFUp.getInputValueByPt(flavor, pt) - sf_value;
 	      // error propagation
 	      double a = (1-sf_value) / (1.0-eff) / (1.0-eff);  // d/deff((1-eff*SF)/(1-eff))
 	      double b = -eff / (1.0-eff);                      // d/dsf((1-eff*SF)/(1-eff))
 	      // squared sum of eff and SF uncertainties
 	      double sf_uncert = TMath::Sqrt(a*a*effDelta*effDelta + b*b*sfDelta*sfDelta);
 	      sf = std::abs(sf_nominal + sf_uncert);
-	      
 	      hTopTagSFRelUncert->Fill(sf_uncert/sf_nominal);
 	    }
 	  // up variation (!t|!gen-t)
@@ -426,6 +434,15 @@ const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzV
 			<< " isGen = " << isGen << " eff = " << eff << " SF = " << sf << std::endl;
 	      sf = 1.0;
 	    }
+
+	  // debug?
+	  if (isTag)
+	    {
+	      std::cout << "=== TopTagSFCalculator:\n\t"
+			<< "flavor = " << flavor << ", pt = " << pt << ", isTag = " << isTag 
+			<< ", isGen = " << isGen << ", eff = " << eff << ", SF = " << sf << std::endl;
+	    }
+
 	}
       
       // If SF is negative, set to zero
@@ -444,7 +461,7 @@ const float TopTagSFCalculator::calculateSF(const std::vector<math::XYZTLorentzV
   // Fill histograms
   hTopTagSF->Fill(totalSF);
   
-  if (0) std::cout << "totalSF = " << totalSF << std::endl;
+  if (print) std::cout << "weight = " << totalSF << "\n" <<std::endl;
   return totalSF;
 }
 
@@ -596,15 +613,15 @@ void TopTagSFCalculator::handleMisidInput(boost::optional<std::vector<ParameterS
     fSFUp.addInput(flavor, ptMin, ptMax, sfMCUp);
     fSFDown.addInput(flavor, ptMin, ptMax, sfMCDown);
 
-    // Debug?
+    // Debug?  
     if (0)
       {
-	std::cout << "ptmin = " << ptMin << " ptmax = " << ptMax 
-		  << " misidData = " << misidData << " misidDataUp = " << misidDataUp 
-		  << " misidDataDown = " << misidDataDown << " misidMC = " << misidMC
-		  << " misidMCUp = " << misidMCUp   << " misidMCDown = "   << misidMCDown
-		  << " sfMC = "  << sfMC << " sfMCUp = " << sfMCUp 
-		  << " sfMCDown = " << sfMCDown << std::endl;
+	std::cout << "ptmin = " << ptMin << ", ptmax = " << ptMax 
+		  << ", misidData = " << misidData << ", misidDataUp = " << misidDataUp 
+		  << ", misidDataDown = " << misidDataDown << ", misidMC = " << misidMC
+		  << ", misidMCUp = " << misidMCUp   << ", misidMCDown = "   << misidMCDown
+		  << ", sfMC = "  << sfMC << ", sfMCUp = " << sfMCUp 
+		  << ", sfMCDown = " << sfMCDown << std::endl;
       }
     }
   
