@@ -44,8 +44,9 @@ def main():
         match = json_re.search(argv)
         if match:
             jsonfile = match.group(0)
-                                                                                
-    limits = limit.BRLimits(limitsfile=jsonfile,configfile="limitdata/lightHplus_configuration.json")
+
+    jsonfile = "limits2016/limits_withLeptonic_180522.json"
+    limits = limit.BRLimits(limitsfile=jsonfile,configfile="limits2016/mu_configuration.json")
 
     # Enable OpenGL
     ROOT.gEnv.SetValue("OpenGL.CanvasPreferGL", 1)
@@ -65,7 +66,7 @@ def main():
         print "    ",masses[i],brs[i]
 
     global db
-    db = BRXSDB.BRXSDatabaseInterface(rootfile)
+    db = BRXSDB.BRXSDatabaseInterface(rootfile,BRvariable= "0.001*831.76*2*tHp_xsec*BR_Hp_taunu")
     for i,m in enumerate(masses):
         db.addExperimentalBRLimit(m,brs[i])
 
@@ -79,45 +80,107 @@ def main():
             obs.RemovePoint(i)
     print
 
+#    graphs["exp"] = limits.expectedGraph()
+    #x = array.array('d',masses)
+    #y = array.array('d',[0.02]*len(masses))
+    #graphs["exp"] = ROOT.TGraph(len(masses),x,y)
+#    graphs["exp1"] = limits.expectedBandGraph(sigma=1)
+#    graphs["exp2"] = limits.expectedBandGraph(sigma=2)
+
+    if obs.GetN() > 0:
+        graphs["obs"] = obs
+
+
+
+    # Remove m=80
+    for gr in graphs.values():
+        limit.cleanGraph(gr, 80)
+
+    print "Plotting graphs"
+    for key in graphs.keys():
+        for i in range(graphs[key].GetN()):
+            xs = graphs[key].GetX()
+            ys = graphs[key].GetY()
+            print "    ",key,xs[i],ys[i]
+        print
+
+    # Interpret in MSSM
+    xVariable = "mu"
     scenario = os.path.split(rootfile)[-1].replace(".root","")
+    if scenario == "lowMHaltv-LHCHXSWG":
+        xVariable = "mHp"
     selection = ""
-    for i in range(len(masses)):
-        mass = masses[i]
-        brlimit = brs[i]
-	if mass < 90:
-	    continue 
+    from JsonWriter import JsonWriter
+#    for i in range(len(masses)):
+#        mass = masses[i]
+#        brlimit = brs[i]
+#	if mass < 90:
+#	    continue 
 #        if not mass == 160:
 #            continue
-	selection = "mHp == %s"%mass 
-        graphs["muexcluded"] = db.muLimit(mass,"mu",selection,brlimit)
+#	selection = "mHp == %s"%mass 
+        #graphs["muexcluded"] = db.muLimit(mass,"mu",selection,brlimit)
+        #db.PrintGraph(graphs["muexcluded"],"muexcluded")
 
+    jsonWriter = JsonWriter()
+    print "check keys",graphs.keys()
 
-        if int(mass) in [155, 160]:
-            graphs["obs_th_plus"] = db.muLimit(mass,"mu",selection,brlimit*(1+0.29))
-            graphs["obs_th_minus"] = db.muLimit(mass,"mu",selection,brlimit*(1-0.29))
+    for key in graphs.keys():
+        print "Graph--------------------------------",key
+        #db.PrintGraph(graphs[key],"Before graphToTanBetaCombined")
+        graphs[key] = db.graphToTanBetaMu(graphs[key],xVariable,selection,True)
+        print key,"done"
+        jsonWriter.addGraph(key,graphs[key])
 
-            for gr in [graphs["obs_th_plus"], graphs["obs_th_minus"]]:
-                gr.SetLineWidth(2)
-                gr.SetLineStyle(9)
+    #graphs["Allowed"] = db.mhLimit("mH","mu",selection,"125.0+-3.0")
+    if xVariable == "mHp":
+        graphs["Allowed"] = db.mHLimit_mHp(selection,"125.0+-3.0")
+    else:
+        graphs["Allowed"] = db.mHLimit_mu(selection,"125.0+-3.0")
+    jsonWriter.addGraph("Allowed",graphs["Allowed"])
 
-            graphs["observed"] = graphs["muexcluded"].Clone()
-            graphs["observed"].SetLineWidth(2)
-            graphs["observed"].SetLineStyle(ROOT.kSolid)
-            graphs["observed"].SetLineColor(ROOT.kBlack)
+    graphs["Inaccessible"] = db.inaccessible(xVariable,selection)
+    jsonWriter.addGraph("Inaccessible",graphs["Inaccessible"])
+    
+    jsonWriter.addParameter("name","limitsTanb_light_"+scenario)
+    jsonWriter.addParameter("scenario",scenario)
+    jsonWriter.addParameter("luminosity",limits.getLuminosity())
+    jsonWriter.addParameter("finalStateText",limits.getFinalstateText())
+    xvar = limit.mu()
+    if xVariable == "mHp":
+        xvar = limit.mHplus()
+    jsonWriter.addParameter("mHplus",xvar)
+    jsonWriter.addParameter("selection",selection)
+    jsonWriter.addParameter("regime","mu")
+    jsonWriter.write("MSSMLimitMu_"+scenario+".json")
 
-            # Remove obs point
-            for name in ["observed", "obs_th_plus", "obs_th_minus"]:
-                gr = graphs[name]
-                print "Graph", name
-                for i in reversed(range(0,gr.GetN())):
-                    if gr.GetY()[i] < 2 or gr.GetY()[i] > 65:
-                        print "    REMOVING POINT",gr.GetY()[i]," corresponding mass=",gr.GetX()[i]
-                        gr.RemovePoint(i)
-
-        graphs["Allowed"]  = db.getHardCoded_mH_limitForMu(mass,0)
-        graphs["Allowed2"] = db.getHardCoded_mH_limitForMu(mass,1)
-
-        doPlot(("limitsMu_light_mHp%s_"+scenario)%(int(mass)), graphs, limits, "#mu (GeV)",scenario, int(mass))
+        #limit.doTanBetaPlotLight("limitsTanb_light_"+scenario, graphs, limits.getLuminosity(), limits.getFinalstateText(), limit.mHplus(), scenario)
+#        if int(mass) in [155, 160]:
+#            graphs["obs_th_plus"] = db.muLimit(mass,"mu",selection,brlimit*(1+0.29))
+#            graphs["obs_th_minus"] = db.muLimit(mass,"mu",selection,brlimit*(1-0.29))
+#
+#            for gr in [graphs["obs_th_plus"], graphs["obs_th_minus"]]:
+#                gr.SetLineWidth(2)
+#                gr.SetLineStyle(9)
+#
+#            graphs["observed"] = graphs["muexcluded"].Clone()
+#            graphs["observed"].SetLineWidth(2)
+#            graphs["observed"].SetLineStyle(ROOT.kSolid)
+#            graphs["observed"].SetLineColor(ROOT.kBlack)
+#
+#            # Remove obs point
+#            for name in ["observed", "obs_th_plus", "obs_th_minus"]:
+#                gr = graphs[name]
+#                print "Graph", name
+#                for i in reversed(range(0,gr.GetN())):
+#                    if gr.GetY()[i] < 2 or gr.GetY()[i] > 65:
+#                        print "    REMOVING POINT",gr.GetY()[i]," corresponding mass=",gr.GetX()[i]
+#                        gr.RemovePoint(i)
+#
+#        graphs["Allowed"]  = db.getHardCoded_mH_limitForMu(mass,0)
+#        graphs["Allowed2"] = db.getHardCoded_mH_limitForMu(mass,1)
+#
+#        doPlot(("limitsMu_light_mHp%s_"+scenario)%(int(mass)), graphs, limits, "#mu (GeV)",scenario, int(mass))
     sys.exit()
 
     

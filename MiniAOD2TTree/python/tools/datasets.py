@@ -334,7 +334,7 @@ datasetsSignalTauNu.append(Dataset('/ChargedHiggs_TTToHplusBWB_HplusToTauNu_M-16
 #datasetsSignalTauNu.extend(datasetsSignalTauNu_reHLT)
 
 #Pythia8
-datasetsSignalTauNu.append(Dataset('/HplusToTauNu_M_200_TuneCUETP8M1_tauola_13TeV_pythia8/amarini-GEN-SIM-71-6edf4b210aa48b81088c0de44a7af6f5/USER', dbs="phys03",dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTauNu.append(Dataset('/HplusToTauNu_M_200_TuneCUETP8M1_tauola_13TeV_pythia8/amarini-GEN-SIM-71-6edf4b210aa48b81088c0de44a7af6f5/USER', dbs="phys03",dataVersion="80Xmc", dasQuery=das, name="ChargedHiggs_HplusTB_HplusToTauNu_M_200_Pythia8"))
 datasetsSignalTauNu.append(Dataset('/ChargedHToTauNu_M140_13TeV_pythia8/amarini-PUMoriond17-MINIAODSIM-v1-28028af67189b3de7224b79195bd0e1d/USER', dbs="phys03",dataVersion="80Xmc", dasQuery=das, name="ChargedHiggs_HplusTB_HplusToTauNu_M_140_Pythia8"))
 datasetsSignalTauNu.append(Dataset('/ChargedHToTauNu_M160_13TeV_pythia8/amarini-PUMoriond17-MINIAODSIM-v1-28028af67189b3de7224b79195bd0e1d/USER', dbs="phys03",dataVersion="80Xmc", dasQuery=das, name="ChargedHiggs_HplusTB_HplusToTauNu_M_160_Pythia8"))
 datasetsSignalTauNu.append(Dataset('/ChargedHToTauNu_M180_13TeV_pythia8/amarini-PUMoriond17-MINIAODSIM-v1-28028af67189b3de7224b79195bd0e1d/USER', dbs="phys03",dataVersion="80Xmc", dasQuery=das, name="ChargedHiggs_HplusTB_HplusToTauNu_M_180_Pythia8"))
@@ -364,6 +364,7 @@ das = "https://cmsweb.cern.ch/das/request?instance=prod%2Fglobal&view=list&input
 datasetsTop.append(Dataset('/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das)) # new tune
 datasetsTop.append(Dataset('/TT_Mtt-700to1000_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 datasetsTop.append(Dataset('/TT_Mtt-1000toInf_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v2/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsTop.append(Dataset('/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v2/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 
 datasetsTopSyst = []
 das = "https://cmsweb.cern.ch/das/request?instance=prod%2Fglobal&view=list&input=dataset%3D%2FTT_%2A%2FRunII%2APUMoriond17_80X_mcRun2%2A%2FMINIAODSIM&idx=150&limit=150"

@@ -269,7 +269,8 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("TTJets", {            
             "7": 172.0, # [10]
             "8": 245.8, # [10]
-            "13": 6.639e+02, #6.639e+02 +- 8.237e+00 pb [16] (inputFiles="001AFDCE-C33B-E611-B032-0025905D1C54.root")            
+            "13": 831.76, # [18], same as TT because apparently TTJets is also an inclusive sample         
+#            "13": 6.639e+02, #6.639e+02 +- 8.237e+00 pb [16] (inputFiles="001AFDCE-C33B-E611-B032-0025905D1C54.root")            
             }),
     CrossSection("TT", {
             "7": 172.0, # [10]

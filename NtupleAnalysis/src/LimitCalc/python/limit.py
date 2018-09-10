@@ -44,6 +44,9 @@ process            = "t #rightarrow H^{+}b, %s" % hplusDecayMode
 processHeavy       = "pp #rightarrow #bar{t}(b)H^{+}, %s" % hplusDecayMode
 processHeavyHtb    = "pp #rightarrow #bar{t}(b)H^{+}, %s" % hplusDecayModeHtb
 processCombination = "pp #rightarrow #bar{t}(b)H^{+}"
+process            = "H^{#pm} #rightarrow #tau#nu"
+processHeavy       = process
+processCombination = process
 
 # Label for the H+->tau BR assumption. fixme: alexandros (does not seem to work!)
 BRassumption = ""
@@ -130,8 +133,10 @@ def useSubscript(HToTB=False):
         BRlimit      = "95%% CL limit on %s_{t#rightarrowH^{+}b}#times%s_{%s}" % (BR, BR, hplusDecayModeHtb)
         sigmaBRlimit = "95%% CL limit on #sigma_{H^{+}}#times%s_{%s} (pb)" % (BR, hplusDecayModeHtb)
     else:
-        BRlimit      = "95%% CL limit on %s_{t#rightarrowH^{+}b}#times%s_{%s}" % (BR, BR, hplusDecayMode)
-        sigmaBRlimit = "95%% CL limit on #sigma_{H^{+}}#times%s_{%s} (pb)" % (BR, hplusDecayMode)
+        #BRlimit      = "95%% CL limit on %s_{t#rightarrowH^{+}b}#times%s_{%s}" % (BR, BR, hplusDecayMode)
+        #sigmaBRlimit = "95%% CL limit on #sigma_{H^{+}}#times%s_{%s} (pb)" % (BR, hplusDecayMode)
+        BRlimit      = "#sigma H^{#pm} %s (pb)" % (hplusDecayMode)
+        sigmaBRlimit = "#sigma H^{#pm} %s (pb)" % (hplusDecayMode)
     return
 
 useSubscript()
@@ -140,7 +145,8 @@ def mHplus():
     '''
     Label for m(H+)
     '''
-    label = "m_{H^{+}} (%s)" % massUnit()
+    #label = "m_{H^{+}} (%s)" % massUnit()
+    label = "m_{H^{#pm}} (%s)" % massUnit()
     return label
 
 
@@ -151,6 +157,12 @@ def mA():
     label = "m_{A} (%s)" % massUnit() 
     return label
 
+def mu():
+    '''
+    Label for mu
+    '''
+    label = "mu (%s)" % massUnit()
+    return label
 
 def setExcludedStyle(graph):
     ci = ROOT.TColor.GetColor(156, 156, 156)
@@ -223,8 +235,15 @@ class BRLimits:
         limits = json.load(f)
         f.close()
 
+        # Open configuration json file
+        msg = "Open file %s" % (os.path.join(directory, configfile))
+        Verbose(msg, True)
+        f = open(os.path.join(directory, configfile), "r")
+        config = json.load(f)
+        f.close()
+        
         self.lumi = float(limits["luminosity"])
-        self.mass = limits["masspoints"].keys()
+        self.mass = config["masspoints"]
         self.isHeavyStatus = False
         
         # Check if light or heavy H+
@@ -268,13 +287,6 @@ class BRLimits:
             setattr(self, attr, [float(m) for m in getattr(self, attr)])
 
        
-        # Open configuration json file
-        msg = "Open file %s" % (os.path.join(directory, configfile))
-        Verbose(msg, True)
-        f = open(os.path.join(directory, configfile), "r")
-        config = json.load(f)
-        f.close()
-
         self.finalstates = []
         def hasDatacard(name):
             for datacard in config["datacards"]:
@@ -1151,6 +1163,12 @@ def getTypesetScenarioName(scenario):
         return "MSSM light stop"
     if myTruncatedScenario == "lowMH":
         return "MSSM low-M_{H}"
+    if myTruncatedScenario == "lowMHaltm":
+        return "MSSM low-M_{H}-altm"
+    if myTruncatedScenario == "lowMHaltp":
+        return "MSSM low-M_{H}-altp"
+    if myTruncatedScenario == "lowMHaltv":
+        return "MSSM low-M_{H}-altv"
     if myTruncatedScenario == "mhmaxup":
         return "MSSM updated ^{}m_{h}^{max}"
     if myTruncatedScenario == "mhmodm":
@@ -1344,15 +1362,15 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
     ROOT.gEnv.SetValue("OpenGL.CanvasPreferGL", 1)
     
 #    isHeavy = regime != "light"
-    tanbMax = 60
+    tanbMax = 65
 
-    if forPaper:
-        if scenario in ["mhmaxup", "mhmodm"] and not "_mA" in name:
-            histograms.cmsTextMode = histograms.CMSMode.PAPER
-        else:
-            histograms.cmsTextMode = histograms.CMSMode.UNPUBLISHED
-    else:
-        histograms.cmsTextMode = histograms.CMSMode.PRELIMINARY
+#    if forPaper:
+#        if scenario in ["mhmaxup", "mhmodp", "mhmodm"] and not "_mA" in name:
+#            histograms.cmsTextMode = histograms.CMSMode.PAPER
+#        else:
+#            histograms.cmsTextMode = histograms.CMSMode.UNPUBLISHED
+#    else:
+#        histograms.cmsTextMode = histograms.CMSMode.PRELIMINARY
 
     blinded = True
     if "obs" in graphs.keys():
@@ -1378,12 +1396,14 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
             excluded.SetPoint(excluded.GetN(), 1000.0, obs.GetY()[0])
             excluded.SetPoint(excluded.GetN(), obs.GetX()[0], obs.GetY()[0])
         else:
-            excluded.SetPoint(excluded.GetN(), -1.0, obs.GetY()[excluded.GetN()-1])
+            excluded.SetPoint(excluded.GetN(), obs.GetX()[excluded.GetN()-1],-1.0)
+            excluded.SetPoint(excluded.GetN(), -1.0, -1.0)
+#            excluded.SetPoint(excluded.GetN(), -1.0, obs.GetY()[excluded.GetN()-1])
             excluded.SetPoint(excluded.GetN(), -1.0, 69.0)
             excluded.SetPoint(excluded.GetN(), 1000.0, 69.0)
             excluded.SetPoint(excluded.GetN(), 1000.0, obs.GetY()[0])
             excluded.SetPoint(excluded.GetN(), obs.GetX()[0], obs.GetY()[0])
-
+            
         setExcludedStyle(excluded)
         graphs["excluded"] = excluded
         if "isomass" in graphs.keys() and "_mA" in name:
@@ -1433,10 +1453,18 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
         allowed.SetLineColor(ROOT.kRed)
         allowed.SetLineStyle(1)
 
+    if "Inaccessible" in graphs.keys():
+        inaccessible = graphs["Inaccessible"]
+        #inaccessible.SetFillStyle(-302)
+        inaccessible.SetFillColor(ROOT.kGray)
+        inaccessible.SetLineWidth(-302)
+        inaccessible.SetLineColor(ROOT.kGray)
+        inaccessible.SetLineStyle(1)
+        
     myLegendDictionary = {
-            "Expected": None,
-            "Expected1": "Expected median #pm 1#sigma",
-            "Expected2": "Expected median #pm 2#sigma",
+            "Expected": "Median expected",
+            "Expected1": "68% expected",
+            "Expected2": "95% expected",
     }
     
     plotsList = []
@@ -1474,14 +1502,16 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
     if "Allowed" in graphs.keys():
         myLegendDictionary["Allowed"] = "m_{"+higgs+"}^{MSSM} #neq 125#pm3 GeV"
         plotsList.extend([histograms.HistoGraph(graphs["Allowed"], "Allowed", drawStyle="L", legendStyle="lf")])
-    
+    if "Inaccessible" in graphs.keys():
+        plotsList.extend([histograms.HistoGraph(graphs["Inaccessible"], "Theor.inaccessible", drawStyle="f", legendStyle="f")])
+        
     # Expected and expected bands
     if "isomass" in graphs.keys():
         truncateBeyondIsomass(graphs["isomass"], expected1)
         truncateBeyondIsomass(graphs["isomass"], expected2)
 
     if "exp" in graphs.keys():
-        plotsList.append(histograms.HistoGraph(graphs["exp"], "Expected", drawStyle="L", legendStyle=None))
+        plotsList.append(histograms.HistoGraph(graphs["exp"], "Expected", drawStyle="L", legendStyle="L"))
     if "expDown" in graphs.keys():
         plotsList.append(histograms.HistoGraph(graphs["expDown"], "Expected", drawStyle="L", legendStyle=None))
     if "exp1" in graphs.keys():
@@ -1512,16 +1542,25 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
 
     if regime == "heavy" or regime == "tb":
         x = 0.52
-        y = -0.25#-0.11
+        y = -0.32#-0.11
         #if scenario.replace("-LHCHXSWG", "") in ["lightstop", "mhmaxup"]:
         #    y += 0.05
     elif regime == "light":
         x = 0.4
         y = -0.05
+    elif regime == "mu":
+        print "check scenario",scenario
+        if scenario == "lowMHaltv-LHCHXSWG":
+            x = 0.52
+            y = -0.1
+        else:
+            x = 0.22
+            y = -0.1
     else:
         x = 0.52
-        y = -0.25
+        y = -0.32
     plot.setLegend(histograms.createLegend(x-0.01, y+0.6-(captionLines-0.2)*captionLineSpacing, x+0.45, y+0.9-(captionLines-0.2)*captionLineSpacing))
+    plot.legend.SetHeader("95% CL upper limits")
     plot.legend.SetMargin(0.17)
 
     #plot.legend.SetFillColor(0)
@@ -1530,28 +1569,56 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
         name += "_blinded"
     name = os.path.basename(name)
     name = name.replace("-","_")
-    
+
+    tanbMin = 1
     if regime == "heavy" or regime == "tb":
         frameXmin = 180
         frameXmax = 500
         if "_mA" in name:
             frameXmin = 140
-        plot.createFrame(name, opts={"ymin": 1, "ymax": tanbMax, "xmin": frameXmin, "xmax": frameXmax})
+        #plot.createFrame(name, opts={"ymin": 1, "ymax": tanbMax, "xmin": frameXmin, "xmax": frameXmax})
     elif regime == "light":
         frameXmax = 160
         frameXmin = 90
         if "_mA" in name:
             frameXmax = 145
             frameXmin = 50
-        plot.createFrame(name, opts={"ymin": 1, "ymax": tanbMax, "xmin": frameXmin, "xmax": frameXmax})
-    else:
-        frameXmax = 600
+        #plot.createFrame(name, opts={"ymin": 1, "ymax": tanbMax, "xmin": frameXmin, "xmax": frameXmax})
+    elif regime == "intermediate":
+        frameXmax = 205
+        frameXmin = 140
+        if "_mA" in name:
+            frameXmax = 205
+            frameXmin = 140
+    elif regime == "combined":
+        frameXmax = 500
         frameXmin = 90
         if "_mA" in name:
             frameXmax = 145
             frameXmin = 50
-        plot.createFrame(name, opts={"ymin": 1, "ymax": tanbMax, "xmin": frameXmin, "xmax": frameXmax})
+        #plot.createFrame(name, opts={"ymin": 1, "ymax": tanbMax, "xmin": frameXmin, "xmax": frameXmax})
+    elif regime == "mu":
+        frameXmax = 3200
+        frameXmin = 200
+    else:
+        raise Exception("Unknown option for regime")
+    if scenario == "lowMHaltm-LHCHXSWG":
+        frameXmin = 3800
+        frameXmax = 6500
+        tanbMin   = 4
+        tanbMax   = 9
+    if scenario == "lowMHaltp-LHCHXSWG":
+        frameXmin = 4800
+        frameXmax = 7000
+        tanbMin   = 4
+        tanbMax   = 9
+    if scenario == "lowMHaltv-LHCHXSWG":
+        frameXmin = 140
+        frameXmax = 220
+        tanbMin   = 4
+        tanbMax   = 9
 
+    plot.createFrame(name, opts={"ymin": tanbMin, "ymax": tanbMax, "xmin": frameXmin, "xmax": frameXmax})
     plot.frame.GetXaxis().SetTitle(xlabel)
     plot.frame.GetYaxis().SetTitle(tanblimit)
 
@@ -1561,28 +1628,43 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
     
     plot.setLuminosity(luminosity)
     if regime == "heavy":
-        plot.addStandardTexts(cmsTextPosition="right")
-    elif regime == "light":
-        plot.addStandardTexts(cmsTextPosition="left")
+        plot.addStandardTexts(cmsTextPosition="right",addLuminosityText=True)
+    elif regime == "light" or regime == "mu":
+        plot.addStandardTexts(cmsTextPosition="left",addLuminosityText=True)
     else:
-        plot.addStandardTexts(cmsTextPosition="right")
+        plot.addStandardTexts(cmsTextPosition="right",addLuminosityText=True)
 #    histograms.addLuminosityText(x=None, y=None, lumi="2.3-4.9")
+#    histograms.addLuminosityText(x=None, y=None, lumi="%s pb^{-1}"%luminosity)
 
     size = 20
     if regime == "light":
         histograms.addText(x, y+0.9, process, size=size)
     elif regime == "heavy":
-        histograms.addText(x+0.01, y+0.84, processHeavy, size=size)
+        histograms.addText(x-0.30, y+1.19, processHeavy, size=size)
     elif regime == "combined":
+        histograms.addText(x-0.30, y+1.19, processCombination, size=size)
+    elif regime == "intermediate":
         histograms.addText(x, y, processCombination, size=size)
+    elif regime == "mu":
+        if scenario == "lowMHaltv-LHCHXSWG":
+            histograms.addText(x, y+0.99, process, size=size)
+        else:
+            histograms.addText(x+0.37, y+0.94, process, size=size)
     elif regime == "tb":
         histograms.addText(x+0.01, y+0.84, processHeavyHtb, size=size)
     else:
         raise Exception("Unknown option for regime")
     y -= captionLineSpacing
     #print "check finalstateText",finalstateText,x,y
+    finalstateText = ""
     if isinstance(finalstateText, str):
-        histograms.addText(x+0.01, y+0.84, finalstateText, size=size)
+        if regime == "mu":
+            if scenario == "lowMHaltv-LHCHXSWG":
+                histograms.addText(x, y+0.96, finalstateText, size=size)
+            else:
+                histograms.addText(x+0.37, y+0.91, finalstateText, size=size)
+        else:
+            histograms.addText(x-0.30, y+1.17, finalstateText, size=size)
         y -= captionLineSpacing
     elif isinstance(finalstateText, list):
         for l in finalstateText:
@@ -1590,7 +1672,15 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
             y -= captionLineSpacing
     else:
         raise Exception("not implemented")
-    histograms.addText(x-0.21, y+0.695, "^{}%s"%getTypesetScenarioName(scenario), size=size)
+    if regime == "mu":
+        if scenario == "lowMHaltv-LHCHXSWG":
+            histograms.addText(x, y+0.93, "^{}%s"%getTypesetScenarioName(scenario), size=size)
+        else:
+            histograms.addText(x+0.37, y+0.88, "^{}%s"%getTypesetScenarioName(scenario), size=size)
+    elif regime == "light":
+        histograms.addText(x, y+0.92, "^{}%s"%getTypesetScenarioName(scenario), size=size)
+    else:
+        histograms.addText(x+0., y+1.275, "^{}%s"%getTypesetScenarioName(scenario), size=size)
 #    histograms.addText(x-0.3, y+0.695, "^{}%s"%getTypesetScenarioName(scenario), size=size)
 #    histograms.addText(x-0.33, y+0.695, "^{}%s"%getTypesetScenarioName(scenario), size=size) # mhmaxup
 #    histograms.addText(x, y+0.93, "^{}%s"%getTypesetScenarioName(scenario), size=size)
