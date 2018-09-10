@@ -43,13 +43,14 @@ import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 #================================================================================================ 
 # Variable definition
 #================================================================================================ 
-ss = ShellStyles.SuccessStyle()
-ns = ShellStyles.NormalStyle()
-ts = ShellStyles.NoteStyle()
-hs = ShellStyles.HighlightAltStyle()
-ls = ShellStyles.HighlightStyle()
-es = ShellStyles.ErrorStyle()
-cs = ShellStyles.CaptionStyle()
+ss  = ShellStyles.SuccessStyle()
+ns  = ShellStyles.NormalStyle()
+ts  = ShellStyles.NoteStyle()
+hs  = ShellStyles.HighlightAltStyle()
+ls  = ShellStyles.HighlightStyle()
+es  = ShellStyles.ErrorStyle()
+cs  = ShellStyles.CaptionStyle()
+cys = ShellStyles.CyanStyle()
 
 #================================================================================================ 
 # Function Definitions
@@ -290,14 +291,14 @@ def PrintSummaryTable(nTotal, nDone, nFilesEOS, nFail, nActive, nRun, nHeld, nId
     # Create table
     table   = []
     align  = "{:^20} {:^20} {:^20} {:^20} {:^20} : {:^20} {:^20} {:^20} {:^20}"
-    header = align.format(ns + "TOTAL" + ns, ss + "DONE" + ns, ss + "EOS" + ns, es + "FAIL" + ns, hs + "ACTIVE" + ns, ts + "RUN" + ns, ls + "HELD" + ns, ns + "I/O" + ns, ns + "IDLE" + ns )
+    header = align.format(ns + "TOTAL" + ns, ss + "DONE" + ns, ss + "EOS" + ns, es + "FAIL" + ns, hs + "ACTIVE" + ns, ts + "RUN" + ns, ls + "HELD" + ns, cys + "I/O" + ns, ns + "IDLE" + ns )
     hLine  = "="*80
     table.append("{:^80}".format(opts.dirName))
     table.append(hLine)
     table.append(header)
     table.append(hLine)
     for k in jobsDict:
-        table.append( align.format(ns + jobsDict["total"] + ns, ss + jobsDict["done"] + ns, ss + jobsDict["eos"] + ns, es + jobsDict["fail"] + ns, hs + jobsDict["active"] + ns, ts + jobsDict["run"] + ns, ls + jobsDict["held"] + ns, ns + jobsDict["IO"] + ns, ns + jobsDict["idle"] + ns ) )
+        table.append( align.format(ns + jobsDict["total"] + ns, ss + jobsDict["done"] + ns, ss + jobsDict["eos"] + ns, es + jobsDict["fail"] + ns, hs + jobsDict["active"] + ns, ts + jobsDict["run"] + ns, ls + jobsDict["held"] + ns, cys + jobsDict["IO"] + ns, ns + jobsDict["idle"] + ns ) )
         break
     table.append("\n")
     #table.append(hLine)
@@ -592,11 +593,11 @@ def PrintCondorQ(condorQ):
 
         status = condorQ["STATUS"][i] 
 
-        if status== "R":
+        if status == "R":
             nRun += 1        
-        elif status== "H":
+        elif status == "H":
             nHeld += 1
-        elif status== "I":
+        elif status == "I":
             nIdle += 1
         elif "<" in status:
             # Each individual condor job will transfer files from NFS disk to the worker node before starting the job 
@@ -616,17 +617,27 @@ def PrintCondorQ(condorQ):
 
     # For-loop: All rows
     for i, row in enumerate(table, 0):
-        colour = ns
+        colour   = ns
+        info     = row.split()
+        nColumns = len(info)
+        if nColumns >= 6:
+            status = info[6]
+        else:
+            status = "?"
 
-        if i > 3: # header and 2xhLines
-            if "R" in row:
+        if row == hLine:
+            pass
+        elif row == header:
+            pass
+        else:
+            if status == "R":
                 colour = ts
-            elif "H" in row:
+            elif "<" in status:
+                colour = cys #hs
+            elif "H" in status:
                 colour = ls
             else:
-                colour = hs
-        else:
-            pass
+                colour = ns
         Print(colour + row + ns, i==0)
 
     # Sanity Check:
