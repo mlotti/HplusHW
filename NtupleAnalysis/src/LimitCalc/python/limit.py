@@ -212,7 +212,7 @@ def setExpectedStyle(graph):
     '''
     graph.SetLineStyle(5) #2)
     graph.SetLineWidth(3)
-    graph.SetLineColor(ROOT.kAzure+1) #ROOT.kBlack
+    graph.SetLineColor(ROOT.kBlack) #ROOT.kAzure+1
     graph.SetMarkerStyle(20)
     return
 
