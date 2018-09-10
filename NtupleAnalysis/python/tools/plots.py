@@ -889,7 +889,7 @@ def isSignal(name):
     '''
     Return True if name is from a signal dataset
     '''
-    return "TTToHplus" in name or "Hplus_taunu" in name or "TTOrTToHplus" in name or "HplusTB" in name
+    return "H^{#pm}" in name or "TTToHplus" in name or "Hplus_taunu" in name or "TTOrTToHplus" in name or "HplusTB" in name
 
 def updateLegendLabel(datasetName, legendLabel):
     '''
