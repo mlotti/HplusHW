@@ -121,17 +121,27 @@ def massUnit():
 
 
 def useParentheses():
+    '''
+    https://twiki.cern.ch/twiki/bin/viewauth/CMS/Internal/FigGuidelines (10 Sep 2018)
+    '''
     global BRlimit, sigmaBRlimit
-    BRlimit      = "95%% CL limit on %s(t#rightarrowH^{+}b)#times%s(%s)" % (BR, BR, hplusDecayMode)
-    sigmaBRlimit = "95%% CL limit on #sigma(H^{+})#times%s(%s) (pb)" % (BR, hplusDecayMode)
+    #BRlimit      = "95%% CL limit on %s(t#rightarrowH^{+}b)#times%s(%s)" % (BR, BR, hplusDecayMode)
+    #sigmaBRlimit = "95%% CL limit on #sigma(H^{+})#times%s(%s) (pb)" % (BR, hplusDecayMode)
+    BRlimit      = "#sigma H^{#pm} %s (pb)" % (hplusDecayModeHtb)
+    sigmaBRlimit = "#sigma H^{#pm} %s (pb)" % (hplusDecayModeHtb)
     return
 
     
 def useSubscript(HToTB=False):
+    '''
+    https://twiki.cern.ch/twiki/bin/viewauth/CMS/Internal/FigGuidelines (10 Sep 2018)
+    '''
     global BRlimit, sigmaBRlimit
     if HToTB:
-        BRlimit      = "95%% CL limit on %s_{t#rightarrowH^{+}b}#times%s_{%s}" % (BR, BR, hplusDecayModeHtb)
-        sigmaBRlimit = "95%% CL limit on #sigma_{H^{+}}#times%s_{%s} (pb)" % (BR, hplusDecayModeHtb)
+        #BRlimit      = "95%% CL limit on %s_{t#rightarrowH^{+}b}#times%s_{%s}" % (BR, BR, hplusDecayModeHtb)
+        #sigmaBRlimit = "95%% CL limit on #sigma_{H^{+}}#times%s_{%s} (pb)" % (BR, hplusDecayModeHtb)
+        BRlimit      = "#sigma H^{#pm} %s (pb)" % (hplusDecayModeHtb)
+        sigmaBRlimit = "#sigma H^{#pm} %s (pb)" % (hplusDecayModeHtb)
     else:
         #BRlimit      = "95%% CL limit on %s_{t#rightarrowH^{+}b}#times%s_{%s}" % (BR, BR, hplusDecayMode)
         #sigmaBRlimit = "95%% CL limit on #sigma_{H^{+}}#times%s_{%s} (pb)" % (BR, hplusDecayMode)
@@ -175,8 +185,13 @@ def setExcludedStyle(graph):
 
 
 def setObservedStyle(graph):
-    graph.SetMarkerStyle(21)
-    graph.SetMarkerSize(1.3)
+    '''
+    Changes made using
+    https://twiki.cern.ch/twiki/bin/viewauth/CMS/Internal/FigGuidelines
+    as guideline
+    '''
+    graph.SetMarkerStyle(ROOT.kFullCircle) #21
+    graph.SetMarkerSize(1.2) #1.3)
     graph.SetMarkerColor(ROOT.kBlack)
     graph.SetLineWidth(3)
     graph.SetLineColor(ROOT.kBlack)
@@ -190,22 +205,41 @@ def setTheoreticalErrorStyle(graph):
 
 
 def setExpectedStyle(graph):
-    graph.SetLineStyle(2)
+    '''
+    Changes made using
+    https://twiki.cern.ch/twiki/bin/viewauth/CMS/Internal/FigGuidelines
+    as guideline
+    '''
+    graph.SetLineStyle(5) #2)
     graph.SetLineWidth(3)
-    graph.SetLineColor(ROOT.kBlack)
+    graph.SetLineColor(ROOT.kAzure+1) #ROOT.kBlack
     graph.SetMarkerStyle(20)
     return
 
 
 def setExpectedGreenBandStyle(graph):
-    graph.SetFillColor(ROOT.kGreen-3)
+    '''
+    Changes made using
+    https://twiki.cern.ch/twiki/bin/viewauth/CMS/Internal/FigGuidelines
+    as guideline
+    '''
+    graph.SetFillColor(ROOT.kGreen+1) #ROOT.kGreen-3
     setExpectedStyle(graph)
+    graph.SetLineColor(ROOT.kBlack)
+    graph.SetLineStyle(ROOT.kSolid)
     return
     
 
 def setExpectedYellowBandStyle(graph):
-    graph.SetFillColor(ROOT.kYellow)
+    '''
+    Changes made using
+    https://twiki.cern.ch/twiki/bin/viewauth/CMS/Internal/FigGuidelines
+    as guideline
+    '''
+    graph.SetFillColor(ROOT.kOrange) #ROOT.kYellow
     setExpectedStyle(graph)
+    graph.SetLineColor(ROOT.kBlack)
+    graph.SetLineStyle(ROOT.kSolid)
     return
 
 
