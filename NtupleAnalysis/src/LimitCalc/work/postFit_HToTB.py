@@ -37,8 +37,7 @@ EXAMPLES:
 
 
 LAST USED:
-../.././postFit_HToTB.py --mergeRares --url --mass 250,500,800
-../.././postFit_HToTB.py --mergeRares --url --mass 250,500,1000 --fitUncert
+../.././postFit_HToTB.py --mergeRares --url --mass 250,500,1000 --fitUncert --prefit && ../.././postFit_HToTB.py --mergeRares --url --mass 250,500,1000 --fitUncert
 
 '''
 
@@ -95,7 +94,7 @@ class Category:
         if opts.logX:
             xMin = 1
         if opts.logY:
-            yMin = 1e-2 #0.1e-2 
+            yMin = 0.5e-2 #1e-2
             yMaxFactor = 10.0
         else:
             yMin = 0.0
@@ -285,12 +284,17 @@ class Category:
         
         if opts.fitUncert:
             p.addMCUncertainty(postfit=not opts.prefit) # boolean changes only the legend
-        p.setLegendHeader("Post-Fit")
+
+        if opts.prefit:
+            p.setLegendHeader("Pre-Fit")
+        else:
+            p.setLegendHeader("Post-Fit")
 
         # Customise histogram 
+        units = "GeV" #(GeV/c^{2})
         myParams = {}
-        myParams["xlabel"]            = "m_{jjbb} (GeV/c^{2})"
-        myParams["ylabel"]            = "< Events / GeV >"
+        myParams["xlabel"]            = "m_{jjbb} (%s)" % (units)
+        myParams["ylabel"]            = "< Events / " + units + " >"
         myParams["ratio"]             = True
         myParams["ratioYlabel"]       = "Data/Bkg. "
         myParams["logx"]              = self.gOpts.logX
