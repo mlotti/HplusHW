@@ -95,11 +95,8 @@ class Category:
         if opts.logX:
             xMin = 1
         if opts.logY:
-            yMin = 1e-2
+            yMin = 1e-2 #0.1e-2 
             yMaxFactor = 10.0
-            if opts.fitUncert:
-                yMin = 1e-1
-                yMaxFactor = 30.0
         else:
             yMin = 0.0
             yMaxFactor = 1.2
@@ -303,7 +300,7 @@ class Category:
         myParams["opts"]              = self.opts
         myParams["optsLogx"]          = self.optsLogx
         myParams["opts2"]             = self.opts2
-        myParams["divideByBinWidth"]  = not opts.fitUncert # Error when used for "TGraphAsymmErrors" (uncert.)
+        myParams["divideByBinWidth"]  = True #not opts.fitUncert # Error when used for "TGraphAsymmErrors" (uncert.)
         myParams["errorBarsX"]        = True
         myParams["xlabelsize"]        = 25
         myParams["ylabelsize"]        = 25
@@ -339,6 +336,12 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
         saveNameURL = aux.convertToURL(saveNameURL, opts.url)
         Print(saveNameURL, i==0)
         plot.saveAs(saveName, formats=saveFormats)
+
+    # Something buggy introduced with "except" added in plots.py to fix the error when
+    # using "divideByBinWidth" option with "addMCUncertainty" option. Must call exit otherwise hangs
+    if opts.fitUncert:
+        Print("EXIT!", True)
+        os._exit(0) #sys.exit()
     return
 
 
