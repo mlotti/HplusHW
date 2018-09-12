@@ -8,6 +8,34 @@ import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
 ##########
 
 
+#====== MET filter
+metFilter = PSet(
+  discriminators = [#"hbheNoiseTokenRun2Loose", # Loose is recommended
+#                    "hbheIsoNoiseToken", # under scrutiny
+                    "Flag_HBHENoiseFilter",
+                    "Flag_HBHENoiseIsoFilter",
+                    "Flag_EcalDeadCellTriggerPrimitiveFilter",
+#                    "Flag_CSCTightHaloFilter",
+                    "Flag_eeBadScFilter",
+                    "Flag_goodVertices",
+                    "Flag_globalTightHalo2016Filter",
+                    "badPFMuonFilter",
+                    "badChargedCandidateFilter"]
+)
+
+#====== Electron veto
+eVeto = PSet(
+    electronPtCut = 15.0,
+    electronEtaCut = 2.1,
+#            electronID = "mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90", # highest (wp90) for vetoing (2012: wp95)
+    electronID = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
+    electronIDType    = "MVA",  # options: "default", "MVA"
+    electronMVA       = "ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values",
+    electronMVACut    = "Loose",
+    electronIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
+    electronIsolType  = "mini", # options: "mini", "default"
+)
+
 ##########
 ## Muon
 ##########
@@ -17,7 +45,7 @@ muonSelection = PSet(
             muonEtaCut = 2.1,
                 muonID = "muIDMedium", # options: muIDLoose, muIDMedium, muIDTight
          muonIsolation = "tight", # for selecting, not vetoing
-	muonIsolType   = "default",      # options: "mini", "default" 
+	muonIsolType   = "mini",      # options: "mini", "default" 
 )
 
 
@@ -33,12 +61,66 @@ tauSelection = PSet(
         tauLdgTrkPtCut = 10.0,
                 prongs = 1,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
                   rtau = 0.0,   # to disable set to 0.0
-#  againstElectronDiscr = "againstElectronTightMVA6",
   againstElectronDiscr = "againstElectronLooseMVA6",
-      againstMuonDiscr = "againstMuonTight",
-#        isolationDiscr = "byMediumIsolationMVA3oldDMwLT",
+      againstMuonDiscr = "againstMuonTight3",
         isolationDiscr = "byLooseIsolationMVArun2v1DBnewDMwLT",
 )
+
+#====== Jet selection
+jetSelection = PSet(
+               jetType  = "Jets", # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
+              jetPtCuts = [20.0],
+             jetEtaCuts = [2.1],
+     tauMatchingDeltaR  = 0.4,
+  numberOfJetsCutValue  = 3,
+  numberOfJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
+            jetIDDiscr = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
+          jetPUIDDiscr = "", # does not work at the moment 
+            HTCutValue = 0.0,
+    HTCutDirection     = ">=",
+            JTCutValue = 0.0,
+    JTCutDirection     = ">=",
+           MHTCutValue = 0.0,
+    MHTCutDirection    = ">=",
+)
+
+#====== B-jet selection
+bjetSelection = PSet(
+    triggerMatchingApply= False,
+    triggerMatchingCone = 0.0,  # DeltaR for matching offline bjet with trigger::TriggerBjet 
+              jetPtCuts = [30.0],
+             jetEtaCuts = [2.1],
+             bjetDiscr  = "pfCombinedInclusiveSecondaryVertexV2BJetTags", # default
+#             bjetDiscr  = "pfCombinedMVAV2BJetTags", # use this for MVA b-tagging
+ bjetDiscrWorkingPoint  = "Medium", #optimal for CSVv2
+# bjetDiscrWorkingPoint  = "Tight", #optimal for CMVAv2
+ numberOfBJetsCutValue  = 1,
+ numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
+)
+
+scaleFactors.setupBtagSFInformation(btagPset=bjetSelection,
+                                    btagPayloadFilename="CSVv2.csv",
+                                    #btagPayloadFilename="cMVAv2_Moriond17_B_H.csv", # use this for MVA b-tagging
+                                    #btagEfficiencyFilename="btageff_TTJets.json",
+                                    #btagEfficiencyFilename="btageff_WJetsHT.json",
+                                    #btagEfficiencyFilename="btageff_hybrid.json",
+                                    #btagEfficiencyFilename="btageff_hybrid_HToTB.json",
+                                    btagEfficiencyFilename="btageff_Hybrid_TT+WJetsHT.json", # use with taunu analysis and WJetsHT samples
+                                    direction="nominal"
+)
+
+
+#====== MET selection
+metSelection = PSet(
+           METCutValue = 20.0,
+       METCutDirection = ">", # options: ==, !=, <, <=, >, >=
+  METSignificanceCutValue = -1000.0,
+  METSignificanceCutDirection = ">", # options: ==, !=, <, <=, >, >=
+               METType = "MET_Type1", # options: MET_Type1, MET_Type1_NoHF, MET_Puppi, GenMET, L1MET, HLTMET, CaloMET
+   applyPhiCorrections = False  # FIXME: no effect yet
+)
+
+
 
 ##########
 ## Common plots options
@@ -73,8 +155,13 @@ commonPlotsOptions = PSet(
 ##########
 
 allSelections = PSet(
+    METFilter 		= metFilter,
+    ElectronSelection 	= eVeto,
     MuonSelection 	= muonSelection,
     TauSelection	= tauSelection,
+    JetSelection	= jetSelection,
+    BJetSelection 	= bjetSelection,
+    METSelection        = metSelection,
     CommonPlots         = commonPlotsOptions,
 )
 
