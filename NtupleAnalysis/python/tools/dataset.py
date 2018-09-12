@@ -675,7 +675,7 @@ def _normalizeToFactor(h, f):
     ROOT.gErrorIgnoreLevel = ROOT.kError
     h.Sumw2() # errors are also scaled after this call 
     ROOT.gErrorIgnoreLevel = backup
-    print "nyt normitetaan arvolla: ", f
+    print "nyt normitetaan arvoon: ", f
     h.Scale(f)
     return h
 
@@ -3181,7 +3181,8 @@ class Dataset:
         if nAllEvents == 0:
             Print("WARNING! nAllEvents = %s" % (nAllEvents), True)
             return 0
-        return self.getCrossSection() / nAllEvents
+        print "huomaa tama vol 2: ", self.getCrossSection() / nAllEvents
+	return self.getCrossSection() / nAllEvents
 
     def hasRootHisto(self, name, **kwargs):
         '''
@@ -3603,6 +3604,7 @@ class DatasetAddedMC(DatasetMerged):
         if nAllEvents == 0:
             raise Exception("%s: Number of all events is 0.\nProbable cause is that the counters are weighted, the analysis job input was a skim, and the updateAllEventsToPUWeighted() has not been called." % self.name)
 
+	print "huomaa tama: ", self.getCrossSection() / nAllEvents
         return self.getCrossSection() / nAllEvents
 
     def formatDatasetTree(self, indent):
