@@ -889,7 +889,7 @@ def isSignal(name):
     '''
     Return True if name is from a signal dataset
     '''
-    return "TTToHplus" in name or "Hplus_taunu" in name or "TTOrTToHplus" in name or "HplusTB" in name
+    return "H^{#pm}" in name or "TTToHplus" in name or "Hplus_taunu" in name or "TTOrTToHplus" in name or "HplusTB" in name
 
 def updateLegendLabel(datasetName, legendLabel):
     '''
@@ -3325,7 +3325,48 @@ class PlotDrawer:
 
         if self._getValue("divideByBinWidth", p, kwargs):
             # TH1::Scale() with "width" option divides the histogram by bin width
-            p.histoMgr.forEachHisto(lambda h: h.getRootHistoWithUncertainties().Scale(1, "width"))
+            try:
+                p.histoMgr.forEachHisto(lambda h: h.getRootHistoWithUncertainties().Scale(1, "width"))
+            except: 
+                msg  = "=== plots.py\n\tWARNING! Tried to \"DivideByBinWidth\" but failed." 
+                msg += "\n\tLikely reason is that one of the RooHistoWithUncertainties is a THGraphAsymmErrors instead of TH1."
+                msg += "\n\tThis is a workaround to that problem. Ugly but works (tested with postFit_HToTB.py)"
+                print msg
+
+                types = ["TH1F", "TGraphAsymmErrors", "THStack"]
+                
+                # For-loop: All histograms in the manager
+                for h in p.histoMgr.getHistos():
+
+                    # Definitions
+                    rh = h.getRootHistoWithUncertainties().getRootHisto()
+                    rh_name = rh.GetName()
+                    rh_type = type(rh).__name__
+
+                    # Debugging
+                    # print "name = %s, type = %s" % (rh_name, rh_type)
+
+                    if rh_type not in types:
+                        raise Exception("Unsupported type(rh) = %s. EXIT" % (str(type(rh))), True)
+
+                    if rh_type == "TGraphAsymmErrors":
+                        for i in xrange(1, rh.GetN()):
+
+                            # Get bin-width and divide all values
+                            dx = rh.GetErrorX(i)*2
+                            rh.GetY()[i] = rh.GetY()[i]/dx
+                            rh.GetEYhigh()[i] = rh.GetEYhigh()[i]/dx
+                            rh.GetEYlow()[i]  = rh.GetEYlow()[i]/dx
+
+                    if rh_type == "TH1F":
+                        if "data" not in rh_name.lower():
+                            rh.Scale(1, "width")
+                            
+                    if rh_type == "THStack":
+                        nHistos = len(rh.GetHists())
+                        for i, h in enumerate(rh.GetHists(), 1):
+                            h.Scale(1, "width")
+
 
     ## Stack MC histograms
     #

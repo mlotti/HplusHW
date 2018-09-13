@@ -33,8 +33,21 @@ XBIN_MIN = 0     #left edge of the first bin in rebinned input data histogram
 XBIN_MAX = 10000 #right edge of the last bin in re-binned input datahistogram
 XMAX_IN_PLOT = 1200.0
 
-DATAROOTFILE    = "taunu_combined.root"
-POSTFITROOTFILE = "fitDiagnostics.root"
+class Signal:
+    def __init__(self,name,label,color,style,rootfile,multiply=1):
+        self.name  = name
+        self.label = label
+        self.color = color
+        self.style = style
+        self.rootfile = rootfile
+        self.multiply = multiply
+
+DATAROOTFILE    = "postfit2/taunu_combined.root"
+SIGNALROOTFILES  = []
+SIGNALROOTFILES.append(Signal("WH","H^{#pm} (100 GeV)",2,1,"postfit2/taunu_combined_mH100.root",0.5))
+SIGNALROOTFILES.append(Signal("Hptn","H^{#pm} (200 GeV)",4,2,"postfit2/taunu_combined_mH200.root",50))
+SIGNALROOTFILES.append(Signal("Hptn","H^{#pm} (2000 GeV)",2,3,"postfit2/taunu_combined_mH2000.root",0.5))
+POSTFITROOTFILE = "postfit2/fitDiagnostics.root"
 
 class Category:
     def __init__(self,name):
@@ -103,7 +116,7 @@ class Category:
                 returnCat.histograms.append(h_sum)
         return returnCat
 
-    def fetchHistograms(self,fINdata,fINpost):
+    def fetchHistograms(self,fINdata,fINsignal,fINpost):
 
         histoData = fINdata.Get(os.path.join(self.name,"data_obs"))
         self.h_data = histoData.Clone("Data")
@@ -118,6 +131,22 @@ class Category:
 
         n = len(binning)-1
         self.h_data.SetBins(nbins,array.array("d",binning))
+
+        global SIGNALROOTFILES
+        
+        self.h_signal = []
+        for i,fINs in enumerate(fINsignal):
+#            print "check",self.name,SIGNALROOTFILES[i].name
+            histoSignal = fINs.Get(os.path.join(self.name,SIGNALROOTFILES[i].name))
+            histoSignal.SetBins(nbins,array.array("d",binning))
+            histoSignal = SIGNALROOTFILES[i].multiply*histoSignal
+            histoSignal.SetLineColor(SIGNALROOTFILES[i].color)
+            histoSignal.SetLineStyle(SIGNALROOTFILES[i].style)
+            histoSignal.SetTitle(SIGNALROOTFILES[i].label)
+            self.h_signal.append(histoSignal.Clone("Hptn"))
+#        self.h_signal = histoSignal.Clone("Hptn")
+#        self.h_signal.SetBins(nbins,array.array("d",binning))
+#        self.h_signal = 50*self.h_signal
 #        print "after SetBins self.h_data has %d bins, they are as follows:"%self.h_data.GetNbinsX()
 #        for iBin in range(self.h_data.GetNbinsX()+1):
 #            print "    DATA: Content of bin %d set to %.6f +- %.6f, low edge is %.1f, width is %.1f"%(iBin,self.h_data.GetBinContent(iBin),self.h_data.GetBinError(iBin),self.h_data.GetBinLowEdge(iBin),self.h_data.GetBinWidth(iBin))
@@ -159,6 +188,13 @@ class Category:
         hhd = histograms.Histo(self.h_data,"Data",legendStyle="PL", drawStyle="E1P")
         hhd.setIsDataMC(isData=True,isMC=False)
         histolist.append(hhd)
+
+        for hsignal in self.h_signal:
+            hhs = histograms.Histo(hsignal,hsignal.GetTitle(),legendStyle="L", drawStyle="HIST")
+            hhs.setIsDataMC(isData=False,isMC=True)
+            hhs.getRootHisto().SetLineWidth(2)
+            histolist.append(hhs)
+
         for hname in self.histonames:
             hhp = histograms.Histo(self.histograms[hname],hname,legendStyle="F", drawStyle="HIST",legendLabel=self.labels[hname])
             hhp.setIsDataMC(isData=False,isMC=True)
@@ -347,6 +383,7 @@ taunuLept_34 = taunuLept_1.clone("ch2_ch1_R4_1_1Mu_notauh")
 
 #categories += [taunuLept_1,taunuLept_2,taunuLept_3,taunuLept_4,taunuLept_5,taunuLept_6,taunuLept_7,taunuLept_8,taunuLept_9,taunuLept_10,taunuLept_11,taunuLept_12,taunuLept_13,taunuLept_14,taunuLept_15,taunuLept_16,taunuLept_17,taunuLept_18,taunuLept_19,taunuLept_20,taunuLept_21,taunuLept_22,taunuLept_23,taunuLept_24,taunuLept_25,taunuLept_26,taunuLept_27,taunuLept_28,taunuLept_29,taunuLept_30,taunuLept_31,taunuLept_32,taunuLept_33,taunuLept_34]
 
+
 # ttlf kRed-7
 # ttcc kRed-3
 # ttbb kRed+3
@@ -370,11 +407,13 @@ def main():
 #    fIN = ROOT.TFile.Open(sys.argv[1],"R")
     fIN_data = ROOT.TFile.Open(DATAROOTFILE,"R")
     fIN_post = ROOT.TFile.Open(POSTFITROOTFILE,"R")
-
+    fIN_signal = []
+    for f in SIGNALROOTFILES:
+        fIN_signal.append(ROOT.TFile.Open(f.rootfile,"R"))
 
     categorySum = categories[0].clone("sum")
     for c in categories:
-        c.fetchHistograms(fIN_data,fIN_post)
+        c.fetchHistograms(fIN_data,fIN_signal,fIN_post)
 #### DIFFERENT BINNING!!        categorySum = categorySum + c
 #### DIFFERENT BINNING!!    categories.append(categorySum)
     for c in categories:
