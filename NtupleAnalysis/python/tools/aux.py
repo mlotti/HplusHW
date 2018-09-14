@@ -12,11 +12,11 @@ import HiggsAnalysis.NtupleAnalysis.tools.git as git
 import getpass
 import socket
 
-def Verbose(msg, printHeader=True):
+def Verbose(msg, printHeader=True, verbose=False):
     '''
     Calls Print() only if verbose options is set to true
     '''
-    if not opts.verbose:
+    if not verbose:
         return
     Print(msg, printHeader)
     return
