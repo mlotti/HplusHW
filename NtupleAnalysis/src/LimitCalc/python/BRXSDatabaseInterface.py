@@ -4,6 +4,7 @@ import sys
 import re
 from array import array
 import math
+import numpy
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -366,7 +367,18 @@ class BRXSDatabaseInterface:
             if i < len(retList) -1:
                 returnSelection+="&&"
         return returnSelection
-    
+
+    def andSelection(self,selections):
+        selection = ""
+        for s in selections:
+            if s == "":
+                continue
+            if selection == "":
+                selection += s
+            else:
+                selection+= "&&"+s
+        return selection
+
     def get(self,variable1,variable2,selection):
 	if not self.selection == "":
 	    selection = self.selection+"&&"+selection
@@ -414,7 +426,7 @@ class BRXSDatabaseInterface:
             print "GraphToTanBeta low tanb region",xVariableName,graph.GetName()
         for i in xrange(0, graph.GetN()):
             xval = graph.GetX()[i]
-            yselection = xVariableName+"=="+str(xval)+"&&"+selection
+            yselection = self.LogicalAnd(xVariableName+"=="+str(xval),selection)
             #print "yselection",yselection
             yval = graph.GetY()[i]
             ylimit = self.getTanbFromLightHpBR(yval,yselection,highTanbRegion)
@@ -428,19 +440,125 @@ class BRXSDatabaseInterface:
         if limitBRtoMin:
             graph = self.graphToMinTanb(graph,xVariableName,selection,highTanbRegion)
 
-        for i in xrange(0, graph.GetN()):
-            print "    ",graph.GetX()[i],graph.GetY()[i]
+        #for i in xrange(0, graph.GetN()):
+        #    print "    ",graph.GetX()[i],graph.GetY()[i]
         return graph
 
     def graphToTanBetaCombined(self,graph,xVariableName,selection):
-        print "High tanb graph" 
-        highTanbGraph = self.graphToTanBeta(graph,xVariableName,selection,highTanbRegion=True)
-        print "Low tanb graph"
-        lowTanbGraph  = self.graphToTanBeta(graph,xVariableName,selection,highTanbRegion=False)
-        print "High+low merged"
+        if xVariableName == "mu":
+            highTanbGraph = self.graphToTanBetaMu(graph,selection,highTanbRegion=True)
+            lowTanbGraph  = self.graphToTanBetaMu(graph,selection,highTanbRegion=False)
+        else:
+            #print "High tanb graph" 
+            highTanbGraph = self.graphToTanBeta(graph,xVariableName,selection,highTanbRegion=True)
+            #print "Low tanb graph"
+            lowTanbGraph  = self.graphToTanBeta(graph,xVariableName,selection,highTanbRegion=False)
+            #print "High+low merged"
         return self.mergeGraphs(highTanbGraph,lowTanbGraph)
 
+
+    def graphToTanBetaMu(self,graph,xVariableName,selection,highTanbRegion):
+        # mA fixed, mHp depends on mu and tanb
+        print "check graphToTanBetaMu",selection
+        if highTanbRegion:
+            x = array('d')
+            y = array('d')
+            for i in reversed(range(graph.GetN())):
+                x.append(graph.GetX()[i])
+                y.append(graph.GetY()[i])
+            graph = ROOT.TGraph(len(x),x,y)        
+        for i in range(graph.GetN()):
+            print "check input",graph.GetX()[i],graph.GetY()[i]
+        mus = self.getValues(xVariableName,selection,roundValues=-1)
+        print "x values",mus
+        x = array('d')
+        y = array('d')
+        x2 = array('d')
+        y2 = array('d')
+        tbmin = 3.0
+        for mu in mus:
+#            if not mu == 6700:
+#                continue
+            if xVariableName == "mu":
+                yselection = "mu == %s"%mu
+            else:
+                yselection = "mHp == %s"%mu
+            tanbs = self.getValues("tanb",yselection,roundValues=-1)
+            #print "check tanbs",tanbs
+            tanb0 = tanbs[0]
+            yBR0  = None#self.get("tanb",self.BRvariable,self.andSelection([yselection,"tanb==%s"%tanb0]))
+#            yBR0  = self.get("tanb","BR_tHpb*BR_Hp_taunu",yselection + "&& tanb==%s"%tanb0)
+            for tanb in tanbs:
+                appended = False
+                if tanb < tbmin:
+                    continue
+#                if highTanbRegion and tanb < 9.8:
+#                    continue
+#                if not highTanbRegion and tanb > 11:
+#                    break
+                massSelection = self.andSelection([yselection,"tanb==%s"%tanb])
+                mHp = self.get("tanb","mHp",massSelection)
+                ytarget = graph.Eval(mHp)
+                yBR = self.get("tanb",self.BRvariable,massSelection)
+                if not yBR0 == None:
+#                yBR = self.get("tanb","BR_tHpb*BR_Hp_taunu",massSelection)
+                    print "check mu,tanb,mhp",mu,tanb,mHp,ytarget,yBR,yBR0
+                    if (yBR > ytarget and yBR0 < ytarget):
+                        tb = self.linearFunction(ytarget,yBR0,tanb0,yBR,tanb)
+                        x2.append(mu)
+                        y2.append(tb)
+                        appended = True
+                        #print "check append2",mu,tb
+                    if (yBR < ytarget and yBR0 > ytarget):
+                        tb = self.linearFunction(ytarget,yBR0,tanb0,yBR,tanb)
+                        x.append(mu)
+                        y.append(tb)
+                        appended = True
+                        #print "check append1",mu,tb
+                #if highTanbRegion and yBR > yval and yBR0 < yval:
+                #    tb = self.linearFunction(yval,yBR0,tanb0,yBR,tanb)
+                #    x.append(mu)
+                #    y.append(tb)
+                #if not highTanbRegion and yBR < yval and yBR0 > yval:
+                #    tb = self.linearFunction(yval,yBR0,tanb0,yBR,tanb)
+                #    x.append(mu)
+                #    y.append(tb)
+                if not appended:
+                    x.append(mu)
+                    y.append(tbmin)
+                tanb0 = tanb
+                yBR0  = yBR
+
+        x.extend(reversed(x2))
+        y.extend(reversed(y2))
+#        x,y = self.cleaning(x,y)
+        if len(x) == 0:
+            return None
+        #for i in range(len(x)):
+        #    print "check graphToTanBetaMu",x[i],y[i]
+        return ROOT.TGraph(len(x),x,y)
+
+    def cleaning(self,x,y):
+        #print "check x",x
+        #print "check y",y
+        xx = array('d')
+        yy = array('d')
+        for i in reversed(range(len(x))):
+            if i > 1 and x[i] == x[i-1]:
+                continue
+            xx.append(x[i])
+            yy.append(y[i])
+        #print "check xx",xx,
+        #print "check yy",yy
+        return xx,yy
+        
     def mergeGraphs(self,graph1,graph2):
+        if graph1 == None:
+            return graph2
+        if graph2 == None:
+            return graph1
+        self.PrintGraph(graph1,"graph1")
+        self.PrintGraph(graph2,"graph2")
         graphX = []
         graphY = []
         for i in range(0,graph1.GetN()):
@@ -596,28 +714,48 @@ class BRXSDatabaseInterface:
 
     def inaccessible(self,xVariableName,selection):
         selection = self.LogicalAnd(selection,self.selection)
-
+        #print "check inaccessible selection",selection
         graphX = []
-        graphY = []
-
-        yVariableName = "tanb"
-        xValues = self.getValues(xVariableName,selection)
-        graphX.append(xValues[0])
-        graphY.append(0.5)
+        graphYup = []
+        graphYdown = []
         
+        yVariableName = "tanb"
+        xValues = self.getValues(xVariableName,selection,roundValues=-1)
+        yValues = self.getValues(yVariableName,"",roundValues=-1)
+        yValuesMin = min(yValues)
+        yValuesMax = max(yValues)
+        yValues = []
+        for i in range(int(10*(yValuesMax-yValuesMin))+1):
+            yValues.append(round(yValuesMin+0.1*i,1))
+        #print "check inaccessible, x",xValues
+        #print "check inaccessible, y",yValues
+
         for x in xValues:
+            yInAcc = []
             ysel = self.LogicalAnd(selection,self.floatSelection("%s==%s"%(xVariableName,x)))
-            y = min(self.getValues(yVariableName,ysel,roundValues=-1))
-            graphX.append(x)
-            graphY.append(y)
+            ycands = self.getValues(yVariableName,ysel,roundValues=-1)
+            #print "check",x,ycands
+            for yVal in yValues:
+                found = False
+                for ycand in ycands:
+                    if numpy.isclose(ycand,yVal):
+                        found = True
+                if not found:
+                    yInAcc.append(yVal)
+            #print "  check yInAcc",yInAcc
+            #print
+            if len(yInAcc) > 0:
+                graphX.append(x)
+                graphYup.append(max(yInAcc))
+                graphYdown.append(min(yInAcc))
 
-        graphX.append(xValues[len(xValues)-1])
-        graphY.append(0.5)
-
+        graphY = graphYup
+        graphY.extend(reversed(graphYdown))
+        graphX.extend(reversed(graphX))
         retGraph = ROOT.TGraph(len(graphX),array('d',graphX),array('d',graphY))
         retGraph.SetName("TheoreticallyInaccessible")
         retGraph.SetFillColor(4)
-        self.PrintGraph(retGraph)
+        #self.PrintGraph(retGraph,"Inaccessible")
         return retGraph
     
 
@@ -636,20 +774,20 @@ class BRXSDatabaseInterface:
         upper_x00 = []
         upper_y00 = []
         if higgs == "mh":
-            lower_x00,lower_y00 = self.getLimitsLT(higgs,xVariableName,"tanb",selection+"&&tanb>=30&&"+xVariableName+">=%s"%mHpStart,self.lowerLimit(mhMeasurement))
-            upper_x00,upper_y00 = self.getLimitsLT(higgs,xVariableName,"tanb",selection+"&&tanb>=30&&"+xVariableName+">=%s"%mHpStart,self.upperLimit(mhMeasurement))
+            lower_x00,lower_y00 = self.getLimitsLT(higgs,xVariableName,"tanb",self.andSelection([selection,"tanb>=30",xVariableName+">=%s"%mHpStart]),self.lowerLimit(mhMeasurement))
+            upper_x00,upper_y00 = self.getLimitsLT(higgs,xVariableName,"tanb",self.andSelection([selection,"tanb>=30",xVariableName+">=%s"%mHpStart]),self.upperLimit(mhMeasurement))
             for i in range(0,len(lower_x00)):
                 j = len(lower_x00) -1 -i
                 x.append(lower_x00[j])
                 y.append(lower_y00[j])
-                print "mh lower_x00,lower_y00",lower_x00[j],lower_y00[j]
+                #print "mh lower_x00,lower_y00",lower_x00[j],lower_y00[j]
 #        x.append(175)
 #        y.append(11.0)
         tanbStart = 5
         if higgs == "mH" or higgs == "mA":
             tanbStart = 1
-        lower_y0,lower_x0 = self.getLimits(higgs,"tanb",xVariableName,selection+"&&tanb>=%s"%tanbStart,self.lowerLimit(mhMeasurement))
-        upper_y0,upper_x0 = self.getLimits(higgs,"tanb",xVariableName,selection+"&&tanb>=%s"%tanbStart,self.upperLimit(mhMeasurement))
+        lower_y0,lower_x0 = self.getLimits(higgs,"tanb",xVariableName,self.andSelection([selection,"tanb>=%s"%tanbStart]),self.lowerLimit(mhMeasurement))
+        upper_y0,upper_x0 = self.getLimits(higgs,"tanb",xVariableName,self.andSelection([selection,"tanb>=%s"%tanbStart]),self.upperLimit(mhMeasurement))
         #print "check lower x0, y0",mhMeasurement,lower_x0,lower_y0,upper_x0,upper_y0
         for i in range(0,len(lower_x0)):
             j = len(lower_x0) -1 -i
@@ -736,6 +874,128 @@ class BRXSDatabaseInterface:
         retGraph.SetFillColor(7)
         retGraph.SetFillStyle(3008)
         return retGraph
+
+    def mHLimit_mHp(self,selection,mhMeasurement):
+        #print "check",selection,mhMeasurement
+        xvalues = self.getValues("mHp",selection,roundValues=-1)
+        print "check xvalues",xvalues
+        x = []
+        y = []
+        """
+        for xv in xvalues:
+            
+            limit = self.lowerLimit(mhMeasurement)
+
+            sele = self.andSelection([selection,"mHp==%s"%xv])
+
+            #graph = self.getGraph("tanb","mH",sele)
+            graph = self.getGraph("mH","tanb",sele)
+            #print "mu=",xv,limit
+            #self.PrintGraph(graph)
+            yval = graph.Eval(limit)
+            #if yval > 0 and yval < 11:
+            #    x.append(xv)
+            #    y.append(yval)
+                
+        #print x,y
+        """
+        """
+        for xv in xvalues:
+
+            limit = self.upperLimit(mhMeasurement)
+
+            sele = self.andSelection([selection,"mHp==%s"%xv])
+
+            minimum = self.getMinimum("mH",sele)
+            if minimum > limit:
+                continue
+            #print "mHp=",xv,limit,minimum
+            graph = self.getGraph("mH","tanb",sele)
+            self.PrintGraph(graph,"mHLimit_mHp 2nd for")
+            yval = graph.Eval(limit)
+            #print "    yval.,.",yval
+            if yval > 0 and yval < 11:
+                x.append(xv)
+                y.append(yval)
+        """        
+        #print x,y
+        yvalues = self.getValues("tanb",selection,roundValues=-1)
+        xx = []
+        yy = []
+        maxTanb = 11
+        if len(x) > 0:
+            maxTanb = y[len(y)-1]
+        for yv in yvalues:
+            limit = self.upperLimit(mhMeasurement)
+            sele = self.andSelection([selection,"tanb==%s"%yv])
+            graph = self.getGraph("mH","mHp",sele)
+            #print "tanb=",yv,limit,x[len(y)-1]
+            #self.PrintGraph(graph)
+            yval = graph.Eval(limit)
+            if yval > 0 and yv > 4 and yv < maxTanb:
+                x.append(yval)
+                y.append(yv)
+        #for i in range(len(x)):
+        #    print "Allowed",x[i],y[i]
+        return ROOT.TGraph(len(x),array('d',x),array('d',y))
+
+
+    def mHLimit_mu(self,selection,mhMeasurement):
+        print "check",selection,mhMeasurement
+        xvalues = self.getValues("mu",selection,roundValues=-1)
+        x = []
+        y = []
+        for xv in xvalues:
+            
+            limit = self.lowerLimit(mhMeasurement)
+
+            sele = self.andSelection([selection,"mu==%s"%xv])
+
+            #graph = self.getGraph("tanb","mH",sele)
+            graph = self.getGraph("mH","tanb",sele)
+            #print "mu=",xv,limit
+            #self.PrintGraph(graph)
+            yval = graph.Eval(limit)
+            if yval > 0 and yval < 11:
+                x.append(xv)
+                y.append(yval)
+
+        print x,y
+        for xv in reversed(xvalues):
+
+            limit = self.upperLimit(mhMeasurement)
+
+            sele = self.andSelection([selection,"mu==%s"%xv])
+
+            graph = self.getGraph("mH","tanb",sele)
+            print "mu=",xv,limit
+            self.PrintGraph(graph)
+            yval = graph.Eval(limit)
+            if yval > 0 and yval < 11:
+                x.append(xv)
+                y.append(yval)
+
+        print x,y
+
+        yvalues = self.getValues("tanb",selection,roundValues=-1)
+        xx = []
+        yy = []
+        maxTanb = 11
+        if len(x) > 0:
+            maxTanb = y[len(y)-1]
+        for yv in reversed(yvalues):
+            limit = self.upperLimit(mhMeasurement)
+            sele = self.andSelection([selection,"tanb==%s"%yv])
+            graph = self.getGraph("mH","mu",sele)
+            #print "tanb=",yv,limit,x[len(y)-1]
+            #self.PrintGraph(graph)
+            yval = graph.Eval(limit)
+            if yval > 0 and yv > 4 and yv < maxTanb:
+                x.append(yval)
+                y.append(yv)
+        for i in range(len(x)):
+            print x[i],y[i]
+        return ROOT.TGraph(len(x),array('d',x),array('d',y))
 
     def mHLimit_mA(self,higgs,xVariableName,selection,mhMeasurement):
         #print "mHLimit_mA",higgs,xVariableName,selection
@@ -1684,7 +1944,8 @@ class BRXSDatabaseInterface:
         x = []
         y = []
 
-        mus = self.getValues("mu","mHp==%s"%hmass)
+        mus = self.getValues("mu","mHp==%s && tanb==10"%hmass)
+        #print "check mus",mus
         highTanbRegion = False
 
         for mu in mus:
@@ -1692,8 +1953,9 @@ class BRXSDatabaseInterface:
             yselection = xVariableName+"=="+str(xval) + "&&" + "mHp==%s"%hmass
             if len(selection) > 0:
                 yselection += "&&"+selection
-
+            #print "check1",yselection
             graph = self.getGraph("tanb","BR_tHpb*BR_Hp_taunu","mu==%s&&mHp==%s"%(xval,hmass))
+            #print "check2"
             first = graph.GetX()[0]
             last = graph.GetX()[graph.GetN()-1]
             crossOverPoints0,crossOverPoints1,directions = self.getCrossOver(graph,obsLimit)
@@ -1999,7 +2261,7 @@ class BRXSDatabaseInterface:
         limits_y = []
 
         for x in xvalues:
-            theSelection = selection+"&&"+self.floatSelection(xVariableName+"==%s"%x)
+            theSelection = self.andSelection([selection,self.floatSelection(xVariableName+"==%s"%x)])
             ymin = self.getMinimum(higgs,theSelection)
             #print "check ymin",ymin,higgs,theSelection
             if limit < ymin:
@@ -2151,14 +2413,20 @@ class BRXSDatabaseInterface:
         #print "check getGraph",xVariable,yVariable,selection,self.floatSelection(selection)
         self.tree.Draw(yVariable+":"+xVariable,self.floatSelection(selection))
         graph = ROOT.gPad.GetPrimitive("Graph")
-        #self.PrintGraph(graph)
+        #self.PrintGraph(graph,"getGraph")
         if graph == None:
             raise Exception("Error: could not find graph!")
         graph.Sort()
         #print "graph SORTED"
         #self.PrintGraph(graph)
         return graph
-        
+
+    def cleanNan(self,graph):
+        for i in reversed(range(graph.GetN())):
+            if math.isnan(graph.GetX()[i]) or math.isnan(graph.GetY()[i]):
+                graph.RemovePoint(i)
+        return graph
+
     def getExpLimit(self,selection):
 	selections = selection.split("&&")
 
@@ -2247,6 +2515,7 @@ class BRXSDatabaseInterface:
             graph = self.getGraph("mHp",variable,self.floatSelection(selection))
         else:
             graph = self.getGraph("tanb",variable,self.floatSelection(selection))
+        #print "check getValues N",graph.GetN()
         for i in range(0,graph.GetN()):
             value = graph.GetY()[i]
             if roundValues >= 0:
@@ -2283,6 +2552,7 @@ class BRXSDatabaseInterface:
         tanb = -1
 
         tanbs = self.getValues("tanb",selection,roundValues=1)
+        #print "check tanbs",tanbs
         for tgb in tanbs:
             if tgb < 1:
                 continue
@@ -2302,7 +2572,7 @@ class BRXSDatabaseInterface:
         minTanb = self.getMinimumTanb(variable,selection)
         #print "check getMinMaxTanb minTanb",minTanb,variable,selection
         graph = self.getGraph("tanb",variable,selection)
-        #self.PrintGraph(graph)
+        self.PrintGraph(graph,"getMinMaxTanb")
         if highTanbRegion:
             for i in range(graph.GetN()):
                 x = graph.GetX()[i]
@@ -2599,6 +2869,7 @@ class BRXSDatabaseInterface:
         return graph.Eval(target,None,"S")
                     
     def getTanbFromLightHpBR(self,targetBR,selection,highTanbRegion=True):
+        print "check getTanbFromLightHpBR begin",targetBR,selection,highTanbRegion,self.BRvariable
 	# for light H+
         tanbmin,tanbmax = self.getMinMaxTanb(self.BRvariable,targetBR,self.floatSelection(selection),highTanbRegion) 
         #print "check getTanbFromLightHpBR",tanbmin,tanbmax
@@ -2679,12 +2950,18 @@ def test():
 #        db = BRXSDatabaseInterface(match.group(0),program="2HDMC")
 	db = BRXSDatabaseInterface(match.group(0),program="FeynHiggs")
 #        db.Print(variable="mH",selection="mA==110 && mu==3300")
-#        db.Print(variable="BR_tHpb*BR_Hp_taunu",selection="mA==110 && mu==3300")
-#        db.Print(variable="BR_tHpb*BR_Hp_taunu",selection="mHp==155 && mu==200")
+#        db.Print(variable="2*BR_tHpb*BR_Hp_taunu*(1-BR_tHpb)",selection="mA==110 && mu==200")
+#        db.Print(variable="2*831.76*BR_tHpb*BR_Hp_taunu*(1-BR_tHpb)",selection="mHp==150")
 #        db.Print(variable="mHp",selection="mA==110 && mu==3300")
 #        db.Print(variable="mHp")
-        db.Print(variable="mh",selection="mHp==400")
-#        db.Print(variable="0.001*2*tHp_xsec*BR_Hp_taunu",selection="mHp==300&&mu==200")
+#        db.Print(variable="tanb")
+#        print db.getValues("tanb","",roundValues=-1)
+#        db.Print(variable="mH",selection="mu==5400")
+#        db.Print(variable="mh",selection="mHp==400")
+#        db.Print(variable="mh",selection="tanb==70")
+#        db.Print(variable="tHp_xsec",selection="mHp==200&&tanb==20")
+#        db.Print(variable="2*tHp_xsec*BR_Hp_taunu",selection="mHp==180")
+        db.Print(variable="0.001*2*tHp_xsec*BR_Hp_taunu",selection="mHp==400")
 #        db.Print(variable="0.001*2*tHp_xsec*BR_Hp_tb",selection="mHp==300&&mu==200")
 #        db.Print(variable="tHp_xsec",selection="mHp==200 && tanb== 40")
 
@@ -2705,11 +2982,11 @@ def test():
 #	db.Print()
 #        db.Print(variable="mA",selection="mHp==200")
 #        db.Print(variable="mA",selection="tanb==21")
-        db.Print(variable="BR_tHpb*BR_Hp_taunu",selection="mHp==155")
+        db.Print(variable="BR_tHpb*BR_Hp_taunu",selection="mHp==160&&mu==2400")
 #        db.Print(variable="BR_Hp_taunu",selection="mHp==200")
 #	db.Print(variable="0.001*2*tHp_xsec*BR_Hp_taunu",selection="mHp==200")
         print "------------------------------------------------------------"
-#        db.Print(variable="mh",selection="mHp==400")
+        db.Print(variable="mH",selection="mu==4000")
 #        db.Print(variable="2*0.001*tHp_xsec*BR_Hp_taunu",selection="mHp==500")
 
 #        tanb = 20

@@ -80,8 +80,8 @@ OptionCombineSingleColumnUncertainties = False # (approxmation that makes limit 
 OptionUseWJetsHT = True # Use HT binned WJets samples instead of inclusive for WJets background
 OptionUseDYHT = True # Use HT binned DY samples instead of inclusive for DY background
 OptionGenuineTauBackgroundSource="MC_FakeAndGenuineTauNotSeparated" # Use "DataDriven" to get EWK+tt genuine taus from embedded samples
-IntSFuncertainty = 0.227 # for SF 0.41 (light region)
-#IntSFuncertainty = 0.106 # for SF 0.65 (heavy region)
+IntSFuncertainty = 0.297037 # for SF 0.41 (light region)
+#IntSFuncertainty = 0.201565 # for SF 0.65 (heavy region)
 
 # Summary tables
 OptionDisplayEventYieldSummary=False
@@ -260,11 +260,11 @@ for mass in HeavyMassPoints+IntermediateMassPoints+IntermediateMassPointsAll:
     intString=""
     if IntermediateAnalysisOnly:
         if mass in IntermediateMassPointsAll:
-            hxNuisanceList += ["CMS_Hptn_int_SF_stat","CMS_Hptn_int_neutral"]
+            hxNuisanceList += ["CMS_Hptn_int_SF_stat"] #,"CMS_Hptn_int_neutral"]
             intString="intermediate"
     else:
         if mass in IntermediateMassPoints:
-            hxNuisanceList += ["CMS_Hptn_int_SF_stat","CMS_Hptn_int_neutral"]
+            hxNuisanceList += ["CMS_Hptn_int_SF_stat"] #,"CMS_Hptn_int_neutral"]
             intString="intermediate"
     hx.setNuisances(hxNuisanceList)
     hx.setDatasetDefinition("HplusTB"+intString+"_M"+str(mass))
@@ -376,8 +376,8 @@ Nuisances=[]
 #====signal acceptance
 Nuisances.append(Nuisance(id="CMS_Hptn_int_SF_stat", label="uncertainty for NLO vs. LO SF in intermediate region",
     distr="lnN", function="Constant", value=IntSFuncertainty))
-Nuisances.append(Nuisance(id="CMS_Hptn_int_neutral", label="effect of WithNeutral samples in intermediate region",
-    distr="lnN", function="Constant", value=0.1, upperValue=0.0))
+#Nuisances.append(Nuisance(id="CMS_Hptn_int_neutral", label="effect of WithNeutral samples in intermediate region",
+#    distr="lnN", function="Constant", value=0.1, upperValue=0.0))
 
 #=====tau ID and mis-ID
 # tau ID
