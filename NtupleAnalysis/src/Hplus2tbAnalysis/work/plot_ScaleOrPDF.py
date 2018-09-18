@@ -12,14 +12,13 @@ USAGE:
 
 
 EXAMPLES:
-./plot_ScaleOrPDF.py -m Hplus2tbAnalysis_Weight_1,Hplus2tbAnalysis_Weight_2,Hplus2tbAnalysis_Weight_3,Hplus2tbAnalysis_Weight_4,Hplus2tbAnalysis_Weight_6,Hplus2tbAnalysis_Weight_8 --url --prefix QCDScale
+./plot_ScaleOrPDF.py -m Hplus2tbAnalysis_Weight_Nominal,Hplus2tbAnalysis_Weight_1,Hplus2tbAnalysis_Weight_2,Hplus2tbAnalysis_Weight_3,Hplus2tbAnalysis_Weight_4,Hplus2tbAnalysis_Weight_6,Hplus2tbAnalysis_Weight_8 --prefix QCDScale --bandValue 2
 
-./plot_ScaleOrPDF.py -m Hplus2tbAnalysis_Weight_9,Hplus2tbAnalysis_Weight_10,Hplus2tbAnalysis_Weight_12,Hplus2tbAnalysis_Weight_16,Hplus2tbAnalysis_Weight_23,Hplus2tbAnalysis_Weight_27,Hplus2tbAnalysis_Weight_32,Hplus2tbAnalysis_Weight_46,Hplus2tbAnalysis_Weight_59,Hplus2tbAnalysis_Weight_63,Hplus2tbAnalysis_Weight_77,Hplus2tbAnalysis_Weight_80,Hplus2tbAnalysis_Weight_96 --url --prefix PDF --bandValue 1.8
+./plot_ScaleOrPDF.py -m Hplus2tbAnalysis_Weight_Nominal,Hplus2tbAnalysis_Weight_9,Hplus2tbAnalysis_Weight_10,Hplus2tbAnalysis_Weight_12,Hplus2tbAnalysis_Weight_16,Hplus2tbAnalysis_Weight_23,Hplus2tbAnalysis_Weight_27,Hplus2tbAnalysis_Weight_32,Hplus2tbAnalysis_Weight_46,Hplus2tbAnalysis_Weight_59,Hplus2tbAnalysis_Weight_63,Hplus2tbAnalysis_Weight_77,Hplus2tbAnalysis_Weight_80,Hplus2tbAnalysis_Weight_96 --prefix PDF --bandValue 2
 
 
 LAST USED:
-./plot_ScaleOrPDF.py -m Hplus2tbAnalysis_Weight_9,Hplus2tbAnalysis_Weight_10,Hplus2tbAnalysis_Weight_12,Hplus2tbAnalysis_Weight_16,Hplus2tbAnalysis_Weight_23,Hplus2tbAnalysis_Weight_27,Hplus2tbAnalysis_Weight_32,Hplus2tbAnalysis_Weight_46,Hplus2tbAnalysis_Weight_59,Hplus2tbAnalysis_Weight_63,Hplus2tbAnalysis_Weight_77,Hplus2tbAnalysis_Weight_80,Hplus2tbAnalysis_Weight_96 --url --prefix PDF && ./plot_PDFweights.py -m Hplus2tbAnalysis_Weight_1,Hplus2tbAnalysis_Weight_2,Hplus2tbAnalysis_Weight_3,Hplus2tbAnalysis_Weight_4,Hplus2tbAnalysis_Weight_6,Hplus2tbAnalysis_Weight_8 --url --prefix QCDScale --bandValue 3
-
+./plot_ScaleOrPDF.py -m Hplus2tbAnalysis_Weight_Nominal,Hplus2tbAnalysis_Weight_1,Hplus2tbAnalysis_Weight_2,Hplus2tbAnalysis_Weight_3,Hplus2tbAnalysis_Weight_4,Hplus2tbAnalysis_Weight_6,Hplus2tbAnalysis_Weight_8 --prefix QCDScale --bandValue 2 && ./plot_ScaleOrPDF.py -m Hplus2tbAnalysis_Weight_Nominal,Hplus2tbAnalysis_Weight_9,Hplus2tbAnalysis_Weight_10,Hplus2tbAnalysis_Weight_12,Hplus2tbAnalysis_Weight_16,Hplus2tbAnalysis_Weight_23,Hplus2tbAnalysis_Weight_27,Hplus2tbAnalysis_Weight_32,Hplus2tbAnalysis_Weight_46,Hplus2tbAnalysis_Weight_59,Hplus2tbAnalysis_Weight_63,Hplus2tbAnalysis_Weight_77,Hplus2tbAnalysis_Weight_80,Hplus2tbAnalysis_Weight_96 --prefix PDF --bandValue 2
 '''
 #================================================================================================ 
 # Imports
@@ -188,7 +187,6 @@ def main(opts):
             
 
 def PlotHistos(datasetName, hPath):
-
 
     _kwargs = GetHistoKwargs(hPath, opts)
     datasetsMgr_list = []
@@ -377,6 +375,9 @@ if __name__ == "__main__":
     else:
         if "," in opts.mcrabs:
             opts.mcrabs = opts.mcrabs.split(",")    
+            aux.Print("Will use the following pseudo-multicrab directories:", True)
+            for d in opts.mcrabs:
+                aux.Print(d, False)
         else:
             cwd  = os.getcwd()
             dirs = [ name for name in os.listdir(cwd) if os.path.isdir(os.path.join(cwd, name)) ]
