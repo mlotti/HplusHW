@@ -82,6 +82,12 @@ def PrintTH1Info(myTH1):
     if not IsTH1(myTH1):
         return
 
+    if "TH2" in str(type(myTH1)):
+        return
+
+    if 0:
+        Print("Printing info for TH1 with name \"%s\" (Entries=%.1f)" % (myTH1.GetName(), myTH1.GetEntries()), True)
+
     # Constuct the table
     table   = []
     align  = "{:>5} {:>10} {:^20} {:>15} {:^3} {:<10} {:>15} {:^3} {:<10}"
@@ -628,7 +634,7 @@ class FakeBResultManager:
                     msg = "Skipping invariant mass shape uncertainty because histogram has more than 1 dimensions!"
                     self.Print(ShellStyles.WarningLabel() + msg, True)
                 else:
-                    self._obtainQCDNormalizationSystHistograms(myShapeHisto, dsetMgr, plotName, luminosity, normDataSrc, normEWKSrc) #iro: fixme (missing plots)
+                    self._obtainQCDNormalizationSystHistograms(myShapeHisto, dsetMgr, plotName, luminosity, normDataSrc, normEWKSrc)
             
         msg = "Obtaining final shape from data path %s" % (ShellStyles.NoteStyle() + dataPath + ShellStyles.NormalStyle())
         self.Verbose(msg, True)

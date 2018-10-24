@@ -253,7 +253,13 @@ class DataDrivenQCDShape:
             if (nData > 0.0):
                 # Assume binomial error
                 myPurity = (nData - nEwk) / nData
-                myUncert = sqrt(myPurity * (1.0-myPurity) / nData) 
+                if (myPurity <= 1.0):
+                    myUncert = sqrt(myPurity * (1.0-myPurity) / nData) 
+                else:
+                    msg = "WARNING! Purity is found to be greater than 1.0. This is unexpected! Setting myUncert to zero!"
+                    self.Print(msg, True)                    
+                    myUncert = 0.0
+
             # Set value and error
             h.SetBinContent(i+1, myPurity * 100.0)
             h.SetBinError(  i+1, myUncert * 100.0)
