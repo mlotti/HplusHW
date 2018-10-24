@@ -342,7 +342,7 @@ class Result:
             # Get the expected/observed limit
             if self._opts.unblinded:
                 observed = precision % float(masspoints[k]["observed"])
-                expected = precision % float(masspoints[k]["expected"])
+                expected = precision % float(masspoints[k]["expected"]["median"])
             else:
                 observed = "blinded"
                 expected = precision % float(masspoints[k]["expected"]["median"])
