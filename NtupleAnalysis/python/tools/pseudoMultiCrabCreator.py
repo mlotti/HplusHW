@@ -422,10 +422,18 @@ class PseudoMultiCrabModule:
             self._hCounters.SetBinContent(i, self._counters[key])
             self._hCounters.SetBinError(i, self._counterUncertainties[key])
         self._hCounters.SetDirectory(myWeightedCounterDir)
+
         # Save splittedBinInfo
-        self._hSplittedBinInfo.SetDirectory(myModuleDir)
+        hType = str(type(self._hSplittedBinInfo)).lower()
+        if "none" not in hType:
+            self._hSplittedBinInfo.SetDirectory(myModuleDir)
+        else:
+            msg = "WARNING! Unexpected problem with splitted bin info histogram. Type is %s" % (hType)
+            self.Print(ShellStyles.ErrorStyle()  + msg + ShellStyles.NormalStyle() , True)
+
         # Save parameter set, code version and data version
         #myModuleDir.Add(self._psetInfo)
+
         # Create config info for the module
         myConfigInfoDir = myModuleDir.mkdir("configInfo")
         self._hConfigInfo = ROOT.TH1F("configinfo","configinfo",2,0,2) # Have to store the histogram to keep it alive for writing        self._hConfigInfo.GetXaxis().SetBinLabel(1,"control")
