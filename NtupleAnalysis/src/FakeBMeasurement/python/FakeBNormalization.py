@@ -75,13 +75,22 @@ class FakeBNormalizationManager:
         self._TF_Error     = {}
         self._TF_Up        = {}
         self._TF_Down      = {}
+        self._TF_Up2x      = {}
+        self._TF_Down2x    = {}
+        self._TF_Up3x      = {}
+        self._TF_Down3x    = {}
         self._dqmKeys      = OrderedDict()
         self._myPath       = os.path.join(resultDirName, "normalisationPlots")
         self._BinLabelMap  = {}
-        self._FakeBNormalization      = {} # for the time being same as TF
-        self._FakeBNormalizationError = {} # for the time being same as TF_Error
-        self._FakeBNormalizationUp    = {} # for the time being same as TF_Up
-        self._FakeBNormalizationDown  = {} # for the time being same as TF_Down
+        self._FakeBNormalization       = {} # for the time being same as TF
+        self._FakeBNormalizationError  = {} # for the time being same as TF_Error
+        self._FakeBNormalizationUp     = {} # for the time being same as TF_Up
+        self._FakeBNormalizationUp2x   = {} 
+        self._FakeBNormalizationUp3x   = {} 
+        self._FakeBNormalizationDown   = {} # for the time being same as TF_Down
+        self._FakeBNormalizationDown2x = {} 
+        self._FakeBNormalizationDown3x = {} 
+
         if not isinstance(binLabels, list):
             raise Exception("Error: binLabels needs to be a list of strings")
         self.Verbose("__init__")
@@ -165,18 +174,45 @@ class FakeBNormalizationManager:
         nCR4 = hFakeB_CR4.IntegralAndError(1, hFakeB_CR4.GetNbinsX()+1, nCR4_Error)
 
         # Calculate Transfer Factor (TF) from Control Region (R) to Signal Region (SR): R = N_CR1/ N_CR2
-        TF       = None
-        TF_Up    = None
-        TF_Down  = None
-        TF_Error = None
-        TF       = (nCR1 / nCR2)
-        TF_Error = errorPropagation.errorPropagationForDivision(nCR1, nCR1_Error, nCR2, nCR2_Error)
+        TF        = None
+        TF_Up     = None
+        TF_Up2x   = None
+        TF_Up3x   = None
+        TF_Down   = None
+        TF_Down2x = None
+        TF_Down3x = None
+        TF_Error  = None
+        TF        = (nCR1 / nCR2)
+        TF_Error  = errorPropagation.errorPropagationForDivision(nCR1, nCR1_Error, nCR2, nCR2_Error)
+
+        # Up variations
         TF_Up    = TF + TF_Error
+        TF_Up2x  = TF + 2*TF_Error
+        TF_Up3x  = TF + 3*TF_Error
         if TF_Up > 1.0:
+            Print("Forcing TF_Up (=%.3f) to be equal to 1!" % ( TF_Up), i==1) # added  23 Oct 2018
             TF_Up = 1.0
-        TF_Down = TF - TF_Error
+        if TF_Up2x > 1.0:
+            Print("Forcing TF_Up2x (=%.3f) to be equal to 1!" % ( TF_Up2x), i==1) # added  23 Oct 2018
+            TF_Up2x = 1.0
+        if TF_Up3x > 1.0:
+            Print("Forcing TF_Up3x (=%.3f) to be equal to 1!" % ( TF_Up3x), i==1) # added  23 Oct 2018
+            TF_Up3x = 1.0
+
+        # Down variations
+        TF_Down   = TF - TF_Error
+        TF_Down2x = TF - 2*TF_Error
+        TF_Down3x = TF - 3*TF_Error
         if TF_Down < 0.0:
+            Print("Forcing TF_Down   (=%.3f) to be equal to 0" % (TF_Down), i==1) # added  23 Oct 2018
             TF_Down = 0.0
+        if TF_Down2x < 0.0:
+            Print("Forcing TF_Down2x (=%.3f) to be equal to 0" % (TF_Down2x), i==1) # added  23 Oct 2018
+            TF_Down2x = 0.0
+        if TF_Down3x < 0.0:
+            Print("Forcing TF_Down3x (=%.3f) to be equal to 0" % (TF_Down3x), i==1) # added  23 Oct 2018
+            TF_Down3x = 0.0
+
         lines.append("TF (bin=%s) = N_CR1 / N_CR2 = %f / %f =  %f +- %f" % (binLabel, nCR1, nCR2, TF, TF_Error) )
 
         # Calculate the transfer factors (R_{i}) where i is index of bin the Fake-b measurement is made in (pT and/or eta of ldg b-jet)
@@ -194,11 +230,19 @@ class FakeBNormalizationManager:
             self._TF[binLabel   ]       = TF
             self._TF_Error[binLabel]    = TF_Error
             self._TF_Up[binLabel]       = TF_Up
+            self._TF_Up2x[binLabel]     = TF_Up2x
+            self._TF_Up3x[binLabel]     = TF_Up3x
             self._TF_Down[binLabel]     = TF_Down 
-            self._FakeBNormalization[binLabel]      = TF       # TF
-            self._FakeBNormalizationError[binLabel] = TF_Error # Error(TF)
-            self._FakeBNormalizationUp[binLabel]    = TF_Up    # TF + Error
-            self._FakeBNormalizationDown[binLabel]  = TF_Down  # TF - Error
+            self._TF_Down2x[binLabel]   = TF_Down2x 
+            self._TF_Down3x[binLabel]   = TF_Down3x 
+            self._FakeBNormalization[binLabel]       = TF         # TF
+            self._FakeBNormalizationError[binLabel]  = TF_Error   # Error(TF)
+            self._FakeBNormalizationUp[binLabel]     = TF_Up      # TF + Error
+            self._FakeBNormalizationUp2x[binLabel]   = TF_Up2x    # TF + 2*Error
+            self._FakeBNormalizationUp3x[binLabel]   = TF_Up3x    # TF + 3*Error
+            self._FakeBNormalizationDown[binLabel]   = TF_Down    # TF - Error
+            self._FakeBNormalizationDown2x[binLabel] = TF_Down2x  # TF - 2*Error
+            self._FakeBNormalizationDown3x[binLabel] = TF_Down3x  # TF - 3*Error
 
         # Store all information for later used (write to file)
         self._commentLines.extend(lines)
@@ -281,7 +325,21 @@ class FakeBNormalizationManager:
         # Then write the transfer factors + error (for each Fake-b measurement bin)
         s += "FakeBNormalisation_ErrorUp = {\n"
         for binLabel in self._TF_Up:
-            s += '    "%s": %f,\n' % (binLabel, self._TF_Up[binLabel])
+            s += '    "%s": %f,\n' % (binLabel, self._TF_Up[binLabel]) 
+        s += "}\n"
+        s += "\n"
+
+        # Then write the transfer factors + 2*error (for each Fake-b measurement bin)
+        s += "FakeBNormalisation_ErrorUp2x = {\n"
+        for binLabel in self._TF_Up2x:
+            s += '    "%s": %f,\n' % (binLabel, self._TF_Up2x[binLabel])
+        s += "}\n"
+        s += "\n"
+
+        # Then write the transfer factors + 3*error (for each Fake-b measurement bin)
+        s += "FakeBNormalisation_ErrorUp3x = {\n"
+        for binLabel in self._TF_Up3x:
+            s += '    "%s": %f,\n' % (binLabel, self._TF_Up3x[binLabel])
         s += "}\n"
         s += "\n"
 
@@ -292,7 +350,21 @@ class FakeBNormalizationManager:
         s += "}\n"
         s += "\n"
 
-        # Then write the transfer factors - error (for each Fake-b measurement bin)
+        # Then write the transfer factors - 2*error (for each Fake-b measurement bin)
+        s += "FakeBNormalisation_ErrorDown2x = {\n"
+        for binLabel in self._TF_Down2x:
+            s += '    "%s": %f,\n' % (binLabel, self._TF_Down2x[binLabel])
+        s += "}\n"
+        s += "\n"
+
+        # Then write the transfer factors - 3*error (for each Fake-b measurement bin)
+        s += "FakeBNormalisation_ErrorDown3x = {\n"
+        for binLabel in self._TF_Down3x:
+            s += '    "%s": %f,\n' % (binLabel, self._TF_Down3x[binLabel])
+        s += "}\n"
+        s += "\n"
+
+        # Then write bin label map
         s += "BinLabelMap = {\n"
         for binLabel in self._BinLabelMap:
             s += '    "%s": \"%s\",\n' % (binLabel, self._BinLabelMap[binLabel])
@@ -621,7 +693,7 @@ class FakeBNormalizationManager:
             pass
 
         #self._dqmKeys[binLabel][name] = result
-        self._dqmKeys[binLabel][name] = value #iro
+        self._dqmKeys[binLabel][name] = value
         return
 
     def _getSanityCheckTextForFractions(self, dataTemplate, binLabel, saveToComments=False):
