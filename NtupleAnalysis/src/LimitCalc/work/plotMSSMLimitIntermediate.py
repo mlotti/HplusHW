@@ -52,7 +52,9 @@ def main():
 #    jsonfile = "limits2016/limits_heavy_180131.json"
 #    jsonfile = "limits2016/limits_heavy_180318.json"
 #    jsonfile = "limits2016/limits_int_180202.json"
-    jsonfile = "limits2016/limits_int_180429.json"
+#    jsonfile = "limits2016/limits_int_180429.json"
+#    jsonfile = "limits2016/limits_unblinded_180809/limits_int.json"
+    jsonfile = "limits2016/limits_unblinded_withLeptonic_30082018/taunu_extInt.json"
 #    limits = limit.BRLimits(limitsfile=jsonfile,configfile="configurationHeavy.json")
     limits = limit.BRLimits(limitsfile=jsonfile,configfile="limits2016/intermediateHplus_configuration.json")
 
@@ -184,7 +186,7 @@ def main():
     jsonWriter.addParameter("finalStateText",limits.getFinalstateText())
     jsonWriter.addParameter("mHplus",limit.mHplus())
     jsonWriter.addParameter("selection",selection)
-    jsonWriter.addParameter("regime","heavy")
+    jsonWriter.addParameter("regime","intermediate")
     jsonWriter.write("MSSMLimitIntermediate_"+scenario+".json")
 
     limit.doTanBetaPlotHeavy("limitsTanb_heavy_"+scenario, graphs, limits.getLuminosity(), limits.getFinalstateText(), limit.mHplus(), scenario)

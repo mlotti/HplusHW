@@ -87,6 +87,13 @@ def SuccessStyle():
     # black text on green backround
     #return "\033[;40m\033[1;42m"
 
+def CyanStyle():
+    # cyan on black backround
+    return "\033[1;36m"
+    
+    # black text on green backround
+    #return "\033[;40m\033[1;42m"
+
 def SuccessLabel():
     # black text on green backround
     return "%sSUCCESS:%s " % (SuccessStyle(), NormalStyle())

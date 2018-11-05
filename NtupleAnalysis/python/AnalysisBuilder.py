@@ -191,6 +191,7 @@ class AnalysisBuilder:
                  # Optional options
                  usePUreweighting=True,    # enable/disable vertex reweighting
                  useTopPtReweighting=True, # enable/disable top pt reweighting for ttbar
+                 intermediateSignalSF=1.0,  # scale intermediate mass range signal samples by this number
                  # Systematics options
                  doSystematicVariations=False, # Enable/disable adding modules for systematic uncertainty variation
                  analysisType="HToTauNu", # Define the analysis type (e.g. "HToTauNu", "HToTB")
@@ -210,6 +211,7 @@ class AnalysisBuilder:
             self._searchModes.append(searchModes)
         self._usePUreweighting = usePUreweighting
         self._useTopPtReweighting = useTopPtReweighting
+        self._intermediateSignalSF = intermediateSignalSF
         self._variations={}
         self._doSystematics = doSystematicVariations    
         self._analysisType  = self._getAnalysisType(analysisType)
@@ -333,6 +335,7 @@ class AnalysisBuilder:
         # Add here options to the config
         config.__setattr__("usePileupWeights", self._usePUreweighting)
         config.__setattr__("useTopPtWeights" , self._useTopPtReweighting)
+        config.__setattr__("intermediateSignalSF", self._intermediateSignalSF)
 
         # Add nominal modules
         if len(self._variations.keys()) > 1 and "systematics" in self._variations.keys():

@@ -557,9 +557,10 @@ class DatacardColumn():
             if not dsetMgr.hasDataset(self.getDatasetMgrColumn()):
                 dset = self.getDatasetMgrColumn()
                 if not dsetMgr.hasDataset(dset):
+                    oldKey = dset
                     dset += "_ext1"
                     if not dsetMgr.hasDataset(dset):
-                        msg = "Cannot find merged dataset by key '%s' in multicrab dir! Did you forget to merge the root files with hplusMergeHistograms.py?" % dset
+                        msg = "Cannot find merged dataset by key '%s' or '%s' in multicrab dir! Did you forget to merge the root files with hplusMergeHistograms.py?" % (oldKey,dset)
                         dsetMgr.PrintInfo()
                         raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
 

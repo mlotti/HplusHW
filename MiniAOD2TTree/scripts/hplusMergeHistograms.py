@@ -1963,6 +1963,11 @@ def main(opts, args):
             taskNameMap[d] = ConvertTasknameToEOS(d, opts)
         taskNameMapR = {v: k for k, v in taskNameMap.items()} #reverse map
 
+    # change lumi.json permissions
+    jsonfile = os.path.join(os.getcwd(),"lumi.json")
+    if os.path.exists(jsonfile):
+        os.system("chmod 644 %s"%jsonfile)
+    
     # Construct regular expressions for output files
     global re_histos
     re_histos.append(re.compile("^output files:.*?(?P<file>%s)" % opts.input))

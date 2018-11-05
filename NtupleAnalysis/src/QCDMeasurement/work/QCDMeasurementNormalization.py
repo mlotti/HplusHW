@@ -307,8 +307,12 @@ def main(argv, dsetMgr, moduleInfoString):
         # par[6] sigma2 for Gaussian term
         # par[7] beta for exponential tail
         template_QCD_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunctionWithPeakShiftClear", norm=1), FITMIN, FITMAX)
+# Works for 1pr:
         template_QCD_Inverted.setDefaultFitParam(defaultLowerLimit=[ 30, 0.1, -10,   0,  -20,  10,   0.0001, 0.0001], 
                                                      defaultUpperLimit=[ 130, 20,  10,  20,  200, 100,     1.0,   0.05]) 
+# Attempt for 3pr:
+#        template_QCD_Inverted.setDefaultFitParam(defaultLowerLimit=[ 30,   1, -20,   0,   20,  10,   0.0001, 0.0001], 
+#                                                 defaultUpperLimit=[130,  10,  20,  15,  200,  50,      1.0,   0.05]) 
 
 
 

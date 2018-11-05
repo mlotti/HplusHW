@@ -196,7 +196,7 @@ def main(opts):
 
         # For-loop: All histograms
         for h in histoPaths:
-            if "_Vs_" not in h:
+            if "_vs_" not in h.lower():
                 continue
             Plot2dHistograms(datasetsMgr, h)
 
@@ -228,6 +228,18 @@ def GetHistoKwargs(h, opts):
         zLabel  = "Arbitrary Units"
     else:
         zLabel = "Unknown"
+    '''
+    if "QCD" in opts.dataset:
+        zMax = 50
+    '''
+    if "Charged" in opts.dataset:
+        zMin = 1e-3
+        #zMax = 3
+        #if "200" in opts.dataset:
+        #    zMax = 2
+        #if "True" in opts.folder:
+        #    zMax = 1
+
     cutBox      = {"cutValue": 400.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True} #box = True works
     cutBoxY     = {"cutValue": 200.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True,
                    "mainCanvas": True, "ratioCanvas": False} # box = True not working
@@ -240,14 +252,16 @@ def GetHistoKwargs(h, opts):
         "xmin"             : xMin,
         "xmax"             : xMax,
         "ymin"             : yMin,
-        "zmin"             : zMin,
-        "zmax"             : zMax,
+        "zmin"             : zMin,#1e-02, #soti
+        "zmax"             : zMax, #2,#70,#zMax, #3,
         "cutBox"           : cutBox,
         "cutBoxY"          : cutBoxY,
         "moveLegend"       : {"dx": -2.0, "dy": 0.0, "dh": -100.0}, #hack to remove legend (tmp)
         "zlabel"           : zLabel
         }
 
+    if "MET_vs_MuonMiniIso" in h:
+        kwargs["opts"]    = {"xmin": 0, "xmax": 1000, "ymin": 0, "ymax": 1} #, "ymaxfactor": yMaxF}          
 
     if "WMass" in h:
         print "here1"
@@ -314,6 +328,115 @@ def GetHistoKwargs(h, opts):
         # if  "AfterAllSelections" in h:
         ROOT.gStyle.SetNdivisions(8, "X")
         ROOT.gStyle.SetNdivisions(8, "Y")
+
+    
+    if "DeltaPhi" in h:
+        units             = ""
+        kwargs["xlabel"]  = "#Delta #phi (Top,b_{free})"
+        kwargs["ylabel"]  = "#Delta #phi (Top,b_{free})"
+        kwargs["rebinX"]  = 1
+        kwargs["rebinY"]  = 1
+        kwargs["opts"]    = {"xmin": 0.0, "xmax": 3, "ymin": 0, "ymax": 3}#, "zmin": 1e-2, "zmax": 3} #, "ymaxfactor": yMaxF}
+        if "jjmin" in h:
+            kwargs["xlabel"]  = "#Delta #phi_{jjmax} (Top,b_{free})"
+            kwargs["ylabel"]  = "#Delta #phi_{jjmin} (Top,b_{free})"
+            if "_w_" in h.lower():            
+                kwargs["xlabel"]  = "#Delta #phi_{jjmax} (W,b_{free})"
+                kwargs["ylabel"]  = "#Delta #phi_{jjmin} (W,b_{free})"
+            if "gen" in h.lower():
+                kwargs["xlabel"]  = "#Delta #phi (Top_{H+},b_{H+})"
+                kwargs["ylabel"]  = "#Delta #phi (Top_{Assoc},b_{H+})"
+
+    if "DeltaEta" in h:
+        units             = ""
+        kwargs["xlabel"]  = "#Delta #eta_{jjmax} (Top,b_{free})"
+        kwargs["ylabel"]  = "#Delta #eta_{jjmin} (Top,b_{free})"
+        kwargs["rebinX"]  = 2
+        kwargs["rebinY"]  = 2
+        kwargs["opts"]    = {"xmin": 0.0, "xmax": 6, "ymin": 0, "ymax": 6}#, "zmin": 1e-2, "zmax": 3} #, "ymaxfactor": yMaxF}
+        if "_w_" in h.lower():            
+            kwargs["xlabel"]  = "#Delta #eta_{jjmax} (W,b_{free})"
+            kwargs["ylabel"]  = "#Delta #eta_{jjmin} (W,b_{free})"
+        if "gen" in h.lower():
+            kwargs["xlabel"]  = "#Delta #eta (Top_{H+},b_{H+})"
+            kwargs["ylabel"]  = "#Delta #eta (Top_{Assoc},b_{H+})"
+
+
+    if "DeltaR" in h:
+        units             = ""
+        kwargs["xlabel"]  = "#Delta R_{jjmax} (Top,b_{free})"
+        kwargs["ylabel"]  = "#Delta R_{jjmin} (Top,b_{free})"
+        kwargs["rebinX"]  = 4
+        kwargs["rebinY"]  = 4
+        kwargs["opts"]    = {"xmin": 0.0, "xmax": 6, "ymin": 0, "ymax": 6}#, "zmin": 1e-2, "zmax": 3} #, "ymaxfactor": yMaxF}
+        if "_w_" in h.lower():            
+            kwargs["xlabel"]  = "#Delta R_{jjmax} (W,b_{free})"
+            kwargs["ylabel"]  = "#Delta R_{jjmin} (W,b_{free})"
+        if "gen" in h.lower():
+            kwargs["xlabel"]  = "#Delta R (Top_{H+},b_{H+})"
+            kwargs["ylabel"]  = "#Delta R (Top_{Assoc},b_{H+})"
+
+    if "DeltaY" in h:
+        units             = ""
+        kwargs["xlabel"]  = "#Delta Y_{jjmax} (Top,b_{free})"
+        kwargs["ylabel"]  = "#Delta Y_{jjmin} (Top,b_{free})"
+        kwargs["rebinX"]  = 4
+        kwargs["rebinY"]  = 4
+        kwargs["opts"]    = {"xmin": 0.0, "xmax": 5, "ymin": 0, "ymax": 5}#, "zmin": 1e-2, "zmax": 3} #, "ymaxfactor": yMaxF}
+        if "_w_" in h.lower():            
+            kwargs["xlabel"]  = "#Delta Y_{jjmax} (W,b_{free})"
+            kwargs["ylabel"]  = "#Delta Y_{jjmin} (W,b_{free})"
+        if "gen" in h.lower():
+            kwargs["xlabel"]  = "#Delta Y (Top_{H+},b_{H+})"
+            kwargs["ylabel"]  = "#Delta Y (Top_{Assoc},b_{H+})"
+
+    if "DeltaPhi_LdgTrijet_TetrajetBjet_Vs_SubldgTrijet_TetrajetBjet" in h:
+        units             = ""
+       # kwargs["xlabel"]  = "#Delta #phi (Top^{sldg},b^{ldg}_{free})"
+        kwargs["ylabel"]  = "#Delta #phi (Top_{sldg},b_{free})"
+        kwargs["rebinX"]  = 1
+        kwargs["rebinY"]  = 1
+        kwargs["opts"]    = {"xmin": 0.0, "xmax": 3, "ymin": 0, "ymax": 3, "zmin": 1e-2, "zmax": 3} #, "ymaxfactor": yMaxF}
+
+    if "DeltaPhi_LdgTrijetDijet_TetrajetBjet_Vs_SubldgTrijetDijet_TetrajetBjet" in h:
+        units             = ""
+       # kwargs["xlabel"]  = "#Delta #phi (Top^{sldg},b^{ldg}_{free})"
+       # kwargs["ylabel"]  = "#Delta #phi (Top^{ldg},b^{ldg}_{free})"
+        kwargs["ylabel"]  = "#Delta #phi (W_{sldg top},b_{free})"
+        kwargs["rebinX"]  = 1
+        kwargs["rebinY"]  = 1
+        kwargs["opts"]    = {"xmin": 0.0, "xmax": 3, "ymin": 0, "ymax": 3, "zmin": 1e-2, "zmax": 3} #, "ymaxfactor": yMaxF}
+
+    if "DeltaR_LdgTrijet_TetrajetBjet_Vs_SubldgTrijet_TetrajetBjet" in h:
+        units             = ""
+       # kwargs["xlabel"]  = "#Delta #phi (Top^{sldg},b^{ldg}_{free})"
+        kwargs["ylabel"]  = "#Delta R (Top_{sldg},b_{free})"
+        kwargs["rebinX"]  = 2
+        kwargs["rebinY"]  = 2
+        kwargs["opts"]    = {"xmin": 0.0, "xmax": 3, "ymin": 0, "ymax": 3, "zmin": 1e-2, "zmax": 3} #, "ymaxfactor": yMaxF}
+
+    if "DeltaR_LdgTrijetDijet_TetrajetBjet_Vs_SubldgTrijetDijet_TetrajetBjet" in h:
+        units             = ""
+       # kwargs["xlabel"]  = "#Delta #phi (Top^{sldg},b^{ldg}_{free})"
+        kwargs["ylabel"]  = "#Delta R (W_{sldg top},b_{free})"
+        kwargs["rebinX"]  = 2
+        kwargs["rebinY"]  = 2
+        kwargs["opts"]    = {"xmin": 0.0, "xmax": 3, "ymin": 0, "ymax": 3, "zmin": 1e-2, "zmax": 3} #, "ymaxfactor": yMaxF}
+        
+    if "DeltaPhi_TetrajetBjet_LdgTrijetBjet_Vs_DeltaPhi_TetrajetBjet_LdgTrijetDijet" in h:
+        kwargs["xlabel"]  = "#Delta #phi (b_{free}, b_{ldg top})"
+        kwargs["ylabel"]  = "#Delta #phi (b_{free}, W_{ldg top})"
+
+    if "DeltaPhi_TetrajetBjet_LdgTrijetBjet_Vs_DeltaPhi_PimDeltaPhi_LdgTrijet_SubldgTrijet" in h:
+        kwargs["xlabel"]  = "#Delta #phi (b_{free}, b_{ldg top})"
+        kwargs["ylabel"]  = "#pi - #Delta #phi (top_{ldg}, top_{sldg})"
+        
+    if "DeltaPhi_TetrajetBjet_LdgTrijetDijet_Vs_DeltaPhi_PimDeltaPhi_LdgTrijet_SubldgTrijet" in h:
+        kwargs["xlabel"]  = "#Delta #phi (b_{free}, W_{ldg top})"
+        kwargs["ylabel"]  = "#pi - #Delta #phi (top_{ldg}, top_{sldg})"
+    if "DeltaR_TetrajetBjet_LdgTrijetBjet_Vs_DeltaR_TetrajetBjet_LdgTrijetDijet" in h:
+        kwargs["xlabel"]  = "#Delta R (b_{free}, b_{ldg top})"
+        kwargs["ylabel"]  = "#Delta R (b_{free}, W_{ldg top})"
         
     return kwargs
     
@@ -520,7 +643,8 @@ if __name__ == "__main__":
                       "eSelection_Veto", "muSelection_Veto", "tauSelection_Veto",
                       "ForDataDrivenCtrlPlotsEWKFakeB", "ForDataDrivenCtrlPlotsEWKGenuineB",
                       "jetSelection_", "bjetSelection_", "metSelection_", 
-                      "topologySelection_", "topbdtSelectionTH2_", "ForDataDrivenCtrlPlots"]
+                      "topologySelection_", "topbdtSelectionTH2_", "ForDataDrivenCtrlPlots", "topSelectionBDT_", "AnalysisTriplets", "AnalysisTripletsTrue", "AnalysisTripletsFalse",
+                      "topbdtSelection_", "topSelectionBDTopt_", "SystTopBDT_TH2"]
 
     if opts.folder not in allowedFolders:
         Print("Invalid folder \"%s\"! Please select one of the following:" % (opts.folder), True)

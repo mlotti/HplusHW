@@ -155,6 +155,11 @@ def main():
         myList    = GetHToTBCombinationMay2018v2()
         doCompare(opts.name, myList)
 
+    if 1:
+        opts.name = "overlap3"
+        myList    = GetHToTBCombinationMay2018v3()
+        doCompare(opts.name, myList)
+
     if 0:
         opts.name = "overlap"
         myList    = GetHToTBCombinationMay2018v2()
@@ -166,10 +171,11 @@ def main():
         doCompare(opts.name, myList)
         #doOverlap(opts.name, myList)
 
-    if 1:
+    if 0:
         opts.name = "BinwiseVsAutoMCStats"
         myList    = GetStatUncertaintyJune2018()
         doCompare(opts.name, myList)
+
 
     # Inform user and exit
     Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + savePath + ShellStyles.NormalStyle()), True)    
@@ -444,9 +450,28 @@ def GetHToTBCombinationMay2018v2():
         #("H^{+}#rightarrow tb (resolved, v6)", myDirs["BDT0p40_ANv6"]  + "CombineResults*"),
         ]
     myList.extend(ext)
-    # Add boosted results
-
     return myList
+
+def GetHToTBCombinationMay2018v3():
+    homeDir1 = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/datacards_Hplus2tb_13TeV_EraRun2016_Search80to1000_OptNominal_limits2016_DataDriven_mH180to3000_Systematics_"
+    homeDir2 = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/datacards_Hplus2tb_13TeV_EraRun2016_DataDriven_mH180to3000_Systematics_"
+    #homeDir3 = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/datacards_Hplus2tb_13TeV_TopMassLE400_BDT0p40_Binning4Eta5Pt_BinScheme18_Stat_27Jul2018_autoMCStats/"
+    homeDir3 = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/datacards_Hplus2tb_13TeV_TopMassLE400_BDT0p40_Binning4Eta5Pt_BinScheme18_Syst_27Jul2018_autoMCStats/"
+    homeDir4 = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/datacards_Hplus2tb_13TeV_TopMassLE400_BDT0p40_Binning4Eta5Pt_BinScheme18_Syst_01Aug2018_autoMCStats/"
+    myDirs  = {}
+    myDirs["BDT0p40_ANv5"] = homeDir1 + "20GeVBins_180412_070202/"
+    myDirs["BDT0p40_ANv5.1"] = homeDir2 + "BDT0p40_Binning12_28Apr2018/"
+    myDirs["BDT0p40_ANv6"] = homeDir4
+
+    myList = GetBoostedSystematics()
+    ext    = [
+        ("H^{+}#rightarrow tb (resolved, v5)", myDirs["BDT0p40_ANv5"]  + "CombineResults*"),
+        # ("H^{+}#rightarrow tb (resolved, v5.1)", myDirs["BDT0p40_ANv5.1"]  + "CombineResults*"),
+        ("H^{+}#rightarrow tb (resolved, v6)", myDirs["BDT0p40_ANv6"]  + "CombineResults*"),
+        ]
+    myList.extend(ext)
+    return myList
+
 
 def GetOptimisationOfEtaBinsMar2018():
     myDirs = {}

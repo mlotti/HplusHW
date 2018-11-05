@@ -51,10 +51,12 @@ def main():
 #    jsonfile = "limits2016/limits_heavy_20171011.json"
 #    jsonfile = "limits2016/limits_heavy_180131.json"
 #    jsonfile = "limits2016/limits_heavy_180318.json"
-    jsonfile = "limits2016/limits_heavy_180417.json"
+#    jsonfile = "limits2016/limits_heavy_180417.json"
+#    jsonfile = "limits2016/limits_unblinded_180809/limits_heavy.json"
+#    jsonfile = "limits2016/limits_unblinded_180809/limits_full_leptonic+hadronic_with_intermediate.json"
+    jsonfile = "limits2016/limits_unblinded_withLeptonic_30082018/taunu_extInt.json"
 #    limits = limit.BRLimits(limitsfile=jsonfile,configfile="configurationHeavy.json")
     limits = limit.BRLimits(limitsfile=jsonfile,configfile="limits2016/heavyHplus_configuration.json")
-
     # Enable OpenGL
     ROOT.gEnv.SetValue("OpenGL.CanvasPreferGL", 1)
 
@@ -177,14 +179,19 @@ def main():
 
     jsonWriter.addGraph("Allowed",graphs["Allowed"])
 
-    jsonWriter.addParameter("name","limitsTanb_heavy_"+scenario)
     jsonWriter.addParameter("scenario",scenario)
     jsonWriter.addParameter("luminosity",limits.getLuminosity())
-    jsonWriter.addParameter("finalStateText",limits.getFinalstateText())
+    name = "limitsTanb_heavy_"
+    finalStateText = limits.getFinalstateText()
+    if "leptonic" in jsonfile:
+        name = "limitsTanb_heavy_LeptHadrFS_"
+        finalStateText = "#tau+jets final state"
+    jsonWriter.addParameter("name",name+scenario)
+    jsonWriter.addParameter("finalStateText",finalStateText)
     jsonWriter.addParameter("mHplus",limit.mHplus())
     jsonWriter.addParameter("selection",selection)
     jsonWriter.addParameter("regime","heavy")
-    jsonWriter.write("MSSMLimitHeavy_"+scenario+".json")
+    jsonWriter.write(name+scenario+".json")
 
     limit.doTanBetaPlotHeavy("limitsTanb_heavy_"+scenario, graphs, limits.getLuminosity(), limits.getFinalstateText(), limit.mHplus(), scenario)
     sys.exit()	

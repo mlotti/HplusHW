@@ -124,7 +124,9 @@ def getFakeBSystematics(myTTBarSystematics, OptionShapeSystematics, verbose=Fals
 OptionTest                             = False # [default: False]
 OptionPaper                            = True  # [default: True]
 OptionMergeRares                       = True  # [default: True]
-OptionIncludeSystematics               = True # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
+OptionIncludeSystematics               = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
+OptionUseTopPtReweightSyst             = False # [default: True] 
+OptionFakeBSyst                        = "TransferFactor3x" # [default: "TransferFactor"] (Options: TransferFactor, TransferFactor2x, TransferFactor3x)
 OptionShapeSystematics                 = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionDoControlPlots                   = True  # [default: True]   (Produce control plots defined at end of this file)
 MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
@@ -155,7 +157,7 @@ OptionSeparateShapeAndNormFromSystList = []           # [default: []]     (Separ
 histoPathInclusive        = "ForDataDrivenCtrlPlots"
 histoPathGenuineB         = histoPathInclusive + "EWKGenuineB"
 histoPathFakeB            = "ForDataDrivenCtrlPlots"
-ShapeHistogramsDimensions = systematics.getBinningForPlot(OptionMassShape) # Get the new binning for the shape histogram
+ShapeHistogramsDimensions = systematics.getBinningForPlot(OptionMassShape) # Get the binning for the shape histogram
 
 if OptionFakeBMeasurementSource == "DataDriven":
     # EWK Datasets should only be Genuibe-b (FakeB = QCD inclusive + EWK GenuineB)
@@ -190,7 +192,10 @@ mySystematics["MC"]          = myLumiSystematics + myPileupSystematics + myTrgEf
 mySystematics["Signal"]      = mySystematics["MC"] + ["CMS_HPTB_mu_RF_HPTB","CMS_HPTB_pdf_HPTB"]
 mySystematics["FakeB"]       = []
 mySystematics["QCD"]         = mySystematics["MC"]
-mySystematics["TT"]          = mySystematics["MC"] + ["QCDscale_ttbar", "pdf_ttbar", "mass_top", "CMS_topreweight"] + ["CMS_HPTB_mu_RF_top","CMS_HPTB_pdf_top"]
+if OptionUseTopPtReweightSyst:
+    mySystematics["TT"]      = mySystematics["MC"] + ["QCDscale_ttbar", "pdf_ttbar", "mass_top", "CMS_topreweight"] + ["CMS_HPTB_mu_RF_top","CMS_HPTB_pdf_top"]
+else:
+    mySystematics["TT"]          = mySystematics["MC"] + ["QCDscale_ttbar", "pdf_ttbar", "mass_top"] + ["CMS_HPTB_mu_RF_top","CMS_HPTB_pdf_top"]
 mySystematics["SingleTop"]   = mySystematics["MC"] + ["QCDscale_singleTop", "pdf_singleTop"] + ["CMS_HPTB_mu_RF_top","CMS_HPTB_pdf_top"]
 mySystematics["TTZToQQ"]     = mySystematics["MC"] + ["QCDscale_ttZ", "pdf_ttZ"] + ["CMS_HPTB_mu_RF_ewk","CMS_HPTB_pdf_ewk"]
 mySystematics["TTTT"]        = mySystematics["MC"] + ["CMS_HPTB_mu_RF_top","CMS_HPTB_pdf_top"]
@@ -350,7 +355,7 @@ DataGroups.append(TT)
 DataGroups.append(SingleTop)
 if OptionMergeRares:
     rares = aux.GetListOfRareDatasets()
-    Print("Replacing rare datasets with single new dataset: [%s] -> %s" % ( ts + ", ".join(rares) + ns, ss + "Rares" + ns), True)
+    Print("Replacing rare datasets with single \"Rares\" dataset: [%s] -> %s" % ( ts + ", ".join(rares) + ns, ss + "Rares" + ns), True)
     DataGroups.append(Rares)
 else:
     DataGroups.append(TTZ)
@@ -371,7 +376,8 @@ JER_Shape      = Nuisance(id="CMS_res_j"      , label="Jet Energy Resolution (JE
 bTagSF_Shape   = Nuisance(id="CMS_eff_b"      , label="b tagging", distr="shapeQ", function="ShapeVariation", systVariation="BTagSF")
 topPt_Shape    = Nuisance(id="CMS_topreweight", label="Top pT reweighting", distr="shapeQ", function="ShapeVariation", systVariation="TopPt")
 PU_Shape       = Nuisance(id="CMS_pileup"     , label="Pileup", distr="shapeQ", function="ShapeVariation", systVariation="PUWeight")
-tf_FakeB_Shape = Nuisance(id="CMS_HPTB_fakeB_transferfactor", label="Transfer Factor uncertainty",  distr="shapeQ", function="QCDShapeVariation", systVariation="TransferFactor")
+#tf_FakeB_Shape = Nuisance(id="CMS_HPTB_fakeB_transferfactor", label="Transfer Factor uncertainty",  distr="shapeQ", function="QCDShapeVariation", systVariation="TransferFactor")
+tf_FakeB_Shape = Nuisance(id="CMS_HPTB_fakeB_transferfactor", label="Transfer Factor uncertainty",  distr="shapeQ", function="QCDShapeVariation", systVariation=OptionFakeBSyst)
 topTag_Shape   = Nuisance(id="CMS_HPTB_toptagging", label="TopTag", distr="shapeQ", function="ShapeVariation", systVariation="TopTagSF")
 # NOTE: systVariation key is first declared in HiggsAnalysis/NtupleAnalysis/python/AnalysisBuilder.py
 
@@ -444,13 +450,13 @@ ttZ_scale_Const      = Nuisance(id="QCDscale_ttZ"      , label="QCD XSection unc
 #tttt_scale_Const     = Nuisance(id="QCDscale_tttt"     , label="TTTT XSection scale uncertainty", distr="lnN", function="Constant", value=tttt_scale_down)
 
 
-#==== Acceptance uncertainties (QCDscale) - new fixme
+#==== Acceptance uncertainties (QCDscale)
 RF_QCDscale_top_const  = Nuisance(id="CMS_HPTB_mu_RF_top" , label="QCDscale acceptance uncertainty for top backgrounds", distr="lnN", function="Constant",value=0.02)
 RF_QCDscale_ewk_const  = Nuisance(id="CMS_HPTB_mu_RF_ewk" , label="QCDscale acceptance uncertainty for EWK backgrounds", distr="lnN", function="Constant",value=0.05)
 RF_QCDscale_HPTB_const = Nuisance(id="CMS_HPTB_mu_RF_HPTB", label="QCDscale acceptance uncertainty for signal"         , distr="lnN", function="Constant",value=0.048)
 #RF_QCDscale_HPTB_const = Nuisance(id="CMS_HPTB_mu_RF_HPTB_heavy", label="QCDscale acceptance uncertainty for signal", distr="lnN", function="Constant",value=0.012)
 
-#==== Acceptance uncertainties  (PDF) -new fixme
+#==== Acceptance uncertainties  (PDF)
 RF_pdf_top_const  = Nuisance(id="CMS_HPTB_pdf_top", label="PDF acceptance uncertainty for top backgrounds", distr="lnN", function="Constant",value=0.02,upperValue=0.0027)
 RF_pdf_ewk_const  = Nuisance(id="CMS_HPTB_pdf_ewk", label="PDF acceptance uncertainty for EWK backgrounds", distr="lnN", function="Constant",value=0.033,upperValue=0.046)
 RF_pdf_HPTB_const = Nuisance(id="CMS_HPTB_pdf_HPTB", label="PDF acceptance uncertainty for signal", distr="lnN", function="Constant",value=0.004,upperValue=0.017)
@@ -485,7 +491,8 @@ if OptionShapeSystematics:
     Nuisances.append(PU_Shape)
     Nuisances.append(JES_Shape)
     Nuisances.append(JER_Shape)
-    Nuisances.append(topPt_Shape)
+    if OptionUseTopPtReweightSyst:
+        Nuisances.append(topPt_Shape)
     Nuisances.append(bTagSF_Shape) 
     Nuisances.append(topTag_Shape)
     Nuisances.append(tf_FakeB_Shape)
@@ -496,8 +503,9 @@ else:
     Nuisances.append(JES_FakeB_Const)
     Nuisances.append(JER_FakeB_Const)
     Nuisances.append(JER_Const)
-    Nuisances.append(topPt_Const)
-    Nuisances.append(topPt_FakeB_Const)
+    if OptionUseTopPtReweightSyst:
+        Nuisances.append(topPt_Const)
+        Nuisances.append(topPt_FakeB_Const)
     Nuisances.append(bTagSF_Const) 
     Nuisances.append(bTagSF_FakeB_Const)
     Nuisances.append(tf_FakeB_Const)

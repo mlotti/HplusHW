@@ -148,8 +148,10 @@ def getBkgDsetCreators(multicrabPaths, bkg1Label, bkg2Label, fakesFromData, mcra
     if fakesFromData:
         if opts.h2tb:
             msg = "Fake-b (Genuine-b) will be estimated from data (signal analysis MC)"
-            if multicrabPaths.getGenuineBPath() == "" or multicrabPaths.getFakeBPath() == "":
-                raise Exception(ErrorStyle() + "Could not find the path for Genuine-b and/or Fake-b datasets" + NormalStyle() )
+            if multicrabPaths.getGenuineBPath() == "":
+                raise Exception(ErrorStyle() + "Could not find the path for Genuine-b datasets" + NormalStyle() )
+            if multicrabPaths.getFakeBPath() == "":
+                raise Exception(ErrorStyle() + "Could not find the path for Fake-b datasets" + NormalStyle() )
             bkg1DsetCreator = getDsetCreator(bkg1Label, multicrabPaths.getGenuineBPath(), mcrabInfoOutput, fakesFromData)
             bkg2DsetCreator = getDsetCreator(bkg2Label, multicrabPaths.getFakeBPath()   , mcrabInfoOutput, fakesFromData)
         else:

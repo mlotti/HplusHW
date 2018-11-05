@@ -123,7 +123,10 @@ def main(opts):
 
 
 def doBRlimit(limits, unblindedStatus, opts, logy=False):
-    
+    '''
+    See https://twiki.cern.ch/twiki/bin/viewauth/CMS/Internal/FigGuidelines
+    '''
+
     graphs = []
     if unblindedStatus:
         gr = limits.observedGraph()
@@ -142,8 +145,8 @@ def doBRlimit(limits, unblindedStatus, opts, logy=False):
     # Add the expected lines
     graphs.extend([
             histograms.HistoGraph(limits.expectedGraph(), "Expected", drawStyle="L"),
-            histograms.HistoGraph(limits.expectedBandGraph(sigma=1), "Expected1", drawStyle="F", legendStyle="fl"),
-            histograms.HistoGraph(limits.expectedBandGraph(sigma=2), "Expected2", drawStyle="F", legendStyle="fl"),
+            histograms.HistoGraph(limits.expectedBandGraph(sigma=1), "Expected1", drawStyle="F", legendStyle="f"), #fl
+            histograms.HistoGraph(limits.expectedBandGraph(sigma=2), "Expected2", drawStyle="F", legendStyle="f"), #fl
             ])
 
     # Plot the TGraphs
@@ -153,12 +156,16 @@ def doBRlimit(limits, unblindedStatus, opts, logy=False):
 
     plot = plots.PlotBase(graphs, saveFormats=saveFormats)
     plot.setLuminosity(limits.getLuminosity())
+    plot.setLegendHeader("95% CL upper limits")
 
     # Customise legend entries
     plot.histoMgr.setHistoLegendLabelMany({
-            "Expected" : None,
-            "Expected1": "Expected median #pm 1#sigma",
-            "Expected2": "Expected median #pm 2#sigma"
+            "Expected": "Median expected",
+            "Expected1": "68% expected",
+            "Expected2": "95% expected"
+            #"Expected" : None,
+            #"Expected1": "Expected median #pm 1#sigma",
+            #"Expected2": "Expected median #pm 2#sigma"
             })
     
     # Branching Ratio Assumption
@@ -256,7 +263,7 @@ def getLegend(limit, opts, xLeg1=0.53):
     # Create customised legend
     #xLeg1 = 0.53
     xLeg2 = 0.93
-    yLeg1 = 0.78 + dy
+    yLeg1 = 0.70 + dy
     yLeg2 = 0.91 + dy
     if opts.unblinded:
         yLeg2 = 0.92 + dy
@@ -357,7 +364,7 @@ def doLimitError(limits, unblindedStatus):
             plot.histoMgr.setHistoLegendLabelMany(obsLabels)
 
     plot.setLegend(histograms.moveLegend(histograms.createLegend(0.48, 0.75, 0.85, 0.92), dx=0.1, dy=-0.1))
-
+ 
     if len(limits.mass) == 1:
         plot.createFrame("limitsBrRelativeUncertainty", opts={"xmin": limits.mass[0]-5.0, "xmax": limits.mass[0]+5.0,  "ymin": 0, "ymaxfactor": 1.5})
     else:
