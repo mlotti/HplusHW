@@ -182,8 +182,8 @@ def GetHistoKwargs(histoName, opts):
             kwargs["moveLegend"] = {"dx": -0.08, "dy": -0.65, "dh": -0.08}
             #myBins  = [0, 50, 100, 150, 250, 350, 400, 500]
             #myBins  = [0, 100, 200, 300, 400, 500, 800]
-        if "_matched" in h:
-            myBins  = [0, 100, 200, 300, 500]
+        #if "_matched" in h:
+        #    myBins  = [0, 100, 200, 300, 500]
         if "_ldg_" in h:
             myBins  = [0, 150, 250, 350, 500]
         if "_sldg_" in h:
@@ -303,21 +303,21 @@ def main(opts, signalMass):
         '''
 
         Numerator = [#"AllTopQuarkPt_MatchedBDT",
-                     #"TrijetFakePt_BDT",
+                     "TrijetFakePt_BDT",
                      #"AssocTopQuarkPt_MatchedBDT",
-                     #"HiggsTopQuarkPt_MatchedBDT",
+                     "HiggsTopQuarkPt_MatchedBDT",
                      #"AllTopQuarkPt_MatchedBDT",
                      #"AllTopQuarkPt_Matched",
-                     "TrijetPt_LdgOrSldg_Matched",
+                     #"TrijetaPt_LdgOrSldg_Matched",
                      ##"TrijetPt_LdgOrSldg_Unmatched",
-                     "TrijetPt_LdgOrSldg_MatchedBDT",
-                     "TrijetPt_LdgOrSldg_MatchedBDT",
-                     "TrijetPt_LdgOrSldg_UnmatchedBDT",
-                     "TrijetPt_LdgOrSldg_UnmatchedBDT",
-                     "TrijetPt_Ldg_Matched",
-                     "TrijetPt_Ldg_MatchedBDT",
+                     #"TrijetPt_LdgOrSldg_MatchedBDT",
+                     #"TrijetPt_LdgOrSldg_MatchedBDT",
+                     #"TrijetPt_LdgOrSldg_UnmatchedBDT",
+                     #"TrijetPt_LdgOrSldg_UnmatchedBDT",
+                     #"TrijetPt_Ldg_Matched",
+                     #"TrijetPt_Ldg_MatchedBDT",
                      ##"TrijetPt_Ldg_MatchedBDT",
-                     "TrijetPt_Ldg_UnmatchedBDT",
+                     #"TrijetPt_Ldg_UnmatchedBDT",
                      #"TrijetPt_Sldg_Matched",
                      #"TrijetPt_Sldg_MatchedBDT",
                      #"TrijetPt_Sldg_MatchedBDT",
@@ -325,21 +325,21 @@ def main(opts, signalMass):
                      
                      ]
         Denominator = [#"AllTopQuarkPt_Matched",
-                       #"TrijetFakePt",
+                       "TrijetFakePt",
                        #"AssocTopQuarkPt_Matched",                       
-                       #"HiggsTopQuarkPt_Matched",                       
+                       "HiggsTopQuarkPt_Matched",                       
                        #"TopQuarkPt",
                        #"TopQuarkPt",
-                       "TrijetPt_LdgOrSldg",
+                       #"TrijetPt_LdgOrSldg",
                        ##"TrijetPt_LdgOrSldg",
-                       "TrijetPt_LdgOrSldg",
-                       "TrijetPt_LdgOrSldg_Matched",
-                       "TrijetPt_LdgOrSldg",
-                       "TrijetPt_LdgOrSldg_Unmatched",
-                       "TrijetPt_Ldg",
-                       "TrijetPt_Ldg",
+                       #"TrijetPt_LdgOrSldg",
+                       #"TrijetPt_LdgOrSldg_Matched",
+                       #"TrijetPt_LdgOrSldg",
+                       #"TrijetPt_LdgOrSldg_Unmatched",
+                       #"TrijetPt_Ldg",
+                       #"TrijetPt_Ldg",
                        ##"TrijetPt_Ldg_Matched",
-                       "TrijetPt_Ldg_Unmatched",
+                       #"TrijetPt_Ldg_Unmatched",
                        #"TrijetPt_Subldg",
                        #"TrijetPt_Subldg",
                        #"TrijetPt_Sldg_Matched",
@@ -511,7 +511,8 @@ def PlotEfficiency(datasetsMgr, numPath, denPath, intLumi):
         #if "charged" in dataset.getName().lower():
         #    if "m_500" in dataset.getName().lower():
         if 1:
-            if "tt" in dataset.getName().lower():
+            #if "tt" in dataset.getName().lower():
+            if "m_500" in dataset.getName().lower():
                 eff_ref = histograms.HistoGraph(eff, plots._legendLabels[dataset.getName()], "lp", "P")
             else:
                 myList.append(histograms.HistoGraph(eff, plots._legendLabels[dataset.getName()], "lp", "P"))

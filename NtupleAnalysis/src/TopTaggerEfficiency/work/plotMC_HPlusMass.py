@@ -119,6 +119,11 @@ def main(opts, signalMass):
         datasetsMgr = GetDatasetsFromDir(opts)
         datasetsMgr.updateNAllEventsToPUWeighted()
         datasetsMgr.loadLuminosities() # from lumi.json
+
+        datasetsMgr_signal = GetDatasetsFromDir(opts)
+        datasetsMgr_signal.updateNAllEventsToPUWeighted()
+        datasetsMgr_signal.loadLuminosities() # from lumi.json
+
         if opts.verbose:
             datasetsMgr.PrintCrossSections()
             datasetsMgr.PrintLuminosities()
@@ -127,7 +132,7 @@ def main(opts, signalMass):
         for d in datasetsMgr.getAllDatasets():
             if "ChargedHiggs" in d.getName():
                 datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
-                       
+                datasetsMgr_signal.getDataset(d.getName()).setCrossSection(1.0)
         # Determine integrated Lumi before removing data
 #        intLumi = datasetsMgr.getDataset("Data").getLuminosity()
         intLumi = 35200
@@ -146,6 +151,20 @@ def main(opts, signalMass):
             datasetsMgr.remove(filter(lambda name: "TTTT" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "FakeBMeasurementTrijetMass" in name, datasetsMgr.getAllDatasetNames()))
             #datasetsMgr.remove(filter(lambda name: "M_" in name and "M_" + str(opts.signalMass) not in name, datasetsMgr.getAllDatasetNames()))
+
+            datasetsMgr_signal.remove(filter(lambda name: "Data" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr_signal.remove(filter(lambda name: "QCD_b" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr_signal.remove(filter(lambda name: "QCD_HT" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr_signal.remove(filter(lambda name: "SingleTop" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr_signal.remove(filter(lambda name: "DYJetsToQQHT" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr_signal.remove(filter(lambda name: "TTZToQQ" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr_signal.remove(filter(lambda name: "TTWJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr_signal.remove(filter(lambda name: "WJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr_signal.remove(filter(lambda name: "Diboson" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr_signal.remove(filter(lambda name: "TTTT" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr_signal.remove(filter(lambda name: "TT" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr_signal.remove(filter(lambda name: "FakeBMeasurementTrijetMass" in name, datasetsMgr.getAllDatasetNames()))
+
         
         if opts.noQCD:
             datasetsMgr.remove(filter(lambda name: "QCD_b" in name, datasetsMgr.getAllDatasetNames()))  
@@ -173,7 +192,7 @@ def main(opts, signalMass):
             datasetOrder.insert(0, m)
             #datasetsMgr.selectAndReorder(newOrder)
         datasetsMgr.selectAndReorder(datasetOrder)
-
+        datasetsMgr_signal.selectAndReorder(datasetOrder)
         # Print dataset information
         datasetsMgr.PrintInfo()
 
@@ -203,11 +222,19 @@ def main(opts, signalMass):
 
         histoPaths = histoPaths1 + histoPaths2
         for h in histoPaths:
-            if "Vs" in h: # Skip TH2D
+            if "vs" in h.lower(): # Skip TH2D
                 continue
-            if "tetrajet" not in h.lower():
-                continue
-            PlotMC(datasetsMgr, h, intLumi)
+            '''
+            if "true" in h.lower():
+                PlotMC(datasetsMgr_signal, h, intLumi)
+            elif "match" in h.lower():
+                PlotMC(datasetsMgr_signal, h, intLumi)
+            '''
+            #else:
+            #if "phi" not in h.lower():
+            #    continue
+            if 1:
+                PlotMC(datasetsMgr, h, intLumi)
 
 
         
@@ -264,6 +291,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
     _xlabel = None
 
     _opts   = {"ymin": 1e-3, "ymaxfactor": 1.0}
+    #_opts   = {"ymin": 1e-3, "ymax": 60}
 
 
     if "pt" in histo.lower():
@@ -292,7 +320,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
         if "ldg" in histo.lower():
             _xlabel = "m_{jjb}^{ldg} (%s)" % _units
     elif "tetrajetmass" in histo.lower():
-        _rebinX = 8 #5 #10 #4
+        _rebinX = 5 #5 #10 #4
         _units  = "GeV/c^{2}"
         _format = "%0.0f " + _units
         _xlabel = "m_{jjbb} (%s)" % (_units)
@@ -350,11 +378,70 @@ def PlotMC(datasetsMgr, histo, intLumi):
         _cutBox = {"cutValue": +0.40, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         _xlabel = "BDTG discriminant"
             
-
+    if "gentop_pt" in histo.lower():
+        _rebinX = 1
+    if "genquark_pt" in histo.lower():
+        _rebinX = 1
+        _opts["xmax"] = 500
     else:
         pass
 
+    if "delta" in histo.lower():
+        _format = "%0.1f "
+        if "phi" in histo.lower():
+            _xlabel = "#Delta #phi"
+        if "deltar" in histo.lower():
+            _rebinX = 2
 
+    if "DiBjetMaxMass_Mass" in histo:
+        _units = "GeV"
+        _rebinX = 4
+        _xlabel = "m_{max}(bb) (%s)" % (_units)
+        _format = "%0.0f " + _units
+        
+    if "DiJetDeltaRmin_Mass" in histo:
+        _units = "GeV"
+        _format = "%0.0f " + _units
+        _xlabel = "m_{#DeltaR_{min}(jj)}(jj) (%s)" % (_units)
+        _opts["xmax"] = 200
+
+    if "DiBjetDeltaRmin_Mass" in histo:
+        _units = "GeV"
+        _format = "%0.0f " + _units
+        _rebinX= 2
+        _xlabel = "m_{#DeltaR_{min}(bb)}(bb) (%s)" % (_units)
+        _opts["xmax"] = 600
+
+    if "LdgBjet_SubldgBjet_Mass" in histo:
+        _units = "GeV"
+        _format = "%0.0f " + _units
+        _rebinX= 4
+        _xlabel = "m(b_{ldg}b_{sldg}) (%s)" % (_units)
+        
+    if "DeltaR_LdgTop_DiBjetDeltaRmin" in histo:
+        _rebinX= 2        
+        _format = "%0.1f "
+        _xlabel = "#DeltaR (top_{ldg}, bb_{#Delta Rmin})"
+
+    if "DeltaR_SubldgTop_DiBjetDeltaRmin" in histo:
+        _rebinX= 2        
+        _format = "%0.1f "
+        _xlabel = "#DeltaR (top_{sldg}, bb_{#Delta Rmin})"
+
+
+    if "phi_alpha" in histo.lower() or "phi_beta" in histo.lower() or "r_alpha" in histo.lower() or "r_beta" in histo.lower():
+        _format = "%0.1f "
+        _opts["xmin"] = 0.0
+        if "phi" in histo.lower():
+            _xlabel = "#phi"
+            _opts["xmax"] = 5.5
+        else:
+            _xlabel = "r"
+            _opts["xmax"] = 6.5
+        if "alpha" in histo.lower():
+            _xlabel = _xlabel+"_{#alpha}"
+        else:
+            _xlabel = _xlabel+"_{#beta}"
     if opts.normaliseToOne:
         logY    = False
         Ylabel  = "Arbitrary Units / %s" % (_format)
@@ -406,7 +493,8 @@ def PlotMC(datasetsMgr, histo, intLumi):
                    ylabel       = Ylabel,
                    log          = logY,
                    rebinX       = _rebinX, cmsExtraText = "Preliminary", 
-                   createLegend = {"x1": 0.59, "y1": 0.65, "x2": 0.92, "y2": 0.92},
+                   #createLegend = {"x1": 0.59, "y1": 0.65, "x2": 0.92, "y2": 0.92},
+                   createLegend = {"x1": 0.59, "y1": 0.70, "x2": 0.92, "y2": 0.92},
                    #createLegend = {"x1": 0.73, "y1": 0.85, "x2": 0.97, "y2": 0.77},
                    opts         = _opts,
                    opts2        = {"ymin": 0.6, "ymax": 1.4},
@@ -461,8 +549,9 @@ if __name__ == "__main__":
     OPTMODE      = ""
     BATCHMODE    = True
     PRECISION    = 3
-    SIGNALMASS   = [200, 500, 650]
-    #SIGNALMASS   = [500, 200]
+    SIGNALMASS   = [200, 300, 400, 500, 650, 800, 1000]
+    SIGNALMASS   = [200, 500, 1000]
+    SIGNALMASS   = []
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False

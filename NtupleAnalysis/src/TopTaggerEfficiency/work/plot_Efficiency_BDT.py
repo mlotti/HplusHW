@@ -1,19 +1,18 @@
 #!/usr/bin/env python
 '''
 DESCRIPTION:
-
+This scripts plots the top (mis)tagging efficiency for varius BDT cuts. All the pseudomulticrabs should be located under the same folder and their name defers ONLY in the BDT cut
 
 USAGE:
-./plot_Efficiency_BDT.py -m <pseudo_mcrab> [opts]
+./plot_Efficiency_BDT.py -m <folder>/<pseudo_mcrab> [opts]
 
 
 EXAMPLES:
-./plot_Efficiency_BDT.py -m MyHplusAnalysis_180202_fullSignalQCDtt --folder topbdtSelection_ --url
+./plot_Efficiency_BDT.py -m BDTcutComparisonPlots_180828_BjetPt40_MassCut400_NewBDTbjetPt40GeV/TopTaggerEfficiency_180827_BDT0p40 --folder topbdtSelection_ --url
 
 
 LAST USED:
-./plot_Efficiency_BDT.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400/TopRecoAnalysis_180320_BDT40/ --folder topbdtSelection_ 
-
+./plot_Efficiency_BDT.py -m BDTcutComparisonPlots_180828_BjetPt40_MassCut400_NewBDTbjetPt40GeV/TopTaggerEfficiency_180827_BDT0p40 --folder topbdtSelection_ --url
 
 STATISTICS OPTIONS:
 https://iktp.tu-dresden.de/~nbarros/doc/root/TEfficiency.html
@@ -270,13 +269,15 @@ def main(opts, signalMass):
         datasetsMgr.updateNAllEventsToPUWeighted()
         datasetsMgr.loadLuminosities() # from lumi.json
 
-        dir = opts.mcrab.replace("_BDT40", "_BDT")
+        dir = opts.mcrab.replace("_BDT0p40", "_BDT0p")
         print dir
+        print dir+"30"
 
         datasetsMgr30 = GetDatasetsFromDir_second(opts, dir+"30")
         datasetsMgr30.updateNAllEventsToPUWeighted()
         datasetsMgr30.loadLuminosities() # from lumi.json                                                                                      
 
+        print dir+"40"
         datasetsMgr40 = GetDatasetsFromDir_second(opts, dir+"40")
         datasetsMgr40.updateNAllEventsToPUWeighted()
         datasetsMgr40.loadLuminosities() # from lumi.json                                                                                                                           
@@ -285,6 +286,7 @@ def main(opts, signalMass):
         #datasetsMgr50.updateNAllEventsToPUWeighted()
         #datasetsMgr50.loadLuminosities() # from lumi.json                                                                                                                           
  
+        print dir+"60"
         datasetsMgr60 = GetDatasetsFromDir_second(opts, dir+"60")
         datasetsMgr60.updateNAllEventsToPUWeighted()
         datasetsMgr60.loadLuminosities() # from lumi.json                                                                                                                               
@@ -293,10 +295,12 @@ def main(opts, signalMass):
         #datasetsMgr70.updateNAllEventsToPUWeighted()
         #datasetsMgr70.loadLuminosities() # from lumi.json                                                                                                                               
 
+        print dir+"80"
         datasetsMgr80 = GetDatasetsFromDir_second(opts, dir+"80")
         datasetsMgr80.updateNAllEventsToPUWeighted()
         datasetsMgr80.loadLuminosities() # from lumi.json                                                                                                                               
 
+        print dir+"90"
         datasetsMgr90 = GetDatasetsFromDir_second(opts, dir+"90")
         datasetsMgr90.updateNAllEventsToPUWeighted()
         datasetsMgr90.loadLuminosities() # from lumi.json                                                                                                                               
@@ -381,7 +385,7 @@ def main(opts, signalMass):
                       #"EventTrijetPt2T_MatchedBDT",
                       "AllTopQuarkPt_MatchedBDT",
                       #"SelectedTrijetsPt_BjetPassCSVdisc_afterCuts",
-                      #"TrijetFakePt_BDT",
+                      "TrijetFakePt_BDT",
                       ]
         Denominators = ["AllTopQuarkPt_Matched",
                         "TopQuarkPt",
@@ -390,11 +394,11 @@ def main(opts, signalMass):
                         #"EventTrijetPt2T",
                         "TopQuarkPt",
                         #'"SelectedTrijetsPt_afterCuts",
-                        #"TrijetFakePt",
+                        "TrijetFakePt",
                         ]
 
         
-        if 0:
+        if 1:
             datasetsMgr.merge("QCD", GetListOfQCDatasets())
             datasetsMgr30.merge("QCD", GetListOfQCDatasets())
             datasetsMgr40.merge("QCD", GetListOfQCDatasets())

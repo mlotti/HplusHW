@@ -129,7 +129,22 @@ private:
 
   WrappedTH1Triplet *hLdgJetQGLikelihood;
   WrappedTH1Triplet *hSubldgJetQGLikelihood;
-
+  WrappedTH1Triplet *hBJetQGLikelihood;
+  //Top-tagger optimization
+  WrappedTH1Triplet *hTrijetCvsL;
+  WrappedTH1Triplet *hDijetCvsL;
+  WrappedTH1Triplet *hTrijetPtD;
+  WrappedTH1Triplet *hDijetPtD;
+  WrappedTH1Triplet *hTrijetAxis2;
+  WrappedTH1Triplet *hDijetAxis2;
+  WrappedTH1Triplet *hTrijetMult;
+  WrappedTH1Triplet *hDijetMult;
+  WrappedTH1Triplet *hTrijetQGLikelihood;
+  WrappedTH1Triplet *hDijetQGLikelihood;
+  WrappedTH1Triplet *hTrijetQGLikelihood_avg;
+  WrappedTH1Triplet *hDijetQGLikelihood_avg;
+  WrappedTH1Triplet *hDijetMassOverTrijetMass;
+  
   WrappedTH1Triplet *hBJetCvsL;
   WrappedTH1Triplet *hBJetPtD;
   WrappedTH1Triplet *hBJetAxis2;
@@ -153,6 +168,7 @@ private:
   WrappedTH1        *hNmatchedTop;
   WrappedTH1        *hNmatchedTrijets;
   WrappedTH1Triplet *hGenTop_Pt;
+  WrappedTH1Triplet *hGenQuark_Pt;
   WrappedTH1        *hTrijetDrMin;
   WrappedTH1        *hTrijetDPtOverGenPt;
   WrappedTH1        *hTrijetDEtaOverGenEta;
@@ -163,6 +179,19 @@ private:
 
   WrappedTH1        *hJetsDeltaRmin;
   WrappedTH1        *hQuarkJetMinDr03_DeltaPtOverPt;
+
+  WrappedTH1        *hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt0To40GeV;
+  WrappedTH1        *hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt40To60GeV;
+  WrappedTH1        *hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt60To80GeV;
+  WrappedTH1        *hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt80To100GeV;
+  WrappedTH1        *hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt100To120GeV;
+  WrappedTH1        *hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt120To140GeV;
+  WrappedTH1        *hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt140To160GeV;
+  WrappedTH1        *hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt160To180GeV;
+  WrappedTH1        *hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt180To200GeV;
+  WrappedTH1        *hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt200ToInfGeV;
+
+
   //Correlations
   WrappedTH2Triplet *hTrijetPtDrVsTrijetMass;
   WrappedTH2Triplet *hTrijetPtDrVsBjetLdgJetMass;
@@ -171,8 +200,11 @@ private:
   WrappedTH2Triplet *hTrijetMassVsBjetLdgJetMass;
   WrappedTH2Triplet *hTrijetMassVsBjetSubldgJetMass;
   WrappedTH2Triplet *hTrijetMassVsDijetMass;
-
-
+  
+  WrappedTH2 *hQuarkJetMinDr03_DeltaPtOverPt_vs_QuarkPt;
+  WrappedTH2 *hQuarkJetMinDr03_DeltaR_vs_QuarkPt;
+  WrappedTH2 *hQuarkJetMinDr03_DeltaPtOverPt_vs_DeltaRmin;
+  
   //next WrappedTH1Triplet
 
   // TTree - TBranches       
@@ -207,6 +239,21 @@ private:
   TBranch *TrijetSubldgJetMult_S;
   TBranch *TrijetLdgJetQGLikelihood_S;
   TBranch *TrijetSubldgJetQGLikelihood_S;
+  TBranch *TrijetBJetQGLikelihood_S;
+  //Top tagger optimization
+  TBranch *TrijetCvsL_S;
+  TBranch *TrijetDijetCvsL_S;
+  TBranch *TrijetPtD_S;
+  TBranch *TrijetDijetPtD_S;
+  TBranch *TrijetAxis2_S;
+  TBranch *TrijetDijetAxis2_S;
+  TBranch *TrijetMult_S;
+  TBranch *TrijetDijetMult_S;
+  TBranch *DijetMassOverTrijetMass_S;
+  TBranch *TrijetQGLikelihood_S;
+  TBranch *TrijetDijetQGLikelihood_S;
+  TBranch *TrijetQGLikelihood_avg_S;
+  TBranch *TrijetDijetQGLikelihood_avg_S;
 
   TBranch *weight_B;
   TBranch *TrijetPtDR_B;
@@ -235,8 +282,22 @@ private:
   TBranch *TrijetSubldgJetMult_B;
   TBranch *TrijetLdgJetQGLikelihood_B;
   TBranch *TrijetSubldgJetQGLikelihood_B;
+  TBranch *TrijetBJetQGLikelihood_B;
 
-
+  //Top tagger optimization
+  TBranch *TrijetCvsL_B;
+  TBranch *TrijetDijetCvsL_B;
+  TBranch *TrijetPtD_B;
+  TBranch *TrijetDijetPtD_B;
+  TBranch *TrijetAxis2_B;
+  TBranch *TrijetDijetAxis2_B;
+  TBranch *TrijetMult_B;
+  TBranch *TrijetDijetMult_B;
+  TBranch *DijetMassOverTrijetMass_B;
+  TBranch *TrijetQGLikelihood_B;
+  TBranch *TrijetDijetQGLikelihood_B;
+  TBranch *TrijetQGLikelihood_avg_B;
+  TBranch *TrijetDijetQGLikelihood_avg_B;
 
   //next TBranch
 
@@ -251,23 +312,6 @@ TopRecoTree::TopRecoTree(const ParameterSet& config, const TH1* skimCounters)
     cfg_EtaBinSetting(config.getParameter<ParameterSet>("CommonPlots.etaBins")),
     cfg_PhiBinSetting(config.getParameter<ParameterSet>("CommonPlots.phiBins")),
 
-    /*cfg_PrelimTopMVACut(config, "FakeBMeasurement.prelimTopMVACut"),
-    fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kTopReco, fHistoWrapper),
-    cAllEvents(fEventCounter.addCounter("all events")),
-    cTrigger(fEventCounter.addCounter("passed trigger")),
-    fMETFilterSelection(config.getParameter<ParameterSet>("METFilter"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    cVertexSelection(fEventCounter.addCounter("passed PV")),
-    fElectronSelection(config.getParameter<ParameterSet>("ElectronSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
-    fMuonSelection(config.getParameter<ParameterSet>("MuonSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
-    fTauSelection(config.getParameter<ParameterSet>("TauSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
-    fJetSelection(config.getParameter<ParameterSet>("JetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    cBTaggingSFCounter(fEventCounter.addCounter("b tag SF")),
-    fMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    fTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    fTopSelection(config.getParameter<ParameterSet>("TopSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    cSelected(fEventCounter.addCounter("Selected Events"))
-    */
     cfg_MassBinSetting(config.getParameter<ParameterSet>("CommonPlots.invMassBins")),
     cfg_DeltaEtaBinSetting(config.getParameter<ParameterSet>("CommonPlots.deltaEtaBins")),
     cfg_DeltaPhiBinSetting(config.getParameter<ParameterSet>("CommonPlots.deltaPhiBins")),
@@ -284,10 +328,6 @@ TopRecoTree::TopRecoTree(const ParameterSet& config, const TH1* skimCounters)
     fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cBTaggingSFCounter(fEventCounter.addCounter("b tag SF")),
     fMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    //fTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-
-    //    fTopSelection(config.getParameter<ParameterSet>("TopSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    //    fTopSelectionBDT(config.getParameter<ParameterSet>("TopSelectionBDT"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     
     cSelected(fEventCounter.addCounter("Selected Events"))
 
@@ -306,10 +346,6 @@ void TopRecoTree::book(TDirectory *dir) {
   fJetSelection.bookHistograms(dir);
   fBJetSelection.bookHistograms(dir);
   fMETSelection.bookHistograms(dir);
-  //fTopologySelection.bookHistograms(dir);
-  //  fTopSelection.bookHistograms(dir);
-  //  fTopSelectionBDT.bookHistograms(dir);
-
   
   // Fixed-binning
   const int nBinsPt    = cfg_PtBinSetting.bins();
@@ -324,42 +360,23 @@ void TopRecoTree::book(TDirectory *dir) {
   const double minPhi  = cfg_PhiBinSetting.min();
   const double maxPhi  = cfg_PhiBinSetting.max();
 
-
-  /* 
-   
-  const int nBinsM     = cfg_MassBinSetting.bins();
-  const double minM    = cfg_MassBinSetting.min();
-  const double maxM    = cfg_MassBinSetting.max();
   
-  const int nBinsdEta  = cfg_DeltaEtaBinSetting.bins();
-  const double mindEta = cfg_DeltaEtaBinSetting.min();
-  const double maxdEta = cfg_DeltaEtaBinSetting.max();
-
-  const int nBinsdPhi  = cfg_DeltaPhiBinSetting.bins();
-  const double mindPhi = cfg_DeltaPhiBinSetting.min();
-  const double maxdPhi = cfg_DeltaPhiBinSetting.max();
-
-  const int nBinsdR    = cfg_DeltaRBinSetting.bins();
-  const double mindR   = cfg_DeltaRBinSetting.min();
-  const double maxdR   = cfg_DeltaRBinSetting.max();
-  */
-
-    // Create directories for normalization                                                                                                                                                
-    std::string myInclusiveLabel  = "TrijetCandidate";
-    std::string myFakeLabel       = myInclusiveLabel+"Fake";
-    std::string myGenuineLabel    = myInclusiveLabel+"Genuine";
-    TDirectory* myInclusiveDir         = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myInclusiveLabel);
-    TDirectory* myFakeDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myFakeLabel);
-    TDirectory* myGenuineDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myGenuineLabel);
-    std::vector<TDirectory*> myDirs = {myInclusiveDir, myFakeDir, myGenuineDir};
-    
-    std::string myInclusiveLabel_2d  = "Scatterplots_";
-    std::string myFakeLabel_2d       = myInclusiveLabel_2d+"Fake";
-    std::string myGenuineLabel_2d    = myInclusiveLabel_2d+"Genuine";
-    TDirectory* myInclusiveDir_2d         = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myInclusiveLabel_2d);
-    TDirectory* myFakeDir_2d = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myFakeLabel_2d);
-    TDirectory* myGenuineDir_2d = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myGenuineLabel_2d);
-    std::vector<TDirectory*> myDirs_2d = {myInclusiveDir_2d, myFakeDir_2d, myGenuineDir_2d};
+  // Create directories for normalization                                                                                                                                                
+  std::string myInclusiveLabel  = "TrijetCandidate";
+  std::string myFakeLabel       = myInclusiveLabel+"Fake";
+  std::string myGenuineLabel    = myInclusiveLabel+"Genuine";
+  TDirectory* myInclusiveDir    = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myInclusiveLabel);
+  TDirectory* myFakeDir    = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myFakeLabel);
+  TDirectory* myGenuineDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myGenuineLabel);
+  std::vector<TDirectory*> myDirs = {myInclusiveDir, myFakeDir, myGenuineDir};
+  
+  std::string myInclusiveLabel_2d  = "Scatterplots_";
+  std::string myFakeLabel_2d       = myInclusiveLabel_2d+"Fake";
+  std::string myGenuineLabel_2d    = myInclusiveLabel_2d+"Genuine";
+  TDirectory* myInclusiveDir_2d    = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myInclusiveLabel_2d);
+  TDirectory* myFakeDir_2d    = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myFakeLabel_2d);
+  TDirectory* myGenuineDir_2d = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myGenuineLabel_2d);
+  std::vector<TDirectory*> myDirs_2d = {myInclusiveDir_2d, myFakeDir_2d, myGenuineDir_2d};
 
     //Top Reconstruction Variables
   hTrijetPt           = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TrijetPt", ";p_{T} (GeV/c)", 2*nBinsPt, minPt , 2*maxPt);
@@ -385,20 +402,36 @@ void TopRecoTree::book(TDirectory *dir) {
   hSubldgJetAxis2 = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "SubldgJetAxis2",";axis2",50,0.0,0.2);
   hLdgJetMult     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "LdgJetMult",";mult",50,0,50);
   hSubldgJetMult  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "SubldgJetMult",";mult",50,0,50);
-  hLdgJetQGLikelihood  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "LdgJetQGLikelihood",";Quark-Gluon Likelihood",100,0.0,1.0);
+  hLdgJetQGLikelihood     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "LdgJetQGLikelihood",";Quark-Gluon Likelihood",100,0.0,1.0);
   hSubldgJetQGLikelihood  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "SubldgJetQGLikelihood",";Quark-Gluon Likelihood",100,0.0,1.0);
+
+  // Top-tagger optimization
+  hTrijetCvsL    = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TrijetAvgCvsL", ";avg CvsL discr", 200,-1,1);
+  hDijetCvsL     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "DijetAvgCvsL", ";avg CvsL discr", 200,-1,1);
+  hTrijetPtD     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TrijetAvgPtD", ";avg p_{T}D",100,0.0,1.0);
+  hDijetPtD      = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "DijetAvgPtD",   ";avg p_{T}D",100,0.0,1.0);
+  hTrijetAxis2   = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TrijetAvgAxis2", ";avg axis2",50,0,0.2);
+  hDijetAxis2    = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "DijetAvgAxis2",  ";avg axis2",50,0,0.2);
+  hTrijetMult    = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TrijetAvgMult", ";avg mult",50,0,50);
+  hDijetMult     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "DijetAvgMult",   ";avg mult",50,0,50);
+  hTrijetQGLikelihood  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TrijetQGLikelihood",";Quark-Gluon Likelihood",100,0.0,1.0);
+  hDijetQGLikelihood   = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "DijetQGLikelihood",";Quark-Gluon Likelihood",100,0.0,1.0);
+  hTrijetQGLikelihood_avg = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "TrijetQGLikelihood_avg",";Quark-Gluon Likelihood",100,0.0,1.0);
+  hDijetQGLikelihood_avg  = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "DijetQGLikelihood_avg",";Quark-Gluon Likelihood",100,0.0,1.0);
+  hDijetMassOverTrijetMass = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "DijetMassOverTrijetMass", ";m_{W}/m_{top}", 100,0.0,1.0);
 
 
   hBJetCvsL     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "BJetCvsL",";CvsL discr", 200,-1,1);
   hBJetPtD      = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "BJetPtD",";p_{T}D",100,0.0,1.0);
   hBJetAxis2    = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "BJetAxis2",";axis2",50,0,0.2);
   hBJetMult     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "BJetMult",";mult",50,0,50);
+  hBJetQGLikelihood     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "BJetQGLikelihood",";Quark-Gluon Likelihood",100,0.0,1.0);
 
   hCJetCvsL     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "CJetCvsL",";CvsL discr", 200,-1,1);
   hCJetPtD      = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "CJetPtD",";p_{T}D",100,0.0,1.0);
   hCJetAxis2    = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "CJetAxis2",";axis2",50,0,0.2);
   hCJetMult     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "CJetMult",";mult",50,0,50);
-  hCJetBdisc = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs,"CJetBdisc",";b-tag discr",100,0.0,1.0);
+  hCJetBdisc    = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "CJetBdisc",";b-tag discr",100,0.0,1.0);
 
   hAllJetCvsL     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "AllJetCvsL",";CvsL discr", 200,-1,1);
   hAllJetPtD      = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs, "AllJetPtD",";p_{T}D",100,0.0,1.0);
@@ -410,15 +443,28 @@ void TopRecoTree::book(TDirectory *dir) {
   hNmatchedTop     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug,myInclusiveDir,"NmatchedTrijets",";NTrijet_{matched}",4,-0.5,3.5);
   hNmatchedTrijets = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug,myInclusiveDir,"NmatchedTrijetCand",";NTrijet_{matched}",4,-0.5,3.5);
   hGenTop_Pt       = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs,"GenTop_Pt", ";p_{T} (GeV/c)", 2*nBinsPt, minPt , 2*maxPt);
+  hGenQuark_Pt     = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myDirs,"GenQuark_Pt", ";p_{T} (GeV/c)", 2*nBinsPt, minPt , 2*maxPt);
 
   hTrijetDrMin          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital,myInclusiveDir,"TrijetDrMin",";#Delta R", 50,0.0,0.5);
-  hTrijetDPtOverGenPt   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital,myInclusiveDir,"TrijetDPtOverGenPt","#;Delta P_{T}/P_{T,qqb}", 500,-2.5,2.5);
+  hTrijetDPtOverGenPt   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital,myInclusiveDir,"TrijetDPtOverGenPt",";#Delta P_{T}/P_{T,qqb}", 500,-2.5,2.5);
   hTrijetDEtaOverGenEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug,myInclusiveDir,"TrijetDEtaOverGenEta",";#Delta #eta/#eta_{qqb}", 200,-1.0,1.0);
   hTrijetDPhiOverGenPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug,myInclusiveDir,"TrijetDPhiOverGenPhi",";#Delta #phi/#phi_{qqb}", 200,-1.0,1.0);
   hTrijetDPt_matched    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug,myInclusiveDir,"TrijetDPt_matched",";#Delta P_{T}", 2*nBinsPt, -maxPt , maxPt);
   hTrijetDEta_matched   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital,myInclusiveDir,"TrijetDEta_matched",";#Delta #eta", 80,-0.4,0.4);
   hTrijetDPhi_matched   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital,myInclusiveDir,"TrijetDPhi_matched",";#Delta #phi", 80,-0.4,0.4);
   hQuarkJetMinDr03_DeltaPtOverPt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital,myInclusiveDir,"QuarkJetMinDr03_DeltaPtOverPt","#;Delta P_{T}(jet-quark)/P_{T,q}", 500,-2.5,2.5);
+
+  hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt0To40GeV=fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital,myInclusiveDir,"QuarkJetMinDr03_DeltaPtOverPt_0To40GeV","#;Delta P_{T}(jet-quark)/P_{T,q}",500,-2.5,2.5);
+  hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt40To60GeV=fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital,myInclusiveDir,"QuarkJetMinDr03_DeltaPtOverPt_40To60GeV","#;Delta P_{T}(jet-quark)/P_{T,q}",500,-2.5,2.5);
+  hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt60To80GeV=fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital,myInclusiveDir,"QuarkJetMinDr03_DeltaPtOverPt_60To80GeV","#;Delta P_{T}(jet-quark)/P_{T,q}",500,-2.5,2.5);
+  hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt80To100GeV=fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital,myInclusiveDir,"QuarkJetMinDr03_DeltaPtOverPt_80To100GeV","#;Delta P_{T}(jet-quark)/P_{T,q}",500,-2.5,2.5);
+  hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt100To120GeV=fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital,myInclusiveDir,"QuarkJetMinDr03_DeltaPtOverPt_100To120GeV","#;Delta P_{T}(jet-quark)/P_{T,q}",500,-2.5,2.5);
+  hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt120To140GeV=fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital,myInclusiveDir,"QuarkJetMinDr03_DeltaPtOverPt_120To140GeV","#;Delta P_{T}(jet-quark)/P_{T,q}",500,-2.5,2.5);
+  hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt140To160GeV=fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital,myInclusiveDir,"QuarkJetMinDr03_DeltaPtOverPt_140To160GeV","#;Delta P_{T}(jet-quark)/P_{T,q}",500,-2.5,2.5);
+  hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt160To180GeV=fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital,myInclusiveDir,"QuarkJetMinDr03_DeltaPtOverPt_160To180GeV","#;Delta P_{T}(jet-quark)/P_{T,q}",500,-2.5,2.5);
+  hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt180To200GeV=fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital,myInclusiveDir,"QuarkJetMinDr03_DeltaPtOverPt_180To200GeV","#;Delta P_{T}(jet-quark)/P_{T,q}",500,-2.5,2.5);
+  hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt200ToInfGeV=fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital,myInclusiveDir,"QuarkJetMinDr03_DeltaPtOverPt_2000ToInfGeV","#;Delta P_{T}(jet-quark)/P_{T,q}",500,-2.5,2.5);
+  
   //Correlation plots
   hTrijetPtDrVsTrijetMass        = fHistoWrapper.makeTHTriplet<TH2F>(true, HistoLevel::kVital, myDirs_2d,"TrijetPtDrVsTrijetMass", ";p_{T}#Delta R_{T};m_{jjb}",100,0.0,1000,  100,0.0,1000);
   hTrijetPtDrVsBjetLdgJetMass    = fHistoWrapper.makeTHTriplet<TH2F>(true, HistoLevel::kVital, myDirs_2d,"TrijetPtDrVsBjetLdgJetMass",";p_{T}#Delta R_{T};m_{b+ldgJet}",100,0.0,1000, 100,0.0,1000);
@@ -428,7 +474,14 @@ void TopRecoTree::book(TDirectory *dir) {
   hTrijetMassVsBjetSubldgJetMass = fHistoWrapper.makeTHTriplet<TH2F>(true, HistoLevel::kVital, myDirs_2d,"TrijetMassVsBjetSubldgJetMass",";m_{jjb};m_{b+subldgJet}" ,100,0.0,1000, 100,0.0,1000);
   hTrijetMassVsDijetMass         = fHistoWrapper.makeTHTriplet<TH2F>(true, HistoLevel::kVital, myDirs_2d,"TrijetMassVsDijetMass",";m_{jjb};m_{W}", 100,0.0,1000, 100,0.0,1000);
 
+  hQuarkJetMinDr03_DeltaPtOverPt_vs_QuarkPt = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, myInclusiveDir_2d,"QuarkJetMinDr03_DeltaPtOverPt_vs_QuarkPt", ";#Delta P_{T}/P_{T};P_{T} (GeV/c)", 
+									 500,-2.5,2.5, 2*nBinsPt, minPt , 2*maxPt);
+  hQuarkJetMinDr03_DeltaR_vs_QuarkPt        = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, myInclusiveDir_2d,"QuarkJetMinDr03_DeltaR_vs_QuarkPt", ";#Delta R;P_{T} (GeV/c)",
+									 100,0.0,1.0, 2*nBinsPt, minPt , 2*maxPt);
+  hQuarkJetMinDr03_DeltaPtOverPt_vs_DeltaRmin   = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, myInclusiveDir_2d,"QuarkJetMinDr03_DeltaPtOverPt_vs_DeltaRmin", ";#Delta P_{T}/P_{T};#Delta R",
+									     500,-2.5,2.5, 100,0.0,1.0);
   hJetsDeltaRmin =   fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital,myInclusiveDir,"JetsDeltaRmin",";#Delta R", 50,0.0,0.5);
+
   // TTree
   treeS = new TTree("treeS", "TTree");
   treeB = new TTree("treeB", "TTree");
@@ -460,8 +513,23 @@ void TopRecoTree::book(TDirectory *dir) {
   TrijetLdgJetMult_S       = treeS -> Branch ("TrijetLdgJetMult",         &TrijetLdgJetMult_S,       "TrijetLdgJetMult_S/I"        );
   TrijetSubldgJetMult_S    = treeS -> Branch ("TrijetSubldgJetMult",      &TrijetSubldgJetMult_S,    "TrijetSubldgJetMult_S/I"     );
 
-  TrijetLdgJetQGLikelihood_S    = treeS -> Branch ("TrijetLdgJetQGLikelihood",&TrijetLdgJetQGLikelihood_S, "TrijetLdgJetQGLikelihood_S/F");
+  TrijetLdgJetQGLikelihood_S       = treeS -> Branch ("TrijetLdgJetQGLikelihood",&TrijetLdgJetQGLikelihood_S, "TrijetLdgJetQGLikelihood_S/F");
   TrijetSubldgJetQGLikelihood_S    = treeS -> Branch ("TrijetSubldgJetQGLikelihood",&TrijetSubldgJetQGLikelihood_S, "TrijetSubldgJetQGLikelihood_S/F");
+  TrijetBJetQGLikelihood_S       = treeS -> Branch ("TrijetBJetQGLikelihood",&TrijetBJetQGLikelihood_S, "TrijetBJetQGLikelihood_S/F");
+  //Top tagger optimization
+  TrijetCvsL_S             = treeS -> Branch ("TrijetCvsL",               &TrijetCvsL_S,             "TrijetCvsL_S/F"              );
+  TrijetDijetCvsL_S        = treeS -> Branch ("TrijetDijetCvsL",          &TrijetDijetCvsL_S,        "TrijetDijetCvsL_S/F"         );
+  TrijetPtD_S              = treeS -> Branch ("TrijetPtD",                &TrijetPtD_S,              "TrijetPtD_S/F"               );
+  TrijetDijetPtD_S         = treeS -> Branch ("TrijetDijetPtD",           &TrijetDijetPtD_S,         "TrijetDijetPtD_S/F"          );
+  TrijetAxis2_S            = treeS -> Branch ("TrijetAxis2",              &TrijetAxis2_S,            "TrijetAxis2_S/F"             );
+  TrijetDijetAxis2_S       = treeS -> Branch ("TrijetDijetAxis2",         &TrijetDijetAxis2_S,       "TrijetDijetAxis2_S/F"        );
+  TrijetMult_S             = treeS -> Branch ("TrijetMult",               &TrijetMult_S,             "TrijetMult_S/F"              );
+  TrijetDijetMult_S        = treeS -> Branch ("TrijetDijetMult",          &TrijetDijetMult_S,        "TrijetDijetMult_S/F"         );
+  DijetMassOverTrijetMass_S= treeS -> Branch ("DijetMassOverTrijetMass",  &DijetMassOverTrijetMass_S,"DijetMassOverTrijetMass_S/F" );
+  TrijetQGLikelihood_S          = treeS -> Branch ("TrijetQGLikelihood",     &TrijetQGLikelihood_S,      "TrijetQGLikelihood_S/F");
+  TrijetDijetQGLikelihood_S     = treeS -> Branch ("TrijetDijetQGLikelihood",&TrijetDijetQGLikelihood_S, "TrijeDijettQGLikelihood_S/F");
+  TrijetQGLikelihood_avg_S          = treeS -> Branch ("TrijetQGLikelihood_avg",     &TrijetQGLikelihood_avg_S,      "TrijetQGLikelihood_avg_S/F");
+  TrijetDijetQGLikelihood_avg_S     = treeS -> Branch ("TrijetDijetQGLikelihood_avg",&TrijetDijetQGLikelihood_avg_S, "TrijeDijettQGLikelihood_avg_S/F");
 
   weight_B                  = treeB -> Branch ("eventWeight",             &weight_B,                 "eventWeight_B/F"             );
 
@@ -490,9 +558,23 @@ void TopRecoTree::book(TDirectory *dir) {
   TrijetLdgJetMult_B       = treeB -> Branch ("TrijetLdgJetMult",         &TrijetLdgJetMult_B,       "TrijetLdgJetMult_B/I"        );
   TrijetSubldgJetMult_B    = treeB -> Branch ("TrijetSubldgJetMult",      &TrijetSubldgJetMult_B,    "TrijetSubldgJetMult_B/I"     );
 
-  TrijetLdgJetQGLikelihood_B    = treeB -> Branch ("TrijetLdgJetQGLikelihood",&TrijetLdgJetQGLikelihood_B, "TrijetLdgJetQGLikelihood_B/F");
+  TrijetLdgJetQGLikelihood_B       = treeB -> Branch ("TrijetLdgJetQGLikelihood",&TrijetLdgJetQGLikelihood_B, "TrijetLdgJetQGLikelihood_B/F");
   TrijetSubldgJetQGLikelihood_B    = treeB -> Branch ("TrijetSubldgJetQGLikelihood",&TrijetSubldgJetQGLikelihood_B, "TrijetSubldgJetQGLikelihood_B/F");
-
+  TrijetBJetQGLikelihood_B       = treeB -> Branch ("TrijetBJetQGLikelihood",&TrijetBJetQGLikelihood_B, "TrijetBJetQGLikelihood_B/F");
+  //Top tagger optimization
+  TrijetCvsL_B             = treeB -> Branch ("TrijetCvsL",               &TrijetCvsL_B,             "TrijetCvsL_B/F"              );
+  TrijetDijetCvsL_B        = treeB -> Branch ("TrijetDijetCvsL",          &TrijetDijetCvsL_B,        "TrijetDijetCvsL_B/F"         );
+  TrijetPtD_B              = treeB -> Branch ("TrijetPtD",                &TrijetPtD_B,              "TrijetPtD_B/F"               );
+  TrijetDijetPtD_B         = treeB -> Branch ("TrijetDijetPtD",           &TrijetDijetPtD_B,         "TrijetDijetPtD_B/F"          );
+  TrijetAxis2_B            = treeB -> Branch ("TrijetAxis2",              &TrijetAxis2_B,            "TrijetAxis2_B/F"             );
+  TrijetDijetAxis2_B       = treeB -> Branch ("TrijetDijetAxis2",         &TrijetDijetAxis2_B,       "TrijetDijetAxis2_B/F"        );
+  TrijetMult_B             = treeB -> Branch ("TrijetMult",               &TrijetMult_B,             "TrijetMult_B/F"              );
+  TrijetDijetMult_B        = treeB -> Branch ("TrijetDijetMult",          &TrijetDijetMult_B,        "TrijetDijetMult_B/F"         );
+  DijetMassOverTrijetMass_B= treeB -> Branch ("DijetMassOverTrijetMass",  &DijetMassOverTrijetMass_B,"DijetMassOverTrijetMass_B/F" );
+  TrijetQGLikelihood_B          = treeB -> Branch ("TrijetQGLikelihood",     &TrijetQGLikelihood_B,      "TrijetQGLikelihood_B/F");
+  TrijetDijetQGLikelihood_B     = treeB -> Branch ("TrijetDijetQGLikelihood",&TrijetDijetQGLikelihood_B, "TrijeDijettQGLikelihood_B/F");
+  TrijetQGLikelihood_avg_B          = treeB -> Branch ("TrijetQGLikelihood_avg",     &TrijetQGLikelihood_avg_B,      "TrijetQGLikelihood_avg_B/F");
+  TrijetDijetQGLikelihood_avg_B     = treeB -> Branch ("TrijetDijetQGLikelihood_avg",&TrijetDijetQGLikelihood_avg_B, "TrijeDijettQGLikelihood_avg_B/F");
 
   //next branch
 
@@ -500,22 +582,17 @@ void TopRecoTree::book(TDirectory *dir) {
 }
 
 
-/*                                                                                                                                                                                            
-  Get all gen particles by pdgId                                                                                                                
-*/
+//  Get all gen particles by pdgId                                                                                                                
 vector<genParticle> TopRecoTree::GetGenParticles(const vector<genParticle> genParticles, const int pdgId)
 {
   std::vector<genParticle> particles;
 
   // For-loop: All genParticles                                                                                                                                     
   for (auto& p: genParticles){
-
     // Find last copy of a given particle                                                                                                                             
     if (!p.isLastCopy()) continue;
-
     // Consider only particles                                                                                                                          
     if (std::abs(p.pdgId()) != pdgId) continue;
-
     // Save this particle                                                                                                                                         
     particles.push_back(p);
   }
@@ -523,9 +600,7 @@ vector<genParticle> TopRecoTree::GetGenParticles(const vector<genParticle> genPa
 }
 
 
-/*                                                                                                                                                                                                  
-  Get the last copy of a particle.                                                                                                                                                                                    
-*/
+//  Get the last copy of a particle.
 const genParticle TopRecoTree::GetLastCopy(const vector<genParticle> genParticles, const genParticle &p){
 
   int gen_pdgId = p.pdgId();
@@ -545,12 +620,12 @@ const genParticle TopRecoTree::GetLastCopy(const vector<genParticle> genParticle
 Jet TopRecoTree::getLeadingSubleadingJet(const Jet& jet0, const Jet& jet1, string selectedJet){
   if (selectedJet != "leading" && selectedJet!="subleading") std::cout<<"WARNING! Unknown option "<<selectedJet<<". Function getLeadingSubleadingJet returns leading Jet"<<std::endl;
   Jet leadingJet, subleadingJet;
-  if (jet0.pt() > jet1.pt()){                                                                                                                                                                                         
-    leadingJet    = jet0;                                                                                                                                                                                           
+  if (jet0.pt() > jet1.pt()){
+    leadingJet    = jet0;
     subleadingJet = jet1;                                                                                                                                                                              
-  }                                                                                                                                                                                                                
+  } 
   else{                                                                                                                                                                           
-    leadingJet    = jet1;                                                                                                                                                                               
+    leadingJet    = jet1;
     subleadingJet = jet0;
   }
 
@@ -744,7 +819,7 @@ void TopRecoTree::process(Long64_t entry) {
   if (fEvent.isMC()) 
     {
       fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
-   }
+    }
   cBTaggingSFCounter.increment();
 
 
@@ -756,29 +831,6 @@ void TopRecoTree::process(Long64_t entry) {
   //if (!METData.passedSelection()) return;
   
 
-  //================================================================================================
-  // 12) Topology selection
-  //================================================================================================
-  // if(0) std::cout << "=== Topology selection" << std::endl;
-  // const TopologySelection::Data TopologyData = fTopologySelection.analyze(fEvent, jetData);
-  // if (!TopologyData.passedSelection()) return;
-
-  //================================================================================================
-  // 13) Top selection
-  //================================================================================================
-  // if (0){ //soti removed topSelection
-  //   if(0) std::cout << "=== Top selection" << std::endl;
-  //  const TopSelection::Data TopData = fTopSelection.analyze(fEvent, jetData, bjetData);
-  //   if (!TopData.passedSelection()) return;
-  // }
-
-
-  //================================================================================================                            
-  // 14) Top BDT selection                                                                                                     
-  //================================================================================================                                                              
-  //  if (0) std::cout << "=== Top BDT selection" << std::endl;
-  // const TopSelectionBDT::Data topBDTData = fTopSelectionBDT.analyze(fEvent, jetData, bjetData);
-
 
   //================================================================================================
   // All cuts passed
@@ -787,27 +839,41 @@ void TopRecoTree::process(Long64_t entry) {
   cSelected.increment();
 
 
-
   // Define the addresses of the variables which will be added to the TTree
+  // Signal
   float eventWeight_S;
 
-  float trijetPtDR_S, trijetDijetPtDR_S, trijetBjetMass_S, trijetLdgJetPt_S, trijetLdgJetEta_S, trijetLdgJetBDisc_S, trijetSubldgJetPt_S, trijetSubldgJetEta_S, trijetSubldgJetBDisc_S, trijetBJetLdgJetMass_S, trijetBJetSubldgJetMass_S, trijetDijetMass_S, trijetBJetBDisc_S, trijetMass_S,trijetSoftDrop_n2_S;
+  float trijetPtDR_S, trijetDijetPtDR_S, trijetBjetMass_S, trijetLdgJetPt_S, trijetLdgJetEta_S, trijetLdgJetBDisc_S, 
+    trijetSubldgJetPt_S, trijetSubldgJetEta_S, trijetSubldgJetBDisc_S, trijetBJetLdgJetMass_S, trijetBJetSubldgJetMass_S, 
+    trijetDijetMass_S, trijetBJetBDisc_S, trijetMass_S,trijetSoftDrop_n2_S;
 
   float trijetLdgJetCvsL_S, trijetSubldgJetCvsL_S, trijetLdgJetPtD_S, trijetSubldgJetPtD_S, trijetLdgJetAxis2_S, trijetSubldgJetAxis2_S;
   int trijetLdgJetMult_S, trijetSubldgJetMult_S;
-  float trijetLdgJetQGLikelihood_S, trijetSubldgJetQGLikelihood_S;
+  float trijetLdgJetQGLikelihood_S, trijetSubldgJetQGLikelihood_S, trijetBJetQGLikelihood_S;
 
+  //Top tagger optimization
+  float trijetCvsL_S, trijetDijetCvsL_S, trijetPtD_S, trijetDijetPtD_S, trijetAxis2_S, trijetDijetAxis2_S, trijetMult_S, trijetDijetMult_S, dijetMassOverTrijetMass_S,
+    trijetQGLikelihood_S, trijetDijetQGLikelihood_S, trijetQGLikelihood_avg_S, trijetDijetQGLikelihood_avg_S;
+  
+
+  //Background
   float eventWeight_B;
 
-  float trijetPtDR_B, trijetDijetPtDR_B, trijetBjetMass_B, trijetLdgJetPt_B, trijetLdgJetEta_B, trijetLdgJetBDisc_B, trijetSubldgJetPt_B, trijetSubldgJetEta_B, trijetSubldgJetBDisc_B, trijetBJetLdgJetMass_B, trijetBJetSubldgJetMass_B, trijetDijetMass_B, trijetBJetBDisc_B, trijetMass_B, trijetSoftDrop_n2_B;
-
+  float trijetPtDR_B, trijetDijetPtDR_B, trijetBjetMass_B, trijetLdgJetPt_B, trijetLdgJetEta_B, trijetLdgJetBDisc_B, 
+    trijetSubldgJetPt_B, trijetSubldgJetEta_B, trijetSubldgJetBDisc_B, trijetBJetLdgJetMass_B, trijetBJetSubldgJetMass_B, 
+    trijetDijetMass_B, trijetBJetBDisc_B, trijetMass_B, trijetSoftDrop_n2_B;
+  
   float trijetLdgJetCvsL_B, trijetSubldgJetCvsL_B, trijetLdgJetPtD_B, trijetSubldgJetPtD_B, trijetLdgJetAxis2_B, trijetSubldgJetAxis2_B;
   int trijetLdgJetMult_B, trijetSubldgJetMult_B;
-  float trijetLdgJetQGLikelihood_B, trijetSubldgJetQGLikelihood_B;
-
+  float trijetLdgJetQGLikelihood_B, trijetSubldgJetQGLikelihood_B, trijetBJetQGLikelihood_B;
+  
+  //Top tagger optimization
+  float trijetCvsL_B, trijetDijetCvsL_B, trijetPtD_B, trijetDijetPtD_B, trijetAxis2_B, trijetDijetAxis2_B, trijetMult_B, trijetDijetMult_B, dijetMassOverTrijetMass_B,
+    trijetQGLikelihood_B, trijetDijetQGLikelihood_B, trijetQGLikelihood_avg_B, trijetDijetQGLikelihood_avg_B;
+  
   //next variable 
-  // TTree Variables (Event-Weight)
 
+  // TTree Variables (Event-Weight)
   weight_S                     -> SetAddress(&eventWeight_S);
   TrijetPtDR_S                 -> SetAddress(&trijetPtDR_S);
   TrijetDijetPtDR_S            -> SetAddress(&trijetDijetPtDR_S);
@@ -836,6 +902,21 @@ void TopRecoTree::process(Long64_t entry) {
 
   TrijetLdgJetQGLikelihood_S   -> SetAddress(&trijetLdgJetQGLikelihood_S);
   TrijetSubldgJetQGLikelihood_S-> SetAddress(&trijetSubldgJetQGLikelihood_S);
+  TrijetBJetQGLikelihood_S   -> SetAddress(&trijetBJetQGLikelihood_S);
+  //Top tagger optimization
+  TrijetCvsL_S                 -> SetAddress(&trijetCvsL_S);
+  TrijetDijetCvsL_S            -> SetAddress(&trijetDijetCvsL_S);
+  TrijetPtD_S                  -> SetAddress(&trijetPtD_S);
+  TrijetDijetPtD_S             -> SetAddress(&trijetDijetPtD_S);
+  TrijetAxis2_S                -> SetAddress(&trijetAxis2_S);
+  TrijetDijetAxis2_S           -> SetAddress(&trijetDijetAxis2_S);
+  TrijetMult_S                 -> SetAddress(&trijetMult_S);
+  TrijetDijetMult_S            -> SetAddress(&trijetDijetMult_S);
+  TrijetQGLikelihood_S         -> SetAddress(&trijetQGLikelihood_S);
+  TrijetDijetQGLikelihood_S    -> SetAddress(&trijetDijetQGLikelihood_S);
+  TrijetQGLikelihood_avg_S     -> SetAddress(&trijetQGLikelihood_avg_S);
+  TrijetDijetQGLikelihood_avg_S -> SetAddress(&trijetDijetQGLikelihood_avg_S);
+  DijetMassOverTrijetMass_S    -> SetAddress(&dijetMassOverTrijetMass_S);
 
   weight_B                     -> SetAddress(&eventWeight_B);
   TrijetPtDR_B                 -> SetAddress(&trijetPtDR_B);
@@ -865,6 +946,22 @@ void TopRecoTree::process(Long64_t entry) {
 
   TrijetLdgJetQGLikelihood_B   -> SetAddress(&trijetLdgJetQGLikelihood_B);
   TrijetSubldgJetQGLikelihood_B-> SetAddress(&trijetSubldgJetQGLikelihood_B);
+  TrijetBJetQGLikelihood_B      -> SetAddress(&trijetBJetQGLikelihood_B);
+
+  //Top tagger optimization
+  TrijetCvsL_B                 -> SetAddress(&trijetCvsL_B);
+  TrijetDijetCvsL_B            -> SetAddress(&trijetDijetCvsL_B);
+  TrijetPtD_B                  -> SetAddress(&trijetPtD_B);
+  TrijetDijetPtD_B             -> SetAddress(&trijetDijetPtD_B);
+  TrijetAxis2_B                -> SetAddress(&trijetAxis2_B);
+  TrijetDijetAxis2_B           -> SetAddress(&trijetDijetAxis2_B);
+  TrijetMult_B                 -> SetAddress(&trijetMult_B);
+  TrijetDijetMult_B            -> SetAddress(&trijetDijetMult_B);
+  DijetMassOverTrijetMass_B    -> SetAddress(&dijetMassOverTrijetMass_B);
+  TrijetQGLikelihood_B         -> SetAddress(&trijetQGLikelihood_B);
+  TrijetDijetQGLikelihood_B    -> SetAddress(&trijetDijetQGLikelihood_B);
+  TrijetQGLikelihood_avg_B     -> SetAddress(&trijetQGLikelihood_avg_B);
+  TrijetDijetQGLikelihood_avg_B -> SetAddress(&trijetDijetQGLikelihood_avg_B);
 
   //next address
 
@@ -873,8 +970,8 @@ void TopRecoTree::process(Long64_t entry) {
   //                            Gen Trijet subjets selection                                        //
   //================================================================================================//
 
-  //START
-  const double twoSigma = 0.32;
+  //Soti
+  const double twoSigma = 0.32; //soti
   const double dRcut    = 0.3;
   if (fEvent.isMC()){
 
@@ -885,8 +982,6 @@ void TopRecoTree::process(Long64_t entry) {
     vector<genParticle> GenTops_Quarks;
 
     for (auto& top: GenTops){
-      //Reject boosted top
-      //      if (top.pt() > 500) return;
       vector<genParticle> quarks;
       genParticle bquark;
       bool foundB = false;      
@@ -938,22 +1033,42 @@ void TopRecoTree::process(Long64_t entry) {
     
     
     //Pseudo-matching: Used to calculate the dPt/Pt cut
-    for (size_t i=0; i<GenTops.size(); i++)
+    for (size_t i=0; i<GenTops_Quarks.size(); i++)
       {
 	genParticle Quark      = GenTops_Quarks.at(i);
+	// if (0){ //soti
+	//   bool isQuark_Top0 = (Quark.index() == GenTops_BQuark.at(0).index()) || (Quark.index() == GenTops_LdgQuark.at(0).index()) || (Quark.index() == GenTops_SubldgQuark.at(0).index());
+	//   bool isQuark_Top1 = (Quark.index() == GenTops_BQuark.at(1).index()) || (Quark.index() == GenTops_LdgQuark.at(1).index()) || (Quark.index() == GenTops_SubldgQuark.at(1).index());
+	//   if (isQuark_Top0 && GenTops.at(0).pt() > 100) return;
+	//   if (isQuark_Top1 && GenTops.at(1).pt() > 100) return;
+	// }
 	Jet JetClosest;
 	double dRmin  = 99999.9;
 	for (auto& jet: jetData.getSelectedJets())
 	  {
 	    double dR  = ROOT::Math::VectorUtil::DeltaR( jet.p4(), Quark.p4());
-	    if (dR > dRcut)     continue;
+	    if (dR > dRcut)   continue;
 	    if (dR > dRmin)   continue;
 	    dRmin  = dR;
 	    JetClosest = jet;
 	  }
 	if (dRmin > dRcut) continue;
 	double dPtOverPt = (JetClosest.pt() - Quark.pt())/Quark.pt();
-	hQuarkJetMinDr03_DeltaPtOverPt -> Fill (dPtOverPt);   //2sigma = 2*0.16 = 0.32
+	hQuarkJetMinDr03_DeltaPtOverPt            -> Fill (dPtOverPt);   //2sigma = 2*0.16 = 0.32
+	hQuarkJetMinDr03_DeltaPtOverPt_vs_QuarkPt -> Fill(dPtOverPt, Quark.pt());
+	hQuarkJetMinDr03_DeltaPtOverPt_vs_DeltaRmin -> Fill(dPtOverPt, dRmin);
+
+	if (Quark.pt() < 40)       hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt0To40GeV    -> Fill(dPtOverPt);
+	else if (Quark.pt() < 60)  hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt40To60GeV   -> Fill(dPtOverPt);
+	else if (Quark.pt() < 80)  hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt60To80GeV   -> Fill(dPtOverPt);
+	else if (Quark.pt() < 100) hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt80To100GeV  -> Fill(dPtOverPt);
+	else if (Quark.pt() < 120) hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt100To120GeV -> Fill(dPtOverPt);
+	else if (Quark.pt() < 140) hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt120To140GeV -> Fill(dPtOverPt);
+	else if (Quark.pt() < 160) hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt140To160GeV -> Fill(dPtOverPt);
+	else if (Quark.pt() < 180) hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt160To180GeV -> Fill(dPtOverPt);
+	else if (Quark.pt() < 200) hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt180To200GeV -> Fill(dPtOverPt);
+	else hQuarkJetMinDr03_DeltaPtOverPt_QuarkPt200ToInfGeV -> Fill(dPtOverPt);
+	hQuarkJetMinDr03_DeltaR_vs_QuarkPt        -> Fill(dRmin, Quark.pt());
       }
 
     //========================================================================================================
@@ -990,9 +1105,9 @@ void TopRecoTree::process(Long64_t entry) {
       double dRmin  = 99999.9;
       // double dPtOverPtmin = 99999.9;
       for (auto& bjet: jetData.getSelectedJets()){
-	double dR  = ROOT::Math::VectorUtil::DeltaR( bjet.p4(), BQuark.p4());
+	double dR        = ROOT::Math::VectorUtil::DeltaR( bjet.p4(), BQuark.p4());
 	double dPtOverPt = std::abs((bjet.pt() - BQuark.pt())/BQuark.pt());
-	if (dR > dRcut)     continue;
+	if (dR > dRcut)   continue;
 	if (dR > dRmin)   continue;
 
 	if (dPtOverPt > twoSigma) continue;
@@ -1075,9 +1190,14 @@ void TopRecoTree::process(Long64_t entry) {
 	      }
 	  }   
       }
+      //Gen Quarks: Pt
+      hGenQuark_Pt -> Fill((dR1min<= dRcut), LdgQuark.pt());
+      hGenQuark_Pt -> Fill((dR2min <= dRcut), SubldgQuark.pt());
+      hGenQuark_Pt -> Fill((dRminB.at(i) <= dRcut), GenTops_BQuark.at(i).pt());
       //Genuine if all the top quarks are matched
       genParticle top = GenTops.at(i);
       bool genuine = (dR1min<= dRcut && dR2min <= dRcut && dRminB.at(i) <= dRcut);
+      
       if (genuine){
 	imatched ++;
 	hGenTop_Pt->Fill(true, top.pt());
@@ -1099,19 +1219,18 @@ void TopRecoTree::process(Long64_t entry) {
     }
     hNmatchedTop ->Fill(imatched);
     
-    
-
+    // USED in 2016 analysis
     //Matching criterion: Select events with DeltaR(q,q') > 0.8
-    //Otherwise: Event not used for the training
-    size_t nTops = GenTops_BQuark.size();
-    for (size_t i=0; i<nTops; i++)
-      {
-	double dR12 = ROOT::Math::VectorUtil::DeltaR(GenTops_LdgQuark.at(i).p4(), GenTops_SubldgQuark.at(i).p4());
-	double dR1b = ROOT::Math::VectorUtil::DeltaR(GenTops_LdgQuark.at(i).p4(), GenTops_BQuark.at(i).p4());
-	double dR2b = ROOT::Math::VectorUtil::DeltaR(GenTops_SubldgQuark.at(i).p4(), GenTops_BQuark.at(i).p4());
-	double dRmin = min(min(dR12, dR1b), dR2b);
-	if (dRmin < 0.8) return;
-      }
+    //Otherwise: Event not used for the training    
+    // size_t nTops = GenTops_BQuark.size();
+    // for (size_t i=0; i<nTops; i++)
+    //   {
+    //  	double dR12 = ROOT::Math::VectorUtil::DeltaR(GenTops_LdgQuark.at(i).p4(),    GenTops_SubldgQuark.at(i).p4());
+    //  	double dR1b = ROOT::Math::VectorUtil::DeltaR(GenTops_LdgQuark.at(i).p4(),    GenTops_BQuark.at(i).p4());
+    //  	double dR2b = ROOT::Math::VectorUtil::DeltaR(GenTops_SubldgQuark.at(i).p4(), GenTops_BQuark.at(i).p4());
+    //  	double dRmin = min(min(dR12, dR1b), dR2b);
+    //  	if (dRmin < 0.8) return;
+    //   }
     //================================================================================================//                      
     //                                    Top Candidates                                              //
     //================================================================================================//
@@ -1132,7 +1251,6 @@ void TopRecoTree::process(Long64_t entry) {
 	  if (areSameJets(jet2,  jet1)) continue;
 	  if (areSameJets(jet2,  jet0)) continue;
 	  
-
 	  //********************************** Bjet Matched OR dijet matched*********************************//
 	  //	  if ( isBJet(jet0, MCtrue_Bjet)    ||    ((isMatchedJet(jet1,MCtrue_LdgJet)||isMatchedJet(jet1,MCtrue_SubldgJet))  &&  (isMatchedJet(jet2,MCtrue_LdgJet)||isMatchedJet(jet2,MCtrue_SubldgJet)))  ){
 	  if ( isBJet(jet0, MCtrue_Bjet)    ||    (isWsubjet(jet1,MCtrue_LdgJet, MCtrue_SubldgJet)  &&  isWsubjet(jet2,MCtrue_LdgJet, MCtrue_SubldgJet))){
@@ -1205,9 +1323,7 @@ void TopRecoTree::process(Long64_t entry) {
             }
           }
 
-	  
-	  
-	  
+	  	 	  
 	  //********************** Non of the three subjets is matched************************//
 	  
 	  else if (jet0.bjetDiscriminator() > jet1.bjetDiscriminator() && jet0.bjetDiscriminator() > jet2.bjetDiscriminator()){            
@@ -1232,10 +1348,6 @@ void TopRecoTree::process(Long64_t entry) {
       } //for (auto& jet1: jetData.getSelectedJets()){
     } //for (auto& jet0: jetData.getSelectedJets()){
     
-    
-    
-    
-  
     //========================================================================================================
     //                       Identification of fake, genuine TopCandidates
     //========================================================================================================
@@ -1257,47 +1369,43 @@ void TopRecoTree::process(Long64_t entry) {
     hNmatchedTrijets ->Fill(jmatched);
 
     //========================================================================================================
-    //                           Check Properties of matched objects //Improve me! 
+    //                           Check Properties of matched objects
     //========================================================================================================
     for (size_t j=0; j<MCtrue_Bjet.size(); j++){
 
-      hTrijetDrMin -> Fill( ROOT::Math::VectorUtil::DeltaR(MCtrue_Bjet.at(j).p4(),MGen_Bjet.at(j).p4()));
-      hTrijetDrMin -> Fill( ROOT::Math::VectorUtil::DeltaR(MCtrue_LdgJet.at(j).p4(),MGen_LdgJet.at(j).p4()));
-      hTrijetDrMin -> Fill( ROOT::Math::VectorUtil::DeltaR(MCtrue_SubldgJet.at(j).p4(),MGen_SubldgJet.at(j).p4()));
+      hTrijetDrMin -> Fill( ROOT::Math::VectorUtil::DeltaR(MCtrue_Bjet.at(j).p4(),      MGen_Bjet.at(j).p4()));
+      hTrijetDrMin -> Fill( ROOT::Math::VectorUtil::DeltaR(MCtrue_LdgJet.at(j).p4(),    MGen_LdgJet.at(j).p4()));
+      hTrijetDrMin -> Fill( ROOT::Math::VectorUtil::DeltaR(MCtrue_SubldgJet.at(j).p4(), MGen_SubldgJet.at(j).p4()));
       
-      hTrijetDPtOverGenPt -> Fill( (MCtrue_Bjet.at(j).pt() - MGen_Bjet.at(j).pt())/MGen_Bjet.at(j).pt());
-      hTrijetDPtOverGenPt -> Fill( (MCtrue_LdgJet.at(j).pt() - MGen_LdgJet.at(j).pt())/MGen_LdgJet.at(j).pt());
+      hTrijetDPtOverGenPt -> Fill( (MCtrue_Bjet.at(j).pt()      - MGen_Bjet.at(j).pt())/MGen_Bjet.at(j).pt());
+      hTrijetDPtOverGenPt -> Fill( (MCtrue_LdgJet.at(j).pt()    - MGen_LdgJet.at(j).pt())/MGen_LdgJet.at(j).pt());
       hTrijetDPtOverGenPt -> Fill( (MCtrue_SubldgJet.at(j).pt() - MGen_SubldgJet.at(j).pt())/MGen_SubldgJet.at(j).pt());
       
-      hTrijetDPt_matched -> Fill( (MCtrue_Bjet.at(j).pt() - MGen_Bjet.at(j).pt()));
-      hTrijetDPt_matched -> Fill( (MCtrue_LdgJet.at(j).pt() - MGen_LdgJet.at(j).pt()));
+      hTrijetDPt_matched -> Fill( (MCtrue_Bjet.at(j).pt()      - MGen_Bjet.at(j).pt()));
+      hTrijetDPt_matched -> Fill( (MCtrue_LdgJet.at(j).pt()    - MGen_LdgJet.at(j).pt()));
       hTrijetDPt_matched -> Fill( (MCtrue_SubldgJet.at(j).pt() - MGen_SubldgJet.at(j).pt()));
       
-      hTrijetDEtaOverGenEta -> Fill( (MCtrue_Bjet.at(j).eta() - MGen_Bjet.at(j).eta())/MGen_Bjet.at(j).eta());
-      hTrijetDEtaOverGenEta -> Fill( (MCtrue_LdgJet.at(j).eta() - MGen_LdgJet.at(j).eta())/MGen_LdgJet.at(j).eta());
+      hTrijetDEtaOverGenEta -> Fill( (MCtrue_Bjet.at(j).eta()      - MGen_Bjet.at(j).eta())/MGen_Bjet.at(j).eta());
+      hTrijetDEtaOverGenEta -> Fill( (MCtrue_LdgJet.at(j).eta()    - MGen_LdgJet.at(j).eta())/MGen_LdgJet.at(j).eta());
       hTrijetDEtaOverGenEta -> Fill( (MCtrue_SubldgJet.at(j).eta() - MGen_SubldgJet.at(j).eta())/MGen_SubldgJet.at(j).eta());
       
-      hTrijetDEta_matched -> Fill( (MCtrue_Bjet.at(j).eta() - MGen_Bjet.at(j).eta()));
-      hTrijetDEta_matched -> Fill( (MCtrue_LdgJet.at(j).eta() - MGen_LdgJet.at(j).eta()));
+      hTrijetDEta_matched -> Fill( (MCtrue_Bjet.at(j).eta()      - MGen_Bjet.at(j).eta()));
+      hTrijetDEta_matched -> Fill( (MCtrue_LdgJet.at(j).eta()    - MGen_LdgJet.at(j).eta()));
       hTrijetDEta_matched -> Fill( (MCtrue_SubldgJet.at(j).eta() - MGen_SubldgJet.at(j).eta()));
       
-      hTrijetDPhiOverGenPhi -> Fill( (ROOT::Math::VectorUtil::DeltaPhi(MCtrue_Bjet.at(j).p4(),MGen_Bjet.at(j).p4()))/MGen_Bjet.at(j).phi());
-      hTrijetDPhiOverGenPhi -> Fill( (ROOT::Math::VectorUtil::DeltaPhi(MCtrue_LdgJet.at(j).p4(),MGen_LdgJet.at(j).p4()))/MGen_LdgJet.at(j).phi());
-      hTrijetDPhiOverGenPhi -> Fill( (ROOT::Math::VectorUtil::DeltaPhi(MCtrue_SubldgJet.at(j).p4(),MGen_SubldgJet.at(j).p4()))/MGen_SubldgJet.at(j).phi());
+      hTrijetDPhiOverGenPhi -> Fill( (ROOT::Math::VectorUtil::DeltaPhi(MCtrue_Bjet.at(j).p4(),      MGen_Bjet.at(j).p4()))/MGen_Bjet.at(j).phi());
+      hTrijetDPhiOverGenPhi -> Fill( (ROOT::Math::VectorUtil::DeltaPhi(MCtrue_LdgJet.at(j).p4(),    MGen_LdgJet.at(j).p4()))/MGen_LdgJet.at(j).phi());
+      hTrijetDPhiOverGenPhi -> Fill( (ROOT::Math::VectorUtil::DeltaPhi(MCtrue_SubldgJet.at(j).p4(), MGen_SubldgJet.at(j).p4()))/MGen_SubldgJet.at(j).phi());
       
-      hTrijetDPhi_matched -> Fill( (ROOT::Math::VectorUtil::DeltaPhi(MCtrue_Bjet.at(j).p4(),MGen_Bjet.at(j).p4())));
-      hTrijetDPhi_matched -> Fill( (ROOT::Math::VectorUtil::DeltaPhi(MCtrue_LdgJet.at(j).p4(),MGen_LdgJet.at(j).p4())));
-      hTrijetDPhi_matched -> Fill( (ROOT::Math::VectorUtil::DeltaPhi(MCtrue_SubldgJet.at(j).p4(),MGen_SubldgJet.at(j).p4())));
+      hTrijetDPhi_matched -> Fill( (ROOT::Math::VectorUtil::DeltaPhi(MCtrue_Bjet.at(j).p4(),      MGen_Bjet.at(j).p4())));
+      hTrijetDPhi_matched -> Fill( (ROOT::Math::VectorUtil::DeltaPhi(MCtrue_LdgJet.at(j).p4(),    MGen_LdgJet.at(j).p4())));
+      hTrijetDPhi_matched -> Fill( (ROOT::Math::VectorUtil::DeltaPhi(MCtrue_SubldgJet.at(j).p4(), MGen_SubldgJet.at(j).p4())));
       
-    }
-    
-
+    }    
     
     //========================================================================================================
     //                                 Fill Triplets and trees
     //========================================================================================================
-    
-    
     
     Bool_t isGenuineTop = false;
 
@@ -1343,12 +1451,31 @@ void TopRecoTree::process(Long64_t entry) {
 
       hLdgJetQGLikelihood    -> Fill(isGenuineTop, TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSqgLikelihood());
       hSubldgJetQGLikelihood -> Fill(isGenuineTop, TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSqgLikelihood());
+      hBJetQGLikelihood      -> Fill(isGenuineTop, TopCandidates.BJet.at(i).QGTaggerAK4PFCHSqgLikelihood());
+      //Top tagger optimization
+      hTrijetCvsL       -> Fill(isGenuineTop, (TopCandidates.Jet1.at(i).pfCombinedCvsLJetTags() + TopCandidates.Jet2.at(i).pfCombinedCvsLJetTags() + TopCandidates.BJet.at(i).pfCombinedCvsLJetTags())/3.);
+      hDijetCvsL        -> Fill(isGenuineTop, (TopCandidates.Jet1.at(i).pfCombinedCvsLJetTags() + TopCandidates.Jet2.at(i).pfCombinedCvsLJetTags())/2.);
+      hTrijetPtD        -> Fill(isGenuineTop, (TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSptD()   + TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSptD()   + TopCandidates.BJet.at(i).QGTaggerAK4PFCHSptD())/3.);
+      hDijetPtD         -> Fill(isGenuineTop, (TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSptD()   + TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSptD())/2.);
+      hTrijetAxis2      -> Fill(isGenuineTop, (TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSaxis2() + TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSaxis2() + TopCandidates.BJet.at(i).QGTaggerAK4PFCHSaxis2())/3.);
+      hDijetAxis2       -> Fill(isGenuineTop, (TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSaxis2() + TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSaxis2())/2.);
+      hTrijetMult       -> Fill(isGenuineTop, (TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSmult()  + TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSmult()  + TopCandidates.BJet.at(i).QGTaggerAK4PFCHSmult())/3.);
+      hDijetMult        -> Fill(isGenuineTop,(TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSmult()   + TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSmult())/2.);
+      hTrijetQGLikelihood-> Fill(isGenuineTop, 
+				 TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSqgLikelihood()*TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSqgLikelihood()*TopCandidates.BJet.at(i).QGTaggerAK4PFCHSqgLikelihood());
+      hDijetQGLikelihood-> Fill(isGenuineTop, TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSqgLikelihood()*TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSqgLikelihood());
+      hTrijetQGLikelihood_avg -> Fill(isGenuineTop, 
+				      (TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSqgLikelihood()+TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSqgLikelihood()+TopCandidates.BJet.at(i).QGTaggerAK4PFCHSqgLikelihood())/3.);
+      hDijetQGLikelihood_avg -> Fill(isGenuineTop, (TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSqgLikelihood()+TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSqgLikelihood())/2.);
+
+      hDijetMassOverTrijetMass -> Fill(isGenuineTop, TopCandidates.DijetP4.at(i).M()/TopCandidates.TrijetP4.at(i).M());
 
       hBJetCvsL           -> Fill(isGenuineTop, TopCandidates.BJet.at(i).pfCombinedCvsLJetTags());
       hBJetPtD            -> Fill(isGenuineTop, TopCandidates.BJet.at(i).QGTaggerAK4PFCHSptD());
       hBJetAxis2          -> Fill(isGenuineTop, TopCandidates.BJet.at(i).QGTaggerAK4PFCHSaxis2());
       hBJetMult           -> Fill(isGenuineTop, TopCandidates.BJet.at(i).QGTaggerAK4PFCHSmult());
       
+
       hTrijetPtDrVsTrijetMass        -> Fill(isGenuineTop, TopCandidates.TrijetP4.at(i).Pt()* ROOT::Math::VectorUtil::DeltaR(TopCandidates.DijetP4.at(i),TopCandidates.BJet.at(i).p4()),TopCandidates.TrijetP4.at(i).M());
       hTrijetPtDrVsBjetLdgJetMass    -> Fill(isGenuineTop, TopCandidates.TrijetP4.at(i).Pt()* ROOT::Math::VectorUtil::DeltaR(TopCandidates.DijetP4.at(i),TopCandidates.BJet.at(i).p4()),(TopCandidates.BJet.at(i).p4()+TopCandidates.Jet1.at(i).p4()).M());
       hDijetPtDrVsDijetMass          -> Fill(isGenuineTop, TopCandidates.DijetP4.at(i).Pt() * ROOT::Math::VectorUtil::DeltaR(TopCandidates.Jet1.at(i).p4(),TopCandidates.Jet2.at(i).p4()), TopCandidates.DijetP4.at(i).M()); 
@@ -1385,8 +1512,23 @@ void TopRecoTree::process(Long64_t entry) {
 
 	trijetLdgJetQGLikelihood_S        = TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSqgLikelihood();
 	trijetSubldgJetQGLikelihood_S     = TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSqgLikelihood();
-      
-      
+	trijetBJetQGLikelihood_S          = TopCandidates.BJet.at(i).QGTaggerAK4PFCHSqgLikelihood();
+      //Top tagger optimization
+	trijetCvsL_S          = (TopCandidates.Jet1.at(i).pfCombinedCvsLJetTags() + TopCandidates.Jet2.at(i).pfCombinedCvsLJetTags() + TopCandidates.BJet.at(i).pfCombinedCvsLJetTags())/3.;
+	trijetDijetCvsL_S     = (TopCandidates.Jet1.at(i).pfCombinedCvsLJetTags() + TopCandidates.Jet2.at(i).pfCombinedCvsLJetTags())/2.;
+	trijetPtD_S           = (TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSptD()   + TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSptD()   + TopCandidates.BJet.at(i).QGTaggerAK4PFCHSptD())/3.;
+	trijetDijetPtD_S      = (TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSptD()   + TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSptD())/2.;
+	trijetAxis2_S         = (TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSaxis2() + TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSaxis2() + TopCandidates.BJet.at(i).QGTaggerAK4PFCHSaxis2())/3.;
+	trijetDijetAxis2_S    = (TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSaxis2() + TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSaxis2())/2.;
+	trijetMult_S          = (TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSmult()  + TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSmult()  + TopCandidates.BJet.at(i).QGTaggerAK4PFCHSmult())/3.;
+	trijetDijetMult_S     = (TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSmult()  + TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSmult())/2.;
+	trijetQGLikelihood_S  =  TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSqgLikelihood()*TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSqgLikelihood()*TopCandidates.BJet.at(i).QGTaggerAK4PFCHSqgLikelihood();
+	trijetDijetQGLikelihood_S = TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSqgLikelihood()*TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSqgLikelihood();
+	trijetQGLikelihood_avg_S=(TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSqgLikelihood()+TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSqgLikelihood()+TopCandidates.BJet.at(i).QGTaggerAK4PFCHSqgLikelihood())/3.;
+	trijetDijetQGLikelihood_avg_S = (TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSqgLikelihood()+TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSqgLikelihood())/2.;
+
+	dijetMassOverTrijetMass_S = TopCandidates.DijetP4.at(i).M()/TopCandidates.TrijetP4.at(i).M();
+            
 	treeS -> Fill();
 	
       }
@@ -1417,6 +1559,23 @@ void TopRecoTree::process(Long64_t entry) {
 
 	trijetLdgJetQGLikelihood_B        = TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSqgLikelihood();
 	trijetSubldgJetQGLikelihood_B     = TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSqgLikelihood();
+	trijetBJetQGLikelihood_B          = TopCandidates.BJet.at(i).QGTaggerAK4PFCHSqgLikelihood();
+
+      //Top tagger optimization
+	trijetCvsL_B          = (TopCandidates.Jet1.at(i).pfCombinedCvsLJetTags() + TopCandidates.Jet2.at(i).pfCombinedCvsLJetTags() + TopCandidates.BJet.at(i).pfCombinedCvsLJetTags())/3.;
+	trijetDijetCvsL_B     = (TopCandidates.Jet1.at(i).pfCombinedCvsLJetTags() + TopCandidates.Jet2.at(i).pfCombinedCvsLJetTags())/2.;
+	trijetPtD_B           = (TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSptD()   + TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSptD()   + TopCandidates.BJet.at(i).QGTaggerAK4PFCHSptD())/3.;
+	trijetDijetPtD_B      = (TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSptD()   + TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSptD())/2.;
+	trijetAxis2_B         = (TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSaxis2() + TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSaxis2() + TopCandidates.BJet.at(i).QGTaggerAK4PFCHSaxis2())/3.;
+	trijetDijetAxis2_B    = (TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSaxis2() + TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSaxis2())/2.;
+	trijetMult_B          = (TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSmult()  + TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSmult()  + TopCandidates.BJet.at(i).QGTaggerAK4PFCHSmult())/3.;
+	trijetDijetMult_B     = (TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSmult()  + TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSmult())/2.;
+	trijetQGLikelihood_B  =  TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSqgLikelihood()*TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSqgLikelihood()*TopCandidates.BJet.at(i).QGTaggerAK4PFCHSqgLikelihood();
+	trijetDijetQGLikelihood_B = TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSqgLikelihood()*TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSqgLikelihood();
+	trijetQGLikelihood_avg_B=(TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSqgLikelihood()+TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSqgLikelihood()+TopCandidates.BJet.at(i).QGTaggerAK4PFCHSqgLikelihood())/3.;
+	trijetDijetQGLikelihood_avg_B = (TopCandidates.Jet1.at(i).QGTaggerAK4PFCHSqgLikelihood()+TopCandidates.Jet2.at(i).QGTaggerAK4PFCHSqgLikelihood())/2.;
+
+	dijetMassOverTrijetMass_B = TopCandidates.DijetP4.at(i).M()/TopCandidates.TrijetP4.at(i).M();
 	
 	treeB -> Fill();
 	
@@ -1424,11 +1583,6 @@ void TopRecoTree::process(Long64_t entry) {
             
     }
     //next fill histo
-
-    //*******************************************************************************************************
-    //                                   TOP SELECTION ENDS HERE
-    //*******************************************************************************************************
-
 
     //========================================================================================================
     //                                    Sanity check
@@ -1443,7 +1597,6 @@ void TopRecoTree::process(Long64_t entry) {
       hAllJetQGLikelihood -> Fill(true, jet.QGTaggerAK4PFCHSqgLikelihood());
     }
   
-
     vector<genParticle> GenCharm = GetGenParticles(fEvent.genparticles().getGenParticles(), 4);
     vector<Jet> CJets;
 
@@ -1473,8 +1626,6 @@ void TopRecoTree::process(Long64_t entry) {
       }
     }
     
-
-
     //========================================================================================================
     //                             Gen particles - Not of interest
     //========================================================================================================
@@ -1488,10 +1639,9 @@ void TopRecoTree::process(Long64_t entry) {
       double genP_eta      = p.eta();
       double genP_phi      = p.phi();
       double genP_ene      = p.e();
-      //    int genP_charge      = p.charge();
-      
-      //      int genMom_index    = -1;
-      //      double genMom_pdgId = 999.999;
+      //    int genP_charge      = p.charge();      
+      //    int genMom_index    = -1;
+      //    double genMom_pdgId = 999.999;
       math::XYZTLorentzVector genP_p4;                                                                                                                                                  
       genP_p4 = p.p4(); 
       // Associated genParticles                                                                                                                                                           
@@ -1516,7 +1666,6 @@ void TopRecoTree::process(Long64_t entry) {
       int firstMom = -1, lastMom = -1, firstDau = -1, lastDau = -1;
       if (genP_mothers.size() > 0){
 	firstMom = genP_mothersIndex.at(0);
-	//      std::cout<<genP_mothersIndex.at(genP_mothers.size()-1)<<std::endl;
 	lastMom  = genP_mothersIndex.at(genP_mothers.size()-1);
       }
       if (genP_daughters.size() >0){
@@ -1541,27 +1690,12 @@ void TopRecoTree::process(Long64_t entry) {
 		  << std::setw(12) << firstMom              << std::setw(12)   << lastMom 
 		  << std::setw(12) << genP_mothers.size()   << std::setw(12)   << firstDau 
 		  << std::setw(12) << lastDau               << std::setw(12)   << genP_daughters.size() <<  std::endl;
-      }
-           
+      }           
     }
-
-    
-    
-    
-    // =========================================================================
-    //================================================================================================                 
-    // Fill TTree                                                                                                                
-    //================================================================================================  
-    
-    //================================================================================================
-    // Fill final plots
-    //================================================================================================
-    //  fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, true);
-    //  fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, 1);
     
     //================================================================================================
     // Finalize
-  //================================================================================================
+    //================================================================================================
     fEventSaver.save();
   }
 }

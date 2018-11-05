@@ -509,7 +509,10 @@ def PlotHistos(d_noSF, d_withSF, num_histoList, den_histoList,  opts):
     # =========================================================================================
     # Normalization Factors (see: getNormalization.py)
     # =========================================================================================
-    f1=0.626877; f2=0.880767;
+    #f1=0.626877; f2=0.880767;
+    f1 = 0.625454; f2 = 0.836566; #noTopPtRew
+    #f1 = 0.626893; f2 = 0.880846; #noDeltaRqq
+    #f1 = 0.625454; f2 = 0.836566; #noDeltaRqq, noTopPtRew
     
     # =========================================================================================
     # (A) Apply Normalization Factors (see: getNormalizations.py)
@@ -671,18 +674,19 @@ def PlotHistos(d_noSF, d_withSF, num_histoList, den_histoList,  opts):
     SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf", ".C"])
     
     # Save results in JSON
-    name = opts.noSFcrab.split("_")[-4]
-    name = name.replace(opts.analysisName, "")
-    print "name = ", name
-    jsonName = "toptagEff_BDT"+name+"_InclusiveTT_TopMassCut400.json"
-    runRange = "273150-284044"
-    analysis = opts.analysisName
-    label = "2016"
-    plotDir =  os.path.join(opts.folder, jsonName)
-    pythonWriter.addParameters(plotDir, label, runRange, opts.intLumi, geff_data)
-    pythonWriter.addMCParameters(label, geff_mc)
-    fileName_json = jsonName
-    pythonWriter.writeJSON(fileName_json)
+    if (opts.inclusiveEff):
+        name = opts.noSFcrab.split("_")[-4]
+        name = name.replace(opts.analysisName, "")
+        print "name = ", name
+        jsonName = "toptagEff_BDT"+name+"_InclusiveTT_TopMassCut400.json"
+        runRange = "273150-284044"
+        analysis = opts.analysisName
+        label = "2016"
+        plotDir =  os.path.join(opts.folder, jsonName)
+        pythonWriter.addParameters(plotDir, label, runRange, opts.intLumi, geff_data)
+        pythonWriter.addMCParameters(label, geff_mc)
+        fileName_json = jsonName
+        pythonWriter.writeJSON(fileName_json)
         
     
     
@@ -825,19 +829,19 @@ def PlotHistos(d_noSF, d_withSF, num_histoList, den_histoList,  opts):
     SavePlot(pp, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf", ".C"])
     
     # Save results in JSON
-    '''
-    name = opts.noSFcrab.split("_")[-4]
-    name = name.replace(opts.analysisName, "")
-    jsonName = "toptagEff_BDT"+name+"_GenuineTT_TopMassCut400.json"
-    runRange = "273150-284044"
-    analysis = opts.analysisName
-    label = "2016"
-    plotDir =  os.path.join(opts.folder, jsonName)
-    pythonWriter.addParameters(plotDir, label, runRange, opts.intLumi, geffi_data)
-    pythonWriter.addMCParameters(label, geffi_mc)
-    fileName_json = jsonName
-    pythonWriter.writeJSON(fileName_json)
-    '''
+    if (not opts.inclusiveEff):
+        name = opts.noSFcrab.split("_")[-4]
+        name = name.replace(opts.analysisName, "")
+        jsonName = "toptagEff_BDT"+name+"_GenuineTT_TopMassCut400.json"
+        runRange = "273150-284044"
+        analysis = opts.analysisName
+        label = "2016"
+        plotDir =  os.path.join(opts.folder, jsonName)
+        pythonWriter.addParameters(plotDir, label, runRange, opts.intLumi, geffi_data)
+        pythonWriter.addMCParameters(label, geffi_mc)
+        fileName_json = jsonName
+        pythonWriter.writeJSON(fileName_json)
+
 
     return
 
@@ -878,7 +882,7 @@ if __name__ == "__main__":
     RATIO        = True
     FOLDER       = "SystTopBDT_"
     INCLUSIVE    = False
-
+    INCLUSIVE_EFF = False
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
     
@@ -936,6 +940,9 @@ if __name__ == "__main__":
     
     parser.add_option("--folder", dest="folder", default=FOLDER,
                       help="Folder in ROOT files under which all necessary histograms are located [default: %s]" % (FOLDER) )
+
+    parser.add_option("--inclusiveEff", dest="inclusiveEff", action="store_true", default=INCLUSIVE_EFF, 
+                      help="Produce json file for inclusive top efficiency [default: %s]" % INCLUSIVE_EFF)
 
     (opts, parseArgs) = parser.parse_args()
 

@@ -16,14 +16,10 @@ EXAMPLES:
 
 
 LAST USED:
-./plotMC_InvMassSmearing.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/TopRecoAnalysis_180524_052417_Mcrab644_BDT_DR0p3_DPtOverPt0p32_PtReweighting/--signalMass 500 --url -n
-
-
-New training:
-/uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/TopRecoAnalysis_180524_052417_Mcrab644_BDT_DR0p3_DPtOverPt0p32_PtReweighting/
+./plotMC_InvMassSmearing.py -m ../../TopTaggerEfficiency/work/TopTaggerEfficiency_180827_062305_BDT0p40_NewBDT_TopMass400/ --signalMass 500 --url -n --analysisName TopTaggerEfficiency
 
 Old training:
-/uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/TopRecoAnalysis_180524_051147_Mcrab644_BDT_DR0p3_DPtOverPt0p32/
+/uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/TopRecoAnalysis_180524_052417_Mcrab644_BDT_DR0p3_DPtOverPt0p32_PtReweighting/
 '''
 
 #================================================================================================ 
