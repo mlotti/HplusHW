@@ -649,8 +649,10 @@ tauLegDatasets = []
 tauLegDatasets.extend(datasetsMuonData03Feb)
 tauLegDatasets.extend(datasetsDY)
 tauLegDatasets.extend(datasetsZprime)
-# tauLegDatasets.extend(datasetsWJets_reHLT)
-# tauLegDatasets.extend(datasetsQCDMuEnriched_reHLT)
+tauLegDatasets.extend(datasetsTop)
+tauLegDatasets.extend(datasetsSingleTop)
+tauLegDatasets.extend(datasetsWJets)
+tauLegDatasets.extend(datasetsQCDMuEnriched)
 # tauLegDatasets.extend(datasetsH125)
 
 
