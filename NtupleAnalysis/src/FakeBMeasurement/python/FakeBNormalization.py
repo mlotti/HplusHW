@@ -190,13 +190,13 @@ class FakeBNormalizationManager:
         TF_Up2x  = TF + 2*TF_Error
         TF_Up3x  = TF + 3*TF_Error
         if TF_Up > 1.0:
-            Print("Forcing TF_Up (=%.3f) to be equal to 1!" % ( TF_Up), i==1) # added  23 Oct 2018
+            Print("Forcing TF_Up (=%.3f) to be equal to 1!" % ( TF_Up), True) # added  23 Oct 2018
             TF_Up = 1.0
         if TF_Up2x > 1.0:
-            Print("Forcing TF_Up2x (=%.3f) to be equal to 1!" % ( TF_Up2x), i==1) # added  23 Oct 2018
+            Print("Forcing TF_Up2x (=%.3f) to be equal to 1!" % ( TF_Up2x), True) # added  23 Oct 2018
             TF_Up2x = 1.0
         if TF_Up3x > 1.0:
-            Print("Forcing TF_Up3x (=%.3f) to be equal to 1!" % ( TF_Up3x), i==1) # added  23 Oct 2018
+            Print("Forcing TF_Up3x (=%.3f) to be equal to 1!" % ( TF_Up3x), True) # added  23 Oct 2018
             TF_Up3x = 1.0
 
         # Down variations
@@ -204,13 +204,13 @@ class FakeBNormalizationManager:
         TF_Down2x = TF - 2*TF_Error
         TF_Down3x = TF - 3*TF_Error
         if TF_Down < 0.0:
-            Print("Forcing TF_Down   (=%.3f) to be equal to 0" % (TF_Down), i==1) # added  23 Oct 2018
+            Print("Forcing TF_Down   (=%.3f) to be equal to 0" % (TF_Down), True) # added  23 Oct 2018
             TF_Down = 0.0
         if TF_Down2x < 0.0:
-            Print("Forcing TF_Down2x (=%.3f) to be equal to 0" % (TF_Down2x), i==1) # added  23 Oct 2018
+            Print("Forcing TF_Down2x (=%.3f) to be equal to 0" % (TF_Down2x), True) # added  23 Oct 2018
             TF_Down2x = 0.0
         if TF_Down3x < 0.0:
-            Print("Forcing TF_Down3x (=%.3f) to be equal to 0" % (TF_Down3x), i==1) # added  23 Oct 2018
+            Print("Forcing TF_Down3x (=%.3f) to be equal to 0" % (TF_Down3x), True) # added  23 Oct 2018
             TF_Down3x = 0.0
 
         lines.append("TF (bin=%s) = N_CR1 / N_CR2 = %f / %f =  %f +- %f" % (binLabel, nCR1, nCR2, TF, TF_Error) )
