@@ -155,7 +155,10 @@ topSelectionBDT = PSet(
     TopMassUppCutDirection =  "<=",   # [default: "<"]
     CSV_bDiscCutValue      = 0.8484,  # [default: 0.8484] # Do not evaluate top candidate if b-jet assigned as b from top fails this cut
     CSV_bDiscCutDirection  = ">=",    # [default: ">="]
-    WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_14July2018.weight.xml", # (All XML files located in data/TopTaggerWeights/)
+    # WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_14July2018.weight.xml",                      # Default ! (fixme)!
+    # WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_noTopPtRew_24Oct2018.weights.xml",            # Disabled top-pt reweighting
+    # WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_noDeltaRqq_24Oct2018.weights.xml",            # dR(q,q') > 0.8 removed from training (q,q': partons from top decay)    
+    WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_noDeltaRqq_noTopPtRew_25Oct2018.weights.xml", # Removed dR(q,q') > 0.8 AND disabled top-pt reweighting
 )
 
 
@@ -209,10 +212,31 @@ else:
 
 # top-tagging (json files available for: defaut, fatJet, ldgJet)
 MVAstring = "%.2f" % topSelectionBDT.TopMVACutValue
+# Determine which top JSON files to use depending on the BDT trainigh weightfile used
+if "noDeltaRqq_noTopPtRew" in topSelectionBDT.WeightFile:
+    # dR(q,q') > 0.8 removed from training (q,q': partons from top decay)    
+    topMisID     = "topMisID_BDT0p40_TopMassCut400_BDTGnoDRqq_noTopPtRew.json"
+    topTagEff    = "toptagEff_BDT0p40_GenuineTT_TopMassCut400_BDTGnoDRqq_noTopPtRew.json"
+    topTagEffUnc = "toptagEffUncert_BDT0p40_GenuineTT_TopMassCut400_BDTGnoDRqq_noTopPtRew.json"    
+elif "noDeltaRqq" in topSelectionBDT.WeightFile:
+    # dR(q,q') > 0.8 removed from training (q,q': partons from top decay)    
+    topMisID     = "topMisID_BDT0p40_TopMassCut400_BDTGnoDRqq.json"
+    topTagEff    = "toptagEff_BDT0p40_GenuineTT_TopMassCut400_BDTGnoDRqq.json"
+    topTagEffUnc = "toptagEffUncert_BDT0p40_GenuineTT_TopMassCut400_BDTGnoDRqq.json"
+elif "noTopPtRew" in topSelectionBDT.WeightFile:
+    # Disabled top-pt reweighting
+    topMisID     = "topMisID_BDT0p40_TopMassCut400_noTopPtRew.json"
+    topTagEff    = "toptagEff_BDT0p40_GenuineTT_TopMassCut400_noTopPtRew.json"
+    topTagEffUnc = "toptagEffUncert_BDT0p40_GenuineTT_TopMassCut400_noTopPtRew.json"
+else:
+    # Defaut !
+    topMisID     = "topMisID_BDT%s_TopMassCut400.json" % MVAstring.replace(".", "p").replace("-", "m"), 
+    topTagEff    = "toptagEff_BDT%s_GenuineTT_TopMassCut400.json" % MVAstring.replace(".", "p").replace("-", "m"),
+    topTagEffUnc = "toptagEffUncert_BDT%s_GenuineTT_TopMassCut400.json" % MVAstring.replace(".", "p").replace("-", "m"),
 scaleFactors.setupToptagSFInformation(topTagPset                     = topSelectionBDT, 
-                                      topTagMisidFilename            = "topMisID_BDT%s_TopMassCut400.json" % MVAstring.replace(".", "p").replace("-", "m"), 
-                                      topTagEfficiencyFilename       = "toptagEff_BDT%s_GenuineTT_TopMassCut400.json" % MVAstring.replace(".", "p").replace("-", "m"),
-                                      topTagEffUncertaintiesFilename = "toptagEffUncert_BDT%s_GenuineTT_TopMassCut400.json" % MVAstring.replace(".", "p").replace("-", "m"),
+                                      topTagMisidFilename            = topMisID, 
+                                      topTagEfficiencyFilename       = topTagEff,
+                                      topTagEffUncertaintiesFilename = topTagEffUnc,
                                       direction                      = "nominal",
                                       variationInfo                  = None)
 
