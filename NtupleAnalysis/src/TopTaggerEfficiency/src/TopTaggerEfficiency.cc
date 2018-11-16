@@ -5,7 +5,6 @@
 
 #include "EventSelection/interface/CommonPlots.h"
 #include "EventSelection/interface/EventSelections.h"
-#include "EventSelection/interface/TopSelectionBDTopt.h" //soti
 #include "TDirectory.h"
 
 struct SelectedTrijet{
