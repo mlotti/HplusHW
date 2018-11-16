@@ -131,6 +131,8 @@ def CreateRunningScript(scriptName, opts):
     f.write('    echo "2=LABEL"\n')
     f.write('    echo "3=GROUP"\n')
     f.write('    echo "4=SYSTEMATICS (optional)"\n')
+    f.write('    echo "5=POSTFIX (optional)"\n')
+    f.write('    echo "6=TIME (optional)"\n')
     f.write('    echo\n')
     f.write('    exit 1\n')
     f.write('endif\n')
@@ -142,6 +144,8 @@ def CreateRunningScript(scriptName, opts):
     f.write('set LABEL       = ${2}\n')
     f.write('set GROUP       = ${3}\n')
     f.write('set SYSTEMATICS = ${4}\n')
+    f.write('set POSTFIX     = ${5}\n')
+    f.write('set DATE        = ${6}\n')
     f.write('\n')
     f.write('set TARBALL = %s\n' % (opts.mcrabTarball.replace(".tgz", "")) )
     f.write('\n')
@@ -193,8 +197,10 @@ def CreateRunningScript(scriptName, opts):
     f.write('\n')
     f.write('# Create the tarball name\n')
     f.write('set FTIME = `date \'+%Hh-%Mm-%Ss-%d%h%Y\'`\n')
-    f.write('echo "\\n=== Tarball name will be ${ANALYSISDIR}_${LABEL}_${STIME}_${FTIME}.tgz"\n')
-    f.write('set TARBALL = "${ANALYSISDIR}_${LABEL}_${STIME}_${FTIME}.tgz"\n')
+    #f.write('echo "\\n=== Tarball name will be ${ANALYSISDIR}_${LABEL}_${STIME}_${FTIME}.tgz"\n')
+    #f.write('set TARBALL = "${ANALYSISDIR}_${LABEL}_${STIME}_${FTIME}.tgz"\n')
+    f.write('echo "\\n=== Tarball name will be ${ANALYSISDIR}_${LABEL}_${POSTFIX}_${DATE}.tgz"\n')
+    f.write('set TARBALL = "${ANALYSISDIR}_${LABEL}_${POSTFIX}_${DATE}.tgz"\n')
     f.write('\n')
     f.write('# Make the output directory to a tarball\n')
     f.write('echo "\\n=== Compressing the output dir $OUTPUTDIR into tarball file $TARBALL"\n')
@@ -270,8 +276,10 @@ def main(opts):
                 f.write("Error  = error_%s.txt\n"  % (fileName) )
                 f.write("Log    = log_%s.txt\n"    % (fileName) )
                 f.write("x509userproxy = /tmp/x509up_u52142\n")
-                #f.write("Arguments = %s NewTopAndBugFixAndSF_TopMassLE%s_BDT%s_Group%s_Syst%s %s %s\n" % (analysis, opts.topMass, opts.BDT, group, syst, group, syst) )
-                f.write("Arguments = %s TopMassLE%s_BDT%s_Binning%s_Group%s_Syst%s %s %s\n" % (analysis, opts.topMass, opts.BDT, opts.binning, group, syst, group, syst) )
+                # Arguments Order: "1=ANALYSISDIR", "2=LABEL", "3=GROUP",  "4=SYSTEMATICS"
+                #f.write("Arguments = %s TopMassLE%s_BDT%s_Binning%s_Group%s_Syst%s %s %s %s\n" % (analysis, opts.topMass, opts.BDT, opts.binning, group, syst, group, syst, opts.postFix) )
+                label = "TopMassLE%s_BDT%s_Binning%s_Group%s_Syst%s" % (opts.topMass, opts.BDT, opts.binning, group, syst)
+                f.write("Arguments = %s %s %s %s %s %s\n" % (analysis, label, group, syst, opts.postFix, opts.date) )
                 f.write("Queue 1\n")
                 f.close()
                 jdlList.append(jdl)
@@ -280,8 +288,8 @@ def main(opts):
     Verbose("Submitting the jobs", True)
     for i, jdl in enumerate(jdlList, 1):
         cmd = "condor_submit %s" %  (jdl)
-        #PrintFlushed(hs + cmd + ns, i==1)
-        os.system(cmd)
+        # PrintFlushed(hs + cmd + ns, i==1)
+        os.system(cmd) 
 
     Print("Total of %s%d jobs submitted%s" % (ss, len(jdlList), ns), True)
     return
@@ -311,6 +319,7 @@ if __name__ == "__main__":
     MCRABPATH   = "/uscms_data/d3/aattikis/workspace/multicrab"
     MCRABTARBALL= None #"multicrab_Hplus2tbAnalysis_v8030_20180508T0644.tgz"
     DIRNAME     = None
+    POSTFIX     = None
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]", add_help_option=True, conflict_handler="resolve")
@@ -336,6 +345,9 @@ if __name__ == "__main__":
     # Do not allow manual name. checkCondor.py relies on name assumptions to work!
     #parser.add_option("-d", "--dirName", dest="dirName", action="store",
     #                  help="Name of directory to be created where all the output will be stored [default: %s]" % (DIRNAME) )
+
+    parser.add_option("--postFix", dest="postFix", action="store",
+                      help="Postfix to use in the directory to be created where all the output will be stored [default: %s]" % (POSTFIX) )
 
     parser.add_option("--topMass", dest="topMass", action="store", default=None,
                       help="Top mass cut used in analuysis [default: %s]" % (None) )
@@ -377,14 +389,15 @@ if __name__ == "__main__":
         sys.exit()
 
     # Define output dir name
-    date = datetime.date.today().strftime('%d%b%Y')    #date = datetime.date.today().strftime('%d-%b-%Y')
-    # if opts.dirName == None:
-    #     #opts.dirName = "TopMassLE%s_BDT%s_AbsEta0p8_1p4_2p0_Pt_60_90_160_300_Stat_%s" % (opts.topMass, opts.BDT, date) #iro
-    #     opts.dirName = "TopMassLE%s_BDT%s_Binning%s_Syst_%s" % (opts.topMass, opts.BDT, opts.binning, date)
-    # else:
-    #     opts.dirName += "_%s" % (date)
-    opts.dirName = "TopMassLE%s_BDT%s_Binning%s_Syst_%s" % (opts.topMass, opts.BDT, opts.binning, date)
-
+    opts.date = datetime.date.today().strftime('%d%b%Y')
+    # date = datetime.datetime.now().strftime("%Hh%Mm%Ss%d%b%Y")
+    # date = datetime.datetime.now().strftime("%Hh%Mm-%d%b%Y")
+    if opts.postFix == None:
+        #opts.dirName = "TopMassLE%s_BDT%s_Binning%s_Syst_%s" % (opts.topMass, opts.BDT, opts.binning, opts.date)
+        opts.dirName = "TopMassLE%s_BDT%s_Binning%s_%s" % (opts.topMass, opts.BDT, opts.binning, opts.date)
+    else:
+        #opts.dirName = "TopMassLE%s_BDT%s_Binning%s_Postfix%s_%s" % (opts.topMass, opts.BDT, opts.binning, opts.postFix, date)
+        opts.dirName = "TopMassLE%s_BDT%s_Binning%s_%s_%s" % (opts.topMass, opts.BDT, opts.binning, opts.postFix, opts.date)
 
     # Overwrite default systematics
     opts.systVarsList = []
