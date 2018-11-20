@@ -126,7 +126,7 @@ OptionPaper                            = True  # [default: True]
 OptionMergeRares                       = True  # [default: True]
 OptionIncludeSystematics               = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionUseTopPtReweightSyst             = False # [default: True] 
-OptionFakeBSyst                        = "TransferFactor3x" # [default: "TransferFactor"] (Options: TransferFactor, TransferFactor2x, TransferFactor3x)
+OptionFakeBSyst                        = "TransferFactor" # [default: "TransferFactor"] (Options: TransferFactor, TransferFactor2x, TransferFactor3x)
 OptionShapeSystematics                 = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionDoControlPlots                   = True  # [default: True]   (Produce control plots defined at end of this file)
 MassPoints                             = [180, 200, 220, 250, 300, 350, 400, 500, 650, 800, 1000, 1500, 2000, 2500, 3000]#, 5000, 7000, 10000]
