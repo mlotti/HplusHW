@@ -216,7 +216,7 @@ class ModuleBuilder:
         self._outputCreator.addModule(myModule)
         return
 
-    def buildTransferFactorVarSystModule(self, dataPath, ewkPath, normFactorsUp, normFactorsDown):
+    def buildTransferFactorVarSystModule(self, dataPath, ewkPath, normFactors):#Up, normFactorsDown):
         '''
         This function re-calculates all histograms as normal and stores them into 
         folders with extensions:
@@ -245,28 +245,54 @@ class ModuleBuilder:
                                                                         self._era, 
                                                                         self._searchMode,
                                                                         self._optimizationMode, 
-                                                                        "SystVarTransferFactorUp", 
+                                                                        "SystVarTransferFactorUp", #self._systematicVariation
                                                                         opts.analysisNameSaveAs, 
                                                                         opts.verbose)
 
         self._transferFactorPlusResult = fakeBResult.FakeBResultManager(dataPath, 
-                                                                       ewkPath,
-                                                                       self._dsetMgr,
-                                                                       self._luminosity,
-                                                                       self.getModuleInfoString(),
-                                                                       normFactorsUp,
-                                                                       optionDoFakeBNormalisationSyst=False,
-                                                                       optionUseInclusiveNorm=self._opts.useInclusiveNorm,
-                                                                       keyList = ["AllSelections"],
-                                                                       verbose=opts.verbose)
+                                                                        ewkPath,
+                                                                        self._dsetMgr,
+                                                                        self._luminosity,
+                                                                        self.getModuleInfoString(),
+                                                                        normFactors["SystVarUp"], 
+                                                                        optionDoFakeBNormalisationSyst=False,
+                                                                        optionUseInclusiveNorm=self._opts.useInclusiveNorm,
+                                                                        keyList = ["AllSelections"],
+                                                                        verbose=opts.verbose)
 
+        # Up variation of Transfer Factors (3x)
+        print
+        Print(ShellStyles.HighlightAltStyle() + "Extra Module: SystVarTransferFactor3xPlus" + ShellStyles.NormalStyle(), False)
+        mySystModule3xPlus = pseudoMultiCrabCreator.PseudoMultiCrabModule(self._dsetMgr, 
+                                                                          self._era, 
+                                                                          self._searchMode,
+                                                                          self._optimizationMode, 
+                                                                          "SystVarTransferFactor3xUp", #self._systematicVariation
+                                                                          opts.analysisNameSaveAs, 
+                                                                          opts.verbose)
+        
+        # Create new list with TF + 3xError
+        self._transferFactorPlusResult3x = fakeBResult.FakeBResultManager(dataPath, 
+                                                                          ewkPath,
+                                                                          self._dsetMgr,
+                                                                          self._luminosity,
+                                                                          self.getModuleInfoString(),
+                                                                          normFactors["SystVar3xUp"],
+                                                                          optionDoFakeBNormalisationSyst=False,
+                                                                          optionUseInclusiveNorm=self._opts.useInclusiveNorm,
+                                                                          keyList = ["AllSelections"],
+                                                                          verbose=opts.verbose)
+        
+        # Add the plots
         mySystModulePlus.addPlots(self._transferFactorPlusResult.getShapePlots(), self._transferFactorPlusResult.getShapePlotLabels())
+        mySystModule3xPlus.addPlots(self._transferFactorPlusResult3x.getShapePlots(), self._transferFactorPlusResult3x.getShapePlotLabels())
+
         # Save "_SystVarTransferFactorUp" folder to pseudo-dataset pseudo-multicrab
         self._outputCreator.addModule(mySystModulePlus)
+        self._outputCreator.addModule(mySystModule3xPlus)
 
         # Down variation of Transfer Factors
         print
-        #Print(ShellStyles.HighlightAltStyle() + "TF-Error Variation" + ShellStyles.NormalStyle() , True)
         Print(ShellStyles.HighlightAltStyle() + "Extra Module: SystVarTransferFactorMinus" + ShellStyles.NormalStyle(), False)
         mySystModuleMinus = pseudoMultiCrabCreator.PseudoMultiCrabModule(self._dsetMgr, 
                                                                          self._era, 
@@ -277,20 +303,46 @@ class ModuleBuilder:
                                                                          opts.verbose)
 
         self._transferFactorMinusResult = fakeBResult.FakeBResultManager(dataPath,
-                                                                        ewkPath,
-                                                                        self._dsetMgr, 
-                                                                        self._luminosity,
-                                                                        self.getModuleInfoString(), 
-                                                                        normFactorsDown, 
-                                                                        optionDoFakeBNormalisationSyst=False,
-                                                                        optionUseInclusiveNorm=self._opts.useInclusiveNorm,
-                                                                        keyList = ["AllSelections"],
-                                                                        verbose=opts.verbose)
+                                                                         ewkPath,
+                                                                         self._dsetMgr, 
+                                                                         self._luminosity,
+                                                                         self.getModuleInfoString(), 
+                                                                         normFactors["SystVarDown"],
+                                                                         optionDoFakeBNormalisationSyst=False,
+                                                                         optionUseInclusiveNorm=self._opts.useInclusiveNorm,
+                                                                         keyList = ["AllSelections"],
+                                                                         verbose=opts.verbose)
         
+        # Down variation of Transfer Factors (3x)
+        print
+        Print(ShellStyles.HighlightAltStyle() + "Extra Module: SystVarTransferFactor3xMinus" + ShellStyles.NormalStyle(), False)
+        mySystModule3xMinus = pseudoMultiCrabCreator.PseudoMultiCrabModule(self._dsetMgr, 
+                                                                           self._era, 
+                                                                           self._searchMode,
+                                                                           self._optimizationMode, 
+                                                                           "SystVarTransferFactor3xDown", 
+                                                                           opts.analysisNameSaveAs, 
+                                                                           opts.verbose)
+
+        self._transferFactorMinusResult3x = fakeBResult.FakeBResultManager(dataPath,
+                                                                           ewkPath,
+                                                                           self._dsetMgr, 
+                                                                           self._luminosity,
+                                                                           self.getModuleInfoString(), 
+                                                                           normFactors["SystVar3xDown"],
+                                                                           optionDoFakeBNormalisationSyst=False,
+                                                                           optionUseInclusiveNorm=self._opts.useInclusiveNorm,
+                                                                           keyList = ["AllSelections"],
+                                                                           verbose=opts.verbose)
+
+        # Add the plots
         mySystModuleMinus.addPlots(self._transferFactorMinusResult.getShapePlots(), self._transferFactorMinusResult.getShapePlotLabels())
+        mySystModule3xMinus.addPlots(self._transferFactorMinusResult3x.getShapePlots(), self._transferFactorMinusResult3x.getShapePlotLabels())
+
         # Save "_SystVarTransferFactorDown" folder to pseudo-dataset pseudo-multicrab
         self._outputCreator.addModule(mySystModuleMinus)
-        # print
+        self._outputCreator.addModule(mySystModule3xMinus)
+
         return
 
 #================================================================================================
@@ -453,19 +505,27 @@ def importNormFactors(era, searchMode, optimizationMode, multicrabDirName):
     myNormFactorsSafetyCheck(era, searchMode, optimizationMode)
 
     # Obtain the normalization (tranfer factors) and their systematic variations
-    myNormFactorsImport            = getattr(normFactorsImport, "FakeBNormalisation_Value")
-    myNormFactorsImportError       = getattr(normFactorsImport, "FakeBNormalisation_Error")
-    myNormFactorsImportSystVarUp   = getattr(normFactorsImport, "FakeBNormalisation_ErrorUp")
-    myNormFactorsImportSystVarDown = getattr(normFactorsImport, "FakeBNormalisation_ErrorDown")
+    myNormFactorsImport              = getattr(normFactorsImport, "FakeBNormalisation_Value")
+    myNormFactorsImportError         = getattr(normFactorsImport, "FakeBNormalisation_Error")
+    myNormFactorsImportSystVarUp     = getattr(normFactorsImport, "FakeBNormalisation_ErrorUp")
+    myNormFactorsImportSystVar2xUp   = getattr(normFactorsImport, "FakeBNormalisation_ErrorUp2x")
+    myNormFactorsImportSystVar3xUp   = getattr(normFactorsImport, "FakeBNormalisation_ErrorUp3x")
+    myNormFactorsImportSystVarDown   = getattr(normFactorsImport, "FakeBNormalisation_ErrorDown")
+    myNormFactorsImportSystVar2xDown = getattr(normFactorsImport, "FakeBNormalisation_ErrorDown2x")
+    myNormFactorsImportSystVar3xDown = getattr(normFactorsImport, "FakeBNormalisation_ErrorDown3x")
     msg = "Obtained transfer factors (TFs) from file %s. The values are:" % (ShellStyles.NoteStyle() + srcBase + ShellStyles.NormalStyle() )
     Verbose(msg, True)
 
     # Import the normalisation factors and inform user
     myNormFactors = {}
-    myNormFactors["Nominal"]     = myNormFactorsImport
-    myNormFactors["Error"]       = myNormFactorsImportError
-    myNormFactors["SystVarUp"]   = myNormFactorsImportSystVarUp
-    myNormFactors["SystVarDown"] = myNormFactorsImportSystVarDown
+    myNormFactors["Nominal"]       = myNormFactorsImport
+    myNormFactors["Error"]         = myNormFactorsImportError
+    myNormFactors["SystVarUp"]     = myNormFactorsImportSystVarUp
+    myNormFactors["SystVar2xUp"]   = myNormFactorsImportSystVar2xUp
+    myNormFactors["SystVar3xUp"]   = myNormFactorsImportSystVar3xUp
+    myNormFactors["SystVarDown"]   = myNormFactorsImportSystVarDown
+    myNormFactors["SystVar2xDown"] = myNormFactorsImportSystVar2xDown
+    myNormFactors["SystVar3xDown"] = myNormFactorsImportSystVar3xDown
 
     # Print the Normalisation Factors aka Transfer Factors (TF)
     if 0:
@@ -594,7 +654,8 @@ def main(opts):
                     # Do TF variations named "SystVarUp" and "SystVarDown" (i.e. (Get results using TF+Error and TF-Error instead of TF)
                     if len(mySystematicsNames) > 0:
                         Verbose("Adding FakeB normalization systematics (iff also other systematics  present) ", True)
-                        nominalModule.buildTransferFactorVarSystModule(opts.dataSrc, opts.ewkSrc, myNormFactors["SystVarUp"], myNormFactors["SystVarDown"])
+                        #nominalModule.buildTransferFactorVarSystModule(opts.dataSrc, opts.ewkSrc, myNormFactors["SystVarUp"], myNormFactors["SystVarDown"])
+                        nominalModule.buildTransferFactorVarSystModule(opts.dataSrc, opts.ewkSrc, myNormFactors)
                     
                     Verbose("Deleting nominal module", True)
                     nominalModule.delete()
@@ -613,7 +674,8 @@ def main(opts):
                         # Create dataset manager with given settings
                         systModule.createDsetMgr(opts.mcrab, era, searchMode, optimizationMode, systematicVariation=syst)
 
-                        # Build asystematics module
+                        # Build systematics module
+                        Verbose("Building systematics module (opts.normFactorKey = %s)" % (opts.normFactorKey), True)
                         systModule.buildModule(opts.dataSrc, opts.ewkSrc, myNormFactors[opts.normFactorKey], False, opts.normDataSrc, opts.normEwkSrc)
                         printTimeEstimate(myGlobalStartTime, myStartTime, iModule, myTotalModules)
                         systModule.delete()
@@ -722,20 +784,6 @@ if __name__ == "__main__":
     
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE, 
                       help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
-
-#    parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
-#                      help="List of datasets in mcrab to include")
-#
-#    parser.add_option("-e", "--excludeTasks", dest="excludeTasks", action="store", 
-#                      help="List of datasets in mcrab to exclude")
-
-    # iro
-    #parser.add_option("-e", "--dataEra", dest="era", type="string", action="append", help="Evaluate specified data eras")
-    #parser.add_option("-m", "--searchMode", dest="searchMode", type="string", action="append", help="name of search mode")
-    #parser.add_option("-o", "--optimizationMode", dest="optimizationMode", type="string", action="append", help="Evaluate specified optimization mode")
-    #parser.add_option("-s", "--systematicVariation", dest="systematicVariation", type="string", action="append", help="Evaluated specified systematic variations")
-    #parser.add_option("-l", "--list", dest="listVariations", action="store_true", default=False, help="Print a list of available variations")
-    # iro
 
     parser.add_option("--dataSrc", dest="dataSrc", action="store", default=DATA_SRC,
                       help="Source of Data histograms [default: %s" % (DATA_SRC) )

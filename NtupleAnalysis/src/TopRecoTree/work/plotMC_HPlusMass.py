@@ -1,22 +1,18 @@
 #!/usr/bin/env python
 '''
 Description:
+This scripts creates the distributions of the input variables used for the training of the top-tagger (BDTG) 
+for all the truth-matched (signal) and unmatched (background) top-candidates in the ttbar sample
 
 Usage:
 ./plotMC_HPlusMass.py -m <pseudo_mcrab> [opts]
 
 Examples:
 ./plotMC_HPlusMass.py -m <peudo_mcrab> -o "" --url --normaliseToOne
-./plotMC_HPlusMass.py -m <peudo_mcrab> --folder topologySelection_ --url --normaliseToOne
-./plotMC_HPlusMass.py -m <peudo_mcrab> --normaliseToOne --url
-./plotMC_HPlusMass.py -m <peudo_mcrab> --normaliseToOne --url --signalMass 500
-./plotMC_HPlusMass.py -m <peudo_mcrab> --normaliseToOne --url --signalMass 500
 
 Last Used:
-./plotMC_HPlusMass.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --normaliseToOne --url --mergeEWK
-./plotMC_HPlusMass.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --normaliseToOne --folder ""
-./plotMC_HPlusMass.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --folder topSelection_ --url --normaliseToOne
-
+ ./plotMC_HPlusMass.py -m TopRecoTree_180717_DeltaR0p3_BJetPt40_TopPtReweighting13Tev/ --normaliseToOne --url
+ ./plotMC_HPlusMass.py -m TopRecoTree_180714_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_TopPtReweighting13Tev/ --normaliseToOne --url
 '''
 
 #================================================================================================ 
@@ -201,9 +197,9 @@ def main(opts, signalMass):
         # Re-order datasets
         datasetOrder = []
         for d in datasetsMgr.getAllDatasets():
-            if "M_" in d.getName():
-                if d not in signalMass:
-                    continue
+            #if "M_" in d.getName():
+            #    if d not in signalMass:
+            #        continue
             datasetOrder.append(d.getName())
             #newOrder = ["TT", "QCD"]
             #newOrder = ["TT", "QCD"]
@@ -254,12 +250,12 @@ def main(opts, signalMass):
             hF = histoPathsF[i]
             if "Vs" in hG: # Skip TH2D
                 continue
+            if "cjet" in hG.lower():
+                continue
+            if "all" in hG.lower():
+                continue
             #PlotMC(datasetsMgr, h, intLumi)
             PlotSignalBackground(datasetsMgr, hG, hF, intLumi)
-            #HistoFit = ["TrijetDPtOverGenPt",]
-
-            #for i in range(len(HistoFit)):
-            #Fit(datasetsMgr.getAllDatasets(), folder+"/"+HistoFit[i], "gaus")
 
     return
 
@@ -292,13 +288,18 @@ def GetHistoKwargs(histoName, opts):
         "cutBoxY"          : {"cutValue": 1.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
         }
 
+    if "trijetmass" in hG.lower():
+        _units  = "GeV/c^{2}"
+        _format = "%0.0f " + _units
+        _xlabel = "m_{top} (%s)" % _units
+        #_cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _opts["xmax"] = 805 #1005
+        _opts   = {"xmin": 0.0, "xmax": 805}
 
 
 def PlotSignalBackground(datasetsMgr, hG, hF, intLumi):
     kwargs = {}
     _kwargs = {}
-    #kwargs = GetHistoKwargs(hG, opts)
-
 
     if opts.normaliseToOne:
         pG = plots.MCPlot(datasetsMgr, hG, normalizeToOne=True, saveFormats=[], **_kwargs)
@@ -307,15 +308,13 @@ def PlotSignalBackground(datasetsMgr, hG, hF, intLumi):
         pG = plots.MCPlot(datasetsMgr, hG, normalizeToLumi=intLumi, saveFormats=[], **_kwargs)
         pF = plots.MCPlot(datasetsMgr, hF, normalizeToLumi=intLumi, saveFormats=[], **_kwargs)
 
-    # Draw the histograms                                                                                                                                                                
+    # Draw the histograms
     _cutBox = None
     _rebinX = 1
     _format = "%0.2f"
     _xlabel = None
     logY    = False
-    _opts   = {"ymin": 1e-3, "ymaxfactor": 1.0}
-
-
+    _opts   = {"ymin": 0, "ymaxfactor": 1.1}
 
     if "mass" in hG.lower():
         _units  = "GeV/c^{2}"
@@ -328,41 +327,51 @@ def PlotSignalBackground(datasetsMgr, hG, hF, intLumi):
         _xlabel = "m_{top} (%s)" % _units
         #_cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _opts["xmax"] = 805 #1005
-
+        _opts   = {"xmin": 0.0, "xmax": 805}
     if "bjetmass" in hG.lower():
         _xlabel = "m_{b-tagged jet} (%s)" % _units
         _opts["xmax"] = 50
     if "bjetldgjet_mass" in hG.lower():
         _xlabel = "m_{b, ldg jet} (%s)" % _units
+        _opts["xmax"] = 705
     if "bjetsubldgjet_mass" in hG.lower():
         _xlabel = "m_{b-tagged, subldg jet} (%s)" % _units
-
+        _opts["xmax"] = 705
     if "jet_mass" in hG.lower():
         _opts["xmax"] = 750
 
     if "mult" in hG.lower():
         _format = "%0.0f"
-        _xlabel = "Leading jet mult"
+        if "ldg" in hG.lower():
+            _xlabel = "Leading jet mult"
         if "subldg" in hG.lower():
             _xlabel = "Subleading jet mult"
-            
+        if "avg" in hG.lower():
+            _xlabel = "avg CvsL"
+
     if "cvsl" in hG.lower():
         _format = "%0.2f"
-        _xlabel = "Leading jet CvsL"
+        if "ldg" in hG.lower():
+            _xlabel = "Leading jet CvsL"
         if "subldg" in hG.lower():
              _xlabel = "Subleading jet CvsL"
-
+        if "avg" in hG.lower():
+            _xlabel = "avg CvsL"
     if "axis2" in hG.lower():
         _format = "%0.3f"
-        _xlabel = "Leading jet axis2"
+        if "ldg" in hG.lower():
+            _xlabel = "Leading jet axis2"
         if "subldg" in hG.lower():
             _xlabel = "Subleading jet axis2"
+        if "avg" in hG.lower():
+            _xlabel = "avg axis2"
 
     if "dijetmass" in hG.lower():
         _units  = "GeV/c^{2}"
         _format = "%0.0f " + _units
         _xlabel = "m_{W} (%s)" % _units
         _opts["xmax"] = 600
+        _opts   = {"xmin": 0.0, "xmax": 605, "ymin": 1e-3, "ymaxfactor": 1.0}
 
     if "trijetptdr" in hG.lower():
         _opts["xmax"] =800
@@ -379,7 +388,32 @@ def PlotSignalBackground(datasetsMgr, hG, hF, intLumi):
         _xlabel = "Leading jet p_{T}D"
         if "subldg" in hG.lower():
             _xlabel = "Subleading jet p_{T}D"
-    
+
+    if "bdisc" in hG.lower():
+        _format = "%0.2f"
+        if "subldg" in hG.lower():
+            _xlabel = "Subleading jet CSV"
+            _opts   = {"ymin": 1e-3, "ymax": 0.06}
+        elif "ldg" in hG.lower():
+            _xlabel = "Leading jet CSV"
+            _opts   = {"ymin": 1e-3, "ymax": 0.06}
+        else:
+            _xlabel = "b-tagged jet CSV"
+            _opts   = {"ymin": 1e-3, "ymax": 0.35}
+
+    if "over" in hG.lower():
+         _format = "%0.2f "
+         _xlabel = "m_{W}/m_{t}"
+         _opts["xmax"] = 1
+         _opts["xmin"] = 0
+    if "likelihood" in hG.lower():
+        _format = "%0.2f"
+        if "ldg" in hG.lower():
+            _xlabel = "Leading jet QGL"
+        if "subldg" in hG.lower():
+            _xlabel = "Subleading jet QGL"
+        if "avg" in hG.lower():
+            _xlabel = "avg QGL"
 
     else:
         pass
@@ -395,7 +429,6 @@ def PlotSignalBackground(datasetsMgr, hG, hF, intLumi):
             _xlabel = "b-tagged jet CSV"
     '''
     
-
     if logY:
         yMaxFactor = 2.0
     else:
@@ -407,87 +440,70 @@ def PlotSignalBackground(datasetsMgr, hG, hF, intLumi):
     else:
         _opts["ymin"] = 1e0
 
-    if "bdisc" in hG.lower():
-        _format = "%0.2f"
-        if "subldg" in hG.lower():
-            _xlabel = "Subleading jet CSV"
-            _opts   = {"ymin": 1e-3, "ymax": 0.06}
-        elif "ldg" in hG.lower():
-            _xlabel = "Leading jet CSV"
-            _opts   = {"ymin": 1e-3, "ymax": 0.06}
-        else:
-            _xlabel = "b-tagged jet CSV"
-            _opts   = {"ymin": 1e-3, "ymax": 0.35}
-
         
     myList = []
     # Customise styling
     pG.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineStyle(ROOT.kSolid))
     pF.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineStyle(ROOT.kSolid))
 
+    #Dataset: ttbar
+    dataset = datasetsMgr.getDataset(opts.dataset) #soti
+    #dataset = datasetsMgr.getDataset("ChargedHiggs_HplusTB_HplusToTB_M_1000")
 
-
-    '''
-    plots.drawPlot(pG, 
-                   hG,  
-                   xlabel       = _xlabel,
-                   ylabel       = "Arbitrary Units / %s" % (_format),
-                   log          = logY,
-                   rebinX       = _rebinX, cmsExtraText = "Preliminary", 
-                   createLegend = {"x1": 0.58, "y1": 0.65, "x2": 0.92, "y2": 0.92},
-                   opts         = _opts,
-                   opts2        = {"ymin": 0.6, "ymax": 1.4},
-                   cutBox       = _cutBox,
-                   )
-
-    plots.drawPlot(pF, 
-                   hF,  
-                   xlabel       = _xlabel,
-                   ylabel       = "Arbitrary Units / %s" % (_format),
-                   log          = logY,
-                   rebinX       = _rebinX, cmsExtraText = "Preliminary", 
-                   createLegend = {"x1": 0.58, "y1": 0.65, "x2": 0.92, "y2": 0.92},
-                   opts         = _opts,
-                   opts2        = {"ymin": 0.6, "ymax": 1.4},
-                   cutBox       = _cutBox,
-                   )
-
-    '''
-
-
-    dataset = datasetsMgr.getDataset("TT")
-    
+    #Get Genuine-top histogram
     h = dataset.getDatasetRootHisto(hG)
     h.normalizeToOne()
     HG = h.getHistogram()
 
+    #Get Fake-top histogram
     h = dataset.getDatasetRootHisto(hF)
     h.normalizeToOne()
     HF = h.getHistogram()
 
-
-    altSignalBDTGStyle  = styles.StyleCompound([styles.StyleMarker(markerSize=1.2, markerColor=ROOT.kAzure+9, markerSizes=None, markerStyle=ROOT.kFullDiamond),
-                                                styles.StyleLine(lineColor=ROOT.kAzure+9, lineStyle=ROOT.kSolid, lineWidth=3),
-                                                styles.StyleFill(fillColor=ROOT.kAzure+9)])
+    #Define Signal style
+    altSignalBDTGStyle     = styles.StyleCompound([styles.StyleMarker(markerSize=1.2, markerColor=ROOT.kAzure+9, markerSizes=None, markerStyle=ROOT.kFullDiamond),
+                                                   styles.StyleLine(lineColor=ROOT.kAzure+9, lineStyle=ROOT.kSolid, lineWidth=3),
+                                                   styles.StyleFill(fillColor=ROOT.kAzure+9)])
+    #Define Background style
     altBackgroundBDTGStyle = styles.StyleCompound([styles.StyleMarker(markerSize=1.2, markerColor=ROOT.kRed-4, markerSizes=None, markerStyle=ROOT.kFullDiamond),
                                                    styles.StyleLine(lineColor=ROOT.kRed-4, lineStyle=ROOT.kSolid, lineWidth=3),
                                                    styles.StyleFill(fillColor=ROOT.kRed-4, fillStyle=3001)])
+    
+    signalBDTGStyle = styles.StyleCompound([styles.StyleMarker(markerSize=1.2, markerColor=ROOT.kTeal+2, markerSizes=None, markerStyle=ROOT.kFullTriangleUp),
+                                        styles.StyleLine(lineColor=ROOT.kTeal+2, lineStyle=ROOT.kSolid, lineWidth=3),
+                                        styles.StyleFill(fillColor=ROOT.kTeal+2)])#, fillStyle=3001)])
 
-
+    signalGrayStyle = styles.StyleCompound([styles.StyleMarker(markerSize=1.2, markerColor=ROOT.kGray+1, markerSizes=None, markerStyle=ROOT.kFullDiamond),
+                                            styles.StyleLine(lineColor=ROOT.kGray+1, lineStyle=ROOT.kSolid, lineWidth=3),
+                                            styles.StyleFill(fillColor=ROOT.kGray+1)])
+    backgroundGrayStyle = styles.StyleCompound([styles.StyleMarker(markerSize=1.2, markerColor=ROOT.kGray+3, markerSizes=None, markerStyle=ROOT.kFullDiamond),
+                                                styles.StyleLine(lineColor=ROOT.kGray+3, lineStyle=ROOT.kSolid, lineWidth=3),
+                                                styles.StyleFill(fillColor=ROOT.kGray+3, fillStyle=3001)])
+    
+    #Comparison Plot
     p = plots.ComparisonPlot(histograms.Histo(HF,"Fake", "p", "P"), histograms.Histo(HG,"Genuine", "pl", "PL"),) 
+
+    #Set labels
     p.histoMgr.setHistoLegendLabelMany({"Fake": "Unmatched", "Genuine": "Truth-matched"}) 
+
+    #Set Draw style
     p.histoMgr.forHisto("Fake", altBackgroundBDTGStyle ) 
     p.histoMgr.setHistoDrawStyle("Fake", "LP") 
     p.histoMgr.setHistoLegendStyle("Fake", "LP") #F
-    
+
     p.histoMgr.forHisto("Genuine", altSignalBDTGStyle) 
     p.histoMgr.setHistoDrawStyle("Genuine" , "HIST") 
     p.histoMgr.setHistoLegendStyle("Genuine", "LP") #LP
+    
+    if "avg" in hG.lower() or "likelihood" in hG.lower() or "over" in hG.lower():
+            p.histoMgr.forHisto("Genuine", signalBDTGStyle) 
+            p.histoMgr.setHistoDrawStyle("Genuine" , "HIST") 
+            p.histoMgr.setHistoLegendStyle("Genuine", "LP") #LP
 
 
-    #HF = dataset.getDatasetRootHisto(hF).getHistogram()
-    #HG = dataset.getDatasetRootHisto(hG).getHistogram()
-
+    if "Gray" in opts.mcrab:
+        p.histoMgr.forHisto("Fake", backgroundGrayStyle ) 
+        p.histoMgr.forHisto("Genuine", signalGrayStyle) 
     histoG = histograms.Histo(HG, "TT", "Signal")
     histoG.setIsDataMC(isData=False, isMC=True)
     
@@ -497,22 +513,12 @@ def PlotSignalBackground(datasetsMgr, hG, hF, intLumi):
     styleG = styles.ttStyle
     styleF = styles.signalStyleHToTB1000
 
-    #hG = histograms.Histo(histoBkg3, legNameBkg3, "F", "HIST9" )
-    #background3_histo = histograms.Histo(histoBkg3, legNameBkg3, "F", "HIST9" )
-
     styleG.apply(HG)
     styleF.apply(HF)
 
     myList.append(histoG)
     myList.append(histoF)
-    
-
-    
-    #myList.append(HF)
-    #myList.append(HG)
-    
-#    p = plots.PlotBase(datasetRootHistos=myList, saveFormats=[])
-    
+        
     _kwargs = {
         "xlabel"           : _xlabel,
         "ylabel"           : "Arbitrary Units / %s" % (_format),
@@ -524,45 +530,20 @@ def PlotSignalBackground(datasetsMgr, hG, hF, intLumi):
         "addLuminosityText": False,
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
-        "opts"             : {"ymin": 0.0, "ymaxfactor": 1.1},
+        #"opts"             : {"ymin": 0.0, "ymaxfactor": 1.1},
+        "opts"             : _opts,
         "opts2"            : {"ymin": 0.6, "ymax": 1.5},
         "log"              : False,
         #"createLegend"     : {"x1": 0.5, "y1": 0.75, "x2": 0.9, "y2": 0.9},                                                                                                                                         
         "createLegend"     : {"x1": 0.58, "y1": 0.65, "x2": 0.92, "y2": 0.82}, 
         }
 
-    '''
-    plots.drawPlot(p, 
-                   hG,  
-                   xlabel       = _xlabel,
-                   ylabel       = "Arbitrary Units / %s" % (_format),
-                   log          = logY,
-                   rebinX       = _rebinX, cmsExtraText = "Preliminary", 
-                   createLegend = {"x1": 0.58, "y1": 0.65, "x2": 0.92, "y2": 0.82},
-                   opts         = _opts,
-                   opts2        = {"ymin": 0.6, "ymaxfactor": 1.1},
-                   cutBox       = _cutBox,
-                   )
-
-
-    '''
     # Save plot in all formats    
     saveName = hG.split("/")[-1]
     #plots.drawPlot(p, saveName, **_kwargs)
-    savePath = os.path.join(opts.saveDir, "HplusMasses", hG.split("/")[0], opts.optMode)
+    savePath = os.path.join(opts.saveDir+ANALYSISNAME, "HplusMasses", hG.split("/")[0], opts.optMode)
     plots.drawPlot(p, savePath, **_kwargs)
-    SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png", ".pdf", ".C"])
-
-    #SavePlot(p, saveName, savePath) 
-
-    #p = plots.DataMCPlot2( myList, saveFormats=[])
-    #p.setLuminosity(opts.intLumi)
-    #p.setDefaultStyles()
-
-    # Draw the plot and save it                                                                                                                                                          
-    #hName = hG
-    #plots.drawPlot(p, hName, **_kwargs)
-    #SavePlot(p, hName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png"])
+    SavePlot(p, saveName, os.path.join(opts.saveDir+opts.mcrab, opts.optMode), saveFormats = [".png"])
 
     return
     
@@ -819,12 +800,12 @@ if __name__ == "__main__":
     MERGEEWK     = False
     URL          = False
     NOERROR      = True
-    SAVEDIR      = "/publicweb/s/skonstan/" + ANALYSISNAME
+    SAVEDIR      = "/publicweb/s/skonstan/" #+ ANALYSISNAME
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
     NORMALISE    = False
     FOLDER       = "" #"topSelection_" #"ForDataDrivenCtrlPlots" #"topologySelection_"
-
+    DATASET      = "TT"
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
 
@@ -878,6 +859,9 @@ if __name__ == "__main__":
 
     parser.add_option("--folder", dest="folder", type="string", default = FOLDER,
                       help="ROOT file folder under which all histograms to be plotted are located [default: %s]" % (FOLDER) )
+
+    parser.add_option("--dataset", dest="dataset", type="string", default = DATASET,
+                      help="Name of disired dataset [default: %s]" % (DATASET) )
 
     (opts, parseArgs) = parser.parse_args()
 

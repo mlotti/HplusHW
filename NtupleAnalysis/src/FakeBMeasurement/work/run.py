@@ -43,7 +43,8 @@ from optparse import OptionParser
 import time
 
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
-from HiggsAnalysis.NtupleAnalysis.AnalysisBuilder import AnalysisBuilder    
+from HiggsAnalysis.NtupleAnalysis.AnalysisBuilder import AnalysisBuilder
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 
 import ROOT
 
@@ -184,17 +185,28 @@ def main():
 
     # Set splitting of phase-space (first bin is below first edge value and last bin is above last edge value)
     allSelections.CommonPlots.histogramSplitting = [                
+        PSet(label="TetrajetBjetPt" , binLowEdges=[60, 90, 160, 300], useAbsoluteValues=False), # Final
+        PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.4, 2.0], useAbsoluteValues=True), # Final
+        # 
         # PSet(label="TetrajsetBjetPt", binLowEdges=[60, 100, 150], useAbsoluteValues=False),
         # PSet(label="TetrajsetBjetPt", binLowEdges=[60, 150], useAbsoluteValues=False),
-        PSet(label="TetrajsetBjetPt", binLowEdges=[55, 110], useAbsoluteValues=False),
-        PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True),
-        #PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True),  #AN v4
+        # PSet(label="TetrajsetBjetPt", binLowEdges=[55, 110], useAbsoluteValues=False),
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True),
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True),  #AN v4
         ]
 
     # Overwrite values
     # allSelections.TopSelectionBDT.CSV_bDiscCutDirection  = ">="
     allSelections.TopSelectionBDT.CSV_bDiscCutValue = 0.54 # allow CSVv2-L for inverted top
     
+    # Testing
+    if 0:
+        msg = "WARNING! This is a simple testing of the FakeB measurement with only 1 CSVv2-M. Disable once done!"
+        Print(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle(), True)
+        allSelections.FakeBMeasurement.baselineBJetsCutValue     = 0 #1
+        allSelections.FakeBMeasurement.baselineBJetsCutDirection = "=="
+
+
     # ================================================================================================
     # Command Line Options
     # ================================================================================================ 

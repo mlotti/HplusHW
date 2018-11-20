@@ -174,7 +174,7 @@ myBtagSystematics       = ["CMS_eff_b"]
 
 # Define systematics dictionary (easier access)
 mySystematics = {}
-mySystematics["MC"]          =  myLumiSystematics + myPileupSystematics + myTrgEffSystematics + myLeptonVetoSystematics + myJetSystematics + myBtagSystematics + myTopTagSystematics
+mySystematics["MC"]          = myLumiSystematics + myPileupSystematics + myTrgEffSystematics + myLeptonVetoSystematics + myJetSystematics + myBtagSystematics + myTopTagSystematics
 mySystematics["Signal"]      = mySystematics["MC"]
 mySystematics["FakeB"]       = []
 mySystematics["QCD"]         = mySystematics["MC"]

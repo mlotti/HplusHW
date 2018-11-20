@@ -530,7 +530,8 @@ def GetControlRegionLabel(histoName):
             return "CR1"
     elif base == "Inverted":
         if sel == "AfterAllSelections":
-            return "VR"
+            #return "VR"
+            return "AR"
         elif sel == "AfterCRSelections":
             return "CR2"
     else:

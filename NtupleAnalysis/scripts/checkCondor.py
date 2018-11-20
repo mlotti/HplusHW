@@ -142,6 +142,7 @@ def GetJobsWithKeyword(dirName, analysis= "FakeBMeasurement", keyword="Results a
     # Define files to search
     fileName = "error_%s_Group*.txt" % (analysis)
     cmd      = "grep -i -n -m1 --files-with-matches '%s' %s/%s" % (keyword, dirName, fileName)
+    Verbose("Popen(%s, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)" % (cmd), True)
     process  = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
     output, err = process.communicate()
     if len(err) > 0:
@@ -194,6 +195,27 @@ def GetJobsWithKeyword(dirName, analysis= "FakeBMeasurement", keyword="Results a
 
     return jdlList, errList, outList, logList, eosList
 
+
+def KillJobs(condorQ, opts):
+
+    if opts.kill == "all":
+        nJobs = len(condorQ["ID"])
+        Print("Killing %d jobs" % (nJobs), True)
+        for i, jobid in enumerate(condorQ["ID"], 1):
+            #cmd = "condor_rm -submitter %s %s" % (getpass.getuser(), jobid)
+            cmd = "condor_rm %s" % (jobid)
+            PrintFlushed(cmd, i==1)
+            os.system(cmd)
+    else:
+        killList = opts.kill.split(",")
+        nJobs = len(killList)
+        Print("Killing %d jobs" % (nJobs), True)
+        for i, jobid in enumerate(killList, 1):
+            #cmd = "condor_rm -submitter %s %s" % (getpass.getuser(), jobid)
+            cmd = "condor_rm %s" % (jobid)
+            PrintFlushed(cmd, i==1)
+            os.system(cmd)
+    return
 
 def ResubmitFailedJobs(jdlList, errList, outList, logList, eosList):
     
@@ -263,6 +285,7 @@ def GetNumberOfJobs(dirName, fileName="run*.jdl"):
 
     # Define the command to be executed
     cmd     = "ls %s | wc -w" % ( os.path.join(os.getcwd(), dirName, fileName) )
+    Verbose("Popen(%s, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)" % (cmd), True)
     process = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
     output, err = process.communicate()
     if len(err) > 0:
@@ -320,17 +343,29 @@ def GetFilesInEOS(eosdir):
     output = []
 
     # Remove anything not ending in ".tgz"
-    for o in outputAll:
+    for i, o in enumerate(outputAll, 1):
         # Is this a file?
         if o.endswith(".tgz") == False:
             #output.remove(o)
             continue
 
-        # Does the filebelong to this specific job?
-        if opts.job not in o:
+        # Does the file belong to this specific job?
+        bSkip = False
+        # For loop: All keywords
+        for k in opts.keyList:
+            if k not in o:
+                bSkip = True
+                break
+            else:
+                bSkip = False
+
+        if bSkip: #opts.job not in o:
             #output.remove(o)
+            #print "o = ", o
             continue
-        output.append(o)
+        else:
+            Verbose("Appending file %s for retrieval" % (o), i==1)
+            output.append(o)
         #print "%s (%s)" % (o, opts.job)
 
     
@@ -383,17 +418,27 @@ def GetCondorQDict(username, keyword="Total for query: "):
 
     # For-loop: All output lines
     for iLine, l in enumerate(output.splitlines(), True):
-
+        
         # Definitions
         if "fnal.gov" in l:
             m = re.search('cmslpc(.+?).fnal.gov', l)
             if m:
                 lpc = m.group(1)
 
+        # Skip jobs unrelated to this task
+        bSkipTask = False
+        # For loop: All keywords
+        for k in opts.keyList:
+            if k not in l:
+                bSkipTask = True
+                break
+            else:
+                bSkipTask = False
+            
         # Inspect only jobs related to this directory!
-        if opts.job in l:
-            Verbose(es + l + ns, iLine==1)
-
+        if not bSkipTask: #opts.job in l:
+            Verbose(es + l + ns, iLine==1)            
+        
             # For command range
             nWords = len(l.split())-8
             cmd    = " ".join(l.split()[-nWords:])
@@ -570,10 +615,10 @@ def PrintCondorQ(condorQ):
     nIdle   = 0
     nIO     = 0 # The arrow statuses mean the job is transferring input or output.
     table   = []
-    align   = "{:>3} {:^10} {:^10} {:^10} {:^15} {:^10} {:^15} {:^10} {:>25} "
-    header  = align.format("#", "LPC", "ID", "SUBMITTED", "RUNTIME", "STATUS", "ANALYSIS", "GROUP", "PSET")
-    hLine   = "="*150
-    table.append("{:^150}".format(opts.dirName))
+    align   = "{:>3} {:^10} {:^10} {:^10} {:^15} {:^10} {:^20} {:^10} {:^55}  {:^15}  {:^10}"
+    header  = align.format("#", "LPC", "ID", "SUBMITTED", "RUNTIME", "STATUS", "ANALYSIS", "GROUP", "PSET", "POSTFIX", "DATE")
+    hLine   = "="*180
+    table.append("{:^180}".format(opts.dirName))
     table.append(hLine)
     table.append(header)
     table.append(hLine)
@@ -609,7 +654,10 @@ def PrintCondorQ(condorQ):
         analysis = condorQ["CMD"][i].split()[1]
         pset     = condorQ["CMD"][i].split()[2]
         group    = condorQ["CMD"][i].split()[3]
-        table.append(align.format(i+1, condorQ["LPC"][i], condorQ["ID"][i], condorQ["SUBMITDATE"][i] + " " + condorQ["SUBMITTIME"][i], condorQ["RUNTIME"][i], condorQ["STATUS"][i], analysis, group, pset) )
+        syst     = condorQ["CMD"][i].split()[3]
+        postfix  = condorQ["CMD"][i].split()[5]
+        date     = condorQ["CMD"][i].split()[6]
+        table.append(align.format(i+1, condorQ["LPC"][i], condorQ["ID"][i], condorQ["SUBMITDATE"][i] + " " + condorQ["SUBMITTIME"][i], condorQ["RUNTIME"][i], condorQ["STATUS"][i], analysis, group, pset, postfix, date) )
 
         if i == (nActive-1):
             Verbose("", False)
@@ -707,7 +755,6 @@ def main(opts):
     Verbose("Create a job status summary table", True)
     condorQ  = GetCondorQDict(opts.userName)
 
-
     Verbose("Printing currently active jobs (from \"condor_q\" output)", True)
     nActive, nRun, nHeld, nIdle, nIO = PrintCondorQ(condorQ)
 
@@ -726,6 +773,11 @@ def main(opts):
     jdlList, errList, outList, logList, eosList = GetJobsWithKeyword(opts.dirName, analysis="Hplus2tbAnalysis", keyword="There was a crash.") 
     ResubmitFailedJobs(jdlList, errList, outList, logList, eosList)
 
+
+    Verbose("Kill jobs", True)
+    if opts.kill != None:
+        KillJobs(condorQ, opts)
+            
 
     jdlList_, errList_, outList_, logList_, eosList_ = GetJobsWithKeyword(opts.dirName, analysis="FakeBMeasurement", keyword="There was a crash.") 
     ResubmitFailedJobs(jdlList_, errList_, outList_, logList_, eosList_)
@@ -747,6 +799,7 @@ def main(opts):
         RetrieveUnpackCleanupFiles(filesSystH2tb, "Hplus2tbAnalysis")
         RetrieveUnpackCleanupFiles(filesSystFakeB, "FakeBMeasurement")
 
+    print
     Print("Done", True)
     return
 
@@ -775,6 +828,7 @@ if __name__ == "__main__":
     GETOUTPUT = False
     EOSDIR    = "$CONDOR"
     RESUBMIT  = False
+    KILL      = None
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]", add_help_option=True, conflict_handler="resolve")
@@ -796,6 +850,9 @@ if __name__ == "__main__":
 
     parser.add_option("--eosdir", dest="eosdir", action="store", default = EOSDIR,
                       help="Location of CONDOR output files in EOS? [default: %s]" % (EOSDIR) )
+
+    parser.add_option("--kill", dest="kill", action="store", default = KILL,
+                      help="List of jobs id's to kill (comma separated) [default: %s]" % (KILL) )
 
     (opts, parseArgs) = parser.parse_args()
 
@@ -823,6 +880,20 @@ if __name__ == "__main__":
         sys.exit()
     else:
         Print("Requires %sPython 2.7.6%s or later (using %sPython %s)" % (hs, ns, ss, pyVer + ns), True)
+
+    # Retrieve info from dirName
+    myPattern = r"(?P<TopMassLE>\w+)_(?P<BDT>\w+)_(?P<Binning>\w+)_(?P<Group>\w+)_(?P<Syst>\S+)"
+    reObject = re.compile(myPattern)
+    search = reObject.search(opts.dirName)
+    if search.group(0) != opts.dirName:
+        msg = "The directory name does not match the group(0) of the regular expression search! It should!"
+        raise Exception(es + msg + ns)
+    opts.topMass = search.group(1)
+    opts.BDT     =  search.group(2)
+    opts.binning =  search.group(3)
+    opts.postfix =  search.group(4)
+    opts.date    =  search.group(5)
+    opts.keyList = [opts.topMass, opts.BDT, opts.binning, opts.postfix, opts.date]
 
     # Call the main function
     main(opts)

@@ -508,4 +508,8 @@ if __name__ == "__main__":
     if opts.systVars != None:
         opts.doSystematics = True
         opts.systVarsList = opts.systVars.split(",")
+
+    if not opts.useTopPtReweighting:
+        Print("WARNING! Top-pT reweighting is disabled!", True)
+
     main()

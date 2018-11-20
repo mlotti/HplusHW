@@ -192,13 +192,13 @@ def main():
 
     allSelections.TopSelectionBDT.TopMVACutValue      = 0.40
     allSelections.TopSelectionBDT.TopMVACutDirection  = ">="
-    
-    # allSelections.TopSelectionBDT.WeightFile = "TopRecoTree_12June18_DeltaR0p3_TopPtReweighting_BDTG.weights.xml" 
-    #                                   Default: "TopRecoTree_180523_DeltaR0p3_DeltaPtOverPt0p32_TopPtReweighting_BDTG.weights.xml"  
-    #                                     Other: "TopRecoTree_12June18_DeltaR0p3_TopPtReweighting_BDTG.weights.xml"   
-    #                               DEFAULT NEW: "TopRecoTree_14July18_DeltaR0p3_DeltaPtOverPt0p32_BJetBt40_TopPtReweighting13Tev.weight.xml"
-    #                                 OTHER NEW: "TopRecoTree_17July18_DeltaR0p3_BJetPt40_TopPtReweighting13Tev.weights.xml"
-    
+    allSelections.TopSelectionBDT.WeightFile          = "BDTG_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_14July2018.weight.xml"
+    #BDTG_DeltaR0p4_BJetPt40_25Sept2018.weights.xml
+    #BDTG_DeltaR0p3_DeltaPtOverPt0p50_BJetPt40_18Sept2018.weights.xml
+    #BDTG_DeltaR0p3_BJetPt40_17July2018.weights.xml
+    #BDTG_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_14July2018.weight.xml
+    allSelections.DeltaR = 0.3
+    allSelections.DeltaPtOverPt = 0.32
     # ================================================================================================
     # Add Analysis Variations
     # ================================================================================================

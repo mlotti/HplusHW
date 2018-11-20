@@ -192,8 +192,6 @@ void TMVAClassificationTopRec( TString myMethodList = "", TString fout = "TMVA_T
    
    //Check the scatterplots of the anticorrelated variables.
 
-
-   //Soti 
    //List of TopRec input variables
   if(1){
      factory->AddVariable( "TrijetPtDR",             "p_{T} #Delta R_{T}",   "",     'F');
@@ -207,25 +205,54 @@ void TMVAClassificationTopRec( TString myMethodList = "", TString fout = "TMVA_T
      factory->AddVariable( "TrijetDijetMass","m_{W}","",'F');   
      factory->AddVariable( "TrijetBJetBDisc","b-tagged jet CSV","",'F');  
      factory->AddVariable( "TrijetSoftDrop_n2","SoftDrop_n2","",'F'); 
-     factory->AddVariable( "TrijetLdgJetCvsL","Leading jet CvsL","",'F');
-     factory->AddVariable( "TrijetSubldgJetCvsL","Subleading jet CvsL","",'F');
+     factory->AddVariable( "TrijetLdgJetCvsL","Leading jet CvsL","",'F');       //-
+     factory->AddVariable( "TrijetSubldgJetCvsL","Subleading jet CvsL","",'F'); //-
      factory->AddVariable( "TrijetLdgJetPtD","Leading jet p_{T}D","",'F');
      factory->AddVariable( "TrijetSubldgJetPtD","Subleading jet p_{T}D","",'F');
      factory->AddVariable( "TrijetLdgJetAxis2","Leading jet axis2","",'F');
      factory->AddVariable( "TrijetSubldgJetAxis2","Subleading jet axis2","",'F');
      factory->AddVariable( "TrijetLdgJetMult","Leading jet mult","",'I');
      factory->AddVariable( "TrijetSubldgJetMult","Subleading jet mult","",'I');
-
      //New variable
      // factory->AddVariable( "TrijetLdgJetQGLikelihood","Leading jet Q-G Likelihood","",'F');
      // factory->AddVariable( "TrijetSubldgJetQGLikelihood","Subleading jet Q-G Likelihood ","",'F');
-     
+     //factory->AddVariable( "TrijetCvsL","Trijet avg CvsL","",'F');               //+
+     //factory->AddVariable( "TrijetDijetMult","Dijet avg Mult","",'F');               //+
+     //factory->AddVariable( "TrijetQGLikelihood_avg","Trijet avg QGL","",'F');          //+     
+  }
+
+  if(0){
+     factory->AddVariable( "TrijetPtDR",             "p_{T} #Delta R_{T}",   "",     'F');
+     factory->AddVariable( "TrijetDijetPtDR",        "p_{T} #Delta R_{W}",   "",     'F');
+     factory->AddVariable( "TrijetBjetMass",         "m_{b-tagged jet}",     "",     'F');
+     factory->AddVariable( "TrijetLdgJetBDisc",      "Leading jet CSV",      "",     'F');
+     factory->AddVariable( "TrijetSubldgJetBDisc",   "Subleading jet CSV",   "",     'F');
+     factory->AddVariable( "TrijetBJetLdgJetMass",   "m_{b, leading jet}",   "",     'F');
+     factory->AddVariable( "TrijetBJetSubldgJetMass","m_{b, subleading jet}","",     'F');
+     factory->AddVariable( "TrijetMass",             "m_{t}",                "GeV",  'F');
+     factory->AddVariable( "TrijetDijetMass","m_{W}","",'F');   
+     factory->AddVariable( "TrijetBJetBDisc","b-tagged jet CSV","",'F');  
+     factory->AddVariable( "TrijetSoftDrop_n2","SoftDrop_n2","",'F'); 
+     factory->AddVariable( "TrijetCvsL","Trijet avg CvsL","",'F');                    //+
+     factory->AddVariable( "TrijetQGLikelihood_avg","Trijet avg QGL","",'F');         //+     
+     factory->AddVariable( "TrijetDijetPtD","Dijet avg p_{T}D","",'F');               //+
+     factory->AddVariable( "TrijetDijetAxis2","Dijet avg axis2","",'F');              //+
+     factory->AddVariable( "TrijetDijetMult","Dijet avg mult","",'F');                //+
   }
 
    // Read training and test data
-   // (it is also possible to use ASCII format as input -> see TMVA Users Guide)OA
-  //TString pseudomulticrab = "TopRecoTree_180714_DeltaR0p3_DeltaPtOverPt0p32_BJetBt40_TopPtReweighting13Tev"; //"TopRecoTree_180523_DeltaR0p3_DeltaPtOverPt0p32_TopPtReweighting";
-  TString pseudomulticrab = "TopRecoTree_180717_DeltaR0p3_BJetBt40_TopPtReweighting13Tev";
+   // (it is also possible to use ASCII format as input -> see TMVA Users Guide)
+  TString pseudomulticrab = "TopRecoTree_181025_085007_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_noDeltaRqq_noTopPt";
+  //"TopRecoTree_181023_124903_DeltaR0p3_BJetPt40_noDeltaRqq_TopTaggerOpt"; //"TopRecoTree_181023_080543_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_noDeltaRqq_TopTaggerOpt";
+  
+  //Again
+  //TopRecoTree_181024_094218_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_noTopPt/
+  //TopRecoTree_181023_080543_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_noDeltaRqq/
+  //TopRecoTree_181024_085120_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_noDeltaRqq_noTopPt/
+
+  //TString pseudomulticrab = "TopRecoTree_180925_074608_DeltaR0p4_BJetPt40_matchingOpt";
+  //TString pseudomulticrab = "TopRecoTree_180918_DeltaR0p3_DeltaPtOverPt0p50_BJetPt40_TopPtReweighting13Tev";
+  //TString pseudomulticrab = "TopRecoTree_180925_050733_DeltaR0p3_BJetPt40_matchingOpt/";
   TString fnameS_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_30/src/HiggsAnalysis/NtupleAnalysis/src/TopRecoTree/work/"+pseudomulticrab+"/TT/res/histograms-TT.root";
   TString fnameB_TT = "/uscms_data/d3/skonstan/CMSSW_8_0_30/src/HiggsAnalysis/NtupleAnalysis/src/TopRecoTree/work/"+pseudomulticrab+"/TT/res/histograms-TT.root";
    //   if (gSystem->AccessPathName( fname ))  // file does not exist in local directory
@@ -448,7 +475,7 @@ void TMVAClassificationTopRec( TString myMethodList = "", TString fout = "TMVA_T
    // Boosted Decision Trees
    if (Use["BDTG"]) // Gradient Boost
       factory->BookMethod( TMVA::Types::kBDT, "BDTG",
-                           "H:!V:NTrees=1000:MinNodeSize=2.5%:MaxDepth=3:BoostType=Grad:Shrinkage=0.10:UseBaggedBoost:BaggedSampleFraction=0.5" );
+                           "H:!V:NTrees=1000:MinNodeSize=2.5%:MaxDepth=3:BoostType=Grad:Shrinkage=0.10:UseBaggedBoost:BaggedSampleFraction=0.5:NegWeightTreatment=IgnoreNegWeightsInTraining" );
 
 
    if (Use["BDT"])  // Adaptive Boost
