@@ -155,10 +155,10 @@ topSelectionBDT = PSet(
     TopMassUppCutDirection =  "<=",   # [default: "<"]
     CSV_bDiscCutValue      = 0.8484,  # [default: 0.8484] # Do not evaluate top candidate if b-jet assigned as b from top fails this cut
     CSV_bDiscCutDirection  = ">=",    # [default: ">="]
-    # WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_14July2018.weight.xml",                      # Default ! (fixme)!
+    WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_14July2018.weight.xml",                      # Default
     # WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_noTopPtRew_24Oct2018.weights.xml",            # Disabled top-pt reweighting
     # WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_noDeltaRqq_24Oct2018.weights.xml",            # dR(q,q') > 0.8 removed from training (q,q': partons from top decay)    
-    WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_noDeltaRqq_noTopPtRew_25Oct2018.weights.xml", # Removed dR(q,q') > 0.8 AND disabled top-pt reweighting
+    # WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_noDeltaRqq_noTopPtRew_25Oct2018.weights.xml", # Removed dR(q,q') > 0.8 AND disabled top-pt reweighting
 )
 
 
@@ -182,15 +182,15 @@ scaleFactors.setupBtagSFInformation(btagPset               = fakeBBjetSelection,
 
 fakeBMeasurement = PSet(
     # b-jets
-    baselineBJetsCutValue          = 2,
-    baselineBJetsCutDirection      = "==",
+    baselineBJetsCutValue          = 2,    # [default: 2]
+    baselineBJetsCutDirection      = "==", # [default: ==]
     baselineBJetsDiscr             = bjetSelection.bjetDiscr,
     baselineBJetsDiscrWP           = bjetSelection.bjetDiscrWorkingPoint,
     # Tops
     LdgTopMVACutValue              = topSelectionBDT.TopMVACutValue,
     LdgTopMVACutDirection          = topSelectionBDT.TopMVACutDirection, 
     SubldgTopMVACutValue           = topSelectionBDT.TopMVACutValue,
-    SubldgTopMVACutDirection       = "<",
+    SubldgTopMVACutDirection       = "<", # [default: "<"]
     )
 
 #================================================================================================
@@ -229,10 +229,10 @@ elif "noTopPtRew" in topSelectionBDT.WeightFile:
     topTagEff    = "toptagEff_BDT0p40_GenuineTT_TopMassCut400_noTopPtRew.json"
     topTagEffUnc = "toptagEffUncert_BDT0p40_GenuineTT_TopMassCut400_noTopPtRew.json"
 else:
-    # Defaut !
-    topMisID     = "topMisID_BDT%s_TopMassCut400.json" % MVAstring.replace(".", "p").replace("-", "m"), 
-    topTagEff    = "toptagEff_BDT%s_GenuineTT_TopMassCut400.json" % MVAstring.replace(".", "p").replace("-", "m"),
-    topTagEffUnc = "toptagEffUncert_BDT%s_GenuineTT_TopMassCut400.json" % MVAstring.replace(".", "p").replace("-", "m"),
+    # Defaut
+    topMisID     = "topMisID_BDT%s_TopMassCut400.json" % MVAstring.replace(".", "p").replace("-", "m")
+    topTagEff    = "toptagEff_BDT%s_GenuineTT_TopMassCut400.json" % MVAstring.replace(".", "p").replace("-", "m")
+    topTagEffUnc = "toptagEffUncert_BDT%s_GenuineTT_TopMassCut400.json" % MVAstring.replace(".", "p").replace("-", "m")
 scaleFactors.setupToptagSFInformation(topTagPset                     = topSelectionBDT, 
                                       topTagMisidFilename            = topMisID, 
                                       topTagEfficiencyFilename       = topTagEff,
