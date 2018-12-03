@@ -34,6 +34,8 @@ process.source = cms.Source("PoolSource",
 	'/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/0693E0E7-97BE-E611-B32F-0CC47A78A3D8.root'
     )
 )
+from H200_Pythia8 import source
+process.source = source
 
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
@@ -153,6 +155,7 @@ process.skimCounterAll        = cms.EDProducer("HplusEventCountProducer")
 process.skimCounterPassed     = cms.EDProducer("HplusEventCountProducer")
 process.skim.TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess()))
 
+####process.load("HiggsAnalysis.MiniAOD2TTree.LheMttSkim_cfi")
 # === Setup customizations
 from HiggsAnalysis.MiniAOD2TTree.CommonFragments import produceCustomisations
 produceCustomisations(process,dataVersion.isData()) # This produces process.CustomisationsSequence which needs to be included to path
@@ -162,6 +165,7 @@ process.runEDFilter = cms.Path(process.PUInfo*
                                process.TopPtProducer*
                                process.skimCounterAll*
                                process.skim*
+####                               process.lheMttskim*
                                process.skimCounterPassed*
                                process.CustomisationsSequence*
                                process.dump)
