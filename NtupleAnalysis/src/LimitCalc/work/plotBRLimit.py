@@ -136,7 +136,7 @@ def doBRlimit(limits, unblindedStatus, opts, log=False):
     # Create legend
     x = 0.51
     x = 0.45
-    legend = histograms.createLegend(x, 0.78+dy, x+0.4, 0.92+dy)
+    legend = histograms.createLegend(x, 0.68+dy, x+0.4, 0.82+dy)
     legend.SetMargin(0.17)
     # Make room for the final state text
     if opts.excludedArea:
@@ -197,7 +197,8 @@ def doBRlimit(limits, unblindedStatus, opts, log=False):
 
     # Add final-state text
     # histograms.addText(x, 0.84, limits.getFinalstateText(), size=size) #fixme: alexandros
-    histograms.addText(x, 0.84, "fully hadronic final state", size=size) #fixme: alexandros
+    histograms.addText(x, 0.84, "semi leptonic final state", size=size) #fixme: alexandros
+    histograms.addText(x, 0.74, "95% CL upper limits", size=size)
     # histograms.addText(x, 0.84, "#tau_{h}+jets and #mu#tau_{h} final states", size=size)
     # histograms.addText(x, 0.84, "#tau_{h}+jets final state", size=size)
     # histograms.addText(x, 0.84, "#tau_{h}+jets, #mu#tau_{h}, ee, e#mu, #mu#mu final states", size=size)

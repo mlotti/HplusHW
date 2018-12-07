@@ -36,7 +36,7 @@ forPaper = True
 BR = "#it{B}"
 
 # Label for H+ decay mode
-hplusDecayMode    = "H^{+} #rightarrow #tau^{+}#nu_{#tau}"
+hplusDecayMode    = "H^{+} #rightarrow H_{SM}W#rightarrow#tau#tau#mu#nu"
 hplusDecayModeHtb = "H^{+} #rightarrow t#bar{b}"
 
 # The label for the physics process
@@ -119,19 +119,19 @@ def massUnit():
 
 def useParentheses():
     global BRlimit, sigmaBRlimit
-    BRlimit      = "95%% CL limit on %s(t#rightarrowH^{+}b)#times%s(%s)" % (BR, BR, hplusDecayMode)
-    sigmaBRlimit = "95%% CL limit on #sigma(H^{+})#times%s(%s) (pb)" % (BR, hplusDecayMode)
+    BRlimit      = "%s(t#rightarrowH^{+}b)#times%s(%s)" % (BR, BR, hplusDecayMode)
+    sigmaBRlimit = "#sigma(H^{+})#times%s(%s) (pb)" % (BR, hplusDecayMode)
     return
 
     
 def useSubscript(HToTB=False):
     global BRlimit, sigmaBRlimit
     if HToTB:
-        BRlimit      = "95%% CL limit on %s_{t#rightarrowH^{+}b}#times%s_{%s}" % (BR, BR, hplusDecayModeHtb)
-        sigmaBRlimit = "95%% CL limit on #sigma_{H^{+}}#times%s_{%s} (pb)" % (BR, hplusDecayModeHtb)
+        BRlimit      = " %s_{t#rightarrowH^{+}b}#times%s_{%s}" % (BR, BR, hplusDecayModeHtb)
+        sigmaBRlimit = "#sigma_{H^{+}}#times%s_{%s} (pb)" % (BR, hplusDecayModeHtb)
     else:
-        BRlimit      = "95%% CL limit on %s_{t#rightarrowH^{+}b}#times%s_{%s}" % (BR, BR, hplusDecayMode)
-        sigmaBRlimit = "95%% CL limit on #sigma_{H^{+}}#times%s_{%s} (pb)" % (BR, hplusDecayMode)
+        BRlimit      = "%s_{t#rightarrowH^{+}b}#times%s_{%s}" % (BR, BR, hplusDecayMode)
+        sigmaBRlimit = "#sigma_{H^{+}}#times%s_{%s} (pb)" % (BR, hplusDecayMode)
     return
 
 useSubscript()

@@ -19,7 +19,7 @@ searchModes = ["1500to3000"]
 
 ROOT.gErrorIgnoreLevel = 0
 
-blacklist = []
+blacklist = ["ChargedHiggs_HplusTB_HplusToTauNu_M_350_2tau","ChargedHiggs_HplusTB_HplusToTauNu_M_1500_2tau","ZJetsToQQ_HT600toInf","QCD_Pt_50to80","QCD_Pt_80to120","QCD_Pt_120to170","QCD_Pt_170to300","QCD_Pt_300to470","WJetsToLNu_old"]
 whitelist = []
 
 ###################

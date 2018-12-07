@@ -240,7 +240,7 @@ Verbose("Edit #1", True)
 # For tau nu analysis:
 #lhcAsymptoticOptionsObserved = '-M AsymptoticLimits -v 3 --cminDefaultMinimizerStrategy 0 --rAbsAcc 0.0001 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --X-rtd MINIMIZER_analytic --cminDefaultMinimizerTolerance=0.1 --cminFallbackAlgo "Minuit,0:0.001"' #default
 #For tau nu analysis with lumi scaling (set to 1.0, for lumi scaling set lumiscale=<current_lumi>/<new_lumi>, see https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsWG/SWGuideHiggsProjections
-l#hcAsymptoticOptionsObserved = '-M AsymptoticLimits -v 3 --cminDefaultMinimizerStrategy 0 --rAbsAcc 0.0001 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --X-rtd MINIMIZER_analytic --cminDefaultMinimizerTolerance=0.1 --cminFallbackAlgo "Minuit,0:0.001" --setParameters lumiscale=1.0'#default
+#hcAsymptoticOptionsObserved = '-M AsymptoticLimits -v 3 --cminDefaultMinimizerStrategy 0 --rAbsAcc 0.0001 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --X-rtd MINIMIZER_analytic --cminDefaultMinimizerTolerance=0.1 --cminFallbackAlgo "Minuit,0:0.001" --setParameters lumiscale=1.0'#default
 # For tb analysis, default_v1:
 #lhcAsymptoticOptionsObserved = '-M AsymptoticLimits -v 3 --cminDefaultMinimizerStrategy 0 --rAbsAcc 0.1 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --cminDefaultMinimizerTolerance=1.0' 
 # For tb analysis, default_v2:
