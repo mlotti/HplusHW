@@ -33,7 +33,7 @@ cmsTextMode = CMSMode.PRELIMINARY
 ## Global dictionary to hold the CMS text labels
 cmsText = {
     CMSMode.NONE: None,
-    CMSMode.PRELIMINARY: "Preliminary",
+    CMSMode.PRELIMINARY: "Very preliminary",
     CMSMode.PAPER: "",
     CMSMode.UNPUBLISHED: "Preliminary",
     CMSMode.SIMULATION : "Simulation",

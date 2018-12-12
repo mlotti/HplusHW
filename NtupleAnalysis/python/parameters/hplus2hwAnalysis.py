@@ -7,6 +7,18 @@ import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
 ## General parameters
 ##########
 
+#====== Trigger
+trg = PSet(
+  # No need to specify version numbers, they are automatically scanned in range 1--100 (remove the '_v' suffix)
+#  TautriggerEfficiencyJsonName = "tauLegTriggerEfficiency_2016_fit.json",
+#  METtriggerEfficiencyJsonName = "metLegTriggerEfficiency_2016_MET90_fit.json",
+#  L1ETM = 80,
+  triggerOR = ["HLT_IsoMu24","HLT_IsoTkMu24"
+               ],
+  triggerOR2 = [
+                ],
+)
+
 
 #====== MET filter
 metFilter = PSet(
@@ -41,8 +53,10 @@ eVeto = PSet(
 ##########
 
 muonSelection = PSet(
-             muonPtCut = 23.0,
-            muonEtaCut = 2.1,
+#  applyTriggerMatching = False,
+#   triggerMatchingCone = 0.1,   # DeltaR for matching offline tau with trigger tau
+             muonPtCut = 26.0,
+            muonEtaCut = 2.4,
                 muonID = "muIDMedium", # options: muIDLoose, muIDMedium, muIDTight
          muonIsolation = "tight", # for selecting, not vetoing
 	muonIsolType   = "mini",      # options: "mini", "default" 
@@ -55,15 +69,15 @@ muonSelection = PSet(
 
 tauSelection = PSet(
   applyTriggerMatching = False,
-   triggerMatchingCone = 0.0,   # DeltaR for matching offline tau with trigger tau
+   triggerMatchingCone = 0.1,   # DeltaR for matching offline tau with trigger tau
               tauPtCut = 20.0,
              tauEtaCut = 2.1,
         tauLdgTrkPtCut = 10.0,
                 prongs = 1,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
                   rtau = 0.0,   # to disable set to 0.0
   againstElectronDiscr = "againstElectronLooseMVA6",
-      againstMuonDiscr = "againstMuonTight3",
-        isolationDiscr = "byLooseIsolationMVArun2v1DBnewDMwLT",
+      againstMuonDiscr = "againstMuonLoose3",
+        isolationDiscr = "byMediumIsolationMVArun2v1DBnewDMwLT",
 )
 
 #====== Jet selection
@@ -112,7 +126,7 @@ scaleFactors.setupBtagSFInformation(btagPset=bjetSelection,
 
 #====== MET selection
 metSelection = PSet(
-           METCutValue = 20.0,
+           METCutValue = 30.0,
        METCutDirection = ">", # options: ==, !=, <, <=, >, >=
   METSignificanceCutValue = -1000.0,
   METSignificanceCutDirection = ">", # options: ==, !=, <, <=, >, >=
@@ -155,6 +169,7 @@ commonPlotsOptions = PSet(
 ##########
 
 allSelections = PSet(
+    Trigger             = trg,
     METFilter 		= metFilter,
     ElectronSelection 	= eVeto,
     MuonSelection 	= muonSelection,

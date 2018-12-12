@@ -967,7 +967,7 @@ def replaceLightHplusWithSignalPlusBackground(datasetMgr, backgroundsWithoutTT=N
         if not isLast:
             datasetMgr.remove(name, close=False)
         datasetMgr.rename(name+"Tmp", name)
-        _legendLabels[name] = "with H^{+}#rightarrow#tau^{+}#nu"
+        _legendLabels[name] = "with H^{+}#rightarrowH_{SM}W"
 
 
 def replaceQCDFromData(datasetMgr, datasetQCDdata):

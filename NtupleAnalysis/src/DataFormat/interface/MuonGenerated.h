@@ -11,7 +11,8 @@
 
 class MuonGeneratedCollection: public ParticleCollection<double> {
 public:
-  explicit MuonGeneratedCollection(const std::string& prefix="Muons")
+//  explicit MuonGeneratedCollection(const std::string& prefix="Muons")
+  MuonGeneratedCollection(const std::string& prefix="Muons")
   : ParticleCollection(prefix),
     fMCmuon(prefix)
   {

@@ -5,6 +5,7 @@
 #include "EventSelection/interface/CommonPlots.h"
 #include "DataFormat/interface/Event.h"
 #include "Framework/interface/HistoWrapper.h"
+#include "DataFormat/interface/Muon.h"
 //#include "Framework/interface/makeTH.h"
 
 MuonSelection::Data::Data() 
@@ -16,6 +17,8 @@ MuonSelection::Data::~Data() { }
 
 MuonSelection::MuonSelection(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix)
 : BaseSelection(eventCounter, histoWrapper, commonPlots, postfix),
+//  bApplyTriggerMatching(config.getParameter<bool>("applyTriggerMatching")),
+//  fTriggerMuonMatchingCone(config.getParameter<float>("triggerMatchingCone")),
   fMuonPtCut(config.getParameter<float>("muonPtCut")),
   fMuonEtaCut(config.getParameter<float>("muonEtaCut")),
   fRelIsoCut(-1.0),
@@ -26,6 +29,7 @@ MuonSelection::MuonSelection(const ParameterSet& config, EventCounter& eventCoun
   cPassedMuonSelection(fEventCounter.addCounter("passed mu selection ("+postfix+")")),
   // Sub counters
   cSubAll(fEventCounter.addSubCounter("mu selection ("+postfix+")", "All events")),
+//  cSubPassedTriggerMatching(fEventCounter.addSubCounter("mu selection", "Passed trigger matching")),
   cSubPassedPt(fEventCounter.addSubCounter("mu selection ("+postfix+")", "Passed pt cut")),
   cSubPassedEta(fEventCounter.addSubCounter("mu selection ("+postfix+")", "Passed eta cut")),
   cSubPassedID(fEventCounter.addSubCounter("mu selection ("+postfix+")", "Passed ID")),
@@ -36,6 +40,8 @@ MuonSelection::MuonSelection(const ParameterSet& config, EventCounter& eventCoun
 
 MuonSelection::MuonSelection(const ParameterSet& config, const std::string& postfix)
 : BaseSelection(),
+//  bApplyTriggerMatching(config.getParameter<bool>("applyTriggerMatching")),
+//  fTriggerMuonMatchingCone(config.getParameter<float>("triggerMatchingCone")),
   fMuonPtCut(config.getParameter<float>("muonPtCut")),
   fMuonEtaCut(config.getParameter<float>("muonEtaCut")),
   fRelIsoCut(-1.0),
@@ -46,6 +52,7 @@ MuonSelection::MuonSelection(const ParameterSet& config, const std::string& post
   cPassedMuonSelection(fEventCounter.addCounter("passed mu selection ("+postfix+")")),
   // Sub counters
   cSubAll(fEventCounter.addSubCounter("mu selection ("+postfix+")", "All events")),
+//  cSubPassedTriggerMatching(fEventCounter.addSubCounter("mu selection ("+postfix+")", "Passed trigger matching")),
   cSubPassedPt(fEventCounter.addSubCounter("mu selection ("+postfix+")", "Passed pt cut")),
   cSubPassedEta(fEventCounter.addSubCounter("mu selection ("+postfix+")", "Passed eta cut")),
   cSubPassedID(fEventCounter.addSubCounter("mu selection ("+postfix+")", "Passed ID")),
@@ -56,6 +63,7 @@ MuonSelection::MuonSelection(const ParameterSet& config, const std::string& post
 }
 
 MuonSelection::~MuonSelection() {
+//  delete hTriggerMatchDeltaR;
   delete hMuonNAll;
   delete hMuonPtAll;
   delete hMuonEtaAll;
@@ -132,6 +140,8 @@ void MuonSelection::bookHistograms(TDirectory* dir) {
   hMuonRelIsoPassed  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonRelIsoPassed", ";relative isolation;Occur / %.0f", 1000, 0.0, 200.0);
   hMuonMiniIsoPassed = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonMiniIsoPassed", ";mini relative isolation;Occur / %.0f", 1000, 0.0, 200.0);
   
+//  hTriggerMatchDeltaR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "triggerMatchDeltaR"  , "Trigger match #DeltaR;#DeltaR", 60, 0, 3.);
+
   // Resolutions
   hPtResolution  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "ptResolution" , ";(p_{T}^{reco} - p_{T}^{gen})/p_{T}^{reco};Occur / %.2f", 200, -1.0, 1.0);
   hEtaResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "etaResolution", ";(#eta^{reco} - #eta^{gen})/#eta^{reco};Occur / %.2f"   , 200, -1.0, 1.0);
@@ -173,13 +183,24 @@ MuonSelection::Data MuonSelection::analyze(const Event& event) {
 MuonSelection::Data MuonSelection::privateAnalyze(const Event& event) {
   Data output;
   cSubAll.increment();
+//  bool passedTriggerMatching = false;
   bool passedPt = false;
   bool passedEta = false;
   bool passedID = false;
   bool passedIsol = false;
 
+  // Cache vector of trigger mu 4-momenta
+//  std::vector<math::LorentzVectorT<double>> myTriggerMuonMomenta;
+//  for (HLTMuon p: event.triggerMuons()) {
+//    myTriggerMuonMomenta.push_back(p.p4());
+//  }
   // For-loop: All muons
   for(Muon muon: event.muons()) {
+
+    // Apply trigger matching
+//    if (!this->passTrgMatching(muon, myTriggerMuonMomenta))
+//      continue;
+//    passedTriggerMatching = true;
 
     // Fill histograms before any cuts
     hMuonPtAll->Fill(muon.pt());
@@ -257,6 +278,8 @@ MuonSelection::Data MuonSelection::privateAnalyze(const Event& event) {
   hMuonNAll->Fill(event.muons().size());
   hMuonNPassed->Fill(output.fSelectedMuons.size());
 
+  // Fill sub-counters
+//  if (passedTriggerMatching) cSubPassedTriggerMatching.increment();
 
   // Fill counters
   if (passedPt) cSubPassedPt.increment();
@@ -275,3 +298,15 @@ MuonSelection::Data MuonSelection::privateAnalyze(const Event& event) {
   // Return data object
   return output;
 }
+
+//bool MuonSelection::passTrgMatching(const Muon& muon, std::vector<math::LorentzVectorT<double>>& trgMuons) const {
+//  if (!bApplyTriggerMatching)
+//    return true;
+//  double myMinDeltaR = 9999.0;
+//  for (auto& p: trgMuons) {
+//    double myDeltaR = ROOT::Math::VectorUtil::DeltaR(p, muon.p4());
+//    myMinDeltaR = std::min(myMinDeltaR, myDeltaR);
+//  }
+//  hTriggerMatchDeltaR->Fill(myMinDeltaR);
+//  return (myMinDeltaR < fTriggerMuonMatchingCone);
+//}

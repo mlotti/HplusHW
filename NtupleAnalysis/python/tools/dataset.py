@@ -307,11 +307,11 @@ def ConvertSymLinks(fileList):
     Verbose("ConvertSymLinks()", True)
     HOST = socket.gethostname()
     bUseSymLinks = False
-    
+
     if "fnal" in HOST:
         prefix = "root://cmseos.fnal.gov//"
     elif "lxplus" in HOST:
-        prefix = "root://eoscms.cern.ch//"
+        prefix = "root://eosuser.cern.ch/"
     else:
         prefix = ""
 
@@ -320,7 +320,7 @@ def ConvertSymLinks(fileList):
         if not os.path.islink(f):
             continue
         bUseSymLinks = True
-        fileList[i] = prefix + os.path.realpath(f)
+        fileList[i] = prefix + "/eos/user/m/mlotti/" + os.path.split(os.path.realpath(f))[0].split("/")[4] + "/" + os.path.split(os.path.realpath(f))[0].split("/")[5] + "/results/" + os.path.split(os.path.realpath(f))[1]
 
     if bUseSymLinks:
         Verbose("SymLinks detected. Appended the prefix \"%s\" to all ROOT file paths" % (prefix) )

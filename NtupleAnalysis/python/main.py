@@ -261,7 +261,7 @@ class Process:
         if "fnal" in HOST:
             prefix = "root://cmseos.fnal.gov//"
         elif "lxplus" in HOST:
-            prefix = "root://eoscms.cern.ch//"
+            prefix = "root://eosuser.cern.ch//"
         else:
             prefix = ""
             

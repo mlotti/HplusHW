@@ -12,7 +12,7 @@ public:
   using value_type = Muon;
 
   MuonCollection() { initialize(); }
-  MuonCollection(const std::string& prefix): MuonGeneratedCollection(prefix) { initialize(); }
+  explicit MuonCollection(const std::string& prefix): MuonGeneratedCollection(prefix) { initialize(); }
   ~MuonCollection() {}
 
   void setupBranches(BranchManager& mgr);
