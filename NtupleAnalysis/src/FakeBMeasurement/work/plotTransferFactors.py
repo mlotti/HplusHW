@@ -4,30 +4,30 @@ DESCRIPTION:
 This script loads and plots the transfer-factors of the Fake-b measurement (R_i) 
 for all the bins considered onto a signle TGraphAsymmetry object
 
-INSTRUCTIONS:
-
 
 USAGE:
 plotTransferFactors.py [opts]
 
 
 EXAMPLES:
-plotTransferFactors.py [opts]
-plotTransferFactors.py --cutLine 500 --gridX --gridY --yMin 1e-3 --yMax 10
-./plotTransferFactors.py -m FakeBMeasurement_PreSel_3CSVv2M_b3Pt40_InvSel_3CSVv2L_2CSVv2M_MVAm0p20to0p40_6BinsAbsEta_NoFatjetVeto_180318_085359 --gridX --gridY --yMax 10 --logy
+./plotTransferFactors.py --cutLine 500 --gridX --gridY --yMin 1e-3 --yMax 10
 ./plotTransferFactors.py -m FakeBMeasurement_PreSel_3CSVv2M_b3Pt40_InvSel_3CSVv2L_2CSVv2M_MVAm0p20to0p40_6BinsAbsEta_NoFatjetVeto_180318_085359 --gridX --gridY 
 
+
 LAST USED:
-./plotTransferFactors.py -m FakeBMeasurement_PreSel_3CSVv2M_b3Pt40_InvSel_3CSVv2L_2CSVv2M_MVAm0p20to0p40_6BinsAbsEta_NoFatjetVeto_180318_085359 --gridX --gridY --yMin 0.0 --yMax 1
+./plotTransferFactors.py -m FakeBMeasurement_Test_22Nov2018/ --gridX --gridY --yMin 0.0 --yMax 1
 
 '''
 
 #================================================================================================
 # Import modules
 #================================================================================================
+import re
 import os
 import getpass
 import sys
+import imp
+import copy
 from optparse import OptionParser
 import array
 
@@ -42,6 +42,17 @@ import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
+
+#================================================================================================                                                                                                                                 
+# Variable definition
+#================================================================================================ 
+ss = ShellStyles.SuccessStyle()
+ns = ShellStyles.NormalStyle()
+ts = ShellStyles.NoteStyle()
+hs = ShellStyles.HighlightAltStyle()
+ls = ShellStyles.HighlightStyle()
+es = ShellStyles.ErrorStyle()
+cs = ShellStyles.CaptionStyle()
 
 #================================================================================================
 # Function definition
@@ -66,6 +77,52 @@ def Print(msg, printHeader=True):
     print "\t", msg
     return
 
+def divideGraph(num, denom, errorY=True, invRatio=False):
+    '''                                                                                                                                                                                                                           
+    Divide two TGraphs
+     \param num    Numerator TGraph
+     \param denom  Denominator TGraph
+     \return new TGraph as the ratio of the two TGraphs
+     '''
+    gr = num.getRootGraph()
+
+    # Numerator and Denominator graphs are the same (i.e. reference histo)
+    if num == denom:
+        for i in xrange(gr.GetN()):
+            gr.SetPoint(i, gr.GetX()[i], 1.0)
+            gr.SetPointEYhigh(i, 1e-4) 
+            gr.SetPointEYlow(i , 1e-4)
+            # Debug?
+            if 0:
+                Print("x = %0.3f, y = %.3f" % (gr.GetX()[i], gr.GetY()[i]), i==1)
+        return gr
+
+    # For-loop: All points
+    for i in xrange(gr.GetN()):
+        yDiv = 0
+        yVal = denom.getRootGraph().GetY()[i]
+
+        # Sanity check
+        if yVal != 0:
+            yDiv = gr.GetY()[i]/yVal
+            if invRatio:
+                yDiv = 1.0/yDiv
+
+        # Set new point x-y coords
+        gr.SetPoint(i, gr.GetX()[i], yDiv)
+        
+        # Disable error bars?
+        if not errorY:
+            gr.SetPointEYlow(i , yVal*1e-4)
+            gr.SetPointEYhigh(i, yVal*1e-4)
+    return gr
+
+def atoi(text):
+    return int(text) if text.isdigit() else text
+
+def natural_keys(text):
+    return [ atoi(c) for c in re.split('(\d+)', text) ]
+
 def GetDatasetsFromDir(opts):
     
     datasets = dataset.getDatasetsFromMulticrabDirs([opts.mcrab],
@@ -80,9 +137,11 @@ def main(opts):
     # Apply TDR style
     style = tdrstyle.TDRStyle()
     style.setOptStat(False)
-    style.setGridX(True)
-    style.setGridY(True)
-
+    style.setGridX(opts.gridX)
+    style.setGridY(opts.gridY)
+    style.setLogX(opts.logX)
+    style.setLogY(opts.logY)
+    
     # Setup & configure the dataset manager 
     datasetsMgr = GetDatasetsFromDir(opts)
     datasetsMgr.updateNAllEventsToPUWeighted()
@@ -91,28 +150,80 @@ def main(opts):
     opts.intLumi = datasetsMgr.getDataset("Data").getLuminosity()
 
     # Do the plot
-    doPlot()
+    moduleDict  = {}
+    moduleNames = list(filter(lambda x: "FakeBTransferFactors" in x and x.endswith(".py") and not x.startswith("#"), os.listdir(opts.mcrab)))
+    sKeys = []
+    Verbose("Found %d import files:%s%s%s" % (len(moduleNames), hs, "\n\t" + "\n\t".join(moduleNames), ns), True)
 
-    # Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)
+    # For-loop: All module files to be imported
+    for i,m in enumerate(moduleNames, 1):
+        if not opts.verbose:
+            Print("Importing module %s" % (hs + os.path.join(opts.mcrab, m) + ns), i==1)
+        else:
+            Print("Importing module %s" % (hs + os.path.join(opts.mcrab, m) + ns), True)
+
+        # Define the path to the .py file (module Path) and the name to be imported as (module name)
+        mPath = os.path.join(os.getcwd(), opts.mcrab, m)
+        mName = m.split("_")[-1].replace(".py", "")
+        sKeys.append(mName)
+        mObj  = imp.load_source(mName, mPath )
+        moduleDict[mName] = mObj
+
+        # Debugging
+        Verbose(moduleDict[mName].FakeBNormalisation_Value.keys(), False)
+        Verbose(moduleDict[mName].FakeBNormalisation_Value.values(), False)
+    
+    gList  = []
+    gListR = []
+    # For-loop: All modules imported
+    for i, k in enumerate(sKeys, 0):
+        g = PlotTFs(i, k, moduleDict[k])
+        gList.extend(g)
+        gListR.extend(g)
+
+    # Create comparison plots
+    PlotTFsCompare("transferFactors" , sKeys, gList)
+
+    gListR = [divideGraph(g, gListR[0], errorY=False, invRatio=False) for g in gListR]
+    PlotTFsCompare("transferFactorsR", sKeys, gListR, isRatio=True)
+
+    Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)
     return
 
 
-def doPlot():
+def PlotTFsCompare(pName, sKeys, gList, isRatio=False):
+
+    # Finally do a all-in=one plot
+    plot  = plots.ComparisonManyPlot(gList[0], gList[1:])
+    for k in sKeys:
+        plot.histoMgr.setHistoLegendLabelMany({
+                k : k,
+                })
+
+    # For-loop: All graphs
+    for i, s in enumerate(sKeys, 1):
+        # Reference histo is exception (draw just a line)
+        if i==1 and isRatio: 
+            plot.histoMgr.setHistoDrawStyle(s, "L")
+            plot.histoMgr.setHistoLegendStyle(s, "L")
+        else:
+            plot.histoMgr.setHistoDrawStyle(s, "P")
+            plot.histoMgr.setHistoLegendStyle(s, "LP")
+
+    plot.setLegend(getLegend(opts, dx=0, dy=-0.3) )
+    plot.createFrame(pName, saveFormats=[])
+    plot.frame.GetXaxis().SetTitle("")
+    plot.frame.GetYaxis().SetTitle("transfer factor")
+    plot.draw()
+    plot.setLuminosity(opts.intLumi)
+    plot.addStandardTexts(addLuminosityText=False, cmsTextPosition="outframe")
+    SavePlot(plot, pName, os.path.join(opts.saveDir, "") )
+    return
+
+
+def PlotTFs(counter, iName, iModule):
     
-    # Import the auto-generated file containing the transfer factors
-    sys.path.append(opts.mcrab)
-    import FakeBTransferFactors_Run2016_80to1000 as tf
-
-    QCDNormalization = {
-        "Inclusive": 0.441958,
-        "1": 0.524575,
-        "0": 0.600980,
-        "3": 0.363374,
-        "2": 0.457656,
-        "5": 0.229395,
-        "4": 0.315185,
-        }
-
+    # Define lists (later converted to arrays)
     xval  = []
     xerrl = []
     xerrh = []
@@ -121,13 +232,23 @@ def doPlot():
     yerrh = []
 
     # Fill TGraph arrays
-    for i, k in enumerate(tf.QCDNormalization):
-        xval.append(k)
-        xerrl.append(0.001)
-        xerrh.append(0.001)
-        yval.append(QCDNormalization[k])
-        yerrl.append(0.01*QCDNormalization[k])
-        yerrh.append(0.01*QCDNormalization[k])
+    sKeys = sorted(iModule.FakeBNormalisation_Value.keys(), key=natural_keys)
+    for i, k in enumerate(sKeys, 1):
+        
+        bin   = k
+        value = iModule.FakeBNormalisation_Value[k]
+        yerr  = iModule.FakeBNormalisation_Error[k]
+        xerr  = yerr
+        if k == "Inclusive":
+            bin = len(iModule.FakeBNormalisation_Value.keys())  + 1
+            
+        xval.append(i) #bin)
+        xerrl.append(xerr)
+        xerrh.append(xerr)
+        Verbose("i = %d, k = %s" % ( i, k), i==1)
+        yval.append(value)
+        yerrl.append(yerr)
+        yerrh.append(yerr)
 
     # Create TGraph object
     tgraph= ROOT.TGraphAsymmErrors(len(xval),
@@ -139,58 +260,40 @@ def doPlot():
                                    array.array("d", yerrh)
                                    )
     # Apply styles
-    setNominalStyle(tgraph)
+    setStyle(counter, tgraph)
+
+    # Set graph name
+    tgraph.SetName(iName)
 
     # Convert the TGraphs to HistoGraphs and append to a list
     graphs = []
     graphs.extend([
-            #histograms.HistoGraph(tgraph, "Nominal", drawStyle="F", legendStyle="fl"),
-            histograms.HistoGraph(tgraph, "Nominal", drawStyle="P", legendStyle="LP"),
+            histograms.HistoGraph(tgraph, iName, drawStyle="P", legendStyle="LP"),
             ])
 
     # Plot the TGraphs
-    saveFormats = [".png", ".C", ".pdf"]
-    plot = plots.PlotBase(graphs, saveFormats=saveFormats)
+    plot = plots.PlotBase(graphs, saveFormats = [".png", ".C", ".pdf"])
     plot.setLuminosity(opts.intLumi)
 
     # Customise legend entries
     plot.histoMgr.setHistoLegendLabelMany({
-            #"Nominal" : "R_{i} #pm #sigma_{R_{i}}",
-            "Nominal" : "Nominal #pm Stat.",
+            iName : iName,
             })
     
     # Create legend
-    xPos   = 0.65
-    legend = getLegend(opts, xPos)
-    plot.setLegend(legend)
+    plot.setLegend(getLegend(opts) )
 
     # Create a frame to be able to impose custom x- and y- range
-    if opts.yMin != -1 and opts.yMax != -1:
-        plot.createFrame("dumbie", opts={"ymin": opts.yMin, "ymax": opts.yMax})
-    elif opts.yMin != -1:
-        plot.createFrame("dumbie", opts={"ymin": opts.yMin})
-    elif opts.yMax != -1:
-        plot.createFrame("dumbie", opts={"ymax": opts.yMax})
-    else:
-        plot.createFrame("dumbie", saveFormats=[])
+    plot.createFrame(iName, saveFormats=[])
 
     # Add cut box?
     if opts.cutLine > 0:
         kwargs = {"greaterThan": True}
         plot.addCutBoxAndLine(cutValue=opts.cutLine, fillColor=ROOT.kRed, box=False, line=True, **kwargs)
 
-    # Set x-axis title
-    plot.frame.GetXaxis().SetTitle("bin") 
-
-    plot.frame.GetYaxis().SetTitle("transfer factor (R_{i})")
-
-    # Enable/Disable logscale for axes
-    plot.getPad().SetLogy(opts.logY)
-    plot.getPad().SetLogx(opts.logX)
-
-    # Enable grids in x and y?
-    plot.getPad().SetGridx(opts.gridX)
-    plot.getPad().SetGridy(opts.gridY)
+    # Set axes title
+    plot.frame.GetXaxis().SetTitle("") #"bin") 
+    plot.frame.GetYaxis().SetTitle("transfer factor")
 
     # Draw the plot with standard texts
     plot.draw()
@@ -200,12 +303,14 @@ def doPlot():
     if 0:
         histograms.addText(0.55, 0.84, "fully hadronic final state", size=20)
     
-    # Save the canvas
-    plot.save()
-
     # Save the plots
-    SavePlot(plot, "transferFactors", os.path.join(opts.saveDir, "") )
-    return
+    SavePlot(plot, "transferFactors_%s" % (iName), os.path.join(opts.saveDir, "") )
+
+    # Debugging
+    if 0:
+        for g in gList:
+            Verbose("%s , x = %s, y = %s "% (g.getRootHisto().GetName(), g.getRootHisto().GetX()[0], g.getRootHisto().GetY()[0]), False)
+    return graphs
 
 def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
@@ -225,14 +330,13 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
         plot.saveAs(saveName, formats=saveFormats)
     return
 
-def getLegend(opts, xLeg1=0.53):
-    dy = -0.10
+def getLegend(opts, dx=0, dy=0):
 
     # Create customised legend
-    #xLeg1 = 0.53
-    xLeg2 = 0.93
-    yLeg1 = 0.78 + dy
-    yLeg2 = 0.91 + dy
+    xLeg1 = 0.65 + dx
+    xLeg2 = 0.93 
+    yLeg1 = 0.82 + dy
+    yLeg2 = 0.92
 
     # Adjust legend slightly to visually align with text
     legend = histograms.createLegend(xLeg1*.98, yLeg1, xLeg2, yLeg2) 
@@ -248,6 +352,26 @@ def setNominalStyle(graph):
     graph.SetLineColor(ROOT.kRed)
     graph.SetMarkerStyle(ROOT.kFullCircle)
     graph.SetMarkerColor(ROOT.kRed)
+    return
+
+def setStyle(i, graph):
+    cList = [ROOT.kRed, ROOT.kAzure, ROOT.kOrange-3, ROOT.kMagenta, ROOT.kGreen-1, ROOT.kViolet, ROOT.kTeal+2, ROOT.kGray+1]
+    mList = [ROOT.kFullCircle, ROOT.kFullCircle, ROOT.kFullTriangleUp, ROOT.kFullTriangleDown, ROOT.kFullSquare, ROOT.kFullSquare, ROOT.kFullCross, ROOT.kFullCross]
+    if i < len(cList) and i < len(mList) :
+        colour = cList[i]
+        marker = mList[i]
+    else: 
+        raise Exception("Exceeded list size!")
+    graph.SetLineStyle(ROOT.kSolid)
+    graph.SetLineWidth(3)
+    graph.SetLineColor(colour)    
+    graph.SetMarkerSize(1.2)
+    graph.SetMarkerStyle(marker)
+    graph.SetMarkerColor(colour)
+    if mList[i] == ROOT.kOpenCross or mList[i] == ROOT.kFullCross:
+        graph.SetMarkerSize(1.50)
+    if mList[i] == ROOT.kFullTriangleUp or mList[i] == ROOT.kFullTriangleUp:
+        graph.SetMarkerSize(1.45)
     return
 
 def setStyle1(graph):

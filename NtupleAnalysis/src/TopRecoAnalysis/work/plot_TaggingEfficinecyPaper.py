@@ -11,10 +11,11 @@ EXAMPLES:
 ./plot_Efficiency.py -m MyHplusAnalysis_180202_fullSignalQCDtt --folder topbdtSelection_ --url
 ./plot_Efficiency.py -m MyHplusAnalysis_180202_fullSignalQCDtt --folder topbdtSelection_ --url
 ./plot_TaggingEfficinecyPaper.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400/TopRecoAnalysis_180320_BDT85 --folder topbdtSelection_ --url
+./plot_TaggingEfficinecyPaper.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400/TopRecoAnalysis_180320_BDT85 --ratio
 
 
 LAST USED:
-./plot_TaggingEfficinecyPaper.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400/TopRecoAnalysis_180320_BDT85 --ratio
+./plot_TaggingEfficinecyPaper.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/BDTcutComparisonPlots_180828_BjetPt40_MassCut400_NewBDTbjetPt40GeV/TopTaggerEfficiency_180827_BDT0p40 --analysisName TopTaggerEfficiency --ratio --url
 
 
 STATISTICS OPTIONS:
@@ -50,6 +51,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.counter as counter
 import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
+import HiggsAnalysis.NtupleAnalysis.tools.systematics as systematics
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 
@@ -205,6 +207,7 @@ def GetHistoKwargs(opts):
         "ylabel"           : "Efficiency / " + units,
         # "ylabel"           : "Misidentification rate / " + units,
         # "rebinX"           : 1,
+        # "rebinX"           : systematics._dataDrivenCtrlPlotBinning["LdgTrijetDijetMass_AfterAllSelections"],
         "ratioYlabel"      : "Ratio ",
         "ratio"            : opts.ratio,
         "ratioInvert"      : True,
@@ -369,7 +372,8 @@ def PlotEfficiency(datasetsMgr, datasetsMgr40, intLumi):
 
     # Append in list
     gEff40_TT  = histograms.HistoGraph(eff40_TT , "t#bar{t}", "lp", "P")
-    gEff40_QCD = histograms.HistoGraph(eff40_QCD, "QCD multijet", "lp", "P")
+    #gEff40_QCD = histograms.HistoGraph(eff40_QCD, "QCD multijet", "lp", "P")
+    gEff40_QCD = histograms.HistoGraph(eff40_QCD, "QCD", "lp", "P")
     myList.append(gEff40_TT)
     myList.append(gEff40_QCD)
         
