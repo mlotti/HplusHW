@@ -736,7 +736,7 @@ if __name__ == "__main__":
     # Call the main function
     dsetSets = {
         "Run2016"  : ["Run2016B", "Run2016C", "Run2016D", "Run2016E", "Run2016F", "Run2016G", "Run2016H"],
-        # Individual Runs (too small statistics)
+        ### Individual Runs (too small statistics)
         # "Run2016B" : ["Run2016B"],
         # "Run2016C" : ["Run2016C"],
         # "Run2016D" : ["Run2016D"],
@@ -744,16 +744,20 @@ if __name__ == "__main__":
         # "Run2016F" : ["Run2016F"],
         # "Run2016G" : ["Run2016G"],
         # "Run2016H" : ["Run2016H"],
-        # Custom-tailor dataset sets (4 groups)
-        #"Run2016BC" : ["Run2016B", "Run2016C"],
-        #"Run2016DEF": ["Run2016D", "Run2016E", "Run2016F"], 
-        ##"Run2016G"  : ["Run2016G"], # not great (up to 30%)
-        "Run2016H"  : ["Run2016H"]
-        # Custom-tailor dataset sets (4 groups)
-        # "Run2016BC": ["Run2016B", "Run2016C"],
-        # "Run2016DE": ["Run2016D", "Run2016E"], 
-        # "Run2016FG": ["Run2016F", "Run2016G"], 
-        # "Run2016H" : ["Run2016H"]
+        ### Custom-tailor dataset sets (4 groups)
+        # "Run2016BC" : ["Run2016B", "Run2016C"],
+        # "Run2016DEF": ["Run2016D", "Run2016E", "Run2016F"], 
+        # "Run2016G"  : ["Run2016G"], # up to 30% wrt "Run2016"
+        # "Run2016H"  : ["Run2016H"],
+        ### Custom-tailor dataset sets (3 groups)
+        # "Run2016BCD": ["Run2016B", "Run2016C", "Run2016D"],
+        # "Run2016EF" : ["Run2016E", "Run2016F"], 
+        # "Run2016GH" : ["Run2016G", "Run2016H"],
+        ### Custom-tailor dataset sets (4 groups)
+        "Run2016BC": ["Run2016B", "Run2016C"],
+        "Run2016DE": ["Run2016D", "Run2016E"], 
+        "Run2016FG": ["Run2016F", "Run2016G"], 
+        "Run2016H" : ["Run2016H"],
         }
 
     # Do partial data dataset (closure attempt)

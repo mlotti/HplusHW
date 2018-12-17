@@ -41,6 +41,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
+import HiggsAnalysis.NtupleAnalysis.tools.errorPropagation as err
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 
 #================================================================================================                                                                                                                                 
@@ -77,7 +78,13 @@ def Print(msg, printHeader=True):
     print "\t", msg
     return
 
-def divideGraph(num, denom, errorY=True, percentDiff=False, invRatio=False):
+def errorPropagationForDivision(a, sigmaA, b, sigmaB):
+    #if abs(a) < 0.000001 or abs(b) < 0.000001:
+    #    return 0.0 # Safety
+    from math import sqrt
+    return sqrt((sigmaA/b)**2 + (a/(b**2)*sigmaB)**2)
+
+def divideGraph(num, denom, errorY=True, invRatio=False):
     '''                                                                                                                                                                                                                           
     Divide two TGraphs
      \param num    Numerator TGraph
@@ -90,9 +97,20 @@ def divideGraph(num, denom, errorY=True, percentDiff=False, invRatio=False):
     if num == denom:
         for i in xrange(gr.GetN()):
             gr.SetPoint(i, gr.GetX()[i], 1.0)
-            gr.SetPointEYhigh(i, 1e-4) 
-            gr.SetPointEYlow(i , 1e-4)
-            # Debug?
+            
+            a = gr.GetY()[i]
+            sigmaAl = gr.GetEYlow()[i]
+            sigmaAh = gr.GetEYhigh()[i]
+            errLow  = err.errorPropagationForDivision(a, sigmaAh, a, sigmaAh)
+            errHigh = err.errorPropagationForDivision(a, sigmaAl, a, sigmaAl)
+            #errLow  = errorPropagationForDivision(a, sigmaAh, a, sigmaAh)
+            #errHigh = errorPropagationForDivision(a, sigmaAl, a, sigmaAl)
+            gr.SetPointEYhigh(i, errLow)
+            gr.SetPointEYlow(i , errHigh)
+            # Disable error bars?
+            if not errorY:
+                gr.SetPointEYhigh(i, 1e-4) 
+                gr.SetPointEYlow(i , 1e-4)
             if 0:
                 Print("x = %0.3f, y = %.3f" % (gr.GetX()[i], gr.GetY()[i]), i==1)
         return gr
@@ -101,18 +119,27 @@ def divideGraph(num, denom, errorY=True, percentDiff=False, invRatio=False):
     for i in xrange(gr.GetN()):
         yDiv = 0
         yVal = denom.getRootGraph().GetY()[i]
-        if percentDiff:
-            yVal -= num.getRootGraph().GetY()[i]
 
         # Sanity check
         if yVal > 0:
             yDiv = gr.GetY()[i]/yVal
+
             if invRatio:
                 yDiv = 1.0/yDiv
 
         # Set new point x-y coords
         gr.SetPoint(i, gr.GetX()[i], yDiv)
-        
+        a = num.getRootGraph().GetY()[i]
+        b = denom.getRootGraph().GetY()[i]
+        sigmaAh  = num.getRootGraph().GetEYhigh()[i]
+        sigmaBh  = denom.getRootGraph().GetEYhigh()[i]
+        sigmaAl  = num.getRootGraph().GetEYlow()[i]
+        sigmaBl  = denom.getRootGraph().GetEYlow()[i]
+        errHigh = err.errorPropagationForDivision(a, sigmaAh, b, sigmaBh)
+        errLow  = err.errorPropagationForDivision(a, sigmaAl, b, sigmaBl)
+        gr.SetPointEYhigh(i, errHigh)
+        gr.SetPointEYlow(i , errLow)
+
         # Disable error bars?
         if not errorY:
             gr.SetPointEYlow(i , yVal*1e-4)
@@ -176,9 +203,9 @@ def main(opts):
         Verbose(moduleDict[mName].FakeBNormalisation_Value.values(), False)
     
     gList  = []
-    gListR = []
+    gListR = []    
     # For-loop: All modules imported
-    for i, k in enumerate(sKeys, 0):
+    for i, k in enumerate(sorted(sKeys, key=natural_keys), 0):
         g = PlotTFs(i, k, moduleDict[k])
         gList.extend(g)
         gListR.extend(g)
@@ -198,7 +225,7 @@ def main(opts):
     PlotTFsCompare("transferFactors" , sKeys, gList)
 
     # Create comparison ratio plot
-    gListR = [divideGraph(g, gListR[0], errorY=False, percentDiff=False, invRatio=False) for g in gListR]
+    gListR = [divideGraph(g, gListR[0], errorY=True, invRatio=False) for g in gListR]
     PlotTFsCompare("transferFactorsR", sKeys, gListR, isRatio=True)
 
     Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)
@@ -217,17 +244,18 @@ def PlotTFsCompare(pName, sKeys, gList, isRatio=False):
     # For-loop: All graphs
     for i, s in enumerate(sKeys, 1):
         # Reference histo is exception (draw just a line)
-        if s == opts.refHisto and isRatio:
-            plot.histoMgr.setHistoDrawStyle(s, "L")
-            plot.histoMgr.setHistoLegendStyle(s, "L")
-        elif s == opts.refHisto and not isRatio:
-            plot.histoMgr.setHistoDrawStyle(s, "C")
-            plot.histoMgr.setHistoLegendStyle(s, "L")
+        if s == opts.refHisto:
+            # plot.histoMgr.setHistoDrawStyle(s, "L")            
+            # plot.histoMgr.setHistoDrawStyle(s, "C3") # curve && filled area is drawn through end points of errors
+            # plot.histoMgr.setHistoDrawStyle(s, "P2")
+            plot.histoMgr.setHistoDrawStyle(s, "C4")   # curve && smoothed filled area is drawn through end points of errors
+            plot.histoMgr.setHistoLegendStyle(s, "F")
+            # plot.histoMgr.setHistoLegendStyle(s, "L")
         else:
             plot.histoMgr.setHistoDrawStyle(s, "P")
             plot.histoMgr.setHistoLegendStyle(s, "LP")
 
-    plot.setLegend(getLegend(opts, dx=0, dy=-0.3) )
+    plot.setLegend(getLegend(opts, dx=+0.0, dy=-0.15) )
     plot.createFrame(pName, saveFormats=[])
     plot.frame.GetXaxis().SetTitle("")
     plot.frame.GetYaxis().SetTitle("transfer factor")
@@ -353,17 +381,14 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
 def getLegend(opts, dx=0, dy=0):
 
     # Create customised legend
-    xLeg1 = 0.65 + dx
-    xLeg2 = 0.93 
-    yLeg1 = 0.82 + dy
+    xLeg1 = 0.72  + dx
+    xLeg2 = xLeg1 + 0.2
+    yLeg1 = 0.82  + dy
     yLeg2 = 0.92
 
     # Adjust legend slightly to visually align with text
     legend = histograms.createLegend(xLeg1*.98, yLeg1, xLeg2, yLeg2) 
     legend.SetMargin(0.17)
-
-    # Make room for the final state text
-    # legend.SetFillStyle(1001) #legend.SetFillStyle(3001)
     return legend
 
 def setNominalStyle(graph):
@@ -375,8 +400,8 @@ def setNominalStyle(graph):
     return
 
 def setStyle(i, graph, isRefHisto):
-    cList = [ROOT.kRed, ROOT.kAzure, ROOT.kOrange-3, ROOT.kMagenta, ROOT.kGreen-1, ROOT.kViolet, ROOT.kTeal+2, ROOT.kGray+1]
-    mList = [ROOT.kFullCircle, ROOT.kFullCircle, ROOT.kFullTriangleUp, ROOT.kFullTriangleDown, ROOT.kFullSquare, ROOT.kFullSquare, ROOT.kFullCross, ROOT.kFullCross]
+    cList = [ROOT.kRed, ROOT.kAzure, ROOT.kOrange-3, ROOT.kGreen+1, ROOT.kViolet, ROOT.kTeal+2, ROOT.kGray+1, ROOT.kMagenta+1]
+    mList = [ROOT.kFullCircle, ROOT.kFullTriangleUp, ROOT.kFullTriangleDown, ROOT.kFullSquare, ROOT.kFullCircle, ROOT.kFullCross, ROOT.kFullCircle]
     if i < len(cList) and i < len(mList) :
         colour = cList[i]
         marker = mList[i]
@@ -385,6 +410,8 @@ def setStyle(i, graph, isRefHisto):
     graph.SetLineStyle(ROOT.kSolid)
     graph.SetLineWidth(3)
     graph.SetLineColor(colour)    
+    graph.SetFillColor(colour)
+    graph.SetFillStyle(3001)
     graph.SetMarkerSize(1.2)
     graph.SetMarkerStyle(marker)
     graph.SetMarkerColor(colour)
