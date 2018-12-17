@@ -10,12 +10,12 @@ plotTransferFactors.py [opts]
 
 
 EXAMPLES:
-./plotTransferFactors.py --cutLine 500 --gridX --gridY --yMin 1e-3 --yMax 10
-./plotTransferFactors.py -m FakeBMeasurement_PreSel_3CSVv2M_b3Pt40_InvSel_3CSVv2L_2CSVv2M_MVAm0p20to0p40_6BinsAbsEta_NoFatjetVeto_180318_085359 --gridX --gridY 
+./plotTransferFactors.py -m FakeBMeasurement_Test_22Nov2018/ --gridX --gridY --url
+./plotTransferFactors.py -m FakeBMeasurement_Test_22Nov2018/ --gridX --gridY --refHisto "Run2016DE"
 
 
 LAST USED:
-./plotTransferFactors.py -m FakeBMeasurement_Test_22Nov2018/ --gridX --gridY --yMin 0.0 --yMax 1
+./plotTransferFactors.py -m FakeBMeasurement_Test_22Nov2018/ --gridX --gridY --refHisto "Run2016"
 
 '''
 
@@ -77,14 +77,14 @@ def Print(msg, printHeader=True):
     print "\t", msg
     return
 
-def divideGraph(num, denom, errorY=True, invRatio=False):
+def divideGraph(num, denom, errorY=True, percentDiff=False, invRatio=False):
     '''                                                                                                                                                                                                                           
     Divide two TGraphs
      \param num    Numerator TGraph
      \param denom  Denominator TGraph
      \return new TGraph as the ratio of the two TGraphs
      '''
-    gr = num.getRootGraph()
+    gr = copy.deepcopy(num.getRootGraph())
 
     # Numerator and Denominator graphs are the same (i.e. reference histo)
     if num == denom:
@@ -101,9 +101,11 @@ def divideGraph(num, denom, errorY=True, invRatio=False):
     for i in xrange(gr.GetN()):
         yDiv = 0
         yVal = denom.getRootGraph().GetY()[i]
+        if percentDiff:
+            yVal -= num.getRootGraph().GetY()[i]
 
         # Sanity check
-        if yVal != 0:
+        if yVal > 0:
             yDiv = gr.GetY()[i]/yVal
             if invRatio:
                 yDiv = 1.0/yDiv
@@ -181,10 +183,22 @@ def main(opts):
         gList.extend(g)
         gListR.extend(g)
 
-    # Create comparison plots
+    # Make sure you use correct graph as reference
+    refPos = 0
+    for i, g in enumerate(gList, 0):
+        if g.getName() == opts.refHisto:
+            refPos = i
+            break
+
+    # Reference histograph
+    gList.insert(0, gList.pop(refPos) )
+    gListR.insert(0, gListR.pop(refPos) )
+    
+    # Create comparison plot
     PlotTFsCompare("transferFactors" , sKeys, gList)
 
-    gListR = [divideGraph(g, gListR[0], errorY=False, invRatio=False) for g in gListR]
+    # Create comparison ratio plot
+    gListR = [divideGraph(g, gListR[0], errorY=False, percentDiff=False, invRatio=False) for g in gListR]
     PlotTFsCompare("transferFactorsR", sKeys, gListR, isRatio=True)
 
     Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + aux.convertToURL(opts.saveDir, opts.url) + ShellStyles.NormalStyle()), True)
@@ -203,8 +217,11 @@ def PlotTFsCompare(pName, sKeys, gList, isRatio=False):
     # For-loop: All graphs
     for i, s in enumerate(sKeys, 1):
         # Reference histo is exception (draw just a line)
-        if i==1 and isRatio: 
+        if s == opts.refHisto and isRatio:
             plot.histoMgr.setHistoDrawStyle(s, "L")
+            plot.histoMgr.setHistoLegendStyle(s, "L")
+        elif s == opts.refHisto and not isRatio:
+            plot.histoMgr.setHistoDrawStyle(s, "C")
             plot.histoMgr.setHistoLegendStyle(s, "L")
         else:
             plot.histoMgr.setHistoDrawStyle(s, "P")
@@ -231,8 +248,10 @@ def PlotTFs(counter, iName, iModule):
     yerrl = []
     yerrh = []
 
-    # Fill TGraph arrays
+    # Ensure correct style is applied to refHisto
     sKeys = sorted(iModule.FakeBNormalisation_Value.keys(), key=natural_keys)
+
+    # Fill TGraph arrays
     for i, k in enumerate(sKeys, 1):
         
         bin   = k
@@ -260,7 +279,8 @@ def PlotTFs(counter, iName, iModule):
                                    array.array("d", yerrh)
                                    )
     # Apply styles
-    setStyle(counter, tgraph)
+    Verbose("Setting style #%d for name \"%s\" and module \"%s\"" % (counter, iName, os.path.basename(str(iModule))), counter==0)
+    setStyle(counter, tgraph, isRefHisto= (iName==opts.refHisto) )
 
     # Set graph name
     tgraph.SetName(iName)
@@ -326,7 +346,7 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     for i, ext in enumerate(saveFormats):
         saveNameURL = saveName + ext
         saveNameURL = aux.convertToURL(saveNameURL, opts.url)
-        Print(saveNameURL, i==0)
+        Verbose(saveNameURL, i==0)
         plot.saveAs(saveName, formats=saveFormats)
     return
 
@@ -354,7 +374,7 @@ def setNominalStyle(graph):
     graph.SetMarkerColor(ROOT.kRed)
     return
 
-def setStyle(i, graph):
+def setStyle(i, graph, isRefHisto):
     cList = [ROOT.kRed, ROOT.kAzure, ROOT.kOrange-3, ROOT.kMagenta, ROOT.kGreen-1, ROOT.kViolet, ROOT.kTeal+2, ROOT.kGray+1]
     mList = [ROOT.kFullCircle, ROOT.kFullCircle, ROOT.kFullTriangleUp, ROOT.kFullTriangleDown, ROOT.kFullSquare, ROOT.kFullSquare, ROOT.kFullCross, ROOT.kFullCross]
     if i < len(cList) and i < len(mList) :
@@ -372,6 +392,9 @@ def setStyle(i, graph):
         graph.SetMarkerSize(1.50)
     if mList[i] == ROOT.kFullTriangleUp or mList[i] == ROOT.kFullTriangleUp:
         graph.SetMarkerSize(1.45)
+
+    if isRefHisto:
+        Verbose("graph.GetName() = %s" % (graph.GetName()), True)
     return
 
 def setStyle1(graph):
@@ -400,6 +423,7 @@ if __name__ == "__main__":
     MINY        = -1
     MAXY        = -1
     SAVEDIR     = None
+    REFHISTO    = "Run2016"
     URL         = False
     OPTMODE     = ""
 
@@ -419,7 +443,6 @@ if __name__ == "__main__":
 
     parser.add_option("-o", "--optMode", dest="optMode", type="string", default=OPTMODE, 
                       help="The optimization mode when analysis variation is enabled  [default: %s]" % OPTMODE)
-
 
     parser.add_option("--logX", dest="logX", default=LOGX, action="store_true",
                       help="Enable x-axis log scale [default: %s]" % (LOGX))
@@ -442,14 +465,14 @@ if __name__ == "__main__":
     parser.add_option("--yMin", dest="yMin", default=MINY, type="float",
                       help="Overwrite automaticly calculated minimum value of y-axis [default: %s]" % (MINY) )
 
-    parser.add_option("--yMax", dest="yMax", default=MAXY, type="float",
-                      help="Overwrite automaticly calculated maximum value of y-axis [default: %s]" % (MAXY) )
-
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR,
                       help="Directory where all plots will be saved [default: %s]" % SAVEDIR)
 
     parser.add_option("-m", "--mcrab", dest="mcrab", action="store", 
                       help="Path to the multicrab directory for input")
+
+    parser.add_option("--refHisto", dest="refHisto", action="store", default=REFHISTO,
+                      help="Name of histogram to be used as refernce in comparison many plotter [default: %s]" % (REFHISTO) )
 
     (opts, args) = parser.parse_args()
 

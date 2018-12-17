@@ -289,14 +289,14 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     for i, ext in enumerate(saveFormats):
         saveNameURL = saveName + ext
         saveNameURL = aux.convertToURL(saveNameURL, opts.url)
-        Print(saveNameURL, i==0)
+        Verbose(saveNameURL, i==0)
         plot.saveAs(saveName, formats=saveFormats)
     return
 
 #================================================================================================ 
 # Main
 #================================================================================================ 
-def main(i, runRange, opts):
+def main(count, runRange, dsetList, opts):
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
@@ -334,32 +334,42 @@ def main(i, runRange, opts):
             datasetsMgr.PrintCrossSections()
             datasetsMgr.PrintLuminosities()
             
-        # Get the PSets:
-        if 0:
-            datasetsMgr.printSelections()
-            #PrintPSet("BJetSelection", datasetsMgr, depth=150)
-            datasetsMgr.PrintInfo()
+        # Remove datasets        
+        removeList   = ["QCD-b", "Charged", "QCD", "ZJetsToQQ_HT600toInf"]
+        opts.intLumi = 0.0
 
-        # ZJets and DYJets overlap!
-        if "ZJetsToQQ_HT600toInf" in datasetsMgr.getAllDatasetNames() and "DYJetsToQQ_HT180" in datasetsMgr.getAllDatasetNames():
-            Verbose("Cannot use both ZJetsToQQ and DYJetsToQQ due to duplicate events? Investigate. Removing ZJetsToQQ datasets for now ..", True)
-            datasetsMgr.remove(filter(lambda name: "ZJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
-            
-        # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
-        plots.mergeRenameReorderForDataMC(datasetsMgr) 
+        # For-loop: All datasets in the manager
+        for d in datasetsMgr.getAllDatasets():
+            if d.isMC():
+                continue
 
-        # Get luminosity if a value is not specified
-        if opts.intLumi < 0:
-            opts.intLumi = datasetsMgr.getDataset("Data").getLuminosity()
-        
-        # Remove datasets
-        removeList = ["QCD-b", "Charged", "2016B", "2016C", "2016D", "2016E", "2016F", "2016G", "2016E", "2016F", "2016G", "2016H"]
-        if not opts.useMC:
-            removeList.append("QCD")
+            # Inclusive data
+            if len(dsetList) == 1 and dsetList[0] == "Run2016":
+                Verbose("Inclusive data. Will not remove anything", True)
+                opts.intLumi += GetLumi(datasetsMgr)
+                break
+
+            # Special combinations
+            for rr in dsetList:
+                if rr not in d.getName():
+                    Verbose("\"%s\" is not in dataset name \"%s\"" % (rr, d.getName()), False)
+                    if d.getName() not in removeList:
+                        # Ensure dataset to be removed is not in the dsetList
+                        if not any(rr in d.getName() for rr in dsetList):
+                            removeList.append(d.getName())
+                else:
+                    Verbose("\"%s\" is in dataset name \"%s\"" % (rr, d.getName()), False)
+                    # Get luminosity if a value is not specified
+                    opts.intLumi += d.getLuminosity()
+
+        # For-loop: All dataset names to be removed
         for i, d in enumerate(removeList, 0):
-            msg = "Removing dataset %s" % d
-            Verbose(ShellStyles.WarningLabel() + msg + ShellStyles.NormalStyle(), i==0)
+            Verbose(ShellStyles.HighlightAltStyle() + "Removing dataset %s" % d + ShellStyles.NormalStyle(), False)
             datasetsMgr.remove(filter(lambda name: d in name, datasetsMgr.getAllDatasetNames()))
+
+        # Inform user of dataset and corresponding integrated lumi
+        Print("%d) %s (%.1f 1/pb)" % (count, runRange, opts.intLumi), count==1)
+        #Print("%d) %s (%.1f 1/pb)" % (count, ", ".join(dsetList), opts.intLumi), count==1)
 
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
@@ -367,14 +377,10 @@ def main(i, runRange, opts):
         # Print dataset information
         if 0:
             datasetsMgr.PrintInfo()
-        
+
         # Merge EWK samples
         datasetsMgr.merge("EWK", aux.GetListOfEwkDatasets())
             
-        # Print summary of datasets to be used
-        if i==1:
-            datasetsMgr.PrintInfo()
-        
         # Do the fit on the histo after ALL selections (incl. topology cuts)
         folderList = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(opts.folder)
         folderList1 = [h for h in folderList if opts.histoKey in h]
@@ -389,7 +395,7 @@ def main(i, runRange, opts):
             histoPaths.extend( pathList )
 
         binLabels = GetBinLabels("CRone", histoPaths)
-        PlotHistosAndCalculateTF(datasetsMgr, histoPaths, binLabels, opts)
+        PlotHistosAndCalculateTF(runRange, datasetsMgr, histoPaths, binLabels, opts)
     return
 
 
@@ -494,7 +500,7 @@ def GetRootHistos(datasetsMgr, histoList, regions, binLabels):
     return rhDict
 
 
-def PlotHistosAndCalculateTF(datasetsMgr, histoList, binLabels, opts):
+def PlotHistosAndCalculateTF(runRange, datasetsMgr, histoList, binLabels, opts):
 
     # Get the histogram customisations (keyword arguments)
     _kwargs = GetHistoKwargs(histoList[0])
@@ -536,7 +542,7 @@ def PlotHistosAndCalculateTF(datasetsMgr, histoList, binLabels, opts):
         # Normalise the VR histogram with the Transfer Factor ( BkgSum = VR * (CR1/CR2) )
         binHisto_VR = rhDict["FakeB-VR-%s" % (bin)]
         VRtoSR_TF   = manager.GetTransferFactor(bin)
-        Print("Applying TF = %s%0.6f%s to VR shape" % (ShellStyles.NoteStyle(), VRtoSR_TF, ShellStyles.NormalStyle()), True)
+        Verbose("Applying TF = %s%0.6f%s to VR shape" % (ShellStyles.NoteStyle(), VRtoSR_TF, ShellStyles.NormalStyle()), True)
         binHisto_VR.Scale(VRtoSR_TF) 
         # Add the normalised histogram to the final Inclusive SR (predicted) histo
         rBkgSum_SR.Add(binHisto_VR, +1)
@@ -548,18 +554,11 @@ def PlotHistosAndCalculateTF(datasetsMgr, histoList, binLabels, opts):
             # Normalise the VR histogram with the Transfer Factor ( BkgSum = VR * (CR1/CR2) )
             binHisto_VR = rhDict["FakeB-VR-%s" % (bin)]
             VRtoSR_TF   = manager.GetTransferFactor(bin)
-            Print("Applying TF = %s%0.6f%s to VR shape" % (ShellStyles.NoteStyle(), VRtoSR_TF, ShellStyles.NormalStyle()), i==1)
+            Verbose("Applying TF = %s%0.6f%s to VR shape" % (ShellStyles.NoteStyle(), VRtoSR_TF, ShellStyles.NormalStyle()), i==1)
             binHisto_VR.Scale(VRtoSR_TF) 
             # Add the normalised histogram to the final Inclusive SR (predicted) histo
             rBkgSum_SR.Add(binHisto_VR, +1)
 
-    #Print("Got Verification Region (VR) shape %s%s%s" % (ShellStyles.NoteStyle(), rFakeB_VR.GetName(), ShellStyles.NormalStyle()), True)
-
-    # Normalise the VR histogram with the Transfer Factor ( BkgSum = VR * (CR1/CR2) )
-    #VRtoSR_TF = manager.GetTransferFactor("Inclusive")
-    #Print("Applying TF = %s%0.6f%s to VR shape" % (ShellStyles.NoteStyle(), VRtoSR_TF, ShellStyles.NormalStyle()), True)
-    #rBkgSum_SR.Scale(VRtoSR_TF) 
-    
     # Plot histograms    
     if opts.altPlot:
         # Add the SR EWK Genuine-b to the SR FakeB ( BkgSum = [FakeB] + [GenuineB-MC] = [VR * (CR1/CR2)] + [GenuineB-MC] )
@@ -610,7 +609,7 @@ def PlotHistosAndCalculateTF(datasetsMgr, histoList, binLabels, opts):
         p.setDefaultStyles()
 
     # Draw the plot and save it
-    hName = opts.histoKey #"test"
+    hName = opts.histoKey
     plots.drawPlot(p, hName, **_kwargs)
     SavePlot(p, hName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png"])
 
@@ -618,8 +617,7 @@ def PlotHistosAndCalculateTF(datasetsMgr, histoList, binLabels, opts):
     # Calculate the Transfer Factor (TF) and save to file
     #=========================================================================================
     Verbose("Write the normalisation factors to a python file", True)
-    #fileName = os.path.join(opts.mcrab, "FakeBTransferFactors%s_%s.py"% ( getModuleInfoString(opts), runRange ) )
-    fileName = os.path.join(opts.mcrab, "FakeBTransferFactors_%s.py"% ( runRange ) )
+    fileName = os.path.join(opts.mcrab, "FakeBTransferFactors_%s.py" % ( runRange ) )
     manager.writeTransferFactorsToFile(fileName, opts)
     return
 
@@ -736,14 +734,34 @@ if __name__ == "__main__":
         opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="TransferFactor")
 
     # Call the main function
-    dsetList = ["Run2016B", "Run2016C", "Run2016D", "Run2016E", "Run2016F", "Run2016G", "Run2016H"]
-    for i, d in enumerate(dsetList, 1):
-        myList = copy.deepcopy(dsetList)
-        myList.remove(d)
-        opts.excludeTasks = "|".join(myList)
-        opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="TransferFactor_%s" % d)
-        runRange = d
-        main(i, runRange, opts)
+    dsetSets = {
+        "Run2016"  : ["Run2016B", "Run2016C", "Run2016D", "Run2016E", "Run2016F", "Run2016G", "Run2016H"],
+        # Individual Runs (too small statistics)
+        # "Run2016B" : ["Run2016B"],
+        # "Run2016C" : ["Run2016C"],
+        # "Run2016D" : ["Run2016D"],
+        # "Run2016E" : ["Run2016E"],
+        # "Run2016F" : ["Run2016F"],
+        # "Run2016G" : ["Run2016G"],
+        # "Run2016H" : ["Run2016H"],
+        # Custom-tailor dataset sets (4 groups)
+        #"Run2016BC" : ["Run2016B", "Run2016C"],
+        #"Run2016DEF": ["Run2016D", "Run2016E", "Run2016F"], 
+        ##"Run2016G"  : ["Run2016G"], # not great (up to 30%)
+        "Run2016H"  : ["Run2016H"]
+        # Custom-tailor dataset sets (4 groups)
+        # "Run2016BC": ["Run2016B", "Run2016C"],
+        # "Run2016DE": ["Run2016D", "Run2016E"], 
+        # "Run2016FG": ["Run2016F", "Run2016G"], 
+        # "Run2016H" : ["Run2016H"]
+        }
+
+    # Do partial data dataset (closure attempt)
+    for i, rr in enumerate(dsetSets, 1):
+        opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="TransferFactor_%s" % rr)
+        dsetList     = dsetSets[rr]
+        Verbose("%d) %s" % (i, ", ".join(dsetList) ), i==1)
+        main(i, rr, dsetList, opts)
 
     if not opts.batchMode:
         raw_input("=== plot_FakeBInPartialDataset.py: Press any key to quit ROOT ...")
