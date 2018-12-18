@@ -6,16 +6,16 @@ for all the bins considered onto a signle TGraphAsymmetry object
 
 
 USAGE:
-plotTransferFactors.py [opts]
+plot_TFsInFakeBDir.py [opts]
 
 
 EXAMPLES:
-./plotTransferFactors.py -m FakeBMeasurement_Test_22Nov2018/ --gridX --gridY --url
-./plotTransferFactors.py -m FakeBMeasurement_Test_22Nov2018/ --gridX --gridY --refHisto "Run2016DE"
+./plot_TFsInFakeBDir.py -m FakeBMeasurement_Test_22Nov2018/ --gridX --gridY --url
+./plot_TFsInFakeBDir.py -m FakeBMeasurement_Test_22Nov2018/ --gridX --gridY --refHisto "Run2016DE"
 
 
 LAST USED:
-./plotTransferFactors.py -m FakeBMeasurement_Test_22Nov2018/ --gridX --gridY --refHisto "Run2016"
+./plot_TFsInFakeBDir.py -m FakeBMeasurement_Test_22Nov2018/ --gridX --gridY --refHisto "Run2016"
 
 '''
 
@@ -103,8 +103,6 @@ def divideGraph(num, denom, errorY=True, invRatio=False):
             sigmaAh = gr.GetEYhigh()[i]
             errLow  = err.errorPropagationForDivision(a, sigmaAh, a, sigmaAh)
             errHigh = err.errorPropagationForDivision(a, sigmaAl, a, sigmaAl)
-            #errLow  = errorPropagationForDivision(a, sigmaAh, a, sigmaAh)
-            #errHigh = errorPropagationForDivision(a, sigmaAl, a, sigmaAl)
             gr.SetPointEYhigh(i, errLow)
             gr.SetPointEYlow(i , errHigh)
             # Disable error bars?
@@ -245,15 +243,23 @@ def PlotTFsCompare(pName, sKeys, gList, isRatio=False):
     for i, s in enumerate(sKeys, 1):
         # Reference histo is exception (draw just a line)
         if s == opts.refHisto:
-            # plot.histoMgr.setHistoDrawStyle(s, "L")            
-            # plot.histoMgr.setHistoDrawStyle(s, "C3") # curve && filled area is drawn through end points of errors
-            # plot.histoMgr.setHistoDrawStyle(s, "P2")
-            plot.histoMgr.setHistoDrawStyle(s, "C4")   # curve && smoothed filled area is drawn through end points of errors
-            plot.histoMgr.setHistoLegendStyle(s, "F")
+            # plot.histoMgr.setHistoDrawStyle(s, "L")
             # plot.histoMgr.setHistoLegendStyle(s, "L")
+            
+            # plot.histoMgr.setHistoDrawStyle(s, "C3") # curve && filled area is drawn through end points of errors
+            # plot.histoMgr.setHistoLegendStyle(s, "F")
+
+            # plot.histoMgr.setHistoDrawStyle(s, "P2")
+            # plot.histoMgr.setHistoLegendStyle(s, "LP")
+
+            plot.histoMgr.setHistoDrawStyle(s, "C4")   # curve && smoothed filled area is drawn through end points of errors
+            plot.histoMgr.setHistoLegendStyle(s, "LF")
         else:
             plot.histoMgr.setHistoDrawStyle(s, "P")
             plot.histoMgr.setHistoLegendStyle(s, "LP")
+            #
+            #plot.histoMgr.setHistoDrawStyle(s, "4")   # curve && smoothed filled area is drawn through end points of errors
+            #plot.histoMgr.setHistoLegendStyle(s, "F")
 
     plot.setLegend(getLegend(opts, dx=+0.0, dy=-0.15) )
     plot.createFrame(pName, saveFormats=[])
@@ -504,8 +510,7 @@ if __name__ == "__main__":
     (opts, args) = parser.parse_args()
 
     if opts.saveDir == None:
-        opts.saveDir = aux.getSaveDirPath("", prefix="", postfix="Test")
-
+        opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="TFsInFakeBDir")
 
     # Require at least two arguments (script-name, path to multicrab)
     if len(sys.argv) < 2:
