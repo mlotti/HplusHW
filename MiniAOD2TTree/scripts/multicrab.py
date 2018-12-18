@@ -99,11 +99,14 @@ from CRABClient.UserUtilities import getUsernameFromSiteDB
 from CRABClient.ClientUtilities import LOGLEVEL_MUTE
 from CRABClient.UserUtilities import getConsoleLogLevel
  
-#try: #sami please fix me-28Nov2017 (alex)
-import HiggsAnalysis.MiniAOD2TTree.tools.git as git
-from HiggsAnalysis.MiniAOD2TTree.tools.datasets import *
-#except: #sami please fix me-28Nov2017 (alex)
+gitFound = False
+try: #sami please fix me-28Nov2017 (alex)
+    import HiggsAnalysis.MiniAOD2TTree.tools.git as git
+    from HiggsAnalysis.MiniAOD2TTree.tools.datasets import *
+    gitfound = True
+except: #sami please fix me-28Nov2017 (alex)
 #    from datasets import *
+    pass
 
 #================================================================================================ 
 # Global Definitions
@@ -1449,9 +1452,11 @@ def CreateTaskDir(dirName):
     else:
         pass
 
-    # Write the commit id, "git status", "git diff" command output the directory created for the multicrab task
-    gitFileList = git.writeCodeGitInfo(dirName, False)    
-    Verbose("Copied %s to '%s'." % ("'" + "', '".join(gitFileList) + "'", dirName) )
+    if gitFound:
+        # Write the commit id, "git status", "git diff" command output the directory created for the multicrab task
+        gitFileList = git.writeCodeGitInfo(dirName, False)    
+        Verbose("Copied %s to '%s'." % ("'" + "', '".join(gitFileList) + "'", dirName) )
+
     return
 
 
