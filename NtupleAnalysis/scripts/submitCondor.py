@@ -405,7 +405,8 @@ if __name__ == "__main__":
         opts.doSystematics = True
         opts.systVarsList = opts.systVars.split(",")
     else:
-        opts.systVarsList = ["JES", "JER", "BTagSF", "TopPt", "PUWeight",  "TopTagSF"]
+        #opts.systVarsList = ["JES", "JER", "BTagSF", "TopPt", "PUWeight",  "TopTagSF"]
+        opts.systVarsList = ["JES", "JER", "BTagSF", "PUWeight",  "TopTagSF"]
 
     # Call the main function
     main(opts)
