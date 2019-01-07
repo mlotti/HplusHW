@@ -767,5 +767,7 @@ if __name__ == "__main__":
         Verbose("%d) %s" % (i, ", ".join(dsetList) ), i==1)
         main(i, rr, dsetList, opts)
 
+    Print("%sAll plots saved under %s%s" % (ShellStyles.SuccessStyle(), opts.saveDir, ShellStyles.NormalStyle()), True)
+
     if not opts.batchMode:
         raw_input("=== plot_FakeBInPartialDataset.py: Press any key to quit ROOT ...")
