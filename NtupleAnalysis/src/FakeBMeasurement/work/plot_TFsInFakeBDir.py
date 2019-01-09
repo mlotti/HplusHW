@@ -12,10 +12,12 @@ plot_TFsInFakeBDir.py [opts]
 EXAMPLES:
 ./plot_TFsInFakeBDir.py -m FakeBMeasurement_Test_22Nov2018/ --gridX --gridY --url
 ./plot_TFsInFakeBDir.py -m FakeBMeasurement_Test_22Nov2018/ --gridX --gridY --refHisto "Run2016DE"
+./plot_TFsInFakeBDir.py -m FakeBMeasurement_Test_22Nov2018/ --gridX --gridY --refHisto "Run2016"
 
 
 LAST USED:
-./plot_TFsInFakeBDir.py -m FakeBMeasurement_Test_22Nov2018/ --gridX --gridY --refHisto "Run2016"
+./plot_TFsInFakeBDir.py --gridX --gridY --refHisto "Run2016" -m FakeBMeasurement_BDT0p4_Run2016_NoTopPtReweight_07Jan2019
+
 
 '''
 
