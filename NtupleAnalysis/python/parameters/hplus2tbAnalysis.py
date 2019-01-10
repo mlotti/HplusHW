@@ -155,8 +155,8 @@ topSelectionBDT = PSet(
     TopMassUppCutDirection =  "<=",   # [default: "<"]
     CSV_bDiscCutValue      = 0.8484,  # [default: 0.8484] # Do not evaluate top candidate if b-jet assigned as b from top fails this cut
     CSV_bDiscCutDirection  = ">=",    # [default: ">="]
-    WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_14July2018.weight.xml",                      # Default
-    # WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_noTopPtRew_24Oct2018.weights.xml",            # Disabled top-pt reweighting
+    # WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_14July2018.weight.xml",                       # Default
+    WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_noTopPtRew_24Oct2018.weights.xml",              # Disabled top-pt reweighting
     # WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_noDeltaRqq_24Oct2018.weights.xml",            # dR(q,q') > 0.8 removed from training (q,q': partons from top decay)    
     # WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_noDeltaRqq_noTopPtRew_25Oct2018.weights.xml", # Removed dR(q,q') > 0.8 AND disabled top-pt reweighting
 )
