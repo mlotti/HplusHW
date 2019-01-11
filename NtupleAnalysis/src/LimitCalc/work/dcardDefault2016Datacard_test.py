@@ -1,6 +1,7 @@
 import HiggsAnalysis.NtupleAnalysis.tools.systematics as systematics
 
-DataCardName ='HplusToTauNu_13TeV'
+#DataCardName ='HplusToTauNu_13TeV'
+DataCardName ='HplusToHW_13TeV'
 
 ###########################
 ### SET MASS RANGE HERE ###
@@ -374,7 +375,7 @@ if "CMS_eff_t_highpt" in myShapeSystematics:
 Nuisances.append(Nuisance(id="CMS_eff_e_veto", label="e veto",
     distr="lnN", function="Ratio",
     numerator="passed e selection ()", # main counter name after electron veto
-    denominator="passed METFilter selection ()", # main counter name before electron and muon veto
+    denominator="Fake tau SF", # main counter name before electron and muon veto
     scaling=0.02
 ))
 #Nuisances.append(Nuisance(id="CMS_eff_m_veto", label="mu veto",
@@ -568,9 +569,9 @@ Nuisances.append(Nuisance(id="CMS_pdf_VV", label="diboson pdf uncertainty",
 
 
 # QCD MC
-Nuisances.append(Nuisance(id="xsect_QCD", label="QCD MC cross section",
-    distr="lnN", function="Constant",
-    value=systematics.getCrossSectionUncertainty("QCD").getUncertaintyDown()))
+#Nuisances.append(Nuisance(id="xsect_QCD", label="QCD MC cross section",
+#    distr="lnN", function="Constant",
+#    value=systematics.getCrossSectionUncertainty("QCD").getUncertaintyDown()))
 
 #===== Luminosity
 Nuisances.append(Nuisance(id="lumi_13TeV", label="lumi_13TeVnosity",
@@ -581,11 +582,11 @@ Nuisances.append(Nuisance(id="lumi_13TeV_forQCD", label="lumi_13TeVnosity",
     value=systematics.getLuminosityUncertainty("2016")))
 
 #===== QCD measurement
-if OptionIncludeSystematics:
-    Nuisances.append(Nuisance(id="CMS_Hptntj_FakeTauBG_templateFit", label="QCDInv: fit", 
-        distr="lnN", function="Constant", value=0.03))
-    Nuisances.append(Nuisance(id="CMS_Hptntj_QCDkbg_metshape", label="QCD met shape syst.",
-        distr="shapeQ", function="QCDShapeVariation", systVariation="QCDNormSource"))
+#if OptionIncludeSystematics:
+#    Nuisances.append(Nuisance(id="CMS_Hptntj_FakeTauBG_templateFit", label="QCDInv: fit", 
+#        distr="lnN", function="Constant", value=0.03))
+#    Nuisances.append(Nuisance(id="CMS_Hptntj_QCDkbg_metshape", label="QCD met shape syst.",
+#        distr="shapeQ", function="QCDShapeVariation", systVariation="QCDNormSource"))
 
 #===== Embedding
 #if OptionGenuineTauBackgroundSource == "DataDriven":
@@ -715,6 +716,12 @@ ControlPlots.append(ControlPlotInput(
                          "ratioLegendPosition": "right",
                          "opts": {"ymin": 0.0009} }
 ))
+
+
+#####
+
+
+
 '''
 ControlPlots.append(ControlPlotInput(
     title            = "NVertices_AfterStandardSelections",
@@ -1329,3 +1336,4 @@ if OptionCtrlPlotsAtMt:
           "legendPosition": "SE",
           "opts": {"ymin": 0.09} }))
 '''
+########

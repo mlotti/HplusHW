@@ -381,14 +381,15 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
     setTauMisIDSFValue(output);
   }
   // Set tau trigger SF value to data object
-  if (event.isMC()) {
-    if (output.hasIdentifiedTaus()) {
-      output.fTauTriggerSF = fTauTriggerSFReader.getScaleFactorValue(output.getSelectedTau().pt());
-    }
-    if (output.hasAntiIsolatedTaus()) {
-      output.fAntiIsolatedTauTriggerSF = fTauTriggerSFReader.getScaleFactorValue(output.getAntiIsolatedTau().pt());
-    }
-  }
+//  if (event.isMC()) {
+//    if (output.hasIdentifiedTaus()) {
+//      cout << "trg sf" << "\n";
+//      output.fTauTriggerSF = fTauTriggerSFReader.getScaleFactorValue(output.getSelectedTau().pt());
+//    }
+//    if (output.hasAntiIsolatedTaus()) {
+//      output.fAntiIsolatedTauTriggerSF = fTauTriggerSFReader.getScaleFactorValue(output.getAntiIsolatedTau().pt());
+//    }
+//  }
 
   // Fill sub-counters
   if (passedTriggerMatching)

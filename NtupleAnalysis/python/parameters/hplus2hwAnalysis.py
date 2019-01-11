@@ -7,7 +7,10 @@ import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
 ## General parameters
 ##########
 
-#====== Trigger
+##########
+## Trigger
+##########
+
 trg = PSet(
   # No need to specify version numbers, they are automatically scanned in range 1--100 (remove the '_v' suffix)
 #  TautriggerEfficiencyJsonName = "tauLegTriggerEfficiency_2016_fit.json",
@@ -20,7 +23,10 @@ trg = PSet(
 )
 
 
-#====== MET filter
+##########
+## MET filter
+##########
+
 metFilter = PSet(
   discriminators = [#"hbheNoiseTokenRun2Loose", # Loose is recommended
 #                    "hbheIsoNoiseToken", # under scrutiny
@@ -35,7 +41,10 @@ metFilter = PSet(
                     "badChargedCandidateFilter"]
 )
 
-#====== Electron veto
+##########
+## Electron veto
+##########
+
 eVeto = PSet(
     electronPtCut = 15.0,
     electronEtaCut = 2.1,
@@ -53,12 +62,12 @@ eVeto = PSet(
 ##########
 
 muonSelection = PSet(
-#  applyTriggerMatching = False,
-#   triggerMatchingCone = 0.1,   # DeltaR for matching offline tau with trigger tau
-             muonPtCut = 26.0,
+  applyTriggerMatching = True,
+   triggerMatchingCone = 0.1,   # DeltaR for matching offline tau with trigger tau
+             muonPtCut = 26, #26.0,
             muonEtaCut = 2.4,
-                muonID = "muIDMedium", # options: muIDLoose, muIDMedium, muIDTight
-         muonIsolation = "tight", # for selecting, not vetoing
+                muonID = "muIDTight", # options: muIDLoose, muIDMedium, muIDTight
+         muonIsolation = "tight", #"tight", # for selecting, not vetoing
 	muonIsolType   = "mini",      # options: "mini", "default" 
 )
 
@@ -70,23 +79,41 @@ muonSelection = PSet(
 tauSelection = PSet(
   applyTriggerMatching = False,
    triggerMatchingCone = 0.1,   # DeltaR for matching offline tau with trigger tau
-              tauPtCut = 20.0,
+              tauPtCut = 24.0,
              tauEtaCut = 2.1,
         tauLdgTrkPtCut = 10.0,
                 prongs = 1,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
                   rtau = 0.0,   # to disable set to 0.0
   againstElectronDiscr = "againstElectronLooseMVA6",
       againstMuonDiscr = "againstMuonLoose3",
-        isolationDiscr = "byMediumIsolationMVArun2v1DBnewDMwLT",
+        isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits", #"byMediumIsolationMVArun2v1DBnewDMwLT",
 )
 
-#====== Jet selection
+##########
+## tau identification scale factors
+##########
+
+scaleFactors.assignTauIdentificationSF(tauSelection)
+
+##########
+## tau misidentification scale factor
+##########
+
+scaleFactors.assignTauMisidentificationSF(tauSelection, "eToTau", "full", "nominal")
+scaleFactors.assignTauMisidentificationSF(tauSelection, "muToTau", "full", "nominal")
+scaleFactors.assignTauMisidentificationSF(tauSelection, "jetToTau", "full", "nominal")
+
+
+##########
+## Jet selection
+##########
+
 jetSelection = PSet(
                jetType  = "Jets", # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
-              jetPtCuts = [20.0],
+              jetPtCuts = [25.0],
              jetEtaCuts = [2.1],
      tauMatchingDeltaR  = 0.4,
-  numberOfJetsCutValue  = 3,
+  numberOfJetsCutValue  = 2,
   numberOfJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
             jetIDDiscr = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
           jetPUIDDiscr = "", # does not work at the moment 
@@ -98,7 +125,10 @@ jetSelection = PSet(
     MHTCutDirection    = ">=",
 )
 
-#====== B-jet selection
+##########
+## b-jet selection
+##########
+
 bjetSelection = PSet(
     triggerMatchingApply= False,
     triggerMatchingCone = 0.0,  # DeltaR for matching offline bjet with trigger::TriggerBjet 
@@ -124,7 +154,10 @@ scaleFactors.setupBtagSFInformation(btagPset=bjetSelection,
 )
 
 
-#====== MET selection
+##########
+## MET selection
+##########
+
 metSelection = PSet(
            METCutValue = 30.0,
        METCutDirection = ">", # options: ==, !=, <, <=, >, >=
