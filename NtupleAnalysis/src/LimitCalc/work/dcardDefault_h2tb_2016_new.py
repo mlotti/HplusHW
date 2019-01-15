@@ -126,7 +126,7 @@ def getFakeBSystematics(myTTBarSystematics, OptionShapeSystematics, verbose=Fals
 #================================================================================================  
 OptionTest                             = False # [default: False]
 OptionPaper                            = True  # [default: True]
-OptionMergeRares                       = True  # [default: True]
+OptionMergeRares                       = False # [default: True]
 OptionIncludeSystematics               = True  # [default: True]   (Shape systematics; Requires pseudo-multicrab produced with doSystematics=True) 
 OptionUseTopPtReweightSyst             = False # [default: False] 
 OptionFakeBSyst                        = "TransferFactor" # [default: "TransferFactor"] (Options: TransferFactor, TransferFactor2x, TransferFactor3x)
