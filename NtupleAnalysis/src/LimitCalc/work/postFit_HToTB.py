@@ -170,7 +170,7 @@ class Category:
         
         histoName  = "data_obs"
         histoData   = fINdata.Get(histoName)
-        Print("Getting data histogram \"%s\" from ROOT file \"%s\" (Integral = %.1f)" % (histoName, fINdata.GetName(), histoData.Integral()), True)
+        Verbose("Getting data histogram \"%s\" from ROOT file \"%s\" (Integral = %.1f)" % (histoName, fINdata.GetName(), histoData.Integral()), True)
         self.h_data = histoData.Clone("Data")
 
         # Inspect histogram contents?
@@ -201,7 +201,7 @@ class Category:
         for i, m in enumerate(opts.masses, 0):
             hName = "Hp%s" % m
             histo = fINsignal[m].Get(hName)
-            Print("Getting signal histogram \"%s\" from ROOT file \"%s\" (Integral = %.1f)" % (hName, fINsignal[m].GetName(), histo.Integral()), False)
+            Verbose("Getting signal histogram \"%s\" from ROOT file \"%s\" (Integral = %.1f)" % (hName, fINsignal[m].GetName(), histo.Integral()), False)
             if 0:
                 histo.SetLineColor(lineColours[i])
                 histo.SetLineStyle(lineStyles[i])
@@ -231,7 +231,19 @@ class Category:
 
             # Get the histograms
             histo = fINpost.Get(histoName)
-            Print("Getting bkg histogram \"%s\" from ROOT file \"%s\" (Integral = %.1f)" % (histoName, fINpost.GetName(), histo.Integral()), i==1)
+
+            # Safety net for empty histos (if datasset integral is zero corresponding histo will not exist)
+            if "TH1" in str(type(histo)):
+                # print "type(histo) = ", type(histo)
+                pass
+            else: 
+                # Histograms to ignore because dataset yield is zero (hack)
+                msg = "Skipping %s. Not a histogram!" % (histoName)
+                Print(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle(), True)
+                opts.empty.append(histoName.split("/")[-1])
+                continue
+
+            Verbose("Getting bkg histogram \"%s\" from ROOT file \"%s\" (Integral = %.1f)" % (histoName, fINpost.GetName(), histo.Integral()), i==1)
 
             # For-loop: All bins
             for iBin in range(0, histo.GetNbinsX()+1):
@@ -266,8 +278,20 @@ class Category:
             histolist.append(hhs)
             
         # For-loop: All bkg histos
-        for hname in self.histonames:
-            hhp = histograms.Histo(self.histograms[hname],hname,legendStyle="F", drawStyle="HIST",legendLabel=self.labels[hname])
+        for i, hname in enumerate(self.histonames, 1):
+            # Safety net for empty histos
+            if hname in opts.empty:
+                msg = "Skipping %s. Not a histogram!" % (hname) 
+                Print(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle(), True)
+                continue
+            else:
+                #print hname
+                pass                
+            
+            myLabel = self.labels[hname]
+            myHisto = self.histograms[hname]
+            Verbose("Creating histogram \"%s\" from ROOT file \"%s\" (Integral = %.1f)" % (hname, myHisto.GetName(), myHisto.Integral()), i==1)
+            hhp = histograms.Histo(myHisto, hname, legendStyle="F", drawStyle="HIST", legendLabel=myLabel)
             hhp.setIsDataMC(isData=False,isMC=True)
             histolist.append(hhp)
 
@@ -524,4 +548,8 @@ if __name__=="__main__":
     if opts.saveDir == None:
         opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="Closure")
 
+    # Histograms to ignore because dataset yield is zero (hack)
+    opts.empty = []
+
+    # Main code
     main(opts)
