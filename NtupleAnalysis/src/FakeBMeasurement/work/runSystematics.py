@@ -451,7 +451,7 @@ if __name__ == "__main__":
     NEVTS         = -1
     HISTOLEVEL    = "Debug" # 'Never', 'Systematics', 'Vital', 'Informative', 'Debug'
     PUREWEIGHT    = True
-    TOPPTREWEIGHT = True
+    TOPPTREWEIGHT = False
     DOSYSTEMATICS = False
     GROUP         = "A"
     SYSTVARS      = None
