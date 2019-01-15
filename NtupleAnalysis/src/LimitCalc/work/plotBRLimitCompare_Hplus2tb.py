@@ -155,9 +155,14 @@ def main():
         myList    = GetHToTBCombinationMay2018v2()
         doCompare(opts.name, myList)
 
-    if 1:
+    if 0:
         opts.name = "overlap3"
         myList    = GetHToTBCombinationMay2018v3()
+        doCompare(opts.name, myList)
+
+    if 1:
+        opts.name = "overlapNov2018"
+        myList    = GetHToTBCombinationNov2018v1()
         doCompare(opts.name, myList)
 
     if 0:
@@ -193,7 +198,8 @@ def GetBoostedStatOnly():
 def GetBoostedSystematics():
     homeDir = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/"
     myList = [
-        ("H^{+}#rightarrow tb (boosted, v3)" , homeDir + "datacards_combine_MIT_AN-17-204_v3/CombineResults_taujets_*"),
+        #("H^{+}#rightarrow tb (boosted, v3)" , homeDir + "datacards_combine_MIT_AN-17-204_v3/CombineResults_taujets_*"),
+        ("H^{+}#rightarrow tb (boosted)" , homeDir + "datacards_HIG-18-015_Preapproval_Boosted_ByHand_Nov2018/CombineResults_taujets_*"),
         ]
     return myList
 
@@ -470,6 +476,19 @@ def GetHToTBCombinationMay2018v3():
         ("H^{+}#rightarrow tb (resolved, v6)", myDirs["BDT0p40_ANv6"]  + "CombineResults*"),
         ]
     myList.extend(ext)
+    return myList
+
+def GetHToTBCombinationNov2018v1():
+    homeDir = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/datacards_HIG-18-015_Preapproval_Resolved_Nov2018/"
+    myDirs  = {}
+    myDirs["Resolved_Preapproval"] = homeDir
+
+    myList = GetBoostedSystematics()
+    ext    = [
+        ("H^{+}#rightarrow tb (resolved)", myDirs["Resolved_Preapproval"]  + "CombineResults*"),
+        ]
+    myList.extend(ext)
+    #return list(reversed(myList))
     return myList
 
 
