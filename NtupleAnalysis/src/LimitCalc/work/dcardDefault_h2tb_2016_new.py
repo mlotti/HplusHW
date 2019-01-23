@@ -141,7 +141,7 @@ BlindAnalysis                          = False        # [default: True]   (Chang
 OptionBlindThreshold                   = None         # [default: None]   (If signal exceeds this fraction of expected events, data is blinded)
 MinimumStatUncertainty                 = 0.5          # [default: 0.5]    (min. stat. uncert. to set to bins with zero events)
 UseAutomaticMinimumStatUncertainty     = False        # [default: False]  (Do NOT use the MinimumStatUncertainty; determine value from lowest non-zero rate for each dataset   )
-OptionCombineSingleColumnUncertainties = False        # [default: False]  (Approxmation that makes limit running faster)
+OptionCombineSingleColumnUncertainties = False        # [default: False]  (Merge nuisances with quadratic sum using the TableProducer.py Only applied to nuisances with one column)
 OptionDisplayEventYieldSummary         = False        # [default: False]  (Print "Event yield summary", using the TableProducer.py)
 OptionDoWithoutSignal                  = False        # [default: False]  (Also do control plots without any signal present)
 OptionFakeBMeasurementSource           = "DataDriven" # [default: "DataDriven"] (options: "DataDriven", "MC")
@@ -455,14 +455,14 @@ ttZ_scale_Const      = Nuisance(id="QCDscale_ttZ"      , label="QCD XSection unc
 
 
 #==== Acceptance uncertainties (QCDscale)
-RF_QCDscale_top_const  = Nuisance(id="CMS_HPTB_mu_RF_top" , label="QCDscale acceptance uncertainty for top backgrounds", distr="lnN", function="Constant",value=0.02)
-RF_QCDscale_ewk_const  = Nuisance(id="CMS_HPTB_mu_RF_ewk" , label="QCDscale acceptance uncertainty for EWK backgrounds", distr="lnN", function="Constant",value=0.05)
-RF_QCDscale_HPTB_const = Nuisance(id="CMS_HPTB_mu_RF_HPTB", label="QCDscale acceptance uncertainty for signal"         , distr="lnN", function="Constant",value=0.048)
+RF_QCDscale_top_const  = Nuisance(id="CMS_HPTB_mu_RF_top" , label="Scale acceptance uncertainty for top"   , distr="lnN", function="Constant",value=0.02)
+RF_QCDscale_ewk_const  = Nuisance(id="CMS_HPTB_mu_RF_ewk" , label="Scale acceptance uncertainty for EWK"   , distr="lnN", function="Constant",value=0.05)
+RF_QCDscale_HPTB_const = Nuisance(id="CMS_HPTB_mu_RF_HPTB", label="Scale acceptance uncertainty for signal", distr="lnN", function="Constant",value=0.048)
 #RF_QCDscale_HPTB_const = Nuisance(id="CMS_HPTB_mu_RF_HPTB_heavy", label="QCDscale acceptance uncertainty for signal", distr="lnN", function="Constant",value=0.012)
 
 #==== Acceptance uncertainties  (PDF)
-RF_pdf_top_const  = Nuisance(id="CMS_HPTB_pdf_top", label="PDF acceptance uncertainty for top backgrounds", distr="lnN", function="Constant",value=0.02,upperValue=0.0027)
-RF_pdf_ewk_const  = Nuisance(id="CMS_HPTB_pdf_ewk", label="PDF acceptance uncertainty for EWK backgrounds", distr="lnN", function="Constant",value=0.033,upperValue=0.046)
+RF_pdf_top_const  = Nuisance(id="CMS_HPTB_pdf_top", label="PDF acceptance uncertainty for top", distr="lnN", function="Constant",value=0.02,upperValue=0.0027)
+RF_pdf_ewk_const  = Nuisance(id="CMS_HPTB_pdf_ewk", label="PDF acceptance uncertainty for EWK", distr="lnN", function="Constant",value=0.033,upperValue=0.046)
 RF_pdf_HPTB_const = Nuisance(id="CMS_HPTB_pdf_HPTB", label="PDF acceptance uncertainty for signal", distr="lnN", function="Constant",value=0.004,upperValue=0.017)
 
 # Fake-b nuisances
@@ -481,7 +481,7 @@ topTag_FakeB_Const      = Nuisance(id="CMS_HPTB_toptagging_forFakeB", label="Top
 ttbar_scale_FakeB_Const = Nuisance(id="QCDscale_ttbar_forFakeB"  , label="QCD XSection uncertainties", distr="lnN", function="ConstantForFakeB", value=tt_scale_down, upperValue=tt_scale_up)
 ttbar_pdf_FakeB_Const   = Nuisance(id="pdf_ttbar_forFakeB"       , label="TTbar XSection pdf uncertainty", distr="lnN", function="ConstantForFakeB", value=tt_pdf_down, upperValue=tt_pdf_up)
 ttbar_mass_FakeB_Const  = Nuisance(id="mass_top_forFakeB"        , label="TTbar XSection top mass uncertainty", distr="lnN", function="ConstantForFakeB", value=tt_mass_down, upperValue=tt_mass_up) 
-RF_QCDscale_FakeB_const = Nuisance(id="CMS_HPTB_mu_RF_top_forFakeB", label="QCDscale acceptance uncertainty for FakeB" , distr="lnN", function="ConstantForFakeB",value=0.02)
+RF_QCDscale_FakeB_const = Nuisance(id="CMS_HPTB_mu_RF_top_forFakeB", label="Scale acceptance uncertainty for FakeB" , distr="lnN", function="ConstantForFakeB",value=0.02)
 RF_pdf_FakeB_const      = Nuisance(id="CMS_HPTB_pdf_top_forFakeB"  , label="PDF acceptance uncertainty for FakeB"      , distr="lnN", function="ConstantForFakeB",value=0.02, upperValue=0.0027)
 
 
@@ -602,7 +602,8 @@ if not OptionShapeSystematics:
     MergeNuisances.append(["CMS_eff_b"    , "CMS_eff_b_forFakeB"])
     MergeNuisances.append(["CMS_scale_j"  , "CMS_scale_j_forFakeB"])
     MergeNuisances.append(["CMS_res_j"    , "CMS_res_j_forFakeB"])
-    MergeNuisances.append(["CMS_topreweight", "CMS_topreweight_forFakeB"])
+    if OptionUseTopPtReweightSyst:
+        MergeNuisances.append(["CMS_topreweight", "CMS_topreweight_forFakeB"])
     #MergeNuisances.append(["CMS_HPTB_toptagging", "CMS_HPTB_toptagging_forFakeB"]) #iro
     
 #================================================================================================ 
