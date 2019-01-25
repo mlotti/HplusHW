@@ -484,7 +484,7 @@ class BRLimits:
         return isLight
         
 
-    def saveAsLatexTable(self, unblindedStatus=False, nDigits=3, savePath=None):
+    def saveAsLatexTable(self, unblindedStatus=False, nDigits=3, savePath=None, HToTB=False):
         '''
         Save the table as tex format
         '''        
@@ -514,10 +514,14 @@ class BRLimits:
         s  = "% Table autocreated by HiggsAnalysis.LimitCalc.limit.saveAsLatexTable() \n"
         s += "\\begin{tabular}{ c c c c c c c } \n"
         s += "\\hline \n"
-        if isLightHplus:
-	    s += "\\multicolumn{7}{ c }{95\\% CL upper limit on $\\BRtH\\times\\BRHtau$}\\\\ \n"
-	else:
-	    s += "\\multicolumn{7}{ c }{95\\% CL upper limit on $\\sigmaHplus\\times\\BRHtau$}\\\\ \n"
+        if HToTB:
+	    s += "\\multicolumn{7}{ c }{95\\% CL upper limit on $\\BRtH\\times\\BRHtb$}\\\\ \n"
+        else:
+            if isLightHplus:
+                s += "\\multicolumn{7}{ c }{95\\% CL upper limit on $\\BRtH\\times\\BRHtau$}\\\\ \n"
+            else:
+                s += "\\multicolumn{7}{ c }{95\\% CL upper limit on $\\sigmaHplus\\times\\BRHtau$}\\\\ \n"
+
 	s += "\\hline \n"
 	s += "\\mHpm & \\multicolumn{5}{ c }{Expected limit} & Observed \\\\ \\cline{2-6} \n"
 	s += "(GeV)   & $-2\\sigma$  & $-1\\sigma$ & median & +1$\\sigma$ & +2$\\sigma$  & limit \\\\ \n"

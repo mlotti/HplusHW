@@ -487,7 +487,12 @@ def doPlot(opts, mass, nameList, allShapeNuisances, luminosity, myDatacardPatter
         rebinList = systematics._dataDrivenCtrlPlotBinning["LdgTetrajetMass_AfterAllSelections"] 
 
     ## Do the actual plots
+    myDsets = ["Hp%s" % (mass), "FakeB", "TT_GenuineB", "SingleTop_GenuineB"]
     for i, d in enumerate(datasets, 1):
+        if d.GetName() not in myDsets:
+            msg = "Skipping dataset %s" % (d.GetName())
+            Print(ShellStyles.WarningStyle() + msg + ShellStyles.NormalStyle(), False)
+            continue
         if opts.verbose:
             d.debug()
         msg = "{:>10}, {:<20}".format("m = %d GeV" % (mass), d.GetName())

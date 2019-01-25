@@ -16,9 +16,14 @@ EXAMPLES:
 
 ./plot_ScaleOrPDF.py -m Hplus2tbAnalysis_Weight_Nominal,Hplus2tbAnalysis_Weight_9,Hplus2tbAnalysis_Weight_10,Hplus2tbAnalysis_Weight_12,Hplus2tbAnalysis_Weight_16,Hplus2tbAnalysis_Weight_23,Hplus2tbAnalysis_Weight_27,Hplus2tbAnalysis_Weight_32,Hplus2tbAnalysis_Weight_46,Hplus2tbAnalysis_Weight_59,Hplus2tbAnalysis_Weight_63,Hplus2tbAnalysis_Weight_77,Hplus2tbAnalysis_Weight_80,Hplus2tbAnalysis_Weight_96 --prefix PDF --bandValue 2
 
+./plot_ScaleOrPDF.py -m Hplus2tbAnalysis_Weight_Nominal,Hplus2tbAnalysis_Weight_1,Hplus2tbAnalysis_Weight_2,Hplus2tbAnalysis_Weight_3,Hplus2tbAnalysis_Weight_4,Hplus2tbAnalysis_Weight_6,Hplus2tbAnalysis_Weight_8 --prefix QCDScale --bandValue 2 && ./plot_ScaleOrPDF.py -m Hplus2tbAnalysis_Weight_Nominal,Hplus2tbAnalysis_Weight_9,Hplus2tbAnalysis_Weight_10,Hplus2tbAnalysis_Weight_12,Hplus2tbAnalysis_Weight_16,Hplus2tbAnalysis_Weight_23,Hplus2tbAnalysis_Weight_27,Hplus2tbAnalysis_Weight_32,Hplus2tbAnalysis_Weight_46,Hplus2tbAnalysis_Weight_59,Hplus2tbAnalysis_Weight_63,Hplus2tbAnalysis_Weight_77,Hplus2tbAnalysis_Weight_80,Hplus2tbAnalysis_Weight_96 --prefix PDF --bandValue 2
+
 
 LAST USED:
-./plot_ScaleOrPDF.py -m Hplus2tbAnalysis_Weight_Nominal,Hplus2tbAnalysis_Weight_1,Hplus2tbAnalysis_Weight_2,Hplus2tbAnalysis_Weight_3,Hplus2tbAnalysis_Weight_4,Hplus2tbAnalysis_Weight_6,Hplus2tbAnalysis_Weight_8 --prefix QCDScale --bandValue 2 && ./plot_ScaleOrPDF.py -m Hplus2tbAnalysis_Weight_Nominal,Hplus2tbAnalysis_Weight_9,Hplus2tbAnalysis_Weight_10,Hplus2tbAnalysis_Weight_12,Hplus2tbAnalysis_Weight_16,Hplus2tbAnalysis_Weight_23,Hplus2tbAnalysis_Weight_27,Hplus2tbAnalysis_Weight_32,Hplus2tbAnalysis_Weight_46,Hplus2tbAnalysis_Weight_59,Hplus2tbAnalysis_Weight_63,Hplus2tbAnalysis_Weight_77,Hplus2tbAnalysis_Weight_80,Hplus2tbAnalysis_Weight_96 --prefix PDF --bandValue 2
+./plot_ScaleOrPDF.py -m Hplus2tbAnalysis_Weight_Nominal,Hplus2tbAnalysis_Weight_1,Hplus2tbAnalysis_Weight_2,Hplus2tbAnalysis_Weight_3,Hplus2tbAnalysis_Weight_4,Hplus2tbAnalysis_Weight_6,Hplus2tbAnalysis_Weight_8 --prefix QCDScale --bandValue 2 --relPath "/uscms_data/d3/aattikis/workspace/pseudo-multicrab/Hplus2tbAnalysis/TopSelectionBDT/multicrab_Hplus2tbAnalysis_v8030_20180508T0644/AfterPreapproval" --xmax 800 --ymin 1e0 && ./plot_ScaleOrPDF.py -m Hplus2tbAnalysis_Weight_Nominal,Hplus2tbAnalysis_Weight_9,Hplus2tbAnalysis_Weight_10,Hplus2tbAnalysis_Weight_12,Hplus2tbAnalysis_Weight_16,Hplus2tbAnalysis_Weight_23,Hplus2tbAnalysis_Weight_27,Hplus2tbAnalysis_Weight_32,Hplus2tbAnalysis_Weight_46,Hplus2tbAnalysis_Weight_59,Hplus2tbAnalysis_Weight_63,Hplus2tbAnalysis_Weight_77,Hplus2tbAnalysis_Weight_80,Hplus2tbAnalysis_Weight_96 --prefix PDF --bandValue 2 --relPath "/uscms_data/d3/aattikis/workspace/pseudo-multicrab/Hplus2tbAnalysis/TopSelectionBDT/multicrab_Hplus2tbAnalysis_v8030_20180508T0644/AfterPreapproval" --xmax 800 --ymin 1e0
+OR
+./doMuRF.csh
+
 '''
 #================================================================================================ 
 # Imports
@@ -106,6 +111,19 @@ def GetHistoKwargs(h, opts):
     else:
         dh = 0.0
 
+    ymaxfactor = 1.2
+    if opts.logy:
+        ymaxfactor = 2.0
+    myOpts = {"ymin": 1e-2, "ymaxfactor": ymaxfactor}
+    if opts.ymin:
+        myOpts["ymin"] = opts.ymin
+    if opts.ymax:
+        myOpts["ymax"] = opts.ymax
+    if opts.xmin:
+        myOpts["xmin"] = opts.xmin
+    if opts.xmax:
+        myOpts["xmax"] = opts.xmax
+
     kwargs = {
         "ylabel"           : "< Events / %s > " % units,
         "xlabel"           : "m_{jjbb} (%s)" % units,
@@ -123,9 +141,10 @@ def GetHistoKwargs(h, opts):
         "addLuminosityText": True,
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
-        "opts"             : {"ymin": 1e-2, "ymaxfactor": 2.0},
+        "opts"             : myOpts,
         "opts2"            : {"ymin": 0.9, "ymax": 1.1},
-        "log"              : True,
+        "opts2"            : {"ymin": 0.8, "ymax": 1.2},
+        "log"              : opts.logy,
         "moveLegend"       : {"dx": -0.08, "dy": -0.02, "dh": dh},
         "cutBox"           : {"cutValue": 500.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True},
         "cutBoxY"          : {"cutValue": cutY, "fillColor": ROOT.kBlack, "fillStyle": 3844, "box": False, "line": True, "greaterThan": False, "mainCanvas": False, "ratioCanvas": True, "mirror": True}
@@ -299,7 +318,13 @@ if __name__ == "__main__":
     PREFIX       = ""
     POSTFIX      = ""
     BANDVALUE    = 5.0
-        
+    RELPATH      = None
+    XMIN         = None
+    XMAX         = None
+    YMIN         = None
+    YMAX         = None
+    LOGY         = False
+
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
 
@@ -354,6 +379,25 @@ if __name__ == "__main__":
     parser.add_option("--bandValue", dest="bandValue", type="float", default=BANDVALUE,
                       help="Add a symmetric band around 1.0. Value passed should be the percentage (e.g 10 or 5)  [default: %s]" % (BANDVALUE) )
 
+    parser.add_option("--relPath", dest="relPath", type="string", default=RELPATH,
+                      help="Relative path for pseudo-multicrab directories (common for all). [default: %s]" % (RELPATH) )
+
+    parser.add_option("--xmin", dest="xmin", type="float", action="store", default=XMIN,
+                      help="Custom x-axis minimum [default: %s]" % (XMIN) )
+
+    parser.add_option("--xmax", dest="xmax", type="float", action="store", default=XMAX,
+                      help="Custom x-axis maximum [default: %s]" % (XMAX) )
+
+    parser.add_option("--ymin", dest="ymin", type="float", action="store", default=YMIN,
+                      help="Custom x-axis minimum [default: %s]" % (YMIN) )
+
+    parser.add_option("--ymax", dest="ymax", type="float", action="store", default=YMAX,
+                      help="Custom x-axis maximum [default: %s]" % (YMAX) )
+
+    parser.add_option("--logy", dest="logy", action="store_true", default=LOGY, 
+                      help="Set y-axis to logarithmic scale [default: %s]" % LOGY)
+    
+
     (opts, parseArgs) = parser.parse_args()
 
     # Require at least two arguments (script-name, path to multicrab)
@@ -375,6 +419,10 @@ if __name__ == "__main__":
     else:
         if "," in opts.mcrabs:
             opts.mcrabs = opts.mcrabs.split(",")    
+            if opts.relPath != None:
+                mcrabs = [os.path.join(opts.relPath, d) for d in opts.mcrabs]
+                opts.mcrabs = mcrabs
+
             aux.Print("Will use the following pseudo-multicrab directories:", True)
             for d in opts.mcrabs:
                 aux.Print(d, False)
@@ -385,7 +433,7 @@ if __name__ == "__main__":
             opts.mcrabs = mcrabs
 
 
-    # For-loop: All pseudomulticrab dirs
+    # For-loop: All pseudomulticrab dirs    
     for mcrab in opts.mcrabs:
         if not os.path.exists("%s/multicrab.cfg" % mcrab):
             msg = "No pseudo-multicrab directory found at path '%s'! Please check path or specify it with --mcrab!" % (mcrab)

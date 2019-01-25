@@ -197,13 +197,13 @@ def GetJobsWithKeyword(dirName, analysis= "FakeBMeasurement", keyword="Results a
 
 
 def KillJobs(condorQ, opts):
-
+    
     if opts.kill == "all":
         nJobs = len(condorQ["ID"])
         Print("Killing %d jobs" % (nJobs), True)
         for i, jobid in enumerate(condorQ["ID"], 1):
             #cmd = "condor_rm -submitter %s %s" % (getpass.getuser(), jobid)
-            cmd = "condor_rm %s" % (jobid)
+            cmd = "condor_rm %s " % (jobid)
             PrintFlushed(cmd, i==1)
             os.system(cmd)
     else:
@@ -212,7 +212,7 @@ def KillJobs(condorQ, opts):
         Print("Killing %d jobs" % (nJobs), True)
         for i, jobid in enumerate(killList, 1):
             #cmd = "condor_rm -submitter %s %s" % (getpass.getuser(), jobid)
-            cmd = "condor_rm %s" % (jobid)
+            cmd = "condor_rm %s " % (jobid)
             PrintFlushed(cmd, i==1)
             os.system(cmd)
     return
@@ -885,15 +885,21 @@ if __name__ == "__main__":
     myPattern = r"(?P<TopMassLE>\w+)_(?P<BDT>\w+)_(?P<Binning>\w+)_(?P<Group>\w+)_(?P<Syst>\S+)"
     reObject = re.compile(myPattern)
     search = reObject.search(opts.dirName)
+
+    if search == None:
+        msg = "The directory name does not have the expected naming structure of TopMassLE<?>_BDT<?>_Binning<?>Eta<?>Pt_<?>_Date. Consider renaming it!"
+        raise Exception(es + msg + ns)
+    
     if search.group(0) != opts.dirName:
         msg = "The directory name does not match the group(0) of the regular expression search! It should!"
         raise Exception(es + msg + ns)
     opts.topMass = search.group(1)
-    opts.BDT     =  search.group(2)
-    opts.binning =  search.group(3)
-    opts.postfix =  search.group(4)
-    opts.date    =  search.group(5)
+    opts.BDT     = search.group(2)
+    opts.binning = search.group(3)
+    opts.postfix = search.group(4)
+    opts.date    = search.group(5)
     opts.keyList = [opts.topMass, opts.BDT, opts.binning, opts.postfix, opts.date]
-
+    Verbose("topMass = %s, BDT = %s, binning = %s, postfix = %s, date = %s" % (opts.topMass, opts.BDT, opts.binning, opts.postfix, opts.date), True)
+    
     # Call the main function
     main(opts)

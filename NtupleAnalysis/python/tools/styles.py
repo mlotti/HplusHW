@@ -551,7 +551,7 @@ def getABCDStyle(region):
         return FakeBStyle1
     elif region == "CR1" or region == "CRone":
         return FakeBStyle2
-    elif region == "VR":
+    elif region == "VR" or region == "AR":
         return FakeBStyle3
     elif region == "CR2" or region == "CRtwo":
         return FakeBStyle4
