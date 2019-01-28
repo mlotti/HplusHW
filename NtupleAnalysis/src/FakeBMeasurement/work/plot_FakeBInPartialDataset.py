@@ -52,10 +52,12 @@ EXAMPLES:
 ./plot_FakeBInPartialDataset.py -m FakeBMeasurement_Test_22Nov2018 --histoKey "TetrajetBJetEta"  --url
 ./plot_FakeBInPartialDataset.py -m FakeBMeasurement_Test_22Nov2018 --histoKey "LdgTrijetMass"  --url
 ./plot_FakeBInPartialDataset.py -m FakeBMeasurement_Test_22Nov2018 --histoKey "LdgTrijetPt"  --url
+./plot_FakeBInPartialDataset.py -m FakeBMeasurement_Test_22Nov2018 --histoKey "TetrajetMass"
+./plot_FakeBInPartialDataset.py -m FakeBMeasurement_Test_22Nov2018 --histoKey TetrajetMass --url
 
 
 LAST USED:
-./plot_FakeBInPartialDataset.py -m FakeBMeasurement_Test_22Nov2018 --histoKey "TetrajetMass"
+./plot_FakeBInPartialDataset.py -m FakeBMeasurement_TopMassLE400_BDT0p40_Binning4Eta5Pt_Syst_NoTopPtReweightCorrXML_10Jan2019 --histoKey TetrajetMass --url
 
 '''
 
