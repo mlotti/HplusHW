@@ -258,7 +258,7 @@ TTX = DataGroup(label                   = labelPrefix + "ttX" + labelPostfix,
                       )
 
 EWK = DataGroup(label                 = labelPrefix + "EWK" + labelPostfix,
-                    landsProcess      = 10,
+                    landsProcess      = 5,
                     shapeHistoName    = OptionMassShape,
                     histoPath         = histoPathEWK, 
                     datasetType       = dsetTypeEWK,
