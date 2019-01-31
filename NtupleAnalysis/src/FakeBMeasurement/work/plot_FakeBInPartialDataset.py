@@ -45,14 +45,7 @@ USAGE:
 
 
 EXAMPLES:
-./plot_FakeBInPartialDataset.py -m FakeBMeasurement_Test_22Nov2018 --url
-./plot_FakeBInPartialDataset.py -m FakeBMeasurement_Test_22Nov2018 --histoKey "TetrajetPt"  --url
-./plot_FakeBInPartialDataset.py -m FakeBMeasurement_Test_22Nov2018 --histoKey "TetrajetMass"  --url
-./plot_FakeBInPartialDataset.py -m FakeBMeasurement_Test_22Nov2018 --histoKey "TetrajetBJetPt"  --url
-./plot_FakeBInPartialDataset.py -m FakeBMeasurement_Test_22Nov2018 --histoKey "TetrajetBJetEta"  --url
 ./plot_FakeBInPartialDataset.py -m FakeBMeasurement_Test_22Nov2018 --histoKey "LdgTrijetMass"  --url
-./plot_FakeBInPartialDataset.py -m FakeBMeasurement_Test_22Nov2018 --histoKey "LdgTrijetPt"  --url
-./plot_FakeBInPartialDataset.py -m FakeBMeasurement_Test_22Nov2018 --histoKey "TetrajetMass"
 ./plot_FakeBInPartialDataset.py -m FakeBMeasurement_Test_22Nov2018 --histoKey TetrajetMass --url
 
 
