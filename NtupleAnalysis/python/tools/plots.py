@@ -616,7 +616,7 @@ _legendLabels = {
     "Data"     : "Data",
     "EWK"      : "EWK",
     "Diboson"  : "Diboson",
-    "ttX"      : "t#bar{t} + X",
+    "ttX"      : "t,tW,t#bar{t}+X",
     "noTop"    : "No t",
     "SingleTop": "Single t",
     "QCD"      : "QCD",#"Mis-ID. #tau_{h} (data)",
