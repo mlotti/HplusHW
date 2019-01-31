@@ -6,10 +6,14 @@ addNewDatasetToPseudomulticrab.py  -m <same_pseudo_multicrab> [opts]
 
 EXAMPLES:
 addNewDatasetToPseudomulticrab.py  -m Hplus2tbAnalysis_AfterPreapproval_TopMassLE400_BDT0p40_17July2018 --newDsetName Rares
+addNewDatasetToPseudomulticrab.py  -m Hplus2tbAnalysis_AfterPreapproval_MVA0p40_NewTopAndBugFixAndSF_FixedStdSelections_Only2CleanTopsBeforeBDT_Syst_07Jul2018 --newDsetName Rares
+addNewDatasetToPseudomulticrab.py  -m Hplus2tbAnalysis_TopMassLE400_BDT0p40_Binning4Eta5Pt_Syst_NoTopPtReweightCorrXML_10Jan2019 --newDsetName Test
 
 
 LAST USED:
-addNewDatasetToPseudomulticrab.py  -m Hplus2tbAnalysis_AfterPreapproval_MVA0p40_NewTopAndBugFixAndSF_FixedStdSelections_Only2CleanTopsBeforeBDT_Syst_07Jul2018 --newDsetName Rares
+addNewDatasetToPseudomulticrab.py -m Hplus2tbAnalysis_TopMassLE400_BDT0p40_Binning4Eta5Pt_Syst_NoTopPtReweightCorrXML_10Jan2019 --newDsetName Rares --dsetsToMerge "WJetsToQQ_HT_600ToInf, DYJetsToQQHT, TTWJetsToQQ, TTZToQQ, Diboson, TTTT"
+addNewDatasetToPseudomulticrab.py -m Hplus2tbAnalysis_TopMassLE400_BDT0p40_Binning4Eta5Pt_Syst_NoTopPtReweightCorrXML_10Jan2019 --newDsetName EWK --dsetsToMerge "WJetsToQQ, DYJetsToQQHT, Diboson"
+addNewDatasetToPseudomulticrab.py -m Hplus2tbAnalysis_TopMassLE400_BDT0p40_Binning4Eta5Pt_Syst_NoTopPtReweightCorrXML_10Jan2019 --newDsetName ttX --dsetsToMerge "TTWJetsToQQ, TTZToQQ, TTTT, SingleTop"
 
 '''
 #================================================================================================ 
@@ -757,8 +761,8 @@ if __name__ == "__main__":
     global opts
     VERBOSE          = False
     ANALYSISNAME     = "Hplus2tbAnalysis"
-    DSETSTOREMOVE    = ["ZJetsToQQ_HT600toInf", "Charged", "QCD", "SingleTop"]
-    DSETSTOMERGE     = ["WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    DSETSTOREMOVE    = ["ZJetsToQQ_HT600toInf", "Charged", "QCD"]#, "SingleTop"]
+    DSETSTOMERGE     = "WJetsToQQ_HT_600ToInf, DYJetsToQQHT, TTWJetsToQQ, TTZToQQ, Diboson, TTTT"
     NEWDSETNAME      = "Rares" 
     ANALYSISNAMESAVE = "Hplus2tbAnalysis" # "ForFakeBMeasurement"
     SEARCHMODES      = ["80to1000"]
@@ -777,7 +781,7 @@ if __name__ == "__main__":
                       help="The optimization mode when analysis variation is enabled [default: %s]" % OPTMODE)
 
     parser.add_option("--dsetsToMerge", dest="dsetsToMerge", default=DSETSTOMERGE,
-                      help="Definition of EWK datset, i.e. datasets to be included in the merge [default: %s]" % ", ".join(DSETSTOMERGE) )
+                      help="Definition of EWK datset, i.e. datasets to be included in the merge [default: %s]" % ", ".join(DSETSTOMERGE.split(",")) )
     
     parser.add_option("--analysisName", dest="analysisName", type="string", default=ANALYSISNAME,
                       help="Override default analysisName [default: %s]" % ANALYSISNAME)
@@ -831,6 +835,8 @@ if __name__ == "__main__":
     if len(opts.dsetsToMerge) < 1:
         msg = "List of datasets to merge is empty! At least one dataset is required!"
         raise Exception(ShellStyles.ErrorLabel() + msg + ShellStyles.NormalStyle())
+    else:
+        opts.dsetsToMerge = opts.dsetsToMerge.replace(" ","").split(",")
 
     # Sanity check
     if opts.analysisName == "GenuineB":
