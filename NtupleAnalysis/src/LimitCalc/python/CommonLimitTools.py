@@ -31,9 +31,20 @@ import subprocess
 
 from optparse import OptionParser
 import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
-#import multicrabWorkflows
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.git as git
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
+
+#================================================================================================
+# Variable definition
+#================================================================================================
+ss = ShellStyles.SuccessStyle()
+ns = ShellStyles.NormalStyle()
+ts = ShellStyles.NoteStyle()
+hs = ShellStyles.HighlightAltStyle()
+ls = ShellStyles.HighlightStyle()
+es = ShellStyles.ErrorStyle()
+cs = ShellStyles.CaptionStyle()
 
 
 #================================================================================================
@@ -195,12 +206,18 @@ def obtainMassPoints(pattern, directory):
     myMasses.sort()
     return myMasses
 
-## Reads luminosity from a datacard and returns it
 def readLuminosityFromDatacard(myPath, filename):
+    '''
+    Reads luminosity from a datacard and returns it
+    '''
+    Verbose("Looking for luminosity in datacard file %s" % (os.path.join(myPath, filename)), True)
+
     lumi_re = re.compile("luminosity=\s*(?P<lumi>\d+\.\d+)")
     fname = os.path.join(myPath, filename)
     f = open(fname)
     myLuminosity = None
+
+    # For-loop: All file lines
     for line in f:
         match = lumi_re.search(line)
         if match:
@@ -209,7 +226,9 @@ def readLuminosityFromDatacard(myPath, filename):
             myLuminosity = match.group("lumi")
             f.close()
             return myLuminosity
-    print "Did not find luminosity information from '%s', using 0" % fname
+
+    msg = "Did not find luminosity information from '%s', assuming 0.0" % fname
+    Print(hs + msg + ns, True)
     return 0.0
 
 ## Returns true if mass list contains only heavy H+
@@ -355,7 +374,7 @@ class ResultContainer:
     ## Constructor
     #
     # \param path  Path to the multicrab directory (where configuration.json exists)
-    def __init__(self, unblindedStatus, path):
+    def __init__(self, unblindedStatus, path, userLumi=None):
         self.unblindedStatus = unblindedStatus
         self.path = path
 
@@ -377,28 +396,46 @@ class ResultContainer:
         if taujetsDc != None:
             self._readLuminosityTaujets(taujetsDc % self.config["masspoints"][0])
         else:
+            # Print("self.config = %s" % (self.config), True)
             self._readLuminosityLeptonic(self.config["datacards"][0] % self.config["masspoints"][0])
 
+        # Sanity check
+        if self.getLuminosity() == None or self.getLuminosity() == "0.0":
+            if userLumi != None:
+                self.lumi = userLumi #"0.0"
+                msg = "Could not determine luminosity for '%s'. Using user-defined luninosity of %s" % (path, userLumi)
+                Print(ls + msg + ns, True)
+            return
+
         self.results = []
+        return
 
-    ## Append a result object to the list
-    #
-    # \param obj   Result object
     def append(self, obj):
+        '''
+        Append a result object to the list
+        
+        \param obj   Result object
+        '''
         self.results.append(obj)
+        return
 
-    ## Read luminosity from a datacard assuming it follows the tau+jets convention
-    #
-    # \param filename  Name of the datacard file inside the multicrab directory
     def _readLuminosityTaujets(self, filename):
+        '''
+        Read luminosity from a datacard assuming it follows the tau+jets convention
+        
+        \param filename  Name of the datacard file inside the multicrab directory
+        '''
         self.lumi = readLuminosityFromDatacard(self.path, filename)
+        return
 
-    ## Read luminosity from a datacard assuming it follows the leptonic convention
-    #
-    # \param filename  Name of the datacard file inside the multicrab directory
-    #
-    # \todo This needs to be updated, it get's the scale wrong
     def _readLuminosityLeptonic(self, filename):
+        '''
+        Read luminosity from a datacard assuming it follows the leptonic convention
+        
+        \param filename  Name of the datacard file inside the multicrab directory
+        
+        \todo This needs to be updated, it get's the scale wrong
+        '''
         scale_re = re.compile("lumi scale (?P<scale>\S+)")
         lumi_re = re.compile("lumi=(?P<lumi>\S+)")
         scale = None
@@ -419,14 +456,19 @@ class ResultContainer:
         if lumi == None:
             #raise Exception("Did not find luminosity information from '%s'" % fname)
             self.lumi = "0.0"
-            print "Did not find luminosity information from '%s', assuming 0.0" % fname
+            msg = "Did not find luminosity information from '%s', assuming 0.0" % fname
+            Verbose(hs + msg + ns, True)
             return
+
         if scale != None:
             lumi *= scale
         self.lumi = str(lumi)
+        return
 
-    ## Get the integrated luminosity as a string in 1/pb
     def getLuminosity(self):
+        '''
+        Get the integrated luminosity as a string in 1/pb
+        '''
         return self.lumi
 
     ## Print the limits
