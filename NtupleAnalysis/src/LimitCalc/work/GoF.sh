@@ -71,6 +71,7 @@ datacard="combine_datacard_hplushadronic_m${1}.txt"
 rootfile="combine_histograms_hplushadronic_m${1}.root"
 algorithm=${2} # "saturated", "KS" (Kolmogorov-Smirnov), AD (Anderson-Darling)
 dirname="GoF_${algorithm}"
+jobMode=condor # interactive,script,lxbatch,SGE,condor,crab3 (NOTE: LXBATCH is decommissioned)
 
 echo "=== Run GoF for $nToys toys over $nJobs for card $1 (#toys per job = $toysPerJob)"
 
@@ -92,7 +93,7 @@ echo "=== Submit job for toys (`pwd`)"
 for (( t=1; t<=$nJobs; t++ ))
 do
     echo "=== Submit job for toys $t/$nJobs"
-    combineTool.py -m ${1} -M GoodnessOfFit --algorithm ${algorithm} ${datacard} -t $toysPerJob --job-mode lxbatch --sub-opts="-q 8nm" --task-name $t -n toys$t --seed "$((123456*$t))"
+    combineTool.py -m ${1} -M GoodnessOfFit --algorithm ${algorithm} ${datacard} -t $toysPerJob --job-mode $jobMode --sub-opts="-q 8nm" --task-name $t -n toys$t --seed "$((123456*$t))"
 done
 
 echo "=== Run job on data:(`pwd`)"

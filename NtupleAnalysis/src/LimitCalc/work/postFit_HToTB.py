@@ -34,10 +34,11 @@ as input.
 EXAMPLES:
 ../.././postFit_HToTB.py --mass 500 --prefit && ../.././postFit_HToTB.py --mass 500 && ../.././postFit_HToTB.py --mass 180 --prefit && ../.././postFit_HToTB.py --mass 180 --url
 ../.././postFit_HToTB.py --mass 500 --prefit --fitUncert
+../.././postFit_HToTB.py --mergeRares --url --mass 250,500,800 --fitUncert --prefit && ../.././postFit_HToTB.py --mergeRares --url --mass 250,500,800 --fitUncert
 
 
 LAST USED:
-../.././postFit_HToTB.py --mergeRares --url --mass 250,500,1000 --fitUncert --prefit && ../.././postFit_HToTB.py --mergeRares --url --mass 250,500,1000 --fitUncert
+../.././postFit_HToTB.py --paper --mass 250,500,800 --fitUncert --prefit --url && ../.././postFit_HToTB.py --paper --mass 250,500,800 --fitUncert --url 
 
 '''
 
@@ -392,16 +393,20 @@ def main(opts):
     # Add all histograms
     h2tb_1.addHisto("FakeB"             , "Fake b (data)", color=ROOT.kBlue-1) #ROOT.kOrange-3)
     h2tb_1.addHisto("TT_GenuineB"       , "t#bar{t}"     , color=ROOT.kMagenta-2)
-    h2tb_1.addHisto("SingleTop_GenuineB", "Single t"     , color=ROOT.kSpring+4)
-    if opts.mergeRares:
-        h2tb_1.addHisto("Rares_GenuineB", "Rares"        , color=ROOT.kViolet+10)
+    if opts.paper:
+        h2tb_1.addHisto("ttX_GenuineB", "t,tW,t#bar{t}+X", color=ROOT.kAzure-4)
+        h2tb_1.addHisto("EWK_GenuineB", "EWK"            , color=ROOT.kOrange+9)
     else:
-        h2tb_1.addHisto("TTZToQQ_GenuineB"              , "t#bar{t}+Z"       , color=ROOT.kAzure-4)
-        h2tb_1.addHisto("TTTT_GenuineB"                 , "t#bar{t}t#bar{t}" , color=ROOT.kYellow-9)
-        h2tb_1.addHisto("DYJetsToQQ_GenuineB"           , "Z/#gamma^{*}+jets", color=ROOT.kTeal-9)
-        h2tb_1.addHisto("TTWJetsToQQ_GenuineB"          , "t#bar{t}+W"       , color=ROOT.kSpring+9)
-        h2tb_1.addHisto("WJetsToQQ_HT_600ToInf_GenuineB", "W+jets"           , color=ROOT.kOrange+9)
-        h2tb_1.addHisto("Diboson_GenuineB"              , "Diboson"          , color=ROOT.kBlue-4)
+        h2tb_1.addHisto("SingleTop_GenuineB", "Single t"     , color=ROOT.kSpring+4)
+        if opts.mergeRares:
+            h2tb_1.addHisto("Rares_GenuineB", "Rares"        , color=ROOT.kViolet+10)
+        else:
+            h2tb_1.addHisto("TTZToQQ_GenuineB"              , "t#bar{t}+Z"       , color=ROOT.kAzure-4)
+            h2tb_1.addHisto("TTTT_GenuineB"                 , "t#bar{t}t#bar{t}" , color=ROOT.kYellow-9)
+            h2tb_1.addHisto("DYJetsToQQHT_GenuineB"         , "Z/#gamma^{*}+jets", color=ROOT.kTeal-9)
+            h2tb_1.addHisto("TTWJetsToQQ_GenuineB"          , "t#bar{t}+W"       , color=ROOT.kSpring+9)
+            h2tb_1.addHisto("WJetsToQQ_HT_600ToInf_GenuineB", "W+jets"           , color=ROOT.kOrange+9)
+            h2tb_1.addHisto("Diboson_GenuineB"              , "Diboson"          , color=ROOT.kBlue-4)
     categories = [h2tb_1]
 
     # For-loop: All files
@@ -468,6 +473,7 @@ if __name__=="__main__":
     PREFIT          = False
     FITUNCERT       = False
     MERGERARES      = False
+    PAPER           = False
 
     parser = OptionParser(usage="Usage: %prog [options]", add_help_option=True, conflict_handler="resolve")
 
@@ -528,6 +534,9 @@ if __name__=="__main__":
     parser.add_option("--mergeRares", dest="mergeRares", default=MERGERARES, action="store_true",
                       help="Merge rare datasets into a single dataset? (v. small contribution to final count) [default: %s]" % (MERGERARES) )
 
+    parser.add_option("--paper", dest="paper", default=PAPER, action="store_true",
+                      help="Merge EWK and ttX datasets? (v. small contribution to final count) [default: %s]" % (PAPER) )
+
     (opts, args) = parser.parse_args()
 
     if opts.postfitFile == None:
@@ -538,6 +547,9 @@ if __name__=="__main__":
     for m in opts.masses:
         fName = "combine_histograms_hplushadronic_m%s.root" % (m)
         opts.dataFiles.append(fName)
+
+    if opts.paper*opts.mergeRares:
+        raise Exception("Cannot have both \"paper\" and \"mergeRares\" options enables! Choose one or the other")
 
     if opts.saveName == None:
         postfix = "postFit"
