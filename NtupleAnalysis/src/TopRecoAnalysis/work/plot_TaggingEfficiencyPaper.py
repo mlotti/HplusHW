@@ -8,14 +8,12 @@ USAGE:
 
 
 EXAMPLES:
-./plot_Efficiency.py -m MyHplusAnalysis_180202_fullSignalQCDtt --folder topbdtSelection_ --url
-./plot_Efficiency.py -m MyHplusAnalysis_180202_fullSignalQCDtt --folder topbdtSelection_ --url
-./plot_TaggingEfficinecyPaper.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400/TopRecoAnalysis_180320_BDT85 --folder topbdtSelection_ --url
-./plot_TaggingEfficinecyPaper.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400/TopRecoAnalysis_180320_BDT85 --ratio
-
+./plot_TaggingEfficiencyPaper.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400/TopRecoAnalysis_180320_BDT85 --folder topbdtSelection_ --url
+./plot_TaggingEfficiencyPaper.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopRecoAnalysis/BDTcutComparisonPlots_BjetPt40_MassCut400/TopRecoAnalysis_180320_BDT85 --ratio
+./plot_TaggingEfficiencyPaper.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/BDTcutComparisonPlots_180828_BjetPt40_MassCut400_NewBDTbjetPt40GeV/TopTaggerEfficiency_180827_BDT0p40 --analysisName TopTaggerEfficiency --ratio --url
 
 LAST USED:
-./plot_TaggingEfficinecyPaper.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/BDTcutComparisonPlots_180828_BjetPt40_MassCut400_NewBDTbjetPt40GeV/TopTaggerEfficiency_180827_BDT0p40 --analysisName TopTaggerEfficiency --ratio --url
+./plot_TaggingEfficiencyPaper.py -m /uscms_data/d3/skonstan/workspace/pseudo-multicrab/TopTaggerEfficiency/TopTaggerEfficiency_190106_084255_BDT0p40_TopMassCut400_noTopPtRew --analysisName TopTaggerEfficiency --ratio --url
 
 
 STATISTICS OPTIONS:

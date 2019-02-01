@@ -12,10 +12,13 @@ plot_TFsInFakeBDir.py [opts]
 EXAMPLES:
 ./plot_TFsInFakeBDir.py -m FakeBMeasurement_Test_22Nov2018/ --gridX --gridY --url
 ./plot_TFsInFakeBDir.py -m FakeBMeasurement_Test_22Nov2018/ --gridX --gridY --refHisto "Run2016DE"
+./plot_TFsInFakeBDir.py -m FakeBMeasurement_Test_22Nov2018/ --gridX --gridY --refHisto "Run2016"
+./plot_TFsInFakeBDir.py --gridX --gridY --refHisto "Run2016" -m FakeBMeasurement_BDT0p4_Run2016_NoTopPtReweight_07Jan2019
 
 
 LAST USED:
-./plot_TFsInFakeBDir.py -m FakeBMeasurement_Test_22Nov2018/ --gridX --gridY --refHisto "Run2016"
+./plot_TFsInFakeBDir.py --gridX --gridY --refHisto "Run2016" -m FakeBMeasurement_TopMassLE400_BDT0p40_Binning4Eta5Pt_Syst_NoTopPtReweightCorrXML_10Jan2019 --url
+
 
 '''
 
@@ -184,6 +187,9 @@ def main(opts):
 
     # For-loop: All module files to be imported
     for i,m in enumerate(moduleNames, 1):
+        # This is the default file (inclusive). But another inclusive one (.._Run2016.py) is also inclded (=>duplicate)
+        if "80to1000" in str(m):
+            continue
         if not opts.verbose:
             Print("Importing module %s" % (hs + os.path.join(opts.mcrab, m) + ns), i==1)
         else:

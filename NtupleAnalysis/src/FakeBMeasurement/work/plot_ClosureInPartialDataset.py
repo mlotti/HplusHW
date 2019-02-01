@@ -41,16 +41,15 @@ properly the "Control-Region" data.
 
 
 USAGE:
-./plot_FakeBInPartialDataset.py -m <pseudo_mcrab_directory> [opts]
+./plot_ClosureInPartialDataset.py -m <pseudo_mcrab_directory> [opts]
 
 
 EXAMPLES:
-./plot_FakeBInPartialDataset.py -m FakeBMeasurement_Test_22Nov2018 --histoKey "LdgTrijetMass"  --url
-./plot_FakeBInPartialDataset.py -m FakeBMeasurement_Test_22Nov2018 --histoKey TetrajetMass --url
+./plot_ClosureInPartialDataset.py -m FakeBMeasurement_Test_22Nov2018 --histoKey TetrajetMass --url
 
 
 LAST USED:
-./plot_FakeBInPartialDataset.py -m FakeBMeasurement_TopMassLE400_BDT0p40_Binning4Eta5Pt_Syst_NoTopPtReweightCorrXML_10Jan2019 --histoKey TetrajetMass --url
+./plot_ClosureInPartialDataset.py -m FakeBMeasurement_TopMassLE400_BDT0p40_Binning4Eta5Pt_Syst_NoTopPtReweightCorrXML_10Jan2019 --histoKey TetrajetMass --url
 
 '''
 
@@ -61,6 +60,7 @@ import sys
 import math
 import copy
 import os
+import re
 import array
 from optparse import OptionParser
 
@@ -106,6 +106,12 @@ def Verbose(msg, printHeader=True, verbose=False):
         return
     Print(msg, printHeader)
     return
+
+def atoi(text):
+    return int(text) if text.isdigit() else text
+
+def natural_keys(text):
+    return [ atoi(c) for c in re.split('(\d+)', text) ]
 
 def GetLumi(datasetsMgr):
     Verbose("Determininig Integrated Luminosity")
@@ -159,7 +165,7 @@ def GetHistoKwargs(histoName):
             _opts["xmin"] =    0
             _opts["xmax"] = 3000
             _cutBox       = {"cutValue": 180.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
-            _rebinX       = systematics.getBinningForTetrajetMass(18) #systematics.getBinningForTetrajetMass(1) systematics.getBinningForTetrajetMass(13)
+            _rebinX       = systematics.getBinningForTetrajetMass(18)
             #if isinstance(_rebinX, list):
             #    _ylabel = "< Events / GeV >"
         if "trijet" in histoName.lower():
@@ -198,6 +204,40 @@ def GetHistoKwargs(histoName):
         "createLegend"     : {"x1": 0.66, "y1": 0.78, "x2": 0.92, "y2": 0.92},
         }
     return kwargs
+
+def setStyle(i, histo, isRefHisto):
+    cList = [ROOT.kRed, ROOT.kAzure, ROOT.kOrange-3, ROOT.kGreen+1, ROOT.kViolet, ROOT.kTeal+2, ROOT.kGray+1, ROOT.kMagenta+1]
+    mList = [ROOT.kFullCircle, ROOT.kFullTriangleUp, ROOT.kFullTriangleDown, ROOT.kFullSquare, ROOT.kFullCircle, ROOT.kFullCross, ROOT.kFullCircle]
+    if i < len(cList) and i < len(mList) :
+        colour = cList[i]
+        marker = mList[i]
+    else:
+        raise Exception("Exceeded list size!")
+
+    if isRefHisto:
+        colour = ROOT.kBlack
+        mSize  = 0.0
+        mStyle = 1
+    else:
+        mSize = 1.2
+        mStyle = marker
+
+    histo.SetLineStyle(ROOT.kSolid)
+    histo.SetLineWidth(3)
+    histo.SetLineColor(colour)
+    histo.SetFillColor(colour)
+    histo.SetFillStyle(3001)
+    histo.SetMarkerSize(mSize)
+    histo.SetMarkerStyle(mStyle)
+    histo.SetMarkerColor(colour)
+    if mList[i] == ROOT.kOpenCross or mList[i] == ROOT.kFullCross:
+        histo.SetMarkerSize(1.50)
+    if mList[i] == ROOT.kFullTriangleUp or mList[i] == ROOT.kFullTriangleUp:
+        histo.SetMarkerSize(1.45)
+
+    if isRefHisto:
+        Verbose("histo.GetName() = %s" % (histo.GetName()), True)
+    return
 
 def GetBinWidthMinMax(binList):
     if not isinstance(binList, list):
@@ -370,8 +410,7 @@ def main(count, runRange, dsetList, opts):
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
 
         # Print dataset information
-        if 0:
-            datasetsMgr.PrintInfo()
+        # datasetsMgr.PrintInfo()
 
         # Merge EWK samples
         datasetsMgr.merge("EWK", aux.GetListOfEwkDatasets())
@@ -390,8 +429,9 @@ def main(count, runRange, dsetList, opts):
             histoPaths.extend( pathList )
 
         binLabels = GetBinLabels("CRone", histoPaths)
-        PlotHistosAndCalculateTF(runRange, datasetsMgr, histoPaths, binLabels, opts)
-    return
+        # Calculate TF and plot histo (Data Vs Fake b + Genuine b)
+        stackListForRunRange = PlotHistosAndCalculateTF(runRange, datasetsMgr, histoPaths, binLabels, opts)
+    return stackListForRunRange
 
 
 def GetBinLabels(region, histoPaths):
@@ -554,57 +594,31 @@ def PlotHistosAndCalculateTF(runRange, datasetsMgr, histoList, binLabels, opts):
             # Add the normalised histogram to the final Inclusive SR (predicted) histo
             rBkgSum_SR.Add(binHisto_VR, +1)
 
-    # Plot histograms    
-    if opts.altPlot:
-        # Add the SR EWK Genuine-b to the SR FakeB ( BkgSum = [FakeB] + [GenuineB-MC] = [VR * (CR1/CR2)] + [GenuineB-MC] )
-        rBkgSum_SR.Add(rEWKGenuineB_SR, +1) 
+    # Create empty histogram stack list
+    myStackList = []
 
-        # Change style
-        styles.getGenuineBStyle().apply(rBkgSum_SR)
-
-        # Remove unsupported settings of kwargs
-        _kwargs["stackMCHistograms"] = False
-        _kwargs["addLuminosityText"] = False
-
-        # Create the plot
-        p = plots.ComparisonManyPlot(rData_SR, [rBkgSum_SR], saveFormats=[])
-
-        # Set draw / legend style
-        p.histoMgr.setHistoDrawStyle("Data-SR-Inclusive", "P")
-        p.histoMgr.setHistoLegendStyle("Data-SR-Inclusive" , "LP")
-        p.histoMgr.setHistoDrawStyle("BkgSum-SR-Inclusive", "HIST")
-        p.histoMgr.setHistoLegendStyle("BkgSum-SR-Inclusive" , "F")
-
-        # Set legend labels
-        p.histoMgr.setHistoLegendLabelMany({
-                "Data-SR"       : "Data",
-                "BkgSum-SR"     : "Fake-b + Gen-b",
-                })
-    else:
-        # Create empty histogram stack list
-        myStackList = []
+    # Add the FakeB data-driven background to the histogram list    
+    hFakeB = histograms.Histo(rBkgSum_SR, "FakeB", "Fake-b")
+    hFakeB.setIsDataMC(isData=False, isMC=True)
+    myStackList.append(hFakeB)
         
-        # Add the FakeB data-driven background to the histogram list    
-        hFakeB = histograms.Histo(rBkgSum_SR, "FakeB", "Fake-b")
-        hFakeB.setIsDataMC(isData=False, isMC=True)
-        myStackList.append(hFakeB)
-        
-        # Add the EWKGenuineB MC background to the histogram list
-        hGenuineB = histograms.Histo(rEWKGenuineB_SR, "GenuineB", "EWK Genuine-b")
-        hGenuineB.setIsDataMC(isData=False, isMC=True)
-        myStackList.append(hGenuineB)
+    # Add the EWKGenuineB MC background to the histogram list
+    hGenuineB = histograms.Histo(rEWKGenuineB_SR, "GenuineB", "EWK Genuine-b")
+    hGenuineB.setIsDataMC(isData=False, isMC=True)
+    myStackList.append(hGenuineB)
 
-        # Add the collision datato the histogram list        
-        hData = histograms.Histo(rData_SR, "Data", "Data")
-        hData.setIsDataMC(isData=True, isMC=False)
-        myStackList.insert(0, hData)
+    # Add the collision datato the histogram list        
+    hData = histograms.Histo(rData_SR, "Data", "Data")
+    hData.setIsDataMC(isData=True, isMC=False)
+    myStackList.insert(0, hData)
         
-        p = plots.DataMCPlot2( myStackList, saveFormats=[])
-        p.setLuminosity(opts.intLumi)
-        p.setDefaultStyles()
+    p = plots.DataMCPlot2( myStackList, saveFormats=[])
+    p.setLuminosity(opts.intLumi)
+    p.setDefaultStyles()
 
     # Draw the plot and save it
     hName = opts.histoKey
+    opts._kwargs = _kwargs
     plots.drawPlot(p, hName, **_kwargs)
     SavePlot(p, hName, os.path.join(opts.saveDir, opts.optMode), saveFormats = [".png"])
 
@@ -614,7 +628,7 @@ def PlotHistosAndCalculateTF(runRange, datasetsMgr, histoList, binLabels, opts):
     Verbose("Write the normalisation factors to a python file", True)
     fileName = os.path.join(opts.mcrab, "FakeBTransferFactors_%s.py" % ( runRange ) )
     manager.writeTransferFactorsToFile(fileName, opts)
-    return
+    return myStackList
 
 if __name__ == "__main__":
     '''
@@ -647,8 +661,8 @@ if __name__ == "__main__":
     VERBOSE      = False
     USEMC        = False
     RATIO        = True
-    FOLDER       = "ForFakeBMeasurement"
     INCLUSIVE    = False
+    FOLDER       = "ForFakeBMeasurement"
     HISTOKEY     = "TetrajetBJetEta" #options: "MET", "TetrajetBJetPt", "TetrajetBJetEta", "TetrajetMass", "LdgTrijetMass", "LdgTrijetPt"
 
     # Define the available script options
@@ -756,13 +770,114 @@ if __name__ == "__main__":
         }
 
     # Do partial data dataset (closure attempt)
+    stackLists = {}
     for i, rr in enumerate(dsetSets, 1):
         opts.saveDir = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="TransferFactor_%s" % rr)
         dsetList     = dsetSets[rr]
         Verbose("%d) %s" % (i, ", ".join(dsetList) ), i==1)
-        main(i, rr, dsetList, opts)
+        
+        # Calculate TF and plot the invMass histo (Data Vs Fake b + Genuine b)
+        stackLists[rr] = main(i, rr, dsetList, opts)
 
-    Print("%sAll plots saved under %s%s" % (ShellStyles.SuccessStyle(), opts.saveDir, ShellStyles.NormalStyle()), True)
+    # Use stack list dictionary to plot a comparison histo of all the invMass histos for all Data-Eras
+    newStack = []
+    refIndex = -1
+    refName  = ""
+    refHisto = None
+
+    # For-loop: All rootHisto stacks
+    for rr in stackLists.keys():
+        
+        # Get the rootHistos stack list for the given run-range
+        myStackList = stackLists[rr]
+
+        # For-loop: All run ranges
+        for index, rh in enumerate(myStackList, 0):
+            
+            # initialisations
+            skipFakeB = False
+            newName   = rh.getName() + "-" + rr
+
+            if rr == "Run2016":
+                skipFakeB = False
+                if "data" in rh.getName().lower():
+                    continue
+                elif "fakeb" in rh.getName().lower():
+                    refIndex = index
+                    refName  = newName
+                    # print "create"
+                    refHisto = rh
+                elif "genuineb" in rh.getName().lower():
+                    #print "add"
+                    refHisto.getRootHisto().Add(rh.getRootHisto(), 1) #fixme! not correct (subract geuine b from data instead!)
+                    pass
+                else:
+                    pass
+            else:
+                skipFakeB = True
+
+
+            if "genuineb" in rh.getName().lower():
+                continue
+
+            if "fakeb" in rh.getName().lower():
+                if skipFakeB:
+                    continue
+
+            # Save rootHisto to stack
+            Verbose(newName, i==0)
+            rh.setName(newName)
+            newStack.append(rh)
+
+    # Add the collision datato the histogram list        
+    otherHistos = [h for i,h in enumerate(newStack, 0) if h.getName()!=refName] 
+    otherHistosS= [h.getName() for h in otherHistos]
+
+    # For-loop: All reference histos
+    # for i, h in enumerate(sorted(otherHistosS, key=natural_keys), 0):
+    #     print h
+    #     pass
+
+    # Create the comparison canvas
+    p = plots.ComparisonManyPlot(refHisto, otherHistos, saveFormats=[])
+    p.histoMgr.forEachHisto(lambda h: h.getRootHisto().Scale(1.0/h.getRootHisto().Integral()))
+    p.setLuminosity(opts.intLumi)
+    p.setDefaultStyles()
+
+    # Set draw / legend style
+    for i, h in enumerate(newStack, 0):
+        Print("%d) %s" % (i, h.getName()), i==0)
+        rhName  = h.getName()
+        legName = h.getName().replace("-", " (").replace("Run", "") + ")"
+        p.histoMgr.setHistoLegendLabelMany({
+                rhName : legName
+                })
+
+        # https://root.cern.ch/doc/master/classTHistPainter.html
+        if rhName == refName:
+            setStyle(i, h.getRootHisto(), False) #True)
+            Verbose("Reference histo is \"%s\"" % (rhName), True)
+            p.histoMgr.setHistoDrawStyle(rhName, "CE4")
+            p.histoMgr.setHistoLegendStyle(rhName, "LF")
+        else:
+            setStyle(i, h.getRootHisto(), False)
+            p.histoMgr.setHistoDrawStyle(rhName, "P")
+            p.histoMgr.setHistoLegendStyle(rhName, "LP")
+            #p.histoMgr.setHistoDrawStyle(styles.styles[i]) #styles.generator(False), "P2")
+
+    kwargs = opts._kwargs
+    kwargs["rebinX"] = systematics.getBinningForPlot("LdgTetrajetMass_AfterAllSelections") 
+    kwargs["divideByBinWidth"]  = True
+    kwargs["stackMCHistograms"] = False
+    kwargs["addLuminosityText"] = False
+    kwargs["createLegend"] = {"x1": 0.50, "y1": 0.60, "x2": 0.92, "y2": 0.92}
+    kwargs["opts"] = {"ymin": 1e-6, "ymaxfactor": 5, "xmax": 3000.0}
+
+    hName = opts.histoKey + "_AllEras"
+    dName = aux.getSaveDirPath(opts.mcrab, prefix="", postfix="")
+    plots.drawPlot(p, hName, **kwargs)
+    SavePlot(p, hName, dName, saveFormats = [".png", ".pdf", ".C"])
+    Print("Saving \"%s\" under \"%s\"" % (hName, aux.convertToURL(dName, opts.url)), True)
 
     if not opts.batchMode:
-        raw_input("=== plot_FakeBInPartialDataset.py: Press any key to quit ROOT ...")
+        raw_input("=== plot_ClosureInPartialDataset.py: Press any key to quit ROOT ...")
