@@ -391,8 +391,8 @@ def main(opts):
     h2tb_1.setMoveLegend(hadrMoveLegend)
 
     # Add all histograms
-    h2tb_1.addHisto("FakeB"             , "Fake b (data)", color=ROOT.kBlue-1) #ROOT.kOrange-3)
-    h2tb_1.addHisto("TT_GenuineB"       , "t#bar{t}"     , color=ROOT.kMagenta-2)
+    h2tb_1.addHisto("FakeB"      , "Fake b"   , color=ROOT.kBlue-1) #ROOT.kOrange-3)
+    h2tb_1.addHisto("TT_GenuineB", "t#bar{t}" , color=ROOT.kMagenta-2)
     if opts.paper:
         h2tb_1.addHisto("ttX_GenuineB", "t,tW,t#bar{t}+X", color=ROOT.kAzure-4)
         h2tb_1.addHisto("EWK_GenuineB", "EWK"            , color=ROOT.kOrange+9)
