@@ -63,8 +63,8 @@ fi
 #====================================================================================================
 # Define Variables
 #====================================================================================================
-nToys=10000
-nJobs=50
+nToys=10000 # DO NOT CHANGE! Somehow affects GoF results ("nToys" value hard-coded somewhere in GoF.py?)
+nJobs=50    # DO NOT CHANGE! Somehow affects GoF results ("nJobs" value hard-coded somewhere in GoF.py?)
 toysPerJob=$((nToys/nJobs))
 datacard="combine_datacard_hplushadronic_m${1}.txt"
 rootfile="combine_histograms_hplushadronic_m${1}.root"
