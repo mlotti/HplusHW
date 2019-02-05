@@ -64,7 +64,7 @@ fi
 # Define Variables
 #====================================================================================================
 nToys=10000
-nJobs=25 #50
+nJobs=50
 toysPerJob=$((nToys/nJobs))
 datacard="combine_datacard_hplushadronic_m${1}.txt"
 rootfile="combine_histograms_hplushadronic_m${1}.root"
