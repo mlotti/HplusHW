@@ -445,6 +445,7 @@ def customizeMarker(p):
 
 def doPlot(opts, mass, nameList, allShapeNuisances, luminosity, myDatacardPattern, rootFilePattern, signalTable):
     fName = rootFilePattern % mass
+    Verbose("Opening ROOT file %s" % (fName), True)
     f = ROOT.TFile.Open(fName)
 
     content = f.GetListOfKeys()
