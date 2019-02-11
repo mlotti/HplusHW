@@ -228,10 +228,10 @@ class TableProducer:
         self._timestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime(time.time()))
         self._outputFileStem = "combine_datacard_hplushadronic_m"
         self._outputRootFileStem = "combine_histograms_hplushadronic_m"
-        if hasattr(self._config, 'OptionMergeRares'):
-            self._Rares = self._config.OptionMergeRares
+        if hasattr(self._config, 'OptionPaper'):
+            self._Paper = self._config.OptionPaper
         else:
-            self._Rares = False
+            self._Paper = False
         if self._h2tb:
             self.channelLabel = "tbhadr"
         else:
@@ -1248,42 +1248,34 @@ class TableProducer:
 
         if self._h2tb:
             myColumnOrder = ["Hp",  "FakeB", "TT_GenuineB", "SingleTop_GenuineB"]
-            if self._Rares:
-                myColumnOrder.append("Rares_GenuineB")  
-                myNuisanceOrder = [["CMS_eff_trg_MC", "trigger efficiency"],
-                                   ["CMS_eff_e_veto", "electron veto eff."],
-                                   ["CMS_eff_m_veto", "muon veto eff."],
-                                   ["CMS_eff_tau_veto", "tau veto eff."],
-                                   ["CMS_eff_b", "b-tagging eff."],
-                                   ["CMS_scale_j", "jet energy scale"],
-                                   ["CMS_res_j", "jet energy resolution"],
-                                   ["CMS_topreweight","top $p_T$ reweighting"],
-                                   ["CMS_pileup", "pileup reweighting"],
+            if self._Paper:
+                myColumnOrder = ["Hp",  "FakeB", "TT_GenuineB", "ttX_GenuineB", "EWK_GenuineB"]
+                myNuisanceOrder = [["lumi_13TeV"         , "luminosity (13 TeV)"],
+                                   ["CMS_eff_trg_MC"     , "trigger efficiency"],
+                                   ["CMS_eff_e_veto"     , "electron veto eff."],
+                                   ["CMS_eff_m_veto"     , "muon veto eff."],
+                                   ["CMS_eff_tau_veto"   , "tau veto eff."],
+                                   ["CMS_eff_b"          , "b-tagging eff."],
+                                   ["CMS_scale_j"        , "jet energy scale"],
+                                   ["CMS_res_j"          , "jet energy resolution"],
+                                   #["CMS_topreweight"    ,"top $p_T$ reweighting"],
+                                   ["CMS_pileup"         , "pileup reweighting"],
                                    ["CMS_HPTB_toptagging", "top tagging"],
-                                   ["QCDscale_ttbar", "$t\\bar{t}$ scale"],
-                                   ["pdf_ttbar", "$t\\bar{t}$ pdf"],
-                                   ["mass_top", "top mass"],
-                                   # ["QCDscale_ttW", "$t\\bar{t}$W scale"],
-                                   # ["pdf_ttW", "$t\\bar{t}$W pdf"],
-                                   # ["QCDscale_ttZ", "$t\\bar{t}$Z scale"],
-                                   # ["pdf_ttZ", "$t\\bar{t}$Z pdf"],
-                                   # ["QCDscale_Wjets", "W+jets scale"],
-                                   # ["pdf_Wjets", "W+jets pdf"],
-                                   # ["QCDscale_DY",  "DY scale"],
-                                   # ["pdf_DY", "DY pdf"],
-                                   # ["QCDscale_VV", "Diboson scale"],
-                                   # ["pdf_VV", "Diboson pdf"],
-                                   ["lumi_13TeV", "luminosity (13 TeV)"],
+                                   ["QCDscale_ttbar"     , "$t\\bar{t}$ scale"],
+                                   ["pdf_ttbar"          , "$t\\bar{t}$ pdf"],
+                                   ["mass_top"           , "top mass"],
+                                   ["QCDscale_singleTop" , "$t\\bar{t}$+X scale"],
+                                   ["pdf_singleTop"      , "$t\\bar{t}$+X pdf"],
+                                   ["QCDscale_ewk"       , "EWK scale"],
+                                   ["pdf_ewk"            , "EWK pdf"],
                                    ["CMS_HPTB_pdf_HPTB"  , "pdf acceptance (signal)"],
                                    ["CMS_HPTB_pdf_top"   , "pdf acceptance (top)"],
-                                   #["CMS_HPTB_pdf_ewk"   , "pdf acceptance (EWK)"],
+                                   ["CMS_HPTB_pdf_ewk"   , "pdf acceptance (EWK)"],
                                    ["CMS_HPTB_mu_RF_HPTB", "RF scale acceptance (signal)"],
                                    ["CMS_HPTB_mu_RF_top" , "RF scale acceptance (top)"],
-                                   #["CMS_HPTB_mu_RF_ewk" , "RF scale acceptance (EWK)"],
-                                   ["CMS_HPTB_fakeB_transferfactor", "Fake $b$ transfer factors"]
+                                   ["CMS_HPTB_mu_RF_ewk" , "RF scale acceptance (EWK)"],
                                    ]
             else:
-                rares = []
                 myNuisanceOrder = [["CMS_eff_trg_MC", "trigger efficiency"],
                                    ["CMS_eff_e_veto", "electron veto eff."],
                                    ["CMS_eff_m_veto", "muon veto eff."],
@@ -1291,7 +1283,7 @@ class TableProducer:
                                    ["CMS_eff_b", "b-tagging eff."],
                                    ["CMS_scale_j", "jet energy scale"],
                                    ["CMS_res_j", "jet energy resolution"],
-                                   ["CMS_topreweight","top $p_T$ reweighting"],
+                                   #["CMS_topreweight","top $p_T$ reweighting"],
                                    ["CMS_pileup", "pileup reweighting"],
                                    ["CMS_HPTB_toptagging", "top tagging"],
                                    ["QCDscale_ttbar", "$t\\bar{t}$ scale"],
@@ -1522,18 +1514,19 @@ class TableProducer:
         myOutput  = "\\renewcommand{\\arraystretch}{1.2}\n"
         myOutput += "\\resizebox{1.0\\linewidth}{!}{%\n"
         myOutput += "\\label{tab:summary:systematics}\n"
-        if self._Rares: #can do this much smarter!
+        if self._Paper: #can do this much smarter!
             myOutput += "\\begin{tabular}{l|c|c|ccc}\n"
         else:
             myOutput += "\\begin{tabular}{l|c|c|cccccccc}\n"            
         myOutput += "\\hline\n"
-        if self._Rares: #can do this much smarter!
+        if self._Paper: #can do this much smarter!
             myOutput += "& Signal & Fake b & \multicolumn{3}{c}{Genuine b}"
         else:
             myOutput += "& Signal & Fake b & \multicolumn{8}{c}{Genuine b}"
         myOutput += "\n \\\\"
-        if self._Rares:
-            myCaptionLine = [["","","","$t\\bar{t}$", "Single top", "Rares"]] 
+        if self._Paper:
+            myCaptionLine = [["","","","$t\\bar{t}$", "$t\\bar{t}$+X", "EWK"]] 
+            #myCaptionLine = [["","","","$t\\bar{t}$", "Single top", "Rares"]] 
         else:
             myCaptionLine = [["","","","$t\\bar{t}$", "Single top", "$t\\bar{t}$+Z", "$t\\bar{t}t\\bar{t}$", "$Z/\gamma^{*}$+jets", "$t\\bar{t}$+W", "W+jets", "Diboson"]] 
         # Calculate dimensions of tables
