@@ -3,6 +3,7 @@
 
 #include <DataFormat/interface/Tau.h>
 #include <DataFormat/interface/Muon.h>
+//#include <DataFormat/interface/GenParticle.h>
 
 #include <cmath>
 
@@ -38,6 +39,14 @@ double TransverseMass::reconstruct(const Tau& tau_1,const Tau& tau_2,const Muon&
   return TransverseMass::reconstruct(tauptvec_1,tauptvec_2,muonptvec,met);
 }
 
+
+//double TransverseMass::reconstruct(const genParticle& gamma_1,const genParticle& gamma_2,const Muon& muon, const math::XYVectorD& met) {
+//  math::XYVector gammaptvec_1 = gamma_1.p2();
+//  math::XYVector gammaptvec_2 = gamma_2.p2();
+//  math::XYVector muonptvec = muon.p2();
+
+//  return TransverseMass::reconstruct(gammaptvec_1,gammaptvec_2,muonptvec,met);
+//}
 
 
 double TransverseMass::reconstruct(const math::XYVector tauptvec_1, const math::XYVector tauptvec_2, const math::XYVector muonptvec, const math::XYVectorD& met) {

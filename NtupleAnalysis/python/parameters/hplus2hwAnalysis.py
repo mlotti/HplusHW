@@ -46,8 +46,8 @@ metFilter = PSet(
 ##########
 
 eVeto = PSet(
-    electronPtCut = 15.0,
-    electronEtaCut = 2.1,
+    electronPtCut = 10.0,
+    electronEtaCut = 2.5,
 #            electronID = "mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90", # highest (wp90) for vetoing (2012: wp95)
     electronID = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
     electronIDType    = "MVA",  # options: "default", "MVA"
@@ -68,7 +68,7 @@ muonSelection = PSet(
             muonEtaCut = 2.4,
                 muonID = "muIDTight", # options: muIDLoose, muIDMedium, muIDTight
          muonIsolation = "tight", #"tight", # for selecting, not vetoing
-	muonIsolType   = "mini",      # options: "mini", "default" 
+	muonIsolType   = "default",      # options: "mini", "default" 
 )
 
 
@@ -77,16 +77,16 @@ muonSelection = PSet(
 ##########
 
 tauSelection = PSet(
-  applyTriggerMatching = False,
+  applyTriggerMatching = False, # no effect now
    triggerMatchingCone = 0.1,   # DeltaR for matching offline tau with trigger tau
-              tauPtCut = 24.0,
-             tauEtaCut = 2.1,
-        tauLdgTrkPtCut = 10.0,
-                prongs = 1,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
+              tauPtCut = 30.0,
+             tauEtaCut = 2.3,
+        tauLdgTrkPtCut = 1.0,
+                prongs = -1,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
                   rtau = 0.0,   # to disable set to 0.0
   againstElectronDiscr = "againstElectronLooseMVA6",
       againstMuonDiscr = "againstMuonLoose3",
-        isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits", #"byMediumIsolationMVArun2v1DBnewDMwLT",
+        isolationDiscr = "byMediumIsolationMVArun2v1DBoldDMwLT", #"byLooseIsolationMVArun2v1DBoldDMwLT", #"byMediumIsolationMVArun2v1DBnewDMwLT",
 )
 
 ##########
@@ -110,8 +110,8 @@ scaleFactors.assignTauMisidentificationSF(tauSelection, "jetToTau", "full", "nom
 
 jetSelection = PSet(
                jetType  = "Jets", # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
-              jetPtCuts = [25.0],
-             jetEtaCuts = [2.1],
+              jetPtCuts = [30.0],
+             jetEtaCuts = [4.7],
      tauMatchingDeltaR  = 0.4,
   numberOfJetsCutValue  = 2,
   numberOfJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
@@ -159,7 +159,7 @@ scaleFactors.setupBtagSFInformation(btagPset=bjetSelection,
 ##########
 
 metSelection = PSet(
-           METCutValue = 30.0,
+           METCutValue = 40.0,
        METCutDirection = ">", # options: ==, !=, <, <=, >, >=
   METSignificanceCutValue = -1000.0,
   METSignificanceCutDirection = ">", # options: ==, !=, <, <=, >, >=

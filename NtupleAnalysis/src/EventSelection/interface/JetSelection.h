@@ -41,6 +41,9 @@ public:
     // Obtain number of selected jets
     int getNumberOfSelectedJets() const { return fSelectedJets.size(); }
 
+    // Obtain number of taus matched to jets
+    int getNumberOfMatchedTaus() const {return fJetMatchedToTau.size(); }
+
     // Obtain collection of selected jets
     const std::vector<Jet>& getSelectedJets() const { return fSelectedJets; }
 

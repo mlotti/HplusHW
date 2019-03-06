@@ -29,7 +29,7 @@ MuonSelection::MuonSelection(const ParameterSet& config, EventCounter& eventCoun
   cPassedMuonSelection(fEventCounter.addCounter("passed mu selection ("+postfix+")")),
   // Sub counters
   cSubAll(fEventCounter.addSubCounter("mu selection ("+postfix+")", "All events")),
-  cSubPassedTriggerMatching(fEventCounter.addSubCounter("mu selection", "Passed trigger matching")),
+  cSubPassedTriggerMatching(fEventCounter.addSubCounter("mu selection ("+postfix+")", "Passed trigger matching")),
   cSubPassedPt(fEventCounter.addSubCounter("mu selection ("+postfix+")", "Passed pt cut")),
   cSubPassedEta(fEventCounter.addSubCounter("mu selection ("+postfix+")", "Passed eta cut")),
   cSubPassedID(fEventCounter.addSubCounter("mu selection ("+postfix+")", "Passed ID")),
@@ -63,7 +63,7 @@ MuonSelection::MuonSelection(const ParameterSet& config, const std::string& post
 }
 
 MuonSelection::~MuonSelection() {
-//  delete hTriggerMatchDeltaR;
+  delete hTriggerMatchDeltaR;
   delete hMuonNAll;
   delete hMuonPtAll;
   delete hMuonEtaAll;
@@ -105,7 +105,7 @@ void MuonSelection::initialize(const ParameterSet& config, const std::string& po
     fMiniIsoCut = 0.4;  // from Brown/MIT sync
   } 
   else if (isolString == "tight" || isolString == "Tight") {
-    fRelIsoCut  = 0.12; // Based on 2012 isolation
+    fRelIsoCut  = 0.15; // Based on 2012 isolation = 0.12
     fMiniIsoCut = 0.10; // arbitrary value selected
   } 
   else {
@@ -279,7 +279,8 @@ MuonSelection::Data MuonSelection::privateAnalyze(const Event& event) {
   hMuonNPassed->Fill(output.fSelectedMuons.size());
 
   // Fill sub-counters
-  if (passedTriggerMatching) cSubPassedTriggerMatching.increment();
+  if (passedTriggerMatching) 
+    cSubPassedTriggerMatching.increment();
 
   // Fill counters
   if (passedPt) cSubPassedPt.increment();
