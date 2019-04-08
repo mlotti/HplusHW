@@ -9,9 +9,6 @@
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
-
-#include "DataFormats/VertexReco/interface/Vertex.h"
-
 #include "TFile.h"
 #include "TH1F.h"
 
@@ -34,10 +31,7 @@ class PUInfo : public edm::EDAnalyzer {
     private:
         edm::EDGetTokenT<std::vector<PileupSummaryInfo> > puSummaryToken;
         edm::EDGetTokenT<GenEventInfoProduct> eventInfoToken;
-        edm::EDGetTokenT<std::vector<reco::Vertex> > pvToken;
         std::string filename;
-
-	bool runOnData;
 
 	TH1F* hPU;
 };
@@ -45,11 +39,9 @@ class PUInfo : public edm::EDAnalyzer {
 PUInfo::PUInfo(const edm::ParameterSet& iConfig) :
   puSummaryToken(consumes<std::vector<PileupSummaryInfo>>(iConfig.getParameter<edm::InputTag>("PileupSummaryInfoSrc"))),
   eventInfoToken(consumes<GenEventInfoProduct>(edm::InputTag("generator"))),
-  pvToken(consumes<std::vector<reco::Vertex>>(iConfig.getParameter<edm::InputTag>("PileupSummaryInfoSrc"))),
-  filename(iConfig.getParameter<std::string>("OutputFileName")),
-  runOnData(iConfig.getUntrackedParameter<bool>("RunOnData",false))
+  filename(iConfig.getParameter<std::string>("OutputFileName"))
 {
-  
+
   hPU = new TH1F("pileup","pileup",100,0,100);
 }
 
@@ -57,9 +49,9 @@ PUInfo::~PUInfo() {}
 
 void PUInfo::beginJob(){}
 void PUInfo::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup){
-  if (!runOnData && iEvent.isRealData())
+  if (iEvent.isRealData())
     return;
-
+  
   edm::Handle<GenEventInfoProduct> genEventInfoHandle;
   iEvent.getByToken(eventInfoToken, genEventInfoHandle);
   double w = 1.0;
@@ -79,11 +71,6 @@ void PUInfo::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup){
             }
         }
 	hPU->Fill(nPU, w);
-    }
-    edm::Handle<std::vector<reco::Vertex> > hPV2;
-    iEvent.getByToken(pvToken, hPV2);
-    if(hPV2.isValid()) {
-        hPU->Fill(hPV2->size());
     }
 }
 
