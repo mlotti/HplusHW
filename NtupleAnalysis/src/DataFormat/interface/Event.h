@@ -12,7 +12,7 @@
 #include "DataFormat/interface/L1IsoTau.h"
 #include "DataFormat/interface/L1Jet.h"
 #include "DataFormat/interface/HLTTau.h"
-//#include "DataFormat/interface/HLTMuon.h"
+#include "DataFormat/interface/HLTMuon.h"
 #include "DataFormat/interface/HLTBJet.h"
 #include "DataFormat/interface/Tau.h"
 #include "DataFormat/interface/Jet.h"
@@ -74,7 +74,7 @@ public:
   const L1IsoTauCollection& l1IsoTaus() const { return fL1IsoTauCollection; }
   const L1JetCollection& l1Jets() const { return fL1JetCollection; }
   const HLTTauCollection& triggerTaus() const { return fTriggerTauCollection; }
-//  const HLTMuonCollection& triggerMuons() const { return fTriggerMuonCollection; }
+  const HLTMuonCollection& triggerMuons() const { return fTriggerMuonCollection; }
   const HLTBJetCollection& triggerBJets() const { return fTriggerBJetCollection; }
   const TauCollection& taus() const { return fTauCollection; }
   const JetCollection& jets() const { return fJetCollection; }
@@ -111,7 +111,7 @@ private:
   L1IsoTauCollection fL1IsoTauCollection;
   L1JetCollection fL1JetCollection;
   HLTTauCollection fTriggerTauCollection;
-//  HLTMuonCollection fTriggerMuonCollection;
+  HLTMuonCollection fTriggerMuonCollection;
   HLTBJetCollection fTriggerBJetCollection;
   TauCollection fTauCollection;
   JetCollection fJetCollection;

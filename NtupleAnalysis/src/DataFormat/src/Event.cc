@@ -111,7 +111,7 @@ void Event::setupBranches(BranchManager& mgr) {
   fL1IsoTauCollection.setupBranches(mgr);
   fL1JetCollection.setupBranches(mgr);
   fTriggerTauCollection.setupBranches(mgr);
-//  fTriggerMuonCollection.setupBranches(mgr);
+  fTriggerMuonCollection.setupBranches(mgr);
   fTriggerBJetCollection.setupBranches(mgr);
   fTauCollection.setupBranches(mgr);
   fJetCollection.setupBranches(mgr);

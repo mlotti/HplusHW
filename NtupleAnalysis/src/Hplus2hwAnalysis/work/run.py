@@ -15,11 +15,12 @@ import ROOT
 prefix      = "Hplus2hwAnalysis"
 postfix     = " "
 dataEras    = ["2016"]
-searchModes = ["1500to3000"]
+searchModes = ["350to3000"]
 
 ROOT.gErrorIgnoreLevel = 0
 
-blacklist = ["ChargedHiggs_HplusTB_HplusToTauNu_M_350_2tau","ChargedHiggs_HplusTB_HplusToTauNu_M_1500_2tau","ZJetsToQQ_HT600toInf","QCD_Pt_50to80","QCD_Pt_80to120","QCD_Pt_120to170","QCD_Pt_170to300","QCD_Pt_300to470","WJetsToLNu_old"]
+#blacklist = ["SingleMuon_Run2016E_03Feb2017_v1_276831_277420","SingleMuon_Run2016F_03Feb2017_v1_277932_278800","SingleMuon_Run2016F_03Feb2017_v1_278801_278808","SingleMuon_Run2016D_03Feb2017_v1276315_276811","SingleMuon_Run2016G_03Feb2017_v1_278820_280385","SingleMuon_Run2016H_03Feb2017_ver2_v1_281613_284035"]
+blacklist = []
 whitelist = []
 
 ###################

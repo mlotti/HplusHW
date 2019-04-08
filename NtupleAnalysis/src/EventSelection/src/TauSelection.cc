@@ -257,8 +257,8 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
   // Loop over taus
   for (Tau tau: event.taus()) {
     // Apply trigger matching
-    if (!this->passTrgMatching(tau, myTriggerTauMomenta))
-      continue;
+//    if (!this->passTrgMatching(tau, myTriggerTauMomenta))
+//      continue;
     passedTriggerMatching = true;
     // Apply cut on decay mode
     if (!this->passDecayModeFinding(tau)) {
@@ -381,14 +381,15 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
     setTauMisIDSFValue(output);
   }
   // Set tau trigger SF value to data object
-  if (event.isMC()) {
-    if (output.hasIdentifiedTaus()) {
-      output.fTauTriggerSF = fTauTriggerSFReader.getScaleFactorValue(output.getSelectedTau().pt());
-    }
-    if (output.hasAntiIsolatedTaus()) {
-      output.fAntiIsolatedTauTriggerSF = fTauTriggerSFReader.getScaleFactorValue(output.getAntiIsolatedTau().pt());
-    }
-  }
+//  if (event.isMC()) {
+//    if (output.hasIdentifiedTaus()) {
+//      cout << "trg sf" << "\n";
+//      output.fTauTriggerSF = fTauTriggerSFReader.getScaleFactorValue(output.getSelectedTau().pt());
+//    }
+//    if (output.hasAntiIsolatedTaus()) {
+//      output.fAntiIsolatedTauTriggerSF = fTauTriggerSFReader.getScaleFactorValue(output.getAntiIsolatedTau().pt());
+//    }
+//  }
 
   // Fill sub-counters
   if (passedTriggerMatching)
@@ -418,7 +419,7 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
   if (passedAntiIsolRtau)
     cSubPassedAntiIsolationRtau.increment();
   if (output.fSelectedTaus.size() > 0 && output.isGenuineTau() )
-  cSubPassedTauSelectionGenuine.increment();
+    cSubPassedTauSelectionGenuine.increment();
   if (output.fSelectedTaus.size() > 1)
     cSubPassedTauSelectionMultipleTaus.increment();
   if (output.fAntiIsolatedTaus.size() > 0)

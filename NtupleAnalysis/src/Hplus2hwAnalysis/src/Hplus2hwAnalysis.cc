@@ -29,17 +29,28 @@ private:
   // Event selection classes and event counters (in same order like they are applied)
   Count cAllEvents;
 
-  METFilterSelection fMETFilterSelection;
-
-  ElectronSelection fElectronSelection;
-
-//  METSelection fMETSelection;
-//  Count cElectronVeto;
+  MuonSelection fMuonSelection;
 
   TauSelection fTauSelection;
 //  Count cTauSelection;
 
-  MuonSelection fMuonSelection;
+  Count cOverTwoTausCounter;
+
+  Count cTauIDSFCounter;
+  Count cFakeTauSFCounter;
+
+
+  ElectronSelection fElectronSelection;
+
+  METFilterSelection fMETFilterSelection;
+
+//  MuonSelection fMuonSelection;
+
+
+//  METSelection fMETSelection;
+//  Count cElectronVeto;
+
+
 //  Count cMuonSelection;
 
 //  Count cJetSelection;
@@ -47,7 +58,8 @@ private:
 
   JetSelection fJetSelection;
 
-//  BJetSelection fBJetSelection;
+  BJetSelection fBJetSelection;
+
   METSelection fMETSelection;
 
   Count cSelected;
@@ -58,6 +70,13 @@ private:
   WrappedTH1 *hTauPt;
   WrappedTH1 *hMuonPt;
   WrappedTH1 *hNJet;
+
+  WrappedTH1 *hTauEta;
+  WrappedTH1 *hMuonEta;
+  WrappedTH1 *hMET;
+
+  WrappedTH1 *hMuonPt_afterMuonSelection;
+  WrappedTH1 *hMuonEta_afterMuonSelection;
 
   WrappedTH1 *hNTau;
 //  WrappedTH1 *hTauPt2;
@@ -78,16 +97,20 @@ Hplus2hwAnalysis::Hplus2hwAnalysis(const ParameterSet& config, const TH1* skimCo
 : BaseSelector(config, skimCounters),
   fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kHplus2hwAnalysis, fHistoWrapper),
   cAllEvents(fEventCounter.addCounter("All events")),
-  fMETFilterSelection(config.getParameter<ParameterSet>("METFilter"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-  fElectronSelection(config.getParameter<ParameterSet>("ElectronSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-  fTauSelection(config.getParameter<ParameterSet>("TauSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-//  cTauSelection(fEventCounter.addCounter("Tau selection")),
   fMuonSelection(config.getParameter<ParameterSet>("MuonSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+  fTauSelection(config.getParameter<ParameterSet>("TauSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+  cOverTwoTausCounter(fEventCounter.addCounter("Over two selected tau leptons")),
+  cTauIDSFCounter(fEventCounter.addCounter("Tau ID SF")),
+  cFakeTauSFCounter(fEventCounter.addCounter("Fake tau SF")),
+  fElectronSelection(config.getParameter<ParameterSet>("ElectronSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
+  fMETFilterSelection(config.getParameter<ParameterSet>("METFilter"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+//  fMuonSelection(config.getParameter<ParameterSet>("MuonSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+//  cTauSelection(fEventCounter.addCounter("Tau selection")),
 //  cMuonSelection(fEventCounter.addCounter("Muon selection")),
 //  cJetSelection(fEventCounter.addCounter("Jet selection")),
   fJetSelection(config.getParameter<ParameterSet>("JetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
 //  cMETSelection(fEventCounter.addCounter("MET selection")),
-//  fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+  fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
   fMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
   cSelected(fEventCounter.addCounter("Selected events"))
 { }
@@ -109,19 +132,25 @@ void Hplus2hwAnalysis::book(TDirectory *dir) {
   fMuonSelection.bookHistograms(dir);
   fJetSelection.bookHistograms(dir);
   fMETSelection.bookHistograms(dir);
-  //fBJetSelection.bookHistograms(dir);
+  fBJetSelection.bookHistograms(dir);
   // Book non-common histograms
   // hAssociatedTop_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTop_Pt", "Associated t pT;p_{T} (G$
   // hAssociatedTop_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTop_Eta", "Associated t eta;#eta",$
 
   hTauPt =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "tauPt", "Tau pT", 40, 0, 400);
-  hMuonPt =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "muonPt", "Muon pT", 40, 0, 400);
+  hMuonPt =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "muPt", "Muon pT", 40, 0, 400);
+  hMET =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MET", "MET", 40, 0, 400);
+
+  hTauEta =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "tauEta", "Tau eta", 50, -2.5, 2.5);
+  hMuonEta =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "muEta", "Muon eta", 50, -2.5, 2.5);
+
+  hMuonEta_afterMuonSelection =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "muEta_afterMuonSelection", "Muon eta after muon selection", 50, -2.5, 2.5);
+  hMuonPt_afterMuonSelection = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "muPt_afterMuonSelection", "Muon pT adter uon selection", 40, 0, 400);
+
   hNJet = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "nJet", "# of jets", 10, 0, 10);
-
   hNTau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "nTau", "# of Selected taus", 10, 0, 10);
-//  hTauPt2 =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "tauPt", "Tau pT", 40, 0, 400);
 
-  hTransverseMass = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass", "TransverseMass", 200, 0, 800);
+  hTransverseMass = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass", "TransverseMass", 200, 0, 2000);
 
   return;
 }
@@ -144,6 +173,7 @@ void Hplus2hwAnalysis::process(Long64_t entry) {
   fCommonPlots.setFactorisationBinForEvent(std::vector<float> {});
   cAllEvents.increment();
 
+
   ////////////
   // Apply Trigger
   ////////////
@@ -151,11 +181,97 @@ void Hplus2hwAnalysis::process(Long64_t entry) {
   if (!(fEvent.passTriggerDecision()))
     return;
 
-//  if (fEvent.isMC()) {
-//    fEventWeight.multiplyWeight(0.9);
-//  }
-
   int nVertices = fEvent.vertexInfo().value();
+
+  ////////////
+  // 3) Primarty Vertex (Check that a PV exists)
+  ////////////
+
+  if (nVertices < 1)
+    return;
+
+  ////////////
+  // 5) Muon
+  ////////////
+
+  const MuonSelection::Data muData = fMuonSelection.analyze(fEvent);
+  if(!(muData.hasIdentifiedMuons()))
+    return;
+
+  if (muData.getSelectedMuons().size() < 1)
+    return;
+
+  ////////////
+  // Dummy Trigger SF for first check
+  ////////////
+
+  if (fEvent.isMC()) {
+    if (26 <= muData.getSelectedMuons()[0].pt() && muData.getSelectedMuons()[0].pt() < 30) fEventWeight.multiplyWeight(0.9664);
+    if (30 <= muData.getSelectedMuons()[0].pt() && muData.getSelectedMuons()[0].pt() < 40) fEventWeight.multiplyWeight(0.9781);
+    if (40 <= muData.getSelectedMuons()[0].pt() && muData.getSelectedMuons()[0].pt() < 50) fEventWeight.multiplyWeight(0.9819);
+    if (50 <= muData.getSelectedMuons()[0].pt() && muData.getSelectedMuons()[0].pt() < 60) fEventWeight.multiplyWeight(0.9822);
+    if (60 <= muData.getSelectedMuons()[0].pt() && muData.getSelectedMuons()[0].pt() < 80) fEventWeight.multiplyWeight(0.9804);
+    if (80 <= muData.getSelectedMuons()[0].pt() && muData.getSelectedMuons()[0].pt() < 120) fEventWeight.multiplyWeight(0.9780);
+    if (120 <= muData.getSelectedMuons()[0].pt() && muData.getSelectedMuons()[0].pt() < 200) fEventWeight.multiplyWeight(0.9752);
+    if (200 <= muData.getSelectedMuons()[0].pt() && muData.getSelectedMuons()[0].pt() < 500) fEventWeight.multiplyWeight(0.9704);
+
+  }
+
+  hMuonPt_afterMuonSelection->Fill(muData.getSelectedMuons()[0].pt());
+  hMuonEta_afterMuonSelection->Fill(muData.getSelectedMuons()[0].eta());
+
+  ////////////
+  // 6) Tau
+  ////////////
+
+  const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
+  if (!tauData.hasIdentifiedTaus())
+    return;
+
+
+//  if (fEvent.isMC() && !tauData.isGenuineTau()) //if not genuine tau, reject the events (fake tau events are taken into account in QCDandFakeTau measurement)
+//    return;
+
+
+  if(tauData.getSelectedTaus().size()<2)
+    return;
+
+  if(tauData.getSelectedTaus()[0].charge() == tauData.getSelectedTaus()[1].charge())
+    return;
+
+  cOverTwoTausCounter.increment();
+
+  fCommonPlots.fillControlPlotsAfterTauSelection(fEvent, tauData);
+
+
+  ////////////
+  // 6) Tau ID SF
+  ////////////
+
+  if (fEvent.isMC()) {
+    fEventWeight.multiplyWeight(tauData.getTauIDSF());
+//    fEventWeight.multiplyWeight(tauData.getTauIDSF());
+    cTauIDSFCounter.increment();
+  }
+
+  ////////////
+  // 6) Tau misID SF
+  ////////////
+
+  if (fEvent.isMC()) {
+    fEventWeight.multiplyWeight(tauData.getTauMisIDSF());
+    cFakeTauSFCounter.increment();
+  }
+
+  ////////////
+  // 4) Electron veto (Fully hadronic + orthogonality)
+  ////////////
+
+  const ElectronSelection::Data eData = fElectronSelection.analyze(fEvent);
+  if (eData.hasIdentifiedElectrons())
+    return;
+
+
 
   ////////////
   // MET filters (to remove events with spurious sources of fake MET)
@@ -168,90 +284,12 @@ void Hplus2hwAnalysis::process(Long64_t entry) {
 //  fCommonPlots.fillControlPlotsAfterMETFilter(fEvent);
 
   ////////////
-  // 3) Primarty Vertex (Check that a PV exists)
-  ////////////
-
-  if (nVertices < 1)
-    return;
-
-
-  ////////////
-  // 5) Muon
-  ////////////
-
-  const MuonSelection::Data muData = fMuonSelection.analyze(fEvent);
-  if(!(muData.hasIdentifiedMuons()))
-    return;
-
-  if (muData.getSelectedMuons().size() != 5)
-    return;
-
-
-
-
-//  cMuonSelection.increment();
-
-
-
-  ////////////
-  // 4) Electron veto (Fully hadronic + orthogonality)
-  ////////////
-
-//  size_t nelectrons = 0;
-//  for(Electron electron: fEvent.electrons()) {
-//    if(electron.pt() > 15 && std::abs(electron.eta()) < 2.1)
-//      ++nelectrons;
-//  }
-//  if(nelectrons > 0)
-//    return;
-//  cElectronVeto.increment();
-
-
-  const ElectronSelection::Data eData = fElectronSelection.analyze(fEvent);
-  if (eData.hasIdentifiedElectrons())
-    return;
-
-
-  ////////////
-  // 6) Tau ID SF
-  ////////////
-
-//  if (fEvent.isMC()) {
-//    fEventWeight.multiplyWeight(0.9);
-//  }
-
-  ////////////
-  // 6) Tau
-  ////////////
-
-
-
-//  const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
-//  if (!tauData.hasIdentifiedTaus())
-//    return;
-
-
-//  if (fEvent.isMC() && !tauData.isGenuineTau()) //if not genuine tau, reject the events (fake tau events are taken into account in QCDandFakeTau measurement)
-//    return;
-
-
-//  if(tauData.getSelectedTaus().size()<2)
-//    return;
-
-
-//  if(tauData.getSelectedTaus()[0].charge() == tauData.getSelectedTaus()[1].charge())
-//    return;
-
-
-
-  ////////////
   // 7) Jet selection
   ////////////
 
-//  const JetSelection::Data jetData = fJetSelection.analyze(fEvent, tauData.getSelectedTau());
-//  if (!jetData.passedSelection())
-//    return;
-
+  const JetSelection::Data jetData = fJetSelection.analyze(fEvent, tauData.getSelectedTau());
+  if (!jetData.passedSelection())
+    return;
 
 
 //  std::vector<Jet> selectedJets;
@@ -276,6 +314,13 @@ void Hplus2hwAnalysis::process(Long64_t entry) {
   // 9) BJet SF
   ////////////
 
+//  if (fEvent.isMC()) {
+//    fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
+//  }
+//  cBTaggingSFCounter.increment();
+//  fCommonPlots.fillControlPlotsAfterBtagSF(fEvent,jetData,bjetData);
+
+
   ////////////
   // 10) MET selection
   ////////////
@@ -291,31 +336,32 @@ void Hplus2hwAnalysis::process(Long64_t entry) {
   // All cuts passed
   ////////////
 
-//  if(tauData.getSelectedTaus()[0].charge() != tauData.getSelectedTaus()[1].charge()) {
- // for(unsigned int i=0; i<tauData.getSelectedTaus().size(); i++){
- //   hTauPt->Fill(tauData.getSelectedTaus()[i].pt());
-//    hTauPt->Fill(tauData.getSelectedTaus()[1].pt());
-//  }
-
-  for(unsigned int i=0; i<muData.getSelectedMuons().size(); i++){
-    hMuonPt->Fill(muData.getSelectedMuons()[i].pt());
+  for(unsigned int i=0; i<2; i++){
+    hTauPt->Fill(tauData.getSelectedTaus()[i].pt());
+    hTauEta->Fill(tauData.getSelectedTaus()[i].eta());
   }
 
-//  hNTau->Fill(tauData.getSelectedTaus().size());
-//  hNJet->Fill(jetData.getNumberOfSelectedJets());
+  hMuonPt->Fill(muData.getSelectedMuons()[0].pt());
+  hMuonEta->Fill(muData.getSelectedMuons()[0].eta());
 
-//  if(tauData.getSelectedTaus().size()>=2) {
-//  double myTransverseMass = TransverseMass::reconstruct(tauData.getSelectedTaus()[0],tauData.getSelectedTaus()[1],muData.getSelectedMuons()[0], METData.getMET());
-  double myTransverseMass = TransverseMass::reconstruct(muData.getSelectedMuons()[0],muData.getSelectedMuons()[1],muData.getSelectedMuons()[2],muData.getSelectedMuons()[3],muData.getSelectedMuons()[4], METData.getMET());
+  hNTau->Fill(tauData.getSelectedTaus().size());
+
+  hMET->Fill(METData.getMET().R());
+
+  hNJet->Fill(jetData.getNumberOfSelectedJets());
+
+  double myTransverseMass = TransverseMass::reconstruct(tauData.getSelectedTaus()[0],tauData.getSelectedTaus()[1],muData.getSelectedMuons()[0], METData.getMET());
+//  double myTransverseMass = TransverseMass::reconstruct(muData.getSelectedMuons()[0],muData.getSelectedMuons()[1],muData.getSelectedMuons()[2],muData.getSelectedMuons()[3],muData.getSelectedMuons()[4], METData.getMET());
   hTransverseMass->Fill(myTransverseMass);
-//  }
+
+
   cSelected.increment();
 
   ////////////
   // Fill final plots
   ////////////
 
-//  fCommonPlots.fillControlPlotsAfterAllSelections(fEvent);
+  fCommonPlots.fillControlPlotsAfterAllSelections(fEvent);
 
   ////////////
   // Finalize
