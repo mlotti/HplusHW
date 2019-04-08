@@ -1,6 +1,7 @@
 import HiggsAnalysis.NtupleAnalysis.tools.systematics as systematics
 
-DataCardName ='HplusToTauNu_13TeV'
+#DataCardName ='HplusToTauNu_13TeV'
+DataCardName ='HplusToHW_13TeV'
 
 ###########################
 ### SET MASS RANGE HERE ###
@@ -33,10 +34,10 @@ if HeavyAnalysis:
 # Options
 OptionIncludeSystematics=False # Include shape systematics (multicrabs must beproduced with doSystematics=True)
 OptionDoControlPlots= True #FIXME: If you want control plots, switch this to true!
-OptionUseWJetsHT = False # Use HT binned WJets samples instead of inclusive for WJets background
+OptionUseWJetsHT = True  # Use HT binned WJets samples instead of inclusive for WJets background
 OptionDoMergeEWKttbar = False #FIXME: if true, Wjets+DY+diboson into one background and for heavy H+, also merges ttbar and singleTop into one background
 BlindAnalysis=True
-OptionBlindThreshold=None # If signal exceeds this fraction of expected events, data is blinded; set to None to disable
+OptionBlindThreshold= 0.01# If signal exceeds this fraction of expected events, data is blinded; set to None to disable
 
 OptionMassShape="TransverseMass"
 #OptionMassShape="FullMass"
@@ -52,7 +53,7 @@ OptionCombineSingleColumnUncertainties=False # Makes limit running faster
 OptionCtrlPlotsAtMt=True # Produce control plots after all selections (all selections for transverse mass)
 OptionDisplayEventYieldSummary=True
 OptionNumberOfDecimalsInSummaries=1
-OptionLimitOnSigmaBr=False # Is automatically set to true for heavy H+
+OptionLimitOnSigmaBr=True # Is automatically set to true for heavy H+
 ToleranceForLuminosityDifference=0.05 # Tolerance for throwing error on luminosity difference (0.01=1 percent agreement is required)
 ToleranceForMinimumRate=0.0 # Tolerance for almost zero rate (columns with smaller rate are suppressed)
 MinimumStatUncertainty=0.5 # Minimum stat. uncertainty to set to bins with zero events
@@ -105,18 +106,21 @@ FakeRateCounter="EWKfaketaus:SelectedEvents"
 
 # Shape histogram definitions
 shapeHistoName=None
-#histoPathInclusive="ForDataDrivenCtrlPlots"
+histoPathInclusive="ForDataDrivenCtrlPlots"
 print "kaytetaan eri reittia puulle"
-histoPathInclusive="../Hplus2hwAnalysis_1500to3000_Run2016"
-#histoPathGenuineTaus="ForDataDrivenCtrlPlotsEWKGenuineTaus"
-histoPathGenuineTaus='../Hplus2hwAnalysis_1500to3000_Run2016' # genuine tau requirement already as part of event selection
-histoPathFakeTaus='../Hplus2hwAnalysis_1500to3000_Run2016'
+#histoPathInclusive="../Hplus2hwAnalysis_350to3000_Run2016"
+histoPathInclusive="ForDataDrivenCtrlPlots"
+histoPathGenuineTaus="ForDataDrivenCtrlPlots"
+#histoPathGenuineTaus='../Hplus2hwAnalysis_350to3000_Run2016' # genuine tau requirement already as part of event selection
+#histoPathFakeTaus='../Hplus2hwAnalysis_350to3000_Run2016'
+histoPathFakeTaus="ForDataDrivenCtrlPlots"
 
 if OptionMassShape =="TransverseMass":
-    #shapeHistoName="shapeTransverseMass"
+    shapeHistoName="shapeTransverseMass"
     #shapeHisto="ForDataDrivenCtrlPlotsEWKGenuineTaus/shapeTransverseMass"
     print "kaytetaan m_t:ta nyt"
-    shapeHistoName = "TransverseMass"
+#    shapeHistoName = "TransverseMass"
+#    shapeHistoName = "Njets_AfterAllSelections"
 elif OptionMassShape =="FullMass":
     raise Exception("Does not work")
     shapeHistoName="shapeInvariantMass"
@@ -139,7 +143,7 @@ Observation=ObservationInput(datasetDefinition="Data", shapeHistoName=shapeHisto
 
 ##############################################################################
 # Define systematics lists commmon to datasets
-myTrgSystematics=[] # Trigger tau part
+myTrgSystematics=["CMS_eff_t_trg_data"] # Trigger muon
 #                  "CMS_eff_met_trg_data","CMS_eff_met_trg_MC"] # Trigger MET part
 myTauIDSystematics=["CMS_eff_t"] #tau ID
 if not LightAnalysis and OptionIncludeSystematics:
@@ -148,7 +152,7 @@ if not LightAnalysis and OptionIncludeSystematics:
 #myTauMisIDSystematics=["CMS_fake_eToTau","CMS_fake_muToTau","CMS_fake_jetToTau"] # tau mis-ID
 myESSystematics=["CMS_scale_t","CMS_scale_j","CMS_res_j","CMS_scale_met"] # TES, JES, CMS_res_j, UES #FIXME
 myBtagSystematics=[] # b tag and mistag
-myTopSystematics=["CMS_Hptntj_topPtReweight"] # top pt reweighting
+myTopSystematics=[] #["CMS_Hptntj_topPtReweight"] # top pt reweighting
 myPileupSystematics=["CMS_pileup"] # CMS_pileup
 myLeptonVetoSystematics=["CMS_eff_e_veto"] # CMS_pileup
 
@@ -175,6 +179,7 @@ DataGroups=[]
 EmbeddingIdList=[]
 EWKFakeIdList=[]
 
+#signalTemplate=DataGroup(datasetType="Signal", histoPath=histoPathInclusive, shapeHistoName=shapeHistoName)
 signalTemplate=DataGroup(datasetType="Signal", histoPath=histoPathInclusive, shapeHistoName=shapeHistoName)
 mergeColumnsByLabel=[]
 
@@ -196,7 +201,7 @@ for mass in HeavyMassPoints:
     hx.setLabel("CMS_Hptntj_Hp"+str(mass)+"_a")
     hx.setLandSProcess(0)
     hx.setValidMassPoints(myMassList)
-    hx.setNuisances(myTauIDSystematics[:] #+myTauMisIDSystematics[:]
+    hx.setNuisances(myTrgSystematics[:]+myTauIDSystematics[:] #+myTauMisIDSystematics[:]
                     +myESSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                     +["lumi_13TeV"])
     if not OptionDoTBbarForHeavy:    
@@ -241,6 +246,7 @@ if OptionUseWJetsHT:
     WJetsDataset = "WJetsHT"
 
 if OptionGenuineTauBackgroundSource =="DataDriven":
+    print "You shouldn't be here"
     # EWK genuine taus from embedding
     myEmbDataDrivenNuisances=["CMS_EmbSingleMu_QCDcontam","CMS_EmbSingleMu_hybridCaloMET","CMS_Hptntj_taubkg_reweighting"] # EWK + ttbar with genuine taus
     EmbeddingIdList=[3]
@@ -260,7 +266,7 @@ else:
                                 datasetType="Embedding",
                                 datasetDefinition="TT",
                                 validMassPoints=MassPoints,
-                                nuisances=myTauIDSystematics[:]
+                                nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                                   +myTopSystematics+["CMS_scale_ttbar","CMS_pdf_ttbar","CMS_mass_ttbar","lumi_13TeV"]))
     DataGroups.append(DataGroup(label=labelPrefix+"W_t_genuine", landsProcess=4,
@@ -268,7 +274,7 @@ else:
                                 datasetType="Embedding", 
                                 datasetDefinition=WJetsDataset, # can be WJets or WJetsHT
                                 validMassPoints=MassPoints,
-                                nuisances=myTauIDSystematics[:]
+                                nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                                   +["CMS_scale_Wjets","CMS_pdf_Wjets","lumi_13TeV"]))
 #    DataGroups.append(DataGroup(label=labelPrefix+"Z_t_genuine", landsProcess=4,
@@ -284,7 +290,7 @@ else:
                                 datasetType="Embedding",
                                 datasetDefinition="SingleTop",
                                 validMassPoints=MassPoints,
-                                nuisances=myTauIDSystematics[:]
+                                nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                                   +["CMS_scale_singleTop","CMS_pdf_singleTop","lumi_13TeV"]))
     DataGroups.append(DataGroup(label=labelPrefix+"DY_t_genuine", landsProcess=6,
@@ -293,7 +299,7 @@ else:
                                 #datasetDefinition="DYJetsToLLHT",
                                 datasetDefinition="DYJetsToLL",
                                 validMassPoints=MassPoints,
-                                nuisances=myTauIDSystematics[:]
+                                nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                                   +["CMS_scale_DY","CMS_pdf_DY","lumi_13TeV"]))
     DataGroups.append(DataGroup(label=labelPrefix+"VV_t_genuine", landsProcess=7,
@@ -338,20 +344,20 @@ Nuisances=[]
 #=====tau ID and mis-ID
 # tau ID
 Nuisances.append(Nuisance(id="CMS_eff_t", label="tau-jet ID (no Rtau) uncertainty for genuine taus",
-    distr="lnN", function="Constant", value=0.04))
+    distr="lnN", function="Constant", value=0.1))
 Nuisances.append(Nuisance(id="CMS_eff_t_forQCD", label="tau-jet ID uncertainty for genuine taus",
-    distr="lnN", function="ConstantForQCD", value=0.04))
+    distr="lnN", function="ConstantForQCD", value=0.05))
 # tau ID high-pT
 if "CMS_eff_t_highpt" in myShapeSystematics:
     Nuisances.append(Nuisance(id="CMS_eff_t_highpt", label="tau-jet ID high-pt uncertainty for genuine taus",
         distr="shapeQ", function="ShapeVariation", systVariation="TauIDSyst"))       
-#=====tau and MET trg
-#if "CMS_eff_t_trg_data" in myShapeSystematics:
-#    Nuisances.append(Nuisance(id="CMS_eff_t_trg_data", label="tau+MET trg tau part data eff.",
-#        distr="shapeQ", function="ShapeVariation", systVariation="TauTrgEffData"))
-#else:
-#    Nuisances.append(Nuisance(id="CMS_eff_t_trg_data", label="APPROXIMATION for tau+MET trg tau part data eff.",
-#        distr="lnN", function="Constant", value=0.03))
+#=====muon trg
+if "CMS_eff_m_trg_data" in myShapeSystematics:
+    Nuisances.append(Nuisance(id="CMS_eff_t_trg_data", label="muon ID and trg eff.",
+        distr="shapeQ", function="ShapeVariation", systVariation="TauTrgEffData")) #FIXME: rename!
+else:
+    Nuisances.append(Nuisance(id="CMS_eff_t_trg_data", label="APPROXIMATION for muon ID and trg eff.",
+        distr="lnN", function="Constant", value=0.05))
 #if "CMS_eff_t_trg_MC" in myShapeSystematics:
 #    Nuisances.append(Nuisance(id="CMS_eff_t_trg_MC", label="tau+MET trg tau part MC eff.",
 #        distr="shapeQ", function="ShapeVariation", systVariation="TauTrgEffMC"))
@@ -373,8 +379,8 @@ if "CMS_eff_t_highpt" in myShapeSystematics:
 #=====lepton veto
 Nuisances.append(Nuisance(id="CMS_eff_e_veto", label="e veto",
     distr="lnN", function="Ratio",
-    numerator="passed e selection ()", # main counter name after electron veto
-    denominator="passed METFilter selection ()", # main counter name before electron and muon veto
+    numerator="passed e selection (Veto)", # main counter name after electron veto
+    denominator="Fake tau SF", # main counter name before electron and muon veto
     scaling=0.02
 ))
 #Nuisances.append(Nuisance(id="CMS_eff_m_veto", label="mu veto",
@@ -443,36 +449,36 @@ if "CMS_scale_t" in myShapeSystematics:
         distr="shapeQ", function="ShapeVariation", systVariation="TauES"))
 else:
     Nuisances.append(Nuisance(id="CMS_scale_t", label="APPROXIMATION for tau ES",
-        distr="lnN", function="Constant", value=0.06))
+        distr="lnN", function="Constant", value=0.05))
 # jet ES
 if "CMS_scale_j" in myShapeSystematics:
     Nuisances.append(Nuisance(id="CMS_scale_j", label="Jet energy scale",
         distr="shapeQ", function="ShapeVariation", systVariation="JES"))
 else:
     Nuisances.append(Nuisance(id="CMS_scale_j", label="APPROXIMATION for jet ES",
-        distr="lnN", function="Constant", value=0.03))
+        distr="lnN", function="Constant", value=0.05))
 # unclustered MET ES
 if "CMS_scale_met" in myShapeSystematics:
     Nuisances.append(Nuisance(id="CMS_scale_met", label="Unclustered MET energy scale",
         distr="shapeQ", function="ShapeVariation", systVariation="UES"))
 else:
     Nuisances.append(Nuisance(id="CMS_scale_met", label="APPROXIMATION for unclustered MET ES",
-        distr="lnN", function="Constant",value=0.03))
+        distr="lnN", function="Constant",value=0.05))
 # CMS_res_j
 if "CMS_res_j" in myShapeSystematics:
     Nuisances.append(Nuisance(id="CMS_res_j", label="Jet energy resolution",
         distr="shapeQ", function="ShapeVariation", systVariation="JER"))
 else:
     Nuisances.append(Nuisance(id="CMS_res_j", label="APPROXIMATION for CMS_res_j",
-        distr="lnN", function="Constant",value=0.04))
+        distr="lnN", function="Constant",value=0.05))
 
 #===== Top pt SF
-if "CMS_Hptntj_topPtReweight" in myShapeSystematics:
-    Nuisances.append(Nuisance(id="CMS_Hptntj_topPtReweight", label="top pT reweighting",
-        distr="shapeQ", function="ShapeVariation", systVariation="TopPt"))
-else:
-    Nuisances.append(Nuisance(id="CMS_Hptntj_topPtReweight", label="APPROXIMATION for top pT reweighting",
-        distr="lnN", function="Constant",value=0.25))
+#if "CMS_Hptntj_topPtReweight" in myShapeSystematics:
+#    Nuisances.append(Nuisance(id="CMS_Hptntj_topPtReweight", label="top pT reweighting",
+#        distr="shapeQ", function="ShapeVariation", systVariation="TopPt"))
+#else:
+#    Nuisances.append(Nuisance(id="CMS_Hptntj_topPtReweight", label="APPROXIMATION for top pT reweighting",
+#        distr="lnN", function="Constant",value=0.25))
 
 #===== Pileup
 if "CMS_pileup" in myShapeSystematics:
@@ -568,9 +574,9 @@ Nuisances.append(Nuisance(id="CMS_pdf_VV", label="diboson pdf uncertainty",
 
 
 # QCD MC
-Nuisances.append(Nuisance(id="xsect_QCD", label="QCD MC cross section",
-    distr="lnN", function="Constant",
-    value=systematics.getCrossSectionUncertainty("QCD").getUncertaintyDown()))
+#Nuisances.append(Nuisance(id="xsect_QCD", label="QCD MC cross section",
+#    distr="lnN", function="Constant",
+#    value=systematics.getCrossSectionUncertainty("QCD").getUncertaintyDown()))
 
 #===== Luminosity
 Nuisances.append(Nuisance(id="lumi_13TeV", label="lumi_13TeVnosity",
@@ -581,11 +587,11 @@ Nuisances.append(Nuisance(id="lumi_13TeV_forQCD", label="lumi_13TeVnosity",
     value=systematics.getLuminosityUncertainty("2016")))
 
 #===== QCD measurement
-if OptionIncludeSystematics:
-    Nuisances.append(Nuisance(id="CMS_Hptntj_FakeTauBG_templateFit", label="QCDInv: fit", 
-        distr="lnN", function="Constant", value=0.03))
-    Nuisances.append(Nuisance(id="CMS_Hptntj_QCDkbg_metshape", label="QCD met shape syst.",
-        distr="shapeQ", function="QCDShapeVariation", systVariation="QCDNormSource"))
+#if OptionIncludeSystematics:
+#    Nuisances.append(Nuisance(id="CMS_Hptntj_FakeTauBG_templateFit", label="QCDInv: fit", 
+#        distr="lnN", function="Constant", value=0.03))
+#    Nuisances.append(Nuisance(id="CMS_Hptntj_QCDkbg_metshape", label="QCD met shape syst.",
+#        distr="shapeQ", function="QCDShapeVariation", systVariation="QCDNormSource"))
 
 #===== Embedding
 #if OptionGenuineTauBackgroundSource == "DataDriven":
@@ -643,31 +649,30 @@ print "-----------------"
 from HiggsAnalysis.LimitCalc.InputClasses import ControlPlotInput
 ControlPlots=[]
 #EWKPath="ForDataDrivenCtrlPlotsEWKFakeTaus"
-#EWKPath="ForDataDrivenCtrlPlotsEWKGenuineTaus"
+EWKPath="ForDataDrivenCtrlPlotsEWKGenuineTaus"
 
-EWKPath="../Hplus2hwAnalysis_1500to3000_Run2016"
+#EWKPath="../Hplus2hwAnalysis_350to3000_Run2016"
 
 #NB! Binnings of these control plots are defined in NtupleAnalysis/python/tools/systematics.py: _dataDrivenCtrlPlotBinning
+
 ControlPlots.append(ControlPlotInput(
     title            = "TransverseMass",
-    histoName        = "TransverseMass",
-    details          = { "xlabel": "M_T",
+    histoName        = "shapeTransverseMass",
+    details          = { "xlabel": "m_{T}",
                          "ylabel": "Events",
                          "divideByBinWidth": True,
                          "unit": "",
                          "log": True,
                          "legendPosition": "NE",
                          "ratioLegendPosition": "right",
-                         "opts": {"ymin": 0.0009} }, blindedRange=[200, 1000], # specify range min,max if blinding applies to this control plot
+                         "opts": {"ymin": 0.0009} }, #blindedRange=[0, 2000], # specify range min,max if blinding applies to this control plot
 ))
-
-
 
 
 ControlPlots.append(ControlPlotInput(
     title            = "tauPt",
     histoName        = "tauPt",
-    details          = { "xlabel": "tauPt",
+    details          = { "xlabel": "#tau p_{T}",
                          "ylabel": "Events",
                          "divideByBinWidth": True,
                          "unit": "",
@@ -678,9 +683,74 @@ ControlPlots.append(ControlPlotInput(
 ))
 
 ControlPlots.append(ControlPlotInput(
-    title            = "muonPt",
-    histoName        = "muonPt",
-    details          = { "xlabel": "muonPt",
+    title            = "muPt",
+    histoName        = "muPt",
+    details          = { "xlabel": "#mu p_{T}",
+                         "ylabel": "Events",
+                         "divideByBinWidth": True,
+                         "unit": "",
+                         "log": True,
+                         "legendPosition": "NE",
+                         "ratioLegendPosition": "right",
+                         "opts": {"ymin": 0.0009} }
+))
+
+ControlPlots.append(ControlPlotInput(
+    title            = "muPt_afterMuonSelection",
+    histoName        = "muPt_afterMuonSelection",
+    details          = { "xlabel": "#mu p_{T}",
+                         "ylabel": "Events",
+                         "divideByBinWidth": True,
+                         "unit": "",
+                         "log": True,
+                         "legendPosition": "NE",
+                         "ratioLegendPosition": "right",
+                         "opts": {"ymin": 0.0009} }
+))
+
+ControlPlots.append(ControlPlotInput(
+    title            = "muEta_afterMuonSelection",
+    histoName        = "muEta_afterMuonSelection",
+    details          = { "xlabel": "#mu #eta",
+                         "ylabel": "Events",
+                         "divideByBinWidth": True,
+                         "unit": "",
+                         "log": True,
+                         "legendPosition": "NE",
+                         "ratioLegendPosition": "right",
+                         "opts": {"ymin": 0.0009} }
+))
+
+ControlPlots.append(ControlPlotInput(
+    title            = "MET",
+    histoName        = "MET",
+    details          = { "xlabel": "E_{T}^{miss}",
+                         "ylabel": "Events",
+                         "divideByBinWidth": True,
+                         "unit": "",
+                         "log": True,
+                         "legendPosition": "NE",
+                         "ratioLegendPosition": "right",
+                         "opts": {"ymin": 0.0009} }
+))
+
+ControlPlots.append(ControlPlotInput(
+    title            = "muEta",
+    histoName        = "muEta",
+    details          = { "xlabel": "#mu #eta",
+                         "ylabel": "Events",
+                         "divideByBinWidth": True,
+                         "unit": "",
+                         "log": True,
+                         "legendPosition": "NE",
+                         "ratioLegendPosition": "right",
+                         "opts": {"ymin": 0.0009} }
+))
+
+ControlPlots.append(ControlPlotInput(
+    title            = "tauEta",
+    histoName        = "tauEta",
+    details          = { "xlabel": "#tau #eta",
                          "ylabel": "Events",
                          "divideByBinWidth": True,
                          "unit": "",
@@ -715,7 +785,6 @@ ControlPlots.append(ControlPlotInput(
                          "ratioLegendPosition": "right",
                          "opts": {"ymin": 0.0009} }
 ))
-'''
 ControlPlots.append(ControlPlotInput(
     title            = "NVertices_AfterStandardSelections",
     histoName        = "NVertices_AfterStandardSelections",
@@ -1046,7 +1115,7 @@ if OptionCtrlPlotsAtMt:
           "ratioLegendPosition": "right",
           "opts": {"ymin": 0.0009} }))
     ControlPlots.append(ControlPlotInput(title="SelectedTau_pT_AfterAllSelections",
-        histoName="SelectedTau_pT_AfterAllSelections",
+        histoName="TESTSelectedTau_pT_AfterAllSelections",
         details={ "xlabel": "Selected #tau ^{}p_{T}",
           "ylabel": "Events/^{}#Deltap_{T}",
           "divideByBinWidth": True,
@@ -1328,4 +1397,4 @@ if OptionCtrlPlotsAtMt:
           "log": True,
           "legendPosition": "SE",
           "opts": {"ymin": 0.09} }))
-'''
+

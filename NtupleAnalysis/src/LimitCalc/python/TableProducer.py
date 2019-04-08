@@ -1059,7 +1059,7 @@ class TableProducer:
             if not (self._config.OptionLimitOnSigmaBr or m > 179):
                 myOutput += "Signal, mH+=%3d GeV, Br(t->bH+)=%.2f: %s"%(m,myBr,self.getResultString(HW, self.formatStr, self.myPrecision))
             else:
-                myOutput += "Signal, mH+=%3d GeV, sigma x Br=1 pb: %s"%(m,self.getResultString(HW, self.formatStr, self.myPrecision))
+                myOutput += "Signal, mH+=%3d GeV, sigma x Br=1 fb: %s"%(m,self.getResultString(HW, self.formatStr, self.myPrecision))
             myOutput += "Backgrounds:\n"
             if containsQCDdataset:
                 myOutput += "                           Multijets: %s"%self.getResultString(QCD, self.formatStr, self.myPrecision)
