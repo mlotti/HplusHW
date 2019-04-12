@@ -321,7 +321,10 @@ datasetsSignalHW = []
 #mh 350
 #https://cmsweb.cern.ch/das/request?input=%2FCRAB_PrivateMC%2Fmlotti-Hplus2hw_2ta_PAT_m350_f-71a58a62b6d71fe0f402eda209b9b80f%2FUSER&instance=prod%2Fphys03
 #older datasetsSignalHW.append(Dataset('/CRAB_PrivateMC/mlotti-Hplus2hw_2ta_PAT_m350_f-71a58a62b6d71fe0f402eda209b9b80f/USER', dbs="phys03", dataVersion="80Xmc", dasQuery=das))
-datasetsSignalHW.append(Dataset('/CRAB_PrivateMC/mlotti-Hplus2hw_2ta_PAT_mhp350_mh150-71a58a62b6d71fe0f402eda209b9b80f/USER', dbs="phys03", dataVersion="80Xmc", dasQuery=das))
+#datasetsSignalHW.append(Dataset('/CRAB_PrivateMC/mlotti-Hplus2hw_2ta_PAT_mhp350_mh150-71a58a62b6d71fe0f402eda209b9b80f/USER', dbs="phys03", dataVersion="80Xmc", dasQuery=das))
+
+#NLO
+datasetsSignalHW.append(Dataset('/CRAB_PrivateMC/mlotti-Hplus2hw_2ta_PAT_mhp300_mh200_noMatch_2-b023a05347da3c2a313d219710ff54e9/USER', dbs="phys03", dataVersion="80Xmc", dasQuery=das))
 
 #mh 1500
 #datasetsSignalHW.append(Dataset('/CRAB_PrivateMC/mlotti-Hplus2hw_2ta_PAT_m1500_f-71a58a62b6d71fe0f402eda209b9b80f/USER', dbs="phys03", dataVersion="80Xmc", dasQuery=das))
