@@ -89,6 +89,11 @@ void TriggerDumper::book(const edm::Run& iRun, HLTConfigProvider hltConfig){
   theTree->Branch("HLTTau_phi",&HLTTau_phi);
   theTree->Branch("HLTTau_e",&HLTTau_e);
 
+  theTree->Branch("HLTMuon_pt",&HLTMuon_pt);  
+  theTree->Branch("HLTMuon_eta",&HLTMuon_eta);
+  theTree->Branch("HLTMuon_phi",&HLTMuon_phi);
+  theTree->Branch("HLTMuon_e",&HLTMuon_e);
+
   // theTree->Branch("HLTJet_pt" , &HLTJet_pt);
   // theTree->Branch("HLTJet_eta", &HLTJet_eta); 
   // theTree->Branch("HLTJet_phi", &HLTJet_phi);
@@ -270,6 +275,26 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  //std::cout << "Trigger Tau " << patTriggerObject.p4().Pt() << std::endl;
 	}//triggerTau
 
+
+
+	////////
+	// Trigger object is of type Muon
+        if(patTriggerObject.id(trigger::TriggerMuon)){
+          bool fired = false;
+          for(size_t i = 0; i < trgMatchPaths.size(); ++i){
+            if(patTriggerObject.hasPathName( trgMatchPaths[i], false, true )) fired = true;
+          }
+          if(fired){
+            HLTMuon_pt.push_back(patTriggerObject.p4().Pt());
+            HLTMuon_eta.push_back(patTriggerObject.p4().Eta());
+            HLTMuon_phi.push_back(patTriggerObject.p4().Phi());
+            HLTMuon_e.push_back(patTriggerObject.p4().E());
+          }
+          //std::cout << "Trigger Muon " << patTriggerObject.p4().Pt() << std::endl;
+        }//triggerMuon
+
+	////////
+
 	// // Trigger object is of type Jet
 	// if(patTriggerObject.id(trigger::TriggerJet)){
 	//   bool fired = false;
@@ -444,6 +469,11 @@ void TriggerDumper::reset(){
     HLTTau_phi.clear();
     HLTTau_e.clear();
 
+    HLTMuon_pt.clear();
+    HLTMuon_eta.clear();
+    HLTMuon_phi.clear();
+    HLTMuon_e.clear();
+
     // HLTJet_pt.clear();
     // HLTJet_eta.clear();
     // HLTJet_phi.clear();
@@ -527,3 +557,4 @@ bool TriggerDumper::isCorrectObject(int id,std::string trgObject){
   if(trgObject.find(sid) < trgObject.length()) return true;
   return false;
 }
+
