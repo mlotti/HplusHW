@@ -64,6 +64,11 @@ private:
 
   Count cSelected;
 
+  double drMuTau1 = 0;
+
+  double drMuTau2 = 0;
+
+  double drTauTau = 0;
 
   // Non-common histograms
 
@@ -79,8 +84,9 @@ private:
   WrappedTH1 *hMuonEta_afterMuonSelection;
 
   WrappedTH1 *hNTau;
-//  WrappedTH1 *hTauPt2;
+  WrappedTH1 *hTauCharge;
 
+  WrappedTH1 *hCheck;
   WrappedTH1 *hTransverseMass;
   // WrappedTH1 *hTransverseMass_ttRegion;
   // WrappedTH1 *hTransverseMass_WRegion;
@@ -149,6 +155,9 @@ void Hplus2hwAnalysis::book(TDirectory *dir) {
 
   hNJet = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "nJet", "# of jets", 10, 0, 10);
   hNTau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "nTau", "# of Selected taus", 10, 0, 10);
+  hTauCharge = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "tauCharge", "charge of taus", 6,-3, 3);
+
+  hCheck = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "OS_tau_with_mu_is_genuine", "OS tau with mu is genuine", 6,-3, 3);
 
   hTransverseMass = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass", "TransverseMass", 200, 0, 2000);
 
@@ -191,6 +200,14 @@ void Hplus2hwAnalysis::process(Long64_t entry) {
     return;
 
   ////////////
+  // MET filters (to remove events with spurious sources of fake MET)
+  ////////////
+
+  const METFilterSelection::Data metFilterData = fMETFilterSelection.analyze(fEvent);
+  if (!metFilterData.passedSelection()) 
+    return;
+
+  ////////////
   // 5) Muon
   ////////////
 
@@ -198,7 +215,7 @@ void Hplus2hwAnalysis::process(Long64_t entry) {
   if(!(muData.hasIdentifiedMuons()))
     return;
 
-  if (muData.getSelectedMuons().size() < 1)
+  if (muData.getSelectedMuons().size() != 1)
     return;
 
   ////////////
@@ -229,14 +246,33 @@ void Hplus2hwAnalysis::process(Long64_t entry) {
     return;
 
 
-//  if (fEvent.isMC() && !tauData.isGenuineTau()) //if not genuine tau, reject the events (fake tau events are taken into account in QCDandFakeTau measurement)
-//    return;
-
-
-  if(tauData.getSelectedTaus().size()<2)
+  if(tauData.getSelectedTaus().size() != 2)
     return;
 
   if(tauData.getSelectedTaus()[0].charge() == tauData.getSelectedTaus()[1].charge())
+    return;
+
+  if (fEvent.isMC() && !tauData.getSelectedTaus()[0].isGenuineTau()) {
+    return;
+  }
+
+  if (fEvent.isMC() && !tauData.getSelectedTaus()[1].isGenuineTau()) {
+    return;
+  }
+
+/*
+  drTauTau = ROOT::Math::VectorUtil::DeltaR(tauData.getSelectedTaus()[0].p4(),tauData.getSelectedTaus()[1].p4());
+  if(drTauTau < 0.5)
+    return;
+
+*/
+  // make sure that the taus are not too close to muon
+  drMuTau1 = ROOT::Math::VectorUtil::DeltaR(muData.getSelectedMuons()[0].p4(),tauData.getSelectedTaus()[0].p4());
+  if(drMuTau1 < 0.5)
+    return;
+
+  drMuTau2 = ROOT::Math::VectorUtil::DeltaR(muData.getSelectedMuons()[0].p4(),tauData.getSelectedTaus()[1].p4());
+  if(drMuTau2 < 0.5)
     return;
 
   cOverTwoTausCounter.increment();
@@ -263,6 +299,15 @@ void Hplus2hwAnalysis::process(Long64_t entry) {
     cFakeTauSFCounter.increment();
   }
 
+
+  if(tauData.getSelectedTaus()[0].decayMode()>1 && tauData.getSelectedTaus()[0].decayMode()<10) {
+    return;
+  }
+
+  if(tauData.getSelectedTaus()[1].decayMode()>1 && tauData.getSelectedTaus()[1].decayMode()<10) {
+    return;
+  }
+
   ////////////
   // 4) Electron veto (Fully hadronic + orthogonality)
   ////////////
@@ -273,13 +318,6 @@ void Hplus2hwAnalysis::process(Long64_t entry) {
 
 
 
-  ////////////
-  // MET filters (to remove events with spurious sources of fake MET)
-  ////////////
-
-  const METFilterSelection::Data metFilterData = fMETFilterSelection.analyze(fEvent);
-  if (!metFilterData.passedSelection()) 
-    return;
 
 //  fCommonPlots.fillControlPlotsAfterMETFilter(fEvent);
 
@@ -287,19 +325,10 @@ void Hplus2hwAnalysis::process(Long64_t entry) {
   // 7) Jet selection
   ////////////
 
-  const JetSelection::Data jetData = fJetSelection.analyze(fEvent, tauData.getSelectedTau());
+/*  const JetSelection::Data jetData = fJetSelection.analyze(fEvent, tauData.getSelectedTau());
   if (!jetData.passedSelection())
     return;
-
-
-//  std::vector<Jet> selectedJets;
-//  for(Jet jet: fEvent.jets()) {
-//    if(jet.pt() > 20 && std::abs(jet.eta()) < 2.1)
-//      selectedJets.push_back(jet);
-//  }
-//  if(selectedJets.size() < 3)
-//    return;
-//  cJetSelection.increment();
+*/
 
   ////////////
   // 8) BJet selection
@@ -336,9 +365,24 @@ void Hplus2hwAnalysis::process(Long64_t entry) {
   // All cuts passed
   ////////////
 
+  // check if the tau lepton that has the SS as the muon is fake or not
+
+  if (fEvent.isMC()) {
+    if (tauData.getSelectedTaus()[0].charge() != muData.getSelectedMuons()[0].charge() && tauData.getSelectedTaus()[0].isGenuineTau()) {
+      hCheck->Fill(1);
+    } else if (tauData.getSelectedTaus()[1].charge() != muData.getSelectedMuons()[0].charge() && tauData.getSelectedTaus()[1].isGenuineTau()) {
+      hCheck->Fill(1);
+    } else {
+      hCheck->Fill(-1); //tau is SS with the muon and that tau is NOT genuine
+    }
+  }
+
+//
+
   for(unsigned int i=0; i<2; i++){
     hTauPt->Fill(tauData.getSelectedTaus()[i].pt());
     hTauEta->Fill(tauData.getSelectedTaus()[i].eta());
+    hTauCharge->Fill(tauData.getSelectedTaus()[i].charge());
   }
 
   hMuonPt->Fill(muData.getSelectedMuons()[0].pt());
@@ -348,7 +392,7 @@ void Hplus2hwAnalysis::process(Long64_t entry) {
 
   hMET->Fill(METData.getMET().R());
 
-  hNJet->Fill(jetData.getNumberOfSelectedJets());
+//  hNJet->Fill(jetData.getNumberOfSelectedJets());
 
   double myTransverseMass = TransverseMass::reconstruct(tauData.getSelectedTaus()[0],tauData.getSelectedTaus()[1],muData.getSelectedMuons()[0], METData.getMET());
 //  double myTransverseMass = TransverseMass::reconstruct(muData.getSelectedMuons()[0],muData.getSelectedMuons()[1],muData.getSelectedMuons()[2],muData.getSelectedMuons()[3],muData.getSelectedMuons()[4], METData.getMET());
