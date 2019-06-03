@@ -266,7 +266,7 @@ lhcAsymptoticRminBrLimit = "0.0" # plain number
 
 ## Default "Rmax" parameter for LHC-CLs (asymptotic)
 
-lhcAsymptoticRmaxSigmaBr = "1.0" # pb
+lhcAsymptoticRmaxSigmaBr = "100.0" # pb
 
 lhcAsymptoticRmaxBrLimit = "0.03" # plain number (updated to 0.05 from 0.03 in 2014 paper due to higher limits)
 

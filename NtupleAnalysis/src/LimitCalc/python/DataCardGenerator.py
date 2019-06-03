@@ -140,7 +140,7 @@ class DatasetMgrCreatorManager:
             #    myProperty = myDsetMgr.getAllDatasets()[0].getProperty("analysisName")
 
         # Sanity check for luminosity
-        #self._checkLuminosityMatching()
+#        self._checkLuminosityMatching()
         return
 
     
@@ -316,8 +316,8 @@ class DatasetMgrCreatorManager:
         same for all dataset managers
         '''
         # For-loop: All lumis
-        #for i, lumi in enumerate(self._luminosities, 0):
-        #    self.Verbose("Lumi for dataset manager \"%s\" is set to %.1f 1/pb" % (self.getDatasetMgrLabel(i), lumi), i==0)
+        for i, lumi in enumerate(self._luminosities, 0):
+            self.Verbose("Lumi for dataset manager \"%s\" is set to %.1f 1/pb" % (self.getDatasetMgrLabel(i), lumi), i==0)
 
         # Compare luminosities to signal analysis
         if len(self._luminosities) == 0:

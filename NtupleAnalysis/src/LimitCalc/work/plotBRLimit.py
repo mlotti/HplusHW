@@ -151,8 +151,8 @@ def doBRlimit(limits, unblindedStatus, opts, log=False):
     if log:
         name += "_log"
         if limits.isHeavyStatus:
-            ymin = 1e-3
-            ymax = 10.0
+            ymin = 0.5
+            ymax = 15000.0
             if limit.BRassumption != "":
                 ymax = 10.0
         else:
@@ -170,7 +170,7 @@ def doBRlimit(limits, unblindedStatus, opts, log=False):
 
     if limits.isHeavyStatus:
         if limit.BRassumption != "":
-            plot.frame.GetYaxis().SetTitle("95% CL limit for #sigma_{H^{+}} (pb)")
+            plot.frame.GetYaxis().SetTitle("95% CL limit for #sigma_{H^{+}} (fb)")
         else:            
             plot.frame.GetYaxis().SetTitle(limit.sigmaBRlimit)
     else:

@@ -1,10 +1,13 @@
 import FWCore.ParameterSet.Config as cms
 
 skim = cms.EDFilter("Hplus2hwAnalysisSkim",
-#    TriggerResults = cms.InputTag("TriggerResults::HLT"),
-#    HLTPaths	   = cms.vstring(
-#        "HLT_IsoMu22_eta2p1_v"
-#    ),
+    TriggerResults = cms.InputTag("TriggerResults::HLT"),
+    HLTPaths	   = cms.vstring(
+        "HLT_IsoMu24_v",
+	"HLT_IsoTkMu24_v"
+    ),
+
+    src   = cms.InputTag("externalLHEProducer"),
 
     JetCollection	= cms.InputTag("slimmedJets"),
 

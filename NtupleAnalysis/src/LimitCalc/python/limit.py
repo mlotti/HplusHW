@@ -120,7 +120,7 @@ def massUnit():
 def useParentheses():
     global BRlimit, sigmaBRlimit
     BRlimit      = "%s(t#rightarrowH^{+}b)#times%s(%s)" % (BR, BR, hplusDecayMode)
-    sigmaBRlimit = "#sigma(H^{+})#times%s(%s) (pb)" % (BR, hplusDecayMode)
+    sigmaBRlimit = "#sigma(H^{+})#times%s(%s) (fb)" % (BR, hplusDecayMode)
     return
 
     
@@ -128,10 +128,10 @@ def useSubscript(HToTB=False):
     global BRlimit, sigmaBRlimit
     if HToTB:
         BRlimit      = " %s_{t#rightarrowH^{+}b}#times%s_{%s}" % (BR, BR, hplusDecayModeHtb)
-        sigmaBRlimit = "#sigma_{H^{+}}#times%s_{%s} (pb)" % (BR, hplusDecayModeHtb)
+        sigmaBRlimit = "#sigma_{H^{+}}#times%s_{%s} (fb)" % (BR, hplusDecayModeHtb)
     else:
         BRlimit      = "%s_{t#rightarrowH^{+}b}#times%s_{%s}" % (BR, BR, hplusDecayMode)
-        sigmaBRlimit = "#sigma_{H^{+}}#times%s_{%s} (pb)" % (BR, hplusDecayMode)
+        sigmaBRlimit = "#sigma_{H^{+}}#times%s_{%s} (fb)" % (BR, hplusDecayMode)
     return
 
 useSubscript()

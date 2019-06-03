@@ -24,14 +24,14 @@ dataVersion = "80Xmc"
 options, dataVersion = getOptionsDataVersion(dataVersion)
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(2)
+    input = cms.untracked.int32(10)
 )
 
 
 process.load("FWCore/MessageService/MessageLogger_cfi")
 process.MessageLogger.categories.append("TriggerBitCounter")
 process.MessageLogger.cerr.FwkReport.reportEvery = 10000
-process.MessageLogger.cerr.TriggerBitCounter = cms.untracked.PSet(limit = cms.untracked.int32(10))
+process.MessageLogger.cerr.TriggerBitCounter = cms.untracked.PSet(limit = cms.untracked.int32(1000))
 
 
 
@@ -47,6 +47,7 @@ process.options = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
 #     'file:cHiggs_13TeV_TuneCUETP8M1_cfi_GEN_SIM_RECOBEFMIX_DIGIPREMIX_S2_DATAMIX_L1_DIGI2RAW_L1Reco_RECO_HLT_PAT.root'
+#     '/store/user/mlotti/CRAB_PrivateMC/CRAB3_Hplus_PAT_1/180830_140204/0000/cHiggs_13TeV_TuneCUETP8M1_cfi_GEN_SIM_RECOBEFMIX_DIGIPREMIX_S2_DATAMIX_L1_DIGI2RAW_L1Reco_RECO_HLT_PAT_1.root'
 #    '/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/0693E0E7-97BE-E611-B32F-0CC47A78A3D8.root',
 #    '/store/data/Run2016B/Tau/MINIAOD/PromptReco-v2/000/273/150/00000/64EFFDF2-D719-E611-A0C3-02163E01421D.root',
 #    '/store/user/mlotti/MinBias/CRAB3_test5_PAT/180531_132305/0000/cHiggs_13TeV_TuneCUETP8M1_cfi_GEN_SIM_RECOBEFMIX_DIGIPREMIX_S2_DATAMIX_L1_DIGI2RAW_L1Reco_RECO_HLT_PAT_1.root',
@@ -55,9 +56,20 @@ process.source = cms.Source("PoolSource",
 #     '/store/user/mlotti/CRAB_PrivateMC/CRAB3_Hplus_PAT/180613_123703/0000/cHiggs_13TeV_TuneCUETP8M1_cfi_GEN_SIM_RECOBEFMIX_DIGIPREMIX_S2_DATAMIX_L1_DIGI2RAW_L1Reco_RECO_HLT_PAT_2.root'
 #	'/store/mc/RunIISummer16MiniAODv2/ChargedHiggs_HplusTB_HplusToTauNu_M-200_13TeV_amcatnlo_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/066DC28C-02CB-E611-B4F0-5065F382B2D1.root'
 
-     '/store/user/mlotti/CRAB_PrivateMC/CRAB3_Hplus_PAT/180613_123703/0000/cHiggs_13TeV_TuneCUETP8M1_cfi_GEN_SIM_RECOBEFMIX_DIGIPREMIX_S2_DATAMIX_L1_DIGI2RAW_L1Reco_RECO_HLT_PAT_11.root' #real
+#     '/store/user/mlotti/CRAB_PrivateMC/CRAB3_Hplus_PAT/180613_123703/0000/cHiggs_13TeV_TuneCUETP8M1_cfi_GEN_SIM_RECOBEFMIX_DIGIPREMIX_S2_DATAMIX_L1_DIGI2RAW_L1Reco_RECO_HLT_PAT_11.root' #real
 #     '/store/data/Run2016H/Tau/MINIAOD/03Feb2017_ver2-v1/100000/00A17AC6-8AEB-E611-9A86-A0369F83627E.root',
-#     '/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/0693E0E7-97BE-E611-B32F-0CC47A78A3D8.root'
+     '/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/0693E0E7-97BE-E611-B32F-0CC47A78A3D8.root'
+#      '/store/user/mlotti/CRAB_PrivateMC/CRAB3_Hplus_PAT_1/180911_130929/0000/cHiggs_13TeV_TuneCUETP8M1_cfi_GEN_SIM_RECOBEFMIX_DIGIPREMIX_S2_DATAMIX_L1_DIGI2RAW_L1Reco_RECO_HLT_PAT_1.root',
+#      '/store/user/mlotti/CRAB_PrivateMC/CRAB3_Hplus_PAT_2/180911_131520/0000/cHiggs_13TeV_TuneCUETP8M1_cfi_GEN_SIM_RECOBEFMIX_DIGIPREMIX_S2_DATAMIX_L1_DIGI2RAW_L1Reco_RECO_HLT_PAT_1.root',
+#      '/store/user/mlotti/CRAB_PrivateMC/CRAB3_Hplus_PAT_3/180911_131616/0000/cHiggs_13TeV_TuneCUETP8M1_cfi_GEN_SIM_RECOBEFMIX_DIGIPREMIX_S2_DATAMIX_L1_DIGI2RAW_L1Reco_RECO_HLT_PAT_1.root',
+#      '/store/user/mlotti/CRAB_PrivateMC/CRAB3_Hplus_PAT_4/180911_131722/0000/cHiggs_13TeV_TuneCUETP8M1_cfi_GEN_SIM_RECOBEFMIX_DIGIPREMIX_S2_DATAMIX_L1_DIGI2RAW_L1Reco_RECO_HLT_PAT_1.root',
+#      '/store/user/mlotti/CRAB_PrivateMC/CRAB3_Hplus_PAT_5/180911_131853/0000/cHiggs_13TeV_TuneCUETP8M1_cfi_GEN_SIM_RECOBEFMIX_DIGIPREMIX_S2_DATAMIX_L1_DIGI2RAW_L1Reco_RECO_HLT_PAT_1.root',
+#      '/store/user/mlotti/CRAB_PrivateMC/CRAB3_Hplus_PAT_6/180911_131948/0000/cHiggs_13TeV_TuneCUETP8M1_cfi_GEN_SIM_RECOBEFMIX_DIGIPREMIX_S2_DATAMIX_L1_DIGI2RAW_L1Reco_RECO_HLT_PAT_1.root',
+#      '/store/user/mlotti/CRAB_PrivateMC/CRAB3_Hplus_PAT_7/180911_132140/0000/cHiggs_13TeV_TuneCUETP8M1_cfi_GEN_SIM_RECOBEFMIX_DIGIPREMIX_S2_DATAMIX_L1_DIGI2RAW_L1Reco_RECO_HLT_PAT_1.root',
+#      '/store/user/mlotti/CRAB_PrivateMC/CRAB3_Hplus_PAT_8/180911_132807/0000/cHiggs_13TeV_TuneCUETP8M1_cfi_GEN_SIM_RECOBEFMIX_DIGIPREMIX_S2_DATAMIX_L1_DIGI2RAW_L1Reco_RECO_HLT_PAT_1.root',
+#      '/store/user/mlotti/CRAB_PrivateMC/CRAB3_Hplus_PAT_10/180911_133053/0000/cHiggs_13TeV_TuneCUETP8M1_cfi_GEN_SIM_RECOBEFMIX_DIGIPREMIX_S2_DATAMIX_L1_DIGI2RAW_L1Reco_RECO_HLT_PAT_1.root',
+#      '/store/user/mlotti/CRAB_PrivateMC/CRAB3_Hplus_PAT_11/180911_133146/0000/cHiggs_13TeV_TuneCUETP8M1_cfi_GEN_SIM_RECOBEFMIX_DIGIPREMIX_S2_DATAMIX_L1_DIGI2RAW_L1Reco_RECO_HLT_PAT_1.root'
+#       '/store/user/mlotti/CRAB_PrivateMC/Hplus2hw_4l_PAT_m350_f/181120_122629/0000/cHiggs_13TeV_TuneCUETP8M1_cfi_GEN_SIM_RECOBEFMIX_DIGIPREMIX_S2_DATAMIX_L1_DIGI2RAW_L1Reco_RECO_HLT_PAT_1.root'
     )
 )
 
@@ -101,25 +113,29 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
         TopPtProducer = cms.InputTag("TopPtProducer"),
     ),
 
-#    Trigger = cms.PSet(
-#        TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess())),
-#        TriggerBits = cms.vstring(
+    Trigger = cms.PSet(
+        TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess())),
+        TriggerBits = cms.vstring(
+	     "HLT_IsoMu24_v",
+	     "HLT_IsoTkMu24_v"
 #	     "HLT_IsoMu22_eta2p1_v"
-#        ),
-#	L1Extra = cms.InputTag("l1extraParticles:MET"),
-#        L1EtSumObjects = cms.InputTag("caloStage2Digis:EtSum"),
-#        TriggerObjects = cms.InputTag("selectedPatTrigger"),
-#        TriggerMatch = cms.untracked.vstring(
-#	     "HLT_IsoMu22_eta2p1" 
-#        ),
-#	TriggerPrescales = cms.untracked.PSet(
-#            src   = cms.InputTag("patTrigger",""),
-#            paths = cms.vstring(
-#		"HLT_IsoMu22_eta2p1_v" 
-#            )
-#	),
-#	filter = cms.untracked.bool(False)
-#    ),
+        ),
+	L1Extra = cms.InputTag("l1extraParticles:MET"),
+        L1EtSumObjects = cms.InputTag("caloStage2Digis:EtSum"),
+        TriggerObjects = cms.InputTag("selectedPatTrigger"),
+        TriggerMatch = cms.untracked.vstring(
+	     "HLT_IsoMu24_v"
+#	     "HLT_IsoMu22_eta2p1_v" 
+        ),
+	TriggerPrescales = cms.untracked.PSet(
+            src   = cms.InputTag("patTrigger",""),
+            paths = cms.vstring(
+		"HLT_IsoMu24_v" 
+#	        "HLT_IsoMu22_eta2p1_v"
+            )
+	),
+	filter = cms.untracked.bool(False)
+    ),
 
     METNoiseFilter = process.METNoiseFilter,
     Taus      = process.Taus,
@@ -182,7 +198,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 process.load("HiggsAnalysis.MiniAOD2TTree.Hplus2hwAnalysisSkim_cfi")
 process.skimCounterAll        = cms.EDProducer("HplusEventCountProducer")
 process.skimCounterPassed     = cms.EDProducer("HplusEventCountProducer")
-#process.skim.TriggerResults   = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess()))
+process.skim.TriggerResults   = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess()))
 
 # === Setup customizations
 produceCustomisations(process,dataVersion.isData()
