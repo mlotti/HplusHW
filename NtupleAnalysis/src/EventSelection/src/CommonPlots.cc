@@ -1162,11 +1162,25 @@ void CommonPlots::fillControlPlotsAfterTauSelection(const Event& event, const Ta
   }
   if (usesAntiIsolatedTaus()) {
     if (data.hasAntiIsolatedTaus()) {
-      bIsGenuineTau = data.getAntiIsolatedTauIsGenuineTau();
+      if (data.getAntiIsolatedTaus().size()==1) {
+//        bIsGenuineTau = data.getAntiIsolatedTauIsGenuineTau();
+	bIsGenuineTau = data.getAntiIsolatedTaus()[0].isGenuineTau();
+      } else if (data.getAntiIsolatedTaus()[0].isGenuineTau() || data.getAntiIsolatedTaus()[1].isGenuineTau()) {
+	bIsGenuineTau = true;
+      } else {
+	bIsGenuineTau = false;
+      }
     }
   } else {
     if (data.hasIdentifiedTaus()) {
-      bIsGenuineTau = data.isGenuineTau();
+//      bIsGenuineTau = data.isGenuineTau();
+      if (data.getSelectedTaus().size()==1) {
+        bIsGenuineTau = data.getSelectedTaus()[0].isGenuineTau();
+      } else if (data.getSelectedTaus()[0].isGenuineTau() || data.getSelectedTaus()[1].isGenuineTau()) {
+        bIsGenuineTau = true;
+      } else {
+	bIsGenuineTau = false;
+      }
     }
   }
 }
@@ -1548,9 +1562,22 @@ void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event, bool wi
   if (withoutTau == false)
     {
       if (usesAntiIsolatedTaus()) {
-	myTransverseMass = TransverseMass::reconstruct(fTauData.getAntiIsolatedTau(), fMETData.getMET());
+//        if (fTauData.getAntiIsolatedTaus().size()>0) {
+//	myTransverseMass = TransverseMass::reconstruct(fTauData.getAntiIsolatedTau(), fMETData.getMET());
+
+        if (fTauData.getAntiIsolatedTaus().size()>=2) {
+          myTransverseMass = TransverseMass::reconstruct(fTauData.getAntiIsolatedTaus()[0],fTauData.getAntiIsolatedTaus()[1],fMuonData.getSelectedMuons()[0], fMETData.getMET());
+        }
+        if (fTauData.getAntiIsolatedTaus().size()==1) {
+          myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTaus()[0],fTauData.getAntiIsolatedTaus()[0],fMuonData.getSelectedMuons()[0], fMETData.getMET());
+        }
+
+//        myTransverseMass = TransverseMass::reconstruct(fLooseTauData.getSelectedTaus()[0],fLooseTauData.getSelectedTaus()[0],fMuonData.getSelectedMuons()[0], fMETData.getMET());
+
       } else {
-	myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTau(), fMETData.getMET());
+//	myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTau(), fMETData.getMET());
+        myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTaus()[0],fTauData.getSelectedTaus()[1],fMuonData.getSelectedMuons()[0], fMETData.getMET());
+
       }
 
       // Create the up and down variation for tau ID shape

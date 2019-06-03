@@ -675,7 +675,6 @@ def _normalizeToFactor(h, f):
     ROOT.gErrorIgnoreLevel = ROOT.kError
     h.Sumw2() # errors are also scaled after this call 
     ROOT.gErrorIgnoreLevel = backup
-    print "nyt normitetaan arvoon: ", f
     h.Scale(f)
     return h
 
@@ -2085,7 +2084,6 @@ class DatasetRootHisto(DatasetRootHistoBase):
         if self.normalization == "byCrossSection":
             return h
         elif self.normalization == "toLuminosity":
-            print "vihdoin taisi osua"
 	    return _normalizeToFactor(h, self.luminosity)
         else:
             raise Exception("Internal error")
@@ -2117,7 +2115,6 @@ class DatasetRootHisto(DatasetRootHistoBase):
     def normalizeToLuminosity(self, lumi):
         if not self.dataset.isMC():
             raise Exception("Can't normalize non-MC histogram to luminosity")
-	print "ja nyt ollaan datasets.py:ssa"
         self.normalization = "toLuminosity"
         self.luminosity = lumi
     
@@ -2549,7 +2546,6 @@ class DatasetRootHistoAddedMC(DatasetRootHistoCompoundBase):
         if self.normalization == "byCrossSection":
             return hsum
         elif self.normalization == "toLuminosity":
-            print "no nyt normitetaan huolella je!"
 	    return _normalizeToFactor(hsum, self.luminosity)
         else:
             raise Exception("Internal error, got normalization %s" % self.normalization)
@@ -3181,7 +3177,6 @@ class Dataset:
         if nAllEvents == 0:
             Print("WARNING! nAllEvents = %s" % (nAllEvents), True)
             return 0
-        print "huomaa tama vol 2: ", self.getCrossSection() / nAllEvents
 	return self.getCrossSection() / nAllEvents
 
     def hasRootHisto(self, name, **kwargs):
@@ -3604,7 +3599,6 @@ class DatasetAddedMC(DatasetMerged):
         if nAllEvents == 0:
             raise Exception("%s: Number of all events is 0.\nProbable cause is that the counters are weighted, the analysis job input was a skim, and the updateAllEventsToPUWeighted() has not been called." % self.name)
 
-	print "huomaa tama: ", self.getCrossSection() / nAllEvents
         return self.getCrossSection() / nAllEvents
 
     def formatDatasetTree(self, indent):
@@ -4515,11 +4509,9 @@ class DatasetManagerCreator:
         Creates DatasetPrecursor objects for each ROOT file, reads the
         contents of first MC file to get list of available analyses.
         '''
-	print "!!!!!"
         self._label = None
         self._precursors = [DatasetPrecursor(name, filenames) for name, filenames in rootFileList]
         self._baseDirectory = kwargs.get("baseDirectory", "")
-        print "precursor done"
         mcRead = False
         for d in self._precursors:
             #if d.isMC() or d.isPseudo():

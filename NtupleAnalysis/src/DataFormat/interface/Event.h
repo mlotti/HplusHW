@@ -77,6 +77,7 @@ public:
   const HLTMuonCollection& triggerMuons() const { return fTriggerMuonCollection; }
   const HLTBJetCollection& triggerBJets() const { return fTriggerBJetCollection; }
   const TauCollection& taus() const { return fTauCollection; }
+  const TauCollection& looseTaus() const { return fLooseTauCollection; }
   const JetCollection& jets() const { return fJetCollection; }
   const GenJetCollection& genjets() const { return fGenJetCollection; }
   const ElectronCollection& electrons() const { return fElectronCollection; }
@@ -114,6 +115,7 @@ private:
   HLTMuonCollection fTriggerMuonCollection;
   HLTBJetCollection fTriggerBJetCollection;
   TauCollection fTauCollection;
+  TauCollection fLooseTauCollection;
   JetCollection fJetCollection;
   GenJetCollection fGenJetCollection;
   ElectronCollection fElectronCollection;

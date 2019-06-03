@@ -90,12 +90,16 @@ class AnalysisConfig:
                                                               partonFakingTau, etaRegion, 
                                                               self._getDirectionString(value))
 		# Trigger
-		elif value.startswith("TauTrgEff"):
-                    variationType = value.replace("TauTrgEff","").replace("Minus","").replace("Plus","")
-                    scaleFactors.assignTauTriggerSF(self._config.TauSelection, self._getDirectionString(value), self._config.Trigger.TautriggerEfficiencyJsonName, variationType)
-                elif value.startswith("METTrgEff"):
-                    variationType = value.replace("METTrgEff","").replace("Minus","").replace("Plus","")
-                    scaleFactors.assignMETTriggerSF(self._config.METSelection, self._config.BJetSelection.bjetDiscrWorkingPoint, self._getDirectionString(value), self._config.Trigger.METtriggerEfficiencyJsonName, variationType)
+#		elif value.startswith("TauTrgEff"):
+#                    variationType = value.replace("TauTrgEff","").replace("Minus","").replace("Plus","")
+#                    scaleFactors.assignTauTriggerSF(self._config.TauSelection, self._getDirectionString(value), self._config.Trigger.TautriggerEfficiencyJsonName, variationType)
+#                elif value.startswith("METTrgEff"):
+#                    variationType = value.replace("METTrgEff","").replace("Minus","").replace("Plus","")
+#                    scaleFactors.assignMETTriggerSF(self._config.METSelection, self._config.BJetSelection.bjetDiscrWorkingPoint, self._getDirectionString(value), self._config.Trigger.METtriggerEfficiencyJsonName, variationType)
+
+                elif value.startswith("MuonTrgEff"):
+                    variationType = value.replace("MuonTrgEff","").replace("Minus","").replace("Plus","")
+                    scaleFactors.assignMuonTriggerSF(self._config.MuonSelection, self._getDirectionString(value), self._config.Trigger.MuontriggerEfficiencyJsonName, variationType)
 
                 # tau ID syst
                 elif value.startswith("TauIDSyst"):
@@ -222,10 +226,10 @@ class AnalysisBuilder:
     def getSystematicsForHToTauNu(self):
         items = []
         # Trigger systematics
-        items.extend(["TauTrgEffData", "TauTrgEffMC"]) 
+        items.extend(["MuonTrgEffData"])
 
         #items.extend(["L1ETMDataEff", "L1ETMMCEff"])
-        items.extend(["METTrgEffData", "METTrgEffMC"])
+#        items.extend(["METTrgEffData", "METTrgEffMC"])
 
         # Tau ID variation systematics
         items.extend(["FakeTauElectron", "FakeTauMuon", "FakeTauJet", "TauIDSyst"])

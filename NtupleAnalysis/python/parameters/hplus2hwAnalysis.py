@@ -13,7 +13,7 @@ import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
 
 trg = PSet(
   # No need to specify version numbers, they are automatically scanned in range 1--100 (remove the '_v' suffix)
-#  TautriggerEfficiencyJsonName = "tauLegTriggerEfficiency_2016_fit.json",
+  MuontriggerEfficiencyJsonName = "muonPAGEff.json",
 #  METtriggerEfficiencyJsonName = "metLegTriggerEfficiency_2016_MET90_fit.json",
 #  L1ETM = 80,
   triggerOR = ["HLT_IsoMu24","HLT_IsoTkMu24"
@@ -64,9 +64,9 @@ eVeto = PSet(
 muonSelection = PSet(
   applyTriggerMatching = True,
    triggerMatchingCone = 0.1,   # DeltaR for matching offline tau with trigger tau
-             muonPtCut = 26, #26.0,
-            muonEtaCut = 2.4,
-                muonID = "muIDTight", # options: muIDLoose, muIDMedium, muIDTight
+             muonPtCut = 26.0,
+            muonEtaCut = 2.1, #2.4,
+                muonID = "muIDTight", #"muIDMedium", #"muIDTight", # options: muIDLoose, muIDMedium, muIDTight
          muonIsolation = "tight", #"tight", # for selecting, not vetoing
 	muonIsolType   = "default",      # options: "mini", "default" 
 )
@@ -79,14 +79,32 @@ muonSelection = PSet(
 tauSelection = PSet(
   applyTriggerMatching = False, # no effect now
    triggerMatchingCone = 0.1,   # DeltaR for matching offline tau with trigger tau
-              tauPtCut = 30.0,
+              tauPtCut = 20.0,
              tauEtaCut = 2.3,
         tauLdgTrkPtCut = 1.0,
                 prongs = -1,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
                   rtau = 0.0,   # to disable set to 0.0
-  againstElectronDiscr = "againstElectronLooseMVA6",
+  againstElectronDiscr = "againstElectronVLooseMVA6",
       againstMuonDiscr = "againstMuonLoose3",
-        isolationDiscr = "byMediumIsolationMVArun2v1DBoldDMwLT", #"byLooseIsolationMVArun2v1DBoldDMwLT", #"byMediumIsolationMVArun2v1DBnewDMwLT",
+        isolationDiscr = "byTightIsolationMVArun2v1DBoldDMwLT", #"byVLooseIsolationMVArun2v1DBoldDMwLT", #byTightIsolationMVArun2v1DBoldDMwLT", #"byLooseIsolationMVArun2v1DBoldDMwLT", #"byLooseIsolationMVArun2v1DBoldDMwLT", #"byMediumIsolationMVArun2v1DBnewDMwLT",
+)
+
+##########
+## Loose Tau
+##########
+
+
+looseTauSelection = PSet(
+  applyTriggerMatching = False, # no effect now
+   triggerMatchingCone = 0.1,   # DeltaR for matching offline tau with trigger tau
+              tauPtCut = 20.0,
+             tauEtaCut = 2.3,
+        tauLdgTrkPtCut = 1.0,
+                prongs = -1,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
+                  rtau = 0.0,   # to disable set to 0.0
+  againstElectronDiscr = "againstElectronVLooseMVA6",
+      againstMuonDiscr = "againstMuonLoose3", #"againstMuonTight3", #"againstMuonLoose3",
+        isolationDiscr = "byVLooseIsolationMVArun2v1DBoldDMwLT", #"byMediumIsolationMVArun2v1DBnewDMwLT",
 )
 
 ##########
@@ -94,6 +112,7 @@ tauSelection = PSet(
 ##########
 
 scaleFactors.assignTauIdentificationSF(tauSelection)
+scaleFactors.assignTauIdentificationSF(looseTauSelection)
 
 ##########
 ## tau misidentification scale factor
@@ -103,6 +122,9 @@ scaleFactors.assignTauMisidentificationSF(tauSelection, "eToTau", "full", "nomin
 scaleFactors.assignTauMisidentificationSF(tauSelection, "muToTau", "full", "nominal")
 scaleFactors.assignTauMisidentificationSF(tauSelection, "jetToTau", "full", "nominal")
 
+scaleFactors.assignTauMisidentificationSF(looseTauSelection, "eToTau", "full", "nominal")
+scaleFactors.assignTauMisidentificationSF(looseTauSelection, "muToTau", "full", "nominal")
+scaleFactors.assignTauMisidentificationSF(looseTauSelection, "jetToTau", "full", "nominal")
 
 ##########
 ## Jet selection
@@ -111,9 +133,9 @@ scaleFactors.assignTauMisidentificationSF(tauSelection, "jetToTau", "full", "nom
 jetSelection = PSet(
                jetType  = "Jets", # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
               jetPtCuts = [30.0],
-             jetEtaCuts = [4.7],
-     tauMatchingDeltaR  = 0.4,
-  numberOfJetsCutValue  = 2,
+             jetEtaCuts = [4.7], #4.7,
+     tauMatchingDeltaR  = 0.0, #0.4,
+  numberOfJetsCutValue  = 1,
   numberOfJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
             jetIDDiscr = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
           jetPUIDDiscr = "", # does not work at the moment 
@@ -132,7 +154,7 @@ jetSelection = PSet(
 bjetSelection = PSet(
     triggerMatchingApply= False,
     triggerMatchingCone = 0.0,  # DeltaR for matching offline bjet with trigger::TriggerBjet 
-              jetPtCuts = [30.0],
+              jetPtCuts = [20.0],
              jetEtaCuts = [2.1],
              bjetDiscr  = "pfCombinedInclusiveSecondaryVertexV2BJetTags", # default
 #             bjetDiscr  = "pfCombinedMVAV2BJetTags", # use this for MVA b-tagging
@@ -159,7 +181,7 @@ scaleFactors.setupBtagSFInformation(btagPset=bjetSelection,
 ##########
 
 metSelection = PSet(
-           METCutValue = 40.0,
+           METCutValue = 0.0,
        METCutDirection = ">", # options: ==, !=, <, <=, >, >=
   METSignificanceCutValue = -1000.0,
   METSignificanceCutDirection = ">", # options: ==, !=, <, <=, >, >=
@@ -177,7 +199,10 @@ commonPlotsOptions = PSet(
     histogramSplitting         = [],    # Splitting of histograms as function of one or more parameters
     enableGenuineBHistograms   = False,
     enablePUDependencyPlots    = False,  # Enable/Disable some debug-level plots
-   # Bin settings (final bin setting done in datacardGenerator, there also variable bin width is supported)
+    # By default, inclusive (i.e. fake tau+genuine tau) and fake tau histograms are produced. Set to true to also produce genuine tau histograms (Note: will slow down running and enlarge resulting files).
+    enableGenuineTauHistograms = False, 
+
+    # Bin settings (final bin setting done in datacardGenerator, there also variable bin width is supported)
     nVerticesBins     = PSet(nBins = 100, axisMin =  0.0, axisMax =  100.0),
     ptBins            = PSet(nBins =  50, axisMin =  0.0, axisMax =  500.0),
     etaBins           = PSet(nBins =  50, axisMin = -5.0, axisMax =    5.0),
@@ -207,6 +232,7 @@ allSelections = PSet(
     ElectronSelection 	= eVeto,
     MuonSelection 	= muonSelection,
     TauSelection	= tauSelection,
+    LooseTauSelection   = looseTauSelection,
     JetSelection	= jetSelection,
     BJetSelection 	= bjetSelection,
     METSelection        = metSelection,

@@ -5,6 +5,7 @@
 #include "EventSelection/interface/BaseSelection.h"
 #include "DataFormat/interface/Muon.h"
 #include "Framework/interface/EventCounter.h"
+#include "Framework/interface/GenericScaleFactor.h"
 
 #include <string>
 #include <vector>

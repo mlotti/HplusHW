@@ -118,7 +118,7 @@ METSelection::Data METSelection::privateAnalyze(const Event& iEvent, int nVertic
   // Set tau trigger SF value to data object
   double metValue = output.getMET().R();
   if (iEvent.isMC()) {
-    output.fMETTriggerSF = fMETTriggerSFReader.getScaleFactorValue(metValue);
+//    output.fMETTriggerSF = fMETTriggerSFReader.getScaleFactorValue(metValue);
   } 
   hMet->Fill(metValue);
   
