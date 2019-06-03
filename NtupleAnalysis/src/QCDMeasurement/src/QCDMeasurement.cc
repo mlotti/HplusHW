@@ -581,8 +581,9 @@ void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, cons
 //====== All cuts passed
   cBaselineTauSelectedEvents.increment();
   // Fill final plots
-  
-  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hBaselineTauTransverseMass, isGenuineTau, myTransverseMass);
+  bool isElectronToTau = event.isMC() && tau.isElectronToTau();
+  bool isMuonToTau = event.isMC() && tau.isMuonToTau();
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hBaselineTauTransverseMass, isGenuineTau || isElectronToTau || isMuonToTau, myTransverseMass);
   
 //====== Experimental code
 
@@ -700,7 +701,7 @@ void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, cons
     fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
     cInvertedTauBTaggingSFCounter.increment();
   }
-
+  fCommonPlots.fillControlPlotsAfterBtagSF(fEvent,jetData,bjetData);
 
 
   if (event.isMC()) {

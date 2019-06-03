@@ -1,0 +1,92 @@
+{
+  "_timestamp":   "Generated on Thu Jul 19 05:03:42 2018 by HiggsAnalysis/NtupleAnalysis/src/SystTopBDT/work/PythonWriter.py",
+  "_rootVersion": "6.05/03",
+  "dataParameters": {
+      "runs_273150_284044": {
+          "era": "2016",
+          "firstRun"  :273150,
+          "lastRun"   :284044,
+          "luminosity": 35916.636,
+          "bins" : [
+             {
+               "pt"              :0.0,
+               "efficiency"      :0.0998346028056,
+               "uncertaintyPlus" :0.00870045628417,
+               "uncertaintyMinus":0.00870045628417
+             },
+             {
+               "pt"              :100.0,
+               "efficiency"      :0.241399794148,
+               "uncertaintyPlus" :0.00966394480091,
+               "uncertaintyMinus":0.00966394480091
+             },
+             {
+               "pt"              :200.0,
+               "efficiency"      :0.360313274858,
+               "uncertaintyPlus" :0.00561913867616,
+               "uncertaintyMinus":0.00561913867616
+             },
+             {
+               "pt"              :300.0,
+               "efficiency"      :0.455535510723,
+               "uncertaintyPlus" :0.0071802509411,
+               "uncertaintyMinus":0.0071802509411
+             },
+             {
+               "pt"              :400.0,
+               "efficiency"      :0.436693941658,
+               "uncertaintyPlus" :0.0116218546008,
+               "uncertaintyMinus":0.0116218546008
+             },
+             {
+               "pt"              :500.0,
+               "efficiency"      :0.32798571341,
+               "uncertaintyPlus" :0.0198437944321,
+               "uncertaintyMinus":0.0198437944321
+             }
+          ]
+      }
+  },
+  "mcParameters": {
+      "2016": {
+          "bins" : [
+             {
+               "pt"              :0.0,
+               "efficiency"      :0.0957670879694,
+               "uncertaintyPlus" :0.00315059548011,
+               "uncertaintyMinus":0.00315059548011
+             },
+             {
+               "pt"              :100.0,
+               "efficiency"      :0.23502435243,
+               "uncertaintyPlus" :0.0022136773983,
+               "uncertaintyMinus":0.0022136773983
+             },
+             {
+               "pt"              :200.0,
+               "efficiency"      :0.369377143346,
+               "uncertaintyPlus" :0.0024875895019,
+               "uncertaintyMinus":0.0024875895019
+             },
+             {
+               "pt"              :300.0,
+               "efficiency"      :0.458303698519,
+               "uncertaintyPlus" :0.00377311451788,
+               "uncertaintyMinus":0.00377311451788
+             },
+             {
+               "pt"              :400.0,
+               "efficiency"      :0.469968704325,
+               "uncertaintyPlus" :0.00644004497023,
+               "uncertaintyMinus":0.00644004497023
+             },
+             {
+               "pt"              :500.0,
+               "efficiency"      :0.36609951986,
+               "uncertaintyPlus" :0.0117391858965,
+               "uncertaintyMinus":0.0117391858965
+             }
+          ]
+      }
+  }
+}

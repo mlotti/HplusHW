@@ -11,11 +11,12 @@ BaseSelector::BaseSelector(const ParameterSet& config, const TH1* skimCounters):
   cPrescaled(fEventCounter.addCounter("Base::Prescale")),
   cTopPtReweighted(fEventCounter.addCounter("Base::Weighted events with top pT")),
   cExclusiveSamplesWeighted(fEventCounter.addCounter("Base::Weighted events for exclusive samples")),
-  fIsMC(config.isMC()),
   bIsttbar(false),
   bIsIntermediateNN(false),
+  fIntSF(config.getParameter<float>("intermediateSignalSF", 1.0)),
   iTopPtVariation(0),
   iPileupWeightVariation(0),
+  fIsMC(config.isMC()),
   hNvtxBeforeVtxReweighting(nullptr),
   hNvtxAfterVtxReweighting(nullptr)
 {
@@ -104,10 +105,10 @@ void BaseSelector::processInternal(Long64_t entry) {
   }
   cTopPtReweighted.increment();
 
-  //====== Intermediate H+ NoNeutral reweighting
-/*  if (fEvent.isMC() && isIntermediateNN()) {
-    fEventWeight.multiplyWeight(-0.5);
-  } */
+  //====== Intermediate H+ NoNeutral reweighting (now disabled as this can be done on the fly with combine)
+  if (fEvent.isMC() && isIntermediateNN()) {
+    fEventWeight.multiplyWeight(fIntSF);  // for 145-170
+  }
 
   //====== Combining of W+jets and Z+jets inclusive and exclusive samples // not needed right now
   cExclusiveSamplesWeighted.increment();

@@ -8,6 +8,7 @@ import json
 import re
 import sys
 import socket
+import datetime
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -17,6 +18,7 @@ import datasets as datasetsTest
 import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.git as git
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 
 #================================================================================================  
 # Global Definitions
@@ -24,7 +26,10 @@ import HiggsAnalysis.NtupleAnalysis.tools.git as git
 _debugMode = False
 _debugPUreweighting = False
 _debugMemoryConsumption = False
-
+sh_Error   = ShellStyles.ErrorStyle()
+sh_Success = ShellStyles.SuccessStyle()
+sh_Note    = ShellStyles.HighlightAltStyle()
+sh_Normal  = ShellStyles.NormalStyle()
 
 #================================================================================================
 # Function Definition
@@ -38,7 +43,6 @@ def Verbose(msg, printHeader=False):
     Print(msg, printHeader)
     return
 
-
 def Print(msg, printHeader=True):
     '''
     Simple print function. If verbose option is enabled prints, otherwise does nothing.                                                                                      
@@ -48,7 +52,12 @@ def Print(msg, printHeader=True):
         print "=== ", fName
     print "\t", msg
     return
-    
+
+def File(fname):
+    fullpath = os.path.join(aux.higgsAnalysisPath(), fname)
+    if not os.path.exists(fullpath):
+        raise Exception("The file %s does not exist" % self._fullpath)
+    return fullpath    
 
 #================================================================================================
 # Class Definition
@@ -100,14 +109,6 @@ class PSet:
     def serialize_(self):
         return json.dumps(self._asDict(), sort_keys=True, indent=2)
 
-
-def File(fname):
-    fullpath = os.path.join(aux.higgsAnalysisPath(), fname)
-    if not os.path.exists(fullpath):
-        raise Exception("The file %s does not exist" % self._fullpath)
-    return fullpath
-
-
 #================================================================================================
 # Class Definition
 #================================================================================================
@@ -128,6 +129,7 @@ class Analyzer:
         if not silentStatus:
             print "Configuration parameters:"
             print self.__dict__["_pset"]
+        return
 
     def __getattr__(self, name):
         return getattr(self._pset, name)
@@ -136,6 +138,7 @@ class Analyzer:
         return hasattr(self._pset, name)
 
     def __setattr__(self, name, value):
+        print "%s = %s " % (name, value)
         setattr(self.__dict__["_pset"], name, value)
 
     def exists(self, name):
@@ -167,16 +170,15 @@ class AnalyzerWithIncludeExclude:
         tasks = aux.includeExcludeTasks([datasetName], **(self._includeExclude))
         return len(tasks) == 1
 
-
 #================================================================================================
 # Class Definition
 #================================================================================================
 class DataVersion:
     def __init__(self, dataVersion):
         self._version = dataVersion
-
         self._isData = "data" in self._version
         self._isMC = "mc" in self._version
+        return
 
     def __str__(self):
         return self._version
@@ -193,6 +195,9 @@ class DataVersion:
     def is74X(self):
         return "74X" in self._version
 
+    def is84X(self):
+        return "84X" in self._version
+
     def isS10(self):
         return self._isMC() and "S10" in self._version
 
@@ -207,6 +212,7 @@ class Dataset:
         self._lumiFile = lumiFile
         self._pileup = pileup
         self._nAllEvents = nAllEvents
+        return
 
     def getName(self):
         return self._name
@@ -237,16 +243,35 @@ class Dataset:
 class Process:
     def __init__(self, outputPrefix="analysis", outputPostfix="", maxEvents={}):
         ROOT.gSystem.Load("libHPlusAnalysis.so")
-
-        self._verbose       = _debugMode
+        self._verbose = _debugMode
         self._outputPrefix  = outputPrefix
         self._outputPostfix = outputPostfix
-        self._datasets  = []
+        self._datasets = []
         self._analyzers = {}
         self._maxEvents = maxEvents
-        self._options   = PSet()
+        self.datasetsData = [] # used only for PU-reweighting
+        self._options = PSet()
         return
     
+    def Verbose(self, msg, printHeader=False):
+        '''
+        Calls Print() only if verbose options is set to true.
+        '''
+        if not self._verbose:
+            return
+        self.Print(msg, printHeader)
+        return
+
+    def Print(self, msg, printHeader=True):
+        '''
+        Simple print function. If verbose option is enabled prints, otherwise does nothing.                                                                                      
+        '''
+        fName = __file__.split("/")[-1].replace(".pyc", ".py")
+        if printHeader:
+            print "=== ", fName
+        print "\t", msg
+        return
+
     def ConvertSymLinks(fileList):
         '''
         Takes as argument a list of files.
@@ -273,13 +298,11 @@ class Process:
             fileList[i] = prefix + os.path.realpath(f)
 
         if bUseSymLinks:
-            Verbose("SymLinks detected. Appended the prefix \"%s\" to all ROOT file paths" % (prefix) )
+            self.Print("SymLinks detected. Appending prefix \"%s\" to all ROOT file paths" % (prefix) )
         return fileList
 
 
     def addDataset(self, name, files=None, dataVersion=None, lumiFile=None):
-        '''
-        '''
         Verbose("addDataset()", True)
         if files is None:
             files = datasetsTest.getFiles(name)
@@ -293,19 +316,11 @@ class Process:
         pileUp["nominal"]=prec.getPileUp("nominal")
         pileUp["up"]=prec.getPileUp("up")
         pileUp["down"]=prec.getPileUp("down")
-        #Debug prints:
-#        if ("data" in prec.getDataVersion()):
-#          sys.stderr.write("addDataset (main.py) l. 210 saves the following means  for nominal, up and down: ")
-#          sys.stderr.write(str(pileUp["nominal"].GetMean())+", ")
-#          sys.stderr.write(str(pileUp["up"].GetMean())+", ")
-#          sys.stderr.write(str(pileUp["down"].GetMean()))
-#          sys.stderr.write("\n\n")
 
         nAllEvents = prec.getNAllEvents()
         prec.close()
         self._datasets.append( Dataset(name, files, dataVersion, lumiFile, pileUp, nAllEvents) )
         return
-
 
     def addDatasets(self, names):
         '''
@@ -315,7 +330,6 @@ class Process:
         for name in names:
             self.addDataset(name)
         return
-
         
     def addDatasetsFromMulticrab(self, directory, *args, **kwargs):
         '''
@@ -342,22 +356,43 @@ class Process:
                 raise Exception("Unsupported input format!")
             del kwargs["whitelist"]
 
+<<<<<<< HEAD
         # dataset._optionDefaults["input"] = "miniaod2tree*.root"
         print "debug zero"
         dataset._optionDefaults["input"] = "histograms-*.root"
         print "debug one"
+=======
+        dataset._optionDefaults["input"] = "histograms-*.root" #"miniaod2tree*.root"
+>>>>>>> origin/hw_analysis
         dsetMgrCreator = dataset.readFromMulticrabCfg(directory=directory, *args, **kwargs)
         print "debug here"
         dsets = dsetMgrCreator.getDatasetPrecursors()
+        # Check if data datasets included
+        for i, d in enumerate(dsets, 1):
+            if d.isData():
+                self.datasetsData.append(d)
         dsetMgrCreator.close()
 
+<<<<<<< HEAD
 	print "debug done"
+=======
+        # Create a manager with data datasets (to enable PU reweighting even if not running with data)
+        if len(self.datasetsData) < 1:
+            dsetMgrCreator_tmp = dataset.readFromMulticrabCfg(directory=directory)
+            dsets_tmp = dsetMgrCreator_tmp.getDatasetPrecursors()
+            for i, d in enumerate(dsets_tmp, 1):
+                if d.isData():
+                    self.datasetsData.append(d)
+            dsetMgrCreator_tmp.close()
+        self.Print("Pileup reweighting will be done according to the sum of:\n\t%s" % (sh_Note + "\n\t".join([d.getName() for d in self.datasetsData]) + sh_Normal), True)
+
+>>>>>>> origin/hw_analysis
 
         if len(whitelist) > 0:
             for dset in dsets:
                 isOnWhiteList = False
                 for item in whitelist:
-                    if dset.getName().startswith(item):
+                    if item==dset.getName() or ( item.endswith('*') and dset.getName().startswith(item[:-1]) ):
                         isOnWhiteList = True
                 if not isOnWhiteList:
                     blacklist.append(dset.getName())
@@ -365,14 +400,13 @@ class Process:
         for dset in dsets:
             isOnBlackList = False
             for item in blacklist:
-                if dset.getName().startswith(item):
+                if item==dset.getName() or ( item.endswith('*') and dset.getName().startswith(item[:-1]) ):
                     isOnBlackList = True
             if isOnBlackList:
-                print "Ignoring dataset because of black/whitelist options: '%s' ..."%dset.getName()
+                self.Print("Ignoring dataset because of black/whitelist options: '%s' ..." % dset.getName(), True)
             else:
                 self.addDataset(dset.getName(), dset.getFileNames(), dataVersion=dset.getDataVersion(), lumiFile=dsetMgrCreator.getLumiFile())
         return
-
 
     def getDatasets(self):
         return self._datasets
@@ -406,8 +440,6 @@ class Process:
         self._analyzers[name] = AnalyzerWithIncludeExclude(analyzer, **kwargs)
         return
 
-
-    # FIXME: not sure if these two actually make sense
     def getAnalyzer(self, name):
         if not self.hasAnalyzer(name):
             raise Exception("Analyzer '%s' does not exist" % name)
@@ -425,6 +457,14 @@ class Process:
         for key, value in kwargs.iteritems():
             setattr(self._options, key, value)
 
+    def isTTbarDataset(self, dset):
+        if not dset.getName().startswith("TT"):
+            return False
+        ignoreList = ["TTZToQQ", "TTWJetsToQQ", "TTTT"]
+        if dset.getName() in ignoreList:
+            return False
+        return True
+        
     def run(self, proof=False, proofWorkers=None):
         outputDir = self._outputPrefix+"_"+time.strftime("%y%m%d_%H%M%S")
         if self._outputPostfix != "":
@@ -432,8 +472,11 @@ class Process:
 
         # Create output directory
         os.mkdir(outputDir)
+        self.Print("Created output directory %s" % (sh_Note + outputDir + sh_Normal), True)
+
         multicrabCfg = os.path.join(outputDir, "multicrab.cfg")
         f = open(multicrabCfg, "w")
+        # For-loop: All datasets to be ran
         for dset in self._datasets:
             f.write("[%s]\n\n" % dset.getName())
         f.close()
@@ -449,13 +492,11 @@ class Process:
             f.close()
             for k in data.keys():
                 if k in lumidata:
-                    raise Exception("Luminosity JSON file %s has a dataset for which the luminosity has already been loaded; please check the luminosity JSON files\n%s" % (fname, k, "\n".join(lumifiles)))
+                    msg  = "Luminosity JSON file %s has a dataset (%s) for which the luminosity has already been loaded. " % (fname, k) 
+                    msg += "Please check the luminosity JSON files:\n%s" % ("\n".join(lumifiles))
+                    raise Exception(sh_Error + msg + sh_Normal)
             lumidata.update(data)
         if len(lumidata) > 0:
-#            f = open(os.path.join(outputDir, "lumi.json"), "w")
-#            json.dump(lumidata, f, sort_keys=True, indent=2)
-#            f.close()
-
             # Add run range in a json file, if runMin and runMax in pset
             rrdata = {}
             for aname, analyzerIE in self._analyzers.iteritems():
@@ -473,8 +514,10 @@ class Process:
                 json.dump(rrdata, f, sort_keys=True, indent=2)
                 f.close()
 
+            # Create the luminosity JSON file
             f = open(os.path.join(outputDir, "lumi.json"), "w")
             json.dump(lumidata, f, sort_keys=True, indent=2)
+            self.Verbose("Created luminosity json file %s" % (sh_Note + f.name + sh_Normal), True)
             f.close()
 
         # Setup proof if asked
@@ -492,13 +535,14 @@ class Process:
         readMbytesTotal = 0
         callsTotal = 0
 
+        # Print the datasets that will be run on!
+        self.Print("Will process %d datasets in total:" % (len(self._datasets) ), True)
+        for i, d in enumerate(self._datasets, 1):
+            self.Print("%d) %s" % (i, sh_Note + d.getName() + sh_Normal), i==0)
 
         # Process over datasets
         ndset = 0
-        for dset in self._datasets:
-            # Get data PU distributions from data
-            #   This is done every time for a dataset since memory management is simpler to handle
-            #   if all the histograms in memory are deleted after reading a dataset is finished
+        for i, dset in enumerate(self._datasets, 1):
             hPUs = self._getDataPUhistos()
             # Initialize
             ndset += 1
@@ -522,7 +566,8 @@ class Process:
                     # ttbar status for top pt corrections
                     ttbarStatus = "0"
                     useTopPtCorrection = analyzer.exists("useTopPtWeights") and analyzer.__getattr__("useTopPtWeights")
-                    useTopPtCorrection = useTopPtCorrection and dset.getName().startswith("TT")
+                    #useTopPtCorrection = useTopPtCorrection and dset.getName().startswith("TT")
+                    useTopPtCorrection = useTopPtCorrection and self.isTTbarDataset(dset)
                     if useTopPtCorrection:
                         ttbarStatus = "1"
                     inputList.Add(ROOT.TNamed("isttbar", ttbarStatus))
@@ -531,7 +576,9 @@ class Process:
                     if dset.getName().find("IntermediateMassNoNeutral") > 0:
                         intermediateStatus = "1"
                     inputList.Add(ROOT.TNamed("isIntermediateNoNeutral", intermediateStatus))
+
                     # Pileup reweighting
+                    self.Verbose("Getting pileup reweighting weights", True)
                     (puAllEvents, puStatus) = self._parsePUweighting(dset, analyzer, aname, hPUs, inputList)
                     nAllEventsPUWeighted += puAllEvents
                     usePUweights = puStatus
@@ -541,10 +588,10 @@ class Process:
                     # Add name
                     anames.append(aname)
             if nanalyzers == 0:
-                print "Skipping %s, no analyzers" % dset.getName()
-                continue
+                self.Print("Skipping %s, no analyzers" % dset.getName(), True)
+                continue                            
 
-            Print("Processing dataset (%d/%d)" % (ndset, len(self._datasets) ))
+            self.Print("Processing dataset (%d/%d)" % (ndset, len(self._datasets) ))
             align= "{:<23} {:<1} {:<60}"
             info = {}
             info["Dataset"] = dset.getName()
@@ -556,7 +603,7 @@ class Process:
             info["UsePUweights"] = usePUweights
             info["UseTopPtCorrection"] = useTopPtCorrection
             for key in info:
-                Print(align.format(key, ":", info[key]), False)
+                self.Print(align.format(key, ":", info[key]), False)
 
             # Create dir for dataset ROOTT files   
             resDir = os.path.join(outputDir, dset.getName(), "res")
@@ -590,12 +637,6 @@ class Process:
             else:
                 inputList.Add(ROOT.TNamed("OUTPUTFILE_LOCATION", resFileName))
 
-#            if _debugPUreweighting:
-#                print "\n\nDebug(inputlist): Input list contains:"
-#                print "--- start of input list ---"
-#                inputList.Print("",1)
-#                print "--- end of input list \n\n"
-
             tselector.SetInputList(inputList)
 
             readBytesStart = ROOT.TFile.GetFileBytesRead()
@@ -624,25 +665,6 @@ class Process:
                     else:
                         tchain.SetCacheEntryRange(0, self._maxEvents[key])
                         tchain.Process(tselector, "", self._maxEvents[key])
-
-#            elif "All" in self._maxEvents:
-#                if len(self._maxEvents) == 1:
-#                    if self._maxEvents["All"] == -1:
-#                        tchain.Process(tselector)
-#                    else:
-#                        tchain.SetCacheEntryRange(0, self._maxEvents["All"])
-#                        tchain.Process(tselector, "", self._maxEvents["All"])
-#                else:
-#                    msg  = "Ambiguous selection for number of max events to run"
-#                    msg += "If \"all\" is selected no other datasets options are allowed. Got: "
-#                    msg += "\n\t".join(self._maxEvents.keys())
-#                    raise Exception(msg)
-#            elif dset.getName() in self._maxEvents.keys():
-#                tchain.SetCacheEntryRange(0, self._maxEvents[dset.getName()])
-#                tchain.Process(tselector, "", self._maxEvents[dset.getName()])
-            #if self._maxEvents > 0:
-            #    tchain.SetCacheEntryRange(0, self._maxEvents)
-            #    tchain.Process(tselector, "", self._maxEvents)
             else:
                 tchain.Process(tselector)
             if _debugMemoryConsumption:
@@ -756,16 +778,9 @@ class Process:
                 readMbytes = float(readBytesStop-readBytesStart)/1024/1024
                 calls = " (%d calls)" % (readCallsStop-readCallsStart)
             realTime = timeStop-timeStart
-            align= "{:<23} {:<1} {:<60}"
-            info = {}
-            info["Real time"]    = "%.3f" % realTime + " s"
-            info["CPU time"]     = "%.3f" % cpuTime  + " s"
-            info["Read Percent"]= "%.3f" % (cpuTime/realTime*100) + " MB"
-            info["Read Size"]    = "%.3f" % (readMbytes) + " MB"
-            info["Read Calls"]   = "%s"   % (readCallsStop-readCallsStart)
-            info["Read Speed"]   = "%.3f" % (readMbytes/realTime) + " MB/s"
-            for key in info:
-                Print(align.format(key, ":", info[key]), False)
+
+            # Print usage stats in user-friendly formatting
+            self.PrintStats(readCallsStop, readCallsStart, cpuTime, realTime, readMbytes)
 
             # Time accumulation
             realTimeTotal   += realTime
@@ -773,20 +788,108 @@ class Process:
             readMbytesTotal += readMbytes
 
         # Total time stats
-        if len(self._datasets) > 1:
-            Print("Usage statistics", True)
-            total = {}
-            total["Real time"]  = "%.3f" % realTimeTotal + " s"
-            total["CPU time"]   = "%.3f" % cpuTimeTotal  + " s (%.1f %% of eal time)" % (cpuTimeTotal/realTimeTotal*100)
-            total["Read size"]  = "%.3f" % (readMbytesTotal) + " MB"
-            total["Read speed"] = "%.3f" % (readMbytes/realTime) + " MB/s"
-            for key in total:
-                Print(align.format(key, ":", total[key]), False)
-        Print("Results are in %s" % (outputDir), True)
-        return outputDir
+        self.PrintStatsTotal(readMbytes, cpuTimeTotal, realTimeTotal, readMbytesTotal)
 
-    ## Returns PU histograms for data
+        # Inform user of location of results
+        self.Print("Results are in %s" % (sh_Success + outputDir + sh_Normal), True)
+        return outputDir
+    
+    def PrintStatsTotal(self, readMbytes, cpuTimeTotal, realTimeTotal, readMbytesTotal):
+        '''
+        Print usage stats (total) in user-friendly formatting
+        '''
+        if len(self._datasets) < 2:
+            return
+        self.Print("Processed all %d datasets" % (len(self._datasets)), True)
+        align = "{:<15} {:<1} {:<30}"
+        total = {}
+        total["CPU time"]     = "%.1f" % cpuTimeTotal  + " s (%.1f %% of real time)" % (cpuTimeTotal/realTimeTotal*100)
+        total["Read size"]    = "%.1f" % (readMbytesTotal) + " MB"
+        total["Read speed"]   = "%.1f" % (readMbytes/realTimeTotal) + " MB/s"
+        dt = str(datetime.timedelta(seconds=round(realTimeTotal))) + " (h:mm:ss)"
+        total["Real time"] = "%s"   % (sh_Note + dt + sh_Normal)
+        # total["Real time"]    = "%.1f" % realTimeTotal + " s"
+        for key in total:
+            self.Print(align.format(key, ":", total[key]), False)
+        return
+
+    def PrintStats(self, readCallsStop, readCallsStart, cpuTime, realTime, readMbytes):
+        '''
+        Print usage stats in user-friendly formatting
+        '''
+        align= "{:<23} {:<1} {:<60}"
+        info = {}
+        info["Read Calls"]   = "%s"   % (readCallsStop-readCallsStart)
+        info["CPU time"]     = "%.1f" % cpuTime  + " s"
+        info["Read Percent"] = "%.1f" % (cpuTime/realTime*100) + " %"
+        info["Read Size"]    = "%.1f" % (readMbytes) + " MB"
+        info["Read Speed"]   = "%.1f" % (readMbytes/realTime) + " MB/s"
+        dt = str(datetime.timedelta(seconds=round(realTime))) + " (h:mm:ss)"
+        info["Real time"] = "%s"   % (sh_Note + dt + sh_Normal)
+        # info["Real time"]    = "%.1f" % realTime + " s"
+        for key in info:
+            self.Print(align.format(key, ":", info[key]), False)
+        return
+
     def _getDataPUhistos(self):
+        '''
+        Get data PU distributions from data
+        This is done every time for a dataset since memory management is simpler to handle
+        if all the histograms in memory are deleted after reading a dataset is finished
+
+        Returns PU histograms for data
+        '''
+        hPUs = {}
+        count= 0
+        for aname, analyzerIE in self._analyzers.iteritems():
+            count+=1
+            hPU = None            
+            direction="nominal"
+            analyzer = analyzerIE.getAnalyzer()
+
+            if hasattr(analyzer,"usePileupWeights"):
+                usePUweights = analyzer.__getattr__("usePileupWeights")
+                if not usePUweights:
+                    continue
+
+            if hasattr(analyzer, "PUWeightSystematicVariation"):
+                direction=getattr(analyzer, "PUWeightSystematicVariation")
+
+            # For-loop: All data datasets
+            for i, dset in enumerate(self.datasetsData, 1):
+                if analyzerIE.runForDataset_(dset.getName()):
+                    if hPU is None:
+                        hPU = dset.getPileUp(direction).Clone()
+                    else:
+                        hPU.Add(dset.getPileUp(direction))
+
+            # Determine PU histo name postfix 
+            if hPU != None:
+                if direction == "plus":
+                    direction_postfix="Up"
+                elif direction == "minus":
+                    direction_postfix = "Down"
+                else:
+                    direction_postfix = ""
+
+                # Set the histogram name
+                hPU.SetName("PileUpData"+direction_postfix)
+                hPU.SetDirectory(None)
+                hPUs[aname] = hPU
+                self.Verbose("Saving PU direction \"%s\" for aname \"%s\". Mean = %s" % (direction, aname, hPUs[aname].GetMean() ), True)
+                # self.Verbose("Determined PU spectrum from data to have mean %.1f" % (hPUs[aname].GetMean()), True)
+            else:
+                raise Exception("Cannot determine PU spectrum for data!")
+        return hPUs
+
+    def _getDataPUhistos_ORIGINAL(self): # for backwards compatibility while in transition
+        '''
+        Get data PU distributions from data
+        This is done every time for a dataset since memory management is simpler to handle
+        if all the histograms in memory are deleted after reading a dataset is finished
+
+        Returns PU histograms for data
+        '''
         hPUs = {}
         for aname, analyzerIE in self._analyzers.iteritems():
             hPU = None
@@ -796,9 +899,12 @@ class Process:
                 usePUweights = analyzer.__getattr__("usePileupWeights")
                 if not usePUweights:
                     continue
+            # iro
             if hasattr(analyzer, "PUWeightSystematicVariation"):
                 direction=getattr(analyzer, "PUWeightSystematicVariation")
-            for dset in self._datasets:
+
+            for i, dset in enumerate(self._datasets, 1):
+                self.Print("dataset = %s" % (dset.getName()), i==1)
                 if dset.getDataVersion().isData() and analyzerIE.runForDataset_(dset.getName()):
                     if hPU is None:
                         hPU = dset.getPileUp(direction).Clone()
@@ -822,7 +928,6 @@ class Process:
 #                sys.stderr.write(", mean =")
 #                sys.stderr.write(str(hPUs[aname].GetMean()))
 #                sys.stderr.write("\n")
-                
             else:
                 raise Exception("Cannot determine PU spectrum for data!")
         return hPUs

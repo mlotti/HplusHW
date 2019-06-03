@@ -31,7 +31,8 @@ metFilter = PSet(
                     "Flag_goodVertices",
                     "Flag_globalTightHalo2016Filter",
                     "badPFMuonFilter",
-                    "badChargedCandidateFilter"]
+                    "badChargedCandidateFilter"],
+    runOnlyData = ["Flag_eeBadScFilter"]
 )
 
 #====== Tau selection
@@ -47,15 +48,15 @@ tauSelection = PSet(
   againstElectronDiscr = "againstElectronTightMVA6",
 #  againstElectronDiscr = "",
       againstMuonDiscr = "againstMuonLoose3",
-#        isolationDiscr = "byMediumIsolationMVA3oldDMwLT",
-        isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
+        isolationDiscr = "byLooseIsolationMVArun2v1DBoldDMwLT", # MVA (default)
+#        isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits",  # cut-based
 )
 # tau identification scale factors
 scaleFactors.assignTauIdentificationSF(tauSelection)
 # tau misidentification scale factors
-scaleFactors.assignTauMisidentificationSF(tauSelection, "eToTau", "full", "nominal")
-scaleFactors.assignTauMisidentificationSF(tauSelection, "muToTau", "full", "nominal")
-scaleFactors.assignTauMisidentificationSF(tauSelection, "jetToTau", "full", "nominal")
+scaleFactors.assignTauMisidentificationSF(tauSelection, "eToTau", "nominal")
+scaleFactors.assignTauMisidentificationSF(tauSelection, "muToTau", "nominal")
+scaleFactors.assignTauMisidentificationSF(tauSelection, "jetToTau", "nominal")
 # tau trigger SF
 
 scaleFactors.assignTauTriggerSF(tauSelection, "nominal", trg.TautriggerEfficiencyJsonName)
@@ -123,7 +124,7 @@ bjetSelection = PSet(
     triggerMatchingApply= False,
     triggerMatchingCone = 0.1,  # DeltaR for matching offline bjet with trigger::TriggerBjet 
               jetPtCuts = [30.0],
-             jetEtaCuts = [2.5],
+             jetEtaCuts = [2.4],
              bjetDiscr  = "pfCombinedInclusiveSecondaryVertexV2BJetTags", # default
 #             bjetDiscr  = "pfCombinedMVAV2BJetTags", # use this for MVA b-tagging
  bjetDiscrWorkingPoint  = "Medium", #optimal for CSVv2
@@ -207,7 +208,7 @@ commonPlotsOptions = PSet(
   # Bin settings (final bin setting done in datacardGenerator, there also variable bin width is supported)
        nVerticesBins = PSet(nBins=60, axisMin=0., axisMax=60.),
               ptBins = PSet(nBins=500, axisMin=0., axisMax=5000.),
-             etaBins = PSet(nBins=60, axisMin=-3.0, axisMax=3.0),
+             etaBins = PSet(nBins=100, axisMin=-5.0, axisMax=5.0),
              phiBins = PSet(nBins=72, axisMin=-3.1415926, axisMax=3.1415926),
         deltaEtaBins = PSet(nBins=50, axisMin=0., axisMax=10.0),
         deltaPhiBins = PSet(nBins=18, axisMin=0., axisMax=180.), # used in 2D plots, i.e. putting high number of bins here will cause troubles

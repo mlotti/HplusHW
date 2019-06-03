@@ -107,6 +107,9 @@ def mergeJsons(jsonfiles):
             merged = limits
         else:
             mergeJson(merged,limits)
+
+    merged["regime"] = "combined"
+    merged["name"] = merged["name"].replace("light","combined",1) 
     return merged
             
 def main():
@@ -120,8 +123,10 @@ def main():
 
     jsonfile = mergeJsons(jsonfiles)
 
-    with open('merged.json', 'w') as fOUT:
-        json.dump(jsonfile, fOUT, sort_keys=True, indent=2 )
+    with open(jsonfile["name"]+'.json', 'w') as fOUT:
+#        json.dump(jsonfile, fOUT, sort_keys=True, indent=2 )
+        json.dump(jsonfile, fOUT, indent=2 )
+        print "created",jsonfile["name"]+'.json'
 
 if __name__ == "__main__":
     main()

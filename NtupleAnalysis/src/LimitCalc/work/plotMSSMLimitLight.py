@@ -48,7 +48,14 @@ def main():
             jsonfile = match.group(0)
 #    jsonfile = "limits_light2016.json"
 #    jsonfile = "limits2016/limitsForMSSMplots_ICHEP_v2_light.json"
-    jsonfile = "limits2016/limits_light_20171011.json"
+#    jsonfile = "limits2016/limits_light_20171011.json"
+#    jsonfile = "limits2016/limits_light_180131.json"
+#    jsonfile = "limits2016/limits_light_180205.json"
+#    jsonfile = "limits2016/limits_light_180318.json"
+#    jsonfile = "limits2016/limits_light_180417.json"
+#    jsonfile = "limits2016/limits_unblinded_180809/limits_light.json"
+#    jsonfile = "limits2016/limits_unblinded_180809/limits_full_leptonic+hadronic_with_intermediate.json"
+    jsonfile = "limits2016/limits_unblinded_withLeptonic_30082018/taunu_extInt_BR.json"
 #    limits = limit.BRLimits(limitsfile=jsonfile,configfile="limitdata/lightHplus_configuration.json")
     limits = limit.BRLimits(limitsfile=jsonfile,configfile="limits2016/lightHplus_configuration.json")
 
@@ -147,14 +154,20 @@ def main():
     jsonWriter.addGraph("Allowed",graphs["Allowed"])
     jsonWriter.addGraph("mintanb",graphs["mintanb"])
 
-    jsonWriter.addParameter("name","limitsTanb_light_"+scenario)
+    name = "limitsTanb_light_"
+    finalStateText = limits.getFinalstateText()
+    if "leptonic" in jsonfile:
+        name = "limitsTanb_light_LeptHadrFS_"
+        finalStateText = "#tau+jets final state"
+    
+    jsonWriter.addParameter("name",name+scenario)
     jsonWriter.addParameter("scenario",scenario)
     jsonWriter.addParameter("luminosity",limits.getLuminosity())
-    jsonWriter.addParameter("finalStateText",limits.getFinalstateText())
+    jsonWriter.addParameter("finalStateText",finalStateText)
     jsonWriter.addParameter("mHplus",limit.mHplus())
     jsonWriter.addParameter("selection",selection)
     jsonWriter.addParameter("regime","light")
-    jsonWriter.write("MSSMLimitLight_"+scenario+".json")
+    jsonWriter.write(name+scenario+".json")
 
     limit.doTanBetaPlotLight("limitsTanb_light_"+scenario, graphs, limits.getLuminosity(), limits.getFinalstateText(), limit.mHplus(), scenario)
     sys.exit()

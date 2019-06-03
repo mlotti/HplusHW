@@ -1,36 +1,4 @@
-## Package for all systematic uncertainties in the analysis
-
-#######################################
-# Shape uncertainties
-
-# These are obtained automatically for each dataset from the SystVar identifier in the analysis module names
-# Also, one can take the full list of shapes, since the variations are zero compared to nominal,
-# unless the analysis has proceeded to a stage where the selection to be varied has been applied
-
-# Considered shape uncertainties:
-# - Tau trg SF uncertainty
-# (- MET trg SF uncertainty)
-# - fake tau SF uncertainty FIXME to be implemented
-# - tau energy scale (TES)
-# - jet energy scale (JES)
-# - MET (unclustered) energy scale
-# - jet energy resolution (JER)
-# - btag SF
-# - top pT reweight SF uncertainty FIXME to be implemented
-# - pileup uncertainty
-# - QCD method normalization
-# - statistical uncertainties
-
-#######################################
-# Scalar uncertainties
-
-# List of considered uncertainties:
-# - tau ID uncertainty
-# - tau mis-ID uncertainty
-# - e/mu reco and ID
-# - Embedding specific FIXME: add if necessary
-# - cross section uncertainties
-# - luminosity
+## Package for fetching systematic uncertainties used in the datacards
 
 from math import sqrt
 
@@ -148,7 +116,7 @@ def getCrossSectionUncertainty(uncertName):
     if "pseudo" in uncertName:
         return _crossSectionUncertainty["default"]
     # Ok, dataset name not found and not in the known list, give a warning message
-    print ShellStyles.WarningLabel()+"Could not find cross section uncertainty for dataset label: %s!%s"%(uncertName,ShellStyles.NormalStyle())
+    print ShellStyles.WarningLabel() + "Could not find cross section uncertainty for dataset label: %s"%uncertName + ShellStyles.NormalStyle()
     return _crossSectionUncertainty["default"]
 
 # def getLeptonVetoUncertainty(uncertName):
@@ -194,27 +162,27 @@ def getBinningForTetrajetMass(binLevel=0):
     '''
     myBins = []
     if binLevel == -1: #1 bin (counting experiment)
-        myBins = [0.0, 4000.0] 
+        myBins = [0.0, 3000.0] 
     elif binLevel == 0: #default binning
         for i in range(0, 1000, 50):
             myBins.append(i)
         for i in range(1000, 2000, 100):
             myBins.append(i)
-        for i in range(2000, 4000+500, 500):
+        for i in range(2000, 3000+500, 500):
             myBins.append(i)
     elif binLevel == 1: #finer binning
         for i in range(0, 1000, 25):
             myBins.append(i)
         for i in range(1000, 2000, 50):
             myBins.append(i)
-        for i in range(2000, 4000+250, 250):
+        for i in range(2000, 3000+250, 250):
             myBins.append(i)
     elif binLevel == 2: #even finer binning
         for i in range(0, 1000, 20):
             myBins.append(i)
         for i in range(1000, 2000, 40):
             myBins.append(i)
-        for i in range(2000, 4000+200, 200):
+        for i in range(2000, 3000+200, 200):
             myBins.append(i)
     elif binLevel == 3: #even more finer binning
         print "%sWARNING! This binning will take hours to compute limits!%s" % (ShellStyles.ErrorStyle(), ShellStyles.NormalStyle())
@@ -222,64 +190,191 @@ def getBinningForTetrajetMass(binLevel=0):
             myBins.append(i)
         for i in range(1000, 2000, 20):
             myBins.append(i)
-        for i in range(2000, 4000+50, 50):
+        for i in range(2000, 3000+50, 50):
+            myBins.append(i)
+    elif binLevel == 4: # 20 GeV bins
+        for i in range(0, 3000+20, 20):
+            myBins.append(i)
+    elif binLevel == 5: # 30 GeV bins
+        for i in range(0, 3000+30, 30):
+            myBins.append(i)
+    elif binLevel == 6: # 40 GeV bins
+        for i in range(0, 3000+40, 40):
+            myBins.append(i)
+    elif binLevel == 7: # 100 GeV bins
+        for i in range(0, 3000+100, 100):
+            myBins.append(i)
+    elif binLevel == 8: # 300 GeV bins
+        for i in range(0, 3000+300, 300):
+            myBins.append(i)
+    elif binLevel == 9: # 50 GeV bins
+        for i in range(0, 3000+50, 50):
+            myBins.append(i)
+    elif binLevel == 10:
+        for i in range(0, 800, 20):
+            myBins.append(i)
+        for i in range(800, 1000, 40):
+            myBins.append(i)
+        for i in range(1000, 1500, 80):
+            myBins.append(i)
+        for i in range(1500, 2000, 100):
+            myBins.append(i)
+        for i in range(2000, 3000+200, 200):
+            myBins.append(i)
+    elif binLevel == 11:
+        for i in range(0, 1000+40, 40):
+            myBins.append(i)
+    elif binLevel == 12: #default binning variation
+        for i in range(0, 1000, 20):
+            myBins.append(i)
+        for i in range(1000, 1500, 100):
+            myBins.append(i)
+        for i in range(1500, 2000, 200):
+            myBins.append(i)
+        #for i in range(2000, 3000+500, 500):
+        for i in range(2000, 3000, 500):  # Up to 2500
+            myBins.append(i)
+    elif binLevel == 13: #default binning variation
+        for i in range(0, 700, 10):
+            myBins.append(i)
+        for i in range(700, 1000, 25):
+            myBins.append(i)
+        for i in range(1000, 1500, 50):
+            myBins.append(i)
+        for i in range(1500, 2000, 200):
+            myBins.append(i)
+        for i in range(2000, 2500+250, 250):
+            myBins.append(i)
+        for i in range(2500, 3000, 500):# Up to 2500?
+            myBins.append(i)
+    elif binLevel == 14:
+        for i in range(0, 800, 25):
+            myBins.append(i)
+        for i in range(800, 1200, 50):
+            myBins.append(i)
+        for i in range(1200, 1500, 100):
+            myBins.append(i)
+        for i in range(1500, 2500, 250):
+            myBins.append(i)
+        for i in range(2500, 3000, 500):
+            myBins.append(i)
+    elif binLevel == 15:
+        for i in range(0, 700, 25):
+            myBins.append(i)
+        for i in range(700, 1000, 50):
+            myBins.append(i)
+        for i in range(1000, 1400, 100):
+            myBins.append(i)
+        for i in range(1400, 2000, 200):
+            myBins.append(i)
+        for i in range(2000, 3000, 500):
+            myBins.append(i)
+    elif binLevel == 16:
+        for i in range(0, 600, 25):
+            myBins.append(i)
+        for i in range(600, 800, 50):
+            myBins.append(i)
+        for i in range(800, 1200, 100):
+            myBins.append(i)
+        for i in range(1400, 2000, 200):
+            myBins.append(i)
+        for i in range(2000, 3000, 500):
+            myBins.append(i)
+    elif binLevel == 17:
+        for i in range(0, 800, 50):
+            myBins.append(i)
+        for i in range(800, 1200, 100):
+            myBins.append(i)
+        for i in range(1400, 2000, 200):
+            myBins.append(i)
+        for i in range(2000, 3000, 500):
+            myBins.append(i)
+    elif binLevel == 18:
+        for i in range(0, 600, 50):
+            myBins.append(i)
+        for i in range(600, 1000, 100):
+            myBins.append(i)
+        for i in range(1000, 2000, 200):
+            myBins.append(i)
+        for i in range(2000, 3000, 500):
+            myBins.append(i)
+    elif binLevel == 19:
+        for i in range(0, 400, 25):
+            myBins.append(i)
+        for i in range(400, 600, 50):
+            myBins.append(i)
+        for i in range(600, 1000, 100):
+            myBins.append(i)
+        for i in range(1000, 2000, 200):
+            myBins.append(i)
+        for i in range(2000, 3000, 500):
             myBins.append(i)
     else:
         raise Exception(ShellStyles.ErrorStyle() + "Please choose bin-level from -1 to 2" + ShellStyles.NormalStyle())
     return myBins
 
-# Binning for data-driven control plots and final shapes
-# Needed to get systematics right for QCD anti-isol. -> isol. systematics
+# Binning for data-driven control plots and final shapes feeded to combine
 # Format: list of left bin edges; last entry is maximum value
 _dataDrivenCtrlPlotBinning = {
+
+    # Counters
     "WeightedCounters": None,
+
+    #NVertices plots
     "NVertices_AfterStandardSelections": None,
-    "Njets*": [3,4,5,6,7,8,9,10],
+    "NVertices_AfterAllSelections": None,
+
+    # Jets
+    "Njets_AfterStandardSelections": [0,1,2,3,4,5,6,7,8],
+    "Njets_AfterBtagSF": [0,1,2,3,4,5,6,7,8],
     "JetPt_AfterStandardSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500,1000],
-    "JetEta_AfterStandardSelections": [-2.5,-2.2,-2.0,-1.8,-1.6,-1.4,-1.2,-1.0,-0.8,-0.6,-0.4,-0.2,-0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2,2.5],
+    "JetPt_AfterBtagSF": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500,1000],
     "JetPt_AfterAllSelections": [0,20,30,40,60,70,80,90,100,120,150,200,250,300,400,500,1000],
-    "JetEta_AfterAllSelections": [-2.5,-2.0,-1.5,-1.0,-0.5,0.0,0.5,1.0,1.5,2.0,2.5],
-    "ImprovedDeltaPhiCuts*": [0,20,40,60,80,100,120,140,160,180,200,220,240,260],
+    "JetEta_AfterStandardSelections": [-4.5,-4.0,-3.5,-3.0,-2.5,-2.2,-2.0,-1.8,-1.6,-1.4,-1.2,-1.0,-0.8,-0.6,-0.4,-0.2,-0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2,2.5,3.0,3.5,4.0,4.5],
+    "JetEta_AfterAllSelections": [-4.5,-4.0,-3.5,-3.0,-2.5,-2.0,-1.5,-1.0,-0.5,0.0,0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5],
+    "Njets_AfterBtagSF": [0,1,2,3,4,5,6,7,8],
+
+    # B tagging
+    "NBjets": [0,1,2,3,4,5,6,7,8],
+    "NBjets_AfterAllSelections": [0,1,2,3,4,5,6,7,8],
+    "BJetPt": [0,30,50,70,90,110,130,150,200,300,400,500],
+    "BJetPt_AfterBtagSF": [0,30,50,70,90,110,130,150,200,300,400,500],
+    "BJetPt_AfterAllSelections": [0,20,30,50,70,90,110,130,150,200,300,400,500],
+    "BJetEta": [-2.5,-2.2,-2.0,-1.8,-1.6,-1.4,-1.2,-1.0,-0.8,-0.6,-0.4,-0.2,-0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2,2.5],
+    "BJetEta_AfterAllSelections": [-2.5,-2.0,-1.5,-1.0,-0.5,0.0,0.5,1.0,1.5,2.0,2.5],
+    "BtagDiscriminator": [-1.0,-0.9,0.0,0.2,0.4,0.5,0.6,0.7,0.8,0.9,1.0],
+    "BtagDiscriminator_AfterAllSelections": [0.0,0.2,0.4,0.5,0.6,0.7,0.8,0.9,1.0],
+    "BJetSelection*": [0,1,2,3,4,5,6,7,8],
+
+    # Angular cuts
     "CollinearAngularCutsMinimum*": [0,20,40,60,80,100,120,140,160,180,200,220,240,260],
     "BackToBackAngularCutsMinimum*": [0,20,40,60,80,100,120,140,160,180,200,220,240,260],
-    "MET": [0,20,40,60,80,100,120,140,160,200,250,300,400,500,600,700,800],
-    "METPhi": [-3.14,-2.75,-2.36,-1.96,-1.57,-1.18,-0.79,-0.39,0.00,0.39,0.79,1.18,1.57,1.96,2.36,2.75,3.14],
-    "METPhiMinusTauPhi": [0.00,0.39,0.79,1.18,1.57,1.96,2.36,2.75,3.14],
-    "MET_AfterAllSelections": [0,20,40,60,80,100,120,140,160,180,200,250,300,400,500,600,700,800],
-#    "MET_AfterAllSelections"  : [i for i in range(0, 100, 10)] + [i for i in range(100, 200, 20)] + [i for i in range(200, 300, 50)] + [i for i in range(300, 700+100, 100)], #HToTB
-    "METPhi_AfterAllSelections": [-3.14,-2.36,-1.57,-0.79,0.00,0.79,1.57,2.36,3.14],
-    "METPhiMinusTauPhi_AfterAllSelections": [0.00,0.39,0.79,1.18,1.57,1.96,2.36,2.75,3.14],
-    "TauPlusMETPt": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,450,500,600,700,800,900,1000],
-    "TauPlusMETPt_AfterAllSelections": [0,40,80,120,160,200,240,280,320,360,400,450,500,600,700,800,900,1000],
-    "NBjets": [0,1,2,3,4,5,6,7,8],
-    "BJetSelection*": [0,1,2,3,4,5,6,7,8],
-    "BJetPt": [0,30,50,70,90,110,130,150,200,300,400,500],
-    "BJetEta": [-2.5,-2.2,-2.0,-1.8,-1.6,-1.4,-1.2,-1.0,-0.8,-0.6,-0.4,-0.2,-0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2,2.5],
-    "BtagDiscriminator": [-1.0,-0.9,0.0,0.2,0.4,0.5,0.6,0.7,0.8,0.9,1.0],
-    "NBjets_AfterAllSelections": [0,1,2,3,4,5,6,7,8],
-    "BJetPt_AfterAllSelections": [0,20,30,50,70,90,110,130,150,200,300,400,500],
-    "BJetEta_AfterAllSelections": [-2.5,-2.0,-1.5,-1.0,-0.5,0.0,0.5,1.0,1.5,2.0,2.5],
-    "BtagDiscriminator_AfterAllSelections": [0.0,0.2,0.4,0.5,0.6,0.7,0.8,0.9,1.0],
-    "DeltaPhiTauMet_AfterAllSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
+    "ImprovedDeltaPhiCuts*": [0,20,40,60,80,100,120,140,160,180,200,220,240,260],
     "MinDeltaPhiTauJet": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
+    "MinDeltaPhiTauJet_AfterAllSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
     "MaxDeltaPhiTauJet": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
-    "TopMass": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,350,400,500],
-    "TopPt": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,350,400,500,600,700,800,900,1000],
-    "WMass": [0,10,20,30,40,50,60,70,80,90,100,100,120,130,140,160,180,200,250,300],
-    "WPt": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,350,400,500,600,700,800,900,1000],
-    "TopMass_AfterAllSelections": [0,20,40,60,80,100,150,200,300,500,600,700,800,900,1000],
-    "TopPt_AfterAllSelections": [0,20,40,60,80,100,150,200,300,500,600,700,800,900,1000],
-    "WMass_AfterAllSelections": [0,10,20,30,40,50,60,70,80,90,100,100,120,130,140,160,180,200,250,300],
-    "WPt_AfterAllSelections": [0,20,40,60,80,100,150,200,300,500,600,700,800,900,1000],
+    "MaxDeltaPhiTauJet_AfterAllSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
 
+<<<<<<< HEAD
     "TransverseMass*": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,600,700,800,900,1000], #extended to 5000
 #    "TransverseMass*": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,350,400,500,600,700,800,900,1000,1500], # MIT rebin
+=======
+    # MET
+    "MET": [0,20,40,60,80,100,120,140,160,200,250,300,400,500,600,700,800],
+    "MET_AfterAllSelections": [0,20,40,60,80,100,120,140,160,180,200,250,300,400,500,600,700,800],
+    "METPhi": [-3.14,-2.75,-2.36,-1.96,-1.57,-1.18,-0.79,-0.39,0.00,0.39,0.79,1.18,1.57,1.96,2.36,2.75,3.14],
+    "METPhi_AfterAllSelections": [-3.14,-2.36,-1.57,-0.79,0.00,0.79,1.57,2.36,3.14],
+    "METPhiMinusTauPhi": [0.00,0.39,0.79,1.18,1.57,1.96,2.36,2.75,3.14],
+    "METPhiMinusTauPhi_AfterAllSelections": [0.00,0.39,0.79,1.18,1.57,1.96,2.36,2.75,3.14],
+    "DeltaPhiTauMet_AfterAllSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
+    "DeltaPhiTauMET_AfterAllSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
+>>>>>>> origin/hw_analysis
 
-#    "shapeTransverseMass": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,600,700,800],
-#    "shapeTransverseMass": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,600,700,800,900,1000,1500,2000,3000,4000,5000], #default extended to 5000
-    "shapeTransverseMass": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,600,800,10000], #aggressive rebinning to get rid of empty bins
-#    "shapeTransverseMass": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,350,400,500,600,700,800,900,1000,1500], # MIT rebin
+    # Tau Pt + MET
+    "TauPlusMETPt": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,450,500,600,700,800,900,1000],
+    "TauPlusMETPt_AfterAllSelections": [0,40,80,120,160,200,240,280,320,360,400,450,500,600,700,800,900,1000],
 
+<<<<<<< HEAD
     "tauPt": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500],
     "muonPt": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500],
     "nJet": [0,1,2,3,4,5,6,7,8,9,10],
@@ -287,12 +382,14 @@ _dataDrivenCtrlPlotBinning = {
 
     "shapeInvariantMass": [0,20,40,60,80,100,120,140,160,200,300,400,500,600,700,800,900,1000,1500,2000,3000,4000,5000],
     "InvariantMass*": [0,20,40,60,80,100,120,140,160,200,400,500,600,700,800,900,1000,1500,2000,3000,4000,5000],
+=======
+    # Tau
+>>>>>>> origin/hw_analysis
     "SelectedTau_pT_AfterStandardSelections": [0,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500,600,700,800,900,1000],
-    "SelectedTau_eta_AfterStandardSelections": [-2.5,-2.1,-1.8,-1.6,-1.4,-1.2,-1.0,-0.8,-0.6,-0.4,-0.2,-0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.1,2.5],
-#    "SelectedTau_eta_AfterStandardSelections": [float(x) * 0.1 for x in range(-25, 26)],
+    "SelectedTau_eta_AfterStandardSelections": [-2.5,-2.1,-2.0,-1.8,-1.6,-1.4,-1.2,-1.0,-0.8,-0.6,-0.4,-0.2,-0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.1,2.5],
     "SelectedTau_phi_AfterStandardSelections": [-3.14,-2.75,-2.36,-1.96,-1.57,-1.18,-0.79,-0.39,0.00,0.39,0.79,1.18,1.57,1.96,2.36,2.75,3.14],
     "SelectedTau_ldgTrkPt_AfterStandardSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500,600,700,800,900,1000],
-    "SelectedTau_Rtau_AfterStandardSelections": [0.70,0.72,0.74,0.75,0.76,0.78,0.80,0.82,0.84,0.86,0.88,0.90,0.92,0.94,0.96,0.98,1.00],
+    "SelectedTau_Rtau_AfterStandardSelections": [0.75,0.78,0.80,0.82,0.84,0.86,0.88,0.90,0.92,0.94,0.96,0.98,1.00],
     "SelectedTau_Rtau_FullRange_AfterStandardSelections": [0.0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.70,0.75,0.80,0.85,0.90,0.95,1.00],
     "SelectedTau_p_AfterStandardSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500,600,700,800,900,1000],
     "SelectedTau_LeadingTrackP_AfterStandardSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500,600,700,800,900,1000],
@@ -304,32 +401,147 @@ _dataDrivenCtrlPlotBinning = {
     "SelectedTau_phi_AfterAllSelections": [-3.14,-2.36,-1.57,-0.79,0.00,0.79,1.57,2.36,3.14],
     "SelectedTau_ldgTrkPt_AfterAllSelections": [0,20,40,50,60,70,80,100,150,200,300,400,500,600,700,800,900,1000],
     "SelectedTau_Rtau_FullRange_AfterAllSelections": [0.0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.70,0.75,0.80,0.85,0.90,0.95,1.00],
-    "SelectedTau_Rtau_AfterAllSelections": [0.70,0.72,0.74,0.75,0.76,0.78,0.80,0.82,0.84,0.86,0.88,0.90,0.92,0.94,0.96,0.98,1.00],
+    "SelectedTau_Rtau_AfterAllSelections": [0.75,0.78,0.80,0.82,0.84,0.86,0.88,0.90,0.92,0.94,0.96,0.98,1.00],
     "SelectedTau_p_AfterAllSelections": [0,20,40,50,60,70,80,100,150,200,300,500,600,700,800,900,1000],
     "SelectedTau_LeadingTrackP_AfterAllSelections": [0,41,60,80,100,150,200,300,500,600,700,800,900,1000],
     "SelectedTau_DecayMode_AfterAllSelections": None,
     "SelectedTau_Nprongs_AfterAllSelections": None,
     "SelectedTau_source_AfterAllSelections": None,
-    "DeltaPhiTauMET_AfterAllSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
-    "MinDeltaPhiTauJet_AfterAllSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
-    "MaxDeltaPhiTauJet_AfterAllSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
-    "NVertices_AfterAllSelections": None,
-    # HToTB
-    "HT_AfterAllSelections"   : [i for i in range(500, 1500, 50)] + [i for i in range(1500, 2000, 100)] + [i for i in range(2000, 3000+500, 500)],
+
+    # Top
+    "TopMass": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,350,400,500],
+    "TopMass_AfterAllSelections": [0,20,40,60,80,100,150,200,300,500,600,700,800,900,1000],
+    "TopPt": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,350,400,500,600,700,800,900,1000],
+    "TopPt_AfterAllSelections": [0,20,40,60,80,100,150,200,300,500,600,700,800,900,1000],
+
+    # W
+    "WPt": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,350,400,500,600,700,800,900,1000],
+    "WPt_AfterAllSelections": [0,20,40,60,80,100,150,200,300,500,600,700,800,900,1000],
+    "WMass": [0,10,20,30,40,50,60,70,80,90,100,100,120,130,140,160,180,200,250,300],
+    "WMass_AfterAllSelections": [0,10,20,30,40,50,60,70,80,90,100,100,120,130,140,160,180,200,250,300],
+
+    # Transverse and invariant mass
+    "TransverseMass*": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,600,800,10000], 
+    "shapeInvariantMass": [0,20,40,60,80,100,120,140,160,200,300,400,500,600,700,800,900,1000,1500,2000,3000,4000,5000],
+    "InvariantMass*": [0,20,40,60,80,100,120,140,160,200,400,500,600,700,800,900,1000,1500,2000,3000,4000,5000],
+
+###############################################################
+### mT and MVA binnings for H+ -> tau nu limit extraction
+###############################################################
+# Constant binning used in pre-approval
+#    "shapeTransverseMass": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,600,800,10000], # for pre-approval
+# Cut-and-count, everything in one bin (cross check)
+#    "shapeTransverseMass": [0.0, 10000.0]
+# Automatic binning for RtauMore, threshold 0.2, DY inclusive
+#    "shapeTransverseMass": [0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 110.0, 120.0, 130.0, 140.0, 150.0, 160.0, 170.0, 180.0, 190.0, 200.0, 210.0, 220.0, 230.0, 240.0, 260.0, 270.0, 290.0, 310.0, 370.0, 10000.0],
+# Automatic binning for  RtauMore, threshold 0.2, DY HT binned
+    "shapeTransverseMass": [0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 110.0, 120.0, 130.0, 140.0, 150.0, 160.0, 170.0, 180.0, 190.0, 200.0, 210.0, 220.0, 230.0, 240.0, 250.0, 260.0, 270.0, 280.0, 290.0, 300.0, 310.0, 320.0, 330.0, 340.0, 350.0, 370.0, 380.0, 390.0, 400.0, 410.0, 420.0, 440.0, 460.0, 490.0, 10000.0],
+## Automatic binning for RtauLess, threshold 0.2, DY inclusive
+#    "shapeTransverseMass": [0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 110.0, 120.0, 130.0, 140.0, 150.0, 160.0, 170.0, 180.0, 190.0, 200.0, 210.0, 220.0, 230.0, 240.0, 250.0, 260.0, 270.0, 280.0, 290.0, 300.0, 310.0, 320.0, 330.0, 350.0, 360.0, 380.0, 400.0, 420.0, 450.0, 530.0, 10000.0],
+# Automatic binning for  RtauLess, threshold 0.2, DY HT binned
+#    "shapeTransverseMass": [0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 110.0, 120.0, 130.0, 140.0, 150.0, 160.0, 170.0, 180.0, 190.0, 200.0, 210.0, 220.0, 230.0, 240.0, 250.0, 260.0, 270.0, 280.0, 290.0, 300.0, 310.0, 320.0, 330.0, 340.0, 350.0, 360.0, 370.0, 380.0, 390.0, 400.0, 410.0, 420.0, 430.0, 440.0, 450.0, 460.0, 470.0, 480.0, 490.0, 500.0, 510.0, 520.0, 530.0, 540.0, 560.0, 580.0, 590.0, 600.0, 610.0, 650.0, 690.0, 720.0, 1030.0, 10000.0],
+# Constant binning for MVA discriminator (experimental), T and DY inclusive
+#    "MVA": [-1.0,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0],
+# Automatic binning for MVA discriminator, 0.2 threshold, TT and DY inclusive
+    "MVA": [-1.0, -0.96, -0.92, -0.88, -0.84, -0.8, -0.76, -0.72, -0.64, -0.6, -0.52, -0.44, -0.36, -0.28, -0.20, -0.12, -0.04, 0.04, 0.15, 0.24, 0.32, 0.40, 0.48, 0.56, 0.64, 0.72, 0.76, 0.8, 0.84, 0.88, 0.92, 0.96, 1.0],
+###############################################################
+
+###############################################################
+### HToTB specific binning settings
+###############################################################
+    "HT_AfterAllSelections"   : [i for i in range(500, 1000, 50)] + [i for i in range(1000, 1500, 100)] + [i for i in range(1500, 2500+200, 200)] + [3000],
     "MHT_AfterAllSelections"  : [i for i in range(0, 140, 10)] + [i for i in range(140, 240, 20)] + [i for i in range(240, 400, 50)],
     "QGLR_AfterAllSelections" : [float(i)/100.0 for i in range(0, 105, 5)],
-    "LdgTrijetPt_AfterAllSelections"     : [j for j in range(0, 500, 20)] + [k for k in range(500, 700, 50)] + [k for k in range(700, 900+100, 100)],
-    "LdgTrijetMass_AfterAllSelections"   : [i for i in range(50, 350, 10)],
-    "LdgTrijetBjetPt_AfterAllSelections" : [j for j in range(0, 300, 10)] + [k for k in range(300, 700+40, 40)],
-    "LdgTrijetBjetEta_AfterAllSelections" : None,
-    "LdgTrijetDijetPt_AfterAllSelections": [j for j in range(0, 400, 10)] + [k for k in range(400, 700+25, 25)],
-    "LdgTrijetDijetMass_AfterAllSelections": None,
+    "LdgTrijetPt_AfterAllSelections"        : [j for j in range(0, 500, 50)] + [k for k in range(500, 900+100, 100)],
+    "SubldgTrijetPt_AfterAllSelections"     : [j for j in range(0, 500, 50)] + [k for k in range(500, 900+100, 100)],
+    "LdgTrijetMass_AfterAllSelections"      : [i for i in range(40, 360+20, 20)],
+    "SubldgTrijetMass_AfterAllSelections"   : [i for i in range(40, 360+20, 20)],
+    "LdgTrijetBjetPt_AfterAllSelections"    : [j for j in range(0, 300, 25)] + [k for k in range(300, 700+50, 50)],
+    "SubldgTrijetBjetPt_AfterAllSelections" : [j for j in range(0, 300, 25)] + [k for k in range(300, 700+50, 50)],
+    "LdgTrijetBjetEta_AfterAllSelections"   : None,
+    "SubldgTrijetBjetEta_AfterAllSelections": None,
+    "LdgTrijetBjetBdisc_AfterAllSelections" : None,
+    "SubldgTrijetBjetBdisc_AfterAllSelections": None,
+    "LdgTrijetDijetPt_AfterAllSelections"   : [j for j in range(0, 500, 25)] + [k for k in range(500, 700+50, 50)],
+    "SubldgTrijetDijetPt_AfterAllSelections": [j for j in range(0, 500, 25)] + [k for k in range(500, 700+50, 50)],
+    "LdgTrijetDijetMass_AfterAllSelections" : [i for i in range(0, 250+10, 10)],
+    "SubldgTrijetDijetMass_AfterAllSelections": [i for i in range(0, 250+10, 10)],
     "LdgTrijetTopMassWMassRatioAfterAllSelections": None,
-    "TetrajetBjetPt_AfterAllSelections"  : [j for j in range(0, 400, 20)] + [k for k in range(400, 600, 40)] + [k for k in range(600, 900+100, 100)],
-    "TetrajetBjetEta_AfterAllSelections" : None,
-    "LdgTetrajetPt_AfterAllSelections"   : [j for j in range(0, 500, 20)] + [k for k in range(500, 700, 50)] + [k for k in range(700, 900+100, 100)],
-    "LdgTetrajetMass_AfterAllSelections": getBinningForTetrajetMass(0),
-    "NVertices_AfterAllSelections": [j for j in range(0, 40, 2)] + [j for j in range(40, 60, 5)] + [j for j in range(60, 80+10, 10)]   
+    "TetrajetBjetPt_AfterAllSelections"     : [j for j in range(0, 300, 20)] + [k for k in range(300, 500+40, 40)] + [600, 900],
+    "TetrajetBjetEta_AfterAllSelections"    : None,
+    "LdgTetrajetPt_AfterAllSelections"      : [j for j in range(0, 500, 20)] + [k for k in range(500, 700, 50)] + [k for k in range(700, 900+100, 100)],
+    "SubldgTetrajetPt_AfterAllSelections"   : [j for j in range(0, 500, 20)] + [k for k in range(500, 700, 50)] + [k for k in range(700, 900+100, 100)],
+    "LdgTetrajetMass_AfterAllSelections"    : getBinningForTetrajetMass(18),
+    "SubldgTetrajetMass_AfterAllSelections" : getBinningForTetrajetMass(18),
+    "Njets_AfterAllSelections"  : [i for i in range(7, 19, 1)],
+    "Jet1Pt_AfterAllSelections" : [i for i in range(0,300, 20)] + [300, 400, 500, 700, 1000],
+    "Jet2Pt_AfterAllSelections" : [i for i in range(0,300, 20)] + [300, 400, 500, 700],
+    "Jet3Pt_AfterAllSelections" : [i for i in range(0,300, 20)] + [300, 400, 500],
+    "Jet4Pt_AfterAllSelections" : [i for i in range(0,300, 20)] + [300, 400],
+    "Jet5Pt_AfterAllSelections" : [i for i in range(0,300, 20)] + [300],
+    "Jet6Pt_AfterAllSelections" : [i for i in range(0,300, 20)] + [300],
+    "Jet7Pt_AfterAllSelections" : [i for i in range(0,200, 10)],
+    "BJet1Pt_AfterAllSelections": [i for i in range(0,300, 20)] + [300, 400, 500, 700],
+    "BJet2Pt_AfterAllSelections": [i for i in range(0,300, 20)] + [300, 400, 500, 700],
+    "BJet3Pt_AfterAllSelections": [i for i in range(0,300, 20)] + [300, 400, 500],
+    "Jet1Eta_AfterAllSelections"  : None,
+    "Jet2Eta_AfterAllSelections"  : None,
+    "Jet3Eta_AfterAllSelections"  : None,
+    "Jet4Eta_AfterAllSelections"  : None,
+    "Jet5Eta_AfterAllSelections"  : None,
+    "Jet6Eta_AfterAllSelections"  : None,
+    "Jet7Eta_AfterAllSelections"  : None,
+    "BJet1Eta_AfterAllSelections" : None,
+    "BJet2Eta_AfterAllSelections" : None,
+    "BJet3Eta_AfterAllSelections" : None,
+    "MET_AfterAllSelections"      : [0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 250, 300], # tmp: clash with HToTauNu
+    #
+    "HT_AfterStandardSelections"   : [i for i in range(500, 1000, 50)] + [i for i in range(1000, 1500, 100)] + [i for i in range(1500, 2500+200, 200)] + [3000],
+    "MHT_AfterStandardSelections"  : [i for i in range(0, 140, 10)] + [i for i in range(140, 240, 20)] + [i for i in range(240, 400, 50)],
+    "QGLR_AfterStandardSelections" : [float(i)/100.0 for i in range(0, 105, 5)],
+    "LdgTrijetPt_AfterStandardSelections"        : [j for j in range(0, 500, 50)] + [k for k in range(500, 900+100, 100)],
+    "SubldgTrijetPt_AfterStandardSelections"     : [j for j in range(0, 500, 50)] + [k for k in range(500, 900+100, 100)],
+    "LdgTrijetMass_AfterStandardSelections"      : [i for i in range(40, 360+20, 20)],
+    "SubldgTrijetMass_AfterStandardSelections"   : [i for i in range(40, 360+20, 20)],
+    "LdgTrijetBjetPt_AfterStandardSelections"    : [j for j in range(0, 300, 25)] + [k for k in range(300, 700+50, 50)],
+    "SubldgTrijetBjetPt_AfterStandardSelections" : [j for j in range(0, 300, 25)] + [k for k in range(300, 700+50, 50)],
+    "LdgTrijetBjetEta_AfterStandardSelections"   : None,
+    "SubldgTrijetBjetEta_AfterStandardSelections": None,
+    "LdgTrijetBjetBdisc_AfterStandardSelections" : None,
+    "SubldgTrijetBjetBdisc_AfterStandardSelections": None,
+    "LdgTrijetDijetPt_AfterStandardSelections"   : [j for j in range(0, 500, 25)] + [k for k in range(500, 700+50, 50)],
+    "SubldgTrijetDijetPt_AfterStandardSelections": [j for j in range(0, 500, 25)] + [k for k in range(500, 700+50, 50)],
+    "LdgTrijetDijetMass_AfterStandardSelections" : [i for i in range(0, 250+10, 10)],
+    "SubldgTrijetDijetMass_AfterStandardSelections": [i for i in range(0, 250+10, 10)],
+    "LdgTrijetTopMassWMassRatioAfterStandardSelections": None,
+    "TetrajetBjetPt_AfterStandardSelections"     : [j for j in range(0, 300, 20)] + [k for k in range(300, 500+40, 40)] + [600, 900],
+    "TetrajetBjetEta_AfterStandardSelections"    : None,
+    "LdgTetrajetPt_AfterStandardSelections"      : [j for j in range(0, 500, 20)] + [k for k in range(500, 700, 50)] + [k for k in range(700, 900+100, 100)],
+    "SubldgTetrajetPt_AfterStandardSelections"   : [j for j in range(0, 500, 20)] + [k for k in range(500, 700, 50)] + [k for k in range(700, 900+100, 100)],
+    "LdgTetrajetMass_AfterStandardSelections"    : getBinningForTetrajetMass(18),
+    "SubldgTetrajetMass_AfterStandardSelections" : getBinningForTetrajetMass(18),
+    "Njets_AfterStandardSelections"  : [i for i in range(7, 19, 1)],
+    "Jet1Pt_AfterStandardSelections" : [i for i in range(0,300, 20)] + [300, 400, 500, 700, 1000],
+    "Jet2Pt_AfterStandardSelections" : [i for i in range(0,300, 20)] + [300, 400, 500, 700],
+    "Jet3Pt_AfterStandardSelections" : [i for i in range(0,300, 20)] + [300, 400, 500],
+    "Jet4Pt_AfterStandardSelections" : [i for i in range(0,300, 20)] + [300, 400],
+    "Jet5Pt_AfterStandardSelections" : [i for i in range(0,300, 20)] + [300],
+    "Jet6Pt_AfterStandardSelections" : [i for i in range(0,300, 20)] + [300],
+    "Jet7Pt_AfterStandardSelections" : [i for i in range(0,200, 10)],
+    "BJet1Pt_AfterStandardSelections": [i for i in range(0,300, 20)] + [300, 400, 500, 700],
+    "BJet2Pt_AfterStandardSelections": [i for i in range(0,300, 20)] + [300, 400, 500, 700],
+    "BJet3Pt_AfterStandardSelections": [i for i in range(0,300, 20)] + [300, 400, 500],
+    "Jet1Eta_AfterStandardSelections"  : None,
+    "Jet2Eta_AfterStandardSelections"  : None,
+    "Jet3Eta_AfterStandardSelections"  : None,
+    "Jet4Eta_AfterStandardSelections"  : None,
+    "Jet5Eta_AfterStandardSelections"  : None,
+    "Jet6Eta_AfterStandardSelections"  : None,
+    "Jet7Eta_AfterStandardSelections"  : None,
+    "BJet1Eta_AfterStandardSelections" : None,
+    "BJet2Eta_AfterStandardSelections" : None,
+    "BJet3Eta_AfterStandardSelections" : None,
+    "MET_AfterStandardSelections"      : [0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 250, 300], # tmp: clash with HToTauNu
 }
 
 

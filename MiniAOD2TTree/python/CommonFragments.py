@@ -165,7 +165,8 @@ def reproduceMET(process,isdata):
       era="Summer16_23Sep2016V4_MC"
 
 #    jerera="Spring16_25nsV6"
-    jerera="Spring16_25nsV10"
+#    jerera="Spring16_25nsV10"
+    jerera="Summer16_25nsV1_80X"
     
 ##___________________________External JEC file________________________________||
  

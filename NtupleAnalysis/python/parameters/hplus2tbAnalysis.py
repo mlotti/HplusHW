@@ -1,4 +1,4 @@
- #!/usr/bin/env python
+#!/usr/bin/env python
 
 from HiggsAnalysis.NtupleAnalysis.main import PSet
 import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
@@ -8,13 +8,12 @@ import HiggsAnalysis.NtupleAnalysis.parameters.jsonReader as jsonReader
 # General parameters
 #================================================================================================
 verbose               = True
-histogramAmbientLevel = "Debug"  # Options: Systematics, Vital, Informative, Debug
+histogramAmbientLevel = "Debug"  # (options: "Systematics", "Vital", "Informative", "Debug")
 
 #================================================================================================
-# Trigger
+# Trigger [scanned in range _v1--_v100 (=>remove the '_v' suffix)]
 #================================================================================================
 trigger = PSet(
-    # scanned in range _v1--_v100 (=>remove the '_v' suffix)
     triggerOR = [
         "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056",
         "HLT_PFHT450_SixJet40_BTagCSV_p056",       
@@ -28,12 +27,14 @@ trigger = PSet(
 #================================================================================================
 metFilter = PSet(
     discriminators = [
-        "hbheNoiseTokenRun2Loose",
+        "Flag_HBHENoiseFilter",
         "Flag_HBHENoiseIsoFilter",
         "Flag_EcalDeadCellTriggerPrimitiveFilter",
-        "Flag_CSCTightHaloFilter",
         "Flag_eeBadScFilter",
-        "Flag_goodVertices"]
+        "Flag_goodVertices",
+        "Flag_globalTightHalo2016Filter",
+        "badPFMuonFilter",
+        "badChargedCandidateFilter"]
     )
 
 #================================================================================================
@@ -74,7 +75,8 @@ tauVeto = PSet(
     rtau                 =   0.0, # [default: 0.0] (to disable set to 0.0)
     againstElectronDiscr = "againstElectronTightMVA6",
     againstMuonDiscr     = "againstMuonLoose3",
-    isolationDiscr       = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
+    isolationDiscr       = "byLooseCombinedIsolationDeltaBetaCorr3Hits", # [higher signal efficiency]
+    # isolationDiscr       = "byVLooseIsolationMVArun2v1DBoldDMwLT", # [boosted analysis]
     )
 
 #================================================================================================
@@ -112,37 +114,20 @@ bjetSelection = PSet(
     numberOfBJetsCutDirection = ">=",     # [default: ">="] (options: ==, !=, <, <=, >, >=)
 )
 
-#================================================================================================
-# Scale Factors
-#================================================================================================
-if bjetSelection.bjetDiscr == "pfCombinedInclusiveSecondaryVertexV2BJetTags":
-    scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
-                                        btagPayloadFilename    = "CSVv2.csv",
-                                        #btagEfficiencyFilename = "btageff_hybrid_HToTB.json",
-                                        btagEfficiencyFilename = "btageff_HToTB.json",
-                                        direction              = "nominal")
-elif bjetSelection.bjetDiscr == "pfCombinedMVAV2BJetTags":
-    print "--> "*10
-    scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
-                                        btagPayloadFilename    = "cMVAv2_Moriond17_B_H.csv", # use this for MVA b-tagging
-                                        btagEfficiencyFilename = "btageff_Hybrid_TT+WJetsHT.json", # use with taunu analysis and WJetsHT samples
-                                        direction              = "nominal")
-else:
-    pass #should crash
-
 #=================================================================================================
-# QGL selection
+# Fat jet selection
 #=================================================================================================
-qglrSelection = PSet(
-    QGLRCutValue             = -1.0, # [default: -1.0] (to disable choose ">=" than -ve value)
-    QGLRCutDirection         = ">=", # [default: ">="] 
-    numberOfJetsCutValue     = 8,   # [default: 10]   (needed to suppress combinatorics => run time)
-    numberOfJetsCutDirection = "<=", # [default: "<="] 
+fatjetVeto = PSet(
+    fatjetType                  = "FatJets", # [default: "FatJets"]  
+    fatjetPtCuts                = [450.0],   # [default: [450.0] ]
+    fatjetEtaCuts               = [2.4],     # [default: [2.4] ]
+    fatjetIDDiscr               = "IDloose", # [default: "IDLoose"] (options: IDloose, IDtight, IDtightLeptonVeto)
+    fatjetPUIDDiscr             = "",        # [default: ""]
+    topMatchDeltaR              = 0.8,       # [default: 0.8]
+    topMatchTypes               = [1],       # [default: 1]   (options: kJJB=1, kJJ=2, kJB=3, kJJBorJJ=4, kJJBorJB=5, kJJorJB=6, kAll=7, any = -1)
+    numberOfFatJetsCutValue     = 0,         # [default: 0]
+    numberOfFatJetsCutDirection = ">=",      # [default: "=="] (TO DISABLE: >=0)
 )
-
-jsonReader.setupQGLInformation(QGLRPset  = qglrSelection,
-                               jsonname_Light  = "QGLdiscriminator_QCD_LightJets.json",
-                               jsonname_Gluon  = "QGLdiscriminator_QCD_GluonJets.json")
 
 #================================================================================================
 # MET selection
@@ -157,61 +142,25 @@ metSelection = PSet(
     )
 
 #================================================================================================
-# Topology selection
-#================================================================================================
-if 0:
-    topologySelection = PSet(
-        SphericityCutValue           = 100.0,   # 0.0 <= S <= 1.0
-        SphericityCutDirection       = "<=",    # options: ==, !=, <, <=, >, >=
-        AplanarityCutValue           = 100.0,   # 0.0 <= A <= 0.5
-        AplanarityCutDirection       = "<=",  
-        PlanarityCutValue            = 100.0,   # 0.0 <= P <= 0.5
-        PlanarityCutDirection        = "<=",  
-        CircularityCutValue          = 100.0,   # 0.0 <= C <= 0.5
-        CircularityCutDirection      = "<=",  
-        Y23CutValue                  = 100.0,   # 0.0 <= y23 <= 0.25
-        Y23CutDirection              = "<=",  
-        CparameterCutValue           = 100.0,   # 0.0 <= C <= 1.0
-        CparameterCutDirection       = "<=", 
-        DparameterCutValue           = 100.0,   # 0.0 <= D <= 1.0
-        DparameterCutDirection       = "<=",  
-        FoxWolframMomentCutValue     = 100.0,   # 0.0 <= H2 <= 1.0
-        FoxWolframMomentCutDirection = "<=", 
-        AlphaTCutValue               = 1000.0,  # 0.0 <= alphaT ~ 2.0 (alphaT->0.5 for perfectly balanced events)
-        AlphaTCutDirection           = "<=", 
-        CentralityCutValue           = 100.0,   # 0.0 <= Centrality ~ 1.0
-        CentralityCutDirection       = "<=",
-        )
-
-#================================================================================================
 # Top selection BDT                                               
 #================================================================================================        
 topSelectionBDT = PSet(
-    MVACutValue            = 0.40,    # [default: 0.40, 0.85]
-    MVACutDirection        =  ">=",   # [default: ">="]
-    MassCutValue           = 500.0,   # [default: 400.0]
-    MassCutDirection       = "<=",    # [default: "<"]
-    CSV_bDiscCutValue      = 0.8484,  # [default: 0.8484] #Do not evaluate top candidate if b-jet assigned as b from top fails this cut
+    AnyTopMVACutValue      = -0.95,   # [default: -1.0] NOTE: Defines StandardSelections
+    AnyTopMVACutDirection  =  ">",    # [default: ">"]
+    TopMVACutValue         =  0.40,   # [default: 0.40] NOTE: Only use numbers with 2 decimals (e.g 0.40, 0.30, 0.00)
+    TopMVACutDirection     =  ">=",   # [default: ">="]
+    TopMassLowCutValue     =   0.0,   # [default: 0.0]
+    TopMassLowCutDirection =  ">=",   # [default: ">="]
+    TopMassUppCutValue     =  400.0,  # [default: 400.0]  # Do not evaluate top candidate if top mass greater than this cut (600 takes TOO long!)
+    TopMassUppCutDirection =  "<=",   # [default: "<"]
+    CSV_bDiscCutValue      = 0.8484,  # [default: 0.8484] # Do not evaluate top candidate if b-jet assigned as b from top fails this cut
     CSV_bDiscCutDirection  = ">=",    # [default: ">="]
-    WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32.weights.xml", # (All XML files located in data/TopTaggerWeights/)
-    # WeightFile             = "BDTG_DeltaR0p3.weights.xml", # do not use!
-    # WeightFile             = "TMVAClassification_BDTG_default.weights.xml",  # old (old lepton veto and b-jet thresholds)
+    # WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_14July2018.weight.xml",                       # Default
+    WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_noTopPtRew_24Oct2018.weights.xml",              # Disabled top-pt reweighting
+    # WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_noDeltaRqq_24Oct2018.weights.xml",            # dR(q,q') > 0.8 removed from training (q,q': partons from top decay)    
+    # WeightFile             = "BDTG_DeltaR0p3_DeltaPtOverPt0p32_BJetPt40_noDeltaRqq_noTopPtRew_25Oct2018.weights.xml", # Removed dR(q,q') > 0.8 AND disabled top-pt reweighting
 )
 
-#=================================================================================================
-# Fat jet selection
-#=================================================================================================
-fatjetVeto = PSet(
-    fatjetType      = "FatJets", # [default: "FatJets"]  
-    fatjetPtCuts    = [450.0],   # [default: [450.0] ]
-    fatjetEtaCuts   = [2.4],     # [default: [2.4] ]
-    fatjetIDDiscr   = "IDloose", # [default: "IDLoose"] (options: IDloose, IDtight, IDtightLeptonVeto)
-    fatjetPUIDDiscr = "",        # [default: ""]
-    topMatchDeltaR  = 0.8,       # [default: 0.8]
-    topMatchTypes   = [1],       # [default: 1]   (options: kJJB=1, kJJ=2, kJB=3, kJJBorJJ=4, kJJBorJB=5, kJJorJB=6, kAll=7, any = -1)
-    numberOfFatJetsCutValue     = 0,    # [default: 0]
-    numberOfFatJetsCutDirection = ">=", # [default: "=="] (TO DISABLE: >=0)
-)
 
 #================================================================================================
 # FakeB Measurement Options
@@ -222,7 +171,7 @@ fakeBBjetSelection = PSet(
     jetPtCuts                 = bjetSelection.jetPtCuts,
     jetEtaCuts                = bjetSelection.jetEtaCuts,
     bjetDiscr                 = bjetSelection.bjetDiscr,    
-    bjetDiscrWorkingPoint     = "Loose", # [default: "Loose"] (options: "Loose", "Medium") NOTE: defines SR, VR, CR1, and CR2
+    bjetDiscrWorkingPoint     = "Loose", # NOTE: Defines VR and CR2
     numberOfBJetsCutValue     = bjetSelection.numberOfBJetsCutValue,
     numberOfBJetsCutDirection = bjetSelection.numberOfBJetsCutDirection,
     )
@@ -231,27 +180,65 @@ scaleFactors.setupBtagSFInformation(btagPset               = fakeBBjetSelection,
                                     btagEfficiencyFilename = "btageff_HToTB.json",
                                     direction              = "nominal")
 
-fakeBTopSelectionBDT = PSet(
-    MVACutValue            = -1.0,   # [default: -0.4, 0.0, 0.6] NOTE: defines SR, VR, CR1, and CR2
-    MVACutDirection        = ">",    # [default: ">"] (NOTE: Crashes if set to ">=" -1)
-    LdgTopDefinition       = "MVA",  # [default: "MVA"] (options: "MVA", "Pt")
-    MassCutValue           = topSelectionBDT.MassCutValue,
-    MassCutDirection       = topSelectionBDT.MassCutDirection,
-    CSV_bDiscCutValue      = topSelectionBDT.CSV_bDiscCutValue,
-    CSV_bDiscCutDirection  = topSelectionBDT.CSV_bDiscCutDirection,
-    WeightFile             = topSelectionBDT.WeightFile,
-)
-
 fakeBMeasurement = PSet(
-    baselineBJetsCutValue     = 2,
-    baselineBJetsCutDirection = "==",
-    baselineBJetsDiscr        = bjetSelection.bjetDiscr,
-    baselineBJetsDiscrWP      = bjetSelection.bjetDiscrWorkingPoint,
-    LdgTopMVACutValue         = topSelectionBDT.MVACutValue,
-    LdgTopMVACutDirection     = topSelectionBDT.MVACutDirection, 
-    SubldgTopMVACutValue      = topSelectionBDT.MVACutValue,
-    SubldgTopMVACutDirection  = "<",
+    # b-jets
+    baselineBJetsCutValue          = 2,    # [default: 2]
+    baselineBJetsCutDirection      = "==", # [default: ==]
+    baselineBJetsDiscr             = bjetSelection.bjetDiscr,
+    baselineBJetsDiscrWP           = bjetSelection.bjetDiscrWorkingPoint,
+    # Tops
+    LdgTopMVACutValue              = topSelectionBDT.TopMVACutValue,
+    LdgTopMVACutDirection          = topSelectionBDT.TopMVACutDirection, 
+    SubldgTopMVACutValue           = topSelectionBDT.TopMVACutValue,
+    SubldgTopMVACutDirection       = "<", # [default: "<"]
     )
+
+#================================================================================================
+# Scale Factors (SFs)
+#================================================================================================
+if bjetSelection.bjetDiscr == "pfCombinedInclusiveSecondaryVertexV2BJetTags":
+    scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
+                                        btagPayloadFilename    = "CSVv2.csv",
+                                        #btagEfficiencyFilename = "btageff_hybrid_HToTB.json",
+                                        btagEfficiencyFilename = "btageff_HToTB.json",
+                                        direction              = "nominal")
+elif bjetSelection.bjetDiscr == "pfCombinedMVAV2BJetTags":
+    scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
+                                        btagPayloadFilename    = "cMVAv2_Moriond17_B_H.csv", # use this for MVA b-tagging
+                                        btagEfficiencyFilename = "btageff_Hybrid_TT+WJetsHT.json", # use with taunu analysis and WJetsHT samples
+                                        direction              = "nominal")
+else:
+    raise Exception("This should never be reached!")
+
+# top-tagging (json files available for: defaut, fatJet, ldgJet)
+MVAstring = "%.2f" % topSelectionBDT.TopMVACutValue
+# Determine which top JSON files to use depending on the BDT trainigh weightfile used
+if "noDeltaRqq_noTopPtRew" in topSelectionBDT.WeightFile:
+    # dR(q,q') > 0.8 removed from training (q,q': partons from top decay)    
+    topMisID     = "topMisID_BDT0p40_TopMassCut400_BDTGnoDRqq_noTopPtRew.json"
+    topTagEff    = "toptagEff_BDT0p40_GenuineTT_TopMassCut400_BDTGnoDRqq_noTopPtRew.json"
+    topTagEffUnc = "toptagEffUncert_BDT0p40_GenuineTT_TopMassCut400_BDTGnoDRqq_noTopPtRew.json"    
+elif "noDeltaRqq" in topSelectionBDT.WeightFile:
+    # dR(q,q') > 0.8 removed from training (q,q': partons from top decay)    
+    topMisID     = "topMisID_BDT0p40_TopMassCut400_BDTGnoDRqq.json"
+    topTagEff    = "toptagEff_BDT0p40_GenuineTT_TopMassCut400_BDTGnoDRqq.json"
+    topTagEffUnc = "toptagEffUncert_BDT0p40_GenuineTT_TopMassCut400_BDTGnoDRqq.json"
+elif "noTopPtRew" in topSelectionBDT.WeightFile:
+    # Disabled top-pt reweighting
+    topMisID     = "topMisID_BDT0p40_TopMassCut400_noTopPtRew.json"
+    topTagEff    = "toptagEff_BDT0p40_GenuineTT_TopMassCut400_noTopPtRew.json"
+    topTagEffUnc = "toptagEffUncert_BDT0p40_GenuineTT_TopMassCut400_noTopPtRew.json"
+else:
+    # Defaut
+    topMisID     = "topMisID_BDT%s_TopMassCut400.json" % MVAstring.replace(".", "p").replace("-", "m")
+    topTagEff    = "toptagEff_BDT%s_GenuineTT_TopMassCut400.json" % MVAstring.replace(".", "p").replace("-", "m")
+    topTagEffUnc = "toptagEffUncert_BDT%s_GenuineTT_TopMassCut400.json" % MVAstring.replace(".", "p").replace("-", "m")
+scaleFactors.setupToptagSFInformation(topTagPset                     = topSelectionBDT, 
+                                      topTagMisidFilename            = topMisID, 
+                                      topTagEfficiencyFilename       = topTagEff,
+                                      topTagEffUncertaintiesFilename = topTagEffUnc,
+                                      direction                      = "nominal",
+                                      variationInfo                  = None)
 
 #================================================================================================
 # Common plots options
@@ -277,7 +264,7 @@ commonPlotsOptions = PSet(
     topMassBins       = PSet(nBins = 200, axisMin =  0.0, axisMax = 1000.0), #  5 GeV bin width 
     wMassBins         = PSet(nBins = 200, axisMin =  0.0, axisMax = 1000.0), #  5 GeV bin width 
     mtBins            = PSet(nBins = 800, axisMin =  0.0, axisMax = 4000.0), #  5 GeV bin width
-    invMassBins       = PSet(nBins = 200, axisMin =  0.0, axisMax = 4000.0), # 20 GeV bin width    
+    invMassBins       = PSet(nBins = 600, axisMin =  0.0, axisMax = 3000.0), #  5 GeV bin width
 )
 
 #================================================================================================
@@ -294,11 +281,9 @@ allSelections = PSet(
     BJetSelection         = bjetSelection,
     METSelection          = metSelection,
     TopSelectionBDT       = topSelectionBDT,
-    FatJetSelection       = fatjetVeto,
+    # FatJetSelection       = fatjetVeto,
     FakeBMeasurement      = fakeBMeasurement,
     FakeBBjetSelection    = fakeBBjetSelection,
-    FakeBTopSelectionBDT  = fakeBTopSelectionBDT,
     CommonPlots           = commonPlotsOptions,
     HistogramAmbientLevel = histogramAmbientLevel,
-    QGLRSelection         = qglrSelection,
 )

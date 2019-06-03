@@ -475,7 +475,8 @@ class DataCardReader:
         self._readDatacardContents(directory, mass)
         if rootFilePattern != None:
             self._readRootFileContents(directory, mass)
-        
+        return
+
     def close(self):
 
         if not self._silentStatus:
@@ -1234,6 +1235,7 @@ class DataCardReader:
             self._datacardFilename = os.path.join(directory, self._datacardFilePattern%mass)
         else:
             self._datacardFilename = os.path.join(directory, self._datacardFilePattern)
+
         # Make backup of original cards
         if not self._readOnly:
             if not os.path.exists(_originalDatacardDirectory):
@@ -1242,6 +1244,7 @@ class DataCardReader:
                 os.system("cp %s %s/."%(os.path.join(directory,self._datacardFilename), _originalDatacardDirectory))
             else:
                 os.system("cp %s ."%(os.path.join(_originalDatacardDirectory,self._datacardFilename)))
+
         # Obtain datacard
         myOriginalCardFile = open(self._datacardFilename)
         myOriginalCardLines = myOriginalCardFile.readlines()
@@ -1254,7 +1257,8 @@ class DataCardReader:
         #print self._observationValue
         #print self._rateValues
         #print self._datasetNuisances
-    
+        return
+
     def _writeDatacardContents(self):
         if self._readOnly:
             return
@@ -1407,25 +1411,38 @@ class DataCardReader:
                 return
         raise Exception("This line should never be reached")
 
-    ## Parse info of nuisances from datacard file
     def _parseDatacardNuisanceNames(self, lines):
+        '''
+        Parse info of nuisances from datacard file
+        '''
         if len(self._datacardColumnNames) == 0:
             raise Exception("No column names found in datacard!")
+
         myNames = []
         myRateLinePassedStatus = False
+        # For-loop: All lines
         for l in lines:
+
+            # Skip autoMCstats (crashes)
+            if "automcstats" in l.lower():
+                continue
+
             if l != "\n":
                 mySplit = l.split()
+
                 if myRateLinePassedStatus and len(mySplit) > 1:# and not "statBin" in mySplit[0]:
+
                     # store nuisance
                     myDict = {}
                     myDict["name"] = mySplit[0]
                     myDict["distribution"] = mySplit[1]
                     for i in range(0,len(self._datacardColumnNames)):
                         myDict[self._datacardColumnNames[i]] = mySplit[i+2]
+
                     # Ignore stat. uncertainty
                     #if not myDict["name"].endswith("stat"):
                     self._datasetNuisances.append(myDict)
+
                 if len(mySplit[0]) > 3:
                     if mySplit[0] == "observation":
                     # store observation
@@ -1435,6 +1452,7 @@ class DataCardReader:
                         for i in range(1,len(mySplit)):
                             self._rateValues[self._datacardColumnNames[i-1]] = mySplit[i]
                         myRateLinePassedStatus = True
+
         if len(self._datasetNuisances) == 0:
             raise Exception("No nuisances found!")
 

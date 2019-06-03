@@ -557,3 +557,4 @@ bool TriggerDumper::isCorrectObject(int id,std::string trgObject){
   if(trgObject.find(sid) < trgObject.length()) return true;
   return false;
 }
+

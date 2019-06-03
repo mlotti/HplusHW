@@ -16,10 +16,15 @@ EXAMPLES:
 ./plotBRLimitCompare_Hplus2tb.py --url --logY --gridX --gridY --cutLine 500 --yMin 0.01 --name h2tb
 ./plotBRLimitCompare_Hplus2tb.py --url --logY --gridX --gridY --cutLine 500 --yMin 0.3 --yMax 10 --name h2tb 
 ./plotBRLimitCompare_Hplus2tb.py --logY --gridX --gridY --relative --cutLine 500 --cutLineY 1
+./plotBRLimitCompare_Hplus2tb.py --logY --gridX --gridY --relative --url
+./plotBRLimitCompare_Hplus2tb.py --logY --gridX --gridY --relative --url --yMax 10
+./plotBRLimitCompare_Hplus2tb.py --logY --gridX --gridY --relative --url --xMax 1000
+./plotBRLimitCompare_Hplus2tb.py --logY --gridX --gridY --relative --yMin 0.5 --xMax 800
+./plotBRLimitCompare_Hplus2tb.py --logY --relative --yMin 0.1 --xMax 1000 --url
 
 
 LAST USED:
-./plotBRLimitCompare_Hplus2tb.py --logY --gridX --gridY --relative --url
+./plotBRLimitCompare_Hplus2tb.py --logY --relative --yMin 0.1 --xMax 3000 --url --bandValue 5
 
 '''
 #================================================================================================
@@ -48,9 +53,6 @@ import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 #================================================================================================
 # Global definitions
 #================================================================================================
-xPos      = 0.53
-xPosLeg   = xPos
-xPosText  = xPos
 styleList = [styles.Style(24, ROOT.kBlack)] + styles.getStyles()
 
 
@@ -95,38 +97,505 @@ def main():
         savePath = opts.saveDir.replace("/afs/cern.ch/user/a/attikis/public/html", "https://cmsdoc.cern.ch/~%s" % getpass.getuser())
 
     # Do the Resolved H->tb fully hadronic final state comparison
-    myList1 = [
-        ("H^{+}#rightarrow tb (#chi^{2})", "*limits2017/datacards_default_170827_075947_noLumi/CombineResults_taujets_*"),
-        #("p_{T}^{b3}#geq40, BDT#geq0.85"        , "limits2018/datacards_Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180126_030205/CombineResults*"),
-        #("p_{T}^{b3}#geq40, BDT#geq0.85 (lev1)" , "limits2018/datacards_Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180126_030205_level1/CombineResults*"),
-        ("p_{T}^{b3}#geq40, BDT#geq0.85 (lev2)" , "limits2018/datacards_Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180126_030205_level2/CombineResults*"),
-        #("p_{T}^{b3}#geq40, BDT#geq0.85 (lev3)"         , "limits2018/datacards_Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180126_030205_level3/CombineResults*"),
-        #("p_{T}^{b3}#geq40, BDT#geq0.85 (lev2, BugFix)" , "limits2018/datacards_Hplus2tbAnalysis_PreSel_3CSVv2M_Pt40_SigSel_MVA0p85_180214_074442_level2_MajorBugFix/CombineResults*"),
-        ("p_{T}^{b3}#geq40, BDT#geq0.85 (lev2, BugFix)" , "limits2018/datacards_Hplus2tbAnalysis_PreSel_3CSVv2M_Pt40_SigSel_MVA0p85_180214_074442_level2_MajorBugFix_StatOnly/CombineResults*"),
-        ]
-    opts.name = "h2tb"
-    doCompare(opts.name, myList1)
+    if 0:
+        opts.name = "optimisationOfEtaBins"
+        myList1   = GetOptimisationOfEtaBinsMar2018()
+        doCompare(opts.name, myList1)
 
+    if 0:
+        opts.name = "optimisationOfMassBins"
+        myList1   = GetPreapprovalMassBinningMar2018()
+        doCompare(opts.name, myList1)
+
+    if 0:
+        opts.name = "optimisationOfBDTStat"
+        myList1   = GetOptimisationOfBDTStatMar2018()
+        doCompare(opts.name, myList1)
+
+    if 0:
+        opts.name = "optimisationOfBDTSyst"
+        myList1   = GetOptimisationOfBDTSystApr2018()
+        doCompare(opts.name, myList1)
+
+    if 0:
+        opts.name = "optimisationOfFatjetVeto"
+        # do not overwrite xMax in this case
+        xmax = opts.xMax
+        opts.xMax = 3000
+        myList1   = GetOptimisationOfFatjetVetoMar2018()
+        doCompare(opts.name, myList1)
+        opts.xMax = xmax #switch back to custom xMax
+
+    if 0:
+        opts.name = "stat"
+        # myList1   = GetHexoListStat19Mar2018()
+        myList1   = GetStatOnlyListMar2018()
+        doCompare(opts.name, myList1)
+
+    if 0:
+        opts.name = "syst"
+        # myList1   = GetHexoListSyst19Mar2018()    
+        myList1   = GetPreapprovalTestsSystMar2018()
+        doCompare(opts.name, myList1)
+
+        
     # Do all H->tb fully hadronic final states comparison
-    myList2 = [
-        ("H^{+}#rightarrow tb (#chi^{2})", "*limits2017/datacards_default_170827_075947_noLumi/CombineResults_taujets_*"),
-        #("H^{+}#rightarrow tb (Fake-b binned)", "limits2018/datacards_Hplus2tbAnalysis_PreSel_3bjets40_SigSel_MVA0p85_180126_030205_level3/CombineResults*"),
-        #("H^{+}#rightarrow tb (MC)"           , "limits2018/datacards_NewLeptonVeto_3bjets40_MVA0p85_MVA0p85_TopMassCutOff600GeV_180122_022900/CombineResults*"),
-        #("H^{+}#rightarrow tb"                , "limits2018/datacards_Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180126_030205_level3/CombineResults*"),
-        ("H^{+}#rightarrow tb"                , "limits2018/datacards_Hplus2tbAnalysis_NewLeptonVeto_PreSel_3bjets40_SigSel_MVA0p85_180126_030205_level3/CombineResults*"),
-        ("H^{+}#rightarrow tb (BugFix)"       , "limits2018/datacards_Hplus2tbAnalysis_PreSel_3CSVv2M_Pt40_SigSel_MVA0p85_180214_074442_level2_MajorBugFix_StatOnly/CombineResults*"),
-        #("H^{+}#rightarrow tb (BugFix, Lumi)" , "limits2018/datacards_Hplus2tbAnalysis_PreSel_3CSVv2M_Pt40_SigSel_MVA0p85_180214_074442_level2_MajorBugFix/CombineResults*"),
-        ("H^{+}#rightarrow tb (~boosted)"     , "limits2017/*datacards_combine_MIT_approximate/CombineResults_taujets_*"),
-        # ("Single Lepton"                 , "limits2017/*datacards_combine_SingleLepton_approximate/CombineResults_taujets_*"),
-        ]
+    if 0:
+        opts.name = "all"
+        myList2 = GetHexoListStat19Mar2018()
+        doCompare(opts.name, myList2)
 
-    # Do the second list of plots
-    opts.name    = "all"
-    doCompare(opts.name, myList2)
+    if 0:
+        opts.name = "overlap1"
+        myList    = GetHToTBCombinationMay2018v1()
+        doCompare(opts.name, myList)
+
+    if 0:
+        opts.name = "overlap2"
+        myList    = GetHToTBCombinationMay2018v2()
+        doCompare(opts.name, myList)
+
+    if 0:
+        opts.name = "overlap3"
+        myList    = GetHToTBCombinationMay2018v3()
+        doCompare(opts.name, myList)
+
+    if 1:
+        opts.name = "overlapNov2018"
+        myList    = GetHToTBCombinationNov2018v1()
+        doCompare(opts.name, myList)
+
+    if 0:
+        opts.name = "overlap"
+        myList    = GetHToTBCombinationMay2018v2()
+        doOverlap(opts.name, myList)
+
+    if 0:
+        opts.name = "FakeBBinning"
+        myList    = GetHToTBFakeBBinningJune2018()
+        doCompare(opts.name, myList)
+        #doOverlap(opts.name, myList)
+
+    if 0:
+        opts.name = "BinwiseVsAutoMCStats"
+        myList    = GetStatUncertaintyJune2018()
+        doCompare(opts.name, myList)
+
 
     # Inform user and exit
     Print("All plots saved under directory %s" % (ShellStyles.NoteStyle() + savePath + ShellStyles.NormalStyle()), True)    
     return
+
+def GetBoostedStatOnly():
+    homeDir = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/"
+    myList = [
+        # Other final states
+        ("H^{+}#rightarrow tb (boosted, 19-Dec-17)" , homeDir + "datacards_combine_MIT_approximate_19Dec2017/CombineResults_taujets_*"),
+        ("H^{+}#rightarrow tb (boosted, 19-Mar-18)" , homeDir + "datacards_combine_MIT_approximate_19Mar2018/CombineResults_taujets_*"),
+        ]
+    return myList
+
+def GetBoostedSystematics():
+    homeDir = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/"
+    myList = [
+        #("H^{+}#rightarrow tb (boosted, v3)" , homeDir + "datacards_combine_MIT_AN-17-204_v3/CombineResults_taujets_*"),
+        ("H^{+}#rightarrow tb (boosted)" , homeDir + "datacards_HIG-18-015_Preapproval_Boosted_ByHand_Nov2018/CombineResults_taujets_*"),
+        ]
+    return myList
+
+def GetStatOnlyListMar2018():
+    myDirs = {}
+    myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto-OptBin"]   = "mH180to3000_StatOnly_180405_211015/"
+    myDirs["b3Pt30_MVAm0p40to0p40_QGLR0p5_NoFatJetVeto_StatOnly"]  = "mH180to1000_b3Pt30_MVAm0p40to0p40_QGLRGE0p5_NoFatJetVeto_StatOnly_180321_133930/"
+    myDirs["b3Pt40_MVAm0p40to0p40_NoFatJetVeto_StatOnly"]  = "mH180to1000_StatOnly_180322_120347/"
+    myDirs["b3Pt40_MVA0p00to0p60_NoFatJetVeto_StatOnly"]   = "mH180to1000_StatOnly_180322_120645/"
+    myDirs["b3Pt40_MVA0p50to0p80_NoFatJetVeto_StatOnly"]   = "mH180to1000_StatOnly_180322_121019/"
+    myDirs["b3Pt40_MVA0p60to0p85_NoFatJetVeto_StatOnly"]   = "mH180to1000_StatOnly_180322_121221/"
+    myDirs["b3Pt40_MVA0p60to0p90_NoFatJetVeto_StatOnly"]   = "mH180to1000_StatOnly_180322_121415/"
+    myDirs["b3Pt40_MVAm1p0to0p40_NoFatJetVeto_StatOnly_SubldgTetrajet"] = "mH180to3000_StatOnly_Binning0_SubldgTetrajet_180416_071158/"
+    #
+    # myDirs["b3Pt30_MVAm0p40to0p40_NoFatJetVeto_StatOnly"]  = "mH180to1000_b3Pt30_MVAm0p40to0p40_NoFatJetVeto_StatOnly_180320_130704/"
+    myDirs["b3Pt30_MVA0p00to0p60_NoFatJetVeto_StatOnly"]   = "mH180to1000_b3Pt30_MVA0p00to0p60_NoFatJetVeto_StatOnly_180321_103154/"
+    myDirs["b3Pt30_MVA0p50to0p80_NoFatJetVeto_StatOnly"]   = "mH180to1000_b3Pt30_MVA0p50to0p80_StatOnly_180321_103541/"
+    myDirs["b3Pt30_MVA0p06to0p85_NoFatJetVeto_StatOnly"]   = "mH180to1000_StatOnly_180322_121620/"
+    myDirs["b3Pt30_MVA0p06to0p90_NoFatJetVeto_StatOnly"]   = "mH180to1000_StatOnly_180322_121827/"
+    #
+    myDirs["b3Pt40_MVA0p40_NoFatJetVeto_StatOnly"]         = "mH180to3000_b3Pt40_MVA0p40_NoFatJetVeto_StatOnly_180319_051408/"
+    myDirs["b3Pt40_MVA0p40_FatJetVeto450_StatOnly"]        = "mH180to3000_b3Pt40_MVA0p40_FatJetVeto450_StatOnly_180319_052727/"
+    myDirs["b3Pt40_MVA0p40_FatJetVeto500_StatOnly"]        = "mH180to3000_b3Pt40_MVA0p40_FatJetVeto500_StatOnly_180319_052958/"
+    # CMS AN-2018/019 (wrong label in dirs names. The dict label is correct for the MVA inversion (-1 < BDT < 0.4)
+    myDirs["b3Pt40_MVAm1p00to0p40_StatOnly_6AbsEtaBins"]         = "mH180to1000_MVAm0p10to0p40_6BinsAbsEta_0PtBins_NoFatjetVeto_StatOnly_180327_062621/"
+    myDirs["b3Pt40_MVAm1p00to0p40_6AbsEtaBins"]                  = "mH180to3000_MVAm0p10to0p40_6BinsAbsEta_0PtBins_NoFatjetVeto_180329_085329/"
+    # myDirs["b3Pt40_MVAm1p00to0p40_6AbsEtaBins"]                  = "mH180to1000_MVAm0p10to0p40_6BinsAbsEta_0PtBins_NoFatjetVeto_180327_055551/"
+    myDirs["b3Pt40_MVAm1p00to0p40_StatOnly_5AbsEtaBins_2PtBins"] = "mH180to1000_MVAm0p10to0p40_5BinsAbsEta_2PtBins_NoFatjetVeto_StatOnly_180327_054831/"
+    myDirs["b3Pt40_MVAm1p00to0p40_5AbsEtaBins_2PtBins"]          = "mH180to1000_MVAm0p10to0p40_5BinsAbsEta_2PtBins_NoFatjetVeto_180327_054831/"
+
+    homeDir = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/"
+    for k in myDirs:
+        myDirs[k] = os.path.join(homeDir, "datacards_Hplus2tb_13TeV_EraRun2016_Search80to1000_OptNominal_limits2016_DataDriven_" + myDirs[k])
+
+    myList = [
+        ### 3 bjets with pT > 40, 40, 30 GeV/c
+        # ("b30, BDT > 0.40 (QGLR #geq 0.5)", myDirs["b3Pt30_MVAm0p40to0p40_QGLR0p5_NoFatJetVeto_StatOnly"] + "CombineResults*"),
+        # ("b30, BDT > 0.40", myDirs["b3Pt30_MVAm0p40to0p40_NoFatJetVeto_StatOnly"] + "CombineResults*"),
+        # ("b30, BDT > 0.60", myDirs["b3Pt30_MVA0p00to0p60_NoFatJetVeto_StatOnly"]  + "CombineResults*"),
+        # ("b30, BDT > 0.80", myDirs["b3Pt30_MVA0p50to0p80_NoFatJetVeto_StatOnly"]  + "CombineResults*"),
+        # ("b30, BDT > 0.85", myDirs["b3Pt30_MVA0p06to0p85_NoFatJetVeto_StatOnly"]  + "CombineResults*"),
+        # ("b30, BDT > 0.90", myDirs["b3Pt30_MVA0p06to0p90_NoFatJetVeto_StatOnly"]  + "CombineResults*"),
+
+        ### 3 bjets with pT > 40 GeV/c
+        ("b40, BDT > 0.40 (opt)", myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto-OptBin"] + "CombineResults*"),
+        ("b40, BDT > 0.40"      , myDirs["b3Pt40_MVAm0p40to0p40_NoFatJetVeto_StatOnly"] + "CombineResults*"),
+        ("b40, BDT > 0.40 (Subldg Top)", myDirs["b3Pt40_MVAm1p0to0p40_NoFatJetVeto_StatOnly_SubldgTetrajet"] + "CombineResults*"),
+        # ("b40, BDT > 0.60", myDirs["b3Pt40_MVA0p00to0p60_NoFatJetVeto_StatOnly"]  + "CombineResults*"),
+        # ("b40, BDT > 0.80", myDirs["b3Pt40_MVA0p50to0p80_NoFatJetVeto_StatOnly"]  + "CombineResults*"),
+        # ("b40, BDT > 0.85", myDirs["b3Pt40_MVA0p60to0p85_NoFatJetVeto_StatOnly"]  + "CombineResults*"),
+        # ("b40, BDT > 0.90", myDirs["b3Pt40_MVA0p60to0p90_NoFatJetVeto_StatOnly"]  + "CombineResults*"),
+
+        ### CMS AN-2018/019 (wrong label in dirs names. The dict label is correct for the MVA inversion (-1 < BDT < 0.4)
+        #("b40, BDT > 0.40 (6#eta bins)", myDirs["b3Pt40_MVAm1p00to0p40_StatOnly_6AbsEtaBins"] + "CombineResults*"),
+        # ("b40, BDT > 0.40 (6#eta bins)", myDirs["b3Pt40_MVAm1p00to0p40_6AbsEtaBins"] + "CombineResults*"),
+        #("b40, BDT > 0.40 (5#eta, 2p_{T} bins)", myDirs["b3Pt40_MVAm1p00to0p40_StatOnly_5AbsEtaBins_2PtBins"] + "CombineResults*"),
+        # ("b40, BDT > 0.40 (5#eta, 2p_{T} bins))", myDirs["b3Pt40_MVAm1p00to0p40_5AbsEtaBins_2PtBins"] + "CombineResults*"),
+
+        #
+        # ("BDT > 0.40", myDirs["b3Pt40_MVA0p40_NoFatJetVeto_StatOnly"] + "CombineResults*"),
+        # ("BDT > 0.40 (Fatjet < 450 GeV)", myDirs["b3Pt40_MVA0p40_FatJetVeto450_StatOnly"] + "CombineResults*"),
+        # ("BDT > 0.40 (Fatjet < 500 GeV)", myDirs["b3Pt40_MVA0p40_FatJetVeto500_StatOnly"] + "CombineResults*"),
+        ]
+
+    # Add boosted results?
+    if 1:
+        myList.extend(GetBoostedStatOnly())
+    return myList
+
+
+def GetStatUncertaintyJune2018():
+    '''
+    '''
+    homeDir = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/"
+    myDirs  = {}
+    myDirs["binwise-04may"]     = "Binning13_04May2018/"
+    myDirs["autoMCstats-04may"] = "Binning13_04May2018_autoMCstats/"
+
+    for k in myDirs:
+        myDirs[k] = os.path.join(homeDir, "datacards_Hplus2tb_13TeV_EraRun2016_DataDriven_mH180to3000_Systematics_BDT0p40_" + myDirs[k])
+
+    myList = [
+        ("binwise"    , myDirs["binwise-04may"]    + "CombineResults*"),
+        ("autoMCstats", myDirs["autoMCstats-04may"] + "CombineResults*"),
+        ]
+    return myList
+
+def GetHToTBFakeBBinningJune2018():
+    '''
+    '''
+    myDirs = {}
+    myDirs["6AbsEtaBins"]             = "AbsEtaBins_0p4_0p8_1p6_2p0_2p2_Stat_03June2018_autoMCstats/"
+    myDirs["Pt55_3AbsEtaBins"]        = "Pt55_AbsEtaBins_0p8_1p6_Stat_06June2018_autoMCstats/"
+    myDirs["Pt60_3AbsEtaBins"]        = "Pt60_AbsEtaBins_0p8_1p6_Stat_06June2018_autoMCstats/"
+    myDirs["Pt50_80_3AbsEtaBins"]     = "Pt50_80_AbsEtaBins_0p8_1p6_Stat_06June2018_autoMCstats/"
+    myDirs["Pt50_110_3AbsEtaBins"]    = "Pt50_110_AbsEtaBins_0p8_1p6_Stat_06June2018_autoMCstats/"
+    myDirs["Pt50_80_160_3AbsEtaBins"] = "Pt50_80_160_AbsEtaBins_0p8_1p6_Stat_04June2018_autoMCstats/"
+
+    homeDir = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/"
+    for k in myDirs:
+        myDirs[k] = os.path.join(homeDir, "datacards_Hplus2tb_13TeV_AfterPreapproval_NewTop_" + myDirs[k])
+
+    myList = [
+        ("0 p_{T}, 6 |#eta| bins"     , myDirs["6AbsEtaBins"]             + "CombineResults*"),
+        ("2 p_{T}, 3 |#eta| bins (v1)", myDirs["Pt55_3AbsEtaBins"]        + "CombineResults*"),
+        ("2 p_{T}, 3 |#eta| bins (v2)", myDirs["Pt60_3AbsEtaBins"]        + "CombineResults*"),
+        ("3 p_{T}, 3 |#eta| bins (v1)", myDirs["Pt50_80_3AbsEtaBins"]     + "CombineResults*"),
+        ("3 p_{T}, 3 |#eta| bins (v2)", myDirs["Pt50_110_3AbsEtaBins"]    + "CombineResults*"),
+        ("4 p_{T}, 3 |#eta| bins"     , myDirs["Pt50_80_160_3AbsEtaBins"] + "CombineResults*"),
+        ]
+    return myList
+
+
+def GetHexoListStat19Mar2018():
+    '''
+    3 bjets 40, 40, 40
+    BDT >= 0.40
+    '''
+    myDirs = {}
+    myDirs["b3Pt40_MVA0p40_NoFatJetVeto_StatOnly"]  = "b3Pt40_MVA0p40_NoFatJetVeto_StatOnly_180319_051408/"
+    myDirs["b3Pt40_MVA0p40_NoFatJetVeto"]           = "b3Pt40_MVA0p40_NoFatJetVeto_180319_052022/"
+    myDirs["b3Pt40_MVA0p40_FatJetVeto450_StatOnly"] = "b3Pt40_MVA0p40_FatJetVeto450_StatOnly_180319_052727/"
+    myDirs["b3Pt40_MVA0p40_FatJetVeto450"]          = "b3Pt40_MVA0p40_FatJetVeto450_180319_052456/"
+    myDirs["b3Pt40_MVA0p40_FatJetVeto500_StatOnly"] = "b3Pt40_MVA0p40_FatJetVeto500_StatOnly_180319_052958/"
+    myDirs["b3Pt40_MVA0p40_FatJetVeto500"]          = "b3Pt40_MVA0p40_FatJetVeto500_180319_053111/"
+    homeDir = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/"
+    for k in myDirs:
+        myDirs[k] = os.path.join(homeDir, "datacards_Hplus2tb_13TeV_EraRun2016_Search80to1000_OptNominal_limits2016_DataDriven_mH180to3000_" + myDirs[k])
+
+    myList = [
+        ("BDT > 0.40", myDirs["b3Pt40_MVA0p40_NoFatJetVeto_StatOnly"] + "CombineResults*"),
+        #("BDT > 0.40 (Syst.)", myDirs["b3Pt40_MVA0p40_NoFatJetVeto"] + "CombineResults*"),
+        ("BDT > 0.40 (Fatjet < 450 GeV)", myDirs["b3Pt40_MVA0p40_FatJetVeto450_StatOnly"] + "CombineResults*"),
+        #("BDT > 0.40 (Syst., Fatjet > 450 GeV)", myDirs["b3Pt40_MVA0p40_FatJetVeto450"] + "CombineResults*"),
+        ("BDT > 0.40 (Fatjet < 500 GeV)", myDirs["b3Pt40_MVA0p40_FatJetVeto500_StatOnly"] + "CombineResults*"),
+        #("BDT > 0.40 (Syst., Fatjet < 500 GeV)", myDirs["b3Pt40_MVA0p40_FatJetVeto500"] + "CombineResults*"),
+        #("H^{+}#rightarrow tb (~boosted)"     , "limits2017/*datacards_combine_MIT_approximate/CombineResults_taujets_*"),
+        ]
+    return myList
+
+def GetHexoListSyst19Mar2018():
+    '''
+    3 bjets 40, 40, 40
+    BDT >= 0.40
+    '''
+    myDirs = {}
+    myDirs["b3Pt40_MVA0p40_NoFatJetVeto_StatOnly"]  = "mH180to3000_b3Pt40_MVA0p40_NoFatJetVeto_StatOnly_180319_051408/"
+    myDirs["b3Pt40_MVA0p40_NoFatJetVeto"]           = "mH180to3000_b3Pt40_MVA0p40_NoFatJetVeto_180319_052022/"
+    myDirs["b3Pt40_MVA0p40_FatJetVeto450_StatOnly"] = "mH180to3000_b3Pt40_MVA0p40_FatJetVeto450_StatOnly_180319_052727/"
+    myDirs["b3Pt40_MVA0p40_FatJetVeto450"]          = "mH180to3000_b3Pt40_MVA0p40_FatJetVeto450_180319_052456/"
+    myDirs["b3Pt40_MVA0p40_FatJetVeto500_StatOnly"] = "mH180to3000_b3Pt40_MVA0p40_FatJetVeto500_StatOnly_180319_052958/"
+    myDirs["b3Pt40_MVA0p40_FatJetVeto500"]          = "mH180to3000_b3Pt40_MVA0p40_FatJetVeto500_180319_053111/"
+    homeDir = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/"
+    for k in myDirs:
+        myDirs[k] = os.path.join(homeDir, "datacards_Hplus2tb_13TeV_EraRun2016_Search80to1000_OptNominal_limits2016_DataDriven_" + myDirs[k])
+
+    # Stat. #oplus Syst.
+    myList = [
+        #("BDT > 0.40", myDirs["b3Pt40_MVA0p40_NoFatJetVeto_StatOnly"] + "CombineResults*"),
+        # ("BDT > 0.50 (CSVv2-Tight, Syst.)", myDirs["b3Pt40T_MVA0p50_NoFatJetVeto"] + "CombineResults*"),
+        #("BDT > 0.40", myDirs["b3Pt40_MVA0p40_NoFatJetVeto_StatOnly"] + "CombineResults*"),
+        ("BDT > 0.40 (Syst.)", myDirs["b3Pt40_MVA0p40_NoFatJetVeto"] + "CombineResults*"),
+        #("BDT > 0.40 (Fatjet < 450 GeV)", myDirs["b3Pt40_MVA0p40_FatJetVeto450_StatOnly"] + "CombineResults*"),
+        ("BDT > 0.40 (Syst., Fatjet < 450 GeV)", myDirs["b3Pt40_MVA0p40_FatJetVeto450"] + "CombineResults*"),
+        #("BDT > 0.40 (Fatjet < 500 GeV)", myDirs["b3Pt40_MVA0p40_FatJetVeto500_StatOnly"] + "CombineResults*"),
+        ("BDT > 0.40 (Syst., Fatjet < 500 GeV)", myDirs["b3Pt40_MVA0p40_FatJetVeto500"] + "CombineResults*"),
+        #
+        #("H^{+}#rightarrow tb (~boosted)"     , "limits2017/*datacards_combine_MIT_approximate/CombineResults_taujets_*"),
+        ]
+    return myList
+
+def GetPreapprovalMassBinningMar2018():
+    myDirs = {}
+    myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto_Binning0"]   = "mH180to3000_Binning0_StatOnly/"
+    myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto_Binningm1"]  = "mH180to3000_Binningm1_StatOnly/"
+    myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto_Binning1"]   = "mH180to3000_Binning1_StatOnly/"
+    myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto_Binning2"]   = "mH180to3000_Binning2_StatOnly/"
+    myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto_Binning3"]   = "mH180to3000_Binning3_StatOnly/"
+    myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto_Binning4"]   = "mH180to3000_Binning4_StatOnly/"
+    myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto_Binning5"]   = "mH180to3000_Binning5_StatOnly/"
+    myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto_Binning6"]   = "mH180to3000_Binning6_StatOnly/"
+    myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto_Binning7"]   = "mH180to3000_Binning7_StatOnly/"
+    myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto_Binning8"]   = "mH180to3000_Binning8_StatOnly/"
+    homeDir = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/"
+    for k in myDirs:
+        myDirs[k] = os.path.join(homeDir, "datacards_Hplus2tb_13TeV_EraRun2016_Search80to1000_OptNominal_limits2016_DataDriven_" + myDirs[k])
+
+    myList = [
+        #("1 bin"                     , myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto_Binningm1"] + "CombineResults*"),
+        #("10 bins (300 GeV)"         , myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto_Binning8"]  + "CombineResults*"),
+        #("30 bins (100 GeV)"         , myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto_Binning7"]  + "CombineResults*"),
+        ("34 bins (50, 100, 500 GeV)", myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto_Binning0"]  + "CombineResults*"), #50, 100, 500
+        ("68 bins (25, 50, 250 GeV)" , myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto_Binning1"]  + "CombineResults*"),
+        ("75 bins (40 GeV)"          , myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto_Binning6"]  + "CombineResults*"),
+        # ("82 bins (20, 40, 50, 100, 200, 500 GeV)" , myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto_Binning3"]  + "CombineResults*"),
+        ("85 bins (20, 40, 200 GeV)" , myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto_Binning2"]  + "CombineResults*"),
+        ("100 bins (30 GeV)"         , myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto_Binning5"]  + "CombineResults*"),
+        ("150 bins (20 GeV)"         , myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto_Binning4"]  + "CombineResults*"),
+        ("1 bin"                     , myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto_Binningm1"] + "CombineResults*"),
+        ("10 bins (300 GeV)"         , myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto_Binning8"]  + "CombineResults*"),
+        ("30 bins (100 GeV)"         , myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto_Binning7"]  + "CombineResults*"),
+        ]
+    return myList
+
+def GetPreapprovalTestsSystMar2018():
+    '''
+    3 bjets 40, 40, 40
+    BDT >= 0.40
+    '''
+    myDirs = {}
+    myDirs["b3Pt40_MVA0p40_NoFatJetVeto"] = "mH180to3000_MVAm0p10to0p40_6BinsAbsEta_0PtBins_NoFatjetVeto_180329_085329/"
+    myDirs["b3Pt40_MVA0p40_NoFatJetVeto_ShapeSyst_20GeV"] = "mH180to3000_Systematics_20GeVBins_180412_070202/"
+
+    homeDir = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/"
+    for k in myDirs:
+        myDirs[k] = os.path.join(homeDir, "datacards_Hplus2tb_13TeV_EraRun2016_Search80to1000_OptNominal_limits2016_DataDriven_" + myDirs[k])
+
+    myList = [
+        ("BDT > 0.40", myDirs["b3Pt40_MVA0p40_NoFatJetVeto"] + "CombineResults*"),
+        ("BDT > 0.40 (20 GeV)", myDirs["b3Pt40_MVA0p40_NoFatJetVeto_ShapeSyst_20GeV"] + "CombineResults*"),
+        ]
+    # Add boosted results?OA
+    if 1:
+        myList.extend(GetBoostedStatOnly())
+    return myList
+
+
+def GetHToTBCombinationMay2018v1():
+    homeDir1 = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/datacards_Hplus2tb_13TeV_EraRun2016_Search80to1000_OptNominal_limits2016_DataDriven_mH180to3000_Systematics_"
+    homeDir2 = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/datacards_Hplus2tb_13TeV_EraRun2016_DataDriven_mH180to3000_Systematics_"
+    myDirs  = {}
+    myDirs["BDT0p40_ANv5"] = homeDir1 + "20GeVBins_180412_070202/"
+    myDirs["BDT0p40_ANv6"] = homeDir2 + "BDT0p40_Binning12_28Apr2018/"
+
+    myList = [
+        ("H^{+}#rightarrow tb (resolved, v5)", myDirs["BDT0p40_ANv5"]  + "CombineResults*"),
+        #("H^{+}#rightarrow tb (resolved, v6)", myDirs["BDT0p40_ANv6"]  + "CombineResults*"),
+        ]
+
+    # Add boosted results
+    myList.extend(GetBoostedSystematics())
+    return myList
+
+def GetHToTBCombinationMay2018v2():
+    homeDir1 = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/datacards_Hplus2tb_13TeV_EraRun2016_Search80to1000_OptNominal_limits2016_DataDriven_mH180to3000_Systematics_"
+    homeDir2 = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/datacards_Hplus2tb_13TeV_EraRun2016_DataDriven_mH180to3000_Systematics_"
+    myDirs  = {}
+    myDirs["BDT0p40_ANv5"] = homeDir1 + "20GeVBins_180412_070202/"
+    myDirs["BDT0p40_ANv6"] = homeDir2 + "BDT0p40_Binning12_28Apr2018/"
+
+    myList = GetBoostedSystematics()
+    ext    = [
+        ("H^{+}#rightarrow tb (resolved, v5)", myDirs["BDT0p40_ANv5"]  + "CombineResults*"),
+        #("H^{+}#rightarrow tb (resolved, v6)", myDirs["BDT0p40_ANv6"]  + "CombineResults*"),
+        ]
+    myList.extend(ext)
+    return myList
+
+def GetHToTBCombinationMay2018v3():
+    homeDir1 = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/datacards_Hplus2tb_13TeV_EraRun2016_Search80to1000_OptNominal_limits2016_DataDriven_mH180to3000_Systematics_"
+    homeDir2 = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/datacards_Hplus2tb_13TeV_EraRun2016_DataDriven_mH180to3000_Systematics_"
+    #homeDir3 = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/datacards_Hplus2tb_13TeV_TopMassLE400_BDT0p40_Binning4Eta5Pt_BinScheme18_Stat_27Jul2018_autoMCStats/"
+    homeDir3 = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/datacards_Hplus2tb_13TeV_TopMassLE400_BDT0p40_Binning4Eta5Pt_BinScheme18_Syst_27Jul2018_autoMCStats/"
+    homeDir4 = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/datacards_Hplus2tb_13TeV_TopMassLE400_BDT0p40_Binning4Eta5Pt_BinScheme18_Syst_01Aug2018_autoMCStats/"
+    myDirs  = {}
+    myDirs["BDT0p40_ANv5"] = homeDir1 + "20GeVBins_180412_070202/"
+    myDirs["BDT0p40_ANv5.1"] = homeDir2 + "BDT0p40_Binning12_28Apr2018/"
+    myDirs["BDT0p40_ANv6"] = homeDir4
+
+    myList = GetBoostedSystematics()
+    ext    = [
+        ("H^{+}#rightarrow tb (resolved, v5)", myDirs["BDT0p40_ANv5"]  + "CombineResults*"),
+        # ("H^{+}#rightarrow tb (resolved, v5.1)", myDirs["BDT0p40_ANv5.1"]  + "CombineResults*"),
+        ("H^{+}#rightarrow tb (resolved, v6)", myDirs["BDT0p40_ANv6"]  + "CombineResults*"),
+        ]
+    myList.extend(ext)
+    return myList
+
+def GetHToTBCombinationNov2018v1():
+    homeDir = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/datacards_HIG-18-015_Preapproval_Resolved_Nov2018/"
+    myDirs  = {}
+    myDirs["Resolved_Preapproval"] = homeDir
+
+    myList = GetBoostedSystematics()
+    ext    = [
+        ("H^{+}#rightarrow tb (resolved)", myDirs["Resolved_Preapproval"]  + "CombineResults*"),
+        ]
+    myList.extend(ext)
+    #return list(reversed(myList))
+    return myList
+
+
+def GetOptimisationOfEtaBinsMar2018():
+    myDirs = {}
+    myDirs["b3Pt40_MVAm1p00to0p40_StatOnly_6AbsEtaBins"]            = "mH180to1000_MVAm0p10to0p40_6BinsAbsEta_0PtBins_NoFatjetVeto_StatOnly_180327_062621/" 
+    myDirs["b3Pt40_MVAm1p00to0p40_StatOnly_5AbsEtaBins_2PtBins_v1"] = "mH180to1000_MVAm0p10to0p40_5BinsAbsEta_2PtBins_NoFatjetVeto_StatOnly_180327_054831/"
+    myDirs["b3Pt40_MVAm1p00to0p40_StatOnly_5AbsEtaBins_2PtBins_v2"] = "mH180to3000_MVAm0p10to0p40_5BinsAbsEta_2PtBins_NoFatjetVeto_StatOnly_180405_065356/"
+    myDirs["b3Pt40_MVAm1p00to0p40_StatOnly_5AbsEtaBins_2PtBins_v3"] = "mH180to3000_MVAm0p10to0p40_5BinsAbsEta_2PtBins_StatOnly_180409_065116/"
+    myDirs["b3Pt40_MVAm1p00to0p40_StatOnly_4AbsEtaBins_3PtBins"]    = "mH180to3000_MVAm0p10to0p40_4BinsAbsEta_3PtBins_NoFatjetVeto_StatOnly_180409_154543/"
+    myDirs["b3Pt40_MVAm1p00to0p40_StatOnly_10NonAbsEtaBins"]        = "mH180to3000_MVAm1p00to0p40_10NonAbsEtaBins_0PtBins_NoFatjetVeto_StatOnly_180330_020858/"
+    myDirs["b3Pt40_MVAm1p00to0p40_JES_JER_5AbsEtaBins_2PtBins"]     = "mH180to3000_MVAm0p10to0p40_5BinsAbsEta_2PtBins_NoFatjetVeto_JES_JER_180405_124445/"
+
+    homeDir = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/"
+    for k in myDirs:
+        myDirs[k] = os.path.join(homeDir, "datacards_Hplus2tb_13TeV_EraRun2016_Search80to1000_OptNominal_limits2016_DataDriven_" + myDirs[k])
+
+    myList = [
+        ("BDT > 0.40 (6 |#eta| bins)", myDirs["b3Pt40_MVAm1p00to0p40_StatOnly_6AbsEtaBins"] + "CombineResults*"),
+        ("BDT > 0.40 (10 #eta bins)" , myDirs["b3Pt40_MVAm1p00to0p40_StatOnly_10NonAbsEtaBins"] + "CombineResults*"),
+        ("BDT > 0.40 (5 |#eta|, 2 p_{T} bins, v1)", myDirs["b3Pt40_MVAm1p00to0p40_StatOnly_5AbsEtaBins_2PtBins_v1"] + "CombineResults*"),
+        ("BDT > 0.40 (5 |#eta|, 2 p_{T} bins, v2)", myDirs["b3Pt40_MVAm1p00to0p40_StatOnly_5AbsEtaBins_2PtBins_v2"] + "CombineResults*"),
+        ("BDT > 0.40 (5 |#eta|, 2 p_{T} bins, v3)", myDirs["b3Pt40_MVAm1p00to0p40_StatOnly_5AbsEtaBins_2PtBins_v3"] + "CombineResults*"),
+        ("BDT > 0.40 (4 |#eta|, 3 p_{T} bins)"    , myDirs["b3Pt40_MVAm1p00to0p40_StatOnly_4AbsEtaBins_3PtBins"] + "CombineResults*"), 
+        #("BDT > 0.40 (5 |#eta|, 2 p_{T} bins, JES+JER)", myDirs["b3Pt40_MVAm1p00to0p40_JES_JER_5AbsEtaBins_2PtBins"] + "CombineResults*"),
+        ]
+    return myList
+
+
+def GetOptimisationOfFatjetVetoMar2018():
+    myDirs = {}
+    myDirs["b3Pt40_MVA0p40_NoFatJetVeto_StatOnly"]         = "mH180to3000_b3Pt40_MVA0p40_NoFatJetVeto_StatOnly_180319_051408/"
+    myDirs["b3Pt40_MVA0p40_FatJetVeto450_StatOnly"]        = "mH180to3000_b3Pt40_MVA0p40_FatJetVeto450_StatOnly_180319_052727/"
+    myDirs["b3Pt40_MVA0p40_FatJetVeto500_StatOnly"]        = "mH180to3000_b3Pt40_MVA0p40_FatJetVeto500_StatOnly_180319_052958/"
+    homeDir = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/"
+    for k in myDirs:
+        myDirs[k] = os.path.join(homeDir, "datacards_Hplus2tb_13TeV_EraRun2016_Search80to1000_OptNominal_limits2016_DataDriven_" + myDirs[k])
+
+    myList = [
+        ("BDT > 0.40 (No Fatjet veto)", myDirs["b3Pt40_MVA0p40_NoFatJetVeto_StatOnly"] + "CombineResults*"),
+        ("BDT > 0.40 (Fatjet > 450 GeV/c)", myDirs["b3Pt40_MVA0p40_FatJetVeto450_StatOnly"] + "CombineResults*"),
+        ("BDT > 0.40 (Fatjet > 500 GeV/c)", myDirs["b3Pt40_MVA0p40_FatJetVeto500_StatOnly"] + "CombineResults*"),
+        ]
+    return myList
+
+
+def GetOptimisationOfBDTStatMar2018():
+    myDirs = {}
+    myDirs["b3Pt40_MVA1p00to0p30_NoFatJetVeto_StatOnly"]   = "mH180to3000_StatOnly_180406_052506/"
+    myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto-OptBin"]     = "mH180to3000_StatOnly_180405_211015/" #test3
+    myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto"]            = "mH180to3000_180328_193452/"
+    myDirs["b3Pt40_MVAm0p40to0p40_NoFatJetVeto_StatOnly"]  = "mH180to1000_StatOnly_180322_120347/"
+    myDirs["b3Pt40_MVAm0p40to0p50_NoFatJetVeto_StatOnly"]  = "mH180to3000_StatOnly_180406_054849/"
+    myDirs["b3Pt40_MVA0p00to0p60_NoFatJetVeto_StatOnly"]   = "mH180to1000_StatOnly_180322_120645/"
+    myDirs["b3Pt40_MVA0p50to0p80_NoFatJetVeto_StatOnly"]   = "mH180to1000_StatOnly_180322_121019/"
+    myDirs["b3Pt40_MVA0p60to0p85_NoFatJetVeto_StatOnly"]   = "mH180to1000_StatOnly_180322_121221/"
+    myDirs["b3Pt40_MVA0p60to0p90_NoFatJetVeto_StatOnly"]   = "mH180to1000_StatOnly_180322_121415/"
+    #
+    myDirs["b3Pt40_MVA0p40_NoFatJetVeto_StatOnly"]         = "mH180to3000_b3Pt40_MVA0p40_NoFatJetVeto_StatOnly_180319_051408/"
+    myDirs["b3Pt40_MVA0p40_FatJetVeto450_StatOnly"]        = "mH180to3000_b3Pt40_MVA0p40_FatJetVeto450_StatOnly_180319_052727/"
+    myDirs["b3Pt40_MVA0p40_FatJetVeto500_StatOnly"]        = "mH180to3000_b3Pt40_MVA0p40_FatJetVeto500_StatOnly_180319_052958/"
+    myDirs["b3Pt40_MVAm1p00to0p40_StatOnly_6AbsEtaBins"]         = "mH180to1000_MVAm0p10to0p40_6BinsAbsEta_0PtBins_NoFatjetVeto_StatOnly_180327_062621/" 
+    myDirs["b3Pt40_MVAm1p00to0p40_6AbsEtaBins"]                  = "mH180to1000_MVAm0p10to0p40_6BinsAbsEta_0PtBins_NoFatjetVeto_180327_055551/"
+    myDirs["b3Pt40_MVAm1p00to0p40_StatOnly_5AbsEtaBins_2PtBins"] = "mH180to1000_MVAm0p10to0p40_5BinsAbsEta_2PtBins_NoFatjetVeto_StatOnly_180327_054831/"
+    myDirs["b3Pt40_MVAm1p00to0p40_5AbsEtaBins_2PtBins"]          = "mH180to1000_MVAm0p10to0p40_5BinsAbsEta_2PtBins_NoFatjetVeto_180327_054831/"
+    homeDir = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/"
+    for k in myDirs:
+        myDirs[k] = os.path.join(homeDir, "datacards_Hplus2tb_13TeV_EraRun2016_Search80to1000_OptNominal_limits2016_DataDriven_" + myDirs[k])
+
+    myList = [
+        ("BDT > 0.30", myDirs["b3Pt40_MVA1p00to0p30_NoFatJetVeto_StatOnly"]  + "CombineResults*"),
+         #("b40, BDT > 0.40", myDirs["b3Pt40_MVAm0p40to0p40_NoFatJetVeto_StatOnly"] + "CombineResults*"),
+        #("BDT > 0.40 (opt bin)", myDirs["b3Pt40_MVA1p00to0p40_NoFatJetVeto-OptBin"] + "CombineResults*"),
+        ("BDT > 0.40", myDirs["b3Pt40_MVAm1p00to0p40_StatOnly_6AbsEtaBins"]  + "CombineResults*"),
+        ("BDT > 0.50", myDirs["b3Pt40_MVAm0p40to0p50_NoFatJetVeto_StatOnly"] + "CombineResults*"),
+        ("BDT > 0.60", myDirs["b3Pt40_MVA0p00to0p60_NoFatJetVeto_StatOnly"]  + "CombineResults*"),
+        ("BDT > 0.80", myDirs["b3Pt40_MVA0p50to0p80_NoFatJetVeto_StatOnly"]  + "CombineResults*"),
+        ("BDT > 0.85", myDirs["b3Pt40_MVA0p60to0p85_NoFatJetVeto_StatOnly"]  + "CombineResults*"),
+        ("BDT > 0.90", myDirs["b3Pt40_MVA0p60to0p90_NoFatJetVeto_StatOnly"]  + "CombineResults*"),
+        # ("b40, BDT > 0.40 (5#eta, 2p_{T} bins)", myDirs["b3Pt40_MVAm1p00to0p40_StatOnly_5AbsEtaBins_2PtBins"] + "CombineResults*"),
+        ]
+    return myList
+
+def GetOptimisationOfBDTSystApr2018():
+    
+    homeDir = "/afs/cern.ch/user/a/attikis/workspace/combine/limits2018/datacards_Hplus2tb_13TeV_EraRun2016_DataDriven_mH180to3000_Systematics_"
+    myDirs  = {}
+    myDirs["b3Pt40_MVA1p00to0p00"]  = homeDir + "BDT0p00_Binning12_01May2018/"
+    myDirs["b3Pt40_MVA1p00to0p10"]  = homeDir + "BDT0p10_Binning12_01May2018/"
+    myDirs["b3Pt40_MVA1p00to0p30"]  = homeDir + "BDT0p30_Binning12_28Apr2018/"
+    myDirs["b3Pt40_MVA1p00to0p40"]  = homeDir + "BDT0p40_Binning12_28Apr2018/"
+    myDirs["b3Pt40_MVA1p00to0p50"]  = homeDir + "BDT0p50_Binning12_28Apr2018/"
+    myDirs["b3Pt40_MVA1p00to0p60"]  = homeDir + "BDT0p60_Binning12_28Apr2018/"
+    myDirs["b3Pt40_MVA1p00to0p70"]  = homeDir + "BDT0p70_Binning12_28Apr2018/"
+    myDirs["b3Pt40_MVA1p00to0p95"]  = homeDir + "BDT0p95_Binning12_01May2018/"
+
+    myList = [
+        ("BDT > 0.00", myDirs["b3Pt40_MVA1p00to0p00"]  + "CombineResults*"),
+        ("BDT > 0.10", myDirs["b3Pt40_MVA1p00to0p10"]  + "CombineResults*"),
+        ("BDT > 0.30", myDirs["b3Pt40_MVA1p00to0p30"]  + "CombineResults*"), #best
+        ("BDT > 0.40", myDirs["b3Pt40_MVA1p00to0p40"]  + "CombineResults*"),
+        ("BDT > 0.50", myDirs["b3Pt40_MVA1p00to0p50"]  + "CombineResults*"),
+        ("BDT > 0.60", myDirs["b3Pt40_MVA1p00to0p60"]  + "CombineResults*"),
+        ("BDT > 0.70", myDirs["b3Pt40_MVA1p00to0p70"]  + "CombineResults*"),
+        # ("BDT > 0.95", myDirs["b3Pt40_MVA1p00to0p95"]  + "CombineResults*"), #no need. v. bad limits - will add confusion
+        ]
+    return myList
 
 def _ifNotNone(value, default):
     if value is None:
@@ -166,7 +635,8 @@ def doCompare(name, compareList, **kwargs):
     expectedList = [l.expectedGraph() for l in limits]
 
     # 1) Expected: Median +/- 1,2 sigma
-    doPlot(limits, legendLabels, expectedList, opts.name + "_median", limit.BRlimit, _opts, yTitle="Expected Sigma Bands")
+    limit.useSubscript(True) #changes y-label to correct as well
+    doPlot(limits, legendLabels, expectedList, opts.name + "_median", limit.sigmaBRlimit, _opts, yTitle="Expected Sigma Bands")
 
     # 2) Expected: +/- 1 sigma
     list1 = [l.expectedGraph(sigma=+1) for l in limits]
@@ -186,7 +656,8 @@ def doCompare(name, compareList, **kwargs):
     # ================================================================================================================
     Verbose("Creating the observed plots", True)
     if opts.unblinded:
-        doPlot(limits, legendLabels, observedList, opts.name, limit.BRlimit, _opts, yTitle="Observed")
+        #doPlot(limits, legendLabels, observedList, opts.name, limit.BRlimit, _opts, yTitle="Observed")
+        doPlot(limits, legendLabels, observedList, opts.name, limit.sigmaBRlimit, _opts, yTitle="Observed")
 
     # ================================================================================================================
     # Do the relative plots
@@ -195,9 +666,15 @@ def doCompare(name, compareList, **kwargs):
     if not opts.relative:
         return
     # Overwrite some settings
-    _opts.yMin    = 0.0
-    _opts.yMax    = 2.5
-    _opts.logY    = False
+    _opts.logY = False
+    if _opts.logY:
+        _opts.yMin    = 1e-1
+        _opts.yMax    = 1e+1
+    else:
+        _opts.yMin    = +0.65
+        _opts.yMax    = +2.05
+        #_opts.yMin    = +0.85
+        #_opts.yMax    = +1.25
 
     # 1) Relative: median
     relLimits    = GetRelativeLimits(limits)
@@ -215,6 +692,33 @@ def doCompare(name, compareList, **kwargs):
     list2 = [limit.divideGraph(l.expectedGraph(sigma=-2), l.expectedGraph()) for l in limits]
     sigma2List = list1 + list2
     doPlot(limits, legendLabels2, sigma2List, opts.name + "_sigma2Relative", "Expected #pm2#sigma / median", _opts, yTitle="Expected #pm2#sigma / median")
+    return
+
+
+def doOverlap(name, compareList, **kwargs):
+    # Define lists
+    legendLabels = []
+    limits       = []
+
+    # For-loop: All label-path pairs
+    for label, path in compareList:
+        legendLabels.append(label)
+        dirs = glob.glob(path)
+        dirs.sort()
+
+        if len(dirs) == 0:
+            raise Exception("No directories for pattern '%s'" % path)
+        directory = dirs[-1]
+        
+        Verbose("Picked %s" % directory, True)
+        limits.append(limit.BRLimits(directory, excludeMassPoints=["155"]))
+
+    # ================================================================================================================
+    # Do the sigma bands
+    # ================================================================================================================
+    Verbose("Creating the sigma-bands plots", True)
+    _opts = copy.deepcopy(opts)
+    doPlotSigmaBandsAlt(limits, legendLabels, opts.name + "_sigmaBands", _opts)
     return
 
 def doPlot(limits, legendLabels, graphs, name, ylabel, _opts={}, yTitle=None):
@@ -247,7 +751,7 @@ def doPlot(limits, legendLabels, graphs, name, ylabel, _opts={}, yTitle=None):
     # If sigma bands are drawn each legend entry is plotted twice. Correct this in the count
     if "Sigma1" in name or "Sigma2" in name:
         nGraphs = nGraphs/2.0
-    legend = getLegend(nGraphs, limit, xPosLeg)
+    legend = getLegend(nGraphs, limit)
     plot.setLegend(legend)
 
     # Determine save name, minimum and maximum of y-axis
@@ -258,7 +762,12 @@ def doPlot(limits, legendLabels, graphs, name, ylabel, _opts={}, yTitle=None):
         _opts.yMax = ymax
 
     # Create the frame and set axes titles
-    plot.createFrame(saveName, opts={"ymin": _opts.yMin, "ymax": _opts.yMax})
+    if _opts.xMax != -1:
+        plot.createFrame(saveName, opts={"xmax": _opts.xMax, "ymin": _opts.yMin, "ymax": _opts.yMax})
+        if _opts.xMin != -1:
+            plot.createFrame(saveName, opts={"xmin": _opts.xMin, "xmax": _opts.xMax, "ymin": _opts.yMin, "ymax": _opts.yMax})
+    else:
+        plot.createFrame(saveName, opts={"ymin": _opts.yMin, "ymax": _opts.yMax})
     
     # Add cut line?
     if opts.cutLine != 999.9:
@@ -267,7 +776,14 @@ def doPlot(limits, legendLabels, graphs, name, ylabel, _opts={}, yTitle=None):
     if opts.cutLineY != 999.9:
         kwargs = {"greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
         plot.addCutBoxAndLineY(cutValue=_opts.cutLineY, fillColor=ROOT.kRed, box=False, line=True, **kwargs)
+
+    if opts.bandValue != 0:
+        if "relative" in name.lower():
+            # https://root.cern.ch/doc/master/classTAttFill.html
+            kwargs = {"cutValue": 1.0 + float(opts.bandValue)/100.0, "fillColor": ROOT.kGray, "fillStyle": 3001, "box": False, "line": True, "greaterThan": True, "mainCanvas": True, "ratioCanvas": False, "mirror": True}
+            plot.addCutBoxAndLineY(**kwargs)    
     
+
     # Set axes titles
     plot.frame.GetXaxis().SetTitle(limit.mHplus())
     plot.frame.GetYaxis().SetTitle(ylabel)
@@ -280,10 +796,11 @@ def doPlot(limits, legendLabels, graphs, name, ylabel, _opts={}, yTitle=None):
     plot.draw()
     plot.setLuminosity(limits[0].getLuminosity())
     plot.addStandardTexts(cmsTextPosition="outframe")
-    addPhysicsText(histograms, limit, x=xPosText)
+    addPhysicsText(histograms, limit, x=0.53)
 
     # Save plots and return
-    SavePlot(plot, _opts.saveDir, saveName, [".png"])#, ".pdf"])
+    #SavePlot(plot, _opts.saveDir, saveName, [".png", ".C", ".pdf"])
+    SavePlot(plot, _opts.saveDir, saveName, [".png", ".C", ".pdf"])
     return
 
 def GetRelativeLimits(limits):
@@ -321,14 +838,20 @@ def addPhysicsText(histograms, limit, x=0.45, y=0.84, size=20):
         histograms.addText(x, y-0.05, limit.BRassumption, size=size)
     return
 
-def getLegend(nPlots, limit, xLeg1):
+def getLegend(nPlots, limit, xLeg=0.40):
     if nPlots < 3:
         nPlots = 3
     dy = (nPlots-3)*0.03
     # Create customised legend
-    xLeg2 = 0.93
-    yLeg1 = 0.66 - dy
-    yLeg2 = 0.82
+    #xLeg1 = 0.35
+    #xLeg2 = 0.93
+    #yLeg1 = 0.66 - dy
+    #yLeg2 = 0.82
+
+    xLeg1 = xLeg
+    xLeg2 = 0.80
+    yLeg1 = 0.65 - dy
+    yLeg2 = 0.83
 
     # Adjust legend slightly to visually align with text
     legend = histograms.createLegend(xLeg1*.98, yLeg1, xLeg2, yLeg2)
@@ -338,6 +861,7 @@ def getLegend(nPlots, limit, xLeg1):
     if 0: #opts.excludedArea:
         legend.SetFillStyle(1001)
     return legend
+
 
 def doPlotSigmaBands(limits, legendLabels, saveName, _opts={}):
 
@@ -383,7 +907,7 @@ def doPlotSigmaBands(limits, legendLabels, saveName, _opts={}):
     # If sigma bands are drawn each legend entry is plotted twice. Correct this in the count
     if "Sigma1" in name or "Sigma2" in name:
         nGraphs = nGraphs/2.0
-    legend = getLegend(nGraphs+4, limit, xPosLeg)
+    legend = getLegend(nGraphs+4, limit)
     plot.setLegend(legend)
 
     # Determine save name, minimum and maximum of y-axis
@@ -406,7 +930,8 @@ def doPlotSigmaBands(limits, legendLabels, saveName, _opts={}):
 
     # Set axes titles
     plot.frame.GetXaxis().SetTitle(limit.mHplus())
-    plot.frame.GetYaxis().SetTitle(limit.BRlimit)
+    #plot.frame.GetYaxis().SetTitle(limit.BRlimit)
+    plot.frame.GetYaxis().SetTitle(limit.sigmaBRlimit)
 
     # Enable/Disable logscale for axes 
     ROOT.gPad.SetLogy(_opts.logY)
@@ -416,10 +941,101 @@ def doPlotSigmaBands(limits, legendLabels, saveName, _opts={}):
     plot.draw()
     plot.addStandardTexts(cmsTextPosition="outframe")
     plot.setLuminosity(limits[0].getLuminosity())
-    addPhysicsText(histograms, limit, x=xPosText)
+    addPhysicsText(histograms, limit, x=0.53)
 
     # Save the plots & return
-    SavePlot(plot, _opts.saveDir, saveName, [".png"])#, ".pdf"])
+    SavePlot(plot, _opts.saveDir, saveName, [".png", ".C", ".pdf"])
+    return
+
+def doPlotSigmaBandsAlt(limits, legendLabels, saveName, _opts={}):
+
+    graphs = [
+        histograms.HistoGraph(limits[1].expectedGraph(), "Resolved-Median", drawStyle="L"),
+        histograms.HistoGraph(limits[0].expectedGraph(), "Boosted-Median", drawStyle="L"),
+        histograms.HistoGraph(limits[1].expectedBandGraph(sigma=1), "Resolved-1Sigma", drawStyle="F", legendStyle="F"),
+        histograms.HistoGraph(limits[0].expectedBandGraph(sigma=1), "Boosted-1Sigma", drawStyle="F", legendStyle="F"),
+        histograms.HistoGraph(limits[1].expectedBandGraph(sigma=2), "Resolved-2Sigma", drawStyle="F", legendStyle="F"),
+        histograms.HistoGraph(limits[0].expectedBandGraph(sigma=2), "Boosted-2Sigma", drawStyle="F", legendStyle="F"),
+        ]
+    
+    # Create plot base object
+    if 0:
+        plot = plots.PlotBase(graphs)
+    else:
+        plot = plots.ComparisonManyPlot(graphs[0], graphs[1:])
+
+    # Customise legend
+    ll = {
+        "Resolved-Median": "Resolved Median",
+        "Boosted-Median" : "Boosted  Median",
+        "Boosted-1Sigma" : None,
+        "Boosted-2Sigma" : None,
+        "Resolved-1Sigma": "#pm 1#sigma",
+        "Resolved-2Sigma": "#pm 2#sigma",
+         }
+
+    # For-loop: All limits
+    for i, gr in enumerate(graphs, 1):
+        name = gr.getName().lower()
+        gr.getRootHisto().SetLineWidth(3)
+
+        if "resolved" in name:
+            gr.getRootHisto().SetLineStyle(8)
+            #gr.getRootHisto(s).SetFillStyle(3001)
+
+        if "boosted" in name:
+            gr.getRootHisto().SetLineStyle(3)
+            #gr.getRootHisto().SetFillStyle(3001)
+
+        if "sigma" in name:
+            gr.getRootHisto().SetLineStyle(ROOT.kSolid)
+            gr.getRootHisto().SetLineWidth(4)
+            gr.getRootHisto().SetFillStyle(1001)
+
+    # Set histo labels
+    plot.histoMgr.setHistoLegendLabelMany(ll)
+
+    # If sigma bands are drawn each legend entry is plotted twice. Correct this in the count
+    legend = getLegend(0, limit)
+    plot.setLegend(legend)
+    histograms.moveLegend(legend, dx=+0.10, dy=-0.01, dw=0.1, dh=+0.0)
+    
+    # Determine save name, minimum and maximum of y-axis
+    ymin, ymax, saveName = getYMinMaxAndName(limits, saveName)
+    if _opts.yMin == -1:
+        _opts.yMin = ymin
+    if _opts.yMax == -1:
+        _opts.yMax = ymax
+
+    # Create the frame and set axes titles
+    plot.createFrame(saveName, opts={"ymin": _opts.yMin, "ymax": _opts.yMax})
+    
+    # Add cut line?
+    if _opts.cutLine != 999.9:
+        kwargs = {"greaterThan": True}
+        plot.addCutBoxAndLine(cutValue=_opts.cutLine, fillColor=ROOT.kRed, box=False, line=True, **kwargs)
+    if opts.cutLineY != 999.9:
+        kwargs = {"greaterThan": True, "mainCanvas": True, "ratioCanvas": False}
+        plot.addCutBoxAndLineY(cutValue=_opts.cutLineY, fillColor=ROOT.kRed, box=False, line=True, **kwargs)
+
+    # Set axes titles
+    limit.useSubscript(True) # convert H->tau nu to H->t b
+    plot.frame.GetXaxis().SetTitle(limit.mHplus())
+    plot.frame.GetYaxis().SetTitle(limit.sigmaBRlimit)
+
+    # Enable/Disable logscale for axes 
+    ROOT.gPad.SetLogy(_opts.logY)
+    ROOT.gPad.SetLogx(_opts.logX)
+
+    # Draw the plot with standard texts
+    plot.draw()
+ 
+    plot.setLuminosity(limits[0].getLuminosity())
+    plot.addStandardTexts(addLuminosityText=True, cmsTextPosition="outframe")
+    addPhysicsText(histograms, limit, x=0.53)
+
+    # Save the plots & return
+    SavePlot(plot, _opts.saveDir, saveName, [".png", ".C", ".pdf"])
     return
 
 def getYMinMaxAndName(limits, name, minIsMedian=False):
@@ -462,9 +1078,9 @@ def SavePlot(plot, saveDir, plotName, saveFormats = [".png", ".pdf"]):
         saveNameURL = saveName + ext
         saveNameURL = saveNameURL.replace("/afs/cern.ch/user/a/attikis/public/html", "https://cmsdoc.cern.ch/~%s" % getpass.getuser())
         if opts.url:
-            Verbose(saveNameURL, i==1)
+            Print(saveNameURL, i==0)
         else:
-            Verbose(saveName + ext, i==1)
+            Print(saveName + ext, i==0)
         plot.saveAs(saveName, formats=saveFormats)
     return
 
@@ -478,10 +1094,13 @@ if __name__ == "__main__":
     LOGY        = False
     GRIDX       = False
     GRIDY       = False
+    MINX        = -1
+    MAXX        = -1
     MINY        = -1
     MAXY        = -1
     CUTLINE     = 999.9
     CUTLINEY    = 999.9
+    BANDVALUE   = 0
     RELATIVE    = False
     RELPAIRS    = False
     VERBOSE     = False
@@ -504,9 +1123,6 @@ if __name__ == "__main__":
 
     parser.add_option("--name", dest="name", type="string", default=NAME,
                       help="Name of the output plot [default = %s]" % (NAME))
-
-    parser.add_option("--ymax", dest="ymax", type="float", default=None, 
-                      help="Maximum y-axis value for regular plots")
 
     parser.add_option("--relativeYmax", dest="relativeYmax", type="float", default=None, 
                       help="Maximum y-value for relative plots")
@@ -538,11 +1154,20 @@ if __name__ == "__main__":
     parser.add_option("--yMax", dest="yMax", default=MAXY, type="float",
                       help="Overwrite automaticly calculated maximum value of y-axis [default: %s]" % (MAXY) )
 
+    parser.add_option("--xMin", dest="xMin", default=MINX, type="float",
+                      help="Overwrite minimum value of x-axis [default: %s]" % (MINX) )
+    
+    parser.add_option("--xMax", dest="xMax", default=MAXX, type="float",
+                      help="Overwrite maximum value of x-axis [default: %s]" % (MAXX) )
+
     parser.add_option("--cutLine", dest="cutLine", type="float", default=CUTLINE,
                       help="Add TLine on the x-axis at this value  [default: %s]" % (CUTLINE) )
 
     parser.add_option("--cutLineY", dest="cutLineY", type="float", default=CUTLINEY,
                       help="Add TLine on the y-axis at this value  [default: %s]" % (CUTLINEY) )
+
+    parser.add_option("--bandValue", dest="bandValue", type="int", default=BANDVALUE,
+                      help="Add a symmetric band around 1.0. Value passed should be the percentage (e.g 10 or 5)  [default: %s]" % (BANDVALUE) )
 
     (opts, args) = parser.parse_args()
 

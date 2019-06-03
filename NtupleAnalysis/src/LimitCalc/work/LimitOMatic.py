@@ -302,7 +302,10 @@ class Result:
         Returns a table (list) with the BR limits
         '''
         # Open json file to read the results
-        filePath   = os.path.join(self._basedir, self._jobDir, "limits.json") 
+        if self._jobDir!=None:
+            filePath   = os.path.join(self._basedir, self._jobDir, "limits.json") 
+        else:
+            filePath   = os.path.join(self._basedir,"limits.json") 
         fileMode   = "r"
         if not os.path.isfile(filePath):
             return []
@@ -339,7 +342,7 @@ class Result:
             # Get the expected/observed limit
             if self._opts.unblinded:
                 observed = precision % float(masspoints[k]["observed"])
-                expected = precision % float(masspoints[k]["expected"])
+                expected = precision % float(masspoints[k]["expected"]["median"])
             else:
                 observed = "blinded"
                 expected = precision % float(masspoints[k]["expected"]["median"])

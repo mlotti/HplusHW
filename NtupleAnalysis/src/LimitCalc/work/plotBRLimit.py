@@ -45,7 +45,7 @@ def main(opts):
     if not opts.unblinded:
         msg="Working in BLINDED mode, i.e. I will not tell you the observed limit before you say please ..."
         Print(msg, True)
-    limits = limit.BRLimits()
+    limits = limit.BRLimits(limitsfile=sys.argv[1],configfile=sys.argv[2])
 
     # Enable OpenGL
     if opts.excludedArea:
@@ -118,9 +118,9 @@ def doBRlimit(limits, unblindedStatus, opts, log=False):
     plot.setLuminosity(limits.getLuminosity())
 
     plot.histoMgr.setHistoLegendLabelMany({
-            "Expected": None,
-            "Expected1": "Expected median #pm 1#sigma",
-            "Expected2": "Expected median #pm 2#sigma"
+            "Expected": "Median expected",
+            "Expected1": "68% expected",
+            "Expected2": "95% expected"
             })
     
     dy = -0.1
@@ -136,7 +136,12 @@ def doBRlimit(limits, unblindedStatus, opts, log=False):
     # Create legend
     x = 0.51
     x = 0.45
+<<<<<<< HEAD
     legend = histograms.createLegend(x, 0.68+dy, x+0.4, 0.82+dy)
+=======
+    legend = histograms.createLegend(x, 0.65+dy, x+0.4, 0.92+dy)
+    legend.SetHeader("95% CL upper limits")
+>>>>>>> origin/hw_analysis
     legend.SetMargin(0.17)
     # Make room for the final state text
     if opts.excludedArea:
@@ -160,6 +165,10 @@ def doBRlimit(limits, unblindedStatus, opts, log=False):
             ymax = 4e-2
     if leptonicFS:
         ymax = 10
+
+    if not opts.paper:
+        name += "_preliminary"
+        
     if len(limits.mass) == 1:
         plot.createFrame(name, opts={"xmin": limits.mass[0]-5.0, "xmax": limits.mass[0]+5.0, "ymin": ymin, "ymax": ymax})
     else:
@@ -184,7 +193,7 @@ def doBRlimit(limits, unblindedStatus, opts, log=False):
 
     # Draw the plot with standard texts
     plot.draw()
-    plot.addStandardTexts()
+    plot.addStandardTexts(cmsTextPosition="right",addLuminosityText=True)
 
     # Add physics-process text
     size = 20
@@ -209,6 +218,7 @@ def doBRlimit(limits, unblindedStatus, opts, log=False):
         histograms.addText(x, 0.79, limit.BRassumption, size=size)
 
     plot.save()
+    print "Created",name
     return
 
 
@@ -277,7 +287,7 @@ def doLimitError(limits, unblindedStatus):
 
     size = 20
     x = 0.2
-    histograms.addText(x, 0.88, limit.process, size=size)
+####    histograms.addText(x, 0.88, limit.process, size=size)
     histograms.addText(x, 0.84, limits.getFinalstateText(), size=size)
     histograms.addText(x, 0.79, limit.BRassumption, size=size)
 

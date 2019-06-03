@@ -1,4 +1,3 @@
-
 '''
 ## \package ControlPlotMaker
 
@@ -104,10 +103,12 @@ class ControlPlotMakerHToTB:
 
                 # The case m < 0 is for plotting hitograms without any signal
                 if m > 0:
-                    saveName = "%s/DataDrivenCtrlPlot_M%d_%02d_%s" % (self._dirname, m, i, myCtrlPlot.title)
+                    # saveName = "%s/DataDrivenCtrlPlot_M%d_%02d_%s" % (self._dirname, m, i, myCtrlPlot.title)
+                    saveName = "%s/DataDrivenCtrlPlot_M%d_%s" % (self._dirname, m, myCtrlPlot.title)
                     msg = "Control Plot %d/%d (m=%s GeV)"  % (counter, nMasses*nPlots, str(m))
                 else:
-                    saveName = "%s/DataDrivenCtrlPlot_%02d_%s" % (self._dirname, i, myCtrlPlot.title)
+                    # saveName = "%s/DataDrivenCtrlPlot_%02d_%s" % (self._dirname, i, myCtrlPlot.title)
+                    saveName = "%s/DataDrivenCtrlPlot_%s" % (self._dirname, myCtrlPlot.title)
                     msg = "Control Plot %d/%d (no signal)"  % (counter, nMasses*nPlots)
 
                 # Inform the user of progress
@@ -184,7 +185,8 @@ class ControlPlotMakerHToTB:
                 
                 # Add signal
                 if m > 0:
-                    mySignalLabel = "HplusTB_M%d" % m
+                    #mySignalLabel = "HplusTB_M%d" % m
+                    mySignalLabel = "ChargedHiggs_HplusTB_HplusToTB_M_%d" % (m)
                     myHisto = histograms.Histo(hSignal, mySignalLabel)
                     myHisto.setIsDataMC(isData=False, isMC=True)
                     myStackList.insert(1, myHisto)
@@ -257,6 +259,8 @@ class ControlPlotMakerHToTB:
         return
 
     def _setYlabelWidthSuffix(self, histo, myParams):
+        # self.Print(histo.GetName(), True)
+
         ylabelBinInfo = True
         if "ylabelBinInfo" in myParams:
             ylabelBinInfo = myParams["ylabelBinInfo"]
@@ -279,9 +283,10 @@ class ControlPlotMakerHToTB:
             widthSuffix = "%s-%s" % (minBinWidthString, maxBinWidthString)
             if abs(minBinWidth-maxBinWidth) < 0.001:
                 widthSuffix = "%s" % (minBinWidthString)
-
             if (myParams["unit"] == "" and widthSuffix == "1"):
                 return
+            elif "< Events / " in myParams["ylabel"]: # e.g. < Events / GeV >
+                return                
             else:
                 myParams["ylabel"] = "%s / %s %s" % (myParams["ylabel"], widthSuffix, myParams["unit"])
             return
@@ -332,6 +337,8 @@ class ControlPlotMakerHToTB:
                 myParams["moveLegend"] = {"dx": -0.53, "dy": -0.40, "dh": 0.14}
             elif myParams["legendPosition"] == "NW":
                 myParams["moveLegend"] = {"dx": -0.53, "dy": -0.02, "dh": 0.14}
+            elif myParams["legendPosition"] == "RM":
+                myParams["moveLegend"] = {"dx": +10.0, "dy": +10.0, "dh": -100.0}
             else:
                 raise Exception("Unknown value for option legendPosition: %s!", myParams["legendPosition"])
             del myParams["legendPosition"]
@@ -426,8 +433,6 @@ class ControlPlotMakerHToTB:
                     hData.getRootHisto().SetBinError(k, 0.0)
         return myBlindingString
                         
-
-
 class SignalAreaEvaluator:
     def __init__(self):
         self._output = ""

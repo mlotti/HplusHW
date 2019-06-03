@@ -43,7 +43,8 @@ from optparse import OptionParser
 import time
 
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
-from HiggsAnalysis.NtupleAnalysis.AnalysisBuilder import AnalysisBuilder    
+from HiggsAnalysis.NtupleAnalysis.AnalysisBuilder import AnalysisBuilder
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 
 import ROOT
 
@@ -156,18 +157,17 @@ def main():
     # Add the datasets (according to user options)
     # ================================================================================================
     if (opts.includeOnlyTasks):
-        Print("Adding only dataset %s from multiCRAB directory %s" % (opts.includeOnlyTasks, opts.mcrab))
+        Verbose("Adding only dataset %s from multiCRAB directory %s" % (opts.includeOnlyTasks, opts.mcrab))
         process.addDatasetsFromMulticrab(opts.mcrab, includeOnlyTasks=opts.includeOnlyTasks)
     elif (opts.excludeTasks):
-        Print("Adding all datasets except %s from multiCRAB directory %s" % (opts.excludeTasks, opts.mcrab))
+        Verbose("Adding all datasets except %s from multiCRAB directory %s" % (opts.excludeTasks, opts.mcrab))
         Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
         process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=opts.excludeTasks)
     else:
         myBlackList = ["M_180", "M_200" , "M_220" , "M_250" , "M_300" , "M_350" , "M_400" , "M_500" , "M_650",
-                       "M_800", 
-                       "M_1000", "M_1500", "M_2000", "M_2500", "M_3000", "M_5000", "M_7000", "M_10000", "QCD"]
-        Print("Adding all datasets from multiCRAB directory %s except %s" % (opts.mcrab, (",".join(myBlackList))) )
-        Print("Vertex reweighting is done according to the chosen data era (%s)" % (",".join(dataEras)) )
+                       "M_800", "M_1000", "M_1500", "M_2000", "M_2500", "M_3000", "M_5000", "M_7000", "M_10000", "QCD_b"]
+        Verbose("Adding all datasets from multiCRAB directory %s except %s" % (opts.mcrab, (",".join(myBlackList))) )
+        Verbose("Vertex reweighting is done according to the chosen data era (%s)" % (",".join(dataEras)) )
         # process.addDatasetsFromMulticrab(opts.mcrab, blacklist=myBlackList)
         if len(myBlackList) > 0:
             regex = "|".join(myBlackList)
@@ -184,24 +184,28 @@ def main():
     allSelections.histogramAmbientLevel = opts.histoLevel
 
     # Set splitting of phase-space (first bin is below first edge value and last bin is above last edge value)
-    allSelections.CommonPlots.histogramSplitting = [        
-        PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True), 
-        # PSet(label="TetrajetBjetPt" , binLowEdges=[100], useAbsoluteValues=False), # C) 
-        # PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 1.2, 1.8, 2.1], useAbsoluteValues=True), # C) 
-        # PSet(label="TetrajetBjetPt" , binLowEdges=[60, 100], useAbsoluteValues=False), # B) not bad for -1.0 < BDT < 0.4
-        # PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 1.2, 1.8, 2.0], useAbsoluteValues=True), # B) not bad for -1.0 < BDT < 0.4
-        # PSet(label="TetrajetBjetPt" , binLowEdges=[120, 200], useAbsoluteValues=False),          # A) not great for -1.0 < BDT < 0.4
-        # PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 1.2, 1.8, 2.1], useAbsoluteValues=True), # A) not great for -1.0 < BDT < 0.4
-        # PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 1.8, 2.0, 2.2], useAbsoluteValues=True), #so-so
-        # PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 1.2, 1.8], useAbsoluteValues=True), #|eta| < 0.4,  0.4 < |eta| < 1.2, 1.2 < |eta| < 1.8, |eta| > 1.8, 
-        # PSet(label="TetrajetBjetEta", binLowEdges=[0.2, 0.4, 0.8, 1.2, 1.6, 2.0, 2.2], useAbsoluteValues=True),
-        # PSet(label="TetrajetBjetEta", binLowEdges=[-1.8, -1.2, -0.4, 0.0, 0.4, 1.2, 1.8], useAbsoluteValues=False), 
-        # PSet(label="TetrajetBjetPt" , binLowEdges=[40, 60, 100, 200, 300], useAbsoluteValues=False), # pT < 40, pT=40-60, pT=60-100, pT=100-200, pT > 200
+    allSelections.CommonPlots.histogramSplitting = [                
+        PSet(label="TetrajetBjetPt" , binLowEdges=[60, 90, 160, 300], useAbsoluteValues=False), # Final
+        PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.4, 2.0], useAbsoluteValues=True), # Final
+        # 
+        # PSet(label="TetrajsetBjetPt", binLowEdges=[60, 100, 150], useAbsoluteValues=False),
+        # PSet(label="TetrajsetBjetPt", binLowEdges=[60, 150], useAbsoluteValues=False),
+        # PSet(label="TetrajsetBjetPt", binLowEdges=[55, 110], useAbsoluteValues=False),
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.8, 1.6], useAbsoluteValues=True),
+        # PSet(label="TetrajetBjetEta", binLowEdges=[0.4, 0.8, 1.6, 2.0, 2.2], useAbsoluteValues=True),  #AN v4
         ]
+
+    # Overwrite values
+    # allSelections.TopSelectionBDT.CSV_bDiscCutDirection  = ">="
+    allSelections.TopSelectionBDT.CSV_bDiscCutValue = 0.54 # allow CSVv2-L for inverted top
     
-    # allSelections.BJetSelection.triggerMatchingApply = True # at least 1 trg b-jet matched to offline b-jets
-    # allSelections.Trigger.triggerOR = ["HLT_PFHT400_SixJet30_DoubleBTagCSV_p056"]
-    # allSelections.Trigger.triggerOR = ["HLT_PFHT450_SixJet40_BTagCSV_p056"]
+    # Testing
+    if 0:
+        msg = "WARNING! This is a simple testing of the FakeB measurement with only 1 CSVv2-M. Disable once done!"
+        Print(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle(), True)
+        allSelections.FakeBMeasurement.baselineBJetsCutValue     = 0 #1
+        allSelections.FakeBMeasurement.baselineBJetsCutDirection = "=="
+
 
     # ================================================================================================
     # Command Line Options
@@ -219,7 +223,9 @@ def main():
                               searchModes,
                               usePUreweighting       = opts.usePUreweighting,
                               useTopPtReweighting    = opts.useTopPtReweighting,
-                              doSystematicVariations = opts.doSystematics)
+                              doSystematicVariations = opts.doSystematics,
+                              analysisType="HToTB",
+                              verbose=opts.verbose)
 
     # Add variations (e.g. for optimisation)
     # builder.addVariation("BJetSelection.triggerMatchingApply", [True, False]) # At least 1 trg b-jet dR-matched to offline b-jets
@@ -283,8 +289,8 @@ def main():
 
 #================================================================================================
 def PrintOptions(opts):
-    '''
-    '''
+    if not opts.verbose:
+        return
     table    = []
     msgAlign = "{:<20} {:<10} {:<10}"
     title    =  msgAlign.format("Option", "Value", "Default")
@@ -333,7 +339,7 @@ if __name__ == "__main__":
     NEVTS         = -1
     HISTOLEVEL    = "Debug" # 'Never', 'Systematics', 'Vital', 'Informative', 'Debug'
     PUREWEIGHT    = True
-    TOPPTREWEIGHT = True
+    TOPPTREWEIGHT = False
     DOSYSTEMATICS = False
 
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")

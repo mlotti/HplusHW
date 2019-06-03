@@ -79,7 +79,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
-import HiggsAnalysis.FakeBMeasurement.QCDInvertedResult as qcdInvertedResult
+import HiggsAnalysis.FakeBMeasurement.FakeBResult as fakeBResult
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.pseudoMultiCrabCreator as pseudoMultiCrabCreator
 
@@ -99,7 +99,8 @@ class ModuleBuilder:
         self._nominalResult            = None
         self._fakeWeightingPlusResult  = None
         self._fakeWeightingMinusResult = None
-        
+        return
+
     def delete(self):
         '''
         Clean up memory
@@ -117,8 +118,7 @@ class ModuleBuilder:
         ROOT.gDirectory.GetList().Delete()
         ROOT.gROOT.CloseFiles()
         ROOT.gROOT.GetListOfCanvases().Delete()
-        
-        
+                
     def Print(self, msg, printHeader=False):
         fName = __file__.split("/")[-1].replace("pyc", "py")
         if printHeader==True:
@@ -127,7 +127,6 @@ class ModuleBuilder:
         else:
             print "\t", msg
         return
-
 
     def Verbose(self, msg, printHeader=True):
         if not self._verbose:
@@ -199,74 +198,151 @@ class ModuleBuilder:
                                                                 opts.verbose)
 
         self.Verbose("Obtain results from the results manager", True)
-        self._nominalResult = qcdInvertedResult.QCDInvertedResultManager(dataPath,
-                                                                         ewkPath,
-                                                                         self._dsetMgr,
-                                                                         self._luminosity,
-                                                                         self.getModuleInfoString(),
-                                                                         normFactors,
-                                                                         calculateQCDNormalizationSyst,
-                                                                         opts.normDataSrc,
-                                                                         opts.normEwkSrc,
-                                                                         self._opts.useInclusiveNorm,
-                                                                         keyList = ["AllSelections"],
-                                                                         verbose=opts.verbose)
+        self._nominalResult = fakeBResult.FakeBResultManager(dataPath,
+                                                             ewkPath,
+                                                             self._dsetMgr,
+                                                             self._luminosity,
+                                                             self.getModuleInfoString(),
+                                                             normFactors,
+                                                             calculateQCDNormalizationSyst,
+                                                             opts.normDataSrc,
+                                                             opts.normEwkSrc,
+                                                             self._opts.useInclusiveNorm,
+                                                             keyList = ["AllSelections"],
+                                                             verbose=opts.verbose)
 
         self.Verbose("Add all plots to be written in the peudo-dataset beind created", True)
         myModule.addPlots(self._nominalResult.getShapePlots(), self._nominalResult.getShapePlotLabels()) 
         self._outputCreator.addModule(myModule)
         return
 
-    def buildQCDNormalizationSystModule(self, dataPath, ewkPath):
+    def buildTransferFactorVarSystModule(self, dataPath, ewkPath, normFactors):#Up, normFactorsDown):
         '''
-        Up variation of QCD normalization (i.e. ctrl->signal region transition)
-        Note that only the source histograms for the shape uncert are stored
-        because the result must be calculated after rebinning
-        (and rebinning is no longer done here for flexibility reasons)
-        '''
-        mySystModule = pseudoMultiCrabCreator.PseudoMultiCrabModule(self._dsetMgr,
-                                                                    self._era,
-                                                                    self._searchMode,
-                                                                    self._optimizationMode,
-                                                                    "SystVarQCDNormSource")
-        mySystModule.addPlots(self._nominalResult.getQCDNormalizationSystPlots(),
-                              self._nominalResult.getQCDNormalizationSystPlotLabels())
-        self._outputCreator.addModule(mySystModule)
+        This function re-calculates all histograms as normal and stores them into 
+        folders with extensions:
+        "Hplus2tbAnalysis_<opts.searchMode>_<opts.era>_SystVarTransferFactorUp"
+        "Hplus2tbAnalysis_<opts.searchMode>_<opts.era>_SystVarTransferFactorDown"
+        The difference is that instead of using the nominal Transfer Factors (TF) 
+        for a given FakeB measurement bin (e.g. ldg b-jet eta) it does it using 
+        an up/down variation of it:
+        TF_Up   = TF + Error
+        TF_Down = TF - Error
+        where the error values and errors of the TFs are calculated in FakeBNormalization.py 
+        using the CalculateTransferFactor() method of FakeBNormalizationManager class object.
 
-    def buildQCDQuarkGluonWeightingSystModule(self, dataPath, ewkPath, normFactorsUp, normFactorsDown, normalizationPoint):
-        # Up variation of fake weighting
-        mySystModulePlus = pseudoMultiCrabCreator.PseudoMultiCrabModule(self._dsetMgr,
-                                                                        self._era,
+        The error in this case is calculated by using error propagation:
+        TF = CR1/CR2
+        TF_Error = ErrorPropagationForDivision(TF) = sqrt((sigmaA/b)**2 + (a/(b**2)*sigmaB)**2)
+        where:
+        A = Integral of CR1 histogram  (from ROOT)
+        sigmaA = Integral Error for CR1 histogram (from ROOT)
+        '''
+        # Up variation of Transfer Factors
+        print
+        #Print(ShellStyles.HighlightAltStyle() + "TF+Error Variation" + ShellStyles.NormalStyle() , True)
+        Print(ShellStyles.HighlightAltStyle() + "Extra Module: SystVarTransferFactorPlus" + ShellStyles.NormalStyle(), False)
+        mySystModulePlus = pseudoMultiCrabCreator.PseudoMultiCrabModule(self._dsetMgr, 
+                                                                        self._era, 
                                                                         self._searchMode,
-                                                                        self._optimizationMode,
-                                                                        "SystVarFakeWeightingPlus")
-        self._fakeWeightingPlusResult = qcdInvertedResult.QCDInvertedResultManager(dataPath, 
-                                                                                   ewkPath,
-                                                                                   self._dsetMgr,
-                                                                                   self._luminosity,
-                                                                                   self.getModuleInfoString(),
-                                                                                   normFactorsUp,
-                                                                                   optionCalculateQCDNormalizationSyst=False,
-                                                                                   optionUseInclusiveNorm=self._opts.useInclusiveNorm)
-        myModule.addPlots(self._fakeWeightingPlusResult.getShapePlots(),
-                          self._fakeWeightingPlusResult.getShapePlotLabels())
+                                                                        self._optimizationMode, 
+                                                                        "SystVarTransferFactorUp", #self._systematicVariation
+                                                                        opts.analysisNameSaveAs, 
+                                                                        opts.verbose)
+
+        self._transferFactorPlusResult = fakeBResult.FakeBResultManager(dataPath, 
+                                                                        ewkPath,
+                                                                        self._dsetMgr,
+                                                                        self._luminosity,
+                                                                        self.getModuleInfoString(),
+                                                                        normFactors["SystVarUp"], 
+                                                                        optionDoFakeBNormalisationSyst=False,
+                                                                        optionUseInclusiveNorm=self._opts.useInclusiveNorm,
+                                                                        keyList = ["AllSelections"],
+                                                                        verbose=opts.verbose)
+
+        # Up variation of Transfer Factors (3x)
+        print
+        Print(ShellStyles.HighlightAltStyle() + "Extra Module: SystVarTransferFactor3xPlus" + ShellStyles.NormalStyle(), False)
+        mySystModule3xPlus = pseudoMultiCrabCreator.PseudoMultiCrabModule(self._dsetMgr, 
+                                                                          self._era, 
+                                                                          self._searchMode,
+                                                                          self._optimizationMode, 
+                                                                          "SystVarTransferFactor3xUp", #self._systematicVariation
+                                                                          opts.analysisNameSaveAs, 
+                                                                          opts.verbose)
+        
+        # Create new list with TF + 3xError
+        self._transferFactorPlusResult3x = fakeBResult.FakeBResultManager(dataPath, 
+                                                                          ewkPath,
+                                                                          self._dsetMgr,
+                                                                          self._luminosity,
+                                                                          self.getModuleInfoString(),
+                                                                          normFactors["SystVar3xUp"],
+                                                                          optionDoFakeBNormalisationSyst=False,
+                                                                          optionUseInclusiveNorm=self._opts.useInclusiveNorm,
+                                                                          keyList = ["AllSelections"],
+                                                                          verbose=opts.verbose)
+        
+        # Add the plots
+        mySystModulePlus.addPlots(self._transferFactorPlusResult.getShapePlots(), self._transferFactorPlusResult.getShapePlotLabels())
+        mySystModule3xPlus.addPlots(self._transferFactorPlusResult3x.getShapePlots(), self._transferFactorPlusResult3x.getShapePlotLabels())
+
+        # Save "_SystVarTransferFactorUp" folder to pseudo-dataset pseudo-multicrab
         self._outputCreator.addModule(mySystModulePlus)
-        # Down variation of fake weighting
-        mySystModuleMinus = pseudoMultiCrabCreator.PseudoMultiCrabModule(dself._dsetMgr,
-                                                                         self._era,
+        self._outputCreator.addModule(mySystModule3xPlus)
+
+        # Down variation of Transfer Factors
+        print
+        Print(ShellStyles.HighlightAltStyle() + "Extra Module: SystVarTransferFactorMinus" + ShellStyles.NormalStyle(), False)
+        mySystModuleMinus = pseudoMultiCrabCreator.PseudoMultiCrabModule(self._dsetMgr, 
+                                                                         self._era, 
                                                                          self._searchMode,
-                                                                         self._optimizationMode,
-                                                                         "SystVarFakeWeightingMinus")
-        self._fakeWeightingMinusResult = qcdInvertedResult.QCDInvertedResultManager(dataPath, 
-                                                                                    ewkPath,
-                                                                                    self._dsetMgr,
-                                                                                    self._myLuminosity,
-                                                                                    self.getModuleInfoString(),
-                                                                                    normFactorsDown,
-                                                                                    optionCalculateQCDNormalizationSyst=False)
-        myModule.addPlots(self._fakeWeightingMinusResult.getShapePlots(),
-                          self._fakeWeightingMinusResult.getShapePlotLabels())
+                                                                         self._optimizationMode, 
+                                                                         "SystVarTransferFactorDown", 
+                                                                         opts.analysisNameSaveAs, 
+                                                                         opts.verbose)
+
+        self._transferFactorMinusResult = fakeBResult.FakeBResultManager(dataPath,
+                                                                         ewkPath,
+                                                                         self._dsetMgr, 
+                                                                         self._luminosity,
+                                                                         self.getModuleInfoString(), 
+                                                                         normFactors["SystVarDown"],
+                                                                         optionDoFakeBNormalisationSyst=False,
+                                                                         optionUseInclusiveNorm=self._opts.useInclusiveNorm,
+                                                                         keyList = ["AllSelections"],
+                                                                         verbose=opts.verbose)
+        
+        # Down variation of Transfer Factors (3x)
+        print
+        Print(ShellStyles.HighlightAltStyle() + "Extra Module: SystVarTransferFactor3xMinus" + ShellStyles.NormalStyle(), False)
+        mySystModule3xMinus = pseudoMultiCrabCreator.PseudoMultiCrabModule(self._dsetMgr, 
+                                                                           self._era, 
+                                                                           self._searchMode,
+                                                                           self._optimizationMode, 
+                                                                           "SystVarTransferFactor3xDown", 
+                                                                           opts.analysisNameSaveAs, 
+                                                                           opts.verbose)
+
+        self._transferFactorMinusResult3x = fakeBResult.FakeBResultManager(dataPath,
+                                                                           ewkPath,
+                                                                           self._dsetMgr, 
+                                                                           self._luminosity,
+                                                                           self.getModuleInfoString(), 
+                                                                           normFactors["SystVar3xDown"],
+                                                                           optionDoFakeBNormalisationSyst=False,
+                                                                           optionUseInclusiveNorm=self._opts.useInclusiveNorm,
+                                                                           keyList = ["AllSelections"],
+                                                                           verbose=opts.verbose)
+
+        # Add the plots
+        mySystModuleMinus.addPlots(self._transferFactorMinusResult.getShapePlots(), self._transferFactorMinusResult.getShapePlotLabels())
+        mySystModule3xMinus.addPlots(self._transferFactorMinusResult3x.getShapePlots(), self._transferFactorMinusResult3x.getShapePlotLabels())
+
+        # Save "_SystVarTransferFactorDown" folder to pseudo-dataset pseudo-multicrab
         self._outputCreator.addModule(mySystModuleMinus)
+        self._outputCreator.addModule(mySystModule3xMinus)
+
         return
 
 #================================================================================================
@@ -305,8 +381,8 @@ def printTimeEstimate(globalStart, localStart, nCurrent, nAll):
     s += "%02d"%(myEstimate)
     
     # Print info
-    Print("Module finished in %.1f seconds" % (myLocalDelta), True)
-    Print("Estimated time to complete %s" %  (s), False)
+    Verbose("Module finished in %.1f seconds" % (myLocalDelta), True)
+    Verbose("Estimated time to complete %s" %  (s), False)
     return
 
 
@@ -317,13 +393,13 @@ def getModuleInfoString(dataEra, searchMode, optimizationMode):
     return moduleInfoString
 
 
-def getGetNormFactorsSrcFilename(dirName, fileName):
+def getTransferFactorsSrcFilename(dirName, fileName):
     src = os.path.join(dirName, fileName)
     if not os.path.exists(src):
-        msg = "Normalisation factors ('%s') not found!\nRun script \"plotQCD_Fit.py\" to auto-generate the normalization factors python file." % src
-        raise Exception(ShellStyles.ErrorLabel() + msg)
+        msg = "Normalisation factors ('%s') not found!\nRun script \"./getABCD_TF.py\" to auto-generate the transfer factors (TFs) file." % src
+        raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
     else:
-        Verbose("Found src file for normalization factors:\n\t%s" % (src), True)
+        Print("Importing transfer factors (TFs) from file %s" % (ShellStyles.NoteStyle() + os.path.basename(src) + ShellStyles.NormalStyle()), True)
     return src
 
 def getNormFactorFileList(dirName, fileBaseName):
@@ -350,6 +426,35 @@ def getNormFactorFileList(dirName, fileBaseName):
         Verbose(ShellStyles.NoteLabel() + msg, True)
     return scriptList
 
+def printNormFactors(myNormFactors):
+    '''
+    Normalisation Factors are simply the transfer factors (TF or R_i)
+    where i indicates the bin the Fake-b measurement is performed in
+    e.g. eta bins of leading b-jet 
+    '''
+    # Constuct the table
+    table   = []
+    align  = "{:^10} {:>15} {:^3} {:<10} {:<10} {:<10}"
+    header = align.format("Bin Label", "TF", "", "Error", "TF (Up)", "TF (Down)")
+    hLine  = "="*80
+    table.append(hLine)
+    table.append(header)
+    table.append(hLine)
+
+    # For-loop: All Fake-b measurement bins
+    for i, binLabel in  enumerate(myNormFactors[opts.normFactorKey], 1):
+        TF_Value     = myNormFactors[opts.normFactorKey][binLabel]
+        TF_Error     = myNormFactors["Error"][binLabel]
+        TF_ValueUp   = myNormFactors["SystVarUp"][binLabel]
+        TF_ValueDown = myNormFactors["SystVarDown"][binLabel]
+        table.append(align.format(binLabel, TF_Value,  "+/-", TF_Error, TF_ValueUp, TF_ValueDown) )
+    table.append(hLine)
+
+    # For-loop: All rows in table
+    for i, row in enumerate(table, 1):
+        #Print(row, i==1)
+        Print(row, False)
+    return
 
 def importNormFactors(era, searchMode, optimizationMode, multicrabDirName):
     '''
@@ -373,7 +478,7 @@ def importNormFactors(era, searchMode, optimizationMode, multicrabDirName):
     moduleInfoString = getModuleInfoString(era, searchMode, optimizationMode)
 
     # Construct source file name
-    src = getGetNormFactorsSrcFilename(multicrabDirName, opts.normFactorsSrc % moduleInfoString)
+    src = getTransferFactorsSrcFilename(multicrabDirName, opts.normFactorsSrc % moduleInfoString)
 
     # Check if normalization coefficients are suitable for the choses era
     Verbose("Reading normalisation factors from:\n\t%s" % src, True)
@@ -390,50 +495,61 @@ def importNormFactors(era, searchMode, optimizationMode, multicrabDirName):
         sys.path.insert(0, os.path.join(cwd, srcDir))
 
     # Import the (normFactor) src file
-    Print("Importing the transfer factors from src file %s" % (ShellStyles.NoteStyle() + src + ShellStyles.NormalStyle()), True)
+    Verbose("Importing the transfer factors from src file %s" % (ShellStyles.NoteStyle() + src + ShellStyles.NormalStyle()), True)
     srcBase = os.path.basename("/".join(pathList))
     normFactorsImport = __import__(srcBase)
     
-    # Get the function definition
-    myNormFactorsSafetyCheck = getattr(normFactorsImport, "QCDInvertedNormalizationSafetyCheck")
+    # Get the function definition and check if the eta, searchMode, and optimizationMode are correct
     Verbose("Check that the era=%s, searchMode=%s, optimizationMode=%s info matches!" % (era, searchMode, optimizationMode) )
+    myNormFactorsSafetyCheck = getattr(normFactorsImport, "FakeBNormalisationSafetyCheck")
     myNormFactorsSafetyCheck(era, searchMode, optimizationMode)
 
-    # Obtain normalization factors
-    myNormFactorsImport = getattr(normFactorsImport, "QCDNormalization")
-
-    # Systematic Variations
-    msg = "Disabled NormFactors SystVar Fake Weighting Up/Down"
-    Print(ShellStyles.WarningLabel() + msg, True)    
-    # myNormFactorsImportSystVarFakeWeightingDown = getattr(normFactorsImport, "QCDPlusEWKFakeTausNormalizationSystFakeWeightingVarDown") #FIXME
-    # myNormFactorsImportSystVarFakeWeightingUp   = getattr(normFactorsImport, "QCDPlusEWKFakeTausNormalizationSystFakeWeightingVarUp")   #FIXME
+    # Obtain the normalization (tranfer factors) and their systematic variations
+    myNormFactorsImport              = getattr(normFactorsImport, "FakeBNormalisation_Value")
+    myNormFactorsImportError         = getattr(normFactorsImport, "FakeBNormalisation_Error")
+    myNormFactorsImportSystVarUp     = getattr(normFactorsImport, "FakeBNormalisation_ErrorUp")
+    myNormFactorsImportSystVar2xUp   = getattr(normFactorsImport, "FakeBNormalisation_ErrorUp2x")
+    myNormFactorsImportSystVar3xUp   = getattr(normFactorsImport, "FakeBNormalisation_ErrorUp3x")
+    myNormFactorsImportSystVarDown   = getattr(normFactorsImport, "FakeBNormalisation_ErrorDown")
+    myNormFactorsImportSystVar2xDown = getattr(normFactorsImport, "FakeBNormalisation_ErrorDown2x")
+    myNormFactorsImportSystVar3xDown = getattr(normFactorsImport, "FakeBNormalisation_ErrorDown3x")
+    msg = "Obtained transfer factors (TFs) from file %s. The values are:" % (ShellStyles.NoteStyle() + srcBase + ShellStyles.NormalStyle() )
+    Verbose(msg, True)
 
     # Import the normalisation factors and inform user
     myNormFactors = {}
-    if "FakeB" in opts.analysisName:
-        myNormFactors[opts.normFactorKey] = myNormFactorsImport
-    elif "GenuineB" in opts.analysisName:
-        myNormFactors[opts.normFactorKey] = {'Inclusive': 1.0}
-    else:
-        raise Exception("This should not be reached!")
+    myNormFactors["Nominal"]       = myNormFactorsImport
+    myNormFactors["Error"]         = myNormFactorsImportError
+    myNormFactors["SystVarUp"]     = myNormFactorsImportSystVarUp
+    myNormFactors["SystVar2xUp"]   = myNormFactorsImportSystVar2xUp
+    myNormFactors["SystVar3xUp"]   = myNormFactorsImportSystVar3xUp
+    myNormFactors["SystVarDown"]   = myNormFactorsImportSystVarDown
+    myNormFactors["SystVar2xDown"] = myNormFactorsImportSystVar2xDown
+    myNormFactors["SystVar3xDown"] = myNormFactorsImportSystVar3xDown
 
-    # Inform user of normalisation factors
-    msg = "Obtained %s normalisation factor dictionary. The values are:" % (ShellStyles.NoteStyle() + opts.normFactorKey + ShellStyles.NormalStyle() )
-    Print(msg, True)
-    for i, k in  enumerate(myNormFactors[opts.normFactorKey], 1):
-        keyName  = k
-        keyValue = myNormFactors[opts.normFactorKey][k]
-        #msg += "%s = %s" % (keyName, keyValue)
-        msg = "%s = %s" % (keyName, keyValue)
-        Print(msg, i==0)
-        
-    # Inform user of weighting up/down
-    msg = "Disabled NormFactors Weighting Up/Down"
-    Verbose(ShellStyles.WarningLabel() + msg, True)  #fixme
-    # myNormFactors["FakeWeightingDown"] = myNormFactorsImportSystVarFakeWeightingDown # FIXME 
-    # myNormFactors["FakeWeightingUp"]   = myNormFactorsImportSystVarFakeWeightingUp   # FIXME
+    # Print the Normalisation Factors aka Transfer Factors (TF)
+    if 0:
+        printNormFactors(myNormFactors)
     return myNormFactors
 
+def getSystematicsNames(mySystematicsNamesRaw, opts):
+    mySystematicsNames = []
+    # Sanity check
+    if len(mySystematicsNamesRaw) < 1:
+        Print("There are 0 systematic variation sources", True)
+        return mySystematicsNames
+    if opts.test:
+        Print("Disabling systematic variations", True)
+        return mySystematicsNames
+
+    # For-loop: All systematics raw names
+    for i, item in enumerate(mySystematicsNamesRaw, 0):
+        # Print("Using systematic %s" % (ShellStyles.NoteStyle() + item + ShellStyles.NormalStyle()), i==0)
+        mySystematicsNames.append("%sPlus" % item)
+        mySystematicsNames.append("%sMinus"% item)    
+
+    Print("There are %d systematic variation sources:%s\n\t%s%s" % (len(mySystematicsNames), ShellStyles.NoteStyle(), "\n\t".join(mySystematicsNames), ShellStyles.NormalStyle()), True)
+    return mySystematicsNames
 
 #================================================================================================ 
 # Main
@@ -448,20 +564,14 @@ def main(opts):
 
     # Obtain systematics names
     mySystematicsNamesRaw = dsetMgrCreator.getSystematicVariationSources()
-    mySystematicsNames    = []
-    for i, item in enumerate(mySystematicsNamesRaw, 0):
-        Print("Using systematic %s" % (ShellStyles.NoteStyle() + item + ShellStyles.NormalStyle()), i==0)
-        mySystematicsNames.append("%sPlus" % item)
-        mySystematicsNames.append("%sMinus"% item)
-    if opts.test:
-        mySystematicsNames = []
-        
+    mySystematicsNames    = getSystematicsNames(mySystematicsNamesRaw, opts)
+    
     # Set the primary source 
     Verbose("Setting the primary source (label=%s)" % (ShellStyles.NoteStyle() + opts.analysisName + ShellStyles.NormalStyle()), True)
-    myModuleSelector.setPrimarySource(label=opts.analysisName, dsetMgrCreator=dsetMgrCreator) #fixme: what is label for?
+    myModuleSelector.setPrimarySource(label=opts.analysisName, dsetMgrCreator=dsetMgrCreator)
 
     # Select modules
-    myModuleSelector.doSelect(opts=None) #fixme: (opts=opts)
+    myModuleSelector.doSelect(opts=None) #fixme: (opts=opts)?
 
     # Loop over era/searchMode/optimizationMode combos
     myTotalModules  = myModuleSelector.getSelectedCombinationCount() * (len(mySystematicsNames)+1) * len(opts.shape)
@@ -469,7 +579,7 @@ def main(opts):
 
     count, nEras, nSearchModes, nOptModes, nSysVars = myModuleSelector.getSelectedCombinationCountIndividually()
     if nSysVars > 0:
-        msg = "Running  over %d modules (%d eras x %d searchModes x %d optimizationModes x %d systematic variations)" % (count, nEras, nSearchModes, nOptModes, nSysVars)
+        msg = "Running over %d modules (%d eras x %d searchModes x %d optimizationModes x %d systematic variations)" % (count, nEras, nSearchModes, nOptModes, nSysVars)
     else:
         msg = "Running over %d modules (%d eras x %d searchModes x %d optimizationModes)" % (count, nEras, nSearchModes, nOptModes)
     Verbose(msg, True)
@@ -487,10 +597,10 @@ def main(opts):
     for iShape, shapeType in enumerate(opts.shape, 1):
         
         msg = "Shape %d/%d:%s %s" % (iShape, len(opts.shape), ShellStyles.NormalStyle(), shapeType)
-        Print(ShellStyles.CaptionStyle() + msg, True)
+        Verbose(ShellStyles.HighlightAltStyle() + msg, True)
 
         # Initialize
-        myOutputCreator.initialize(subTitle=shapeType, prefix="") #fixeme: remove shapeType from sub-directory name?
+        myOutputCreator.initialize(subTitle=shapeType, prefix="") #fixme: remove shapeType from sub-directory name?
 
         # Get lists of settings
         erasList   = myModuleSelector.getSelectedEras()
@@ -499,18 +609,20 @@ def main(opts):
         if 0:
             optList.append("") #append the default opt mode iff more optimization modes exist
 
-        # For-Loop over era, searchMode, and optimizationMode options
+        # For-loop: All eras
         for era in erasList:
+            # For-loop: All searchModes
             for searchMode in modesList:
+                # For-loop: AlloptimizationModes
                 for optimizationMode in optList:
-                    
                     Verbose("era = %s, searchMode = %s, optMode = %s" % (era, searchMode, optimizationMode), True)
+
                     # If an optimization mode is defined in options skip the rest
                     if opts.optMode != None:
                         if optimizationMode != opts.optMode:
                             continue
 
-                    # Obtain normalization factors
+                    # Obtain normalization factors for given Era, SearchMode, and OptimizationMode!
                     myNormFactors = importNormFactors(era, searchMode, optimizationMode, opts.mcrab)
 
                     # Nominal module
@@ -518,8 +630,11 @@ def main(opts):
                     iModule += 1
 
                     # Inform user of what is being processes
-                    msg = "Module %d/%d:%s %s/%s" % (iModule, myTotalModules, ShellStyles.NormalStyle(), myModuleInfoString, shapeType)
-                    Print(ShellStyles.CaptionStyle() + msg, True)
+                    if optimizationMode != "":
+                        msg = "Module %d/%d: %s_%s_%s_%s" % (iModule, myTotalModules, opts.analysisName, searchMode, era, optimizationMode)
+                    else:
+                        msg = "Module %d/%d: %s_%s_%s" % (iModule, myTotalModules, opts.analysisName, searchMode, era)
+                    Print(ShellStyles.HighlightAltStyle() + msg + ShellStyles.NormalStyle(), iModule==1) 
 
                     # Keep time
                     myStartTime = time.time()
@@ -532,29 +647,16 @@ def main(opts):
                         if opts.verbose:
                             nominalModule.debug()
                      
-                    doQCDNormalizationSyst=False #FIXME
-                    if not doQCDNormalizationSyst:
-                        msg = "Disabling systematics"
-                        Verbose(ShellStyles.WarningLabel() + msg, True) #fixme
-                        
                     # Build the module
-                    nominalModule.buildModule(opts.dataSrc, opts.ewkSrc, myNormFactors[opts.normFactorKey], doQCDNormalizationSyst, opts.normDataSrc, opts.normEwkSrc)
+                    doFakeBNormalisationSyst = False 
+                    nominalModule.buildModule(opts.dataSrc, opts.ewkSrc, myNormFactors[opts.normFactorKey], doFakeBNormalisationSyst, opts.normDataSrc, opts.normEwkSrc)
 
+                    # Do TF variations named "SystVarUp" and "SystVarDown" (i.e. (Get results using TF+Error and TF-Error instead of TF)
                     if len(mySystematicsNames) > 0:
-                        Print("Adding QCD normalization systematics (iff also other systematics  present) ", True)
-                        nominalModule.buildQCDNormalizationSystModule(opts.dataSrc, opts.ewkSrc)
-
-                    # FIXME: add quark gluon weighting systematics!
-                    if 0: 
-                        Print("Adding Quark/Gluon weighting systematics", True)
-                        nominalModule.buildQCDQuarkGluonWeightingSystModule(opts.dataSrc,
-                                                                            opts.ewkSrc,
-                                                                            myNormFactors["FakeWeightingUp"],
-                                                                            myNormFactors["FakeWeightingDown"],
-                                                                            False,
-                                                                            opts.normDataSrc,
-                                                                            opts.normEwkSrc)
-
+                        Verbose("Adding FakeB normalization systematics (iff also other systematics  present) ", True)
+                        #nominalModule.buildTransferFactorVarSystModule(opts.dataSrc, opts.ewkSrc, myNormFactors["SystVarUp"], myNormFactors["SystVarDown"])
+                        nominalModule.buildTransferFactorVarSystModule(opts.dataSrc, opts.ewkSrc, myNormFactors)
+                    
                     Verbose("Deleting nominal module", True)
                     nominalModule.delete()
 
@@ -564,23 +666,25 @@ def main(opts):
                     Verbose("Now do the rest of systematics variations", True)
                     for syst in mySystematicsNames:
                         iModule += 1
-                        msg = "Analyzing systematics variations %d/%d: %s/%s/%s" % (iModule, myTotalModules, myModuleInfoString, syst, shapeType)
-                        Print(ShellStyles.CaptionStyle() + msg + ShellStyles.NormalStyle(), True)
+                        msg = "Module %d/%d: %s/%s" % (iModule, myTotalModules, myModuleInfoString, syst)
+                        print
+                        Print(ShellStyles.HighlightAltStyle() + msg + ShellStyles.NormalStyle(), False)
                         myStartTime = time.time()
                         systModule  = ModuleBuilder(opts, myOutputCreator)
                         # Create dataset manager with given settings
                         systModule.createDsetMgr(opts.mcrab, era, searchMode, optimizationMode, systematicVariation=syst)
 
-                        # Build asystematics module
+                        # Build systematics module
+                        Verbose("Building systematics module (opts.normFactorKey = %s)" % (opts.normFactorKey), True)
                         systModule.buildModule(opts.dataSrc, opts.ewkSrc, myNormFactors[opts.normFactorKey], False, opts.normDataSrc, opts.normEwkSrc)
                         printTimeEstimate(myGlobalStartTime, myStartTime, iModule, myTotalModules)
                         systModule.delete()
-
+        print
         Verbose("Pseudo-multicrab ready for %s" % shapeType, True)
-    
+        
     # Print some timing statistics
-    Print("Average processing time per module was %.1f seconds" % getAvgProcessTimeForOneModule(myGlobalStartTime, myTotalModules), True)
-    Print("Total elapsed time was %.1f seconds" % getTotalElapsedTime(myGlobalStartTime), False)
+    Verbose("Average processing time per module was %.1f seconds" % getAvgProcessTimeForOneModule(myGlobalStartTime, myTotalModules), True)
+    Print("Total elapsed time was %.1f seconds" % getTotalElapsedTime(myGlobalStartTime), True)
 
     # Create rest of pseudo multicrab directory
     myOutputCreator.finalize(silent=False)
@@ -613,32 +717,25 @@ if __name__ == "__main__":
     DATAERAS         = ["Run2016"]
     OPTMODE          = None
     BATCHMODE        = True
-    PRECISION        = 3
     INTLUMI          = -1.0
-    SUBCOUNTERS      = False
-    LATEX            = False
-    MCONLY           = False
     URL              = False
-    NOERROR          = True
     SAVEDIR          = "/publicweb/a/aattikis/FakeBMeasurement/"
     VERBOSE          = False
-    VARIATIONS       = False
-    TEST             = True
+    TEST             = False
     FACTOR_SRC       = "FakeBTransferFactors_%s.py"
     DATA_SRC         = "ForDataDrivenCtrlPlots" #"ForFakeBMeasurement"
     EWK_SRC          = DATA_SRC + "EWKGenuineB" # FakeB = Data - EWK GenuineB
     NORM_DATA_SRC    = DATA_SRC + "EWKGenuineB" 
     NORM_EWK_SRC     = DATA_SRC + "EWKGenuineB"
-    INCLUSIVE_ONLY   = False #True
-    MULTICRAB        = None
+    INCLUSIVE_ONLY   = False
     SHAPE            = ["TrijetMass"]
-    NORMFACTOR_KEY   = "nominal"
+    NORMFACTOR_KEY   = "Nominal" # "Nominal", "SystVarUp", "SystVarDown"
  
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]", add_help_option=True, conflict_handler="resolve")
 
     parser.add_option("-m", "--mcrab", dest="mcrab", action="store",# required=True,
-                      help="Path to the multicrab directory for input [default: %s]" % (MULTICRAB) )
+                      help="Path to the multicrab directory for input [default: None]")
 
     parser.add_option("--normFactorKey", dest="normFactorKey", default=NORMFACTOR_KEY, 
                       help="The normalisation factor key (e.g. nominal) [default: %s]" % (NORMFACTOR_KEY) )
@@ -649,11 +746,8 @@ if __name__ == "__main__":
     parser.add_option("--normFactorsSrc", dest="normFactorsSrc", action="store", default=FACTOR_SRC,
                       help="The python file (auto-generated) containing the normalisation factors. [default: %s]" % FACTOR_SRC)
 
-    parser.add_option("-l", "--list", dest="listVariations", action="store_true", default=VARIATIONS, 
-                      help="Print a list of available variations [default: %s]" % VARIATIONS)
-
     parser.add_option("--shape", dest="shape", action="store", default=SHAPE, 
-                      help="Shape identifiers") # unknown use
+                      help="Shape identifiers")
 
     parser.add_option("--test", dest="test", action="store_true", default=TEST, 
                       help="Make short test by limiting number of syst. variations [default: %s]" % TEST)
@@ -673,9 +767,6 @@ if __name__ == "__main__":
     parser.add_option("--analysisNameSaveAs", dest="analysisNameSaveAs", type="string", default=ANALYSISNAMESAVE,
                       help="Name of folder that the new pseudo-dataset will be stored in [default: %s]" % ANALYSISNAMESAVE)
 
-    parser.add_option("--mcOnly", dest="mcOnly", action="store_true", default=MCONLY,
-                      help="Plot only MC info [default: %s]" % MCONLY)
-
     parser.add_option("--intLumi", dest="intLumi", type=float, default=INTLUMI,
                       help="Override the integrated lumi [default: %s]" % INTLUMI)
 
@@ -693,12 +784,6 @@ if __name__ == "__main__":
     
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE, 
                       help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
-
-    parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
-                      help="List of datasets in mcrab to include")
-
-    parser.add_option("-e", "--excludeTasks", dest="excludeTasks", action="store", 
-                      help="List of datasets in mcrab to exclude")
 
     parser.add_option("--dataSrc", dest="dataSrc", action="store", default=DATA_SRC,
                       help="Source of Data histograms [default: %s" % (DATA_SRC) )
@@ -730,7 +815,7 @@ if __name__ == "__main__":
             raise Exception(ShellStyles.ErrorLabel() + msg + ShellStyles.NormalStyle())
         else:
             msg = "Using pseudo-multicrab directory %s" % (ShellStyles.NoteStyle() + opts.mcrab + ShellStyles.NormalStyle())
-            Print(msg , True)
+            Verbose(msg , True)
 
     # Sanity check: fixme
     if len(opts.shape) == 0:
@@ -753,10 +838,9 @@ if __name__ == "__main__":
             raise Exception(ShellStyles.ErrorLabel() + msg + ShellStyles.NormalStyle())
                     
     # Inform user of which datasets you consider as EWK
-    msg = "The following datasets will comprise the %sEWK merged-dataset%s:"  % (ShellStyles.NoteStyle(), ShellStyles.NormalStyle())
+    msg = "The following datasets will comprise the %sEWK merged-datasets%s:"  % (ShellStyles.NoteStyle(), ShellStyles.NormalStyle())
     Print(msg, True)     
-    for d in opts.ewkDatasets:
-        Print(d, False)
+    Print(", ".join(opts.ewkDatasets), False)
 
     # Call the main function
     main(opts)

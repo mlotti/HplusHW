@@ -1,6 +1,5 @@
 // -*- c++ -*-
 #include "EventSelection/interface/TauSelection.h"
-
 #include "Framework/interface/Exception.h"
 #include "Framework/interface/ParameterSet.h"
 #include "EventSelection/interface/CommonPlots.h"
@@ -80,6 +79,11 @@ TauSelection::TauSelection(const ParameterSet& config, EventCounter& eventCounte
   cSubPassedAntiIsolation(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed anti-isolation")),
   cSubPassedAntiIsolationRtau(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed anti-isolated Rtau")),
   cSubPassedTauSelectionGenuine(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed tau selection and genuine")),
+  cSubPassedElectronToTau(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Electrons passing tau selection")),
+  cSubPassedMuonToTau(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Muons passing tau selection")),
+  cSubPassedJetToTau(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Jets passing tau selection")),
+  cSubPassedGluonToTau(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Gluons passing tau selection")),
+  cSubPassedUnknownToTau(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Unknown decays passing tau selection")),
   cSubPassedTauSelectionMultipleTaus(fEventCounter.addSubCounter("tau selection ("+postfix+")", "multiple selected taus")),
   cSubPassedAntiIsolatedTauSelection(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed anti-isolated tau selection")),
   cSubPassedAntiIsolatedTauSelectionMultipleTaus(fEventCounter.addSubCounter("tau selection ("+postfix+")", "multiple anti-isolated taus"))
@@ -143,6 +147,11 @@ TauSelection::TauSelection(const ParameterSet& config, const std::string& postfi
   cSubPassedAntiIsolation(fEventCounter.addSubCounter("tau selection", "Passed anti-isolation")),
   cSubPassedAntiIsolationRtau(fEventCounter.addSubCounter("tau selection", "Passed anti-isolated Rtau")),
   cSubPassedTauSelectionGenuine(fEventCounter.addSubCounter("tau selection", "Passed tau selection and genuine")),
+  cSubPassedElectronToTau(fEventCounter.addSubCounter("tau selection", "Electrons passing tau selection")),
+  cSubPassedMuonToTau(fEventCounter.addSubCounter("tau selection", "Muons passing tau selection")),
+  cSubPassedJetToTau(fEventCounter.addSubCounter("tau selection", "Jets passing tau selection")),
+  cSubPassedGluonToTau(fEventCounter.addSubCounter("tau selection", "Gluons passing tau selection")),
+  cSubPassedUnknownToTau(fEventCounter.addSubCounter("tau selection", "Unknown decays passing tau selection")),
   cSubPassedTauSelectionMultipleTaus(fEventCounter.addSubCounter("tau selection", "multiple selected taus")),
   cSubPassedAntiIsolatedTauSelection(fEventCounter.addSubCounter("tau selection", "Passed anti-isolated tau selection")),
   cSubPassedAntiIsolatedTauSelectionMultipleTaus(fEventCounter.addSubCounter("tau selection", "multiple anti-isolated taus"))
@@ -401,6 +410,13 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
   if (event.isMC()) {
     setTauMisIDSFValue(output);
   }
+
+  // DEBUG: test print for mis-id SFs
+//  if (event.isMC() && output.hasIdentifiedTaus() && output.getSelectedTau().isElectronToTau()) 
+//    std::cout << "found e->tau with pT " << output.getSelectedTau().pt() << " and eta " << output.getSelectedTau().eta() << ", applying SF " << output.fTauMisIDSF << std::endl;
+//  if (event.isMC() && output.hasIdentifiedTaus() && output.getSelectedTau().isMuonToTau()) 
+//    std::cout << "found mu->tau with pT " << output.getSelectedTau().pt() << " and eta " << output.getSelectedTau().eta() << ", applying SF " << output.fTauMisIDSF << std::endl;
+
   // Set tau trigger SF value to data object
 //  if (event.isMC()) {
 //    if (output.hasIdentifiedTaus()) {
@@ -656,8 +672,23 @@ TauSelection::Data TauSelection::privateAnalyzeTight(const Event& event) {
     cSubPassedAntiIsolation.increment();
   if (passedAntiIsolRtau)
     cSubPassedAntiIsolationRtau.increment();
+<<<<<<< HEAD
   if (output.fSelectedTaus.size() > 0 && output.isGenuineTau() )
     cSubPassedTauSelectionGenuine.increment();
+=======
+  if (output.fSelectedTaus.size() > 0 && output.isGenuineTau())
+    cSubPassedTauSelectionGenuine.increment();
+  if (event.isMC() && output.hasIdentifiedTaus() && output.getSelectedTau().isElectronToTau())
+    cSubPassedElectronToTau.increment();
+  if (event.isMC() && output.hasIdentifiedTaus() && output.getSelectedTau().isMuonToTau())
+    cSubPassedMuonToTau.increment();
+  if (event.isMC() && output.hasIdentifiedTaus() && output.getSelectedTau().isJetToTau())
+    cSubPassedJetToTau.increment();
+  if (event.isMC() && output.hasIdentifiedTaus() && output.getSelectedTau().isGluonToTau())
+    cSubPassedGluonToTau.increment();
+  if (event.isMC() && output.hasIdentifiedTaus() && output.getSelectedTau().isUnknownTauDecay())
+    cSubPassedUnknownToTau.increment(); 
+>>>>>>> origin/hw_analysis
   if (output.fSelectedTaus.size() > 1)
     cSubPassedTauSelectionMultipleTaus.increment();
   if (output.fAntiIsolatedTaus.size() > 0)
@@ -712,10 +743,22 @@ bool TauSelection::passNprongsCut(const Tau& tau) const {
 
 std::vector<TauSelection::TauMisIDRegionType> TauSelection::assignTauMisIDSFRegion(const ParameterSet& config, const std::string& label) const{
   std::vector<TauMisIDRegionType> result;
+  if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauBarrel0to0p4SF"))
+    result.push_back(kBarrel0to0p4);
+  if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauBarrel0p4to0p8SF"))
+    result.push_back(kBarrel0p4to0p8);
+  if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauBarrel0p8to1p2SF"))
+    result.push_back(kBarrel0p8to1p2);
+  if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauBarrel1p2to1p7SF"))
+    result.push_back(kBarrel1p2to1p7);
+  if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauElectronBarrelSF"))
+    result.push_back(kElectronBarrel);
+  if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauElectronEndcapSF"))
+    result.push_back(kElectronEndcap);
   if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauBarrelSF"))
     result.push_back(kBarrel);
-  if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauEndcapSF"))
-    result.push_back(kEndcap);
+  if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauElectronEndcapSF"))
+    result.push_back(kElectronEndcap);
   if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauSF"))
     result.push_back(kFullCoverage);
 //   if (!result.size())
@@ -725,10 +768,22 @@ std::vector<TauSelection::TauMisIDRegionType> TauSelection::assignTauMisIDSFRegi
 
 std::vector<float> TauSelection::assignTauMisIDSFValue(const ParameterSet& config, const std::string& label) const {
   std::vector<float> result;
+  if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauBarrel0to0p4SF"))
+    result.push_back(config.getParameter<float>("tauMisidetification"+label+"ToTauBarrel0to0p4SF"));
+  if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauBarrel0p4to0p8SF"))
+    result.push_back(config.getParameter<float>("tauMisidetification"+label+"ToTauBarrel0p4to0p8SF"));
+  if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauBarrel0p8to1p2SF"))
+    result.push_back(config.getParameter<float>("tauMisidetification"+label+"ToTauBarrel0p8to1p2SF"));
+  if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauBarrel1p2to1p7SF"))
+    result.push_back(config.getParameter<float>("tauMisidetification"+label+"ToTauBarrel1p2to1p7SF"));
   if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauBarrelSF"))
     result.push_back(config.getParameter<float>("tauMisidetification"+label+"ToTauBarrelSF"));
   if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauEndcapSF"))
     result.push_back(config.getParameter<float>("tauMisidetification"+label+"ToTauEndcapSF"));
+  if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauElectronBarrelSF"))
+    result.push_back(config.getParameter<float>("tauMisidetification"+label+"ToTauElectronBarrelSF"));
+  if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauElectronEndcapSF"))
+    result.push_back(config.getParameter<float>("tauMisidetification"+label+"ToTauElectronEndcapSF"));
   if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauSF"))
     result.push_back(config.getParameter<float>("tauMisidetification"+label+"ToTauSF"));
 //   if (!result.size())
@@ -781,9 +836,21 @@ float TauSelection::setTauMisIDSFValueHelper(const Tau& tau) {
 bool TauSelection::tauMisIDSFBelongsToRegion(TauMisIDRegionType region, double eta) {
   if (region == kFullCoverage)
     return true;
+  else if (region == kBarrel0to0p4)
+    return std::abs(eta) <= 0.4;
+  else if (region == kBarrel0p4to0p8)
+      return std::abs(eta) > 0.4 && std::abs(eta) <= 0.8;
+  else if (region == kBarrel0p8to1p2)
+      return std::abs(eta) > 0.8 && std::abs(eta) <= 1.2;
+  else if (region == kBarrel1p2to1p7)
+    return std::abs(eta) > 1.2 && std::abs(eta) <= 1.7;
   else if (region == kBarrel)
-    return std::abs(eta) < 1.5;
+    return std::abs(eta) <= 1.7;
   else if (region == kEndcap)
+    return std::abs(eta) > 1.7;
+  else if (region == kElectronBarrel)
+    return std::abs(eta) <= 1.5;
+  else if (region == kElectronEndcap)
     return std::abs(eta) > 1.5;
   // never reached
   return false;

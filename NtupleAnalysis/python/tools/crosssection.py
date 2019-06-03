@@ -116,6 +116,8 @@ class CrossSectionList:
 # [17] https://twiki.cern.ch/twiki/bin/view/CMS/SummaryTable1G25ns#DY_Z and https://arxiv.org/pdf/1105.0020v1.pdf
 # [18] top mass 172.5, https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
 # [19] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
+# [20] https://github.com/UHH2/UHH2/wiki/Ntuple-Production-(Run-II,-2nd-round,-50ns)
+# [21] CMS AN2018_042_v4, Table 3
 
 print "xsection listaus "
 print "----------------"
@@ -271,11 +273,99 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("TTJets", {            
             "7": 172.0, # [10]
             "8": 245.8, # [10]
-            "13": 6.639e+02, #6.639e+02 +- 8.237e+00 pb [16] (inputFiles="001AFDCE-C33B-E611-B032-0025905D1C54.root")            
+            "13": 831.76, # [18], same as TT because apparently TTJets is also an inclusive sample         
+#            "13": 6.639e+02, #6.639e+02 +- 8.237e+00 pb [16] (inputFiles="001AFDCE-C33B-E611-B032-0025905D1C54.root")            
             }),
     CrossSection("TT", {
             "7": 172.0, # [10]
             "8": 245.8, # [10]
+            "13": 831.76, # [18]
+            }),
+    CrossSection("TT_Mtt_0to700", {
+            "13": 831.76, # [18], same sas TT inclusive (because this sample is in fact the inclusive sample skimmed to Mtt<700)
+            }),
+    CrossSection("TT_Mtt_700to1000", {
+            "13": 76.60518, # [18],[20], calculated as 75.15 (from generation) /815.96 (from generation) * 831.76 (NNLO)
+            }),
+    CrossSection("TT_Mtt_1000toInf", {
+            "13": 20.57789, # [18],[20], calculated as 20.187 (from generation) /815.96 (from generation) * 831.76 (NNLO)
+            }),
+    CrossSection("TTGJets", {            
+            "13": 1.0, # FIXME (Marina)
+            }),
+    CrossSection("TT_fsrdown", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_fsrup", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_isrdown", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_isrup", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_hdampDOWN", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_hdampUP", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_mtop1665", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_mtop1695", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_mtop1715", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_mtop1735", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_mtop1755", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_mtop1785", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_widthx0p2", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_widthx0p5", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_widthx0p8", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_widthx2", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_widthx4", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_widthx8", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_evtgen", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_erdON", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_TuneEE5C", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_TuneCUETP8M2T4up", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_TuneCUETP8M2T4down", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_GluonMoveCRTune", {
+            "13": 831.76, # [18] 
+            }),
+    CrossSection("TT_QCDbasedCRTune_erdON", {
             "13": 831.76, # [18] 
             }),
     CrossSection("TTJets_HT600to800", {
@@ -369,17 +459,32 @@ backgroundCrossSections = CrossSectionList(
             "8": 11050.0, # [1]
             "13" :3205.6*3.0, # [14]
             }),
+    CrossSection("DYJetsToLL_M_50_HT_70to100", {
+            "13": 209.592, # [21]
+            }),
     CrossSection("DYJetsToLL_M_50_HT_100to200", {
-            "13": 139.4*1.231, # McM times NNLO/LO ratio of inclusive sample
+            "13": 181.302, # McM times NNLO/LO ratio of inclusive sample
             }),
     CrossSection("DYJetsToLL_M_50_HT_200to400", {
-            "13": 42.75*1.231, # McM times NNLO/LO ratio of inclusive sample
+            "13": 50.4177, # McM times NNLO/LO ratio of inclusive sample
             }),
     CrossSection("DYJetsToLL_M_50_HT_400to600", {
-            "13": 5.497*1.231, # McM times NNLO/LO ratio of inclusive sample
+            "13": 6.98314, # McM times NNLO/LO ratio of inclusive sample
             }),
     CrossSection("DYJetsToLL_M_50_HT_600toInf", {
             "13": 2.21*1.231, # McM times NNLO/LO ratio of inclusive sample
+            }),
+    CrossSection("DYJetsToLL_M_50_HT_600to800", {
+            "13": 1.6841, # [21]
+            }),
+    CrossSection("DYJetsToLL_M_50_HT_800to1200", {
+            "13": 0.775392, # [21]
+            }),
+    CrossSection("DYJetsToLL_M_50_HT_1200to2500", {
+            "13": 0.18622, # [21]
+            }),
+    CrossSection("DYJetsToLL_M_50_HT_2500toInf", {
+            "13": 0.004384, # [21]
             }),
     CrossSection("DYJetsToLL_M_100to200", {
             "13": 0.0, # FIXME
@@ -584,6 +689,9 @@ backgroundCrossSections = CrossSectionList(
             }),
     CrossSection("TTWJetsToQQ", {
             "13": 4.034e-01, #4.034e-01 +- 2.493e-03 pb [16] (inputFiles="2211E19A-CC1E-E611-97CC-44A84225C911.root")
+            }),
+    CrossSection("TTWJetsToLNu", {
+            "13": 0.2043, #+/- 0.0020 [17]]
             }),
     CrossSection("TTZToQQ", {
             "13": 5.297e-01, #5.297e-01 +- 7.941e-04 pb [16] (inputFiles="204FB864-5D1A-E611-9BA7-001E67A3F49D.root")

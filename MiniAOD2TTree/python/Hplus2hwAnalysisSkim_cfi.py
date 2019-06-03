@@ -18,4 +18,8 @@ skim = cms.EDFilter("Hplus2hwAnalysisSkim",
 
     TauCollection	= cms.InputTag("slimmedTaus"),
     NTaus		= cms.int32(2),
+<<<<<<< HEAD
     )
+=======
+)
+>>>>>>> origin/hw_analysis

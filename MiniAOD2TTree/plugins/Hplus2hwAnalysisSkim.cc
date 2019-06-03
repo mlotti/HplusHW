@@ -218,3 +218,7 @@ bool Hplus2hwAnalysisSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSe
 
 
 DEFINE_FWK_MODULE(Hplus2hwAnalysisSkim);
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/hw_analysis
