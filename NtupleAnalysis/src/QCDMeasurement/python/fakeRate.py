@@ -35,7 +35,11 @@ class FakeRateCalculator:
 
         self.averageWeight = 0
 
+#        print "DEBUG: **** WRONG ****"
+
         self.doCalculate()
+
+
 
     def doCalculate(self):
         nSplitBins = self.qcdShape.getNumberOfPhaseSpaceSplitBins()

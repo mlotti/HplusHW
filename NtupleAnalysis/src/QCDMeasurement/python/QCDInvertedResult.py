@@ -93,6 +93,7 @@ class QCDInvertedShape:
             myShapeEwkSum.append(0.0)
             myShapeEwkSumUncert.append(0.0)
         # Calculate results separately for each phase space bin and then combine
+        print "nSplitted bins: ", nSplitBins
         for i in range(0, nSplitBins):
             # Get data-driven QCD, data, and MC EWK shape histogram for the phase space bin
             h = shape.getDataDrivenQCDHistoForSplittedBin(i)
@@ -108,6 +109,7 @@ class QCDInvertedShape:
             else:
                 wQCD = normFactors[wQCDLabel]
             # Loop over bins in the shape histogram
+            print "DEBUG: in splitted bin: ", i, " weight: ", wQCD
             for j in range(1,h.GetNbinsX()+1):
                 myResult = 0.0
                 myStatDataUncert = 0.0
@@ -127,6 +129,7 @@ class QCDInvertedShape:
                     self._histogramsList[i].SetBinError(j, myCountObject.statUncertainty())
                 self._resultShape.SetBinContent(j, self._resultShape.GetBinContent(j) + myCountObject.value())
                 self._resultShape.SetBinError(j, self._resultShape.GetBinError(j) + myCountObject.statUncertainty()**2) # Sum squared
+
                 # Sum items for purity calculation
                 myShapeDataSum[j-1] += hData.GetBinContent(j)*wQCD
                 myShapeDataSumUncert[j-1] += (hData.GetBinError(j)*wQCD)**2
@@ -355,6 +358,9 @@ class QCDInvertedResultManager:
             if not mySkipStatus:
                 continue
             # Obtain shape plots (the returned object is not owned)
+
+	    print "DEBUG: ewkPath: ", ewkPath
+
             myShapeHisto = self._obtainShapeHistograms(i, dataPath, ewkPath, dsetMgr, plotName, luminosity, normFactors)
             # Obtain plots for systematics coming from met shape difference for control plots
             if optionCalculateQCDNormalizationSyst:
@@ -419,15 +425,15 @@ class QCDInvertedResultManager:
                                                                         dsetLabelData="Data",
                                                                         dsetLabelEwk="EWK",
                                                                         histoName=plotName,
-                                                                        dataPath=normDataSrc+"QCDNormalizationSignal",
-                                                                        ewkPath=normEWKSrc+"QCDNormalizationSignal",
+                                                                        dataPath=normDataSrc+"", #"QCDNormalizationSignal",
+                                                                        ewkPath=normEWKSrc+"", #"QCDNormalizationSignal",
                                                                         luminosity=luminosity)
         myPlotControlRegionShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr=dsetMgr,
                                                                          dsetLabelData="Data",
                                                                          dsetLabelEwk="EWK",
                                                                          histoName=plotName,
-                                                                         dataPath=normDataSrc+"QCDNormalizationControl",
-                                                                         ewkPath=normEWKSrc+"QCDNormalizationControl",
+                                                                         dataPath=normDataSrc+"", #"QCDNormalizationControl",
+                                                                         ewkPath=normEWKSrc+"", #"QCDNormalizationControl",
                                                                          luminosity=luminosity)
         myPlotRegionTransitionSyst = metSyst.SystematicsForMetShapeDifference(myPlotSignalRegionShape, 
                                                                               myPlotControlRegionShape, 
