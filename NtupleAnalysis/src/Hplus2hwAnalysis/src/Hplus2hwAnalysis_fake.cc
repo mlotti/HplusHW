@@ -328,8 +328,8 @@ void Hplus2hwAnalysis_fake::process(Long64_t entry) {
     if (120 <= muData.getSelectedMuons()[1].pt() && muData.getSelectedMuons()[1].pt() < 200) fEventWeight.multiplyWeight(1.024);
 
   }
-
 */
+
 
 
 
@@ -345,6 +345,7 @@ void Hplus2hwAnalysis_fake::process(Long64_t entry) {
   if (InvMass > 100)
     return;
 */
+
   ////////////
   // 6) Tau
   ////////////
@@ -352,6 +353,49 @@ void Hplus2hwAnalysis_fake::process(Long64_t entry) {
   const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
 
   const TauSelection::Data looseTauData = fLooseTauSelection.analyzeTight(fEvent);
+
+  if (!(looseTauData.hasIdentifiedTaus()))
+    return;
+
+  ////////////
+  // 7) Jet selection
+  ////////////
+
+  const JetSelection::Data jetData = fJetSelection.analyze(fEvent, looseTauData.getSelectedTau());
+  if (!jetData.passedSelection())
+    return;
+
+
+  ////////////
+  // 8) BJet selection
+  ////////////
+
+  const BJetSelection::Data bjetData = fBJetSelection.analyze(fEvent, jetData);
+
+  if (!bjetData.passedSelection())
+    return;
+
+  ////////////
+  // 9) BJet SF
+  ////////////
+
+  if (fEvent.isMC()) {
+    fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
+  }
+//  cBTaggingSFCounter.increment();
+//  fCommonPlots.fillControlPlotsAfterBtagSF(fEvent,jetData,bjetData);
+
+
+  ////////////
+  // 10) MET selection
+  ////////////
+
+  const METSelection::Data METData = fMETSelection.analyze(fEvent, nVertices);
+  if (!METData.passedSelection())
+    return;
+
+
+//  cMETSelection.increment();
 
 
   double drMuTau1 = 0;
@@ -362,8 +406,8 @@ void Hplus2hwAnalysis_fake::process(Long64_t entry) {
 
 //  fCommonPlots.fillControlPlotsAfterTauSelection(fEvent, tauData);
 
-  if (!(looseTauData.hasIdentifiedTaus()))
-    return;
+//  if (!(looseTauData.hasIdentifiedTaus()))
+//    return;
 
   if(looseTauData.getSelectedTaus().size() != 2)
     return;
@@ -376,16 +420,11 @@ void Hplus2hwAnalysis_fake::process(Long64_t entry) {
 //  if(drMuMu < 0.3)
 //    return;
 
-//  hTauPt_ratio_1pr->Fill(InvMass);
 
   std::vector<float> myFactorisationInfo;
 
 
-
-
   if (tauData.hasIdentifiedTaus()) {
-
-
 
       //====== Tau ID SF
     if (fEvent.isMC()) {
@@ -401,7 +440,7 @@ void Hplus2hwAnalysis_fake::process(Long64_t entry) {
 //      return;
 //    }
 
-    for(unsigned int i=0; i<tauData.getSelectedTaus().size(); i++){
+/*    for(unsigned int i=0; i<tauData.getSelectedTaus().size(); i++){
 
         // make sure that the taus are not too close to muons
       drMuTau1 = ROOT::Math::VectorUtil::DeltaR(muData.getSelectedMuons()[0].p4(),tauData.getSelectedTaus()[i].p4());
@@ -409,16 +448,16 @@ void Hplus2hwAnalysis_fake::process(Long64_t entry) {
         return;
       }
 
-//      drMuTau2 = ROOT::Math::VectorUtil::DeltaR(muData.getSelectedMuons()[1].p4(),tauData.getSelectedTaus()[i].p4());
-//      if(drMuTau2 < 0.5) {
-//        return;
-//      }
+      drMuTau2 = ROOT::Math::VectorUtil::DeltaR(muData.getSelectedMuons()[1].p4(),tauData.getSelectedTaus()[i].p4());
+      if(drMuTau2 < 0.5) {
+        return;
+      }
     }
-
+*/
       // Do rest of event selection
     doSignalAnalysis(fEvent, tauData, nVertices);
 
-    hNTau->Fill(tauData.getSelectedTaus().size());
+//    hNTau->Fill(tauData.getSelectedTaus().size());
 
       // take tight weight away
 
@@ -434,9 +473,6 @@ void Hplus2hwAnalysis_fake::process(Long64_t entry) {
   } // if has tight tau
 
   if (looseTauData.hasIdentifiedTaus()) {
-      // Sanity check passed: at least one isolated tau exists
-      // Set factorisation bin
-
       // loose id
 
       //====== Tau ID SF
@@ -449,7 +485,7 @@ void Hplus2hwAnalysis_fake::process(Long64_t entry) {
       fEventWeight.multiplyWeight(looseTauData.getTauMisIDSF());
     }
 
-
+/*
     for(unsigned int i=0; i<looseTauData.getSelectedTaus().size(); i++){
 
         // make sure that the taus are not too close to muons
@@ -458,15 +494,15 @@ void Hplus2hwAnalysis_fake::process(Long64_t entry) {
         return;
       }
 
-//      drMuTau2 = ROOT::Math::VectorUtil::DeltaR(muData.getSelectedMuons()[1].p4(),looseTauData.getSelectedTaus()[i].p4());
-//      if(drMuTau2 < 0.5) {
-//        return;
-//      }
+      drMuTau2 = ROOT::Math::VectorUtil::DeltaR(muData.getSelectedMuons()[1].p4(),looseTauData.getSelectedTaus()[i].p4());
+      if(drMuTau2 < 0.5) {
+        return;
+      }
     }
+*/
 
 
-
-    hMuonPt->Fill(muData.getSelectedMuons()[0].pt());
+//    hMuonPt->Fill(muData.getSelectedMuons()[0].pt());
 //    hMuonPt->Fill(muData.getSelectedMuons()[1].pt());
 
 //    hNJet->Fill(jetData.getNumberOfSelectedJets());

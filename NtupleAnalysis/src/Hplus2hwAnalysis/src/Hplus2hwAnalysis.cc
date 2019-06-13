@@ -1,6 +1,7 @@
 // -*- c++ -*-
 #include "Framework/interface/BaseSelector.h"
 #include "Framework/interface/makeTH.h"
+#include "Framework/interface/TreeWriter.h"
 
 #include "EventSelection/interface/CommonPlots.h"
 #include "EventSelection/interface/EventSelections.h"
@@ -26,6 +27,8 @@ private:
 
   /// Common plots
   CommonPlots fCommonPlots;
+
+  TreeWriter fTreeWriter;
   // Event selection classes and event counters (in same order like they are applied)
   Count cAllEvents;
 
@@ -179,6 +182,9 @@ void Hplus2hwAnalysis::process(Long64_t entry) {
   ////////////
 
   fCommonPlots.initialize();
+
+  fTreeWriter.initialize();
+
   fCommonPlots.setFactorisationBinForEvent(std::vector<float> {});
   cAllEvents.increment();
 
@@ -246,11 +252,57 @@ void Hplus2hwAnalysis::process(Long64_t entry) {
     return;
 
 
+
+//  if(fEvent.isMC())  fTreeWriter.write(fEvent,tauData);
+
+  ////////////
+  // 7) Jet selection
+  ////////////
+
+  const JetSelection::Data jetData = fJetSelection.analyze(fEvent, tauData.getSelectedTau());
+  if (!jetData.passedSelection())
+    return;
+
+
+  ////////////
+  // 8) BJet selection
+  ////////////
+
+  const BJetSelection::Data bjetData = fBJetSelection.analyze(fEvent, jetData);
+
+  if (!bjetData.passedSelection())
+    return;
+
+  ////////////
+  // 9) BJet SF
+  ////////////
+
+  if (fEvent.isMC()) {
+    fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
+  }
+//  cBTaggingSFCounter.increment();
+//  fCommonPlots.fillControlPlotsAfterBtagSF(fEvent,jetData,bjetData);
+
+
+  ////////////
+  // 10) MET selection
+  ////////////
+
+  const METSelection::Data METData = fMETSelection.analyze(fEvent, nVertices);
+  if (!METData.passedSelection())
+    return;
+
+
+//  cMETSelection.increment();
+
   if(tauData.getSelectedTaus().size() != 2)
     return;
 
   if(tauData.getSelectedTaus()[0].charge() == tauData.getSelectedTaus()[1].charge())
     return;
+
+
+  if(fEvent.isMC())  fTreeWriter.write(fEvent,tauData);
 
   if (fEvent.isMC() && !tauData.getSelectedTaus()[0].isGenuineTau()) {
     return;
@@ -260,6 +312,7 @@ void Hplus2hwAnalysis::process(Long64_t entry) {
     return;
   }
 
+
 /*
   drTauTau = ROOT::Math::VectorUtil::DeltaR(tauData.getSelectedTaus()[0].p4(),tauData.getSelectedTaus()[1].p4());
   if(drTauTau < 0.5)
@@ -267,14 +320,14 @@ void Hplus2hwAnalysis::process(Long64_t entry) {
 
 */
   // make sure that the taus are not too close to muon
-  drMuTau1 = ROOT::Math::VectorUtil::DeltaR(muData.getSelectedMuons()[0].p4(),tauData.getSelectedTaus()[0].p4());
+/*  drMuTau1 = ROOT::Math::VectorUtil::DeltaR(muData.getSelectedMuons()[0].p4(),tauData.getSelectedTaus()[0].p4());
   if(drMuTau1 < 0.5)
     return;
 
   drMuTau2 = ROOT::Math::VectorUtil::DeltaR(muData.getSelectedMuons()[0].p4(),tauData.getSelectedTaus()[1].p4());
   if(drMuTau2 < 0.5)
     return;
-
+*/
   cOverTwoTausCounter.increment();
 
   fCommonPlots.fillControlPlotsAfterTauSelection(fEvent, tauData);
@@ -316,7 +369,11 @@ void Hplus2hwAnalysis::process(Long64_t entry) {
   if (eData.hasIdentifiedElectrons())
     return;
 
+//  TTree t("t","a Tree with data");
 
+//  t.Branch("event",&fEvent.taus());
+
+//  t.Fill();;
 
 
 //  fCommonPlots.fillControlPlotsAfterMETFilter(fEvent);
@@ -354,9 +411,9 @@ void Hplus2hwAnalysis::process(Long64_t entry) {
   // 10) MET selection
   ////////////
 
-  const METSelection::Data METData = fMETSelection.analyze(fEvent, nVertices);
-  if (!METData.passedSelection())
-    return;
+//  const METSelection::Data METData = fMETSelection.analyze(fEvent, nVertices);
+//  if (!METData.passedSelection())
+//    return;
 
 
 //  cMETSelection.increment();
@@ -404,6 +461,8 @@ void Hplus2hwAnalysis::process(Long64_t entry) {
   ////////////
   // Fill final plots
   ////////////
+
+
 
   fCommonPlots.fillControlPlotsAfterAllSelections(fEvent);
 

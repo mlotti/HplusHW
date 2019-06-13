@@ -297,6 +297,7 @@ void Hplus2hwAnalysis_background::process(Long64_t entry) {
   if (!looseTauData.hasIdentifiedTaus())
     return;
 
+//  cMETSelection.increment();
 
 //  std::cout << "loosetaudata get identified " << looseTauData.getSelectedTaus().size()  << "\n";
 
@@ -327,7 +328,7 @@ void Hplus2hwAnalysis_background::process(Long64_t entry) {
       return;
     }
   }
-
+/*
   drMuTau1 = ROOT::Math::VectorUtil::DeltaR(muData.getSelectedMuons()[0].p4(),looseTauData.getSelectedTaus()[0].p4());
   if(drMuTau1 < 0.5) {
     return;
@@ -337,9 +338,9 @@ void Hplus2hwAnalysis_background::process(Long64_t entry) {
   if(drMuTau2 < 0.5) {
     return;
   }
+*/
 
-
-  if (tauData.getAntiIsolatedTaus().size() == 2) { // both anti tight Iso
+  if (tauData.getAntiIsolatedTaus().size() == 2 && tauData.getSelectedTaus().size()==0) { // both anti tight Iso
 
 //    std::cout << "two or more anti tight iso" << "\n";
 
@@ -381,7 +382,7 @@ void Hplus2hwAnalysis_background::process(Long64_t entry) {
     fCommonPlots.fillControlPlotsAfterTauSelection(fEvent, tauData);
 
 
-  } else if (tauData.getAntiIsolatedTaus().size() == 1){  //only one tau is fake
+  } else if (tauData.getAntiIsolatedTaus().size() >= 1 && tauData.getSelectedTaus().size()==1){  //only one tau is fake
 
 //    std::cout << "one is anti tight iso" << "\n";
 
@@ -416,7 +417,8 @@ void Hplus2hwAnalysis_background::process(Long64_t entry) {
 
   } else {
 
-    std::cout << "This should not be reached" << "\n";
+//    this is reached when there are 2 anti-isolated but also identified taus
+//    std::cout << "This should not be reached" << "\n";
 
     return;
 
@@ -436,31 +438,34 @@ void Hplus2hwAnalysis_background::process(Long64_t entry) {
 
 //  fCommonPlots.fillControlPlotsAfterMETFilter(fEvent);
 
+
+
+
   ////////////
   // 7) Jet selection
   ////////////
 
-//  const JetSelection::Data jetData = fJetSelection.analyze(fEvent, tauData.getSelectedTau());
-//  if (!jetData.passedSelection())
-//    return;
+  const JetSelection::Data jetData = fJetSelection.analyze(fEvent, looseTauData.getSelectedTau());
+  if (!jetData.passedSelection())
+    return;
 
 
   ////////////
   // 8) BJet selection
   ////////////
 
-//  const BJetSelection::Data bjetData = fBJetSelection.analyze(fEvent, jetData);
+  const BJetSelection::Data bjetData = fBJetSelection.analyze(fEvent, jetData);
 
-//  if (!bjetData.passedSelection())
-//    return;
+  if (!bjetData.passedSelection())
+    return;
 
   ////////////
   // 9) BJet SF
   ////////////
 
-//  if (fEvent.isMC()) {
-//    fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
-//  }
+  if (fEvent.isMC()) {
+    fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
+  }
 //  cBTaggingSFCounter.increment();
 //  fCommonPlots.fillControlPlotsAfterBtagSF(fEvent,jetData,bjetData);
 
@@ -473,12 +478,12 @@ void Hplus2hwAnalysis_background::process(Long64_t entry) {
   if (!METData.passedSelection())
     return;
 
-
 //  cMETSelection.increment();
 
   ////////////
   // All cuts passed
   ////////////
+
 
   for(unsigned int i=0; i<2; i++){
     hTauPt->Fill(looseTauData.getSelectedTaus()[i].pt());
