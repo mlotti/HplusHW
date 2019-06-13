@@ -117,8 +117,6 @@ class CrossSectionList:
 # [18] top mass 172.5, https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
 # [19] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
 
-print "xsection listaus "
-print "----------------"
 
 backgroundCrossSections = CrossSectionList(
     CrossSection("QCD_Pt_15to30", {

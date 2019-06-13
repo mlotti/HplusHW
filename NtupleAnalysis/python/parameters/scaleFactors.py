@@ -49,7 +49,7 @@ def assignTauMisidentificationSF(tauSelectionPset, partonFakingTau, etaRegion, d
         _assignJetToTauSF(tauSelectionPset, etaRegion, dirNumber)
     else:
         raise Exception("Error: unknown option for parton faking tau ('%s')!"%partonFakingTau)
-    
+
 def _assignEToTauSF(tauSelectionPset, etaRegion, dirNumber):
     if etaRegion == "barrel":
         tauSelectionPset.tauMisidetificationEToTauBarrelSF = 1.0 + dirNumber*0.20

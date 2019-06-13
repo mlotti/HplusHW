@@ -353,6 +353,8 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
   }
   hNPassed->Fill(output.fSelectedTaus.size());
   // If there are multiple taus, choose the one with highest pT
+
+  //comparison for sort defined in Tau.h
   std::sort(output.fSelectedTaus.begin(), output.fSelectedTaus.end());
   std::sort(output.fAntiIsolatedTaus.begin(), output.fAntiIsolatedTaus.end());
   

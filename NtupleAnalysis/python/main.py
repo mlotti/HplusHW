@@ -284,7 +284,6 @@ class Process:
         if files is None:
             files = datasetsTest.getFiles(name)
 
-        print "see this"
         prec = dataset.DatasetPrecursor(name, files)
         if dataVersion is None:
             dataVersion = prec.getDataVersion()
@@ -343,15 +342,10 @@ class Process:
             del kwargs["whitelist"]
 
         # dataset._optionDefaults["input"] = "miniaod2tree*.root"
-        print "debug zero"
         dataset._optionDefaults["input"] = "histograms-*.root"
-        print "debug one"
         dsetMgrCreator = dataset.readFromMulticrabCfg(directory=directory, *args, **kwargs)
-        print "debug here"
         dsets = dsetMgrCreator.getDatasetPrecursors()
         dsetMgrCreator.close()
-
-	print "debug done"
 
         if len(whitelist) > 0:
             for dset in dsets:
