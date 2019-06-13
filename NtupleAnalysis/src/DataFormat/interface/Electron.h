@@ -48,6 +48,11 @@ public:
       return true;
     return fCollection->fElectronIDDiscriminator->value()[index()];
   }
+  /// Operator defined for using std::sort on vector<Tau>
+  bool operator<(const Electron& electron) const {
+    // Descending order by e pT
+    return (this->pt() > electron.pt());
+  }
 };
 
 inline
