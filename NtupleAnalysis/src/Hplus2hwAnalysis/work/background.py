@@ -10,9 +10,7 @@ import ROOT
 ## OPTIONS
 ###################
 
-#prefix      = "Hplus2hwAnalysis_fake"
 prefix      = "Hplus2hwAnalysis_background"
-#prefix      = "Hplus2hwAnalysis"
 postfix     = " "
 dataEras    = ["2016"]
 searchModes = ["350to3000"]
@@ -53,13 +51,13 @@ def main():
     ## ADD DATASETS
     ###################
 
-#    process.addDatasetsFromMulticrab(sys.argv[1])
     process.addDatasetsFromMulticrab(sys.argv[1],blacklist=blacklist,whitelist=whitelist)
 
 
 
     # Enable genuine tau histograms for common plots (needed for calculating N_QCD)
     allSelections.CommonPlots.enableGenuineTauHistograms = True
+
     # Set splitting of phase space (first bin is below first edge value and last bin is above last edge value)
     allSelections.CommonPlots.histogramSplitting = [
     PSet(label="tauPt_1", binLowEdges=[40,60], useAbsoluteValues=False),

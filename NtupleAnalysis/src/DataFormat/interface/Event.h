@@ -13,6 +13,7 @@
 #include "DataFormat/interface/L1Jet.h"
 #include "DataFormat/interface/HLTTau.h"
 #include "DataFormat/interface/HLTMuon.h"
+#include "DataFormat/interface/HLTElectron.h"
 #include "DataFormat/interface/HLTBJet.h"
 #include "DataFormat/interface/Tau.h"
 #include "DataFormat/interface/Jet.h"
@@ -75,6 +76,7 @@ public:
   const L1JetCollection& l1Jets() const { return fL1JetCollection; }
   const HLTTauCollection& triggerTaus() const { return fTriggerTauCollection; }
   const HLTMuonCollection& triggerMuons() const { return fTriggerMuonCollection; }
+  const HLTElectronCollection& triggerElectrons() const { return fTriggerElectronCollection; }
   const HLTBJetCollection& triggerBJets() const { return fTriggerBJetCollection; }
   const TauCollection& taus() const { return fTauCollection; }
   const TauCollection& looseTaus() const { return fLooseTauCollection; }
@@ -113,6 +115,7 @@ private:
   L1JetCollection fL1JetCollection;
   HLTTauCollection fTriggerTauCollection;
   HLTMuonCollection fTriggerMuonCollection;
+  HLTElectronCollection fTriggerElectronCollection;
   HLTBJetCollection fTriggerBJetCollection;
   TauCollection fTauCollection;
   TauCollection fLooseTauCollection;
