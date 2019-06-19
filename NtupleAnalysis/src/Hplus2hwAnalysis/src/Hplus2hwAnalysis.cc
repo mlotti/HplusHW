@@ -31,6 +31,8 @@ private:
   // Event selection classes and event counters (in same order like they are applied)
   Count cAllEvents;
 
+  METFilterSelection fMETFilterSelection;
+
   MuonSelection fMuonSelection;
 
   TauSelection fTauSelection;
@@ -40,10 +42,7 @@ private:
   Count cTauIDSFCounter;
   Count cFakeTauSFCounter;
 
-
   ElectronSelection fElectronSelection;
-
-  METFilterSelection fMETFilterSelection;
 
   JetSelection fJetSelection;
 
@@ -325,15 +324,6 @@ void Hplus2hwAnalysis::process(Long64_t entry) {
   const METSelection::Data METData = fMETSelection.analyze(fEvent, nVertices);
   if (!METData.passedSelection())
     return;
-
-  ////////////
-  // Electron veto (Fully hadronic + orthogonality)
-  ////////////
-
-  const ElectronSelection::Data eData = fElectronSelection.analyze(fEvent);
-  if (eData.hasIdentifiedElectrons())
-    return;
-
 
   ////////////
   // All cuts passed
