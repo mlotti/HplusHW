@@ -46,6 +46,8 @@ metFilter = PSet(
 ##########
 
 eVeto = PSet(
+    applyTriggerMatching = False,
+    triggerMatchingCone = 0.1,   # DeltaR for matching offline tau with trigger tau
     electronPtCut = 10.0,
     electronEtaCut = 2.5,
 #            electronID = "mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90", # highest (wp90) for vetoing (2012: wp95)
@@ -86,7 +88,7 @@ tauSelection = PSet(
                   rtau = 0.0,   # to disable set to 0.0
   againstElectronDiscr = "againstElectronVLooseMVA6",
       againstMuonDiscr = "againstMuonLoose3",
-        isolationDiscr = "byTightIsolationMVArun2v1DBoldDMwLT", #"byVLooseIsolationMVArun2v1DBoldDMwLT", #byTightIsolationMVArun2v1DBoldDMwLT", #"byLooseIsolationMVArun2v1DBoldDMwLT", #"byLooseIsolationMVArun2v1DBoldDMwLT", #"byMediumIsolationMVArun2v1DBnewDMwLT",
+        isolationDiscr = "byMediumIsolationMVArun2v1DBoldDMwLT", #"byVLooseIsolationMVArun2v1DBoldDMwLT", #byTightIsolationMVArun2v1DBoldDMwLT", #"byLooseIsolationMVArun2v1DBoldDMwLT", #"byLooseIsolationMVArun2v1DBoldDMwLT", #"byMediumIsolationMVArun2v1DBnewDMwLT",
 )
 
 ##########
@@ -133,9 +135,9 @@ scaleFactors.assignTauMisidentificationSF(looseTauSelection, "jetToTau", "full",
 jetSelection = PSet(
                jetType  = "Jets", # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
               jetPtCuts = [30.0],
-             jetEtaCuts = [4.7], #4.7,
-     tauMatchingDeltaR  = 0.0, #0.4,
-  numberOfJetsCutValue  = 1,
+             jetEtaCuts = [2.1], #4.7,
+     tauMatchingDeltaR  = 0.4, #0.4,
+  numberOfJetsCutValue  = 3,
   numberOfJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
             jetIDDiscr = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
           jetPUIDDiscr = "", # does not work at the moment 
@@ -154,7 +156,7 @@ jetSelection = PSet(
 bjetSelection = PSet(
     triggerMatchingApply= False,
     triggerMatchingCone = 0.0,  # DeltaR for matching offline bjet with trigger::TriggerBjet 
-              jetPtCuts = [20.0],
+              jetPtCuts = [30.0],
              jetEtaCuts = [2.1],
              bjetDiscr  = "pfCombinedInclusiveSecondaryVertexV2BJetTags", # default
 #             bjetDiscr  = "pfCombinedMVAV2BJetTags", # use this for MVA b-tagging
@@ -181,7 +183,7 @@ scaleFactors.setupBtagSFInformation(btagPset=bjetSelection,
 ##########
 
 metSelection = PSet(
-           METCutValue = 0.0,
+           METCutValue = 30.0,
        METCutDirection = ">", # options: ==, !=, <, <=, >, >=
   METSignificanceCutValue = -1000.0,
   METSignificanceCutDirection = ">", # options: ==, !=, <, <=, >, >=
@@ -240,20 +242,3 @@ allSelections = PSet(
 )
 
 
-#====== Build all selections group
-#allSelections = PSet(
-# histogramAmbientLevel = histoLevel,
-#               Trigger = trg,
-#             METFilter = metFilter,
-#          TauSelection = tauSelection,
-#     ElectronSelection = eVeto,
-#         MuonSelection = muVeto,
-#      MuonForEmbedding = muForEmbedding,
-#          JetSelection = jetSelection,
-#  AngularCutsCollinear = angularCutsCollinear,
-#         BJetSelection = bjetSelection,
-#          METSelection = metSelection,
-# AngularCutsBackToBack = angularCutsBackToBack,
-#       JetCorrelations = jetCorrelations,
-#           CommonPlots = commonPlotsOptions,
-#)
