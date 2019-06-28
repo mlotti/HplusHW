@@ -115,6 +115,17 @@ datasetsMuonData18Apr.append(Dataset('/SingleMuon/Run2016F-18Apr2017-v2/MINIAOD'
 datasetsMuonData18Apr.append(Dataset('/SingleMuon/Run2016G-18Apr2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_278820-280385_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016G.txt"))
 datasetsMuonData18Apr.append(Dataset('/SingleMuon/Run2016H-18Apr2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_281613-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016H.txt"))
 
+datasetsElectronData03Feb = []
+# 
+datasetsElectronData03Feb.append(Dataset('/SingleElectron/Run2016B-03Feb2017_ver2-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_273150-275376_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016B.txt"))
+datasetsElectronData03Feb.append(Dataset('/SingleElectron/Run2016C-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_275656-276283_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016C.txt"))
+datasetsElectronData03Feb.append(Dataset('/SingleElectron/Run2016D-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276315-276811_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016D.txt"))
+datasetsElectronData03Feb.append(Dataset('/SingleElectron/Run2016E-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276831-277420_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016E.txt"))
+datasetsElectronData03Feb.append(Dataset('/SingleElectron/Run2016F-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_277932-278800_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016F_HIP.txt"))
+datasetsElectronData03Feb.append(Dataset('/SingleElectron/Run2016F-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_278801-278808_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016F_HIPfixed.txt"))
+datasetsElectronData03Feb.append(Dataset('/SingleElectron/Run2016G-03Feb2017-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_278820-280385_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016G.txt"))
+datasetsElectronData03Feb.append(Dataset('/SingleElectron/Run2016H-03Feb2017_ver2-v1/MINIAOD', dataVersion="80Xdata2016H", dasQuery=das, lumiMask="Cert_281613-284035_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016H.txt"))
+datasetsElectronData03Feb.append(Dataset('/SingleElectron/Run2016H-03Feb2017_ver3-v1/MINIAOD', dataVersion="80Xdata2016H", dasQuery=das, lumiMask="Cert_284036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON_Run2016H.txt"))
 
 datasetsZeroBiasData = []
 das = ""
@@ -308,7 +319,7 @@ datasetsSignalTauNu.append(Dataset('/ChargedHiggs_TTToHplusBWB_HplusToTauNu_M-16
 #datasetsSignalTauNu.extend(datasetsSignalTauNu_reHLT)
 datasetsSignalTauNu.append(Dataset('/HplusToTauNu_M_200_TuneCUETP8M1_tauola_13TeV_pythia8/amarini-GEN-SIM-71-6edf4b210aa48b81088c0de44a7af6f5/USER', dbs="phys03",dataVersion="80Xmc", dasQuery=das))
 
-das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fphys03&input=dataset%3D%2FCRAB_PrivateMC%2Fmlotti-Hplus2hw_2ta_PAT_m350_f-71a58a62b6d71fe0f402eda209b9b80f%2FUSER"
+das = "https://cmsweb.cern.ch/das/request?input=dataset%3D%2FCRAB_private_ChargedHiggs_HplusTB_HplusToHW_M300_mH200_2ta_NLO%2Fmlotti-Hplus2hw_2ta_w2all_NLO_mhp300_mh200_PAT-b023a05347da3c2a313d219710ff54e9%2FUSER&instance=prod/phys03"
 
 # cHiggs 2 HW
 datasetsSignalHW = []
@@ -324,7 +335,10 @@ datasetsSignalHW = []
 #datasetsSignalHW.append(Dataset('/CRAB_PrivateMC/mlotti-Hplus2hw_2ta_PAT_mhp350_mh150-71a58a62b6d71fe0f402eda209b9b80f/USER', dbs="phys03", dataVersion="80Xmc", dasQuery=das))
 
 #NLO
-datasetsSignalHW.append(Dataset('/CRAB_PrivateMC/mlotti-Hplus2hw_2ta_PAT_mhp300_mh200_noMatch_2-b023a05347da3c2a313d219710ff54e9/USER', dbs="phys03", dataVersion="80Xmc", dasQuery=das))
+#datasetsSignalHW.append(Dataset('/CRAB_PrivateMC/mlotti-Hplus2hw_2ta_PAT_mhp300_mh200_noMatch_2-b023a05347da3c2a313d219710ff54e9/USER', dbs="phys03", dataVersion="80Xmc", dasQuery=das))
+
+#datasetsSignalHW.append(Dataset('/CRAB_private_ChargedHiggs_HplusTB_HplusToHW_M300_mH200_2ta_NLO/mlotti-Hplus2hw_2ta_w2all_NLO_mhp300_mh200_PAT-b023a05347da3c2a313d219710ff54e9/USER', dbs="phys03", dataVersion="80Xmc", dasQuery=das))
+datasetsSignalHW.append(Dataset('/CRAB_private_ChargedHiggs_HplusTB_HplusToHW_M700_mH200_2ta_NLO/mlotti-Hplus2hw_2ta_w2all_NLO_mhp700_mh200_PAT-b023a05347da3c2a313d219710ff54e9/USER', dbs="phys03", dataVersion="80Xmc", dasQuery=das))
 
 #mh 1500
 #datasetsSignalHW.append(Dataset('/CRAB_PrivateMC/mlotti-Hplus2hw_2ta_PAT_m1500_f-71a58a62b6d71fe0f402eda209b9b80f/USER', dbs="phys03", dataVersion="80Xmc", dasQuery=das))
@@ -548,6 +562,10 @@ datasetsTTWJetsToQQ = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FTTWJetsToQQ*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
 datasetsTTWJetsToQQ.append(Dataset('/TTWJetsToQQ_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 
+datasetsTTWJetsToLNu = []
+das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FTTWJetsTo*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
+datasetsTTWJetsToLNu.append(Dataset('/TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext2-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+
 
 datasetsTTTT = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FTTTT*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
@@ -563,6 +581,11 @@ das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglo
 datasetsTTZToQQ = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FTTZToQQ*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
 datasetsTTZToQQ.append(Dataset('/TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dasQuery=das))
+
+
+datasetsTTZToLLNuNu = []
+das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FTTZ*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
+datasetsTTZToLLNuNu.append(Dataset('/TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext3-v1/MINIAODSIM', dasQuery=das))
 
 datasetsNeutrino = []
 datasetsNeutrino.append(Dataset('/SingleNeutrino/RunIIHighPUTrainsMiniAODv2-HighPUTrains_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dasQuery=das))
@@ -656,6 +679,7 @@ hplus2hwAnalysisDatasets = []
 #hplus2hwAnalysisDatasets.extend(datasetsSingleTop)
 
 #hplus2hwAnalysisDatasets.extend(datasetsMuonData03Feb)
+hplus2hwAnalysisDatasets.extend(datasetsElectronData03Feb)
 
 #hplus2hwAnalysisDatasets.extend(datasetsDY)
 
@@ -669,10 +693,13 @@ hplus2hwAnalysisDatasets = []
 
 #hplus2hwAnalysisDatasets.extend(datasetsDiboson)
 
-#hplus2hwAnalysisDatasets.extend(datasetsQCD)
+#hplus2hwAnalysisDatasets.extend(datasetsSignalHW)
 
-hplus2hwAnalysisDatasets.extend(datasetsSignalHW)
-
+#hplus2hwAnalysisDatasets.extend(datasetsTTWJetsToQQ)
+#hplus2hwAnalysisDatasets.extend(datasetsTTWJetsToLNu)
+#hplus2hwAnalysisDatasets.extend(datasetsTTTT)
+#hplus2hwAnalysisDatasets.extend(datasetsTTZToQQ)
+#hplus2hwAnalysisDatasets.extend(datasetsTTZToLLNuNu)
 
 #signalAnalysisDatasets.extend(datasetsSignalTB)
 ####signalAnalysisDatasets.extend(datasetsSignalTauNu_TRGdev)
