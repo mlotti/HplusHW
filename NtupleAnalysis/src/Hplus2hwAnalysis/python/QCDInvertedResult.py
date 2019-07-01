@@ -7,8 +7,8 @@
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.extendedCount as extendedCount
 import HiggsAnalysis.NtupleAnalysis.tools.errorPropagation as errorPropagation
-import HiggsAnalysis.QCDMeasurement.systematicsForMetShapeDifference as metSyst
-import HiggsAnalysis.QCDMeasurement.dataDrivenQCDCount as dataDrivenQCDCount
+import HiggsAnalysis.Hplus2hwAnalysis.systematicsForMetShapeDifference as metSyst
+import HiggsAnalysis.Hplus2hwAnalysis.dataDrivenQCDCount as dataDrivenQCDCount
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.systematics as systematics
 import math
@@ -93,7 +93,7 @@ class QCDInvertedShape:
             myShapeEwkSum.append(0.0)
             myShapeEwkSumUncert.append(0.0)
         # Calculate results separately for each phase space bin and then combine
-        print "nSplitted bins: ", nSplitBins
+#        print "nSplitted bins: ", nSplitBins
         for i in range(0, nSplitBins):
             # Get data-driven QCD, data, and MC EWK shape histogram for the phase space bin
             h = shape.getDataDrivenQCDHistoForSplittedBin(i)
@@ -109,7 +109,7 @@ class QCDInvertedShape:
             else:
                 wQCD = normFactors[wQCDLabel]
             # Loop over bins in the shape histogram
-            print "DEBUG: in splitted bin: ", i, " weight: ", wQCD
+#            print "DEBUG: in splitted bin: ", i, " weight: ", wQCD
             for j in range(1,h.GetNbinsX()+1):
                 myResult = 0.0
                 myStatDataUncert = 0.0
@@ -119,7 +119,7 @@ class QCDInvertedShape:
                     myResult = h.GetBinContent(j) * wQCD
                     # Calculate abs. stat. uncert. for data and for MC EWK
                     myStatDataUncert = hData.GetBinError(j) * wQCD
-                    myStatEwkUncert = hEwk.GetBinError(j) * wQCD
+                    myStatEwkUncert = 0 #hEwk.GetBinError(j) * wQCD
                     #errorPropagation.errorPropagationForProduct(hLeg1.GetBinContent(j), hLeg1Data.GetBinError(j), myEffObject.value(), myEffObject.uncertainty("statData"))
                     # Do not calculate here MC EWK syst.
                 myCountObject = extendedCount.ExtendedCount(myResult, [myStatDataUncert, myStatEwkUncert], myUncertaintyLabels)
@@ -359,7 +359,7 @@ class QCDInvertedResultManager:
                 continue
             # Obtain shape plots (the returned object is not owned)
 
-	    print "DEBUG: ewkPath: ", ewkPath
+#	    print "DEBUG: ewkPath: ", ewkPath
 
             myShapeHisto = self._obtainShapeHistograms(i, dataPath, ewkPath, dsetMgr, plotName, luminosity, normFactors)
             # Obtain plots for systematics coming from met shape difference for control plots

@@ -287,6 +287,9 @@ private:
 
   // control plots after all selections
   HistoSplitter::SplittedTripletTH1s hCtrlNVerticesAfterAllSelections;  
+  HistoSplitter::SplittedTripletTH1s hCtrlSelectedTausPtAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSelectedTausEtaAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSelectedTausPhiAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauPtAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauEtaAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauPhiAfterAllSelections;

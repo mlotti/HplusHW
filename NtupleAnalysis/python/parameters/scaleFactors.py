@@ -17,9 +17,11 @@ def assignTauIdentificationSF(tauSelectionPset):
     if tauSelectionPset.isolationDiscr=="byLooseCombinedIsolationDeltaBetaCorr3Hits":    SF = 0.93
     elif tauSelectionPset.isolationDiscr=="byMediumCombinedIsolationDeltaBetaCorr3Hits": SF = 0.91
     elif tauSelectionPset.isolationDiscr=="byTightCombinedIsolationDeltaBetaCorr3Hits":  SF = 0.89
+    elif tauSelectionPset.isolationDiscr=="byVLooseIsolationMVArun2v1DBoldDMwLT":        SF = 0.99
     elif tauSelectionPset.isolationDiscr=="byLooseIsolationMVArun2v1DBoldDMwLT":         SF = 0.99
     elif tauSelectionPset.isolationDiscr=="byMediumIsolationMVArun2v1DBoldDMwLT":        SF = 0.97
     elif tauSelectionPset.isolationDiscr=="byTightIsolationMVArun2v1DBoldDMwLT":         SF = 0.95
+    elif tauSelectionPset.isolationDiscr=="byVTightIsolationMVArun2v1DBoldDMwLT":        SF = 0.93
     else:
         raise Exception("Error: tau ID scale factor not defined for discriminator %s"%tauSelectionPset.isolationDiscr)
     tauSelectionPset.tauIdentificationSF = SF
@@ -47,7 +49,7 @@ def assignTauMisidentificationSF(tauSelectionPset, partonFakingTau, etaRegion, d
         _assignJetToTauSF(tauSelectionPset, etaRegion, dirNumber)
     else:
         raise Exception("Error: unknown option for parton faking tau ('%s')!"%partonFakingTau)
-    
+
 def _assignEToTauSF(tauSelectionPset, etaRegion, dirNumber):
     if etaRegion == "barrel":
         tauSelectionPset.tauMisidetificationEToTauBarrelSF = 1.0 + dirNumber*0.20
@@ -121,6 +123,33 @@ def assignMETTriggerSF(METSelectionPset, btagDiscrWorkingPoint, direction, metTr
         _assignTrgSF("metTriggerSF", result["binEdges"], result["SF"], result["SFmcUp"], result["SFmcDown"], METSelectionPset, direction)
     elif variationType == "Data":
         _assignTrgSF("metTriggerSF", result["binEdges"], result["SF"], result["SFdataUp"], result["SFdataDown"], METSelectionPset, direction)
+    else:
+        raise Exception("Error: Unsupported variation type '%s'! Valid options are: 'MC', 'data'"%variationType)
+
+
+#########################################
+## muon trigger SF (SF as function of pT)
+#######################################
+# \param tauSelectionPset  the tau config PSet
+# \param direction         "nominal, "up", "down"
+# \param variationType     "MC", "data"  (the uncertainty in MC and data are variated separately)
+def assignMuonTriggerSF(muonSelectionPset, direction, muonTrgJson, variationType="Data"):
+    # FIXME: there is no mechanic right now to choose correct era / run range
+    # FIXME: this approach works as long as there is just one efficiency for the simulated samples
+
+
+####    tauTrgJson = "tauLegTriggerEfficiency2015_"+nprongs+".json"
+####    tauTrgJson = "tauLegTriggerEfficiency2016_ICHEP.json"
+
+    print "Taking muon trigger eff/sf from",muonTrgJson
+
+    reader = TriggerMuonSFJsonReader("2016", "runs_273150_284044", muonTrgJson)
+
+    result = reader.getResult()
+    if variationType == "MC":
+        _assignTrgSF("muonTriggerSF", result["binEdges"], result["SF"], result["SFmcUp"], result["SFmcDown"], muonSelectionPset, direction)
+    elif variationType == "Data":
+        _assignTrgSF("muonTriggerSF", result["binEdges"], result["SF"], result["SFdataUp"], result["SFdataDown"], muonSelectionPset, direction)
     else:
         raise Exception("Error: Unsupported variation type '%s'! Valid options are: 'MC', 'data'"%variationType)
 
@@ -273,6 +302,76 @@ def _assignTrgSF(name, binEdges, SF, SFup, SFdown, pset, direction):
     ))
 
 ## Reader for trigger SF json files
+class TriggerMuonSFJsonReader:
+    def __init__(self, era, runrange, jsonname):
+        # Read json
+        _jsonpath = os.path.join(os.getenv("HIGGSANALYSIS_BASE"), "NtupleAnalysis", "data", "TriggerEfficiency")
+        filename = os.path.join(_jsonpath, jsonname)
+        if not os.path.exists(filename):
+            raise Exception("Error: file '%s' does not exist!"%filename)
+        f = open(filename)
+        contents = json.load(f)
+        f.close()
+        # Obtain SFs
+        param = "IsoMu24_OR_IsoTkMu24_PtBins"
+        if not param in contents.keys():
+            raise Exception("Error: missing key '%s' in json '%s'! Options: %s"%(param,filename,", ".join(map(str,contents.keys()))))
+        if not "pt_ratio" in contents[param].keys():
+            print "pt_ratio missing in trg json"
+            raise Exception("Error: missing run range '%s' for data in json '%s'! Options: %s"(runrange,filename,", ".join(map(str,contents[param].keys()))))
+        datadict = self._muonReadValues(contents[param]["pt_ratio"], "data")
+        # Obtain MC efficiencies
+#        param = "mcParameters"
+#        if not param in contents.keys():
+#            raise Exception("Error: missing key '%s' in json '%s'! Options: %s"%(param,filename,", ".join(map(str,contents.keys()))))
+#        if not era in contents[param].keys():
+#            raise Exception("Error: missing era '%s' for mc in json '%s'! Options: %s"(runrange,filename,", ".join(map(str,contents[param].keys()))))
+#        mcdict = self._readValues(contents[param][era], "mc")
+        # Calculate SF's
+        keys = datadict.keys()
+#        if len(keys) != len(mcdict.keys()):
+#            raise Exception("Error: different number of bins for data and mc in json '%s'!"%filename)
+        keys.sort()
+        self.result = {}
+        self.result["binEdges"] = []
+        self.result["SF"] = []
+        self.result["SFdataUp"] = []
+        self.result["SFdataDown"] = []
+        self.result["SFmcUp"] = []
+        self.result["SFmcDown"] = []
+        i = 0
+        for key in keys:
+            if i > 0:
+                self.result["binEdges"].append(key)
+            i += 1
+            self.result["SF"].append(datadict[key]["dataSF"])
+            self.result["SFdataUp"].append(datadict[key]["dataSFup"])
+            self.result["SFdataDown"].append(datadict[key]["dataSFdown"])
+#            self.result["SFmcUp"].append(datadict[key]["dataeff"] / mcdict[key]["mceffup"])
+#            if abs(mcdict[key]["mceffdown"]) < 0.000001:
+#                raise Exception("Down variation in bin '%s' is zero in json '%s'"%(key, filename))
+#            self.result["SFmcDown"].append(datadict[key]["dataeff"] / mcdict[key]["mceffdown"])
+            # Sanity check
+#            if self.result["SF"][len(self.result["SF"])-1] < 0.000001:
+#                raise Exception("Error: In file '%s' bin %s the SF is zero! Please fix!"%(filename, key))
+    def getResult(self):
+        return self.result
+
+    def _muonReadValues(self, inputdict, label):
+        outdict = {}
+        for item in inputdict:
+            bindict = {}
+            bindict[label+"SF"] = inputdict[item]["value"]
+
+            bindict[label+"SFup"] = inputdict[item]["value"]+inputdict[item]["error"]
+            bindict[label+"SFdown"] = inputdict[item]["value"]-inputdict[item]["error"]
+
+            #pt bin lower edge
+            outdict[item.split(':')[1].split(',')[0].split('[')[1]] = bindict
+        return outdict
+
+
+    ## Reader for trigger SF json files
 class TriggerSFJsonReader:
     def __init__(self, era, runrange, jsonname):
         # Read json
@@ -347,3 +446,4 @@ class TriggerSFJsonReader:
                 bindict[label+"effdown"] = value
             outdict[item["pt"]] = bindict
         return outdict
+

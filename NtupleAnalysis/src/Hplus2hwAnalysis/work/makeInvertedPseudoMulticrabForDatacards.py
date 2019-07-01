@@ -13,7 +13,7 @@ import cProfile
 import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
-import HiggsAnalysis.QCDMeasurement.QCDInvertedResult as qcdInvertedResult
+import HiggsAnalysis.Hplus2hwAnalysis.QCDInvertedResult as qcdInvertedResult
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.pseudoMultiCrabCreator as pseudoMultiCrabCreator
 
@@ -153,11 +153,56 @@ class ModuleBuilder:
         self._fakeWeightingMinusResult = qcdInvertedResult.QCDInvertedResultManager(dataPath, 
                                                                                     ewkPath,
                                                                                     self._dsetMgr,
-                                                                                    self._myLuminosity,
+                                                                                    self._luminosity,
                                                                                     self.getModuleInfoString(),
                                                                                     normFactorsDown,
-                                                                                    optionCalculateQCDNormalizationSyst=False)
+                                                                                    optionCalculateQCDNormalizationSyst=False,
+									            optionUseInclusiveNorm=self._opts.useInclusiveNorm)
         myModule.addPlots(self._fakeWeightingMinusResult.getShapePlots(),
+                          self._fakeWeightingMinusResult.getShapePlotLabels())
+        self._outputCreator.addModule(mySystModuleMinus)
+
+    def buildFRWeightingSystModule(self, dataPath, ewkPath, normFactorsUp, normFactorsDown,normDataSrc,normEWKSrc):
+        # Up variation of fake weighting
+        mySystModulePlus = pseudoMultiCrabCreator.PseudoMultiCrabModule(self._dsetMgr,
+                                                                        self._era,
+                                                                        self._searchMode,
+                                                                        self._optimizationMode,
+                                                                        "SystVarFakeWeightingPlus")
+
+        self._fakeWeightingPlusResult = qcdInvertedResult.QCDInvertedResultManager(dataPath, 
+                                                                                   ewkPath,
+                                                                                   self._dsetMgr,
+                                                                                   self._luminosity,
+                                                                                   self.getModuleInfoString(),
+                                                                                   normFactorsUp,
+                                                                                   optionCalculateQCDNormalizationSyst=False,
+										   normDataSrc=normDataSrc,
+                                                                                   normEWKSrc=normEWKSrc,
+                                                                                   optionUseInclusiveNorm=self._opts.useInclusiveNorm)
+
+        mySystModulePlus.addPlots(self._fakeWeightingPlusResult.getShapePlots(),
+                          self._fakeWeightingPlusResult.getShapePlotLabels())
+        self._outputCreator.addModule(mySystModulePlus)
+        # Down variation of fake weighting
+        mySystModuleMinus = pseudoMultiCrabCreator.PseudoMultiCrabModule(self._dsetMgr,
+                                                                         self._era,
+                                                                         self._searchMode,
+                                                                         self._optimizationMode,
+                                                                         "SystVarFakeWeightingMinus")
+
+        self._fakeWeightingMinusResult = qcdInvertedResult.QCDInvertedResultManager(dataPath, 
+                                                                                    ewkPath,
+                                                                                    self._dsetMgr,
+                                                                                    self._luminosity,
+                                                                                    self.getModuleInfoString(),
+                                                                                    normFactorsDown,
+                                                                                    optionCalculateQCDNormalizationSyst=False,
+                                                                                    normDataSrc=normDataSrc,
+                                                                                    normEWKSrc=normEWKSrc,
+                                                                                    optionUseInclusiveNorm=self._opts.useInclusiveNorm)
+
+        mySystModuleMinus.addPlots(self._fakeWeightingMinusResult.getShapePlots(),
                           self._fakeWeightingMinusResult.getShapePlotLabels())
         self._outputCreator.addModule(mySystModuleMinus)
 
@@ -312,19 +357,22 @@ if __name__ == "__main__":
                                               normEWKSrc=_generalOptions["normalizationEWKSource"])
 
                     #===== QCD normalization systematics (add only if there are also other systematics as well) 
-                    if len(mySystematicsNames) > 0:
-                        nominalModule.buildQCDNormalizationSystModule(_generalOptions["dataSource"],
-                                                                      _generalOptions["EWKsource"])
-                    if False: #FIXME: add quark gluon weighting systematics!
+#                    if len(mySystematicsNames) > 0:
+#                        nominalModule.buildFRWeightingSystModule(_generalOptions["dataSource"],
+#                                                                      _generalOptions["EWKsource"])
+
+                    if True: #FIXME: add quark gluon weighting systematics!
                     
                         #===== Quark gluon weighting systematics
-                        nominalModule.buildQCDQuarkGluonWeightingSystModule(_generalOptions["dataSource"],
+                        nominalModule.buildFRWeightingSystModule(_generalOptions["dataSource"],
                                                                             _generalOptions["EWKsource"],
                                                                             myNormFactors["FakeWeightingUp"],
                                                                             myNormFactors["FakeWeightingDown"],
-                                                                            calculateQCDNormalizationSyst=False,
-                                                                            normDataSrc=_generalOptions["normalizationDataSource"],
+									    normDataSrc=_generalOptions["normalizationDataSource"],
                                                                             normEWKSrc=_generalOptions["normalizationEWKSource"])
+#                                                                            calculateQCDNormalizationSyst=True,
+#                                                                            normDataSrc=_generalOptions["normalizationDataSource"],
+#                                                                            normEWKSrc=_generalOptions["normalizationEWKSource"])
                     nominalModule.delete()
                     #===== Time estimate
                     printTimeEstimate(myGlobalStartTime, myStartTime, n, myTotalModules)

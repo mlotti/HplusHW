@@ -31,6 +31,9 @@ void TauCollection::setIsolationDiscriminator(const std::string& name) {
   if (name == "")
     return;
   bValidityOfIsolationDiscr = true;
+  //Debug
+//  std::cout << name << "\n";
+  //
   checkDiscriminatorNameValidity(name, this->getIsolationDiscriminatorNames());
   fIsolationDiscriminatorName = name;
 }

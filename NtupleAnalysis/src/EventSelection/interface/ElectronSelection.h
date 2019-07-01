@@ -5,6 +5,7 @@
 #include "EventSelection/interface/BaseSelection.h"
 #include "DataFormat/interface/Electron.h"
 #include "Framework/interface/EventCounter.h"
+#include "Framework/interface/GenericScaleFactor.h"
 
 #include <string>
 #include <vector>
@@ -73,10 +74,14 @@ private:
   void initialize(const ParameterSet& config, const std::string& postfix);
   /// The actual selection
   Data privateAnalyze(const Event& iEvent);
+
+  bool passTrgMatching(const Electron& electron, std::vector<math::LorentzVectorT<double>>& trgElectrons) const;
   /// Return MVA decision based on MVA Cut
   bool getMVADecision(const Electron& ele, const std::string mvaCut);
   
   // Input parameters
+  const bool bApplyTriggerMatching;
+  const float fTriggerElectronMatchingCone;
   const double fElectronPtCut;
   const double fElectronEtaCut;
   float fRelIsoCut;
@@ -90,12 +95,14 @@ private:
   Count cPassedElectronSelection;
   // Sub counters
   Count cSubAll;
+  Count cSubPassedTriggerMatching;
   Count cSubPassedPt;
   Count cSubPassedEta;
   Count cSubPassedID;
   Count cSubPassedIsolation;
   
   // Histograms
+  WrappedTH1 *hTriggerMatchDeltaR;
   WrappedTH1 *hElectronNAll;
   WrappedTH1 *hElectronPtAll;
   WrappedTH1 *hElectronEtaAll;

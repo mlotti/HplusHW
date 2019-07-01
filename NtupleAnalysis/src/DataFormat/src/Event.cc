@@ -71,6 +71,21 @@ Event::Event(const ParameterSet& config):
   if (tauIsolationDiscr)
     fTauCollection.setIsolationDiscriminator(*tauIsolationDiscr);
   
+  // Tight Tau discriminators
+  boost::optional<std::vector<std::string> > looseTauDiscr = config.getParameterOptional<std::vector<std::string> >("LooseTauSelection.discriminators", std::vector<std::string>{});
+  if(looseTauDiscr) {
+    fLooseTauCollection.setConfigurableDiscriminators(*looseTauDiscr);
+  }
+  boost::optional<std::string> looseTauAgainstElectronDiscr = config.getParameterOptional<std::string>("LooseTauSelection.againstElectronDiscr");
+  if (looseTauAgainstElectronDiscr)
+    fLooseTauCollection.setAgainstElectronDiscriminator(*looseTauAgainstElectronDiscr);
+  boost::optional<std::string> looseTauAgainstMuonDiscr = config.getParameterOptional<std::string>("LooseTauSelection.againstMuonDiscr");
+  if (looseTauAgainstMuonDiscr)
+    fLooseTauCollection.setAgainstMuonDiscriminator(*looseTauAgainstMuonDiscr);
+  boost::optional<std::string> looseTauIsolationDiscr = config.getParameterOptional<std::string>("LooseTauSelection.isolationDiscr");
+  if (looseTauIsolationDiscr)
+    fLooseTauCollection.setIsolationDiscriminator(*looseTauIsolationDiscr);
+  
   // Muon discriminators
   boost::optional<std::string> muIDDiscr = config.getParameterOptional<std::string>("MuonSelection.muonID");
   if (muIDDiscr)
@@ -114,6 +129,7 @@ void Event::setupBranches(BranchManager& mgr) {
   fTriggerMuonCollection.setupBranches(mgr);
   fTriggerBJetCollection.setupBranches(mgr);
   fTauCollection.setupBranches(mgr);
+  fLooseTauCollection.setupBranches(mgr);
   fJetCollection.setupBranches(mgr);
   fGenJetCollection.setupBranches(mgr);
   fMuonCollection.setupBranches(mgr);

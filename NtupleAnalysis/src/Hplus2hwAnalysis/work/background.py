@@ -10,7 +10,7 @@ import ROOT
 ## OPTIONS
 ###################
 
-prefix      = "Hplus2hwAnalysis"
+prefix      = "Hplus2hwAnalysis_background"
 postfix     = " "
 dataEras    = ["2016"]
 searchModes = ["350to3000"]
@@ -20,9 +20,9 @@ ROOT.gErrorIgnoreLevel = 0
 #blacklist = ["SingleMuon_Run2016E_03Feb2017_v1_276831_277420","SingleMuon_Run2016F_03Feb2017_v1_277932_278800","SingleMuon_Run2016F_03Feb2017_v1_278801_278808","SingleMuon_Run2016D_03Feb2017_v1276315_276811","SingleMuon_Run2016G_03Feb2017_v1_278820_280385","SingleMuon_Run2016H_03Feb2017_ver2_v1_281613_284035"]
 #blacklist = ["DYJetsToLL_M_50_ext1"]
 blacklist = []
-whitelist = ["DYJetsToLL_M_50_ext1","SingleMuon_Run2016G_03Feb2017_v1_278820_280385","SingleMuon_Run2016H_03Feb2017_ver2_v1_281613_284035","SingleMuon_Run2016H_03Feb2017_ver3_v1_284036_284044"]
+#whitelist = ["DYJetsToLL_M_50_ext1","SingleMuon_Run2016G_03Feb2017_v1_278820_280385","SingleMuon_Run2016H_03Feb2017_ver2_v1_281613_284035","SingleMuon_Run2016H_03Feb2017_ver3_v1_284036_284044"]
 #whitelist= ["TT","SingleMuon_Run2016F_03Feb2017_v1_278801_278808"]
-#whitelist= []
+whitelist= []
 
 ###################
 ## MAIN
@@ -47,12 +47,24 @@ def main():
 
     process = Process(prefix, maxEvents = maxEvents)
 
-
     ###################
     ## ADD DATASETS
     ###################
 
     process.addDatasetsFromMulticrab(sys.argv[1],blacklist=blacklist,whitelist=whitelist)
+
+
+
+    # Enable genuine tau histograms for common plots (needed for calculating N_QCD)
+    allSelections.CommonPlots.enableGenuineTauHistograms = True
+
+    # Set splitting of phase space (first bin is below first edge value and last bin is above last edge value)
+    allSelections.CommonPlots.histogramSplitting = [
+    PSet(label="tauPt_1", binLowEdges=[40,60], useAbsoluteValues=False),
+    PSet(label="decayMode_1", binLowEdges=[2,3], useAbsoluteValues=False),
+    PSet(label="tauPt_2", binLowEdges=[20,40,60], useAbsoluteValues=False),
+    PSet(label="decayMode_2", binLowEdges=[1,2,3], useAbsoluteValues=False),
+    ]
 
 
     ##################
@@ -65,8 +77,8 @@ def main():
 			      ### OPRIONS ###
                               usePUreweighting       = True,
                               useTopPtReweighting    = False,
-                              doSystematicVariations = False,
-			      analysisType 	     = "HToHW")
+                              doSystematicVariations = False
+			      )
 
 
 
@@ -78,3 +90,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -8,6 +8,10 @@
 #include "DataFormat/interface/Muon.h"
 //#include "Framework/interface/makeTH.h"
 
+#include "Math/VectorUtil.h"
+
+#include <cmath>
+
 MuonSelection::Data::Data() 
 : fHighestSelectedMuonPt(0.0),
   fHighestSelectedMuonEta(0.0),
@@ -274,6 +278,9 @@ MuonSelection::Data MuonSelection::privateAnalyze(const Event& event) {
       }
   } //for-loop: muons
   
+  //sort muons
+  std::sort(output.fSelectedMuons.begin(), output.fSelectedMuons.end());
+
   // Fill histos
   hMuonNAll->Fill(event.muons().size());
   hMuonNPassed->Fill(output.fSelectedMuons.size());
