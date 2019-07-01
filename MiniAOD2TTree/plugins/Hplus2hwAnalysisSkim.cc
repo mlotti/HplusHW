@@ -25,6 +25,7 @@
 #include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
 
 #include "FWCore/Framework/interface/LuminosityBlock.h"
 
@@ -59,6 +60,8 @@ class Hplus2hwAnalysisSkim : public edm::EDFilter {
 	edm::EDGetTokenT<edm::View<pat::Muon>> muonToken;
 	const int nMuons;
 
+        edm::EDGetTokenT<edm::View<pat::Electron>> electronToken;
+
         int nEvents;
         int nSelectedEvents;
 };
@@ -75,6 +78,7 @@ Hplus2hwAnalysisSkim::Hplus2hwAnalysisSkim(const edm::ParameterSet& iConfig)
   metToken(consumes<edm::View<pat::MET>>(iConfig.getParameter<edm::InputTag>("METCollection"))),
   muonToken(consumes<edm::View<pat::Muon>>(iConfig.getParameter<edm::InputTag>("MuonCollection"))),
   nMuons(iConfig.getParameter<int>("NMuons")),
+  electronToken(consumes<edm::View<pat::Electron>>(iConfig.getParameter<edm::InputTag>("ElectronCollection"))),
   nEvents(0),
   nSelectedEvents(0)
 {

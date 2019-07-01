@@ -24,7 +24,7 @@ dataVersion = "80Xmc"
 options, dataVersion = getOptionsDataVersion(dataVersion)
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10)
+    input = cms.untracked.int32(100)
 )
 
 
@@ -59,6 +59,7 @@ process.source = cms.Source("PoolSource",
 #     '/store/user/mlotti/CRAB_PrivateMC/CRAB3_Hplus_PAT/180613_123703/0000/cHiggs_13TeV_TuneCUETP8M1_cfi_GEN_SIM_RECOBEFMIX_DIGIPREMIX_S2_DATAMIX_L1_DIGI2RAW_L1Reco_RECO_HLT_PAT_11.root' #real
 #     '/store/data/Run2016H/Tau/MINIAOD/03Feb2017_ver2-v1/100000/00A17AC6-8AEB-E611-9A86-A0369F83627E.root',
      '/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/0693E0E7-97BE-E611-B32F-0CC47A78A3D8.root'
+#      '/store/mc/RunIISummer16MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/80000/F283191C-11C4-E611-973D-00215E2EB74E.root'
 #      '/store/user/mlotti/CRAB_PrivateMC/CRAB3_Hplus_PAT_1/180911_130929/0000/cHiggs_13TeV_TuneCUETP8M1_cfi_GEN_SIM_RECOBEFMIX_DIGIPREMIX_S2_DATAMIX_L1_DIGI2RAW_L1Reco_RECO_HLT_PAT_1.root',
 #      '/store/user/mlotti/CRAB_PrivateMC/CRAB3_Hplus_PAT_2/180911_131520/0000/cHiggs_13TeV_TuneCUETP8M1_cfi_GEN_SIM_RECOBEFMIX_DIGIPREMIX_S2_DATAMIX_L1_DIGI2RAW_L1Reco_RECO_HLT_PAT_1.root',
 #      '/store/user/mlotti/CRAB_PrivateMC/CRAB3_Hplus_PAT_3/180911_131616/0000/cHiggs_13TeV_TuneCUETP8M1_cfi_GEN_SIM_RECOBEFMIX_DIGIPREMIX_S2_DATAMIX_L1_DIGI2RAW_L1Reco_RECO_HLT_PAT_1.root',
@@ -117,21 +118,21 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
         TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess())),
         TriggerBits = cms.vstring(
 	     "HLT_IsoMu24_v",
-	     "HLT_IsoTkMu24_v"
-#	     "HLT_IsoMu22_eta2p1_v"
+	     "HLT_IsoTkMu24_v",
+	     "HLT_Ele27_eta2p1_WPTight_Gsf_v",
         ),
 	L1Extra = cms.InputTag("l1extraParticles:MET"),
         L1EtSumObjects = cms.InputTag("caloStage2Digis:EtSum"),
         TriggerObjects = cms.InputTag("selectedPatTrigger"),
         TriggerMatch = cms.untracked.vstring(
-	     "HLT_IsoMu24_v"
-#	     "HLT_IsoMu22_eta2p1_v" 
+	     "HLT_IsoMu24_v",
+	     "HLT_Ele27_eta2p1_WPTight_Gsf_v" ,
         ),
 	TriggerPrescales = cms.untracked.PSet(
             src   = cms.InputTag("patTrigger",""),
             paths = cms.vstring(
-		"HLT_IsoMu24_v" 
-#	        "HLT_IsoMu22_eta2p1_v"
+		"HLT_IsoMu24_v", 
+	        "HLT_Ele27_eta2p1_WPTight_Gsf_v",
             )
 	),
 	filter = cms.untracked.bool(False)

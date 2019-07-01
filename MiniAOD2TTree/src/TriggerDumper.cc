@@ -94,6 +94,11 @@ void TriggerDumper::book(const edm::Run& iRun, HLTConfigProvider hltConfig){
   theTree->Branch("HLTMuon_phi",&HLTMuon_phi);
   theTree->Branch("HLTMuon_e",&HLTMuon_e);
 
+  theTree->Branch("HLTElectron_pt",&HLTElectron_pt);  
+  theTree->Branch("HLTElectron_eta",&HLTElectron_eta);
+  theTree->Branch("HLTElectron_phi",&HLTElectron_phi);
+  theTree->Branch("HLTElectron_e",&HLTElectron_e);
+
   // theTree->Branch("HLTJet_pt" , &HLTJet_pt);
   // theTree->Branch("HLTJet_eta", &HLTJet_eta); 
   // theTree->Branch("HLTJet_phi", &HLTJet_phi);
@@ -123,13 +128,15 @@ void TriggerDumper::book(const edm::Run& iRun, HLTConfigProvider hltConfig){
   }
 
   // Trigger matching
-  std::regex obj_re("((Tau)|(Mu))");
+  std::regex obj_re("((Tau)|(Mu)|(Ele))");
+//  std::regex obj_re("((Tau)|(Egamma))");
   for(size_t imatch = 0; imatch < trgMatchStr.size(); ++imatch){
     std::string name = "";
     std::smatch match;
     if (std::regex_search(trgMatchStr[imatch], match, obj_re) && match.size() > 0) name = match.str(0); 
     if(name=="Tau") name = "Taus"; // FIXME, these should come from the config
     if(name=="Mu") name = "Muons"; // FIXME, these should come from the config
+    if(name=="Ele") name = "Electrons"; // FIXME, these should come from the config
     name+= "_TrgMatch_";
 
     std::regex match_re(trgMatchStr[imatch]);
@@ -189,12 +196,13 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
       for(size_t j = 0; j < trgResultsHandle->size(); ++j){
 
 	// Search for the selected triggers 
+//	std::cout << selectedTriggers[i] << "\n";
 	size_t pos = names.triggerName(j).find(selectedTriggers[i]);
 
 	// If a selected trigger is found, set the "fire" bit accordingly
 	if (pos == 0 && names.triggerName(j).size() > 0) {
 	  iBit[i] = trgResultsHandle->accept(j);
-	  // cout << names.triggerName(j)  << ", accept = " << trgResultsHandle->accept(j) << endl;
+//	  cout << names.triggerName(j)  << ", accept = " << trgResultsHandle->accept(j) << endl;
 	  iCountAll[i] += 1;
 	  if(trgResultsHandle->accept(j)) iCountPassed[i] += 1;
 	  break;
@@ -213,6 +221,7 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 	if (std::regex_search(names.triggerName(j), match_re)) 
 	  {
+//	    std::cout << names.triggerName(j) << "\n";
 	    trgMatchPaths.push_back(names.triggerName(j));
 	  }
 
@@ -282,7 +291,7 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
         if(patTriggerObject.id(trigger::TriggerMuon)){
           bool fired = false;
           for(size_t i = 0; i < trgMatchPaths.size(); ++i){
-            if(patTriggerObject.hasPathName( trgMatchPaths[i], false, true )) fired = true;
+            if(patTriggerObject.hasPathName( trgMatchPaths[i], true, true )) fired = true;
           }
           if(fired){
             HLTMuon_pt.push_back(patTriggerObject.p4().Pt());
@@ -294,6 +303,38 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
         }//triggerMuon
 
 	////////
+
+        if (patTriggerObject.hasPathName( "HLT_Ele27_eta2p1_WPTight_Gsf_v8", true, true )) {
+	  std::cout << "FIRED " << patTriggerObject.hasPathName( "HLT_Ele27_eta2p1_WPTight_Gsf_v8", true, true ) << std::endl;
+	  std::cout << "Trigger id: " << std::endl;
+	  std::cout << "Mu " << patTriggerObject.id(trigger::TriggerMuon) << std::endl;
+          std::cout << "Ele " << patTriggerObject.id(trigger::TriggerElectron) << std::endl;
+	  std::cout << "Tau " << patTriggerObject.id(trigger::TriggerTau) << std::endl;
+	  std::cout << "Photon " << patTriggerObject.id(trigger::TriggerPhoton) << std::endl;
+	  std::cout << "Cluster " << patTriggerObject.id(trigger::TriggerCluster) << std::endl;
+
+	  std::cout << "Trigger paths: " << std::endl;
+          for(size_t i = 0; i < patTriggerObject.pathNames().size(); ++i){
+            std::cout << patTriggerObject.pathNames()[i] << std::endl;
+          }
+        }
+
+        ////////
+        // Trigger object is of type Electron
+        if(patTriggerObject.id(trigger::TriggerElectron) || patTriggerObject.id(trigger::TriggerCluster)){
+          bool fired = false;
+          for(size_t i = 0; i < trgMatchPaths.size(); ++i){
+            if(patTriggerObject.hasPathName( trgMatchPaths[i], true, true )) fired = true;
+          }
+          if(fired){
+            HLTElectron_pt.push_back(patTriggerObject.p4().Pt());
+            HLTElectron_eta.push_back(patTriggerObject.p4().Eta());
+            HLTElectron_phi.push_back(patTriggerObject.p4().Phi());
+            HLTElectron_e.push_back(patTriggerObject.p4().E());
+          }
+        }//triggerElectron
+
+        ////////
 
 	// // Trigger object is of type Jet
 	// if(patTriggerObject.id(trigger::TriggerJet)){
@@ -474,6 +515,11 @@ void TriggerDumper::reset(){
     HLTMuon_phi.clear();
     HLTMuon_e.clear();
 
+    HLTElectron_pt.clear();
+    HLTElectron_eta.clear();
+    HLTElectron_phi.clear();
+    HLTElectron_e.clear();
+
     // HLTJet_pt.clear();
     // HLTJet_eta.clear();
     // HLTJet_phi.clear();
@@ -505,6 +551,7 @@ std::pair<int,int> TriggerDumper::counters(std::string path){
 }
 
 void TriggerDumper::triggerMatch(int id,std::vector<reco::Candidate::LorentzVector> objs){
+//  std::cout << "matching" << "\n";
   for(size_t iobj = 0; iobj < objs.size(); ++iobj){
     for(int i = 0; i < nTrgDiscriminators; ++i){
       bool matchFound = false;
@@ -514,7 +561,11 @@ void TriggerDumper::triggerMatch(int id,std::vector<reco::Candidate::LorentzVect
       size_t pos = matchedTrgObject.find("_TrgMatch_") + 10;
       matchedTrgObject = matchedTrgObject.substr(pos,len-pos);
 
+//      std::cout << id << " " << matchedTrgObject << "\n";
+
       if(!isCorrectObject(id,matchedTrgObject)) continue;
+
+//      std::cout << "we are soon matching" << "\n";
 
       if(patTriggerObjects.isValid()){
 	for (pat::TriggerObjectStandAlone patTriggerObject : *patTriggerObjects) {
@@ -525,11 +576,12 @@ void TriggerDumper::triggerMatch(int id,std::vector<reco::Candidate::LorentzVect
 	    std::regex match_re(matchedTrgObject);
 	    for(size_t i = 0; i < pathNamesAll.size(); ++i){
 	      if (std::regex_search(pathNamesAll[i], match_re)) {
-		if(patTriggerObject.hasPathName( pathNamesAll[i], false, true )) fired = true;
+		if(patTriggerObject.hasPathName( pathNamesAll[i], true, true )) fired = true;
+//		if((id == 82 || id==82) && patTriggerObject.hasPathName( pathNamesAll[i], true, true )) fired = true; 
 	      }
 	    }
 	    if(!fired) continue;
-
+//	    std::cout << "we are matching" << "\n";
 	    double dr = ROOT::Math::VectorUtil::DeltaR(objs[iobj],patTriggerObject.p4());
 	    if(dr < trgMatchDr) matchFound = true;
 	  }
@@ -545,6 +597,12 @@ bool TriggerDumper::isCorrectObject(int id,std::string trgObject){
   switch (id) {
   case trigger::TriggerTau:
     sid = "Tau";
+    break;
+  case trigger::TriggerElectron:
+    sid = "Ele";
+    break;
+  case trigger::TriggerCluster:
+    sid = "Ele";
     break;
   case trigger::TriggerMuon:
     sid = "Mu";

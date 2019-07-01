@@ -192,7 +192,11 @@ bool MiniAOD2TTreeFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSet
 	accept = accept && tauDumper->fill(iEvent,iSetup);
         if (trgDumper) trgDumper->triggerMatch(trigger::TriggerTau,tauDumper->selected());
     }
-    if (electronDumper) accept = accept && electronDumper->fill(iEvent,iSetup);
+    if (electronDumper) {
+	accept = accept && electronDumper->fill(iEvent,iSetup);
+//	if (trgDumper) trgDumper->triggerMatch(trigger::TriggerElectron,electronDumper->selected());
+        if (trgDumper) trgDumper->triggerMatch(trigger::TriggerCluster,electronDumper->selected());
+    }
     if (muonDumper) {
 	accept = accept && muonDumper->fill(iEvent,iSetup);
 	if (trgDumper) trgDumper->triggerMatch(trigger::TriggerMuon,muonDumper->selected());
