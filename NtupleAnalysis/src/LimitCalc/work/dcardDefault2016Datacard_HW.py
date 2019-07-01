@@ -1,4 +1,5 @@
 import HiggsAnalysis.NtupleAnalysis.tools.systematics as systematics
+from HiggsAnalysis.LimitCalc.InputClasses import Nuisance
 
 #DataCardName ='HplusToTauNu_13TeV'
 DataCardName ='HplusToHW_13TeV'
@@ -32,7 +33,7 @@ if HeavyAnalysis:
 
 ##############################################################################
 # Options
-OptionIncludeSystematics=False # Include shape systematics (multicrabs must beproduced with doSystematics=True)
+OptionIncludeSystematics=True # Include shape systematics (multicrabs must beproduced with doSystematics=True)
 OptionDoControlPlots= True #FIXME: If you want control plots, switch this to true!
 OptionUseWJetsHT = True  # Use HT binned WJets samples instead of inclusive for WJets background
 OptionDoMergeEWKttbar = False #FIXME: if true, Wjets+DY+diboson into one background and for heavy H+, also merges ttbar and singleTop into one background
@@ -104,21 +105,26 @@ OptionSqrtS=13 # sqrt(s)
 SignalRateCounter="Selected events"
 FakeRateCounter="EWKfaketaus:SelectedEvents"
 
+
 # Shape histogram definitions
 shapeHistoName=None
-histoPathInclusive="ForDataDrivenCtrlPlots"
-print "kaytetaan eri reittia puulle"
-#histoPathInclusive="../Hplus2hwAnalysis_350to3000_Run2016"
+#print "kaytetaan eri reittia puulle"
+
 histoPathInclusive="ForDataDrivenCtrlPlots"
 histoPathGenuineTaus="ForDataDrivenCtrlPlots"
-#histoPathGenuineTaus='../Hplus2hwAnalysis_350to3000_Run2016' # genuine tau requirement already as part of event selection
-#histoPathFakeTaus='../Hplus2hwAnalysis_350to3000_Run2016'
 histoPathFakeTaus="ForDataDrivenCtrlPlots"
 
+#histoPathInclusive="../Hplus2hwAnalysis_350to3000_Run2016"
+#histoPathGenuineTaus='../Hplus2hwAnalysis_350to3000_Run2016' # genuine tau requirement already as part of event selection
+#histoPathFakeTaus='../Hplus2hwAnalysis_350to3000_Run2016'
+
 if OptionMassShape =="TransverseMass":
+
     shapeHistoName="shapeTransverseMass"
+#    shapeHistoName="TransverseMass"
+
     #shapeHisto="ForDataDrivenCtrlPlotsEWKGenuineTaus/shapeTransverseMass"
-    print "kaytetaan m_t:ta nyt"
+#    print "kaytetaan m_t:ta nyt"
 #    shapeHistoName = "TransverseMass"
 #    shapeHistoName = "Njets_AfterAllSelections"
 elif OptionMassShape =="FullMass":
@@ -218,27 +224,29 @@ for mass in HeavyMassPoints:
 #if OptionMassShape =="TransverseMass":#myQCD.setDatasetDefinition("QCDinvertedmt")
 #elif OptionMassShape =="FullMass":#myQCD.setDatasetDefinition("QCDinvertedinvmass")
 
-myQCDSystematics = myESSystematics[:]+myTopSystematics[:]+myPileupSystematics[:]
+myQCDSystematics = [] #myTrgSystematics[:]+myESSystematics[:]+myBtagSystematics[:]+myTopSystematics[:]+myPileupSystematics[:]
 #approximation 1: only ttbar xsect uncertinty applied to QCD, as ttbar dominates the EWK BG (but uncertainty is scaled according to 1-purity, i.e. #all_ttbar+EWK_events_in_QCDandFakeTau/#all_events_in_QCDandFakeTau)
-myQCDSystematics+=["CMS_scale_ttbar_forQCD","CMS_pdf_ttbar_forQCD","CMS_mass_ttbar_forQCD","lumi_13TeV_forQCD","CMS_eff_t_forQCD"]
+#myQCDSystematics+=["CMS_scale_ttbar_forQCD","CMS_pdf_ttbar_forQCD","CMS_mass_ttbar_forQCD","lumi_13TeV_forQCD","CMS_eff_t_forQCD"]
 #approximation 2: myLeptonVetoSystematics neglected for QCD
+myQCDSystematics+=["CMS_FakeRate"]
 
 if OptionIncludeSystematics: 
-    if not LightAnalysis:
-        myQCDSystematics += ["CMS_eff_t_highpt"]
-    myQCDSystematics += ["CMS_Hptntj_FakeTauBG_templateFit","CMS_Hptntj_QCDkbg_metshape"] #these can be used only if QCDMeasurement has been run with systematics
+    #if not LightAnalysis:
+        #myQCDSystematics += ["CMS_eff_t_highpt"]
+#    myQCDSystematics += ["CMS_Hptntj_FakeTauBG_templateFit","CMS_Hptntj_QCDkbg_metshape"] #these can be used only if QCDMeasurement has been run with systematics
+    myShapeSystematics += myQCDSystematics
 
 labelPrefix="CMS_Hptntj_"
 if LightAnalysis:
     labelPrefix=""
 
-#myQCD=DataGroup(label=labelPrefix+"QCDandFakeTau", landsProcess=1, validMassPoints=MassPoints,
+myQCD=DataGroup(label=labelPrefix+"QCDandFakeTau", landsProcess=1, validMassPoints=MassPoints,
                 #datasetType="QCD MC", datasetDefinition="QCD",
                 #nuisances=myShapeSystematics[:]+["xsect_QCD","lumi_13TeV"],
-#                datasetType="QCD MC", datasetDefinition="QCD",
-#                nuisances=myQCDSystematics,
-#                shapeHistoName=shapeHistoName, histoPath=histoPathInclusive)
-#DataGroups.append(myQCD)
+                datasetType="QCD inverted", datasetDefinition="QCDMeasurementMT",
+                nuisances=myQCDSystematics,
+                shapeHistoName=shapeHistoName, histoPath=histoPathInclusive)
+DataGroups.append(myQCD)
 
 # Choose between WJets and WJetsHT dataset
 WJetsDataset = "WJets"
@@ -337,7 +345,6 @@ if not OptionAddSingleTopSignal:DataGroups.append(DataGroup(label="res.", landsP
 #
 # Note: Remember to include 'stat.' into the label of nuistances of statistical nature
 #
-from HiggsAnalysis.LimitCalc.InputClasses import Nuisance
 ReservedNuisances=[]
 Nuisances=[]
 
@@ -376,14 +383,21 @@ else:
 #else:
 #    Nuisances.append(Nuisance(id="CMS_eff_met_trg_MC", label="APPROXIMATION for tau+MET trg MET MC eff.",
 #        distr="lnN", function="Constant", value=0.01))
+#=====fake BK
+#Nuisances.append(Nuisance(id="CMS_FakeRate", label="dummy FR uncertainty",
+#    distr="lnN", function="Constant", value=0.30))
+
+if "CMS_FakeRate" in myShapeSystematics:
+    Nuisances.append(Nuisance(id="CMS_FakeRate", label="FR weight uncertainty",
+        distr="shapeQ", function="ShapeVariation", systVariation="FakeWeighting"))
+else:
+    Nuisances.append(Nuisance(id="CMS_FakeRate", label="dummy FR uncertainty",
+        distr="lnN", function="Constant", value=0.3))
+
 #=====lepton veto
 Nuisances.append(Nuisance(id="CMS_eff_e_veto", label="e veto",
     distr="lnN", function="Ratio",
-<<<<<<< HEAD
     numerator="passed e selection (Veto)", # main counter name after electron veto
-=======
-    numerator="passed e selection ()", # main counter name after electron veto
->>>>>>> a9f630fe17ff70b8366f28e334e17e6efd5ad0dc
     denominator="Fake tau SF", # main counter name before electron and muon veto
     scaling=0.02
 ))
@@ -645,9 +659,6 @@ from HiggsAnalysis.LimitCalc.InputClasses import separateShapeAndNormalizationFr
 separateShapeAndNormalizationFromSystVariation(Nuisances, OptionSeparateShapeAndNormalizationFromSystVariationList)
 
 
-print "-----------------"
-print "vihdoin taalla!"
-print "-----------------"
 
 # Control plots
 from HiggsAnalysis.LimitCalc.InputClasses import ControlPlotInput
@@ -662,6 +673,7 @@ EWKPath="ForDataDrivenCtrlPlotsEWKGenuineTaus"
 ControlPlots.append(ControlPlotInput(
     title            = "TransverseMass",
     histoName        = "shapeTransverseMass",
+#    histoName        = "TransverseMass",
     details          = { "xlabel": "m_{T}",
                          "ylabel": "Events",
                          "divideByBinWidth": True,
@@ -789,16 +801,10 @@ ControlPlots.append(ControlPlotInput(
                          "ratioLegendPosition": "right",
                          "opts": {"ymin": 0.0009} }
 ))
-<<<<<<< HEAD
-=======
-
-
-#####
 
 
 
-'''
->>>>>>> a9f630fe17ff70b8366f28e334e17e6efd5ad0dc
+
 ControlPlots.append(ControlPlotInput(
     title            = "NVertices_AfterStandardSelections",
     histoName        = "NVertices_AfterStandardSelections",
@@ -922,7 +928,7 @@ ControlPlots.append(ControlPlotInput(
                          "unit": "",
                          "log": True,
                          "opts": {"ymin": 0.9} },
-    flowPlotCaption  = "^{}#tau_{h}+#geq3j", # Leave blank if you don't want to include the item to the selection flow plot
+    flowPlotCaption  = " ", # ^{}#tau_{h}+#geq3j", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 ControlPlots.append(ControlPlotInput(
     title            = "JetPt_AfterStandardSelections",
@@ -968,7 +974,7 @@ ControlPlots.append(ControlPlotInput(
                          "unit": "",
                          "log": True,
                          "opts": {"ymin": 0.09} },
-    flowPlotCaption  = "#geq1 b tag", # Leave blank if you don't want to include the item to the selection flow plot
+    flowPlotCaption  = " ", ## #geq1 b tag", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 ControlPlots.append(ControlPlotInput(
     title            = "BJetPt",
@@ -1011,7 +1017,7 @@ ControlPlots.append(ControlPlotInput(
                          "unit": "GeV",
                          "log": True,
                          "opts": {"ymin": 0.00009, "ymaxfactor": 10, "xmax": 500} },
-    flowPlotCaption  = "^{}E_{T}^{miss}", # Leave blank if you don't want to include the item to the selection flow plot
+    flowPlotCaption  =" ", ##  "^{}E_{T}^{miss}", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 ControlPlots.append(ControlPlotInput(
     title            = "METPhi",
@@ -1034,7 +1040,7 @@ ControlPlots.append(ControlPlotInput(
                          "log": True,
                          "legendPosition": "SE",
                          "opts": {"ymin": 0.09} },
-    flowPlotCaption  = "^{}R_{bb}^{min}", # Leave blank if you don't want to include the item to the selection flow plot
+#    flowPlotCaption  = "^{}R_{bb}^{min}", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
 if OptionMassShape =="TransverseMass":
@@ -1128,8 +1134,20 @@ if OptionCtrlPlotsAtMt:
           "log": True,
           "ratioLegendPosition": "right",
           "opts": {"ymin": 0.0009} }))
+    ControlPlots.append(ControlPlotInput(title="SelectedTaus_pT_AfterAllSelections",
+        histoName="SelectedTaus_pT_AfterAllSelections",
+        details={ "xlabel": "Selected #tau ^{}p_{T}",
+          "ylabel": "Events/^{}#Deltap_{T}",
+          "divideByBinWidth": True,
+          "unit": "GeV/c",
+          "log": True,
+          "opts": {"ymin": 0.0009, "ymaxfactor": 15, "xmax": 500},
+        },
+        flowPlotCaption="after all", # Leave blank if you don't want to include the item to the selection flow plot          	
+    ))
+          
     ControlPlots.append(ControlPlotInput(title="SelectedTau_pT_AfterAllSelections",
-        histoName="TESTSelectedTau_pT_AfterAllSelections",
+        histoName="SelectedTau_pT_AfterAllSelections",
         details={ "xlabel": "Selected #tau ^{}p_{T}",
           "ylabel": "Events/^{}#Deltap_{T}",
           "divideByBinWidth": True,
@@ -1145,8 +1163,8 @@ if OptionCtrlPlotsAtMt:
           "log": True,
           "ratioLegendPosition": "right",
           "opts": {"ymin": 0.0009, "ymaxfactor": 10, "xmax": 500} }))
-    ControlPlots.append(ControlPlotInput(title="SelectedTau_eta_AfterAllSelections",
-        histoName="SelectedTau_eta_AfterAllSelections",
+    ControlPlots.append(ControlPlotInput(title="SelectedTaus_eta_AfterAllSelections",
+        histoName="SelectedTaus_eta_AfterAllSelections",
         details={ "xlabel": "Selected #tau #eta",
           "ylabel": "Events",
           "divideByBinWidth": False,
@@ -1154,8 +1172,8 @@ if OptionCtrlPlotsAtMt:
           "log": True,
           "legendPosition": "SW",
           "opts": {"ymin": 0.009} }))
-    ControlPlots.append(ControlPlotInput(title="SelectedTau_phi_AfterAllSelections",
-        histoName="SelectedTau_phi_AfterAllSelections",
+    ControlPlots.append(ControlPlotInput(title="SelectedTaus_phi_AfterAllSelections",
+        histoName="SelectedTaus_phi_AfterAllSelections",
         details={ "xlabel": "Selected #tau #phi",
           "ylabel": "Events",
           "divideByBinWidth": False,
@@ -1201,6 +1219,8 @@ if OptionCtrlPlotsAtMt:
         "log": True,
         "ratioLegendPosition": "right",
         "opts": {"ymin": 0.9} }))
+
+
 #    ControlPlots.append(ControlPlotInput(title="SelectedTau_source_AfterAllSelections",
 #        histoName="SelectedTau_source_AfterAllSelections",
 #        details={ "xlabel": "",
@@ -1411,9 +1431,5 @@ if OptionCtrlPlotsAtMt:
           "log": True,
           "legendPosition": "SE",
           "opts": {"ymin": 0.09} }))
-<<<<<<< HEAD
 
-=======
-'''
 ########
->>>>>>> a9f630fe17ff70b8366f28e334e17e6efd5ad0dc

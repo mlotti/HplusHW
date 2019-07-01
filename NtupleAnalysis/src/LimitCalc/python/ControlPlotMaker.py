@@ -23,12 +23,12 @@ print "nyt tehdaan controlliplotteja jee!"
 print "-----"
 
 _legendLabelQCD = "QCD" 
-_legendLabelQCDdata = "QCD MC"
+_legendLabelQCDdata = "Mis-ID. #tau_{h} (data)"
 _legendLabelEmbedding = "EWK+t#bar{t} with #tau_{h} (data)"
 _legendLabelEWKFakes = "EWK+t#bar{t} no #tau_{h} (sim.)"
 #_legendLabelEWKFakes = "EWK+tt with e/#mu/jet#rightarrow#tau_{h} (sim.)"
 
-print "testataanpas: ", _legendLabelQCDdata 
+#print "testataanpas: ", _legendLabelQCDdata 
 
 drawPlot = plots.PlotDrawer(ratio=True, ratioYlabel="Data/Bkg. ", ratioCreateLegend=True,
                             ratioType="errorScale", ratioErrorOptions={"numeratorStatSyst": False},

@@ -504,12 +504,12 @@ _legendLabels = {
     "ttX"      : "t#bar{t} + X",
     "noTop"    : "No t",
     "SingleTop": "Single t",
-    "QCD"      : "QCD",#"Mis-ID. #tau_{h} (data)",
+    "QCD"      : "Mis-ID. #tau_{h} (data)",
     "FakeB"    : "Fake b (data)",
     "GenuineB" : "Genuine b (MC)",
     "QCD-b"    : "QCD (b enr.)",
-#    "QCDdata"  : "Mis-ID. #tau_{h} (data)", #"QCD (data driven)"
-    "QCDdata"  : "QCD (MC)", 
+    "QCDdata"  : "Mis-ID. #tau_{h} (data)", #"QCD (data driven)"
+#    "QCDdata"  : "QCD (MC)", 
 
     "TTJets"        : "t#bar{t}+jets",
     "TT"            : "t#bar{t}",
@@ -1251,7 +1251,7 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle, numeratorStatSyst=True,
                 self._gr = gr
                 self._ratio = False
             def ratioDrawStyle(self):
-                return "PZ"
+                return "E0PZ"
             def begin(self):
                 return 0
             def end(self):

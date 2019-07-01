@@ -989,16 +989,18 @@ class TableProducer:
                         HW = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                     elif c.getLabel().startswith("HST") or c.getLabel().startswith("CMS_Hptntj_HST"):
                         HST = c.getCachedShapeRootHistogramWithUncertainties().Clone()
-                    #elif c.typeIsQCD() or c.typeIsFakeB():
-                    #    containsQCDdataset = True
-                    #    if QCD == None:
-                    #        try:
-                    #            QCD = c.getCachedShapeRootHistogramWithUncertainties().Clone()
-                    #        except AttributeError:
-                    #            msg = "Did you create the pseudo-Multicrab containing the correctly normalized QCD background? Step 3) in the QCD background measurement instructions."
-                    #            raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
-                    #    else:
-                    #        QCD.Add(c.getCachedShapeRootHistogramWithUncertainties())
+                    elif c.typeIsQCD() or c.typeIsFakeB():
+                        containsQCDdataset = True
+##
+                        if QCD == None:
+                            try:
+                                QCD = c.getCachedShapeRootHistogramWithUncertainties().Clone()
+                            except AttributeError:
+                                msg = "Did you create the pseudo-Multicrab containing the correctly normalized QCD background? Step 3) in the QCD background measurement instructions."
+                                raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle())
+                        else:
+                            QCD.Add(c.getCachedShapeRootHistogramWithUncertainties())
+##
                     elif c.typeIsEWK() or (c.typeIsEWKfake() and self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated") or c.typeIsEWKMC() or c.typeIsGenuineB():
                         # fixme: what a mess! c.typeIsEWKMC() and c.typeIsGenuineB() ORs added for h2tb. must make a proper code!
                         if Embedding == None:
@@ -1282,6 +1284,7 @@ class TableProducer:
                                ["CMS_scale_VV", "diboson scale"],
                                ["CMS_pdf_VV", "diboson pdf"],
                                ["lumi_13TeV","luminosity (13 TeV)"],
+			       ["CMS_FakeRate","Fake Rate measurement"],
                                ["CMS_Hptntj_QCDbkg_templateFit","Fake tau template fit"],
                                ["CMS_Hptntj_QCDkbg_metshape","Fake tau MET shape"]
                                ]
