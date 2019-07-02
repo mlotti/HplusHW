@@ -271,15 +271,19 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
 
   // Cache vector of trigger tau 4-momenta
   std::vector<math::LorentzVectorT<double>> myTriggerTauMomenta;
-//  for (HLTTau p: event.triggerTaus()) {
-//  myTriggerTauMomenta.push_back(p.p4());
-//  }
+  if (bApplyTriggerMatching) {
+    for (HLTTau p: event.triggerTaus()) {
+    myTriggerTauMomenta.push_back(p.p4());
+    }
+  }
   // Loop over taus
 
   for (Tau tau: event.taus()) {
-    // Apply trigger matching
-//    if (!this->passTrgMatching(tau, myTriggerTauMomenta))
-//      continue;
+    // Apply trigger matching    
+    if (bApplyTriggerMatching) {
+      if (!this->passTrgMatching(tau, myTriggerTauMomenta))
+        continue;
+    }
     passedTriggerMatching = true;
     // Apply cut on decay mode
     if (!this->passDecayModeFinding(tau)) {

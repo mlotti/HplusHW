@@ -2,7 +2,7 @@ import sys
 
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
 from HiggsAnalysis.NtupleAnalysis.AnalysisBuilder import AnalysisBuilder
-from HiggsAnalysis.NtupleAnalysis.parameters.hplus2hwAnalysis_ele import allSelections
+from HiggsAnalysis.NtupleAnalysis.parameters.hplus2hwAnalysis import allSelections
 
 import ROOT
 
@@ -10,7 +10,7 @@ import ROOT
 ## OPTIONS
 ###################
 
-prefix      = "Hplus2hwAnalysis_ele"
+prefix      = "Hplus2hwAnalysis_background"
 postfix     = " "
 dataEras    = ["2016"]
 searchModes = ["350to3000"]
@@ -47,12 +47,24 @@ def main():
 
     process = Process(prefix, maxEvents = maxEvents)
 
-
     ###################
     ## ADD DATASETS
     ###################
 
     process.addDatasetsFromMulticrab(sys.argv[1],blacklist=blacklist,whitelist=whitelist)
+
+
+
+    # Enable genuine tau histograms for common plots (needed for calculating N_QCD)
+    allSelections.CommonPlots.enableGenuineTauHistograms = True
+
+    # Set splitting of phase space (first bin is below first edge value and last bin is above last edge value)
+    allSelections.CommonPlots.histogramSplitting = [
+    PSet(label="tauPt_1", binLowEdges=[40,60], useAbsoluteValues=False),
+    PSet(label="decayMode_1", binLowEdges=[2,3], useAbsoluteValues=False),
+    PSet(label="tauPt_2", binLowEdges=[20,40,60], useAbsoluteValues=False),
+    PSet(label="decayMode_2", binLowEdges=[1,2,3], useAbsoluteValues=False),
+    ]
 
 
     ##################
@@ -65,8 +77,8 @@ def main():
 			      ### OPRIONS ###
                               usePUreweighting       = True,
                               useTopPtReweighting    = False,
-                              doSystematicVariations = False,
-			      analysisType 	     = "HToHW")
+                              doSystematicVariations = True,
+			      analysisType           = "HToHW_background")
 
 
 
@@ -78,3 +90,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

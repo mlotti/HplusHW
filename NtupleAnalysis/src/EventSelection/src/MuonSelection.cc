@@ -194,16 +194,21 @@ MuonSelection::Data MuonSelection::privateAnalyze(const Event& event) {
   bool passedIsol = false;
 
   // Cache vector of trigger mu 4-momenta
+
   std::vector<math::LorentzVectorT<double>> myTriggerMuonMomenta;
-  for (HLTMuon p: event.triggerMuons()) {
-    myTriggerMuonMomenta.push_back(p.p4());
+  if (bApplyTriggerMatching) {
+    for (HLTMuon p: event.triggerMuons()) {
+      myTriggerMuonMomenta.push_back(p.p4());
+    }
   }
   // For-loop: All muons
   for(Muon muon: event.muons()) {
 
     // Apply trigger matching
-    if (!this->passTrgMatching(muon, myTriggerMuonMomenta))
-      continue;
+    if (bApplyTriggerMatching) {
+      if (!this->passTrgMatching(muon, myTriggerMuonMomenta))
+        continue;
+    }
     passedTriggerMatching = true;
 
     // Fill histograms before any cuts
@@ -278,7 +283,7 @@ MuonSelection::Data MuonSelection::privateAnalyze(const Event& event) {
       }
   } //for-loop: muons
   
-  //sort muons
+  //sort muons, needed comparisons defined in Muon.h
   std::sort(output.fSelectedMuons.begin(), output.fSelectedMuons.end());
 
   // Fill histos

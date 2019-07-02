@@ -3,11 +3,13 @@
 
 #include "Framework/interface/ParameterSet.h"
 #include "EventSelection/interface/CommonPlots.h"
+#include "DataFormat/interface/Electron.h"
 #include "DataFormat/interface/Event.h"
 #include "Framework/interface/HistoWrapper.h"
+#include "DataFormat/interface/Electron.h"
 //#include "Framework/interface/makeTH.h"
 
-ElectronSelection::Data::Data() 
+ElectronSelection::Data::Data()
 : fHighestSelectedElectronPt(0.0),
   fHighestSelectedElectronEta(0.0) { }
 
@@ -15,6 +17,8 @@ ElectronSelection::Data::~Data() { }
 
 ElectronSelection::ElectronSelection(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix)
 : BaseSelection(eventCounter, histoWrapper, commonPlots, postfix),
+  bApplyTriggerMatching(config.getParameter<bool>("applyTriggerMatching")),
+  fTriggerElectronMatchingCone(config.getParameter<float>("triggerMatchingCone")),
   fElectronPtCut(config.getParameter<float>("electronPtCut")),
   fElectronEtaCut(config.getParameter<float>("electronEtaCut")),
   fRelIsoCut(-1.0),
@@ -27,6 +31,7 @@ ElectronSelection::ElectronSelection(const ParameterSet& config, EventCounter& e
   cPassedElectronSelection(fEventCounter.addCounter("passed e selection ("+postfix+")")),
   // Sub counters
   cSubAll(fEventCounter.addSubCounter("e selection ("+postfix+")", "All events")),
+  cSubPassedTriggerMatching(fEventCounter.addSubCounter("e selection ("+postfix+")", "Passed trigger matching")),
   cSubPassedPt(fEventCounter.addSubCounter("e selection ("+postfix+")", "Passed pt cut")),
   cSubPassedEta(fEventCounter.addSubCounter("e selection ("+postfix+")", "Passed eta cut")),
   cSubPassedID(fEventCounter.addSubCounter("e selection ("+postfix+")", "Passed ID")),
@@ -37,6 +42,8 @@ ElectronSelection::ElectronSelection(const ParameterSet& config, EventCounter& e
 
 ElectronSelection::ElectronSelection(const ParameterSet& config, const std::string& postfix)
 : BaseSelection(),
+  bApplyTriggerMatching(config.getParameter<bool>("applyTriggerMatching")),
+  fTriggerElectronMatchingCone(config.getParameter<float>("triggerMatchingCone")),
   fElectronPtCut(config.getParameter<float>("electronPtCut")),
   fElectronEtaCut(config.getParameter<float>("electronEtaCut")),
   fRelIsoCut(-1.0),
@@ -49,6 +56,7 @@ ElectronSelection::ElectronSelection(const ParameterSet& config, const std::stri
   cPassedElectronSelection(fEventCounter.addCounter("passed e selection ("+postfix+")")),
   // Sub counters
   cSubAll(fEventCounter.addSubCounter("e selection ("+postfix+")", "All events")),
+  cSubPassedTriggerMatching(fEventCounter.addSubCounter("e selection ("+postfix+")", "Passed trigger matching")),
   cSubPassedPt(fEventCounter.addSubCounter("e selection ("+postfix+")", "Passed pt cut")),
   cSubPassedEta(fEventCounter.addSubCounter("e selection ("+postfix+")", "Passed eta cut")),
   cSubPassedID(fEventCounter.addSubCounter("e selection ("+postfix+")", "Passed ID")),
@@ -59,6 +67,7 @@ ElectronSelection::ElectronSelection(const ParameterSet& config, const std::stri
 }
 
 ElectronSelection::~ElectronSelection() {
+  delete hTriggerMatchDeltaR;
   delete hElectronNAll;
   delete hElectronPtAll;
   delete hElectronEtaAll;
@@ -144,6 +153,8 @@ void ElectronSelection::bookHistograms(TDirectory* dir) {
   hElectronRelIsoPassed  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "electronRelIsoPassed", ";relative isolation;Occur / %.2f", 1000, 0.0, 200.0);
   hElectronMiniIsoPassed = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "electronMiniIsoPassed", ";relative mini-isolation;Occur / %.2f", 1000, 0.0, 200.0);
 
+  hTriggerMatchDeltaR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "triggerMatchDeltaR"  , "Trigger match #DeltaR;#DeltaR", 60, 0, 3.);
+
   // Resolutions
   hPtResolution  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "ptResolution" , ";(p_{T}^{reco} - p_{T}^{gen})/p_{T}^{reco};Occur / %.2f", 200, -1.0, 1.0);
   hEtaResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "etaResolution", ";(#eta^{reco} - #eta^{gen})/#eta^{reco};Occur / %.2f"   , 200, -1.0, 1.0);
@@ -185,13 +196,30 @@ ElectronSelection::Data ElectronSelection::analyze(const Event& event) {
 ElectronSelection::Data ElectronSelection::privateAnalyze(const Event& event) {
   Data output;
   cSubAll.increment();
+  bool passedTriggerMatching = false;
   bool passedPt = false;
   bool passedEta = false;
   bool passedID = false;
   bool passedIsol = false;
 
+  // Cache vector of trigger ele 4-momenta
+
+  std::vector<math::LorentzVectorT<double>> myTriggerElectronMomenta;
+  if (bApplyTriggerMatching) {
+    for (HLTElectron p: event.triggerElectrons()) {
+      myTriggerElectronMomenta.push_back(p.p4());
+    }
+  }
   // For-loop: All electrons
   for(Electron electron: event.electrons()) {
+
+    // Apply trigger matching
+    if (bApplyTriggerMatching) {
+      if (!this->passTrgMatching(electron, myTriggerElectronMomenta))
+        continue;
+    }
+
+    passedTriggerMatching = true;
 
     // Fill histograms before any cuts
     hElectronPtAll->Fill(electron.pt());
@@ -272,9 +300,16 @@ ElectronSelection::Data ElectronSelection::privateAnalyze(const Event& event) {
 
   }//for-loop: electrons
 
+  //sort electrons, needed comparisons defined in Electron.h
+  std::sort(output.fSelectedElectrons.begin(), output.fSelectedElectrons.end());
+
   // Fill histos
   hElectronNAll->Fill(event.electrons().size());
   hElectronNPassed->Fill(output.fSelectedElectrons.size());
+
+  // Fill sub-counters
+  if (passedTriggerMatching)
+    cSubPassedTriggerMatching.increment();
 
   // Fill counters
   if (passedPt) cSubPassedPt.increment();
@@ -316,4 +351,16 @@ bool ElectronSelection::getMVADecision(const Electron& ele, const std::string mv
       throw hplus::Exception("config") << "Invalid electronMVACut option '" << mvaCut << "'! Options: 'Loose'";
     }
   return false;
+}
+
+bool ElectronSelection::passTrgMatching(const Electron& electron, std::vector<math::LorentzVectorT<double>>& trgElectrons) const {
+  if (!bApplyTriggerMatching)
+    return true;
+  double myMinDeltaR = 9999.0;
+  for (auto& p: trgElectrons) {
+    double myDeltaR = ROOT::Math::VectorUtil::DeltaR(p, electron.p4());
+    myMinDeltaR = std::min(myMinDeltaR, myDeltaR);
+  }
+  hTriggerMatchDeltaR->Fill(myMinDeltaR);
+  return (myMinDeltaR < fTriggerElectronMatchingCone);
 }

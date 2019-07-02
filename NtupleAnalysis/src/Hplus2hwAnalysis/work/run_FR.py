@@ -2,7 +2,9 @@ import sys
 
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
 from HiggsAnalysis.NtupleAnalysis.AnalysisBuilder import AnalysisBuilder
-from HiggsAnalysis.NtupleAnalysis.parameters.hplus2hwAnalysis_ele import allSelections
+
+from HiggsAnalysis.NtupleAnalysis.parameters.hplus2hwAnalysis import allSelections
+
 
 import ROOT
 
@@ -10,7 +12,7 @@ import ROOT
 ## OPTIONS
 ###################
 
-prefix      = "Hplus2hwAnalysis_ele"
+prefix      = "Hplus2hwAnalysis_fake"
 postfix     = " "
 dataEras    = ["2016"]
 searchModes = ["350to3000"]
@@ -21,7 +23,8 @@ ROOT.gErrorIgnoreLevel = 0
 #blacklist = ["DYJetsToLL_M_50_ext1"]
 blacklist = []
 #whitelist = ["DYJetsToLL_M_50_ext1","SingleMuon_Run2016G_03Feb2017_v1_278820_280385","SingleMuon_Run2016H_03Feb2017_ver2_v1_281613_284035","SingleMuon_Run2016H_03Feb2017_ver3_v1_284036_284044"]
-#whitelist= ["TT","SingleMuon_Run2016F_03Feb2017_v1_278801_278808"]
+#whitelist= ["DYJetsToLL_M_50_ext1","SingleMuon_Run2016B_03Feb2017_ver2_v2_273150_275376","SingleMuon_Run2016C_03Feb2017_v1_275656_276283","SingleMuon_Run2016D_03Feb2017_v1_276315_276811", "SingleMuon_Run2016E_03Feb2017_v1_276831_277420", "SingleMuon_Run2016F_03Feb2017_v1_277932_278800", "SingleMuon_Run2016F_03Feb2017_v1_278801_278808","SingleMuon_Run2016G_03Feb2017_v1_278820_280385","SingleMuon_Run2016H_03Feb2017_ver2_v1_281613_284035", "SingleMuon_Run2016H_03Feb2017_ver3_v1_284036_284044"]
+#whitelist = ["TT","SingleMuon_Run2016F_03Feb2017_v1_278801_278808"]
 whitelist= []
 
 ###################
@@ -47,7 +50,6 @@ def main():
 
     process = Process(prefix, maxEvents = maxEvents)
 
-
     ###################
     ## ADD DATASETS
     ###################
@@ -65,8 +67,8 @@ def main():
 			      ### OPRIONS ###
                               usePUreweighting       = True,
                               useTopPtReweighting    = False,
-                              doSystematicVariations = False,
-			      analysisType 	     = "HToHW")
+                              doSystematicVariations = False
+			      )
 
 
 
