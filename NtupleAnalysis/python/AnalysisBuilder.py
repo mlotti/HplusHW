@@ -213,7 +213,7 @@ class AnalysisBuilder:
         return
 
     def _getAnalysisType(self, analysis):
-        myAnalyses = ["HToTauNu", "HToTB","HToHW"]
+        myAnalyses = ["HToTauNu", "HToTB","HToHW","HToHW_background"]
         if analysis not in myAnalyses:
             msg = "Unsupported analysis \"%s\". Please select one of the following: %s" % (analysis, ", ".join(myAnalyses))
             raise Exception(ShellStyles.ErrorStyle() + msg + ShellStyles.NormalStyle() )
@@ -227,6 +227,8 @@ class AnalysisBuilder:
             return self.getSystematicsForHToTB()
 	elif  self._analysisType == "HToHW":
             return self.getSystematicsForHToHW()
+	elif  self._analysisType == "HToHW_background":
+            return self.getSystematicsForHToHW_background()
         else:
             raise Exception(ShellStyles.ErrorStyle() + "This should never be reached" + ShellStyles.NormalStyle() )
 
@@ -297,6 +299,14 @@ class AnalysisBuilder:
 
         # PU weight systematics
         items.extend(["PUWeight"])
+
+        return items
+
+    def getSystematicsForHToHW_background(self):
+        items = []
+
+        # Trigger systematics
+        items.extend(["MuonTrgEffData"])
 
         return items
 

@@ -79,7 +79,7 @@ muonSelection = PSet(
 ##########
 
 tauSelection = PSet(
-  applyTriggerMatching = False, # no effect now
+  applyTriggerMatching = False,
    triggerMatchingCone = 0.1,   # DeltaR for matching offline tau with trigger tau
               tauPtCut = 20.0,
              tauEtaCut = 2.3,

@@ -16,7 +16,7 @@ trg = PSet(
   MuontriggerEfficiencyJsonName = "muonPAGEff.json",
 #  METtriggerEfficiencyJsonName = "metLegTriggerEfficiency_2016_MET90_fit.json",
 #  L1ETM = 80,
-  triggerOR = ["HLT_Ele27_eta2p1_WPTight_Gsf" # "HLT_IsoMu24","HLT_IsoTkMu24"
+  triggerOR = ["HLT_Ele27_eta2p1_WPTight_Gsf"
                ],
   triggerOR2 = [
                 ],
@@ -42,25 +42,25 @@ metFilter = PSet(
 )
 
 ##########
-## Electron veto
+## Electron
 ##########
 
 eVeto = PSet(
     applyTriggerMatching = True,
     triggerMatchingCone = 0.1,   # DeltaR for matching offline tau with trigger tau
-    electronPtCut = 10.0,
+    electronPtCut = 20.0,
     electronEtaCut = 2.5,
 #            electronID = "mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90", # highest (wp90) for vetoing (2012: wp95)
     electronID = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
     electronIDType    = "MVA",  # options: "default", "MVA"
     electronMVA       = "ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values",
     electronMVACut    = "Loose",
-    electronIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
-    electronIsolType  = "mini", # options: "mini", "default"
+    electronIsolation = "tight", # loosest possible for vetoing ("veto"), "tight" for selecting
+    electronIsolType  = "default", # options: "mini", "default"
 )
 
 ##########
-## Muon
+## Muon veto
 ##########
 
 muonSelection = PSet(
@@ -69,7 +69,7 @@ muonSelection = PSet(
              muonPtCut = 26.0,
             muonEtaCut = 2.1, #2.4,
                 muonID = "muIDTight", #"muIDMedium", #"muIDTight", # options: muIDLoose, muIDMedium, muIDTight
-         muonIsolation = "tight", #"tight", # for selecting, not vetoing
+         muonIsolation = "veto", #"tight", # for selecting, not vetoing
 	muonIsolType   = "default",      # options: "mini", "default" 
 )
 
