@@ -1620,9 +1620,9 @@ void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event, bool wi
   if (withoutTau == false)
     {
       if (usesAntiIsolatedTaus()) {
-//        if (fTauData.getAntiIsolatedTaus().size()>0) {
-//	myTransverseMass = TransverseMass::reconstruct(fTauData.getAntiIsolatedTau(), fMETData.getMET());
-
+        if (fTauData.getAntiIsolatedTaus().size()>0) {
+	  if ((fAnalysisType != kHplus2hwAnalysis) || (fAnalysisType != kHplus2hw_ele_Analysis) ) myTransverseMass = TransverseMass::reconstruct(fTauData.getAntiIsolatedTau(), fMETData.getMET());
+        }
         if (fTauData.getAntiIsolatedTaus().size()>=2) {
           if (fAnalysisType == kHplus2hwAnalysis) myTransverseMass = TransverseMass::reconstruct(fTauData.getAntiIsolatedTaus()[0],fTauData.getAntiIsolatedTaus()[1],fMuonData.getSelectedMuons()[0], fMETData.getMET());
           if (fAnalysisType == kHplus2hw_ele_Analysis) myTransverseMass = TransverseMass::reconstruct(fTauData.getAntiIsolatedTaus()[0],fTauData.getAntiIsolatedTaus()[1],fElectronData.getSelectedElectrons()[0], fMETData.getMET());
@@ -1635,7 +1635,7 @@ void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event, bool wi
 //        myTransverseMass = TransverseMass::reconstruct(fLooseTauData.getSelectedTaus()[0],fLooseTauData.getSelectedTaus()[0],fMuonData.getSelectedMuons()[0], fMETData.getMET());
 
       } else {
-//	myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTau(), fMETData.getMET());
+       if ((fAnalysisType != kHplus2hwAnalysis) || (fAnalysisType != kHplus2hw_ele_Analysis) ) myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTau(), fMETData.getMET());
        if (fAnalysisType == kHplus2hwAnalysis) myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTaus()[0],fTauData.getSelectedTaus()[1],fMuonData.getSelectedMuons()[0], fMETData.getMET());
        if (fAnalysisType == kHplus2hw_ele_Analysis) myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTaus()[0],fTauData.getSelectedTaus()[1],fElectronData.getSelectedElectrons()[0], fMETData.getMET());
       }

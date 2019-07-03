@@ -24,6 +24,7 @@ public:
 
   void terminate();
 
+
 private:
   const bool fEnabled;
   bool fSave;

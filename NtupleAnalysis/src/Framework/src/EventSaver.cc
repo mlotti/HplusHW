@@ -1,5 +1,6 @@
 #include "Framework/interface/EventSaver.h"
 
+
 #include "TList.h"
 #include "TEntryList.h"
 #include "TTree.h"
@@ -21,6 +22,7 @@ EventSaver::EventSaver(const ParameterSet& config, TList *outputList, std::strin
   fPickEvents(isEnabled(config,"EventSaver.pickEvents")),
   fEntryList(nullptr)
 {
+
   if(!fEnabled) return;
 
   if(fPickEvents) {
