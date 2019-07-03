@@ -127,6 +127,7 @@ void Event::setupBranches(BranchManager& mgr) {
   fL1JetCollection.setupBranches(mgr);
   fTriggerTauCollection.setupBranches(mgr);
   fTriggerMuonCollection.setupBranches(mgr);
+  fTriggerElectronCollection.setupBranches(mgr);
   fTriggerBJetCollection.setupBranches(mgr);
   fTauCollection.setupBranches(mgr);
   fLooseTauCollection.setupBranches(mgr);
@@ -146,3 +147,4 @@ void Event::setupBranches(BranchManager& mgr) {
   fPFCandidates.setupBranches(mgr);
   fAK8JetCollection.setupBranches(mgr);
 }
+
