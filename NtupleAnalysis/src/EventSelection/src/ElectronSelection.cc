@@ -204,20 +204,25 @@ ElectronSelection::Data ElectronSelection::privateAnalyze(const Event& event) {
 
   // Cache vector of trigger ele 4-momenta
 
+
   std::vector<math::LorentzVectorT<double>> myTriggerElectronMomenta;
   if (bApplyTriggerMatching) {
     for (HLTElectron p: event.triggerElectrons()) {
       myTriggerElectronMomenta.push_back(p.p4());
     }
   }
+
+
   // For-loop: All electrons
   for(Electron electron: event.electrons()) {
+
 
     // Apply trigger matching
     if (bApplyTriggerMatching) {
       if (!this->passTrgMatching(electron, myTriggerElectronMomenta))
         continue;
     }
+
 
     passedTriggerMatching = true;
 

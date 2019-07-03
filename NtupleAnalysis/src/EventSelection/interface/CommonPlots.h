@@ -21,6 +21,7 @@ public:
     kSignalAnalysis,
     kHplus2tbAnalysis,
     kHplus2hwAnalysis,
+    kHplus2hw_ele_Analysis,
     kBTagEfficiencyAnalysis,
     kTauAnalysis,
     kTopReco,

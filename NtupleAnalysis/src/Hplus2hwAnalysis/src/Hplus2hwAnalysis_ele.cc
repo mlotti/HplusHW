@@ -86,7 +86,7 @@ REGISTER_SELECTOR(Hplus2hwAnalysis_ele);
 
 Hplus2hwAnalysis_ele::Hplus2hwAnalysis_ele(const ParameterSet& config, const TH1* skimCounters)
 : BaseSelector(config, skimCounters),
-  fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kHplus2hwAnalysis, fHistoWrapper),
+  fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kHplus2hw_ele_Analysis, fHistoWrapper),
   cAllEvents(fEventCounter.addCounter("All events")),
   fElectronSelection(config.getParameter<ParameterSet>("ElectronSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
   fTauSelection(config.getParameter<ParameterSet>("TauSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
@@ -197,6 +197,7 @@ void Hplus2hwAnalysis_ele::process(Long64_t entry) {
 
   if(eData.getSelectedElectrons().size() != 1)
     return;
+
 
 
   ////////////
@@ -364,12 +365,12 @@ void Hplus2hwAnalysis_ele::process(Long64_t entry) {
   ////////////
 
 
-
   fCommonPlots.fillControlPlotsAfterAllSelections(fEvent);
 
   ////////////
   // Finalize
   ////////////
+
 
   fEventSaver.save();
 
