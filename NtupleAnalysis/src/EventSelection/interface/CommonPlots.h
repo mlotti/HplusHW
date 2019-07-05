@@ -27,6 +27,8 @@ public:
     kTopReco,
     kMuAnalysis,
     kQCDMeasurement,
+    kQCDMeasurement_ele,
+    kQCDMeasurement_muon,
     kFakeBMeasurement,
     kQCDNormalizationSystematicsSignalRegion, // Needed for obtaining normalization systematics to data-driven control plots
     kQCDNormalizationSystematicsControlRegion // Needed for obtaining normalization systematics to data-driven control plots
@@ -140,7 +142,7 @@ public:
 private:
   /// Returns true if anti-isolated taus need to be used (QCD measurement)
   const bool usesAntiIsolatedTaus() const { return fAnalysisType == kQCDMeasurement ||
-      fAnalysisType == kQCDNormalizationSystematicsControlRegion; }
+      fAnalysisType == kQCDNormalizationSystematicsControlRegion || fAnalysisType == kQCDMeasurement_ele || fAnalysisType == kQCDMeasurement_muon; }
   
 private:
   ///===== Config params
@@ -301,6 +303,12 @@ private:
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauRtauAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauSourceAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauIPxyAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSelectedMuonPtAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSelectedMuonEtaAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSelectedMuonPhiAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSelectedElectronPtAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSelectedElectronEtaAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSelectedElectronPhiAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlNJetsAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlJetPtAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlJetEtaAfterAllSelections;

@@ -162,6 +162,12 @@ CommonPlots::~CommonPlots() {
   fHistoSplitter.deleteHistograms(hCtrlSelectedTauRtauAfterAllSelections);
   fHistoSplitter.deleteHistograms(hCtrlSelectedTauSourceAfterAllSelections);
   fHistoSplitter.deleteHistograms(hCtrlSelectedTauIPxyAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedMuonPtAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedMuonEtaAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedMuonPhiAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedElectronPtAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedElectronEtaAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedElectronPhiAfterAllSelections);
   fHistoSplitter.deleteHistograms(hCtrlNJetsAfterAllSelections);
   fHistoSplitter.deleteHistograms(hCtrlJetPtAfterAllSelections);
   fHistoSplitter.deleteHistograms(hCtrlJetEtaAfterAllSelections);
@@ -832,7 +838,39 @@ void CommonPlots::book(TDirectory *dir, bool isData) {
 						       100, 0, 0.2);
     }// if (!hplus2tb)   
   
-  
+    if (hplus2hw)
+    {
+      fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlSelectedMuonPtAfterAllSelections, 
+                                                       "SelectedMu_pT_AfterAllSelections", ";#mu p_{T}, GeV/c;N_{events}",
+                                                       fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+
+      fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlSelectedMuonEtaAfterAllSelections, 
+                                                       "SelectedMu_eta_AfterAllSelections", ";#mu #eta;N_{events}",
+                                                       fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
+
+      fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlSelectedMuonPhiAfterAllSelections, 
+                                                       "SelectedMu_phi_AfterAllSelections", ";#mu #phi;N_{events}",
+                                                       fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+
+    }// if (hplushw_muon)
+
+
+    if (hplus2hw_ele)
+    {
+      fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlSelectedElectronPtAfterAllSelections, 
+                                                       "SelectedEle_pT_AfterAllSelections", ";e p_{T}, GeV/c;N_{events}",
+                                                       fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+
+      fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlSelectedElectronEtaAfterAllSelections, 
+                                                       "SelectedEle_eta_AfterAllSelections", ";e #eta;N_{events}",
+                                                       fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
+
+      fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlSelectedElectronPhiAfterAllSelections, 
+                                                       "SelectedEle_phi_AfterAllSelections", ";e #phi;N_{events}",
+                                                       fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+
+    }// if (hplushw_ele)
+
   fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlNJetsAfterAllSelections, 
 						   "Njets_AfterAllSelections", ";Number of selected jets;N_{events}",
 						   fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
@@ -1621,21 +1659,21 @@ void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event, bool wi
     {
       if (usesAntiIsolatedTaus()) {
         if (fTauData.getAntiIsolatedTaus().size()>0) {
-	  if ((fAnalysisType != kHplus2hwAnalysis) || (fAnalysisType != kHplus2hw_ele_Analysis) ) myTransverseMass = TransverseMass::reconstruct(fTauData.getAntiIsolatedTau(), fMETData.getMET());
+	  if ((fAnalysisType == kSignalAnalysis) ) myTransverseMass = TransverseMass::reconstruct(fTauData.getAntiIsolatedTau(), fMETData.getMET());
         }
         if (fTauData.getAntiIsolatedTaus().size()>=2) {
-          if (fAnalysisType == kHplus2hwAnalysis) myTransverseMass = TransverseMass::reconstruct(fTauData.getAntiIsolatedTaus()[0],fTauData.getAntiIsolatedTaus()[1],fMuonData.getSelectedMuons()[0], fMETData.getMET());
-          if (fAnalysisType == kHplus2hw_ele_Analysis) myTransverseMass = TransverseMass::reconstruct(fTauData.getAntiIsolatedTaus()[0],fTauData.getAntiIsolatedTaus()[1],fElectronData.getSelectedElectrons()[0], fMETData.getMET());
+          if (fAnalysisType == kHplus2hwAnalysis || fAnalysisType == kQCDMeasurement_muon) myTransverseMass = TransverseMass::reconstruct(fTauData.getAntiIsolatedTaus()[0],fTauData.getAntiIsolatedTaus()[1],fMuonData.getSelectedMuons()[0], fMETData.getMET());
+          if (fAnalysisType == kHplus2hw_ele_Analysis || fAnalysisType == kQCDMeasurement_ele) myTransverseMass = TransverseMass::reconstruct(fTauData.getAntiIsolatedTaus()[0],fTauData.getAntiIsolatedTaus()[1],fElectronData.getSelectedElectrons()[0], fMETData.getMET());
         }
         if (fTauData.getAntiIsolatedTaus().size()==1) {
-          if (fAnalysisType == kHplus2hwAnalysis) myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTaus()[0],fTauData.getAntiIsolatedTaus()[0],fMuonData.getSelectedMuons()[0], fMETData.getMET());
-          if (fAnalysisType == kHplus2hw_ele_Analysis) myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTaus()[0],fTauData.getAntiIsolatedTaus()[0],fElectronData.getSelectedElectrons()[0], fMETData.getMET());
+          if (fAnalysisType == kHplus2hwAnalysis || fAnalysisType == kQCDMeasurement_muon) myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTaus()[0],fTauData.getAntiIsolatedTaus()[0],fMuonData.getSelectedMuons()[0], fMETData.getMET());
+          if (fAnalysisType == kHplus2hw_ele_Analysis || fAnalysisType == kQCDMeasurement_ele) myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTaus()[0],fTauData.getAntiIsolatedTaus()[0],fElectronData.getSelectedElectrons()[0], fMETData.getMET());
         }
 
 //        myTransverseMass = TransverseMass::reconstruct(fLooseTauData.getSelectedTaus()[0],fLooseTauData.getSelectedTaus()[0],fMuonData.getSelectedMuons()[0], fMETData.getMET());
 
       } else {
-       if ((fAnalysisType != kHplus2hwAnalysis) || (fAnalysisType != kHplus2hw_ele_Analysis) ) myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTau(), fMETData.getMET());
+       if ((fAnalysisType == kSignalAnalysis)) myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTau(), fMETData.getMET());
        if (fAnalysisType == kHplus2hwAnalysis) myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTaus()[0],fTauData.getSelectedTaus()[1],fMuonData.getSelectedMuons()[0], fMETData.getMET());
        if (fAnalysisType == kHplus2hw_ele_Analysis) myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTaus()[0],fTauData.getSelectedTaus()[1],fElectronData.getSelectedElectrons()[0], fMETData.getMET());
       }
